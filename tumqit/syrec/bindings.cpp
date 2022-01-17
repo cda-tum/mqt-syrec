@@ -34,7 +34,7 @@ namespace syrec {
         return qc;
     }
 
-    PYBIND11_MODULE(pyqcec, m) {
+    PYBIND11_MODULE(pysyrec, m) {
         m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
 
         py::class_<Dummy>(m, "Dummy")
