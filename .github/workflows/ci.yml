@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  MAKEFLAGS:  "-j2"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run:  |
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBINDINGS=ON -T "ClangCl"
+              else
+                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBINDINGS=ON
+              fi  
+
+      - name: Build
+        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+
+  test:
+    needs:   build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Configure CMake
+        run:  |
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl"
+              else
+                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+              fi  
+
+      - name: Build
+        run:  |
+              if [ "$RUNNER_OS" == "Windows" ]; then
+                cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+              else
+                cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE --target syrec_test
+              fi  
+
+      - name:              Test
+        working-directory: ${{github.workspace}}/build/test
+        run:               |
+                           if [ "$RUNNER_OS" == "Windows" ]; then
+                             cd $BUILD_TYPE
+                             ./syrec_test.exe
+                           else
+                             ./syrec_test
+                           fi
+
+  coverage:
+    needs:   test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Configure CMake
+        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON -DCOVERAGE=1
+      - name: Build
+        run:  cmake --build "${{github.workspace}}/build" --config Debug --target syrec_test
+      - name:              Test
+        working-directory: ${{github.workspace}}/build/test
+        run:               ./syrec_test
+      - name: Run gcov
+        run:  |
+              find . -type f -name '*.gcno' -exec gcov -p  {} +
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          fail_ci_if_error: true
+
+  codestyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - uses: DoozyX/clang-format-lint-action@v0.13
+        with:
+          source:             'include src test tumqit/syrec'
+          extensions:         'h,hpp,c,cpp'
+          clangFormatVersion: 12
