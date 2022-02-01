@@ -8,98 +8,97 @@ on:
   workflow_dispatch:
 
 env:
-  BUILD_TYPE: Release
-  MAKEFLAGS:  "-j2"
+  BUILD_TYPE:          Release
+  MAKEFLAGS:           "-j2"
+  BOOST_VERSION_MAJOR: 1
+  BOOST_VERSION_MINOR: 76
+  BOOST_VERSION_PATCH: 0
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Configure CMake
-        run:  |
-              if [ "$RUNNER_OS" == "Windows" ]; then
-                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBINDINGS=ON -T "ClangCl"
-              else
-                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBINDINGS=ON
-              fi  
-
-      - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-
-  test:
-    needs:   build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-
-      - name: Configure CMake
-        run:  |
-              if [ "$RUNNER_OS" == "Windows" ]; then
-                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl"
-              else
-                cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
-              fi  
-
-      - name: Build
-        run:  |
-              if [ "$RUNNER_OS" == "Windows" ]; then
-                cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-              else
-                cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE --target syrec_test
-              fi  
-
-      - name:              Test
-        working-directory: ${{github.workspace}}/build/test
-        run:               |
-                           if [ "$RUNNER_OS" == "Windows" ]; then
-                             cd $BUILD_TYPE
-                             ./syrec_test.exe
-                           else
-                             ./syrec_test
-                           fi
-
-  coverage:
-    needs:   test
+  build-ubuntu:
+    name:    Ubuntu (Build, Test, and Coverage)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+      - name: Install boost
+        run:  sudo apt install libboost-all-dev
       - name: Configure CMake
-        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON -DCOVERAGE=1
+        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
       - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config Debug --target syrec_test
+        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
       - name:              Test
         working-directory: ${{github.workspace}}/build/test
-        run:               ./syrec_test
-      - name: Run gcov
+        run:               ctest -C $BUILD_TYPE --output-on-failure
+      - name: Coverage
         run:  |
-              find . -type f -name '*.gcno' -exec gcov -p  {} +
+              cmake -S "${{github.workspace}}" -B "${{github.workspace}}/buildCov" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DCOVERAGE=ON
+              cmake --build "${{github.workspace}}/buildCov" --config Debug
+              cd buildCov/test
+              ctest -C Debug --output-on-failure
+      - name: Run gcov
+        run:  find . -type f -name '*.gcno' -exec gcov -p  {} +
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2.1.0
         with:
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token:            ${{ secrets.CODECOV_TOKEN }}
+
+  build-macos:
+    name:    macOS (Build and Test)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install boost
+        run:  brew install boost
+      - name: Configure CMake
+        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+      - name: Build
+        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+      - name:              Test
+        working-directory: ${{github.workspace}}/build/test
+        run:               ctest -C $BUILD_TYPE --output-on-failure
+
+  build-windows:
+    name:    Windows (Build and Test)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Cache Boost
+        id:   cache-boost
+        uses: actions/cache@v2
+        with:
+          path: ${{github.workspace}}/boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}
+          key:  ${{ runner.OS }}-boost-${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}
+      - name:  Download boost
+        if:    steps.cache-boost.outputs.cache-hit != 'true'
+        shell: cmd
+        run:   |
+               C:\msys64\usr\bin\wget.exe https://boostorg.jfrog.io/artifactory/main/release/${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}/source/boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}.7z --no-check-certificate
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Building boost
+        if:   steps.cache-boost.outputs.cache-hit != 'true'
+        run:  |
+              "/c/Program Files/7-Zip/7z.exe" x boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}.7z "-o${{github.workspace}}"
+              cd boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}
+              ./bootstrap.bat
+              ./b2.exe -j8 address-model=64 link=static threading=multi runtime-link=shared variant=release --build-type=minimal
+      - name: Configure CMake
+        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl" -DBoost_USE_STATIC_LIBS=ON -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_RUNTIME=OFF -DBOOST_ROOT="${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}" -DBOOST_INCLUDEDIR="${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\include" -DBOOST_LIBRARYDIR="${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\lib"
+      - name: Build
+        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+      - name:              Test
+        working-directory: ${{github.workspace}}/build/test
+        run:               cd $BUILD_TYPE && ./syrec_test
 
   codestyle:
     runs-on: ubuntu-latest

@@ -14,6 +14,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CMAKE_CXX_STANDARD_REQUIRED ON 
 add_subdirectory("${PROJECT_SOURCE_DIR}/extern/qfr" "extern/qfr")
 target_link_libraries(${PROJECT_NAME} PUBLIC JKQ::qfr)
 
+# add header-only part of the Boost library
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.71 REQUIRED)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+
 # enable interprocedural optimization if it is supported
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/dynamic_bitset.hpp>
+
 namespace syrec {
     class Dummy {
     public:
@@ -13,6 +15,7 @@ namespace syrec {
         void setVal(double v);
 
     protected:
-        double val{};
+        double                  val{};
+        boost::dynamic_bitset<> bitset{};
     };
 } // namespace syrec
