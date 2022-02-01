@@ -12,7 +12,7 @@ build-verbosity = 3
 
 [tool.cibuildwheel.linux]
 before-all = [
-    "curl -O https://dl.bintray.com/boostorg/release/1.76.0/source/boost_1_76_0.tar.gz",
+    "curl -O https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz",
     "tar -xzf boost_1_*",
     "cd boost_1_*/",
     "./bootstrap.sh", # --prefix=/opt/boost",
