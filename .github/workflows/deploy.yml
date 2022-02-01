@@ -58,7 +58,6 @@ jobs:
         with:
           boost_version:    ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
-          toolset:          msvc
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
         env:
