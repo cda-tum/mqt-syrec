@@ -11,7 +11,13 @@ environment = { DEPLOY = "ON" }
 build-verbosity = 3
 
 [tool.cibuildwheel.linux]
-before-all = "sudo apt install libboost-all-dev"
+before-all = [
+    "wget https://dl.bintray.com/boostorg/release/1.76.0/source/boost_1_76_0.tar.gz",
+    "tar -xzf boost_1_*",
+    "cd boost_1_*/",
+    "./bootstrap.sh", # --prefix=/opt/boost",
+    "./b2 install" # --prefix=/opt/boost --with=all"
+]
 
 [tool.cibuildwheel.macos]
 archs = "x86_64"
