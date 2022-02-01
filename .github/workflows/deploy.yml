@@ -72,8 +72,8 @@ jobs:
               ./b2.exe -j8 address-model=64 link=static threading=multi runtime-link=shared variant=release --build-type=minimal
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.3.1
-        env:
-          CIBW_ENVIRONMENT_WINDOWS: "Boost_USE_STATIC_LIBS='ON' Boost_USE_MULTITHREADED='ON' Boost_USE_STATIC_RUNTIME='OFF' BOOST_ROOT='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}' BOOST_INCLUDEDIR='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\include' BOOST_LIBRARYDIR='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\lib'"
+      #        env:
+      #          CIBW_ENVIRONMENT_WINDOWS: "Boost_USE_STATIC_LIBS='ON' Boost_USE_MULTITHREADED='ON' Boost_USE_STATIC_RUNTIME='OFF' BOOST_ROOT='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}' BOOST_INCLUDEDIR='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\include' BOOST_LIBRARYDIR='${{github.workspace}}\boost_${{ env.BOOST_VERSION_MAJOR }}_${{ env.BOOST_VERSION_MINOR }}_${{ env.BOOST_VERSION_PATCH }}\lib'"
       - uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
