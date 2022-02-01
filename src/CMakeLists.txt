@@ -53,5 +53,5 @@ if (COVERAGE)
 	target_link_libraries(${PROJECT_NAME} PUBLIC --coverage)
 endif ()
 
-# add TUMQIT alias
-add_library(TUMQIT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+# add MQT alias
+add_library(MQT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

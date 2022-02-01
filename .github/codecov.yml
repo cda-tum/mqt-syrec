@@ -1,6 +1,6 @@
 ignore:
   - "extern/**/*"
-  - "tumqit/**/*"
+  - "mqt/**/*"
   - "test/**/*"
 
 coverage:

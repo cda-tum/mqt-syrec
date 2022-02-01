@@ -55,5 +55,5 @@ endif ()
 
 # add Python binding code
 if (BINDINGS)
-	add_subdirectory(tumqit/syrec)
+	add_subdirectory(mqt/syrec)
 endif ()

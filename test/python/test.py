@@ -1,4 +1,4 @@
-from tumqit import syrec
+from mqt import syrec
 
 if __name__ == "__main__":
     dummy = syrec.Dummy()

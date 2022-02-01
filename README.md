@@ -25,7 +25,7 @@ SyReC is mainly developed as a C++ library with an easy-to-use Python interface.
   This enables platform specific compiler optimizations that cannot be enabled on portable wheels.
 - Once installed, start using it in Python:
     ```python
-    from tumqit.syrec import * 
+    from mqt.syrec import * 
     
     <...>
     ```

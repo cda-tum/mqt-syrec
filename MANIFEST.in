@@ -1,7 +1,7 @@
 include README.md LICENSE CMakeLists.txt
 graft src
 graft include
-graft tumqit
+graft mqt
 include extern/qfr/CMakeLists.txt
 graft extern/qfr/src
 graft extern/qfr/include

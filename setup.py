@@ -84,10 +84,10 @@ setup(
     long_description_content_type="text/markdown",
     license="MIT",
     # url="",
-    ext_modules=[CMakeExtension('pysyrec', namespace='tumqit.syrec.')],
+    ext_modules=[CMakeExtension('pysyrec', namespace='mqt.syrec.')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    packages=find_namespace_packages(include=['tumqit.*']),
+    packages=find_namespace_packages(include=['mqt.*']),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         "Programming Language :: Python :: 3",
@@ -100,7 +100,7 @@ setup(
         "Natural Language :: English",
         "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
     ],
-    keywords="tumqit reversible_computing synthesis",
+    keywords="mqt reversible_computing synthesis",
     project_urls={
         'Source': 'https://github.com/iic-jku/syrec/',
         'Tracker': 'https://github.com/iic-jku/syrec/issues',

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 build = "cp3*"
 skip = "*-win32 *-musllinux_i686 *-manylinux_i686"
 test-skip = "*_arm64 *_universal2:arm64"
-test-command = "python -c \"from tumqit import syrec\ndummy = syrec.Dummy()\ndummy.setVal(42)\nprint(dummy.getVal())\ndummy = syrec.Dummy(42)\n\""
+test-command = "python -c \"from mqt import syrec\ndummy = syrec.Dummy()\ndummy.setVal(42)\nprint(dummy.getVal())\ndummy = syrec.Dummy(42)\n\""
 environment = { DEPLOY = "ON" }
 build-verbosity = 3
 
