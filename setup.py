@@ -76,7 +76,7 @@ with open(README_PATH) as readme_file:
 
 setup(
     name='syrec',
-    version='1.0.0',
+    version='0.1.0',
     author='Smaran Adarsh',
     author_email='smaran.adarsh@tum.de',
     description='SyReC - A Programming Language for Synthesis of Reversible Circuits',
