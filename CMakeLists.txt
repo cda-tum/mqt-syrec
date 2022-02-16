@@ -55,5 +55,5 @@ add_subdirectory(src)
 
 # add Python binding code
 if (BINDINGS)
-	add_subdirectory(bindings)
+	add_subdirectory(mqt/syrec)
 endif ()
