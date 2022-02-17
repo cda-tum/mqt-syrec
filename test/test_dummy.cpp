@@ -6,7 +6,7 @@ namespace syrec {
     class DummyTest: public ::testing::Test {
     protected:
         // any objects needed by all tests
-        double dummyVal;
+        double dummyVal = 0.;
 
         void SetUp() override {
             // setup all the individual objects before each test

@@ -1,5 +1,6 @@
-# TODO: add any header and source files here
 add_library(${PROJECT_NAME}
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/Dummy.hpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/Dummy.cpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_p.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
