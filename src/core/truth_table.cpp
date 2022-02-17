@@ -17,56 +17,47 @@
 
 #include "core/truth_table.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  std::ostream& operator<<( std::ostream& os, const binary_truth_table& spec )
-  {
-    for ( binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it )
-    {
-      // iterate through input cube (bit by bit)
-      foreach_ ( const binary_truth_table::value_type& in_bit, it->first )
-      {
-        os << ( in_bit ? ( *in_bit ? "1" : "0" ) : "-" );
-      }
+    std::ostream& operator<<(std::ostream& os, const binary_truth_table& spec) {
+        for (binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it) {
+            // iterate through input cube (bit by bit)
+            foreach_(const binary_truth_table::value_type& in_bit, it->first) {
+                os << (in_bit ? (*in_bit ? "1" : "0") : "-");
+            }
 
-      os << " ";
+            os << " ";
 
-      // iterate through output cube (bit by bit)
-      foreach_ ( const binary_truth_table::value_type& out_bit, it->second )
-      {
-        os << ( out_bit ? ( *out_bit ? "1" : "0" ) : "-" );
-      }
+            // iterate through output cube (bit by bit)
+            foreach_(const binary_truth_table::value_type& out_bit, it->second) {
+                os << (out_bit ? (*out_bit ? "1" : "0") : "-");
+            }
 
-      os << std::endl;
+            os << std::endl;
+        }
+
+        return os;
     }
 
-    return os;
-  }
+    unsigned truth_table_cube_to_number(const binary_truth_table::cube_type& cube) {
+        unsigned ret = 0;
 
-  unsigned truth_table_cube_to_number( const binary_truth_table::cube_type& cube )
-  {
-    unsigned ret = 0;
-    
-    for ( unsigned i = 0; i < cube.size(); ++i )
-    {
-      assert( cube.at( i ) );
-      ret |= ( *cube.at( i ) << ( cube.size() - 1 - i ) );
+        for (unsigned i = 0; i < cube.size(); ++i) {
+            assert(cube.at(i));
+            ret |= (*cube.at(i) << (cube.size() - 1 - i));
+        }
+
+        return ret;
     }
 
-    return ret;
-  }
+    binary_truth_table::cube_type number_to_truth_table_cube(unsigned number, unsigned bw) {
+        binary_truth_table::cube_type c;
 
-  binary_truth_table::cube_type number_to_truth_table_cube( unsigned number, unsigned bw )
-  {
-    binary_truth_table::cube_type c;
+        for (unsigned i = 0; i < bw; ++i) {
+            c.push_back((number & (1u << (bw - 1 - i))) ? true : false);
+        }
 
-    for ( unsigned i = 0; i < bw; ++i )
-    {
-      c.push_back( ( number & ( 1u << ( bw -1  - i ) ) ) ? true : false );
+        return c;
     }
 
-    return c;
-  }
-
-}
+} // namespace revkit

@@ -18,69 +18,55 @@
 #include "core/functions/expand_circuit.hpp"
 
 #include <boost/tuple/tuple.hpp>
-
 #include <core/functions/copy_circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  bool expand_circuit( const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter )
-  {
-    /* circ has to be empty */
-    if ( circ.num_gates() != 0 )
-    {
-      assert( false );
-      return false;
-    }
-
-    if ( num_lines == 0u || !filter.size() )
-    {
-      copy_circuit( base, circ );
-      return true;
-    }
-    else
-    {
-      circ.set_lines( num_lines );
-
-      foreach_ ( const gate& g, base )
-      {
-        gate& new_g = circ.append_gate();
-      
-        for ( gate::const_iterator it = g.begin_controls(); it != g.end_controls(); ++it )
-        {
-          new_g.add_control( filter.at( *it ) );
+    bool expand_circuit(const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter) {
+        /* circ has to be empty */
+        if (circ.num_gates() != 0) {
+            assert(false);
+            return false;
         }
-        
-        for ( gate::const_iterator it = g.begin_targets(); it != g.end_targets(); ++it )
-        {
-          new_g.add_target( filter.at( *it ) );
+
+        if (num_lines == 0u || !filter.size()) {
+            copy_circuit(base, circ);
+            return true;
+        } else {
+            circ.set_lines(num_lines);
+
+            foreach_(const gate& g, base) {
+                gate& new_g = circ.append_gate();
+
+                for (gate::const_iterator it = g.begin_controls(); it != g.end_controls(); ++it) {
+                    new_g.add_control(filter.at(*it));
+                }
+
+                for (gate::const_iterator it = g.begin_targets(); it != g.end_targets(); ++it) {
+                    new_g.add_target(filter.at(*it));
+                }
+
+                new_g.set_type(g.type());
+            }
         }
-        
-        new_g.set_type( g.type() ); 
-      }
+
+        return true;
     }
 
-    return true;
-  }
+    bool expand_circuit(const circuit& base, circuit& circ) {
+        /* circ has to be empty */
+        if (circ.num_gates() != 0) {
+            assert(false);
+            return false;
+        }
 
-  bool expand_circuit( const circuit& base, circuit& circ )
-  {
-    /* circ has to be empty */
-    if ( circ.num_gates() != 0 )
-    {
-      assert( false );
-      return false;
+        /* is base a sub-circuit */
+        if (!base.is_subcircuit()) {
+            copy_circuit(base, circ);
+            return true;
+        }
+
+        return expand_circuit(base, circ, base.filter().first, base.filter().second);
     }
 
-    /* is base a sub-circuit */
-    if ( !base.is_subcircuit() )
-    {
-      copy_circuit( base, circ );
-      return true;
-    }
-
-    return expand_circuit( base, circ, base.filter().first, base.filter().second );
-  }
-
-}
-
+} // namespace revkit

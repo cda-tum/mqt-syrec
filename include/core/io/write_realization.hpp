@@ -27,23 +27,20 @@
 #ifndef WRITE_REALIZATION_HPP
 #define WRITE_REALIZATION_HPP
 
+#include <core/circuit.hpp>
 #include <iosfwd>
 #include <string>
 
-#include <core/circuit.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Settings for write_realization function
    *
    * @author RevKit
    * @since  1.0
    */
-  struct write_realization_settings
-  {
-    /**
+    struct write_realization_settings {
+        /**
      * @brief Default constructor
      *
      * Initializes default values
@@ -51,9 +48,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    write_realization_settings();
+        write_realization_settings();
 
-    /**
+        /**
      * @brief A version string
      * 
      * Default value is 2.0 and printed after \b .version command
@@ -61,9 +58,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string version;
+        std::string version;
 
-    /**
+        /**
      * @brief A header for the file
      *
      * This header will be printed as a comment in the first
@@ -86,10 +83,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string header;
-  };
+        std::string header;
+    };
 
-  /**
+    /**
    * @brief Writes a circuit as RevLib realization to an output stream
    *
    * This method takes a circuit and writes it to an output stream.
@@ -116,9 +113,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void write_realization( const circuit& circ, std::ostream& os, const write_realization_settings& settings = write_realization_settings() );
+    void write_realization(const circuit& circ, std::ostream& os, const write_realization_settings& settings = write_realization_settings());
 
-  /**
+    /**
    * @brief Writes a circuit as RevLib realization to a file
    *
    * This is a wrapper function for write_realization(const circuit&, std::ostream&, const write_realization_settings&)
@@ -164,8 +161,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool write_realization( const circuit& circ, const std::string& filename, const write_realization_settings& settings = write_realization_settings(), std::string* error = 0 );
+    bool write_realization(const circuit& circ, const std::string& filename, const write_realization_settings& settings = write_realization_settings(), std::string* error = 0);
 
-}
+} // namespace revkit
 
 #endif /* WRITE_REALIZATION_HPP */

@@ -17,38 +17,32 @@
 
 #include "core/syrec/grammar.hpp"
 
-#include <fstream>
-
 #include <boost/foreach.hpp>
+#include <fstream>
 
 #define foreach_ BOOST_FOREACH
 
-namespace revkit
-{
+namespace revkit {
 
-  bool parse( syrec::ast_program& prog, const std::string& filename )
-  {
-    std::string content, line;
-      
-    std::ifstream is;
-    is.open( filename.c_str(), std::ios::in );
+    bool parse(syrec::ast_program& prog, const std::string& filename) {
+        std::string content, line;
 
-    while ( getline( is, line ) )
-    {
-      content += line + '\n';
-    }
-      
-    return parse_string( prog, content );
-  }
+        std::ifstream is;
+        is.open(filename.c_str(), std::ios::in);
 
-  bool parse_string( syrec::ast_program& prog, const std::string& program )
-  {
-    if ( !syrec::parse( prog, program.begin(), program.end() ) )
-    {
-      return false;
+        while (getline(is, line)) {
+            content += line + '\n';
+        }
+
+        return parse_string(prog, content);
     }
 
-    return true;
-  }
+    bool parse_string(syrec::ast_program& prog, const std::string& program) {
+        if (!syrec::parse(prog, program.begin(), program.end())) {
+            return false;
+        }
 
-}
+        return true;
+    }
+
+} // namespace revkit

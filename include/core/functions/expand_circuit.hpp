@@ -26,10 +26,9 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Expands a circuit
    *
    * This function expands the circuit \p base, such that
@@ -47,9 +46,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool expand_circuit( const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter );
+    bool expand_circuit(const circuit& base, circuit& circ, unsigned num_lines, const std::vector<unsigned>& filter);
 
-  /**
+    /**
    * @brief Expands a circuit
    *
    * As expand_circuit(const circuit&, circuit&, unsigned, const std::vector<unsigned>& but takes
@@ -64,8 +63,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool expand_circuit( const circuit& base, circuit& circ );
+    bool expand_circuit(const circuit& base, circuit& circ);
 
-}
+} // namespace revkit
 
 #endif /* EXPAND_CIRCUIT_HPP */

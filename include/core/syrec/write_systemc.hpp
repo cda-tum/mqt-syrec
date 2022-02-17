@@ -24,24 +24,20 @@
 #ifndef WRITE_SYSTEMC_HPP
 #define WRITE_SYSTEMC_HPP
 
-
+#include <core/properties.hpp>
 #include <fstream>
 #include <iostream>
 
-#include <core/properties.hpp>
+namespace revkit {
+    class pattern;
 
-namespace revkit
-{
-  class pattern;
+    namespace syrec {
+        class program;
+    }
 
-  namespace syrec
-  {
-    class program;
-  }
+    void write_systemc(const syrec::program& prog, std::ostream& os, properties::ptr settings, const pattern& p);
+    void write_systemc(const syrec::program& prog, const std::string& filename, properties::ptr settings, const pattern& p);
 
-  void write_systemc( const syrec::program& prog, std::ostream& os, properties::ptr settings, const pattern& p );
-  void write_systemc( const syrec::program& prog, const std::string& filename, properties::ptr settings, const pattern& p );
-
-}
+} // namespace revkit
 
 #endif /* WRITE_SYSTEMC_HPP */

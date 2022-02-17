@@ -18,63 +18,52 @@
 #include "core/functions/circuit_to_truth_table.hpp"
 
 #include <boost/format.hpp>
-
 #include <core/properties.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  void bitset_to_vector( binary_truth_table::cube_type& vec, const boost::dynamic_bitset<> number )
-  {
-    vec.clear();
-    for ( unsigned i = 0u; i < number.size(); ++i )
-    {
-      vec.push_back( number.test( i ) );
+    void bitset_to_vector(binary_truth_table::cube_type& vec, const boost::dynamic_bitset<> number) {
+        vec.clear();
+        for (unsigned i = 0u; i < number.size(); ++i) {
+            vec.push_back(number.test(i));
+        }
     }
-  }
 
-  boost::dynamic_bitset<>& inc( boost::dynamic_bitset<>& bitset )
-  {
-    for ( boost::dynamic_bitset<>::size_type i = 0; i < bitset.size(); ++i )
-    {
-      bitset.flip( i );
-      if ( bitset.test( i ) ) break;
+    boost::dynamic_bitset<>& inc(boost::dynamic_bitset<>& bitset) {
+        for (boost::dynamic_bitset<>::size_type i = 0; i < bitset.size(); ++i) {
+            bitset.flip(i);
+            if (bitset.test(i)) break;
+        }
+        return bitset;
     }
-    return bitset;
-  }
 
-  bool circuit_to_truth_table( const circuit& circ, binary_truth_table& spec, const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation )
-  {
-    // number of patterns to check depends on partial or non-partial simulation
-    boost::dynamic_bitset<>::size_type n = ( simulation.settings() && simulation.settings()->get<bool>( "partial", false ) ) ? std::count( circ.constants().begin(), circ.constants().end(), constant() ) : circ.lines();
-    boost::dynamic_bitset<> input( n, 0u );
+    bool circuit_to_truth_table(const circuit& circ, binary_truth_table& spec, const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation) {
+        // number of patterns to check depends on partial or non-partial simulation
+        boost::dynamic_bitset<>::size_type n = (simulation.settings() && simulation.settings()->get<bool>("partial", false)) ? std::count(circ.constants().begin(), circ.constants().end(), constant()) : circ.lines();
+        boost::dynamic_bitset<>            input(n, 0u);
 
-    do
-    {
-      boost::dynamic_bitset<> output;
-      
-      if ( simulation( output, circ, input ) )
-      {
-        binary_truth_table::cube_type in_cube, out_cube;
-       
-        bitset_to_vector( in_cube, input );
-        bitset_to_vector( out_cube, output );
-        
-        spec.add_entry( in_cube, out_cube );
-      }
-      else
-      {
-        return false;
-      }
-    } while ( !inc( input ).none() );
+        do {
+            boost::dynamic_bitset<> output;
 
-    // metadata
-    spec.set_inputs( circ.inputs() );
-    spec.set_outputs( circ.outputs() );
-    spec.set_constants( circ.constants() );
-    spec.set_garbage( circ.garbage() );
+            if (simulation(output, circ, input)) {
+                binary_truth_table::cube_type in_cube, out_cube;
 
-    return true;
-  }
+                bitset_to_vector(in_cube, input);
+                bitset_to_vector(out_cube, output);
 
-}
+                spec.add_entry(in_cube, out_cube);
+            } else {
+                return false;
+            }
+        } while (!inc(input).none());
+
+        // metadata
+        spec.set_inputs(circ.inputs());
+        spec.set_outputs(circ.outputs());
+        spec.set_constants(circ.constants());
+        spec.set_garbage(circ.garbage());
+
+        return true;
+    }
+
+} // namespace revkit

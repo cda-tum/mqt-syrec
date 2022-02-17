@@ -25,10 +25,9 @@
 #include <string>
 #include <vector>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Pattern file for sequential simulation
    *
    * This class is used together with read_pattern and create_simulation_pattern
@@ -55,26 +54,25 @@ namespace revkit
    * @author RevKit
    * @since  1.2
    */
-  class pattern
-  {
-  public:
-    /**
+    class pattern {
+    public:
+        /**
      * @brief Standard constructor
      *
      * @author RevKit
      * @since  1.2
      */
-    pattern();
+        pattern();
 
-    /**
+        /**
      * @brief Deconstructor
      *
      * @author RevKit
      * @since  1.2
      */
-    ~pattern();
+        ~pattern();
 
-    /**
+        /**
      * @brief Map for initializers
      *
      * The key is the name of the state signal and
@@ -83,9 +81,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    typedef std::map<std::string, unsigned> initializer_map;
+        typedef std::map<std::string, unsigned> initializer_map;
 
-    /**
+        /**
      * @brief Pattern Type
      *
      * A pattern is a sequence of values
@@ -95,17 +93,17 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    typedef std::vector<unsigned> pattern_t;
+        typedef std::vector<unsigned> pattern_t;
 
-    /**
+        /**
      * @brief Vector of pattern
      *
      * @author RevKit
      * @since  1.2
      */
-    typedef std::vector<pattern_t> pattern_vec;
+        typedef std::vector<pattern_t> pattern_vec;
 
-    /**
+        /**
      * @brief Adds an initializer
      *
      * @param name Name of the state signal
@@ -114,9 +112,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    void add_initializer( const std::string& name, unsigned value );
+        void add_initializer(const std::string& name, unsigned value);
 
-    /**
+        /**
      * @brief Adds an input signal
      *
      * @param name Name of the input signal
@@ -124,9 +122,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    void add_input( const std::string& name );
+        void add_input(const std::string& name);
 
-    /**
+        /**
      * @brief Adds a pattern sequence
      *
      * The pattern sequence must have the size of all
@@ -137,9 +135,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    void add_pattern( const std::vector<unsigned>& pattern );
+        void add_pattern(const std::vector<unsigned>& pattern);
 
-    /**
+        /**
      * @brief Returns the initializers
      *
      * A map is returned with a the name of the
@@ -148,26 +146,25 @@ namespace revkit
      *
      * @return Map of initializers
      */
-    const initializer_map& initializers() const;
+        const initializer_map& initializers() const;
 
-    /**
+        /**
      * @brief Returns the list of input signals
      *
      * @return List of input signals
      */
-    const std::vector<std::string>& inputs() const;
+        const std::vector<std::string>& inputs() const;
 
-    /**
+        /**
      * @brief Returns the list of pattern sequences
      *
      * @return List of pattern sequences
      */
-    const pattern_vec& patterns() const;
+        const pattern_vec& patterns() const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-}
-
+} // namespace revkit

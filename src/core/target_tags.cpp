@@ -17,42 +17,34 @@
 
 #include "core/target_tags.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  bool same_type( const gate& g1, const gate& g2 )
-  {
-    return g1.type().type() == g2.type().type();
-  }
+    bool same_type(const gate& g1, const gate& g2) {
+        return g1.type().type() == g2.type().type();
+    }
 
-  bool is_toffoli( const gate& g )
-  {
-    return is_type<toffoli_tag>( g.type() );
-  }
+    bool is_toffoli(const gate& g) {
+        return is_type<toffoli_tag>(g.type());
+    }
 
-  bool is_fredkin( const gate& g )
-  {
-    return is_type<fredkin_tag>( g.type() );
-  }
+    bool is_fredkin(const gate& g) {
+        return is_type<fredkin_tag>(g.type());
+    }
 
-  bool is_peres( const gate& g )
-  {
-    return is_type<peres_tag>( g.type() );
-  }
+    bool is_peres(const gate& g) {
+        return is_type<peres_tag>(g.type());
+    }
 
-  bool is_v( const gate& g )
-  {
-    return is_type<v_tag>( g.type() );
-  }
+    bool is_v(const gate& g) {
+        return is_type<v_tag>(g.type());
+    }
 
-  bool is_vplus( const gate& g )
-  {
-    return is_type<vplus_tag>( g.type() );
-  }
+    bool is_vplus(const gate& g) {
+        return is_type<vplus_tag>(g.type());
+    }
 
-  bool is_module( const gate& g )
-  {
-    return is_type<module_tag>( g.type() );
-  }
+    bool is_module(const gate& g) {
+        return is_type<module_tag>(g.type());
+    }
 
-}
+} // namespace revkit

@@ -17,12 +17,10 @@
 
 #include "core/functions/find_lines.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  void find_empty_lines( const gate& src, unsigned line_size, gate::line_container& lines )
-  {
-    find_empty_lines( src, line_size, std::insert_iterator<gate::line_container>( lines, lines.begin() ) );
-  }
+    void find_empty_lines(const gate& src, unsigned line_size, gate::line_container& lines) {
+        find_empty_lines(src, line_size, std::insert_iterator<gate::line_container>(lines, lines.begin()));
+    }
 
-}
+} // namespace revkit

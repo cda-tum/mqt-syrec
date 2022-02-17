@@ -27,13 +27,11 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
-
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Type for costs
    *
    * Costs is an unsigned long long, that is usually
@@ -43,25 +41,25 @@ namespace revkit
    * @author RevKit
    * @since  1.2
    */
-  typedef unsigned long long cost_t;
+    typedef unsigned long long cost_t;
 
-  /**
+    /**
    * @brief Functor for cost function measured by the whole circuit
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef boost::function<cost_t( const circuit& circ )> costs_by_circuit_func;
+    typedef boost::function<cost_t(const circuit& circ)> costs_by_circuit_func;
 
-  /**
+    /**
    * @brief Functor for cost function measured by each gate
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef boost::function<cost_t( const gate& gate, unsigned lines )> costs_by_gate_func;
+    typedef boost::function<cost_t(const gate& gate, unsigned lines)> costs_by_gate_func;
 
-  /**
+    /**
    * @brief Cost Function type
    *
    * It can either be a costs_by_circuit_func or a costs_by_gate_func
@@ -69,9 +67,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  typedef boost::variant<costs_by_circuit_func, costs_by_gate_func> cost_function;
+    typedef boost::variant<costs_by_circuit_func, costs_by_gate_func> cost_function;
 
-  /**
+    /**
    * @brief Calculates the gate costs
    *
    * This costs class is basically a wrapper around num_gates()
@@ -83,9 +81,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct gate_costs
-  {
-    /**
+    struct gate_costs {
+        /**
      * @brief Returns the number of gates
      *
      * @param circ Circuit
@@ -95,10 +92,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    cost_t operator()( const circuit& circ ) const;
-  };
+        cost_t operator()(const circuit& circ) const;
+    };
 
-  /**
+    /**
    * @brief Calculates the line costs
    *
    * This costs class is basically a wrapper around lines()
@@ -110,9 +107,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct line_costs
-  {
-    /**
+    struct line_costs {
+        /**
      * @brief Returns the number of lines
      *
      * @param circ Circuit
@@ -122,10 +118,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    cost_t operator()( const circuit& circ ) const;
-  };
+        cost_t operator()(const circuit& circ) const;
+    };
 
-  /**
+    /**
    * @brief Calculates the quantum costs
    *
    * This costs class calculates the quantum costs.
@@ -137,9 +133,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct quantum_costs
-  {
-    /**
+    struct quantum_costs {
+        /**
      * @brief Standard constructor
      *
      * Initializes default values
@@ -147,9 +142,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    quantum_costs();
+        quantum_costs();
 
-    /**
+        /**
      * @brief Returns the quantum costs for gate \p g
      *
      * @param g Gate
@@ -160,9 +155,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    cost_t operator()( const gate& g, unsigned lines ) const;
+        cost_t operator()(const gate& g, unsigned lines) const;
 
-    /**
+        /**
      * @brief Offset for control lines
      *
      * With this parameter the number of controls can be
@@ -178,10 +173,10 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    int controls_offset;
-  };
+        int controls_offset;
+    };
 
-  /**
+    /**
    * @brief Calculates the transistor costs
    *
    * This class calculates the so called transistor
@@ -193,9 +188,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct transistor_costs
-  {
-    /**
+    struct transistor_costs {
+        /**
      * @brief Returns the transistor costs for gate \p g
      *
      * @param g Gate
@@ -206,10 +200,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    cost_t operator()( const gate& g, unsigned lines ) const;
-  };
+        cost_t operator()(const gate& g, unsigned lines) const;
+    };
 
-  /**
+    /**
    * @brief Calculates the costs of a circuit by a given cost function
    *
    * With this function the costs for a circuit can be calculated.
@@ -229,15 +223,15 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  cost_t costs( const circuit& circ, const cost_function& f );
-  
-  cost_t final_quantum_cost( const circuit& circ, unsigned lines );
-  
-  cost_t my_quantum_costs( const gate& g, unsigned lines );
-  
-  cost_t my_transistor_costs( const gate& g, unsigned lines );
-  
-  cost_t final_transistor_cost( const circuit& circ, unsigned lines );
-}
+    cost_t costs(const circuit& circ, const cost_function& f);
+
+    cost_t final_quantum_cost(const circuit& circ, unsigned lines);
+
+    cost_t my_quantum_costs(const gate& g, unsigned lines);
+
+    cost_t my_transistor_costs(const gate& g, unsigned lines);
+
+    cost_t final_transistor_cost(const circuit& circ, unsigned lines);
+} // namespace revkit
 
 #endif /* COSTS_HPP */

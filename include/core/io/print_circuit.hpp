@@ -24,16 +24,14 @@
 #ifndef PRINT_CIRCUIT_HPP
 #define PRINT_CIRCUIT_HPP
 
+#include <core/circuit.hpp>
 #include <iostream>
 
-#include <core/circuit.hpp>
+namespace revkit {
 
-namespace revkit
-{
+    class gate;
 
-  class gate;
-
-  /**
+    /**
    * @brief Settings for print_circuit function
    *
    * @note This settings cannot be applied when
@@ -43,9 +41,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct print_circuit_settings
-  {
-    /**
+    struct print_circuit_settings {
+        /**
      * @brief Default constructor
      *
      * Initializes default values
@@ -55,33 +52,33 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    print_circuit_settings( std::ostream& os = std::cout );
+        print_circuit_settings(std::ostream& os = std::cout);
 
-    /**
+        /**
      * @brief Default deconstructor
      *
      * @author RevKit
      * @since  1.1
      */
-    virtual ~print_circuit_settings();
+        virtual ~print_circuit_settings();
 
-    /**
+        /**
      * @brief The stream to dump the circuit to (default: \b std::ostream)
      *
      * @author RevKit
      * @since  1.0
      */
-    std::ostream& os;
+        std::ostream& os;
 
-    /**
+        /**
      * @brief Determines whether the inputs and outputs should be printed (default: \b false)
      *
      * @author RevKit
      * @since  1.0
      */
-    bool print_inputs_and_outputs;
+        bool print_inputs_and_outputs;
 
-    /**
+        /**
      * @brief Determines whether the gate_index should be printed (default: \b false)
      *
      * If this flag is enabled, in the first line --
@@ -94,9 +91,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool print_gate_index;
+        bool print_gate_index;
 
-    /**
+        /**
      * @brief Character to be printed for a control line
      *
      * Default value is \b *
@@ -104,9 +101,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    char control_char;
-    
-    /**
+        char control_char;
+
+        /**
      * @brief Character to be printed for an empty line
      *
      * Default value is \b -
@@ -114,9 +111,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    char line_char;
+        char line_char;
 
-    /**
+        /**
      * @brief Space between gates
      *
      * Default value is \b 0.
@@ -124,9 +121,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    unsigned gate_spacing;
+        unsigned gate_spacing;
 
-    /**
+        /**
      * @brief Space between lines
      *
      * Default value is \b 0.
@@ -134,9 +131,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    unsigned line_spacing;
+        unsigned line_spacing;
 
-    /**
+        /**
      * @brief Returns a char for a gate
      *
      * The default implementation returns \b O for Toffoli
@@ -153,10 +150,10 @@ namespace revkit
      *
      * @return The char
      */
-    virtual char target_type_char( const gate& g ) const;
-  };
+        virtual char target_type_char(const gate& g) const;
+    };
 
-  /**
+    /**
    * @brief Prints a circuit as ASCII
    *
    * This method can be used to dump a circuit
@@ -169,9 +166,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void print_circuit( const circuit& circ, const print_circuit_settings& settings = print_circuit_settings() );
+    void print_circuit(const circuit& circ, const print_circuit_settings& settings = print_circuit_settings());
 
-  /**
+    /**
    * @brief Wrapper for using with the output stream operator
    *
    * This operator wraps the print_circuit method to output a circuit
@@ -185,8 +182,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  std::ostream& operator<<( std::ostream& os, const circuit& circ );
+    std::ostream& operator<<(std::ostream& os, const circuit& circ);
 
-}
+} // namespace revkit
 
 #endif /* PRINT_CIRCUIT_HPP */

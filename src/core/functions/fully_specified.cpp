@@ -17,13 +17,10 @@
 
 #include "core/functions/fully_specified.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  bool fully_specified( const binary_truth_table& tt, bool is_reversible )
-  {
-    return fully_specified( tt, boost::optional<bool>(), is_reversible );
-  }
+    bool fully_specified(const binary_truth_table& tt, bool is_reversible) {
+        return fully_specified(tt, boost::optional<bool>(), is_reversible);
+    }
 
-}
-
+} // namespace revkit

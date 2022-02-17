@@ -27,20 +27,17 @@
 #ifndef READ_REALIZATION_HPP
 #define READ_REALIZATION_HPP
 
+#include <core/circuit.hpp>
+#include <core/io/revlib_processor.hpp>
 #include <iosfwd>
 #include <vector>
-
-#include <core/circuit.hpp>
-
-#include <core/io/revlib_processor.hpp>
 
 /**
  * @brief Main namespace
  */
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Implementation of revlib_processor to construct a circuit
    *
    * This class inherits from revlib_processor and constructs
@@ -52,10 +49,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class circuit_processor : public revlib_processor
-  {
-  public:
-    /**
+    class circuit_processor: public revlib_processor {
+    public:
+        /**
      * @brief Default constructor
      *
      * Initializes private data
@@ -67,10 +63,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit circuit_processor( circuit& circ );
+        explicit circuit_processor(circuit& circ);
 
-
-    /**
+        /**
      * @brief Default deconstructor
      *
      * Clears private data
@@ -78,28 +73,28 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual ~circuit_processor();
+        virtual ~circuit_processor();
 
-  protected:
-    virtual void on_comment( const std::string& comment ) const;
-    virtual void on_numvars( unsigned numvars ) const;
-    virtual void on_inputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
-    virtual void on_outputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
-    virtual void on_constants( std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last ) const;
-    virtual void on_garbage( std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last ) const;
-    virtual void on_inputbus( const std::string& name, const std::vector<unsigned>& line_indices ) const; 
-    virtual void on_outputbus( const std::string& name, const std::vector<unsigned>& line_indices ) const; 
-    virtual void on_state( const std::string& name, const std::vector<unsigned>& line_indices, unsigned initial_value ) const;
-    virtual void on_module( const std::string& name, const boost::optional<std::string>& filename ) const;
-    virtual void on_gate( const boost::any& target_type, const std::vector<unsigned>& line_indices ) const;
-    virtual void on_end() const;
+    protected:
+        virtual void on_comment(const std::string& comment) const;
+        virtual void on_numvars(unsigned numvars) const;
+        virtual void on_inputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
+        virtual void on_outputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
+        virtual void on_constants(std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last) const;
+        virtual void on_garbage(std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last) const;
+        virtual void on_inputbus(const std::string& name, const std::vector<unsigned>& line_indices) const;
+        virtual void on_outputbus(const std::string& name, const std::vector<unsigned>& line_indices) const;
+        virtual void on_state(const std::string& name, const std::vector<unsigned>& line_indices, unsigned initial_value) const;
+        virtual void on_module(const std::string& name, const boost::optional<std::string>& filename) const;
+        virtual void on_gate(const boost::any& target_type, const std::vector<unsigned>& line_indices) const;
+        virtual void on_end() const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-  /**
+    /**
    * @brief Read a circuit realization into a circuit from stream
    *
    * This method uses revlib_parser(std::istream&, revlib_processor&, std::string*)
@@ -116,9 +111,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool read_realization( circuit& circ, std::istream& in, std::string* error = 0 );
+    bool read_realization(circuit& circ, std::istream& in, std::string* error = 0);
 
-  /**
+    /**
    * @brief Read a circuit realization into a circuit from filename
    *
    * This method construts a \b std::ifstream of the given \p filename
@@ -158,7 +153,7 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool read_realization( circuit& circ, const std::string& filename, std::string* error = 0 );
-}
+    bool read_realization(circuit& circ, const std::string& filename, std::string* error = 0);
+} // namespace revkit
 
 #endif /* READ_REALIZATION_HPP */

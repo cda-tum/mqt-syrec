@@ -18,21 +18,17 @@
 #include "core/functions/reverse_circuit.hpp"
 
 #include "core/circuit.hpp"
-
 #include "core/functions/copy_circuit.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  void reverse_circuit( const circuit& src, circuit& dest )
-  {
-    copy_circuit( src, dest );
-    reverse_circuit( dest );
-  }
+    void reverse_circuit(const circuit& src, circuit& dest) {
+        copy_circuit(src, dest);
+        reverse_circuit(dest);
+    }
 
-  void reverse_circuit( circuit& circ )
-  {
-    std::reverse( circ.begin(), circ.end() );
-  }
-  
-}
+    void reverse_circuit(circuit& circ) {
+        std::reverse(circ.begin(), circ.end());
+    }
+
+} // namespace revkit

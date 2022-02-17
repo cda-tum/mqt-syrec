@@ -23,22 +23,19 @@
 #ifndef WRITE_SPECIFICATION_HPP
 #define WRITE_SPECIFICATION_HPP
 
+#include <core/truth_table.hpp>
 #include <string>
 
-#include <core/truth_table.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Settings for write_specification
    *
    * @author RevKit
    * @since  1.0
    */
-  struct write_specification_settings
-  {
-    /**
+    struct write_specification_settings {
+        /**
      * @brief Default constructor
      *
      * Initializes default values
@@ -46,9 +43,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    write_specification_settings();
+        write_specification_settings();
 
-    /**
+        /**
      * @brief A version string
      * 
      * Default value is 2.0 and printed after \b .version command
@@ -56,9 +53,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string version;
-    
-    /**
+        std::string version;
+
+        /**
      * @brief A header for the file
      *
      * This header will be printed as a comment in the first
@@ -81,9 +78,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string header;
+        std::string header;
 
-    /**
+        /**
      * @brief Order of literals in the output cubes
      *
      * The order of the literals in the output cube can
@@ -101,10 +98,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::vector<unsigned> output_order;
-  };
+        std::vector<unsigned> output_order;
+    };
 
-  /**
+    /**
    * @brief Writes a truth table to a RevLib specification file
    *
    * @param spec Specification
@@ -112,8 +109,8 @@ namespace revkit
    * @param settings Settings
    * @return true on success, false otherwise
    */
-  bool write_specification( const binary_truth_table& spec, const std::string& filename, const write_specification_settings& settings = write_specification_settings() );
+    bool write_specification(const binary_truth_table& spec, const std::string& filename, const write_specification_settings& settings = write_specification_settings());
 
-}
+} // namespace revkit
 
 #endif /* WRITE_SPECIFICATION_HPP */

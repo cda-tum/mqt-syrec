@@ -23,27 +23,25 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
-
 #include <core/circuit.hpp>
 #include <core/functor.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Simulation functor
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)> simulation_func;
+    typedef functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)> simulation_func;
 
-  /**
+    /**
    * @brief Multi step simulation functor
    *
    * @author RevKit
    * @since  1.2
    */
-  typedef functor<bool(std::vector<boost::dynamic_bitset<> >&, const circuit&, const std::vector<boost::dynamic_bitset<> >& )> multi_step_simulation_func;
+    typedef functor<bool(std::vector<boost::dynamic_bitset<>>&, const circuit&, const std::vector<boost::dynamic_bitset<>>&)> multi_step_simulation_func;
 
-}
+} // namespace revkit

@@ -23,16 +23,13 @@
 #ifndef PROGRAM_HPP
 #define PROGRAM_HPP
 
+#include <core/syrec/module.hpp>
 #include <vector>
 
-#include <core/syrec/module.hpp>
+namespace revkit {
+    namespace syrec {
 
-namespace revkit
-{
-  namespace syrec
-  {
-
-    /**
+        /**
      * @brief SyReC program
      *
      * This class represents a SyReC program, which
@@ -41,10 +38,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class program
-    {
-    public:
-      /** 
+        class program {
+        public:
+            /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -52,17 +48,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      program();
+            program();
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~program();
+            ~program();
 
-      /** 
+            /**
        * @brief Adds a module to the program
        * 
        * @param module Module
@@ -70,9 +66,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_module( module::ptr module );
+            void add_module(module::ptr module);
 
-      /** 
+            /**
        * @brief Returns all modules of the program
        *
        * @return List of modules 
@@ -80,9 +76,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const module::vec& modules() const;
+            const module::vec& modules() const;
 
-      /** 
+            /**
        * @brief Finds a module by its name
        * 
        * @param name Name of the module
@@ -93,14 +89,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      module::ptr find_module( const std::string& name ) const;
+            module::ptr find_module(const std::string& name) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief Prints a program to an output stream
      * 
      * @param os Output stream
@@ -111,9 +107,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<( std::ostream& os, const program& p );
+        std::ostream& operator<<(std::ostream& os, const program& p);
 
-  }
-}
+    } // namespace syrec
+} // namespace revkit
 
 #endif /* PROGRAM_HPP */

@@ -29,12 +29,11 @@
 
 #include <string>
 
-namespace revkit
-{
+namespace revkit {
 
-  class pattern;
+    class pattern;
 
-  /**
+    /**
    * @brief I/O routine for reading a pattern (*.sim) file
    *
    * @param p Empty pattern class
@@ -45,9 +44,8 @@ namespace revkit
    * @author RevKit
    * @since  1.2
    */
-  bool read_pattern( pattern& p, const std::string& filename, std::string* error = 0 );
+    bool read_pattern(pattern& p, const std::string& filename, std::string* error = 0);
 
-}
+} // namespace revkit
 
 #endif /* READ_PATTERN_HPP */
-

@@ -26,18 +26,16 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Settings for print_statistics
    *
    * @author RevKit
    * @since  1.0
    */
-  struct print_statistics_settings
-  {
-    /**
+    struct print_statistics_settings {
+        /**
      * @brief Default constructor
      *
      * Initializes default values
@@ -45,9 +43,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    print_statistics_settings();
+        print_statistics_settings();
 
-    /**
+        /**
      * @brief Main Template for statistics output
      *
      * Use
@@ -61,9 +59,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string main_template;
+        std::string main_template;
 
-    /**
+        /**
      * @brief Run-time Template for statistics output
      *
      * This template will only be generated when a run-time parameter is specified (i.e. not -1)
@@ -77,10 +75,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string runtime_template;
-  };
+        std::string runtime_template;
+    };
 
-  /**
+    /**
    * @brief Print statistics about a circuit to an arbitrary output stream
    *
    * This function prints statistics to an arbitrary output stream \p os.
@@ -95,10 +93,10 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void print_statistics( std::ostream& os, const circuit& circ, double runtime = -1.0,
-                         const print_statistics_settings& settings = print_statistics_settings() );
+    void print_statistics(std::ostream& os, const circuit& circ, double runtime = -1.0,
+                          const print_statistics_settings& settings = print_statistics_settings());
 
-  /**
+    /**
    * @brief Print statistics about a circuit to standard output
    *
    * This function prints statistics to standard output.
@@ -112,13 +110,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void print_statistics( const circuit& circ, double runtime = -1.0,
-                         const print_statistics_settings& settings = print_statistics_settings() );
+    void print_statistics(const circuit& circ, double runtime = -1.0,
+                          const print_statistics_settings& settings = print_statistics_settings());
 
-  
-
-}
-
-  
+} // namespace revkit
 
 #endif /* PRINT_STATISTICS_HPP */

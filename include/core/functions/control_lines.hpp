@@ -27,9 +27,8 @@
 
 #include <core/gate.hpp>
 
-namespace revkit
-{
-  /**
+namespace revkit {
+    /**
    * @brief Gets the control lines of a gate
    *
    * This function stores all control lines of a gate into a container.
@@ -49,16 +48,14 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator control_lines( const gate& g, Iterator result )
-  {
-    for ( gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c )
-    {
-      *result++ = *c;
+    template<typename Iterator>
+    Iterator control_lines(const gate& g, Iterator result) {
+        for (gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c) {
+            *result++ = *c;
+        }
+        return result;
     }
-    return result;
-  }
-  
-}
+
+} // namespace revkit
 
 #endif /* CONTROL_LINES_HPP */

@@ -21,57 +21,47 @@
 
 using namespace boost::assign;
 
-namespace revkit
-{
+namespace revkit {
 
-  class pattern::priv
-  {
-  public:
-    priv() {}
+    class pattern::priv {
+    public:
+        priv() {}
 
-    initializer_map initializers;
-    std::vector<std::string> inputs;
-    std::vector<std::vector<unsigned> > patterns;
-  };
+        initializer_map                    initializers;
+        std::vector<std::string>           inputs;
+        std::vector<std::vector<unsigned>> patterns;
+    };
 
-  pattern::pattern()
-    : d( new priv() )
-  {
-  }
+    pattern::pattern():
+        d(new priv()) {
+    }
 
-  pattern::~pattern()
-  {
-    delete d;
-  }
+    pattern::~pattern() {
+        delete d;
+    }
 
-  void pattern::add_initializer( const std::string& name, unsigned value )
-  {
-    d->initializers[name] = value;
-  }
+    void pattern::add_initializer(const std::string& name, unsigned value) {
+        d->initializers[name] = value;
+    }
 
-  void pattern::add_input( const std::string& name )
-  {
-    d->inputs += name;
-  }
+    void pattern::add_input(const std::string& name) {
+        d->inputs += name;
+    }
 
-  void pattern::add_pattern( const std::vector<unsigned>& pattern )
-  {
-    d->patterns += pattern;
-  }
+    void pattern::add_pattern(const std::vector<unsigned>& pattern) {
+        d->patterns += pattern;
+    }
 
-  const pattern::initializer_map& pattern::initializers() const
-  {
-    return d->initializers;
-  }
+    const pattern::initializer_map& pattern::initializers() const {
+        return d->initializers;
+    }
 
-  const std::vector<std::string>& pattern::inputs() const
-  {
-    return d->inputs;
-  }
+    const std::vector<std::string>& pattern::inputs() const {
+        return d->inputs;
+    }
 
-  const pattern::pattern_vec& pattern::patterns() const
-  {
-    return d->patterns;
-  }
+    const pattern::pattern_vec& pattern::patterns() const {
+        return d->patterns;
+    }
 
-}
+} // namespace revkit

@@ -23,10 +23,9 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Insert a circuit \p src at the end of another circuit \p circ
    *
    * @param circ Destination circuit
@@ -36,9 +35,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void append_circuit( circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container() );
+    void append_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
-  /**
+    /**
    * @brief Insert a circuit \p src at the beginning of another circuit \p circ
    *
    * @param circ Destination circuit
@@ -48,9 +47,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void prepend_circuit( circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container() );
+    void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
-  /**
+    /**
    * @brief Insert a circuit \p src before gate \p pos (counting from 0) of another circuit \p circ
    *
    * @param circ Destination circuit
@@ -61,7 +60,6 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void insert_circuit( circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls = gate::line_container() );
+    void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls = gate::line_container());
 
-}
-
+} // namespace revkit

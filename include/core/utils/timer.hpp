@@ -25,18 +25,16 @@
 #define TIMER_HPP
 
 #include <cassert>
-#include <iostream>
-
-#include <unistd.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <sys/times.h>
-
 #include <core/properties.hpp>
+#include <iostream>
+#include <stdarg.h>
+#include <stdio.h>
+#include <sys/times.h>
+#include <unistd.h>
 
 namespace revkit {
 
-  /**
+    /**
    * @brief Functor for the timer class which prints the run-time to an output stream
    *
    * This functor prints the run-time to a given output stream which can be
@@ -45,8 +43,8 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-  struct print_timer {
-    /**
+    struct print_timer {
+        /**
      * Result value of the print_timer is void,
      * since it does not return anything in the operator call.
      *
@@ -55,9 +53,9 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    typedef void result_type;
+        typedef void result_type;
 
-    /** 
+        /**
      * @brief Default constructor
      *
      * Available for delayed starting of the timer.
@@ -65,9 +63,10 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    print_timer() : os( std::cout ) {}
+        print_timer():
+            os(std::cout) {}
 
-    /**
+        /**
      * @brief Default constructor
      *
      * @param _os Stream where to write the run-time after measuring
@@ -75,9 +74,10 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    explicit print_timer( std::ostream& _os = std::cout ) : os( _os ) {}
+        explicit print_timer(std::ostream& _os = std::cout):
+            os(_os) {}
 
-    /**
+        /**
      * @brief Prints the measured run-time
      *
      * @param runtime The run-time
@@ -85,15 +85,15 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    void operator()( double runtime ) const {
-      std::cout << "Runtime: " << runtime << " secs" << std::endl;
-    }
+        void operator()(double runtime) const {
+            std::cout << "Runtime: " << runtime << " secs" << std::endl;
+        }
 
-  private:
-    std::ostream& os;
-  };
+    private:
+        std::ostream& os;
+    };
 
-  /**
+    /**
    * @brief Functor for the timer class which assigns the run-time to a given variable
    *
    * Make sure that the variable for the run-time is declared outside of the scope
@@ -113,8 +113,8 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-  struct reference_timer {
-    /**
+    struct reference_timer {
+        /**
      * Result value of the reference_timer is double,
      * since it returns the value of the reference value, the run-time
      * in the operator call. This is only useful, when using the intermediate measurement
@@ -125,9 +125,9 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    typedef double result_type;
+        typedef double result_type;
 
-    /** 
+        /**
      * @brief Default constructor
      *
      * Available for delayed starting of the timer.
@@ -135,9 +135,9 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    reference_timer() {}
+        reference_timer() {}
 
-    /**
+        /**
      * @brief Default constructor
      *
      * @param _runtime A pointer referencing to the variable where the run-time should be saved.
@@ -145,9 +145,10 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    explicit reference_timer( double* _runtime ) : runtime( _runtime ) {}
+        explicit reference_timer(double* _runtime):
+            runtime(_runtime) {}
 
-    /**
+        /**
      * @brief Saves the run-time to the variable
      *
      * @param r The run-time
@@ -155,15 +156,15 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    double operator()( double r ) const {
-      return ( *runtime = r );
-    }
+        double operator()(double r) const {
+            return (*runtime = r);
+        }
 
-  private:
-    double* runtime;
-  };
+    private:
+        double* runtime;
+    };
 
-  /**
+    /**
    * @brief Functor for the timer class which assigns the run-time to a property map
    *
    * This functor writes the \em runtime field of a property map
@@ -173,10 +174,8 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-  struct properties_timer
-  {
-
-    /**
+    struct properties_timer {
+        /**
      * Result value of the reference_timer is double,
      * since it returns the value of the run-time
      * in the operator call. This is only useful, when using the intermediate measurement
@@ -187,9 +186,9 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    typedef double result_type;
+        typedef double result_type;
 
-    /** 
+        /**
      * @brief Default constructor
      *
      * Available for delayed starting of the timer.
@@ -197,9 +196,9 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    properties_timer() {}
+        properties_timer() {}
 
-    /**
+        /**
      * @brief Default constructor
      *
      * @param _statistics A smart pointer to a statistics properties object. Can be empty.
@@ -207,9 +206,10 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    properties_timer( properties::ptr _statistics ) : statistics( _statistics ) {}
+        properties_timer(properties::ptr _statistics):
+            statistics(_statistics) {}
 
-    /**
+        /**
      * @brief Saves the run-time to the \b runtime field of the statistics variable
      *
      * @param r The run-time
@@ -217,28 +217,25 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    double operator()( double r ) const
-    {
-      if ( statistics )
-      {
-        statistics->set( "runtime", r );
-      }
-      return r;
-    }
+        double operator()(double r) const {
+            if (statistics) {
+                statistics->set("runtime", r);
+            }
+            return r;
+        }
 
-  private:
-    properties::ptr statistics;
-  };
+    private:
+        properties::ptr statistics;
+    };
 
-  /**
+    /**
    * @brief Measure Method for timer
    *
    * This class is only holding one enumeration
    * used for the timer::set_measure_method method.
    */
-  struct measure_method
-  {
-    /**
+    struct measure_method {
+        /**
      * @brief Flags for different times to measure
      *
      * Flags which can be used (also in combination) by the
@@ -247,10 +244,12 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-    enum { none = 0, user_time = 1, system_time = 2 };
-  };
+        enum { none        = 0,
+               user_time   = 1,
+               system_time = 2 };
+    };
 
-  /**
+    /**
    * @brief A generic timer class
    *
    * This class measures the time between its constructor and
@@ -307,11 +306,10 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-  template<typename Outputter>
-  class timer
-  {
-  public:
-    /**
+    template<typename Outputter>
+    class timer {
+    public:
+        /**
      * @brief Constructor which does not start measuring the time
      *
      * When delayed starting should be done (using start(const Outputter&)) this
@@ -320,13 +318,12 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    timer()
-      : started( false ),
-        _measure_method( measure_method::user_time )
-    {
-    }
+        timer():
+            started(false),
+            _measure_method(measure_method::user_time) {
+        }
 
-    /**
+        /**
      * @brief Constructor which starts measuring the time
      *
      * The \p outputter is copied and called in the
@@ -337,15 +334,14 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    explicit timer( const Outputter& outputter )
-      : p( outputter ),
-        started( true ),
-        _measure_method( measure_method::user_time )
-    {
-      times( &_start );
-    }
+        explicit timer(const Outputter& outputter):
+            p(outputter),
+            started(true),
+            _measure_method(measure_method::user_time) {
+            times(&_start);
+        }
 
-    /**
+        /**
      * @brief Delayed start
      *
      * There might be reasons when the starting of the measurement
@@ -357,14 +353,13 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    void start( const Outputter& outputter )
-    {
-      p = outputter;
-      started = true;
-      times( &_start );
-    }
+        void start(const Outputter& outputter) {
+            p       = outputter;
+            started = true;
+            times(&_start);
+        }
 
-    /**
+        /**
      * @brief Specify the measure method
      *
      * Use the flags of the timer class to specify the measure method,
@@ -374,12 +369,11 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-    void set_measure_method( unsigned method )
-    {
-      _measure_method = method;
-    }
+        void set_measure_method(unsigned method) {
+            _measure_method = method;
+        }
 
-    /**
+        /**
      * @brief Intermediate Call of the timer functor
      *
      * This operator also returns the return type of the functor.
@@ -407,31 +401,27 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    typename Outputter::result_type operator()() const
-    {
-      assert( started );
+        typename Outputter::result_type operator()() const {
+            assert(started);
 
-      struct tms end;
-      times( &end );
+            struct tms end;
+            times(&end);
 
-      clock_t end_t = 0, start_t = 0;
+            clock_t end_t = 0, start_t = 0;
 
-      if ( _measure_method & measure_method::user_time )
-      {
-        end_t += end.tms_utime + end.tms_cutime;
-        start_t += _start.tms_utime + _start.tms_cutime;
-      }
-      else if ( _measure_method & measure_method::system_time )
-      {
-        end_t += end.tms_stime + end.tms_cstime;
-        start_t += _start.tms_stime + _start.tms_cstime;
-      }
+            if (_measure_method & measure_method::user_time) {
+                end_t += end.tms_utime + end.tms_cutime;
+                start_t += _start.tms_utime + _start.tms_cutime;
+            } else if (_measure_method & measure_method::system_time) {
+                end_t += end.tms_stime + end.tms_cstime;
+                start_t += _start.tms_stime + _start.tms_cstime;
+            }
 
-      double runtime = ( double( end_t - start_t ) ) / (double)sysconf( _SC_CLK_TCK );
-      return p( runtime );
-    }
+            double runtime = (double(end_t - start_t)) / (double)sysconf(_SC_CLK_TCK);
+            return p(runtime);
+        }
 
-    /**
+        /**
      * @brief Deconstructor which stops measuring the time
      *
      * In this function time is measured again and the functor
@@ -440,20 +430,19 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-    virtual ~timer() {
-      if ( started )
-      {
-        operator()();
-      }
-    }
+        virtual ~timer() {
+            if (started) {
+                operator()();
+            }
+        }
 
-  private:
-    struct tms _start;
-    Outputter p; // NOTE: has to be copy
-    bool started;
-    unsigned _measure_method;
-  };
+    private:
+        struct tms _start;
+        Outputter  p; // NOTE: has to be copy
+        bool       started;
+        unsigned   _measure_method;
+    };
 
-}
+} // namespace revkit
 
 #endif

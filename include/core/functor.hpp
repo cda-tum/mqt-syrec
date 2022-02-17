@@ -25,13 +25,11 @@
 #define FUNCTOR_HPP
 
 #include <boost/function.hpp>
-
 #include <core/properties.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Functor class for interfacing algorithms
    *
    * When interfacing an algorithm, we wanna encapsulate
@@ -45,11 +43,10 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename T>
-  class functor : public boost::function<T>
-  {
-  public:
-    /**
+    template<typename T>
+    class functor: public boost::function<T> {
+    public:
+        /**
      * @brief Default constructor
      *
      * Calls the constructor of the base class.
@@ -57,10 +54,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    functor()
-      : boost::function<T>() {}
+        functor():
+            boost::function<T>() {}
 
-    /** 
+        /**
      * @brief Copy constructor
      *
      * This copy constructor allows for example, the assignment
@@ -74,10 +71,11 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    template<typename F>
-    functor( F f ) : boost::function<T>( f ) {}
+        template<typename F>
+        functor(F f):
+            boost::function<T>(f) {}
 
-    /** 
+        /**
      * @brief Initializes the settings and statistics fields.
      *
      * This method is usually called by the functor creation function
@@ -106,43 +104,40 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    void init( const properties::ptr& settings, const properties::ptr& statistics )
-    {
-      _settings = settings;
-      _statistics = statistics;
-    }
-    
-    /** 
+        void init(const properties::ptr& settings, const properties::ptr& statistics) {
+            _settings   = settings;
+            _statistics = statistics;
+        }
+
+        /**
      * @brief Returns a smart pointer to the settings
      *
      * This smart pointer can be empty, if init() was never called. 
      * 
      * @return A smart pointer to the settings
      */
-    const revkit::properties::ptr& settings() const
-    {
-      return _settings;
-    }
+        const revkit::properties::ptr& settings() const {
+            return _settings;
+        }
 
-    /** 
+        /**
      * @brief Returns a smart pointer to the statistics
      *
      * This smart pointer can be empty, if init() was never called. 
      * 
      * @return A smart pointer to the statistics
      */
-    const revkit::properties::ptr& statistics() const
-    {
-      return _statistics;
-    }
+        const revkit::properties::ptr& statistics() const {
+            return _statistics;
+        }
 
-  private:
-    /** @cond 0 */
-    properties::ptr _settings;
-    properties::ptr _statistics;
-    /** @endcond */
-  };
+    private:
+        /** @cond 0 */
+        properties::ptr _settings;
+        properties::ptr _statistics;
+        /** @endcond */
+    };
 
-}
+} // namespace revkit
 
 #endif /* FUNCTOR_HPP */

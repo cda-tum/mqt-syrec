@@ -18,134 +18,104 @@
 #include "core/meta/bus_collection.hpp"
 
 #include <algorithm>
-#include <cassert>
-
 #include <boost/foreach.hpp>
+#include <cassert>
 
 #define foreach_ BOOST_FOREACH
 
-namespace revkit
-{
+namespace revkit {
 
-  class bus_collection::priv
-  {
-  public:
-    priv() {}
+    class bus_collection::priv {
+    public:
+        priv() {}
 
-    bus_collection::map buses;
-    std::map<std::string, unsigned> initial_values;
-  };
+        bus_collection::map             buses;
+        std::map<std::string, unsigned> initial_values;
+    };
 
-  bus_collection::bus_collection()
-    : d( new priv() )
-  {
-  }
-
-  bus_collection::~bus_collection()
-  {
-    // NOTE uncommenting this line leads to an segmentation fault
-    //    delete d;
-  }
-
-  void bus_collection::add( const map::key_type& name, const map::mapped_type& line_indices, const boost::optional<unsigned>& initial_value )
-  {
-    d->buses.insert( std::make_pair( name, line_indices ) );
-
-    if ( initial_value )
-    {
-      d->initial_values[name] = *initial_value;
-    }
-  }
-
-  const bus_collection::map::mapped_type& bus_collection::get( const map::key_type& name ) const
-  {
-    map::const_iterator it = d->buses.find( name );
-
-    if ( it != d->buses.end() )
-    {
-      return it->second;
-    }
-    else
-    {
-      assert( false );
-    }
-  }
-
-  const bus_collection::map& bus_collection::buses() const
-  {
-    return d->buses;
-  }
-
-  bus_collection::map::key_type bus_collection::find_bus( map::mapped_type::value_type line_index ) const
-  {
-    foreach_ ( const map::value_type& p, d->buses )
-    {
-      if ( std::find( p.second.begin(), p.second.end(), line_index ) != p.second.end() )
-      {
-        return p.first;
-      }
+    bus_collection::bus_collection():
+        d(new priv()) {
     }
 
-    return map::key_type();
-  }
-
-  bool bus_collection::has_bus( map::mapped_type::value_type line_index ) const
-  {
-    foreach_ ( const map::value_type& p, d->buses )
-    {
-      if ( std::find( p.second.begin(), p.second.end(), line_index ) != p.second.end() )
-      {
-        return true;
-      }
+    bus_collection::~bus_collection() {
+        // NOTE uncommenting this line leads to an segmentation fault
+        //    delete d;
     }
 
-    return false;
-  }
+    void bus_collection::add(const map::key_type& name, const map::mapped_type& line_indices, const boost::optional<unsigned>& initial_value) {
+        d->buses.insert(std::make_pair(name, line_indices));
 
-  unsigned bus_collection::signal_index( unsigned line_index ) const
-  {
-    foreach_ ( const map::value_type& p, d->buses )
-    {
-      map::mapped_type::const_iterator it = std::find( p.second.begin(), p.second.end(), line_index );
-      if ( it != p.second.end() )
-      {
-        return std::distance( p.second.begin(), it );
-      }
+        if (initial_value) {
+            d->initial_values[name] = *initial_value;
+        }
     }
 
-    assert( false );
-  }
+    const bus_collection::map::mapped_type& bus_collection::get(const map::key_type& name) const {
+        map::const_iterator it = d->buses.find(name);
 
-  void bus_collection::set_initial_value( const std::string& name, unsigned initial_value )
-  {
-    map::const_iterator it = d->buses.find( name );
-
-    if ( it != d->buses.end() )
-    {
-      d->initial_values[name] = initial_value;
+        if (it != d->buses.end()) {
+            return it->second;
+        } else {
+            assert(false);
+        }
     }
-  }
 
-  boost::optional<unsigned> bus_collection::initial_value( const std::string& name ) const
-  {
-    map::const_iterator it = d->buses.find( name );
-
-    if ( it != d->buses.end() )
-    {
-      std::map<std::string, unsigned>::const_iterator it2 = d->initial_values.find( name );
-      if ( it2 != d->initial_values.end() )
-      {
-        return it2->second;
-      }
-      else
-      {
-        return boost::optional<unsigned>();
-      }
+    const bus_collection::map& bus_collection::buses() const {
+        return d->buses;
     }
-    else
-    {
-      return boost::optional<unsigned>();
-    }
-  }
 
-}
+    bus_collection::map::key_type bus_collection::find_bus(map::mapped_type::value_type line_index) const {
+        foreach_(const map::value_type& p, d->buses) {
+            if (std::find(p.second.begin(), p.second.end(), line_index) != p.second.end()) {
+                return p.first;
+            }
+        }
+
+        return map::key_type();
+    }
+
+    bool bus_collection::has_bus(map::mapped_type::value_type line_index) const {
+        foreach_(const map::value_type& p, d->buses) {
+            if (std::find(p.second.begin(), p.second.end(), line_index) != p.second.end()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    unsigned bus_collection::signal_index(unsigned line_index) const {
+        foreach_(const map::value_type& p, d->buses) {
+            map::mapped_type::const_iterator it = std::find(p.second.begin(), p.second.end(), line_index);
+            if (it != p.second.end()) {
+                return std::distance(p.second.begin(), it);
+            }
+        }
+
+        assert(false);
+    }
+
+    void bus_collection::set_initial_value(const std::string& name, unsigned initial_value) {
+        map::const_iterator it = d->buses.find(name);
+
+        if (it != d->buses.end()) {
+            d->initial_values[name] = initial_value;
+        }
+    }
+
+    boost::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
+        map::const_iterator it = d->buses.find(name);
+
+        if (it != d->buses.end()) {
+            std::map<std::string, unsigned>::const_iterator it2 = d->initial_values.find(name);
+            if (it2 != d->initial_values.end()) {
+                return it2->second;
+            } else {
+                return boost::optional<unsigned>();
+            }
+        } else {
+            return boost::optional<unsigned>();
+        }
+    }
+
+} // namespace revkit

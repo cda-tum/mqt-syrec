@@ -17,22 +17,18 @@
 
 #include "core/functions/clear_circuit.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  void clear_circuit( circuit& circ )
-  {
-    circ.set_lines( 0 );
-    circ.set_inputs( std::vector<std::string>() );
-    circ.set_outputs( std::vector<std::string>() );
-    circ.set_constants( std::vector<constant>() );
-    circ.set_garbage( std::vector<bool>() );
+    void clear_circuit(circuit& circ) {
+        circ.set_lines(0);
+        circ.set_inputs(std::vector<std::string>());
+        circ.set_outputs(std::vector<std::string>());
+        circ.set_constants(std::vector<constant>());
+        circ.set_garbage(std::vector<bool>());
 
-    while ( circ.num_gates() )
-    {
-      circ.remove_gate_at( 0 );
+        while (circ.num_gates()) {
+            circ.remove_gate_at(0);
+        }
     }
-  }
 
-}
-
+} // namespace revkit

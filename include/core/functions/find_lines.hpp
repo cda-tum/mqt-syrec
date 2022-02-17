@@ -24,17 +24,15 @@
 #ifndef FIND_EMPTY_LINES_HPP
 #define FIND_EMPTY_LINES_HPP
 
-#include <core/circuit.hpp>
-
 #include <boost/bind.hpp>
 #include <boost/iterator/counting_iterator.hpp>
+#include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  class gate;
+    class gate;
 
-  /**
+    /**
    * @brief Finds non empty lines in a gate
    *
    * This function inserts all lines, which are
@@ -55,14 +53,13 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator find_non_empty_lines( const gate& src, Iterator result )
-  {
-    std::copy( src.begin_controls(), src.end_controls(), result );
-    return std::copy( src.begin_targets(), src.end_targets(), result );
-  }
+    template<typename Iterator>
+    Iterator find_non_empty_lines(const gate& src, Iterator result) {
+        std::copy(src.begin_controls(), src.end_controls(), result);
+        return std::copy(src.begin_targets(), src.end_targets(), result);
+    }
 
-  /**
+    /**
    * @brief Finds non empty lines in a range of gates
    *
    * This function finds lines in a range of gates [\p first, \p last) which
@@ -78,14 +75,13 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename GateIterator, typename Iterator>
-  Iterator find_non_empty_lines( GateIterator first, GateIterator last, Iterator result )
-  {
-    std::for_each( first, last, boost::bind( (Iterator(*)(const gate&, Iterator))&find_non_empty_lines<Iterator>, _1, result ) );
-    return result;
-  }
+    template<typename GateIterator, typename Iterator>
+    Iterator find_non_empty_lines(GateIterator first, GateIterator last, Iterator result) {
+        std::for_each(first, last, boost::bind((Iterator(*)(const gate&, Iterator)) & find_non_empty_lines<Iterator>, _1, result));
+        return result;
+    }
 
-  /**
+    /**
    * @brief Finds non empty lines in a circuit
    *
    * This function finds lines in a circuit which
@@ -100,13 +96,12 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator find_non_empty_lines( const circuit& circ, Iterator result )
-  {
-    return find_non_empty_lines( circ.begin(), circ.end(), result );
-  }
+    template<typename Iterator>
+    Iterator find_non_empty_lines(const circuit& circ, Iterator result) {
+        return find_non_empty_lines(circ.begin(), circ.end(), result);
+    }
 
-  /**
+    /**
    * @brief Finds empty lines in a gate
    *
    * This function inserts all empty lines, which are
@@ -128,17 +123,16 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator find_empty_lines( const gate& src, unsigned line_size, Iterator result )
-  {
-    gate::line_container all_lines;
-    find_non_empty_lines( src, std::insert_iterator<gate::line_container>( all_lines, all_lines.begin() ) );
-    
-    return std::set_difference( boost::make_counting_iterator( 0u ), boost::make_counting_iterator( line_size ),
-                                all_lines.begin(), all_lines.end(), result );
-  }
+    template<typename Iterator>
+    Iterator find_empty_lines(const gate& src, unsigned line_size, Iterator result) {
+        gate::line_container all_lines;
+        find_non_empty_lines(src, std::insert_iterator<gate::line_container>(all_lines, all_lines.begin()));
 
-  /**
+        return std::set_difference(boost::make_counting_iterator(0u), boost::make_counting_iterator(line_size),
+                                   all_lines.begin(), all_lines.end(), result);
+    }
+
+    /**
    * @brief Finds empty lines in a gate
    *
    * This function inserts all empty lines, which are
@@ -158,9 +152,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void find_empty_lines( const gate& src, unsigned line_size, gate::line_container& lines );
+    void find_empty_lines(const gate& src, unsigned line_size, gate::line_container& lines);
 
-  /**
+    /**
    * @brief Finds empty lines in a range of gates
    *
    * This function finds lines in a range of gates [\p first, \p last) which
@@ -177,17 +171,16 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename GateIterator, typename Iterator>
-  Iterator find_empty_lines( GateIterator first, GateIterator last, unsigned line_size, Iterator result )
-  {
-    gate::line_container all_lines;
-    find_non_empty_lines( first, last, std::insert_iterator<gate::line_container>( all_lines, all_lines.begin() ) );
-    
-    return std::set_difference( boost::make_counting_iterator( 0u ), boost::make_counting_iterator( line_size ),
-                                all_lines.begin(), all_lines.end(), result );
-  }
+    template<typename GateIterator, typename Iterator>
+    Iterator find_empty_lines(GateIterator first, GateIterator last, unsigned line_size, Iterator result) {
+        gate::line_container all_lines;
+        find_non_empty_lines(first, last, std::insert_iterator<gate::line_container>(all_lines, all_lines.begin()));
 
-  /**
+        return std::set_difference(boost::make_counting_iterator(0u), boost::make_counting_iterator(line_size),
+                                   all_lines.begin(), all_lines.end(), result);
+    }
+
+    /**
    * @brief Finds empty lines in a circuit
    *
    * This function finds lines in a circuit which
@@ -202,11 +195,10 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator find_empty_lines( const circuit& circ, Iterator result )
-  {
-    return find_empty_lines( circ.begin(), circ.end(), circ.lines(), result );
-  }
-}
+    template<typename Iterator>
+    Iterator find_empty_lines(const circuit& circ, Iterator result) {
+        return find_empty_lines(circ.begin(), circ.end(), circ.lines(), result);
+    }
+} // namespace revkit
 
 #endif /* FIND_EMPTY_LINES_HPP */

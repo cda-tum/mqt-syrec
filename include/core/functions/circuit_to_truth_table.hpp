@@ -25,15 +25,13 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
-
 #include <core/circuit.hpp>
 #include <core/functor.hpp>
 #include <core/truth_table.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Generates a truth table from a circuit
    *
    * This function takes a circuit, simulates it with a custom simulation function
@@ -48,10 +46,10 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool circuit_to_truth_table(  const circuit& circ, 
-                                binary_truth_table& spec, 
-                                const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation );
+    bool circuit_to_truth_table(const circuit&                                                                                 circ,
+                                binary_truth_table&                                                                            spec,
+                                const functor<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&)>& simulation);
 
-}
+} // namespace revkit
 
 #endif /* CIRCUIT_TO_TRUTH_TABLE_HPP */

@@ -26,18 +26,16 @@
 
 #include <core/truth_table.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Settings for read_pla function
    *
    * @author RevKit
    * @since  1.0
    */
-  struct read_pla_settings
-  {
-    /**
+    struct read_pla_settings {
+        /**
      * @brief Standard constructor
      *
      * Initializes default values
@@ -45,9 +43,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    read_pla_settings();
+        read_pla_settings();
 
-    /**
+        /**
      * @brief If true, the truth table is extended after parsing
      *
      * If this variable is set to true, then 1) all cubes
@@ -63,10 +61,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool extend;
-  };
+        bool extend;
+    };
 
-  /**
+    /**
    * @brief Reads a specification from a PLA file
    *
    * This function parses an PLA file and creates a truth table.
@@ -82,8 +80,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool read_pla( binary_truth_table& spec, const std::string& filename, const read_pla_settings& settings = read_pla_settings(), std::string* error = 0 );
+    bool read_pla(binary_truth_table& spec, const std::string& filename, const read_pla_settings& settings = read_pla_settings(), std::string* error = 0);
 
-}
+} // namespace revkit
 
 #endif /* READ_PLA_HPP */

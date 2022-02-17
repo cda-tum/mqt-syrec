@@ -24,20 +24,17 @@
 #ifndef REVLIB_PROCESSOR_HPP
 #define REVLIB_PROCESSOR_HPP
 
+#include <boost/any.hpp>
+#include <boost/optional.hpp>
+#include <core/circuit.hpp>
+#include <core/io/revlib_parser.hpp>
+#include <core/properties.hpp>
 #include <iosfwd>
 #include <vector>
 
-#include <boost/any.hpp>
-#include <boost/optional.hpp>
+namespace revkit {
 
-#include <core/circuit.hpp>
-#include <core/properties.hpp>
-#include <core/io/revlib_parser.hpp>
-
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Base class for actions on the revlib_parser
    *
    * The RevLib file parser revlib_parser(std::istream&, revlib_processor&, std::string*)
@@ -55,10 +52,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class revlib_processor
-  {
-  public:
-    /**
+    class revlib_processor {
+    public:
+        /**
      * @brief Default constructor
      *
      * Initializes private data
@@ -66,9 +62,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    revlib_processor();
+        revlib_processor();
 
-    /**
+        /**
      * @brief Default deconstructor
      *
      * Clears private data
@@ -76,13 +72,13 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual ~revlib_processor();
+        virtual ~revlib_processor();
 
-  private:
-    friend bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string&, std::string* error );
+    private:
+        friend bool revlib_parser(std::istream& in, revlib_processor& reader, const std::string&, std::string* error);
 
-  protected:
-    /**
+    protected:
+        /**
      * @brief Called when parsing comments
      *
      * This method is called when a comment (starting with a #)
@@ -94,9 +90,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_comment( const std::string& comment ) const;
+        virtual void on_comment(const std::string& comment) const;
 
-    /**
+        /**
      * @brief Called when parsing .version command
      *
      * This method is called when a \b .version command is parsed.
@@ -108,9 +104,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_version( const std::string& version ) const;
+        virtual void on_version(const std::string& version) const;
 
-    /**
+        /**
      * @brief Called when parsing .numvars command
      *
      * This method is called when a \b .numvars command is parsed.
@@ -121,9 +117,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_numvars( unsigned numvars ) const;
+        virtual void on_numvars(unsigned numvars) const;
 
-    /**
+        /**
      * @brief Called when parsing .variables command
      *
      * This method is called when a \b .variables command is parsed.
@@ -142,9 +138,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_variables( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
+        virtual void on_variables(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
 
-    /**
+        /**
      * @brief Called when parsing .inputs command
      *
      * This method is called when a \b .inputs command is parsed.
@@ -157,9 +153,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_inputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
+        virtual void on_inputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
 
-    /**
+        /**
      * @brief Called when parsing .outputs command
      *
      * This method is called when a \b .outputs command is parsed.
@@ -172,9 +168,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_outputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
+        virtual void on_outputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
 
-    /**
+        /**
      * @brief Called when parsing the .constants command
      *
      * This method is called when a \b .constants command is parsed.
@@ -188,10 +184,10 @@ namespace revkit
      *
      * @author RevKit
      * @since  1.0
-     */    
-    virtual void on_constants( std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last ) const;
+     */
+        virtual void on_constants(std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last) const;
 
-    /**
+        /**
      * @brief Called when parsing .garbage command
      *
      * This method is called when a \b .garbage command is parsed.
@@ -205,9 +201,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_garbage( std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last ) const;
+        virtual void on_garbage(std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last) const;
 
-    /**
+        /**
      * @brief Called when parsing .inputbus command
      *
      * This method is called when a \b .inputbus command is parsed.
@@ -222,9 +218,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    virtual void on_inputbus( const std::string& name, const std::vector<unsigned>& line_indices ) const;
+        virtual void on_inputbus(const std::string& name, const std::vector<unsigned>& line_indices) const;
 
-    /**
+        /**
      * @brief Called when parsing .outputbus command
      *
      * This method is called when a \b .outputbus command is parsed.
@@ -239,9 +235,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    virtual void on_outputbus( const std::string& name, const std::vector<unsigned>& line_indices ) const;
+        virtual void on_outputbus(const std::string& name, const std::vector<unsigned>& line_indices) const;
 
-    /**
+        /**
      * @brief Called when parsing .state command
      *
      * This method is called when a \b .state command is parsed.
@@ -261,9 +257,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    virtual void on_state( const std::string& name, const std::vector<unsigned>& line_indices, unsigned initial_value ) const;
+        virtual void on_state(const std::string& name, const std::vector<unsigned>& line_indices, unsigned initial_value) const;
 
-    /**
+        /**
      * @brief Called when parsing .module command
      *
      * This method is called when a \b .module command is parsed.
@@ -274,9 +270,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    virtual void on_module( const std::string& name, const boost::optional<std::string>& filename ) const;
+        virtual void on_module(const std::string& name, const boost::optional<std::string>& filename) const;
 
-    /**
+        /**
      * @brief Called when parsing .begin command
      *
      * This method is called when a \b .begin command is parsed.
@@ -284,9 +280,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_begin() const;
+        virtual void on_begin() const;
 
-    /**
+        /**
      * @brief Called when parsing .end command
      *
      * This method is called when a \b .end command is parsed.
@@ -294,9 +290,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_end() const;
+        virtual void on_end() const;
 
-    /**
+        /**
      * @brief Called when a gate is parsed
      *
      * This method is called when a gate is parsed
@@ -314,9 +310,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_gate( const boost::any& target_type, const std::vector<unsigned>& line_indices ) const;
+        virtual void on_gate(const boost::any& target_type, const std::vector<unsigned>& line_indices) const;
 
-    /**
+        /**
      * @brief Called when a truth table line is parsed
      *
      * This method is called when a truth table line is parsed.
@@ -333,9 +329,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void on_truth_table_line( unsigned line_index, const std::vector<boost::optional<bool> >::const_iterator first, const std::vector<boost::optional<bool> >::const_iterator last ) const;
+        virtual void on_truth_table_line(unsigned line_index, const std::vector<boost::optional<bool>>::const_iterator first, const std::vector<boost::optional<bool>>::const_iterator last) const;
 
-    /** 
+        /**
      * @brief Adds an annotation to the processor
      *
      * The parser adds all annotations in each step, i.e. every
@@ -349,9 +345,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void add_annotation( const std::string& key, const std::string& value );
+        void add_annotation(const std::string& key, const std::string& value);
 
-    /** 
+        /**
      * @brief Clears the current annotations
      *
      * This method clears the current annotations, i.e. when a new
@@ -360,9 +356,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void clear_annotations();
+        void clear_annotations();
 
-    /** 
+        /**
      * @brief Returns the current annotations
      * 
      * @return Properties structure with annotations
@@ -370,13 +366,13 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    properties::ptr current_annotations() const;
+        properties::ptr current_annotations() const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-}
+} // namespace revkit
 
 #endif /* REVLIB_PROCESSOR_HPP */

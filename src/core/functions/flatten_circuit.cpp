@@ -17,64 +17,52 @@
 
 #include "core/functions/flatten_circuit.hpp"
 
+#include "core/circuit.hpp"
+#include "core/functions/copy_metadata.hpp"
+#include "core/target_tags.hpp"
+
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
-#include "core/circuit.hpp"
-#include "core/target_tags.hpp"
-
-#include "core/functions/copy_metadata.hpp"
-
 #define foreach_ BOOST_FOREACH
 
-namespace revkit
-{
+namespace revkit {
 
-  void flatten_circuit( const circuit& base, circuit& circ, bool keep_meta_data )
-  {
-    copy_metadata_settings settings;
-    settings.copy_modules = keep_meta_data;
-    settings.copy_inputbuses = keep_meta_data;
-    settings.copy_outputbuses = keep_meta_data;
-    settings.copy_statesignals = keep_meta_data;
-    copy_metadata( base, circ, settings );
+    void flatten_circuit(const circuit& base, circuit& circ, bool keep_meta_data) {
+        copy_metadata_settings settings;
+        settings.copy_modules      = keep_meta_data;
+        settings.copy_inputbuses   = keep_meta_data;
+        settings.copy_outputbuses  = keep_meta_data;
+        settings.copy_statesignals = keep_meta_data;
+        copy_metadata(base, circ, settings);
 
-    foreach_ ( const gate& g, base )
-    {
-      if ( is_module( g ) )
-      {
-        circuit flattened;
-        const module_tag& tag = boost::any_cast<module_tag>( g.type() );
-        flatten_circuit( *tag.reference.get(), flattened );
+        foreach_(const gate& g, base) {
+            if (is_module(g)) {
+                circuit           flattened;
+                const module_tag& tag = boost::any_cast<module_tag>(g.type());
+                flatten_circuit(*tag.reference.get(), flattened);
 
-        std::vector<unsigned> target_lines( g.begin_targets(), g.end_targets() );
+                std::vector<unsigned> target_lines(g.begin_targets(), g.end_targets());
 
-        foreach_ ( const gate& fg, flattened )
-        {
-          gate& new_gate = circ.append_gate();
+                foreach_(const gate& fg, flattened) {
+                    gate& new_gate = circ.append_gate();
 
-          std::for_each( g.begin_controls(), g.end_controls(), boost::bind( &gate::add_control, &new_gate, _1 ) );
+                    std::for_each(g.begin_controls(), g.end_controls(), boost::bind(&gate::add_control, &new_gate, _1));
 
-          for ( gate::const_iterator it = fg.begin_controls(); it != fg.end_controls(); ++it )
-          {
-            new_gate.add_control( target_lines.at( tag.target_sort_order.at( *it ) ) );
-          }
+                    for (gate::const_iterator it = fg.begin_controls(); it != fg.end_controls(); ++it) {
+                        new_gate.add_control(target_lines.at(tag.target_sort_order.at(*it)));
+                    }
 
-          for ( gate::const_iterator it = fg.begin_targets(); it != fg.end_targets(); ++it )
-          {
-            new_gate.add_target( target_lines.at( tag.target_sort_order.at( *it ) ) );
-          }
+                    for (gate::const_iterator it = fg.begin_targets(); it != fg.end_targets(); ++it) {
+                        new_gate.add_target(target_lines.at(tag.target_sort_order.at(*it)));
+                    }
 
-          new_gate.set_type( fg.type() );
+                    new_gate.set_type(fg.type());
+                }
+            } else {
+                circ.append_gate() = g;
+            }
         }
-      }
-      else
-      {
-        circ.append_gate() = g;
-      }
     }
-  }
 
-}
-
-
+} // namespace revkit

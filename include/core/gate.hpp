@@ -24,74 +24,71 @@
 #ifndef GATE_HPP
 #define GATE_HPP
 
-#include <iostream>
-#include <set>
-#include <vector>
-
 #include <boost/any.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <iostream>
+#include <set>
+#include <vector>
 
-namespace revkit
-{
+namespace revkit {
 
-  struct transform_line;
-  struct filter_line;
-  class filtered_gate;
+    struct transform_line;
+    struct filter_line;
+    class filtered_gate;
 
-  /**
+    /**
    * @brief Represents a gate in a circuit
    *
    * @author RevKit
    * @since  1.0
    */
-  class gate  
-  {
-  public:
-    /**
+    class gate {
+    public:
+        /**
      * @brief Vector type of gates
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef std::vector<gate>  vector;
+        typedef std::vector<gate> vector;
 
-    /**
+        /**
      * @brief Type for accessing the line (line index)
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef unsigned                line;
+        typedef unsigned line;
 
-    /**
+        /**
      * @brief Container for storing lines
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef std::set<line>          line_container;
+        typedef std::set<line> line_container;
 
-    /**
+        /**
      * @brief Mutable Iterator for iterating through control or target lines
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::iterator> > iterator;
+        typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::iterator>> iterator;
 
-    /**
+        /**
      * @brief Constant Iterator for iterating through control or target lines
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::const_iterator> > const_iterator;
+        typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::const_iterator>> const_iterator;
 
-  public:
-    /**
+    public:
+        /**
      * @brief Default constructor
      *
      * Initializes private data
@@ -99,9 +96,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    gate();
+        gate();
 
-    /**
+        /**
      * @brief Copy Constructor
      *
      * Initializes private data and copies gate
@@ -111,9 +108,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    gate( const gate& other );
+        gate(const gate& other);
 
-    /**
+        /**
      * @brief Default deconstructor
      *
      * Clears private data
@@ -121,9 +118,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual ~gate();
+        virtual ~gate();
 
-    /**
+        /**
      * @brief Assignment operator
      *
      * @param other Gate to be assigned
@@ -133,9 +130,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    gate& operator=( const gate& other );
-    
-    /**
+        gate& operator=(const gate& other);
+
+        /**
      * @brief Start iterator for accessing control lines. 
      *
      * Returns The start iterator of the line_container for accessing control lines. 
@@ -143,9 +140,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual const_iterator begin_controls() const;
+        virtual const_iterator begin_controls() const;
 
-    /**
+        /**
      * @brief End iterator for accessing control lines (const).
      *
      * Returns The end iterator of the line_container for accessing control lines (const).
@@ -153,9 +150,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual const_iterator end_controls() const;
+        virtual const_iterator end_controls() const;
 
-    /**
+        /**
      * @brief Start iterator for accessing control lines (non-const).
      *
      * Returns The start iterator of the line_container for accessing lines (non-const). 
@@ -163,9 +160,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual iterator begin_controls();
+        virtual iterator begin_controls();
 
-    /**
+        /**
      * @brief End iterator for accessing control lines (non-const).
      *
      * Returns the end iterator of the line_container for accessing control lines (non-const). 
@@ -173,9 +170,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual iterator end_controls();
+        virtual iterator end_controls();
 
-    /**
+        /**
      * @brief Start iterator for accessing target lines (const).
      *
      * Returns The start iterator of the line_container for accessing target lines (const). 
@@ -183,9 +180,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual const_iterator begin_targets() const;
+        virtual const_iterator begin_targets() const;
 
-    /**
+        /**
      * @brief End iterator for accessing target lines (const).
      *
      * Returns The end iterator of the line_container for accessing target lines (const). 
@@ -193,10 +190,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual const_iterator end_targets() const;
+        virtual const_iterator end_targets() const;
 
-
-     /**
+        /**
      * @brief Start iterator for accessing target lines (const).
      *
      * Returns The start iterator of the line_container for accessing target lines (const). 
@@ -204,9 +200,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual iterator begin_targets();
+        virtual iterator begin_targets();
 
-    /**
+        /**
      * @brief End iterator for accessing target lines (non-const).
      *
      * Returns The start iterator of the line_container for accessing target lines (non-const). 
@@ -214,9 +210,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual iterator end_targets();
+        virtual iterator end_targets();
 
-    /**
+        /**
      * @brief Returns the number of control and target lines as sum
      *
      * This method returns the number of control and target
@@ -227,9 +223,9 @@ namespace revkit
      *
      * @return Number of control and target lines.
      */
-    virtual unsigned size() const;
+        virtual unsigned size() const;
 
-    /** 
+        /**
      * @brief Adds a control line to the gate
      *
      * @param c control line to add
@@ -237,9 +233,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0 
      */
-    virtual void add_control( line c );
+        virtual void add_control(line c);
 
-    /** 
+        /**
      * @brief Remove control line to the gate
      *
      * @param c control line to remove
@@ -247,9 +243,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0 
      */
-    virtual void remove_control( line c );
+        virtual void remove_control(line c);
 
-    /**
+        /**
      * @brief Adds a target to the desired line
      *
      * @param l target line 
@@ -257,9 +253,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual void add_target( line l );
- 
-    /**
+        virtual void add_target(line l);
+
+        /**
      * @brief Removes a target from the desired line
      *
      * @param l target line 
@@ -267,9 +263,9 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    virtual void remove_target( line l );
-    
-    /**
+        virtual void remove_target(line l);
+
+        /**
      * @brief Sets the type of the target line(s)
      *
      * @param t target type
@@ -277,9 +273,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void set_type( const boost::any& t );
+        virtual void set_type(const boost::any& t);
 
-    /**
+        /**
      * @brief Returns the type of the target line(s)
      *
      * @return target type
@@ -287,16 +283,16 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual const boost::any& type() const;
+        virtual const boost::any& type() const;
 
-    friend class filtered_gate;
+        friend class filtered_gate;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-  /**
+    /**
    * @brief Wrapper for a gate to filter some lines
    *
    * This class wraps a underline \p base gate to just
@@ -309,10 +305,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class filtered_gate : public gate
-  {
-  public:
-    /**
+    class filtered_gate: public gate {
+    public:
+        /**
      * @brief Standard constructor
      *
      * Creates a filtered_gate from a base gate and
@@ -325,9 +320,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    filtered_gate( gate& base, std::vector<unsigned>& filter );
+        filtered_gate(gate& base, std::vector<unsigned>& filter);
 
-    /**
+        /**
      * @brief Copy constructor
      *
      * @param other Object to be copied from
@@ -335,14 +330,14 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit filtered_gate( const filtered_gate& other );
+        explicit filtered_gate(const filtered_gate& other);
 
-    /**
+        /**
      * @brief Deconstructor
      */
-    virtual ~filtered_gate();
+        virtual ~filtered_gate();
 
-    /**
+        /**
      * @brief Assignment operator
      *
      * @param other Gate to be assigned
@@ -352,69 +347,69 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    filtered_gate& operator=( const filtered_gate& other );
+        filtered_gate& operator=(const filtered_gate& other);
 
-    const_iterator begin_controls() const;
-    const_iterator end_controls() const;
-    iterator begin_controls();
-    iterator end_controls();
+        const_iterator begin_controls() const;
+        const_iterator end_controls() const;
+        iterator       begin_controls();
+        iterator       end_controls();
 
-    const_iterator begin_targets() const;
-    const_iterator end_targets() const;
-    iterator begin_targets();
-    iterator end_targets();
+        const_iterator begin_targets() const;
+        const_iterator end_targets() const;
+        iterator       begin_targets();
+        iterator       end_targets();
 
-    unsigned size() const;
-    void add_control( line c );
-    void remove_control( line c );
-    void add_target( line l );
-    void remove_target( line l );
+        unsigned size() const;
+        void     add_control(line c);
+        void     remove_control(line c);
+        void     add_target(line l);
+        void     remove_target(line l);
 
-    void set_type( const boost::any& t );
-    const boost::any& type() const;
+        void              set_type(const boost::any& t);
+        const boost::any& type() const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-  /** @cond */
-  struct transform_line
-  {
-    typedef gate::line result_type;
-    
-    transform_line() : filter( 0 ) {}
+    /** @cond */
+    struct transform_line {
+        typedef gate::line result_type;
 
-    explicit transform_line( const std::vector<unsigned>& filter ) : filter( &filter ) {}
+        transform_line():
+            filter(0) {}
 
-    gate::line operator()( gate::line l ) const
-    {
-      return filter ? std::find( filter->begin(), filter->end(), l ) - filter->begin() : l;
-      return l;
-    }
+        explicit transform_line(const std::vector<unsigned>& filter):
+            filter(&filter) {}
 
-  private:
-    const std::vector<unsigned>* filter;
-  };
-  /** @endcond */
+        gate::line operator()(gate::line l) const {
+            return filter ? std::find(filter->begin(), filter->end(), l) - filter->begin() : l;
+            return l;
+        }
 
-  /** @cond */
-  struct filter_line
-  {
-    filter_line() : filter( 0 ) {}
+    private:
+        const std::vector<unsigned>* filter;
+    };
+    /** @endcond */
 
-    explicit filter_line( const std::vector<unsigned>& filter ) : filter( &filter ) {}
+    /** @cond */
+    struct filter_line {
+        filter_line():
+            filter(0) {}
 
-    bool operator()( const gate::line& l ) const
-    {
-      return !filter || std::find( filter->begin(), filter->end(), l ) != filter->end();
-    }
+        explicit filter_line(const std::vector<unsigned>& filter):
+            filter(&filter) {}
 
-  private:
-    const std::vector<unsigned>* filter;
-  };
-  /** @endcond */
+        bool operator()(const gate::line& l) const {
+            return !filter || std::find(filter->begin(), filter->end(), l) != filter->end();
+        }
 
-}
+    private:
+        const std::vector<unsigned>* filter;
+    };
+    /** @endcond */
+
+} // namespace revkit
 
 #endif /* GATE_HPP */

@@ -24,12 +24,11 @@
 #ifndef FLATTEN_CIRCUIT_HPP
 #define FLATTEN_CIRCUIT_HPP
 
-namespace revkit
-{
+namespace revkit {
 
-  class circuit;
+    class circuit;
 
-  /**
+    /**
    * @brief Flattens a circuit with modules
    *
    * This functions takes a circuit with module \p base and
@@ -43,10 +42,8 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  void flatten_circuit( const circuit& base, circuit& circ, bool keep_meta_data = false );
+    void flatten_circuit(const circuit& base, circuit& circ, bool keep_meta_data = false);
 
-}
+} // namespace revkit
 
 #endif /* FLATTEN_CIRCUIT_HPP */
-
-

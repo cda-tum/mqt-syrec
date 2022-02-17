@@ -25,17 +25,15 @@
 #define FULLY_SPECIFIED_HPP
 
 #include <boost/foreach.hpp>
-
 #include <core/truth_table.hpp>
 
 /** @cond */
 #define foreach_ BOOST_FOREACH
 /** @endcond */
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Returns whether a truth table is fully specified
    *
    * This function checks whether a truth table \p tt is full specified,
@@ -54,41 +52,34 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename T>
-  bool fully_specified( const truth_table<T>& tt, const typename truth_table<T>::value_type& dc_value, bool is_reversible = true )
-  {
-    if ( tt.num_inputs() == 0 )
-    {
-      return false;
+    template<typename T>
+    bool fully_specified(const truth_table<T>& tt, const typename truth_table<T>::value_type& dc_value, bool is_reversible = true) {
+        if (tt.num_inputs() == 0) {
+            return false;
+        }
+
+        if (is_reversible && tt.num_inputs() != tt.num_outputs()) {
+            return false;
+        }
+
+        if ((1u << tt.num_inputs()) != (unsigned)std::distance(tt.begin(), tt.end())) {
+            return false;
+        }
+
+        for (typename truth_table<T>::const_iterator it = tt.begin(); it != tt.end(); ++it) {
+            if (std::find(it->first.first, it->first.second, dc_value) != it->first.second) {
+                return false;
+            }
+
+            if (std::find(it->second.first, it->second.second, dc_value) != it->second.second) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    if ( is_reversible && tt.num_inputs() != tt.num_outputs() )
-    {
-      return false;
-    }
-
-    if ( ( 1u << tt.num_inputs() ) != (unsigned)std::distance( tt.begin(), tt.end() ) )
-    {
-      return false;
-    }
-
-    for ( typename truth_table<T>::const_iterator it = tt.begin(); it != tt.end(); ++it )
-    {
-      if ( std::find( it->first.first, it->first.second, dc_value ) != it->first.second )
-      {
-        return false;
-      }
-
-      if ( std::find( it->second.first, it->second.second, dc_value ) != it->second.second )
-      {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-
-  /**
+    /**
    * @brief Returns whether a truth table is fully specified
    *
    * This function is specialized for a reversible_truth_table,
@@ -101,8 +92,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool fully_specified( const binary_truth_table& tt, bool is_reversible = true );
+    bool fully_specified(const binary_truth_table& tt, bool is_reversible = true);
 
-}
+} // namespace revkit
 
 #endif /* FULLY_SPECIFIED_HPP */

@@ -17,13 +17,11 @@
 
 #include "core/version.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  const char* revkit_version()
-  {
-    static const char* version = "1.3-snapshot";
-    return version;
-  }
+    const char* revkit_version() {
+        static const char* version = "1.3-snapshot";
+        return version;
+    }
 
-}
+} // namespace revkit

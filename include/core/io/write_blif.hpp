@@ -24,27 +24,24 @@
 #ifndef WRITE_BLIF_HPP
 #define WRITE_BLIF_HPP
 
+#include <boost/optional.hpp>
 #include <iostream>
 #include <map>
 #include <vector>
 
-#include <boost/optional.hpp>
+namespace revkit {
 
-namespace revkit
-{
-  
-  class circuit;
-  class gate;
+    class circuit;
+    class gate;
 
-  /**
+    /**
    * @brief Settings for write_blif
    *
    * @author RevKit
    * @since  1.0
    */
-  struct write_blif_settings
-  {
-    /**
+    struct write_blif_settings {
+        /**
      * @brief Stores truth tables
      *
      * The key is the index of the respective target line.
@@ -54,9 +51,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1.1
      */
-    typedef std::map<unsigned, std::map<std::vector<boost::optional<bool> >, bool> > truth_table_map;
+        typedef std::map<unsigned, std::map<std::vector<boost::optional<bool>>, bool>> truth_table_map;
 
-    /**
+        /**
      * @brief Standard constructor
      *
      * Initializes default values
@@ -64,9 +61,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    write_blif_settings();
+        write_blif_settings();
 
-    /**
+        /**
      * @brief Prefix for the auxiliary variables which are created by the algorithm
      *
      * Default value is \b tmp
@@ -74,9 +71,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string tmp_signal_name;
+        std::string tmp_signal_name;
 
-    /**
+        /**
      * @brief Sets if output should comply to BlifMV
      *
      * In BlifMV spaces are inserted between the elements
@@ -87,12 +84,11 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool blif_mv;
-    std::string state_prefix; // added as per RevKit 1.3 (tanmay)
-    bool keep_constant_names; // added as per RevKit 1.3 (tanmay)
+        bool        blif_mv;
+        std::string state_prefix;        // added as per RevKit 1.3 (tanmay)
+        bool        keep_constant_names; // added as per RevKit 1.3 (tanmay)
 
-
-    /**
+        /**
      * @brief Operator for transforming the gates into BLIF code
      *
      * By convention the first input signals are for the target lines and then the control lines.
@@ -109,11 +105,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void operator()( const gate& g, truth_table_map& map ) const;
+        virtual void operator()(const gate& g, truth_table_map& map) const;
+    };
 
-  };
-
-  /**
+    /**
    * @brief Writes a circuit to a BLIF file
    *
    * This function writes the circuit to a BLIF file.
@@ -126,8 +121,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void write_blif( const circuit& circ, std::ostream& os = std::cout, const write_blif_settings& settings = write_blif_settings() );
+    void write_blif(const circuit& circ, std::ostream& os = std::cout, const write_blif_settings& settings = write_blif_settings());
 
-}
+} // namespace revkit
 
 #endif /* WRITE_BLIF_HPP */

@@ -17,138 +17,114 @@
 
 #include "core/io/read_pla.hpp"
 
-#include <fstream>
+#include "core/functions/extend_truth_table.hpp"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
-#include "core/functions/extend_truth_table.hpp"
+namespace revkit {
 
-namespace revkit
-{
+    struct transform_to_constants {
+        constant operator()(const char& c) const {
+            switch (c) {
+                case '-':
+                case '~':
+                    return constant();
+                    break;
 
-  struct transform_to_constants
-  {
-    constant operator()( const char& c ) const
-    {
-      switch ( c ) {
-      case '-':
-      case '~':
-        return constant();
-        break;
+                case '0':
+                case '1':
+                    return constant(c == '1');
+                    break;
 
-      case '0':
-      case '1':
-        return constant( c == '1' );
-        break;
+                default:
+                    assert(false);
+                    return constant();
+                    break;
+            }
+        }
+    };
 
-      default:
-        assert( false );
-        return constant();
-        break;
-      }
+    read_pla_settings::read_pla_settings():
+        extend(true) {
     }
-  };
 
-  read_pla_settings::read_pla_settings()
-    : extend( true )
-  {
-  }
+    bool read_pla(binary_truth_table& spec, std::istream& in, const read_pla_settings& settings, std::string* error) {
+        std::string line;
 
-  bool read_pla( binary_truth_table& spec, std::istream& in, const read_pla_settings& settings, std::string* error )
-  {
-    std::string line;
+        spec.clear();
 
-    spec.clear();
+        while (in.good() && getline(in, line)) {
+            boost::algorithm::trim(line);
 
-    while ( in.good() && getline( in, line ) )
-    {
-      boost::algorithm::trim( line );
+            /* skip empty lines */
+            if (!line.size()) {
+                continue;
+            }
 
-      /* skip empty lines */
-      if ( !line.size() )
-      {
-        continue;
-      }
+            // command?
+            if (line.at(0) == '.') {
+                std::vector<std::string> params;
+                boost::algorithm::split(params, line, boost::algorithm::is_any_of(" "));
 
-      // command?
-      if ( line.at( 0 ) == '.' )
-      {
-        std::vector<std::string> params;
-        boost::algorithm::split( params, line, boost::algorithm::is_any_of( " " ) );
-
-
-        /* It is possible that there are empty elements in params,
+                /* It is possible that there are empty elements in params,
            e.g. when line contains two spaces between identifiers instead of one.
            These should be removed. */
-        std::vector<std::string>::iterator newEnd = std::remove( params.begin(), params.end(), "" );
-        params.erase( newEnd, params.end() );
+                std::vector<std::string>::iterator newEnd = std::remove(params.begin(), params.end(), "");
+                params.erase(newEnd, params.end());
 
-        /* By means of the first element we can determine the command */
-        std::string command = params.front();
-        params.erase( params.begin() );
+                /* By means of the first element we can determine the command */
+                std::string command = params.front();
+                params.erase(params.begin());
 
-        if ( command == ".i" || command == ".o" || command == ".e" )
-        {
-          // skip, will be set automatically by input output line
+                if (command == ".i" || command == ".o" || command == ".e") {
+                    // skip, will be set automatically by input output line
+                } else if (command == ".ilb") {
+                    spec.set_inputs(params);
+                } else if (command == ".ob") {
+                    spec.set_outputs(params);
+                }
+            } else if (line.at(0) == '#') {
+                // skip comments for now
+            } else {
+                assert(line.at(0) == '-' || line.at(0) == '1' || line.at(0) == '0');
+
+                std::vector<std::string> cubes;
+                boost::algorithm::split(cubes, line, boost::algorithm::is_any_of(" \t"));
+                cubes.erase(std::remove(cubes.begin(), cubes.end(), ""), cubes.end());
+
+                assert(cubes.size() == 2);
+
+                std::vector<boost::optional<bool>> cube_in(cubes.at(0).size());
+                std::transform(cubes.at(0).begin(), cubes.at(0).end(), cube_in.begin(), transform_to_constants());
+
+                std::vector<boost::optional<bool>> cube_out(cubes.at(1).size());
+                std::transform(cubes.at(1).begin(), cubes.at(1).end(), cube_out.begin(), transform_to_constants());
+
+                spec.add_entry(cube_in, cube_out);
+            }
         }
-        else if ( command == ".ilb" )
-        {
-          spec.set_inputs( params );
+
+        if (settings.extend) {
+            extend_truth_table(spec);
         }
-        else if ( command == ".ob" )
-        {
-          spec.set_outputs( params );
-        }
-      }
-      else if ( line.at( 0 ) == '#' )
-      {
-        // skip comments for now
-      }
-      else
-      {
-        assert( line.at( 0 ) == '-' || line.at( 0 ) == '1' || line.at( 0 ) == '0' );
 
-        std::vector<std::string> cubes;
-        boost::algorithm::split( cubes, line, boost::algorithm::is_any_of( " \t" ) );
-        cubes.erase( std::remove( cubes.begin(), cubes.end(), "" ), cubes.end() );
-
-        assert( cubes.size() == 2 );
-
-        std::vector<boost::optional<bool> > cube_in( cubes.at( 0 ).size() );
-        std::transform( cubes.at( 0 ).begin(), cubes.at( 0 ).end(), cube_in.begin(), transform_to_constants() );
-
-        std::vector<boost::optional<bool> > cube_out( cubes.at( 1 ).size() );
-        std::transform( cubes.at( 1 ).begin(), cubes.at( 1 ).end(), cube_out.begin(), transform_to_constants() );
-
-        spec.add_entry( cube_in, cube_out );
-      }
+        return true;
     }
 
-    if ( settings.extend )
-    {
-      extend_truth_table( spec );
+    bool read_pla(binary_truth_table& spec, const std::string& filename, const read_pla_settings& settings, std::string* error) {
+        std::ifstream is;
+        is.open(filename.c_str(), std::ifstream::in);
+
+        if (!is.good()) {
+            if (error) {
+                *error = "Cannot open " + filename;
+            }
+            return false;
+        }
+
+        return read_pla(spec, is, settings, error);
     }
 
-    return true;
-  }
-
-  bool read_pla( binary_truth_table& spec, const std::string& filename, const read_pla_settings& settings, std::string* error )
-  {
-    std::ifstream is;
-    is.open( filename.c_str(), std::ifstream::in );
-
-    if ( !is.good() )
-    {
-      if ( error )
-      {
-        *error = "Cannot open " + filename;
-      }
-      return false;
-    }
-
-    return read_pla( spec, is, settings, error );
-  }
-
-}
-
+} // namespace revkit

@@ -24,10 +24,9 @@
  * @since  1.1
  */
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Returns RevKit version
    *
    * Returns the current RevKit version
@@ -37,7 +36,6 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  const char* revkit_version();
+    const char* revkit_version();
 
-}
-
+} // namespace revkit

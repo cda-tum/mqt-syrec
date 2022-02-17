@@ -23,18 +23,15 @@
 #ifndef NUMBER_HPP
 #define NUMBER_HPP
 
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+namespace revkit {
+    namespace syrec {
+        class binary_numeric_expr;
 
-namespace revkit
-{
-  namespace syrec
-  {
-    class binary_numeric_expr;
-
-    /**
+        /**
      * @brief SyReC number data type
      *
      * This class represents a number in the context of a SyReC
@@ -47,18 +44,17 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class number
-    {
-    public:
-      /**
+        class number {
+        public:
+            /**
        * @brief Smart pointer
        *
        * @author RevKit
        * @since  1.1
        */
-      typedef std::shared_ptr<number> ptr;
+            typedef std::shared_ptr<number> ptr;
 
-      /**
+            /**
        * @brief Loop Variable Mapping
        *
        * A loop variable mapping assigns a current value
@@ -68,9 +64,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      typedef std::map<std::string, unsigned> loop_variable_mapping;
+            typedef std::map<std::string, unsigned> loop_variable_mapping;
 
-      /**
+            /**
        * @brief Construct by number
        *
        * This constructor generates a number based on the value \p value.
@@ -80,9 +76,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      explicit number( unsigned value );
+            explicit number(unsigned value);
 
-      /**
+            /**
        * @brief Construct by loop variable
        *
        * This constructor generates a number based on a loop variable with the name \p value.
@@ -92,9 +88,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      explicit number( const std::string& value );
-      
-      /**
+            explicit number(const std::string& value);
+
+            /**
        * @brief Construct by binary conjunction
        *
        * This constructor generates a number based on two numbers \p lhs and \p rhs and 
@@ -107,17 +103,17 @@ namespace revkit
        * @author RevKit
        * @since  1.3
        */
-      explicit number( const number::ptr lhs, const unsigned op, const number::ptr rhs );
+            explicit number(const number::ptr lhs, const unsigned op, const number::ptr rhs);
 
-      /**
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~number();
+            ~number();
 
-      /**
+            /**
        * @brief Returns whether the number is a loop variable
        *
        * @return true, if the number is a loop variable
@@ -125,9 +121,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      bool is_loop_variable() const;
-      
-      /**
+            bool is_loop_variable() const;
+
+            /**
        * @brief Returns whether the number is a conjunction of two numbers
        *
        * @return true, if the number is a conjunction
@@ -135,9 +131,9 @@ namespace revkit
        * @author RevKit
        * @since  1.3
        */
-      bool is_conjunction() const;
-      
-      /**
+            bool is_conjunction() const;
+
+            /**
        * @brief Returns whether the number is a known constant number
        *
        * @return true, if the number is a known constant number
@@ -145,9 +141,9 @@ namespace revkit
        * @author RevKit
        * @since  1.3
        */
-      bool is_constant() const;
+            bool is_constant() const;
 
-      /**
+            /**
        * @brief Returns the variable name in case it is a loop variable
        *
        * This method can only be called when is_loop_variable() returns true,
@@ -159,9 +155,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::string& variable_name() const;
-      
-      /**
+            const std::string& variable_name() const;
+
+            /**
        * @brief Returns the binary expression in case it is a conjunction of two numbers
        * 
        * This method can only be called if is_conjunction() returns true, 
@@ -173,9 +169,9 @@ namespace revkit
        * @author RevKit
        * @since 1.3
        */
-      binary_numeric_expr* conjunction_expr() const;
+            binary_numeric_expr* conjunction_expr() const;
 
-      /** 
+            /**
        * @brief Evaluates the number in the context of an execution
        * 
        * This method works as follows. If the number is represented
@@ -194,18 +190,18 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unsigned evaluate( const loop_variable_mapping& map ) const;
+            unsigned evaluate(const loop_variable_mapping& map) const;
 
-      /** @cond 0 */
-      friend std::ostream& operator<<( std::ostream& os, const number& n );
-      /** @endcond */
+            /** @cond 0 */
+            friend std::ostream& operator<<(std::ostream& os, const number& n);
+            /** @endcond */
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /**
+        /**
      * @brief Prints the number to an output stream
      *
      * @param os Output stream
@@ -216,9 +212,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<( std::ostream& os, const number& n );
+        std::ostream& operator<<(std::ostream& os, const number& n);
 
-  }
-}
+    } // namespace syrec
+} // namespace revkit
 
 #endif /* NUMBER_HPP */

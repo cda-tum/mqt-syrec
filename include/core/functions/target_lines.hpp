@@ -25,12 +25,11 @@
 #ifndef TARGET_LINES_HPP
 #define TARGET_LINES_HPP
 
-namespace revkit
-{
+namespace revkit {
 
-  class gate;
+    class gate;
 
-  /**
+    /**
    * @brief Gets the target lines of a gate
    *
    * This function stores all target lines of a gate into a container.
@@ -50,16 +49,14 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename Iterator>
-  Iterator target_lines( const gate& g, Iterator result )
-  {
-    for ( gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c )
-    {
-      *result++ = *c;
+    template<typename Iterator>
+    Iterator target_lines(const gate& g, Iterator result) {
+        for (gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c) {
+            *result++ = *c;
+        }
+        return result;
     }
-    return result;
-  }
-  
-}
+
+} // namespace revkit
 
 #endif /* TARGET_LINES_HPP */

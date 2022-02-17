@@ -17,12 +17,10 @@
 
 #include "algorithms/synthesis/syrec_synthesis_p.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-namespace internal
-{
+    namespace internal {
 
-}
+    }
 
-}
+} // namespace revkit

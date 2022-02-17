@@ -26,10 +26,9 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Helper class for adding lines in an easier way
    *
    * This class should not be used stand alone but just with the add_\em gate methods
@@ -40,10 +39,9 @@ namespace revkit
    *
    * @sa \ref sub_add_gates
    */
-  class target_line_adder
-  {
-  public:
-    /**
+    class target_line_adder {
+    public:
+        /**
      * @brief Default constructor
      *
      * @param gate Gate, to which target lines should be added
@@ -53,9 +51,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit target_line_adder( gate* gate );
+        explicit target_line_adder(gate* gate);
 
-    /**
+        /**
      * @brief Add one target line
      *
      * @param  l1 First target line
@@ -67,9 +65,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    gate& operator()( const gate::line& l1 );
+        gate& operator()(const gate::line& l1);
 
-    /**
+        /**
      * @brief Add two target lines
      *
      * @param  l1 First target line
@@ -82,13 +80,13 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    gate& operator()( const gate::line& l1, const gate::line& l2 );
+        gate& operator()(const gate::line& l1, const gate::line& l2);
 
-  private:
-    gate* g;
-  };
+    private:
+        gate* g;
+    };
 
-  /**
+    /**
    * @brief Helper class for adding lines in an easier way
    *
    * This class should not be used stand alone but just with the add_\em gate methods
@@ -99,10 +97,9 @@ namespace revkit
    *
    * @sa \ref sub_add_gates
    */
-  class control_line_adder
-  {
-  public:
-    /**
+    class control_line_adder {
+    public:
+        /**
      * @brief Default constructor
      *
      * @param g Gate, to which control lines should be added
@@ -112,9 +109,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit control_line_adder( gate& g );
+        explicit control_line_adder(gate& g);
 
-    /**
+        /**
      * @brief Add no control line
      *
      * @return A target_line_adder
@@ -124,9 +121,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()();
+        target_line_adder operator()();
 
-    /**
+        /**
      * @brief Add one control line
      *
      * @param  l1 First control line
@@ -138,9 +135,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1 );
+        target_line_adder operator()(const gate::line& l1);
 
-    /**
+        /**
      * @brief Add two control lines
      *
      * @param  l1 First control line
@@ -153,9 +150,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2);
 
-    /**
+        /**
      * @brief Add three control lines
      *
      * @param  l1 First control line
@@ -169,9 +166,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3);
 
-    /**
+        /**
      * @brief Add four control lines
      *
      * @param  l1 First control line
@@ -186,9 +183,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4);
 
-    /**
+        /**
      * @brief Add five control lines
      *
      * @param  l1 First control line
@@ -204,9 +201,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5);
 
-    /**
+        /**
      * @brief Add six control lines
      *
      * @param  l1 First control line
@@ -223,9 +220,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6);
 
-    /**
+        /**
      * @brief Add seven control lines
      *
      * @param  l1 First control line
@@ -243,9 +240,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7);
 
-    /**
+        /**
      * @brief Add eight control lines
      *
      * @param  l1 First control line
@@ -264,9 +261,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8);
 
-    /**
+        /**
      * @brief Add nine control lines
      *
      * @param  l1 First control line
@@ -286,13 +283,13 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    target_line_adder operator()( const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9 );
+        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9);
 
-  private:
-    gate* g;
-  };
+    private:
+        gate* g;
+    };
 
-  /**
+    /**
    * @brief Helper function for appending a \b Toffoli gate
    *
    * @param circ     Circuit
@@ -304,9 +301,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_toffoli( circuit& circ, const gate::line_container& controls, const gate::line& target );
+    gate& append_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for appending a \b Fredkin gate
    *
    * @param circ     Circuit
@@ -319,9 +316,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_fredkin( circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2 );
+    gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for appending a \b Peres gate
    *
    * @param circ    Circuit
@@ -334,9 +331,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_peres( circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2 );
+    gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for appending a \b CNOT gate
    *
    * @param circ    Circuit
@@ -348,9 +345,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_cnot( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& append_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for appending a \b V gate
    *
    * @param circ    Circuit
@@ -362,9 +359,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_v( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& append_v(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for appending a \b V+ gate
    *
    * @param circ    Circuit
@@ -376,9 +373,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_vplus( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for appending a \b NOT gate
    *
    * @param circ    Circuit
@@ -389,9 +386,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& append_not( circuit& circ, const gate::line& target );
+    gate& append_not(circuit& circ, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for appending a module gate
    *
    * @param circ        Circuit
@@ -404,9 +401,9 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  gate& append_module( circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets );
+    gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
-  /**
+    /**
    * @brief Helper function for appending a generic gate using the control_line_adder
    *
    * @param circ Circuit
@@ -420,9 +417,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder append_gate( circuit& circ, const boost::any& tag );
+    control_line_adder append_gate(circuit& circ, const boost::any& tag);
 
-  /**
+    /**
    * @brief Helper function for appending a \b Toffoli gate using the control_line_adder
    *
    * @param circ Circuit
@@ -434,9 +431,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder append_toffoli( circuit& circ );
+    control_line_adder append_toffoli(circuit& circ);
 
-  /**
+    /**
    * @brief Helper function for appending a \b Fredkin gate using the control_line_adder
    *
    * @param circ Circuit
@@ -448,12 +445,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder append_fredkin( circuit& circ );
+    control_line_adder append_fredkin(circuit& circ);
 
-
-
-
-  /**
+    /**
    * @brief Helper function for prepending a \b Toffoli gate
    *
    * @param circ     Circuit
@@ -465,9 +459,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_toffoli( circuit& circ, const gate::line_container& controls, const gate::line& target );
+    gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b Fredkin gate
    *
    * @param circ     Circuit
@@ -480,9 +474,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_fredkin( circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2 );
+    gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b Peres gate
    *
    * @param circ    Circuit
@@ -495,9 +489,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_peres( circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2 );
+    gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b CNOT gate
    *
    * @param circ    Circuit
@@ -509,9 +503,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_cnot( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b V gate
    *
    * @param circ    Circuit
@@ -523,9 +517,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_v( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b V+ gate
    *
    * @param circ    Circuit
@@ -537,9 +531,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_vplus( circuit& circ, const gate::line& control, const gate::line& target );
+    gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b NOT gate
    *
    * @param circ    Circuit
@@ -550,9 +544,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& prepend_not( circuit& circ, const gate::line& target );
+    gate& prepend_not(circuit& circ, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for prepending a module gate
    *
    * @param circ        Circuit
@@ -565,9 +559,9 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  gate& prepend_module( circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets );
+    gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
-  /**
+    /**
    * @brief Helper function for prepending a generic gate using the control_line_adder
    *
    * @param circ Circuit
@@ -581,9 +575,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder prepend_gate( circuit& circ, const boost::any& tag );
+    control_line_adder prepend_gate(circuit& circ, const boost::any& tag);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b Toffoli gate using the control_line_adder
    *
    * @param circ Circuit
@@ -595,9 +589,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder prepend_toffoli( circuit& circ );
+    control_line_adder prepend_toffoli(circuit& circ);
 
-  /**
+    /**
    * @brief Helper function for prepending a \b Fredkin gate using the control_line_adder
    *
    * @param circ Circuit
@@ -609,12 +603,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder prepend_fredkin( circuit& circ );
+    control_line_adder prepend_fredkin(circuit& circ);
 
-
-
-
-  /**
+    /**
    * @brief Helper function for inserting a \b Toffoli gate
    *
    * @param circ     Circuit
@@ -627,9 +618,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_toffoli( circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target );
+    gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b Fredkin gate
    *
    * @param circ     Circuit
@@ -643,9 +634,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_fredkin( circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2 );
+    gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b Peres gate
    *
    * @param circ    Circuit
@@ -659,9 +650,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_peres( circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2 );
+    gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b CNOT gate
    *
    * @param circ    Circuit
@@ -674,9 +665,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_cnot( circuit& circ, unsigned n, const gate::line& control, const gate::line& target );
+    gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b V gate
    *
    * @param circ    Circuit
@@ -689,9 +680,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_v( circuit& circ, unsigned n, const gate::line& control, const gate::line& target );
+    gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b V+ gate
    *
    * @param circ    Circuit
@@ -704,9 +695,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_vplus( circuit& circ, unsigned n, const gate::line& control, const gate::line& target );
+    gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b NOT gate
    *
    * @param circ    Circuit
@@ -718,9 +709,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  gate& insert_not( circuit& circ, unsigned n, const gate::line& target );
+    gate& insert_not(circuit& circ, unsigned n, const gate::line& target);
 
-  /**
+    /**
    * @brief Helper function for inserting a module gate
    *
    * @param circ        Circuit
@@ -734,9 +725,9 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  gate& insert_module( circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets );
+    gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
-  /**
+    /**
    * @brief Helper function for inserting a generic gate using the control_line_adder
    *
    * @param circ Circuit
@@ -751,9 +742,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder insert_gate( circuit& circ, unsigned n, const boost::any& tag );
+    control_line_adder insert_gate(circuit& circ, unsigned n, const boost::any& tag);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b Toffoli gate using the control_line_adder
    *
    * @param circ Circuit
@@ -766,9 +757,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder insert_toffoli( circuit& circ, unsigned n );
+    control_line_adder insert_toffoli(circuit& circ, unsigned n);
 
-  /**
+    /**
    * @brief Helper function for inserting a \b Fredkin gate using the control_line_adder
    *
    * @param circ Circuit
@@ -781,9 +772,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  control_line_adder insert_fredkin( circuit& circ, unsigned n );
+    control_line_adder insert_fredkin(circuit& circ, unsigned n);
 
-
-}
+} // namespace revkit
 
 #endif /* ADD_GATES_HPP */

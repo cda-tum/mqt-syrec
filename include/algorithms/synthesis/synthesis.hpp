@@ -24,48 +24,45 @@
 #ifndef SYNTHESIS_HPP
 #define SYNTHESIS_HPP
 
-#include <string>
-
 #include <boost/function.hpp>
-
 #include <core/circuit.hpp>
 #include <core/functor.hpp>
 #include <core/truth_table.hpp>
+#include <string>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Functor for synthesis based on a truth table
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef functor<bool(circuit&, const binary_truth_table&)> truth_table_synthesis_func;
+    typedef functor<bool(circuit&, const binary_truth_table&)> truth_table_synthesis_func;
 
-  /**
+    /**
    * @brief Functor for synthesis based on a file-name (PLA or BLIF)
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef functor<bool(circuit&, const std::string&)> pla_blif_synthesis_func;
+    typedef functor<bool(circuit&, const std::string&)> pla_blif_synthesis_func;
 
-  /**
+    /**
    * @brief Functor for embedding a binary truth table in place
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef functor<bool(binary_truth_table&, const binary_truth_table&)> embedding_func;
+    typedef functor<bool(binary_truth_table&, const binary_truth_table&)> embedding_func;
 
-  /**
+    /**
    * @brief Functor for decomposing a reversible circuit into a quantum circuit
    *
    * @author RevKit
    * @since  1.0
    */
-  typedef functor<bool(circuit&, const circuit&)> decomposition_func;
-}
+    typedef functor<bool(circuit&, const circuit&)> decomposition_func;
+} // namespace revkit
 
 #endif /* SYNTHESIS_HPP */

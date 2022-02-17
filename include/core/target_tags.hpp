@@ -26,15 +26,13 @@
 #ifndef TARGET_TAGS_HPP
 #define TARGET_TAGS_HPP
 
+#include <boost/any.hpp>
 #include <core/circuit.hpp>
 #include <core/gate.hpp>
 
-#include <boost/any.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Target Tag for Toffoli gates.
    *
    * @sa \ref sub_target_tags
@@ -42,9 +40,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct toffoli_tag {};
+    struct toffoli_tag {};
 
-  /**
+    /**
    * @brief Target Tag for Fredkin gates.
    *
    * @sa \ref sub_target_tags
@@ -52,9 +50,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct fredkin_tag {};
+    struct fredkin_tag {};
 
-  /**
+    /**
    * @brief Target Tag for Peres gates.
    *
    * @sa \ref sub_target_tags
@@ -62,8 +60,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct peres_tag {
-    /**
+    struct peres_tag {
+        /**
      * @brief Order of Target Lines
      *
      * If \b true, the order of target lines is interchanged,
@@ -77,10 +75,10 @@ namespace revkit
      * @author RevKit
      * @since  1.3
      */
-    bool swap_targets;
-  };
+        bool swap_targets;
+    };
 
-  /**
+    /**
    * @brief Target Tag for V gates.
    *
    * @sa \ref sub_target_tags
@@ -88,9 +86,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct v_tag {};
+    struct v_tag {};
 
-  /**
+    /**
    * @brief Target Tag for V+ gates.
    *
    * @sa \ref sub_target_tags
@@ -98,9 +96,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct vplus_tag {};
+    struct vplus_tag {};
 
-  /**
+    /**
    * @brief Target Tag for Modules
    *
    * @sa \ref sub_target_tags
@@ -108,17 +106,16 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  struct module_tag
-  {
-    /**
+    struct module_tag {
+        /**
      * @brief Name of the module
      *
      * @author RevKit
      * @since  1.1
      */
-    std::string name;
+        std::string name;
 
-    /**
+        /**
      * @brief Reference to the circuit
      *
      * Usually the circuit is inside of the
@@ -127,9 +124,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::shared_ptr<circuit> reference;
+        std::shared_ptr<circuit> reference;
 
-    /**
+        /**
      * @brief Sort order of the target tags
      *
      * This list stores the values from
@@ -145,10 +142,10 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::vector<unsigned> target_sort_order;
-  };
+        std::vector<unsigned> target_sort_order;
+    };
 
-  /**
+    /**
    * @brief Compares type of a boost::any variable
    *
    * This method is called by is_\em gate functions
@@ -160,13 +157,12 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename T>
-  bool is_type( const boost::any& operand )
-  {
-    return operand.type() == typeid( T );
-  }
+    template<typename T>
+    bool is_type(const boost::any& operand) {
+        return operand.type() == typeid(T);
+    }
 
-  /**
+    /**
    * @brief Checks if two gates have the same type
    *
    * Use this function, since == does not work on gate::type
@@ -179,9 +175,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool same_type( const gate& g1, const gate& g2 );
+    bool same_type(const gate& g1, const gate& g2);
 
-  /**
+    /**
    * @brief Returns whether a gate is a Toffoli gate
    *
    * @param g Gate
@@ -190,9 +186,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool is_toffoli( const gate& g );
+    bool is_toffoli(const gate& g);
 
-  /**
+    /**
    * @brief Returns whether a gate is a Fredkin gate
    *
    * @param g Gate
@@ -201,9 +197,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool is_fredkin( const gate& g );
+    bool is_fredkin(const gate& g);
 
-  /**
+    /**
    * @brief Returns whether a gate is a Peres gate
    *
    * @param g Gate
@@ -212,9 +208,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool is_peres( const gate& g );
+    bool is_peres(const gate& g);
 
-  /**
+    /**
    * @brief Returns whether a gate is a V gate
    *
    * @param g Gate
@@ -223,9 +219,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool is_v( const gate& g );
+    bool is_v(const gate& g);
 
-  /**
+    /**
    * @brief Returns whether a gate is a V+ gate
    *
    * @param g Gate
@@ -234,9 +230,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool is_vplus( const gate& g );
+    bool is_vplus(const gate& g);
 
-  /**
+    /**
    * @brief Returns whether a gate is a module
    *
    * @param g Gate
@@ -245,8 +241,8 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  bool is_module( const gate& g );
+    bool is_module(const gate& g);
 
-}
+} // namespace revkit
 
 #endif /* TARGET_TAGS_HPP */

@@ -17,137 +17,112 @@
 
 #include "core/syrec/module.hpp"
 
-#include <iterator>
-#include <sstream>
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
+#include <iterator>
+#include <sstream>
 
 #define foreach_ BOOST_FOREACH
 
 using namespace boost::assign;
 
-namespace revkit
-{
-  namespace syrec
-  {
+namespace revkit {
+    namespace syrec {
 
-    class module::priv
-    {
-    public:
-      priv() {}
+        class module::priv {
+        public:
+            priv() {}
 
-      std::string name;
-      variable::vec parameters;
-      variable::vec variables;
-      statement::vec statements;
-    };
+            std::string    name;
+            variable::vec  parameters;
+            variable::vec  variables;
+            statement::vec statements;
+        };
 
-    module::module()
-      : d( new priv() )
-    {
-    }
-
-    module::module( const std::string& name )
-      : d( new priv() )
-    {
-      d->name = name;
-    }
-
-    module::~module()
-    {
-      delete d;
-    }
-
-    void module::set_name( const std::string& name )
-    {
-      d->name = name;
-    }
-
-    const std::string& module::name() const
-    {
-      return d->name;
-    }
-
-    void module::add_parameter( variable::ptr parameter )
-    {
-      d->parameters += parameter;
-    }
-
-    const variable::vec& module::parameters() const
-    {
-      return d->parameters;
-    }
-
-    void module::add_variable( variable::ptr variable )
-    {
-      d->variables += variable;
-    }
-
-    const variable::vec& module::variables() const
-    {
-      return d->variables;
-    }
-
-    variable::ptr module::find_parameter_or_variable( const std::string& name ) const
-    {
-      foreach_ ( variable::ptr var, d->parameters )
-      {
-        if ( var->name() == name )
-        {
-          return var;
+        module::module() :d(new priv()) {
         }
-      }
 
-      foreach_ ( variable::ptr var, d->variables )
-      {
-        if ( var->name() == name )
-        {
-          return var;
+        module::module(const std::string& name) :d(new priv()) {
+            d->name = name;
         }
-      }
 
-      return variable::ptr();
-    }
+        module::~module() {
+            delete d;
+        }
 
-    void module::add_statement( statement::ptr statement )
-    {
-      d->statements += statement;
-    }
+        void module::set_name(const std::string& name) {
+            d->name = name;
+        }
 
-    const statement::vec& module::statements() const
-    {
-      return d->statements;
-    }
+        const std::string& module::name() const {
+            return d->name;
+        }
 
-    /* helper function which creates a string from a output stream */
-    struct to_string
-    {
-      typedef std::string result_type;
+        void module::add_parameter(variable::ptr parameter) {
+            d->parameters += parameter;
+        }
 
-      template<typename T>
-      std::string operator()( const T& t ) const
-      {
-        std::stringstream oss;
-        oss.precision( 0u );
-        oss << t;
-        return oss.str();
-      }
-    };
+        const variable::vec& module::parameters() const {
+            return d->parameters;
+        }
 
-    std::ostream& operator<<( std::ostream& os, const module& m )
-    {
-      using boost::adaptors::indirected;
-      using boost::adaptors::transformed;
+        void module::add_variable(variable::ptr variable) {
+            d->variables += variable;
+        }
 
-      os << "module " << m.name() << "(" << boost::algorithm::join( m.parameters() | indirected | transformed( to_string() ), ", " ) << ")" << std::endl;
-      boost::copy( m.variables() | indirected, std::ostream_iterator<const variable>( os, "\n" ) );
-      boost::copy( m.statements() | indirected, std::ostream_iterator<const statement>( os ) );
-      return os;
-    }
+        const variable::vec& module::variables() const {
+            return d->variables;
+        }
 
-  }
-}
+        variable::ptr module::find_parameter_or_variable(const std::string& name) const {
+            foreach_(variable::ptr var, d->parameters) {
+                if (var->name() == name) {
+                    return var;
+                }
+            }
+
+            foreach_(variable::ptr var, d->variables) {
+                if (var->name() == name) {
+                    return var;
+                }
+            }
+
+            return variable::ptr();
+        }
+
+        void module::add_statement(statement::ptr statement) {
+            d->statements += statement;
+        }
+
+        const statement::vec& module::statements() const {
+            return d->statements;
+        }
+
+        /* helper function which creates a string from a output stream */
+        struct to_string {
+            typedef std::string result_type;
+
+            template<typename T>
+            std::string operator()(const T& t) const {
+                std::stringstream oss;
+                oss.precision(0u);
+                oss << t;
+                return oss.str();
+            }
+        };
+
+        std::ostream& operator<<(std::ostream& os, const module& m) {
+            using boost::adaptors::indirected;
+            using boost::adaptors::transformed;
+
+            os << "module " << m.name() << "(" << boost::algorithm::join(m.parameters() | indirected | transformed(to_string()), ", ") << ")" << std::endl;
+            boost::copy(m.variables() | indirected, std::ostream_iterator<const variable>(os, "\n"));
+            boost::copy(m.statements() | indirected, std::ostream_iterator<const statement>(os));
+            return os;
+        }
+
+    } // namespace syrec
+} // namespace revkit

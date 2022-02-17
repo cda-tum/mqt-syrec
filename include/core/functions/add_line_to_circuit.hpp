@@ -24,14 +24,12 @@
 #ifndef ADD_LINE_TO_CIRCUIT_HPP
 #define ADD_LINE_TO_CIRCUIT_HPP
 
+#include <core/circuit.hpp>
 #include <string>
 
-#include <core/circuit.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Add a line to a circuit with specifying all meta-data
    *
    * This function helps adding a line to the circuit.
@@ -49,8 +47,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0 (Return value since 1.1)
    */
-  unsigned add_line_to_circuit( circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false );
+    unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false);
 
-}
+} // namespace revkit
 
 #endif /* ADD_LINE_TO_CIRCUIT_HPP */

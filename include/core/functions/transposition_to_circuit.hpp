@@ -25,11 +25,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace revkit
-{
-  class circuit;
+namespace revkit {
+    class circuit;
 
-  /**
+    /**
    * @brief Creates a circuit realization for a transposition
    *
    * This function takes one line from a reversible truth table (inputs -> outputs)
@@ -43,10 +42,10 @@ namespace revkit
    * @author RevKit
    * @since  1.3
    */
-  bool transposition_to_circuit( circuit& circ,
-      const boost::dynamic_bitset<>& inputs,
-      const boost::dynamic_bitset<>& outputs);
+    bool transposition_to_circuit(circuit&                       circ,
+                                  const boost::dynamic_bitset<>& inputs,
+                                  const boost::dynamic_bitset<>& outputs);
 
-}
+} // namespace revkit
 
 #endif /* TRANSPOSITION_TO_CIRCUIT */

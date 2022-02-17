@@ -26,10 +26,9 @@
 
 #include "../circuit.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Clears the circuit \p circ
    *
    * This function clears all lines, gates and meta-data in a circuit.
@@ -39,8 +38,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void clear_circuit( circuit& circ );
+    void clear_circuit(circuit& circ);
 
-}
+} // namespace revkit
 
 #endif /* CLEAR_CIRCUIT_HPP */

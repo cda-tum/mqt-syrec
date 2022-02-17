@@ -26,10 +26,9 @@
 
 #include <core/gate.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Slot for adding control lines automatically
    *
    * This is a slot which can be connected to the circuit::gate_added
@@ -63,13 +62,12 @@ namespace revkit
    * revkit::append_not( circ, 1u );
    * @endcode
    */
-  class active_controls
-  {
-  public:
-    active_controls();
-    ~active_controls();
+    class active_controls {
+    public:
+        active_controls();
+        ~active_controls();
 
-    /**
+        /**
      * @brief Add an active control line
      *
      * An active control line is implicitely added by every operation
@@ -84,9 +82,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void add( gate::line control );
+        void add(gate::line control);
 
-    /**
+        /**
      * @brief Removes an active control line
      *
      * An active control line is implicitely added by every operation
@@ -101,9 +99,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void remove( gate::line control );
+        void remove(gate::line control);
 
-    /**
+        /**
      * @brief Returns a list with all active lines
      *
      * An active control line is implicitely added by every operation
@@ -115,9 +113,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    const gate::line_container& controls() const;
+        const gate::line_container& controls() const;
 
-    /**
+        /**
      * @brief Operator implementation
      *
      * This operator adds the active controls to the gate
@@ -128,13 +126,13 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void operator()( gate& g ) const;
+        void operator()(gate& g) const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-}
+} // namespace revkit
 
 #endif /* ACTIVE_CONTROLS_HPP */

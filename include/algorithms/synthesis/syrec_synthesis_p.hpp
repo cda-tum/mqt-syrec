@@ -17,43 +17,38 @@
 
 /** @cond */
 #ifndef SYREC_SYNTHESIS_P_HPP
-#define SYREC_SYNTHESIS_P_HPP
+    #define SYREC_SYNTHESIS_P_HPP
 
-#include <boost/graph/adjacency_list.hpp>
+    #include <boost/graph/adjacency_list.hpp>
+    #include <core/circuit.hpp>
+    #include <core/gate.hpp>
 
-#include <core/circuit.hpp>
-#include <core/gate.hpp>
+namespace revkit {
 
-namespace revkit
-{
- 
-namespace internal
-{
-  struct node_properties
-  {
-    node_properties() {}
+    namespace internal {
+        struct node_properties {
+            node_properties() {}
 
-    unsigned control;
-    gate::line_container controls;
-    std::shared_ptr<circuit> circ;
-  };
-  
-  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                                boost::property<boost::vertex_name_t, node_properties> > cct;
+            unsigned                 control;
+            gate::line_container     controls;
+            std::shared_ptr<circuit> circ;
+        };
 
-  typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
-  typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
-  
-  struct cct_manager
-  {
-    cct tree;
-    cct_node current;
-    cct_node root;
-  };
-}
+        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                      boost::property<boost::vertex_name_t, node_properties>>
+                cct;
 
-}
+        typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+        typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
+
+        struct cct_manager {
+            cct      tree;
+            cct_node current;
+            cct_node root;
+        };
+    } // namespace internal
+
+} // namespace revkit
 
 #endif /* SYREC_SYNTHESIS_P_HPP */
 /** @endcond */
-

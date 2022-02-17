@@ -28,20 +28,18 @@
 
 #include <iostream>
 
-namespace revkit
-{
+namespace revkit {
 
-  class circuit;
+    class circuit;
 
-  /**
+    /**
    * @brief Settings for write_verilog
    *
    * @author RevKit
    * @since  1.1
    */
-  struct write_verilog_settings
-  {
-    /**
+    struct write_verilog_settings {
+        /**
      * @brief Standard constructor
      *
      * Initializes default values
@@ -49,9 +47,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    write_verilog_settings();
+        write_verilog_settings();
 
-    /**
+        /**
      * @brief Determines whether the constants are propagated
      *
      * If the constants are propagated, then no signals
@@ -63,10 +61,10 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    bool propagate_constants;
-  };
+        bool propagate_constants;
+    };
 
-  /**
+    /**
    * @brief Writes a circuit to a Verilog file
    *
    * This function dumps the circuit as a Verilog file.
@@ -78,8 +76,8 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  void write_verilog( const circuit& circ, std::ostream& os = std::cout, const write_verilog_settings& settings = write_verilog_settings() );
+    void write_verilog(const circuit& circ, std::ostream& os = std::cout, const write_verilog_settings& settings = write_verilog_settings());
 
-}
+} // namespace revkit
 
 #endif /* WRITE_VERILOG_HPP */

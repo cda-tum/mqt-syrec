@@ -23,23 +23,19 @@
 #ifndef STATEMENT_HPP
 #define STATEMENT_HPP
 
-#include <iostream>
-#include <vector>
-
 #include <boost/shared_ptr.hpp>
-
 #include <core/syrec/expression.hpp>
 #include <core/syrec/module.hpp>
 #include <core/syrec/variable.hpp>
+#include <iostream>
+#include <vector>
 
-namespace revkit
-{
-  namespace syrec
-  {
+namespace revkit {
+    namespace syrec {
 
-    class module;
+        class module;
 
-    /**
+        /**
      * @brief Abstract base class for all SyReC statements
      *
      * All statement classes are derived from this abstract class.
@@ -49,26 +45,25 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class statement
-    {
-    public:
-      /**
+        class statement {
+        public:
+            /**
        * @brief Smart pointer
        *
        * @author RevKit
        * @since  1.1
        */
-      typedef std::shared_ptr<statement> ptr;
+            typedef std::shared_ptr<statement> ptr;
 
-      /**
+            /**
        * @brief Vector of smart pointers
        *
        * @author RevKit
        * @since  1.1
        */
-      typedef std::vector<ptr>             vec;
+            typedef std::vector<ptr> vec;
 
-      /**
+            /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -76,17 +71,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      statement();
+            statement();
 
-      /**
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      virtual ~statement();
+            virtual ~statement();
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -96,9 +91,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      virtual std::ostream& print( std::ostream& os ) const;
+            virtual std::ostream& print(std::ostream& os) const;
 
-      /** 
+            /**
        * @brief Sets the line number of the SyReC code
        * 
        * @param line_number Line number in SyReC code
@@ -106,9 +101,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_line_number( unsigned line_number );
+            void set_line_number(unsigned line_number);
 
-      /**
+            /**
        * @brief Returns the line number of the SyReC code
        *
        * @return Line number in SyReC code
@@ -116,14 +111,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unsigned line_number() const;
+            unsigned line_number() const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief SWAP Statement
      *
      * This class represents the SyReC SWAP Statement (<=>)
@@ -132,10 +127,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class swap_statement : public statement
-    {
-    public:
-      /** 
+        class swap_statement: public statement {
+        public:
+            /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -143,9 +137,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      swap_statement();
+            swap_statement();
 
-      /** 
+            /**
        * @brief Constructor
        * 
        * @param lhs Variable access on left hand side
@@ -154,18 +148,18 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      swap_statement( variable_access::ptr lhs,
-                      variable_access::ptr rhs );
+            swap_statement(variable_access::ptr lhs,
+                           variable_access::ptr rhs);
 
-      /** 
+            /**
        * @brief Deconstructor
        * 
        * @author RevKit
        * @since  1.1
        */
-      ~swap_statement();
+            ~swap_statement();
 
-      /** 
+            /**
        * @brief Sets variable access on left hand side
        * 
        * @param lhs Variable access
@@ -173,9 +167,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_lhs( variable_access::ptr lhs );
+            void set_lhs(variable_access::ptr lhs);
 
-      /** 
+            /**
        * @brief Returns variable access on left hand side
        * 
        * @return Variable access
@@ -183,9 +177,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      variable_access::ptr lhs() const;
-      
-      /** 
+            variable_access::ptr lhs() const;
+
+            /**
        * @brief Sets variable access on right hand side
        * 
        * @param rhs Variable access
@@ -193,9 +187,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_rhs( variable_access::ptr rhs );
+            void set_rhs(variable_access::ptr rhs);
 
-      /** 
+            /**
        * @brief Returns variable access on right hand side
        * 
        * @return Variable access
@@ -203,9 +197,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      variable_access::ptr rhs() const;
+            variable_access::ptr rhs() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -215,14 +209,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief Unary Statement
      *
      * This class represents the SyReC Unary statements (++, --, ~)
@@ -230,34 +224,33 @@ namespace revkit
      *
      * @author RevKit
      * @since  1.1
-     */    
-    class unary_statement : public statement
-    {
-    public:
-      /**
+     */
+        class unary_statement: public statement {
+        public:
+            /**
        * @brief Type of the statement
        *
        * @author RevKit
        * @since  1.1
        */
-      enum {
-        /**
+            enum {
+                /**
          * @brief Inversion of the variable
          */
-        invert,
-        
-        /**
+                invert,
+
+                /**
          * @brief Increment of the variable by 1
          */
-        increment,
+                increment,
 
-        /**
+                /**
          * @brief Decrement of the variable by 1
          */
-        decrement
-      };
-      
-      /** 
+                decrement
+            };
+
+            /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -265,9 +258,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unary_statement();
+            unary_statement();
 
-      /** 
+            /**
        * @brief Constructor
        * 
        * @param op Operation
@@ -276,18 +269,18 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unary_statement( unsigned op,
-                       variable_access::ptr var );
+            unary_statement(unsigned             op,
+                            variable_access::ptr var);
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~unary_statement();
-      
-      /** 
+            ~unary_statement();
+
+            /**
        * @brief Sets the operation of the statement
        * 
        * @param op Operation
@@ -295,9 +288,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_op( unsigned op );
+            void set_op(unsigned op);
 
-      /** 
+            /**
        * @brief Returns the operation of the statement
        * 
        * @return Operation
@@ -305,9 +298,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unsigned op() const;
+            unsigned op() const;
 
-      /** 
+            /**
        * @brief Sets the variable access of the statement
        * 
        * @param var Variable access
@@ -315,9 +308,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_var( variable_access::ptr var );
+            void set_var(variable_access::ptr var);
 
-      /** 
+            /**
        * @brief Returns the variable access of the statement
        * 
        * @return Variable access
@@ -325,9 +318,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      variable_access::ptr var() const;
-      
-      /** 
+            variable_access::ptr var() const;
+
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -337,14 +330,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief Assignment Statement
      *
      * This class represents the SyReC assignment statements (+=, -=, ^=)
@@ -352,33 +345,33 @@ namespace revkit
      *
      * @author RevKit
      * @since  1.1
-     */    
-    class assign_statement : public statement
-    {
-    public:
-      /**
+     */
+        class assign_statement: public statement {
+        public:
+            /**
        * @brief Type of assignment
        *
        * @author RevKit
        * @since  1.1
        */
-      enum {
-        /**
+            enum {
+                /**
          * @brief Addition to itself
          */
-        add,
+                add,
 
-        /**
+                /**
          * @brief Substraction from itself
          */
-        subtract,
+                subtract,
 
-        /**
+                /**
          * @brief Reflexive EXOR operation
          */
-        exor };
+                exor
+            };
 
-      /**
+            /**
        * @brief Standard constructor
        *
        * Initilizes default values
@@ -386,9 +379,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      assign_statement();
+            assign_statement();
 
-      /** 
+            /**
        * @brief Constructor
        * 
        * @param lhs Variable access to which the operation is applied
@@ -398,19 +391,19 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      assign_statement( variable_access::ptr lhs,
-                        unsigned op,
-                        expression::ptr rhs );
+            assign_statement(variable_access::ptr lhs,
+                             unsigned             op,
+                             expression::ptr      rhs);
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~assign_statement();
+            ~assign_statement();
 
-      /** 
+            /**
        * @brief Sets variable access to which the operation is applied
        * 
        * @param lhs Variable access
@@ -418,9 +411,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_lhs( variable_access::ptr lhs );
+            void set_lhs(variable_access::ptr lhs);
 
-      /** 
+            /**
        * @brief Returns variable access to which the operation is applied
        * 
        * @return Variable access
@@ -428,9 +421,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      variable_access::ptr lhs() const;
-      
-      /** 
+            variable_access::ptr lhs() const;
+
+            /**
        * @brief Sets the expression to be evaluated
        * 
        * @param rhs Expression
@@ -438,9 +431,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_rhs( expression::ptr rhs );
+            void set_rhs(expression::ptr rhs);
 
-      /** 
+            /**
        * @brief Returns the expression to be evaluated
        * 
        * @return Expression
@@ -448,9 +441,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      expression::ptr rhs() const;
+            expression::ptr rhs() const;
 
-      /** 
+            /**
        * @brief Sets the operation to be applied
        * 
        * @param op Operation
@@ -458,9 +451,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_op( unsigned op );
+            void set_op(unsigned op);
 
-      /** 
+            /**
        * @brief Returns the operation to be applied
        * 
        * 
@@ -469,9 +462,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      unsigned op() const;
+            unsigned op() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -481,14 +474,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief IF Statement
      *
      * This class represents the SyReC \b if statement
@@ -496,10 +489,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class if_statement : public statement
-    {
-    public:
-      /** 
+        class if_statement: public statement {
+        public:
+            /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -507,17 +499,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      if_statement();
+            if_statement();
 
-      /** 
+            /**
        * @brief Deconstructor
        * 
        * @author RevKit
        * @since  1.1
        */
-      ~if_statement();
+            ~if_statement();
 
-      /** 
+            /**
        * @brief Sets the condition for the execution of the then_statements()
        *
        * The expression \p condition is assumed to have a bit-width of 1 bit.
@@ -527,9 +519,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_condition( expression::ptr condition );
+            void set_condition(expression::ptr condition);
 
-      /** 
+            /**
        * @brief Returns the condition for the execution of the then_statements()
        * 
        * @return Expression
@@ -537,9 +529,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      expression::ptr condition() const;
+            expression::ptr condition() const;
 
-      /** 
+            /**
        * @brief Adds a statement to the then branch
        * 
        * @param then_statement Statement to be executed in the if branch
@@ -547,9 +539,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_then_statement( statement::ptr then_statement );
+            void add_then_statement(statement::ptr then_statement);
 
-      /** 
+            /**
        * @brief Returns all statements in the if branch
        * 
        * @return List of statements
@@ -557,9 +549,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const statement::vec& then_statements() const;
+            const statement::vec& then_statements() const;
 
-      /** 
+            /**
        * @brief Adds a statement to the else branch
        * 
        * @param else_statement Statement to be executed in the else branch
@@ -567,9 +559,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_else_statement( statement::ptr else_statement );
+            void add_else_statement(statement::ptr else_statement);
 
-      /** 
+            /**
        * @brief Returns all statements in the else branch
        * 
        * @return List of statements
@@ -577,9 +569,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const statement::vec& else_statements() const;
+            const statement::vec& else_statements() const;
 
-      /** 
+            /**
        * @brief Sets the reverse condition for the execution of the if_statements()
        *
        * The expression \p fi_condition is assumed to have a bit-width of 1 bit.
@@ -592,9 +584,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_fi_condition( expression::ptr fi_condition );
+            void set_fi_condition(expression::ptr fi_condition);
 
-      /** 
+            /**
        * @brief Returns the reverse condition for the execution of the if_statements()
        * 
        * @return Expression
@@ -602,9 +594,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      expression::ptr fi_condition() const;
+            expression::ptr fi_condition() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -614,14 +606,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /** 
+        /**
      * @brief FOR Statement
      *
      * This class represents the SyReC \b for statement
@@ -629,10 +621,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class for_statement : public statement
-    {
-    public:
-      /**
+        class for_statement: public statement {
+        public:
+            /**
        * @brief Standard constructor
        *
        * Initilizes default values
@@ -640,17 +631,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      for_statement();
+            for_statement();
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~for_statement();
+            ~for_statement();
 
-      /** 
+            /**
        * @brief Sets the name of the loop variable.
        *
        * Setting a loop variable is optional.
@@ -660,9 +651,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_loop_variable( const std::string& loop_variable );
+            void set_loop_variable(const std::string& loop_variable);
 
-      /** 
+            /**
        * @brief Returns the name of the loop variable
        * 
        * 
@@ -671,9 +662,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::string& loop_variable() const;
+            const std::string& loop_variable() const;
 
-      /** 
+            /**
        * @brief Sets the range of the loop
        *
        * The range holds the \b start and \b end values.
@@ -686,9 +677,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_range( const std::pair<number::ptr, number::ptr>& range );
+            void set_range(const std::pair<number::ptr, number::ptr>& range);
 
-      /** 
+            /**
        * @brief Returns the range of the loop
        * 
        * @return Range of the loop
@@ -696,9 +687,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::pair<number::ptr, number::ptr>& range() const;
+            const std::pair<number::ptr, number::ptr>& range() const;
 
-      /** 
+            /**
        * @brief Sets the step of the loop
        *
        * The step of the loop is the incremental delta which is
@@ -711,9 +702,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_step( const number::ptr& step );
+            void set_step(const number::ptr& step);
 
-      /** 
+            /**
        * @brief Returns the step of the loop
        * 
        * @return Step of the loop
@@ -721,9 +712,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const number::ptr& step() const;
+            const number::ptr& step() const;
 
-      /** 
+            /**
        * @brief Sets whether the step is substracted
        * 
        * @param negative_step If true, the step is substracted after each loop execution from the current index
@@ -731,9 +722,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_negative_step( bool negative_step );
+            void set_negative_step(bool negative_step);
 
-      /** 
+            /**
        * @brief Returns whether the step is substracted
        * 
        * @return If true, the step is substracted after each loop execution from the current index
@@ -741,9 +732,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      bool is_negative_step() const;
-      
-      /** 
+            bool is_negative_step() const;
+
+            /**
        * @brief Adds a statement to be executed in the loop
        * 
        * @param statement Statement
@@ -751,9 +742,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_statement( statement::ptr statement );
+            void add_statement(statement::ptr statement);
 
-      /** 
+            /**
        * @brief Returns the statements to be executed in the loop
        * 
        * @return List of statements
@@ -761,9 +752,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const statement::vec& statements() const;
+            const statement::vec& statements() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -773,14 +764,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /**
+        /**
      * @brief CALL Statement
      *
      * This class represents the SyReC \b call statement to call a module.
@@ -788,10 +779,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class call_statement : public statement
-    {
-    public:
-      /**
+        class call_statement: public statement {
+        public:
+            /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -799,9 +789,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      call_statement();
+            call_statement();
 
-      /** 
+            /**
        * @brief Constructor with module
        * 
        * @param target Module to call
@@ -809,9 +799,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      explicit call_statement( std::shared_ptr<module> target );
+            explicit call_statement(std::shared_ptr<module> target);
 
-      /** 
+            /**
        * @brief Constructor with module and parameters
        * 
        * @param target Module to call
@@ -820,17 +810,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      call_statement( std::shared_ptr<module> target, const std::vector<std::string>& parameters );
+            call_statement(std::shared_ptr<module> target, const std::vector<std::string>& parameters);
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~call_statement();
+            ~call_statement();
 
-      /** 
+            /**
        * @brief Sets the target module to call
        * 
        * @param target Module
@@ -838,9 +828,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_target( std::shared_ptr<module> target );
+            void set_target(std::shared_ptr<module> target);
 
-      /** 
+            /**
        * @brief Returns the target module to call
        * 
        * @return Module
@@ -848,9 +838,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::shared_ptr<module> target() const;
+            std::shared_ptr<module> target() const;
 
-      /** 
+            /**
        * @brief Sets the parameters to assign with the module call
        * 
        * @param parameters List of parameter names
@@ -858,9 +848,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_parameters( const std::vector<std::string>& parameters );
+            void set_parameters(const std::vector<std::string>& parameters);
 
-      /** 
+            /**
        * @brief Returns the parameters to assign with the module call
        * 
        * @return List of parameter names
@@ -868,9 +858,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::vector<std::string>& parameters() const;
+            const std::vector<std::string>& parameters() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -880,14 +870,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /**
+        /**
      * @brief UNCALL Statement
      *
      * This class represents the SyReC \b uncall statement to uncall a module.
@@ -895,10 +885,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class uncall_statement : public statement
-    {
-    public:
-      /**
+        class uncall_statement: public statement {
+        public:
+            /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -906,9 +895,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      uncall_statement();
+            uncall_statement();
 
-      /** 
+            /**
        * @brief Constructor with module
        * 
        * @param target Module to uncall
@@ -916,9 +905,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      explicit uncall_statement( std::shared_ptr<module> target );
+            explicit uncall_statement(std::shared_ptr<module> target);
 
-      /** 
+            /**
        * @brief Constructor with module and parameters
        * 
        * @param target Module to uncall
@@ -927,17 +916,17 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      uncall_statement( std::shared_ptr<module> target, const std::vector<std::string>& parameters );
+            uncall_statement(std::shared_ptr<module> target, const std::vector<std::string>& parameters);
 
-      /** 
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      ~uncall_statement();
+            ~uncall_statement();
 
-      /** 
+            /**
        * @brief Sets the target module to uncall
        * 
        * @param target Module
@@ -945,9 +934,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_target( std::shared_ptr<module> target );
+            void set_target(std::shared_ptr<module> target);
 
-      /** 
+            /**
        * @brief Returns the target module to uncall
        * 
        * @return Module
@@ -955,9 +944,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::shared_ptr<module> target() const;
+            std::shared_ptr<module> target() const;
 
-      /** 
+            /**
        * @brief Sets the parameters to assign with the module uncall
        * 
        * @param parameters List of parameter names
@@ -965,9 +954,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_parameters( const std::vector<std::string>& parameters );
+            void set_parameters(const std::vector<std::string>& parameters);
 
-      /** 
+            /**
        * @brief Returns the parameters to assign with the module uncall
        * 
        * @return List of parameter names
@@ -975,9 +964,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::vector<std::string>& parameters() const;
+            const std::vector<std::string>& parameters() const;
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -987,14 +976,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
+            std::ostream& print(std::ostream& os) const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /**
+        /**
      * @brief SKIP statement
      *
      * This class represents the SyReC \b skip statement, the
@@ -1003,18 +992,17 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class skip_statement : public statement
-    {
-    public:
-      /** 
+        class skip_statement: public statement {
+        public:
+            /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-      virtual ~skip_statement();
+            virtual ~skip_statement();
 
-      /** 
+            /**
        * @brief Prints the statement to the output stream \p os
        * 
        * @param os Output stream
@@ -1024,10 +1012,10 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      std::ostream& print( std::ostream& os ) const;
-    };
+            std::ostream& print(std::ostream& os) const;
+        };
 
-    /** 
+        /**
      * @brief Prints the statement \p s to the output stream \p os
      * 
      * @param os Output stream
@@ -1038,9 +1026,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<( std::ostream& os, const statement& s );
+        std::ostream& operator<<(std::ostream& os, const statement& s);
 
-  }
-}
+    } // namespace syrec
+} // namespace revkit
 
 #endif /* STATEMENT_HPP */

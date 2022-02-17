@@ -17,36 +17,32 @@
 
 #include "core/functions/circuit_hierarchy.hpp"
 
-#include <boost/foreach.hpp>
-
 #include "core/circuit.hpp"
+
+#include <boost/foreach.hpp>
 
 #define foreach_ BOOST_FOREACH
 
-namespace revkit
-{
+namespace revkit {
 
-  typedef boost::graph_traits<hierarchy_graph>::vertex_descriptor hierarchy_vertex;
+    typedef boost::graph_traits<hierarchy_graph>::vertex_descriptor hierarchy_vertex;
 
-  const hierarchy_vertex& _circuit_hierarchy( const circuit& circ, const std::string& name, hierarchy_graph& graph )
-  {
-    const hierarchy_vertex& v = boost::add_vertex( graph );
-    boost::get<0>( boost::get( boost::vertex_name, graph )[v] ) = name;
-    boost::get<1>( boost::get( boost::vertex_name, graph )[v] ) = &circ;
+    const hierarchy_vertex& _circuit_hierarchy(const circuit& circ, const std::string& name, hierarchy_graph& graph) {
+        const hierarchy_vertex& v                               = boost::add_vertex(graph);
+        boost::get<0>(boost::get(boost::vertex_name, graph)[v]) = name;
+        boost::get<1>(boost::get(boost::vertex_name, graph)[v]) = &circ;
 
-    typedef std::pair<std::string, std::shared_ptr<circuit> > pair_t;
-    foreach_ ( const pair_t& module, circ.modules() )
-    {
-      boost::add_edge( v, _circuit_hierarchy( *module.second, module.first, graph ), graph );
+        typedef std::pair<std::string, std::shared_ptr<circuit>> pair_t;
+        foreach_(const pair_t& module, circ.modules()) {
+            boost::add_edge(v, _circuit_hierarchy(*module.second, module.first, graph), graph);
+        }
+
+        return v;
     }
 
-    return v;
-  }
+    void circuit_hierarchy(const circuit& circ, hierarchy_tree& tree) {
+        hierarchy_tree::node_type root = _circuit_hierarchy(circ, "top", tree.graph());
+        tree.set_root(root);
+    }
 
-  void circuit_hierarchy( const circuit& circ, hierarchy_tree& tree )
-  {
-    hierarchy_tree::node_type root = _circuit_hierarchy( circ, "top", tree.graph() );
-    tree.set_root( root );
-  }
-
-}
+} // namespace revkit

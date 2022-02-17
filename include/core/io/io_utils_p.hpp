@@ -17,61 +17,54 @@
 
 /** @cond */
 #ifndef IO_UTILS_P_HPP
-#define IO_UTILS_P_HPP
+    #define IO_UTILS_P_HPP
 
-#include <boost/assign/std/vector.hpp>
+    #include <boost/assign/std/vector.hpp>
 
 using namespace boost::assign;
 
-namespace revkit
-{
-  
-  template<typename Iterator>
-  Iterator in_cube_to_values( binary_truth_table::in_const_iterator first, binary_truth_table::in_const_iterator last, Iterator result )
-  {
-    // Example
-    // 0--11
-    // base = 00011 = 3
-    // dc_positions = 1,2
-    // numbers = 3, 7, 11, 15
+namespace revkit {
 
-    unsigned base = 0;
-    std::vector<unsigned> dc_positions;
-    unsigned pos = 0;
+    template<typename Iterator>
+    Iterator in_cube_to_values(binary_truth_table::in_const_iterator first, binary_truth_table::in_const_iterator last, Iterator result) {
+        // Example
+        // 0--11
+        // base = 00011 = 3
+        // dc_positions = 1,2
+        // numbers = 3, 7, 11, 15
 
-    while ( first != last )
-    {
-      if ( *first ) // if not DC
-      {
-        base |= ( **first << ( last - first - 1 ) );
-      }
-      else
-      {
-        dc_positions += pos;
-      }
+        unsigned              base = 0;
+        std::vector<unsigned> dc_positions;
+        unsigned              pos = 0;
 
-      ++pos;
-      ++first;
+        while (first != last) {
+            if (*first) // if not DC
+            {
+                base |= (**first << (last - first - 1));
+            } else {
+                dc_positions += pos;
+            }
+
+            ++pos;
+            ++first;
+        }
+
+        *result++ = base;
+
+        for (unsigned i = 1; i < (1u << dc_positions.size()); ++i) {
+            unsigned copy = base;
+            for (unsigned j = 0; j < dc_positions.size(); ++j) {
+                unsigned local_bit      = i & (1u << (dc_positions.size() - j - 1)) ? 1 : 0;
+                unsigned global_bit_pos = pos - dc_positions.at(j) - 1;
+                copy |= (local_bit << global_bit_pos);
+            }
+            *result++ = copy;
+        }
+
+        return result;
     }
 
-    *result++ = base;
-
-    for ( unsigned i = 1; i < ( 1u << dc_positions.size() ); ++i )
-    {
-      unsigned copy = base;
-      for ( unsigned j = 0; j < dc_positions.size(); ++j )
-      {
-        unsigned local_bit = i & ( 1u << ( dc_positions.size() - j - 1 ) ) ? 1 : 0;
-        unsigned global_bit_pos = pos - dc_positions.at( j ) - 1;
-        copy |= ( local_bit << global_bit_pos );
-      }
-      *result++ = copy;
-    }
-
-    return result;
-  }
-
-}
+} // namespace revkit
 
 #endif /* IO_UTILS_P_HPP */
 /** @endcond */

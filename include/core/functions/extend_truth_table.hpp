@@ -26,10 +26,9 @@
 
 #include <core/truth_table.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Removes the Don't Care Values of a binary truth table
    *
    * This methods fills the incomplete cubes of a truth table.
@@ -39,8 +38,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void extend_truth_table( binary_truth_table& spec );
+    void extend_truth_table(binary_truth_table& spec);
 
-}
+} // namespace revkit
 
 #endif /* EXTEND_TRUTH_TABLE_HPP */

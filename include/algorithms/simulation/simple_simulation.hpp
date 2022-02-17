@@ -24,19 +24,16 @@
 #ifndef SIMPLE_SIMULATION_HPP
 #define SIMPLE_SIMULATION_HPP
 
+#include <algorithms/simulation/simulation.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
-
 #include <core/circuit.hpp>
 
-#include <algorithms/simulation/simulation.hpp>
+namespace revkit {
 
-namespace revkit
-{
+    class gate;
 
-  class gate;
-
-  /**
+    /**
    * @brief Functor for gate-wise simulation, used as a setting for \ref revkit::simple_simulation "simple_simulation"
    *
    * For more information, see the concrete implementation \ref revkit::core_gate_simulation "core_gate_simulation"
@@ -44,9 +41,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  typedef boost::function<boost::dynamic_bitset<>&( const gate&, boost::dynamic_bitset<>& )> gate_simulation_func;
+    typedef boost::function<boost::dynamic_bitset<>&(const gate&, boost::dynamic_bitset<>&)> gate_simulation_func;
 
-  /**
+    /**
    * @brief Functor which is called after a step result is calculated
    *
    * If set, this functor is called in \ref revkit::simple_simulation "simple_simulation"
@@ -56,9 +53,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  typedef boost::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
+    typedef boost::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
 
-  /**
+    /**
    * @brief A gate simulation implementation of \ref revkit::gate_simulation_func "gate_simulation_func"
    *
    * This functor performs simulation on a boost::dynamic_bitset<> for Toffoli, Fredkin, and Peres gates
@@ -118,9 +115,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct core_gate_simulation
-  {
-    /**
+    struct core_gate_simulation {
+        /**
      * @brief Simulation for a single gate \p g
      *
      * This operator performs simulation for a single gate and is called by
@@ -137,10 +133,10 @@ namespace revkit
      * @author RevKit
      * @since 1.0
      */
-    boost::dynamic_bitset<>& operator()( const gate& g, boost::dynamic_bitset<>& input ) const;
-  };
+        boost::dynamic_bitset<>& operator()(const gate& g, boost::dynamic_bitset<>& input) const;
+    };
 
-  /**
+    /**
    * @brief Simple Simulation function for a single gate
    *
    * This method calls the \em gate_simulation setting's functor on
@@ -193,11 +189,11 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool simple_simulation( boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
-                          properties::ptr settings = properties::ptr(),
-                          properties::ptr statistics = properties::ptr() );
+    bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
+                           properties::ptr settings   = properties::ptr(),
+                           properties::ptr statistics = properties::ptr());
 
-  /**
+    /**
    * @brief Simple Simulation function for a range of gates
    *
    * This method calls the \em gate_simulation setting's functor on
@@ -254,11 +250,11 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool simple_simulation( boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
-                          properties::ptr settings = properties::ptr(),
-                          properties::ptr statistics = properties::ptr() );
+    bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
+                           properties::ptr settings   = properties::ptr(),
+                           properties::ptr statistics = properties::ptr());
 
-  /**
+    /**
    * @brief Simple Simulation function for a circuit
    *
    * This method calls the \em gate_simulation setting's functor on
@@ -314,11 +310,11 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool simple_simulation( boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                          properties::ptr settings = properties::ptr(),
-                          properties::ptr statistics = properties::ptr() );
+    bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
+                           properties::ptr settings   = properties::ptr(),
+                           properties::ptr statistics = properties::ptr());
 
-  /**
+    /**
    * @brief Functor for the \ref revkit::simple_simulation "simple_simulation" algorithm
    *
    * @param settings Settings (see \ref revkit::simple_simulation "simple_simulation")
@@ -329,9 +325,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  simulation_func simple_simulation_func( properties::ptr settings = properties::ptr( new properties() ), properties::ptr statistics = properties::ptr( new properties() ) );
+    simulation_func simple_simulation_func(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
 
-}
+} // namespace revkit
 
 #endif /* SIMPLE_SIMULATION_HPP */
-

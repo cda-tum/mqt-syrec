@@ -27,10 +27,9 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Copies a circuit with all meta information
    *
    * This function creates a copy of the circuit \p src in \p dest
@@ -43,8 +42,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void copy_circuit( const circuit& src, circuit& dest );
-  
-}
+    void copy_circuit(const circuit& src, circuit& dest);
+
+} // namespace revkit
 
 #endif /* COPY_CIRCUIT_HPP */

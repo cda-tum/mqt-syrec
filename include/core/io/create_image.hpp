@@ -24,16 +24,14 @@
 #ifndef CREATE_IMAGE_HPP
 #define CREATE_IMAGE_HPP
 
-#include <iostream>
+#include <core/circuit.hpp>
 #include <fstream>
+#include <iostream>
 #include <string>
 
-#include <core/circuit.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Generic class for the create_image function (Template Design Pattern)
    *
    * This class is never used directly. Instead use other derived classes
@@ -43,14 +41,13 @@ namespace revkit
    * draw_before, draw_in_between and draw_after are supposed to be overridden
    * for special use cases.
    */
-  class create_image_settings
-  {
-  public:
-    /** @cond false */
-    virtual ~create_image_settings() {}
-    /** @endcond */
+    class create_image_settings {
+    public:
+        /** @cond false */
+        virtual ~create_image_settings() {}
+        /** @endcond */
 
-    /**
+        /**
      * @brief Begin with drawing
      *
      * This method is called when it is started to paint
@@ -61,9 +58,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_begin( std::ostream& os ) const = 0;
+        virtual void draw_begin(std::ostream& os) const = 0;
 
-    /**
+        /**
      * @brief Draws a circuit line
      *
      * This method draws a circuit line.
@@ -76,9 +73,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_line( std::ostream& os, float x1, float x2, float y ) const = 0;
+        virtual void draw_line(std::ostream& os, float x1, float x2, float y) const = 0;
 
-    /**
+        /**
      * @brief Draws an input name
      *
      * This methods draws an input name at the starting position of a line
@@ -92,9 +89,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_input( std::ostream& os, float x, float y, const std::string& text, bool is_constant ) const = 0;
+        virtual void draw_input(std::ostream& os, float x, float y, const std::string& text, bool is_constant) const = 0;
 
-    /**
+        /**
      * @brief Draws an output name
      *
      * This methods draws an output name at the starting position of a line
@@ -108,9 +105,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_output( std::ostream& os, float x, float y, const std::string& text, bool is_garbage ) const = 0;
+        virtual void draw_output(std::ostream& os, float x, float y, const std::string& text, bool is_garbage) const = 0;
 
-    /**
+        /**
      * @brief Draws a control
      *
      * This methods draws a control
@@ -122,9 +119,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_control( std::ostream& os, float x, float y ) const = 0;
+        virtual void draw_control(std::ostream& os, float x, float y) const = 0;
 
-    /**
+        /**
      * @brief Draws a control
      *
      * This methods draws a control
@@ -137,9 +134,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_targets( std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag ) const = 0;
+        virtual void draw_targets(std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag) const = 0;
 
-    /**
+        /**
      * @brief Draws the frame around Peres Gates
      *
      * This method draws the frame around Peres gates.
@@ -153,9 +150,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_peres_frame( std::ostream& os, float x1, float y1, float x2, float y2 ) const = 0;
+        virtual void draw_peres_frame(std::ostream& os, float x1, float y1, float x2, float y2) const = 0;
 
-    /**
+        /**
      * @brief Draws a gate line
      *
      * Draws a line from the top most element to the bottom most element
@@ -168,9 +165,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_gate_line( std::ostream& os, float x, float y1, float y2 ) const = 0;
+        virtual void draw_gate_line(std::ostream& os, float x, float y1, float y2) const = 0;
 
-    /**
+        /**
      * @brief Stops ending the image
      *
      * This methods is called after finishing painting the
@@ -181,10 +178,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_end( std::ostream& os ) const = 0;
+        virtual void draw_end(std::ostream& os) const = 0;
 
-  public:
-    /**
+    public:
+        /**
      * @brief User callback for user-defined drawing before the circuit is painted
      *
      * @param os Output stream of the create_image function
@@ -192,9 +189,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_before( std::ostream& os ) const;
+        virtual void draw_before(std::ostream& os) const;
 
-    /**
+        /**
      * @brief User callback for user-defined drawing after the lines but before the gates are painted
      *
      * @param os Output stream of the create_image function
@@ -202,9 +199,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_in_between( std::ostream& os ) const;
+        virtual void draw_in_between(std::ostream& os) const;
 
-    /**
+        /**
      * @brief User callback for user-defined drawing after the circuit was painted
      *
      * @param os Output stream of the create_image function
@@ -212,9 +209,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual void draw_after( std::ostream& os ) const;
-        
-    /**
+        virtual void draw_after(std::ostream& os) const;
+
+        /**
      * @brief With of the image
      *
      * Set by create_image function
@@ -222,9 +219,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float width;
+        float width;
 
-    /**
+        /**
      * @brief Height of the image
      *
      * Set by create_image function
@@ -232,9 +229,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float height;
-    
-    /**
+        float height;
+
+        /**
      * @brief Width of a gate
      *
      * No default value, can be different for
@@ -243,9 +240,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float elem_width;
+        float elem_width;
 
-    /**
+        /**
      * @brief Height of a gate
      *
      * No default value, can be different for
@@ -254,9 +251,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float elem_height;
+        float elem_height;
 
-    /**
+        /**
      * @brief Width of a line
      *
      * No default value, can be different for
@@ -265,9 +262,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float line_width;
+        float line_width;
 
-    /**
+        /**
      * @brief Radius of a control element
      *
      * No default value, can be different for
@@ -276,9 +273,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float control_radius;
+        float control_radius;
 
-    /**
+        /**
      * @brief Radius of a target element
      *
      * No default value, can be different for
@@ -287,9 +284,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    float target_radius;    
+        float target_radius;
 
-    /**
+        /**
      * @brief Text written before the circuit is printed
      *
      * Default value is empty
@@ -297,9 +294,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string draw_before_text;
+        std::string draw_before_text;
 
-    /**
+        /**
      * @brief Text written after the lines but before the gates are printed
      *
      * Default value is empty
@@ -307,9 +304,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string draw_in_between_text;
+        std::string draw_in_between_text;
 
-    /**
+        /**
      * @brief Text written after the circuit is printed
      *
      * Default value is empty
@@ -317,10 +314,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    std::string draw_after_text;
-  };
-    
-  /**
+        std::string draw_after_text;
+    };
+
+    /**
    * @brief Implementation of create_image_settings for generating LaTeX code using PsTricks
    *
    * For drawing the circuit the PsTricks package is used. For more information
@@ -329,34 +326,33 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class create_pstricks_settings : public create_image_settings
-  {
-  public:
-    /**
+    class create_pstricks_settings: public create_image_settings {
+    public:
+        /**
      * @brief Default constructor
      *
      * @author RevKit
      * @since  1.0
      */
-    create_pstricks_settings();
+        create_pstricks_settings();
 
-    /** @cond false */
-    virtual ~create_pstricks_settings() {}
-    /** @endcond */
+        /** @cond false */
+        virtual ~create_pstricks_settings() {}
+        /** @endcond */
 
-    virtual void draw_begin( std::ostream& os ) const;
-    virtual void draw_line( std::ostream& os, float x1, float x2, float y ) const;
-    virtual void draw_input( std::ostream& os, float x, float y, const std::string& text, bool is_constant ) const;
-    virtual void draw_output( std::ostream& os, float x, float y, const std::string& text, bool is_garbage ) const;
+        virtual void draw_begin(std::ostream& os) const;
+        virtual void draw_line(std::ostream& os, float x1, float x2, float y) const;
+        virtual void draw_input(std::ostream& os, float x, float y, const std::string& text, bool is_constant) const;
+        virtual void draw_output(std::ostream& os, float x, float y, const std::string& text, bool is_garbage) const;
 
-    virtual void draw_control( std::ostream& os, float x, float y ) const;
-    virtual void draw_targets( std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag ) const;
-    virtual void draw_peres_frame( std::ostream& os, float x1, float y1, float x2, float y2 ) const;
-    virtual void draw_gate_line( std::ostream& os, float x, float y1, float y2 ) const;
-    virtual void draw_end( std::ostream& os ) const;
+        virtual void draw_control(std::ostream& os, float x, float y) const;
+        virtual void draw_targets(std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag) const;
+        virtual void draw_peres_frame(std::ostream& os, float x1, float y1, float x2, float y2) const;
+        virtual void draw_gate_line(std::ostream& os, float x, float y1, float y2) const;
+        virtual void draw_end(std::ostream& os) const;
 
-  public:
-    /**
+    public:
+        /**
      * @brief Specifies whether inputs and outputs should be put in $ ... $ math mode
      *
      * Default value is \b false.
@@ -364,10 +360,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool math_emph;
-  };
+        bool math_emph;
+    };
 
-  /**
+    /**
    * @brief Implementation of create_image_settings for generating LaTeX code using TikZ
    *
    * For drawing the circuit the TikZ package is used. For more information
@@ -376,34 +372,33 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class create_tikz_settings : public create_image_settings
-  {
-  public:
-    /**
+    class create_tikz_settings: public create_image_settings {
+    public:
+        /**
      * @brief Default constructor
      *
      * @author RevKit
      * @since  1.0
      */
-    create_tikz_settings();
+        create_tikz_settings();
 
-    /** @cond false */
-    virtual ~create_tikz_settings() {}
-    /** @endcond */
+        /** @cond false */
+        virtual ~create_tikz_settings() {}
+        /** @endcond */
 
-    virtual void draw_begin( std::ostream& os ) const;
-    virtual void draw_line( std::ostream& os, float x1, float x2, float y ) const;
-    virtual void draw_input( std::ostream& os, float x, float y, const std::string& text, bool is_constant ) const;
-    virtual void draw_output( std::ostream& os, float x, float y, const std::string& text, bool is_garbage ) const;
+        virtual void draw_begin(std::ostream& os) const;
+        virtual void draw_line(std::ostream& os, float x1, float x2, float y) const;
+        virtual void draw_input(std::ostream& os, float x, float y, const std::string& text, bool is_constant) const;
+        virtual void draw_output(std::ostream& os, float x, float y, const std::string& text, bool is_garbage) const;
 
-    virtual void draw_control( std::ostream& os, float x, float y ) const;
-    virtual void draw_targets( std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag ) const;
-    virtual void draw_peres_frame( std::ostream& os, float x1, float y1, float x2, float y2 ) const;
-    virtual void draw_gate_line( std::ostream& os, float x, float y1, float y2 ) const;
-    virtual void draw_end( std::ostream& os ) const;
+        virtual void draw_control(std::ostream& os, float x, float y) const;
+        virtual void draw_targets(std::ostream& os, float x, const std::vector<float>& ys, const boost::any& target_tag) const;
+        virtual void draw_peres_frame(std::ostream& os, float x1, float y1, float x2, float y2) const;
+        virtual void draw_gate_line(std::ostream& os, float x, float y1, float y2) const;
+        virtual void draw_end(std::ostream& os) const;
 
-  public:
-    /**
+    public:
+        /**
      * @brief Specifies whether inputs and outputs should be put in $ ... $ math mode
      *
      * Default value is \b false.
@@ -411,10 +406,10 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool math_emph;
-  };
+        bool math_emph;
+    };
 
-  /**
+    /**
    * @brief Create image from circuit \p circ and write it to \p os
    *
    * This function creates an image from a circuit.
@@ -432,9 +427,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void create_image( std::ostream& os, const circuit& circ, create_image_settings& settings );
+    void create_image(std::ostream& os, const circuit& circ, create_image_settings& settings);
 
-  /**
+    /**
    * @brief Wrapper for create_image to save to a file
    *
    * This is a wrapper for create_image(std::ostream& os, const circuit&, create_image_settings&)
@@ -447,7 +442,7 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void create_image( const std::string& filename, const circuit& circ, create_image_settings& settings );
-}
+    void create_image(const std::string& filename, const circuit& circ, create_image_settings& settings);
+} // namespace revkit
 
 #endif /* CREATE_IMAGE_HPP */

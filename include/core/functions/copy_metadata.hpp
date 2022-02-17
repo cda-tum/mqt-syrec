@@ -27,10 +27,9 @@
 #include "../circuit.hpp"
 #include "../truth_table.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Settings for copy_metadata
    *
    * With this settings structure some parts can be
@@ -41,9 +40,8 @@ namespace revkit
    * @since  1.2
    *
    */
-  struct copy_metadata_settings
-  {
-    /**
+    struct copy_metadata_settings {
+        /**
      * @brief Standard Constructor
      *
      * Initializes default values
@@ -51,9 +49,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    copy_metadata_settings();
+        copy_metadata_settings();
 
-    /**
+        /**
      * @brief Input names are copied
      *
      * The default value is \b true.
@@ -61,9 +59,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_inputs;
+        bool copy_inputs;
 
-    /**
+        /**
      * @brief Output names are copied
      *
      * The default value is \b true.
@@ -71,9 +69,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_outputs;
+        bool copy_outputs;
 
-    /**
+        /**
      * @brief Constant line information is copied
      *
      * The default value is \b true.
@@ -81,9 +79,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_constants;
+        bool copy_constants;
 
-    /**
+        /**
      * @brief Garbage line information is copied
      *
      * The default value is \b true.
@@ -91,9 +89,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_garbage;
+        bool copy_garbage;
 
-    /**
+        /**
      * @brief Circuit name is copied
      *
      * The default value is \b true.
@@ -101,9 +99,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_name;
+        bool copy_name;
 
-    /**
+        /**
      * @brief Input buses are copied
      *
      * The default value is \b true.
@@ -111,9 +109,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_inputbuses;
+        bool copy_inputbuses;
 
-    /**
+        /**
      * @brief Output buses are copied
      *
      * The default value is \b true.
@@ -121,9 +119,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_outputbuses;
+        bool copy_outputbuses;
 
-    /**
+        /**
      * @brief State signals are copied
      *
      * The default value is \b true.
@@ -131,9 +129,9 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_statesignals;
+        bool copy_statesignals;
 
-    /**
+        /**
      * @brief Modules are copied
      *
      * The default value is \b true.
@@ -141,10 +139,10 @@ namespace revkit
      * @author RevKit
      * @since  1.2
      */
-    bool copy_modules;
-  };
+        bool copy_modules;
+    };
 
-  /**
+    /**
    * @brief Copies meta-data from a specification to a circuit
    *
    * This method reads the inputs and outputs from a specification
@@ -157,16 +155,15 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename T>
-  void copy_metadata( const truth_table<T>& spec, circuit& circ )
-  {
-    circ.set_inputs( spec.inputs() );
-    circ.set_outputs( spec.outputs() );
-    circ.set_constants( spec.constants() );
-    circ.set_garbage( spec.garbage() );
-  }
+    template<typename T>
+    void copy_metadata(const truth_table<T>& spec, circuit& circ) {
+        circ.set_inputs(spec.inputs());
+        circ.set_outputs(spec.outputs());
+        circ.set_constants(spec.constants());
+        circ.set_garbage(spec.garbage());
+    }
 
-  /**
+    /**
    * @brief Copies meta-data from a circuit to another circuit
    *
    * This method copies everything but the gates from circuit \p base
@@ -179,8 +176,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void copy_metadata( const circuit& base, circuit& circ, const copy_metadata_settings& settings = copy_metadata_settings() );
+    void copy_metadata(const circuit& base, circuit& circ, const copy_metadata_settings& settings = copy_metadata_settings());
 
-}
+} // namespace revkit
 
 #endif /* COPY_METADATA_HPP */

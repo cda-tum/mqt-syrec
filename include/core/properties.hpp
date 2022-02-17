@@ -27,17 +27,15 @@
 #ifndef PROPERTIES_HPP
 #define PROPERTIES_HPP
 
+#include <boost/any.hpp>
+#include <boost/shared_ptr.hpp>
 #include <iostream>
 #include <map>
 #include <string>
 
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Property Map for storing settings and statistical information
    *
    * In this data structure settings and statistical data can be stored.
@@ -48,25 +46,24 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  struct properties
-  {
-    /**
+    struct properties {
+        /**
      * @brief Internal storage type used with the internal property map
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef std::map<std::string, boost::any>                     storage_type;
+        typedef std::map<std::string, boost::any> storage_type;
 
-    /**
+        /**
      * @brief Value type of the property map, i.e. \p std::string
      *
      * @author RevKit
      * @since  1.0
      */
-    typedef storage_type::mapped_type value_type;
+        typedef storage_type::mapped_type value_type;
 
-    /**
+        /**
      * @brief Key type of the property map, i.e. \p boost::any
      *
      * There are pre-defined getter methods, which can be called with a
@@ -75,9 +72,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    typedef storage_type::key_type   key_type;
+        typedef storage_type::key_type key_type;
 
-    /**
+        /**
      * @brief Smart Pointer version of this class
      *
      * Inside the framework, always the Smart Pointer version is used.
@@ -91,9 +88,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    typedef std::shared_ptr<properties>                         ptr;
+        typedef std::shared_ptr<properties> ptr;
 
-    /**
+        /**
      * @brief Standard constructor
      *
      * Creates the property map on base of the storage map
@@ -101,9 +98,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    properties();
+        properties();
 
-    /**
+        /**
      * @brief Direct access to the value type
      *
      * Since the \p value_type is of type \p boost::any, it is not recommended
@@ -115,9 +112,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    const value_type& operator[]( const key_type& k ) const;
+        const value_type& operator[](const key_type& k) const;
 
-    /**
+        /**
      * @brief Casted access to an existing element
      *
      * With \p T you can specify the type of the element. Note, that
@@ -132,13 +129,12 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    template<typename T>
-    T get( const key_type& k ) const
-    {
-      return boost::any_cast<T>( map.find( k )->second );
-    }
+        template<typename T>
+        T get(const key_type& k) const {
+            return boost::any_cast<T>(map.find(k)->second);
+        }
 
-    /**
+        /**
      * @brief Casted access to an existing element with fall-back option
      *
      * The same as get(const key_type& k), but if \p k does not exist,
@@ -152,20 +148,16 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    template<typename T>
-    T get( const key_type& k, const T& default_value ) const
-    {
-      if ( map.find( k ) == map.end() )
-      {
-        return default_value;
-      }
-      else
-      {
-        return boost::any_cast<T>( map.find( k )->second );
-      }
-    }
+        template<typename T>
+        T get(const key_type& k, const T& default_value) const {
+            if (map.find(k) == map.end()) {
+                return default_value;
+            } else {
+                return boost::any_cast<T>(map.find(k)->second);
+            }
+        }
 
-    /**
+        /**
      * @brief Adds or modifies a value in the property map
      *
      * This methods sets the value located at key \p k to \p value.
@@ -188,9 +180,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    void set( const key_type& k, const value_type& value );
+        void set(const key_type& k, const value_type& value);
 
-    /**
+        /**
      * @brief Start iterator for the properties
      *
      * @return Iterator
@@ -198,9 +190,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    storage_type::const_iterator begin() const;
+        storage_type::const_iterator begin() const;
 
-    /**
+        /**
      * @brief End iterator for the properties
      *
      * @return Iterator
@@ -208,9 +200,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    storage_type::const_iterator end() const;
+        storage_type::const_iterator end() const;
 
-    /**
+        /**
      * @brief Number of properties
      *
      * @return The number of properties
@@ -218,21 +210,21 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    unsigned size() const;
+        unsigned size() const;
 
-    /**
+        /**
      * @brief Clears all properties
      *
      * @author RevKit
      * @since  1.1
      */
-    void clear();
+        void clear();
 
-  private:
-    storage_type      map;
-  };
+    private:
+        storage_type map;
+    };
 
-  /**
+    /**
    * @brief A helper method to access the get method on a properties smart pointer
    *
    * This method has basically two fall backs. If settings does not point to anything,
@@ -250,13 +242,12 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  template<typename T>
-  T get( const properties::ptr& settings, const properties::key_type& k, const T& default_value )
-  {
-    return settings ? settings->get<T>( k, default_value ) : default_value;
-  }
+    template<typename T>
+    T get(const properties::ptr& settings, const properties::key_type& k, const T& default_value) {
+        return settings ? settings->get<T>(k, default_value) : default_value;
+    }
 
-  /**
+    /**
    * @brief Sets an error message to a statistics smart pointer
    *
    * This function checks first if the smart pointer references something,
@@ -270,8 +261,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void set_error_message( properties::ptr statistics, const std::string& error );
+    void set_error_message(properties::ptr statistics, const std::string& error);
 
-}
+} // namespace revkit
 
 #endif /* PROPERTIES_HPP */

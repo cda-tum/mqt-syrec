@@ -27,12 +27,11 @@
 #include <iosfwd>
 #include <string>
 
-namespace revkit
-{
+namespace revkit {
 
-  class revlib_processor;
+    class revlib_processor;
 
-  /**
+    /**
    * @brief A parser for the RevLib file format
    *
    * This function can read a circuit realization and truth table
@@ -58,8 +57,8 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  bool revlib_parser( std::istream& in, revlib_processor& reader, const std::string& base_directory = std::string( "." ), std::string* error = 0 );
+    bool revlib_parser(std::istream& in, revlib_processor& reader, const std::string& base_directory = std::string("."), std::string* error = 0);
 
-}
+} // namespace revkit
 
 #endif /* REVLIB_PARSER_HPP */

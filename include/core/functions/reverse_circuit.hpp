@@ -26,10 +26,9 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Reverse a circuit
    *
    * This function reverses a circuit \p src and writes
@@ -44,9 +43,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void reverse_circuit( const circuit& src, circuit& dest );
+    void reverse_circuit(const circuit& src, circuit& dest);
 
-  /**
+    /**
    * @brief Reverse a circuit in-place
    *
    * This function reverses a circuit \p circ in-place.
@@ -56,8 +55,8 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  void reverse_circuit( circuit& circ );
+    void reverse_circuit(circuit& circ);
 
-}
+} // namespace revkit
 
 #endif /* REVERSE_CIRCUIT_HPP */

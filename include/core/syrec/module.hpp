@@ -23,23 +23,19 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
+#include <boost/shared_ptr.hpp>
+#include <core/syrec/statement.hpp>
+#include <core/syrec/variable.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+namespace revkit {
+    namespace syrec {
 
-#include <core/syrec/statement.hpp>
-#include <core/syrec/variable.hpp>
+        class statement;
 
-namespace revkit
-{
-  namespace syrec
-  {
-
-    class statement;
-
-    /**
+        /**
      * @brief SyReC module data type
      *
      * This class represents a SyReC module. It containes of a name(), parameters(),
@@ -48,26 +44,25 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    class module
-    {
-    public:
-      /**
+        class module {
+        public:
+            /**
        * @brief Smart pointer
        *
        * @author RevKit
        * @since  1.1
        */
-      typedef std::shared_ptr<module> ptr;
+            typedef std::shared_ptr<module> ptr;
 
-      /**
+            /**
        * @brief Vector of smart pointers
        *
        * @author RevKit
        * @since  1.1
        */
-      typedef std::vector<ptr>          vec;
+            typedef std::vector<ptr> vec;
 
-      /**
+            /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -75,9 +70,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      module();
+            module();
 
-      /**
+            /**
        * @brief Constructor
        *
        * Initializes a module with a name
@@ -87,14 +82,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      explicit module( const std::string& name );
+            explicit module(const std::string& name);
 
-      /**
+            /**
        * @brief Deconstructor
        */
-      ~module();
+            ~module();
 
-      /**
+            /**
        * @brief Sets the name of the module
        *
        * @param name Name
@@ -102,9 +97,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void set_name( const std::string& name );
+            void set_name(const std::string& name);
 
-      /**
+            /**
        * @brief Returns the name of the module
        *
        * @return Name
@@ -112,9 +107,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::string& name() const;
+            const std::string& name() const;
 
-      /**
+            /**
        * @brief Adds a parameter to the module
        *
        * @param parameter Parameter
@@ -122,9 +117,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_parameter( variable::ptr parameter );
+            void add_parameter(variable::ptr parameter);
 
-      /**
+            /**
        * @brief Returns all parameters of the module
        *
        * @return Vector of parameters
@@ -132,9 +127,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const variable::vec& parameters() const;
+            const variable::vec& parameters() const;
 
-      /**
+            /**
        * @brief Adds a variable to the module
        *
        * @param variable Variable
@@ -142,9 +137,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_variable( variable::ptr variable );
+            void add_variable(variable::ptr variable);
 
-      /**
+            /**
        * @brief Returns all variables of the module
        *
        * @return Vector of variables
@@ -152,9 +147,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const variable::vec& variables() const;
+            const variable::vec& variables() const;
 
-      /**
+            /**
        * @brief Finds a parameter or variable in the module
        *
        * This methods tries to find a parameter or a variable
@@ -166,9 +161,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      variable::ptr find_parameter_or_variable( const std::string& name ) const;
+            variable::ptr find_parameter_or_variable(const std::string& name) const;
 
-      /**
+            /**
        * @brief Adds a statement to the module
        *
        * @param statement Statement
@@ -176,9 +171,9 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      void add_statement( std::shared_ptr<statement> statement );
+            void add_statement(std::shared_ptr<statement> statement);
 
-      /**
+            /**
        * @brief Returns all statements of the module
        *
        * @return Vector of statements
@@ -186,14 +181,14 @@ namespace revkit
        * @author RevKit
        * @since  1.1
        */
-      const std::vector<std::shared_ptr<statement> >& statements() const;
+            const std::vector<std::shared_ptr<statement>>& statements() const;
 
-    private:
-      class priv;
-      priv* const d;
-    };
+        private:
+            class priv;
+            priv* const d;
+        };
 
-    /**
+        /**
      * @brief Prints module to output stream
      *
      * @param os Output Stream
@@ -204,9 +199,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<( std::ostream& os, const module& m );
+        std::ostream& operator<<(std::ostream& os, const module& m);
 
-  }
-}
+    } // namespace syrec
+} // namespace revkit
 
 #endif /* MODULE_HPP */

@@ -23,16 +23,14 @@
 #ifndef BUS_COLLECTION_HPP
 #define BUS_COLLECTION_HPP
 
+#include <boost/optional.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <boost/optional.hpp>
+namespace revkit {
 
-namespace revkit
-{
-
-  /**
+    /**
    * @brief Collection for buses
    *
    * This class represents a collection of buses.
@@ -45,34 +43,33 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  class bus_collection
-  {
-  public:
-    /**
+    class bus_collection {
+    public:
+        /**
      * @brief
      *
      * @author RevKit
      * @since  1.1
      */
-    typedef std::map<std::string, std::vector<unsigned> > map;
+        typedef std::map<std::string, std::vector<unsigned>> map;
 
-    /**
+        /**
      * @brief Standard constructor
      *
      * @author RevKit
      * @since  1.1
      */
-    bus_collection();
+        bus_collection();
 
-    /**
+        /**
      * @brief Deconstructor
      *
      * @author RevKit
      * @since  1.1
      */
-    ~bus_collection();
+        ~bus_collection();
 
-    /**
+        /**
      * @brief Adds a new bus to the collection
      *
      * @param name Name of the bus
@@ -84,9 +81,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void add( const std::string& name, const std::vector<unsigned>& line_indices, const boost::optional<unsigned>& initial_value = boost::optional<unsigned>() );
+        void add(const std::string& name, const std::vector<unsigned>& line_indices, const boost::optional<unsigned>& initial_value = boost::optional<unsigned>());
 
-    /**
+        /**
      * @brief Gets the corresponding lines of a bus by the name
      *
      * If there is no such bus with the name \p name in the collection,
@@ -100,9 +97,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    const std::vector<unsigned>& get( const std::string& name ) const;
+        const std::vector<unsigned>& get(const std::string& name) const;
 
-    /**
+        /**
      * @brief Returns all buses of the collection
      *
      * This method returns all the buses of the collection.
@@ -112,9 +109,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    const map& buses() const;
+        const map& buses() const;
 
-    /**
+        /**
      * @brief This method finds the bus for a line
      *
      * If the line belongs to a bus, the name of the bus
@@ -130,9 +127,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    std::string find_bus( unsigned line_index ) const;
+        std::string find_bus(unsigned line_index) const;
 
-    /**
+        /**
      * @brief This method determines whether there exists a bus for a given line
      *
      * If the line at \p line_index is contained in a bus, this
@@ -145,9 +142,9 @@ namespace revkit
      *
      * @return \b true, if line at \p line_index is contained in a bus
      */
-    bool has_bus( unsigned line_index ) const;
+        bool has_bus(unsigned line_index) const;
 
-    /**
+        /**
      * @brief Returns the signal index relative to the bus
      *
      * If e.g. a bus \b A is defined by the line indices 3,4,6
@@ -164,9 +161,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    unsigned signal_index( unsigned line_index ) const;
+        unsigned signal_index(unsigned line_index) const;
 
-    /**
+        /**
      * @brief Sets the initial value of a bus
      *
      * This method is used primarily for state signals, which
@@ -180,9 +177,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void set_initial_value( const std::string& name, unsigned initial_value );
+        void set_initial_value(const std::string& name, unsigned initial_value);
 
-    /**
+        /**
      * @brief Retrieves the initial value of a bus
      *
      * Given a name of the bus, this method tries to retrieve an initial
@@ -210,13 +207,13 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    boost::optional<unsigned> initial_value( const std::string& name ) const;
+        boost::optional<unsigned> initial_value(const std::string& name) const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-}
+} // namespace revkit
 
 #endif /* BUS_HPP */

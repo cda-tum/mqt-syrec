@@ -25,13 +25,11 @@
 #define PROGRAM_OPTIONS_HPP
 
 #include <boost/program_options.hpp>
-
 #include <core/utils/costs.hpp>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Class for program options on top of the Boost.Program_Options library
    *
    * This class can be used when writing programs for accessing algorithms.
@@ -71,10 +69,9 @@ namespace revkit
    * revkit::write_realization( circ, opts.write_realization_filename() );
    * @endcode
    */
-  class program_options : public boost::program_options::options_description
-  {
-  public:
-    /**
+    class program_options: public boost::program_options::options_description {
+    public:
+        /**
      * @brief Default constructor
      *
      * Calls the constructor of the boost::program_options::options_description
@@ -85,9 +82,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit program_options( unsigned line_length = m_default_line_length );
+        explicit program_options(unsigned line_length = m_default_line_length);
 
-    /**
+        /**
      * @brief Constructor with setting a caption for usage output
      *
      * Calls the constructor of the boost::program_options::options_description
@@ -99,14 +96,14 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit program_options( const std::string& caption, unsigned line_length = m_default_line_length );
+        explicit program_options(const std::string& caption, unsigned line_length = m_default_line_length);
 
-    /**
+        /**
      * @brief Default deconstructor
      */
-    virtual ~program_options();
+        virtual ~program_options();
 
-    /**
+        /**
      * @brief Is help needed? Are all properties set properly?
      *
      * This method returns true when the --help option is not set
@@ -119,9 +116,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool good() const;
+        bool good() const;
 
-    /**
+        /**
      * @brief Parses the command line
      *
      * @param argc C argc argument of the main function
@@ -130,9 +127,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    void parse( int argc, char ** argv );
+        void parse(int argc, char** argv);
 
-    /**
+        /**
      * @brief Checks whether a parameter was set or not
      *
      * This method calls Boost's variable_map::count method
@@ -148,9 +145,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool is_set( const std::string& option ) const;
+        bool is_set(const std::string& option) const;
 
-    /**
+        /**
      * @brief Adds an option for an input as RevLib realization
      *
      * This method adds an option called --filename which takes
@@ -164,9 +161,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    program_options& add_read_realization_option();
+        program_options& add_read_realization_option();
 
-    /**
+        /**
      * @brief Adds an option for an input as RevLib specification
      *
      * This method adds an option called --filename which takes
@@ -180,9 +177,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    program_options& add_read_specification_option();
+        program_options& add_read_specification_option();
 
-    /**
+        /**
      * @brief Adds an option for an output as RevLib realization
      *
      * This method adds an option called --realname which takes
@@ -196,9 +193,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    program_options& add_write_realization_option();
+        program_options& add_write_realization_option();
 
-    /**
+        /**
      * @brief Adds an option for selecting a cost function
      *
      * This method adds an option called --costs which takes
@@ -211,9 +208,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    program_options& add_costs_option();
+        program_options& add_costs_option();
 
-    /**
+        /**
      * @brief Returns the RevLib realization input if it was set
      *
      * This method can just be called after the option
@@ -225,9 +222,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    const std::string& read_realization_filename() const;
+        const std::string& read_realization_filename() const;
 
-    /**
+        /**
      * @brief Returns the RevLib specification input if it was set
      *
      * This method can just be called after the option
@@ -239,9 +236,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    const std::string& read_specification_filename() const;
+        const std::string& read_specification_filename() const;
 
-    /**
+        /**
      * @brief Returns the RevLib realization output if it was set
      *
      * This method can just be called after the option
@@ -253,9 +250,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    const std::string& write_realization_filename() const;
+        const std::string& write_realization_filename() const;
 
-    /**
+        /**
      * @brief Checks whether a filename for RevLib realization output was set
      *
      * This method evaluates to true, when add_write_realization_option was
@@ -266,9 +263,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    bool is_write_realization_filename_set() const;
+        bool is_write_realization_filename_set() const;
 
-    /**
+        /**
      * @brief Returns a cost function
      *
      * Use this method together with add_costs_option() only.
@@ -280,20 +277,20 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    cost_function costs() const;
+        cost_function costs() const;
 
-    // needed for python exposing
-    /** @cond */
-    const boost::program_options::variables_map& variables_map() const;
-    /** @endcond */
+        // needed for python exposing
+        /** @cond */
+        const boost::program_options::variables_map& variables_map() const;
+        /** @endcond */
 
-  private:
-    void init();
+    private:
+        void init();
 
-    class priv;
-    priv* const d;
-  };
+        class priv;
+        priv* const d;
+    };
 
-}
+} // namespace revkit
 
 #endif /* PROGRAM_OPTIONS_HPP */

@@ -15,43 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
 #include "core/io/print_statistics.hpp"
+
+#include "core/utils/costs.hpp"
 
 #include <boost/format.hpp>
 #include <string>
 
-#include "core/utils/costs.hpp"
-
-
-namespace revkit
-{
-  print_statistics_settings::print_statistics_settings()
-    : main_template( "%1$sGates:            %2$d\nLines:            %3$d\nQuantum Costs:    %4$d\nTransistor Costs: %5$d\n" ),
-      runtime_template( "Runtime:          %.2f\n" )
-  {
-  }
-
-  void print_statistics( std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings )
-  {
-    std::string runtime_string;
-
-    if ( runtime != -1 )
-    {
-      runtime_string = boost::str( boost::format( settings.runtime_template ) % runtime );
+namespace revkit {
+    print_statistics_settings::print_statistics_settings():
+        main_template("%1$sGates:            %2$d\nLines:            %3$d\nQuantum Costs:    %4$d\nTransistor Costs: %5$d\n"),
+        runtime_template("Runtime:          %.2f\n") {
     }
 
-    boost::format fmt( settings.main_template );
-    fmt.exceptions( boost::io::all_error_bits ^ ( boost::io::too_many_args_bit | boost::io::too_few_args_bit ) );
+    void print_statistics(std::ostream& os, const circuit& circ, double runtime, const print_statistics_settings& settings) {
+        std::string runtime_string;
 
-    os << fmt % runtime_string % circ.num_gates() % circ.lines() % costs( circ, costs_by_gate_func( quantum_costs() ) ) % costs( circ, costs_by_gate_func( transistor_costs() ) );
-  }
+        if (runtime != -1) {
+            runtime_string = boost::str(boost::format(settings.runtime_template) % runtime);
+        }
 
-  void print_statistics( const circuit& circ, double runtime, const print_statistics_settings& settings )
-  {
-    print_statistics( std::cout, circ, runtime, settings );
-  }
+        boost::format fmt(settings.main_template);
+        fmt.exceptions(boost::io::all_error_bits ^ (boost::io::too_many_args_bit | boost::io::too_few_args_bit));
 
+        os << fmt % runtime_string % circ.num_gates() % circ.lines() % costs(circ, costs_by_gate_func(quantum_costs())) % costs(circ, costs_by_gate_func(transistor_costs()));
+    }
 
-}
+    void print_statistics(const circuit& circ, double runtime, const print_statistics_settings& settings) {
+        print_statistics(std::cout, circ, runtime, settings);
+    }
+
+} // namespace revkit

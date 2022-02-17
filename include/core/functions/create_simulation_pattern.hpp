@@ -27,19 +27,17 @@
 #ifndef CREATE_SIMULATION_PATTERN_HPP
 #define CREATE_SIMULATION_PATTERN_HPP
 
+#include <boost/dynamic_bitset.hpp>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
-#include <boost/dynamic_bitset.hpp>
+namespace revkit {
 
-namespace revkit
-{
+    class circuit;
+    class pattern;
 
-  class circuit;
-  class pattern;
-
-  /**
+    /**
    * @brief Create simulation pattern for sequential simulation
    *
    * @param p Pattern class
@@ -51,9 +49,8 @@ namespace revkit
    * @author RevKit
    * @since  1.2
    */
-  bool create_simulation_pattern( const pattern& p, const circuit& circ, std::vector<boost::dynamic_bitset<> >& sim, std::map<std::string, boost::dynamic_bitset<> >& init, std::string* error = 0 );
+    bool create_simulation_pattern(const pattern& p, const circuit& circ, std::vector<boost::dynamic_bitset<>>& sim, std::map<std::string, boost::dynamic_bitset<>>& init, std::string* error = 0);
 
-}
+} // namespace revkit
 
 #endif /* CREATE_SIMULATION_PATTERN_HPP */
-

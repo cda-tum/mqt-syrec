@@ -17,296 +17,269 @@
 
 #include "core/utils/costs.hpp"
 
+#include "core/functions/flatten_circuit.hpp"
+#include "core/target_tags.hpp"
+
 #include <boost/tuple/tuple.hpp>
 
-#include "core/target_tags.hpp"
-#include "core/functions/flatten_circuit.hpp"
+namespace revkit {
 
-namespace revkit
-{
-
-  cost_t gate_costs::operator()( const circuit& circ ) const
-  {
-    return circ.num_gates();
-  }
-
-  cost_t line_costs::operator()( const circuit& circ ) const
-  {
-    return circ.lines();
-  }
-
-  quantum_costs::quantum_costs()
-    : controls_offset( 0 )
-  {
-  }
-
-  cost_t quantum_costs::operator()( const gate& g, unsigned lines ) const
-  {
-    cost_t costs = 0ull;
-
-    unsigned n = lines;
-    unsigned c = std::distance( g.begin_controls(), g.end_controls() );
-
-    if ( is_fredkin( g ) )
-    {
-      costs = 2ull;
-      c += 1u;
+    cost_t gate_costs::operator()(const circuit& circ) const {
+        return circ.num_gates();
     }
 
-    c += std::max( -1 * (int)c, 0 );
-    c = std::min( c, lines - 1u );
-
-    unsigned e = n - c - 1u; // empty lines
-
-    switch ( c ) {
-    case 0u:
-    case 1u:
-      costs = 1ull;
-      break;
-    case 2u:
-      costs = 5ull;
-      break;
-    case 3u:
-      costs = 13ull;
-      break;
-    case 4u:
-      costs = ( e >= 2u ) ? 26ull : 29ull;
-      break;
-    case 5u:
-      if ( e >= 3u ) {
-        costs = 38ull;
-      } else if ( e >= 1u ) {
-        costs = 52ull;
-      } else {
-        costs = 61ull;
-      }
-      break;
-    case 6u:
-      if ( e >= 4u ) {
-        costs = 50ull;
-      } else if ( e >= 1u ) {
-        costs = 80ull;
-      } else {
-        costs = 125ull;
-      }
-      break;
-    case 7u:
-      if ( e >= 5u ) {
-        costs = 62ull;
-      } else if ( e >= 1u ) {
-        costs = 100ull;
-      } else {
-        costs = 253ull;
-      }
-      break;
-    case 8u:
-      if ( e >= 6u ) {
-        costs = 74ull;
-      } else if ( e >= 1u ) {
-        costs = 128ull;
-      } else {
-        costs = 509ull;
-      }
-      break;
-    case 9u:
-      if ( e >= 7u ) {
-        costs = 86ull;
-      } else if ( e >= 1u ) {
-        costs = 152ull;
-      } else {
-        costs = 1021ull;
-      }
-      break;
-    default:
-      if ( e >= c - 2u ) {
-        costs = 12ull * c - 33ull;
-      } else if ( e >= 1u ) {
-        costs = 24ull * c - 87ull;
-      } else {
-        costs = ( 1ull << ( c + 1ull ) ) - 3ull;
-      }
+    cost_t line_costs::operator()(const circuit& circ) const {
+        return circ.lines();
     }
 
-    return costs;
-  }
-
-  cost_t transistor_costs::operator()( const gate& g, unsigned lines ) const
-  {
-    return 8ull * std::distance( g.begin_controls(), g.end_controls() );
-  }
-
-  struct costs_visitor : public boost::static_visitor<cost_t>
-  {
-    explicit costs_visitor( const circuit& circ ) : circ( circ ) {}
-
-    cost_t operator()( const costs_by_circuit_func& f ) const
-    {
-      // flatten before if the circuit has modules
-      if ( circ.modules().empty() )
-      {
-        return f( circ );
-      }
-      else
-      {
-        circuit flattened;
-        flatten_circuit( circ, flattened );
-        return f( flattened );
-      }
+    quantum_costs::quantum_costs():
+        controls_offset(0) {
     }
 
-    cost_t operator()( const costs_by_gate_func& f ) const
-    {
-      cost_t sum = 0ull;
-      foreach_ ( const gate& g, circ )
-      {
-        // respect modules
-        if ( is_module( g ) )
-        {
-          sum += costs( *boost::any_cast<module_tag>( g.type() ).reference.get(), f );
+    cost_t quantum_costs::operator()(const gate& g, unsigned lines) const {
+        cost_t costs = 0ull;
+
+        unsigned n = lines;
+        unsigned c = std::distance(g.begin_controls(), g.end_controls());
+
+        if (is_fredkin(g)) {
+            costs = 2ull;
+            c += 1u;
         }
-        else
-        {
-          sum += f( g, circ.lines() );
+
+        c += std::max(-1 * (int)c, 0);
+        c = std::min(c, lines - 1u);
+
+        unsigned e = n - c - 1u; // empty lines
+
+        switch (c) {
+            case 0u:
+            case 1u:
+                costs = 1ull;
+                break;
+            case 2u:
+                costs = 5ull;
+                break;
+            case 3u:
+                costs = 13ull;
+                break;
+            case 4u:
+                costs = (e >= 2u) ? 26ull : 29ull;
+                break;
+            case 5u:
+                if (e >= 3u) {
+                    costs = 38ull;
+                } else if (e >= 1u) {
+                    costs = 52ull;
+                } else {
+                    costs = 61ull;
+                }
+                break;
+            case 6u:
+                if (e >= 4u) {
+                    costs = 50ull;
+                } else if (e >= 1u) {
+                    costs = 80ull;
+                } else {
+                    costs = 125ull;
+                }
+                break;
+            case 7u:
+                if (e >= 5u) {
+                    costs = 62ull;
+                } else if (e >= 1u) {
+                    costs = 100ull;
+                } else {
+                    costs = 253ull;
+                }
+                break;
+            case 8u:
+                if (e >= 6u) {
+                    costs = 74ull;
+                } else if (e >= 1u) {
+                    costs = 128ull;
+                } else {
+                    costs = 509ull;
+                }
+                break;
+            case 9u:
+                if (e >= 7u) {
+                    costs = 86ull;
+                } else if (e >= 1u) {
+                    costs = 152ull;
+                } else {
+                    costs = 1021ull;
+                }
+                break;
+            default:
+                if (e >= c - 2u) {
+                    costs = 12ull * c - 33ull;
+                } else if (e >= 1u) {
+                    costs = 24ull * c - 87ull;
+                } else {
+                    costs = (1ull << (c + 1ull)) - 3ull;
+                }
         }
-      }
-      return sum;
+
+        return costs;
     }
 
-  private:
-    const circuit& circ;
-  };
-
-  cost_t costs( const circuit& circ, const cost_function& f )
-  {
-    
-    return boost::apply_visitor( costs_visitor( circ ), f );
-  }
-
-cost_t my_quantum_costs( const gate& g, unsigned lines )
-  {
-    cost_t costs = 0ull;
-
-    unsigned n = lines;
-    unsigned c = std::distance( g.begin_controls(), g.end_controls() );
-
-    if ( is_fredkin( g ) )
-    {
-      costs = 2ull;
-      c += 1u;
+    cost_t transistor_costs::operator()(const gate& g, unsigned lines) const {
+        return 8ull * std::distance(g.begin_controls(), g.end_controls());
     }
 
-    c += std::max( -1 * (int)c, 0 );
-    c = std::min( c, lines - 1u );
+    struct costs_visitor: public boost::static_visitor<cost_t> {
+        explicit costs_visitor(const circuit& circ):
+            circ(circ) {}
 
-    unsigned e = n - c - 1u; // empty lines
+        cost_t operator()(const costs_by_circuit_func& f) const {
+            // flatten before if the circuit has modules
+            if (circ.modules().empty()) {
+                return f(circ);
+            } else {
+                circuit flattened;
+                flatten_circuit(circ, flattened);
+                return f(flattened);
+            }
+        }
 
-    switch ( c ) {
-    case 0u:
-    case 1u:
-      costs = 1ull;
-      break;
-    case 2u:
-      costs = 5ull;
-      break;
-    case 3u:
-      costs = 13ull;
-      break;
-    case 4u:
-      costs = ( e >= 2u ) ? 26ull : 29ull;
-      break;
-    case 5u:
-      if ( e >= 3u ) {
-        costs = 38ull;
-      } else if ( e >= 1u ) {
-        costs = 52ull;
-      } else {
-        costs = 61ull;
-      }
-      break;
-    case 6u:
-      if ( e >= 4u ) {
-        costs = 50ull;
-      } else if ( e >= 1u ) {
-        costs = 80ull;
-      } else {
-        costs = 125ull;
-      }
-      break;
-    case 7u:
-      if ( e >= 5u ) {
-        costs = 62ull;
-      } else if ( e >= 1u ) {
-        costs = 100ull;
-      } else {
-        costs = 253ull;
-      }
-      break;
-    case 8u:
-      if ( e >= 6u ) {
-        costs = 74ull;
-      } else if ( e >= 1u ) {
-        costs = 128ull;
-      } else {
-        costs = 509ull;
-      }
-      break;
-    case 9u:
-      if ( e >= 7u ) {
-        costs = 86ull;
-      } else if ( e >= 1u ) {
-        costs = 152ull;
-      } else {
-        costs = 1021ull;
-      }
-      break;
-    default:
-      if ( e >= c - 2u ) {
-        costs = 12ull * c - 33ull;
-      } else if ( e >= 1u ) {
-        costs = 24ull * c - 87ull;
-      } else {
-        costs = ( 1ull << ( c + 1ull ) ) - 3ull;
-      }
+        cost_t operator()(const costs_by_gate_func& f) const {
+            cost_t sum = 0ull;
+            foreach_(const gate& g, circ) {
+                // respect modules
+                if (is_module(g)) {
+                    sum += costs(*boost::any_cast<module_tag>(g.type()).reference.get(), f);
+                } else {
+                    sum += f(g, circ.lines());
+                }
+            }
+            return sum;
+        }
+
+    private:
+        const circuit& circ;
+    };
+
+    cost_t costs(const circuit& circ, const cost_function& f) {
+        return boost::apply_visitor(costs_visitor(circ), f);
     }
 
-    return costs;
-  }
+    cost_t my_quantum_costs(const gate& g, unsigned lines) {
+        cost_t costs = 0ull;
 
-cost_t final_quantum_cost( const circuit& circ, unsigned lines )
-{
-circuit::const_iterator first = circ.begin();
-circuit::const_iterator last = circ.end();
+        unsigned n = lines;
+        unsigned c = std::distance(g.begin_controls(), g.end_controls());
 
-cost_t final_q_costs = 0ull;
+        if (is_fredkin(g)) {
+            costs = 2ull;
+            c += 1u;
+        }
 
-while ( first != last )
-    {
-     final_q_costs= final_q_costs + my_quantum_costs(*first, lines);
-     ++first;
-     }
-return final_q_costs;
-}
+        c += std::max(-1 * (int)c, 0);
+        c = std::min(c, lines - 1u);
 
-cost_t my_transistor_costs( const gate& g, unsigned lines )
-  {
-    return 8ull * std::distance( g.begin_controls(), g.end_controls() );
-  }
+        unsigned e = n - c - 1u; // empty lines
 
-cost_t final_transistor_cost( const circuit& circ, unsigned lines )
-{
-circuit::const_iterator first = circ.begin();
-circuit::const_iterator last = circ.end();
+        switch (c) {
+            case 0u:
+            case 1u:
+                costs = 1ull;
+                break;
+            case 2u:
+                costs = 5ull;
+                break;
+            case 3u:
+                costs = 13ull;
+                break;
+            case 4u:
+                costs = (e >= 2u) ? 26ull : 29ull;
+                break;
+            case 5u:
+                if (e >= 3u) {
+                    costs = 38ull;
+                } else if (e >= 1u) {
+                    costs = 52ull;
+                } else {
+                    costs = 61ull;
+                }
+                break;
+            case 6u:
+                if (e >= 4u) {
+                    costs = 50ull;
+                } else if (e >= 1u) {
+                    costs = 80ull;
+                } else {
+                    costs = 125ull;
+                }
+                break;
+            case 7u:
+                if (e >= 5u) {
+                    costs = 62ull;
+                } else if (e >= 1u) {
+                    costs = 100ull;
+                } else {
+                    costs = 253ull;
+                }
+                break;
+            case 8u:
+                if (e >= 6u) {
+                    costs = 74ull;
+                } else if (e >= 1u) {
+                    costs = 128ull;
+                } else {
+                    costs = 509ull;
+                }
+                break;
+            case 9u:
+                if (e >= 7u) {
+                    costs = 86ull;
+                } else if (e >= 1u) {
+                    costs = 152ull;
+                } else {
+                    costs = 1021ull;
+                }
+                break;
+            default:
+                if (e >= c - 2u) {
+                    costs = 12ull * c - 33ull;
+                } else if (e >= 1u) {
+                    costs = 24ull * c - 87ull;
+                } else {
+                    costs = (1ull << (c + 1ull)) - 3ull;
+                }
+        }
 
-cost_t final_t_costs = 0ull;
+        return costs;
+    }
 
-while ( first != last )
-    {
-     final_t_costs= final_t_costs + my_transistor_costs(*first, lines);
-     ++first;
-     }
-return final_t_costs;
-}
+    cost_t final_quantum_cost(const circuit& circ, unsigned lines) {
+        circuit::const_iterator first = circ.begin();
+        circuit::const_iterator last  = circ.end();
 
+        cost_t final_q_costs = 0ull;
 
+        while (first != last) {
+            final_q_costs = final_q_costs + my_quantum_costs(*first, lines);
+            ++first;
+        }
+        return final_q_costs;
+    }
 
-}
+    cost_t my_transistor_costs(const gate& g, unsigned lines) {
+        return 8ull * std::distance(g.begin_controls(), g.end_controls());
+    }
+
+    cost_t final_transistor_cost(const circuit& circ, unsigned lines) {
+        circuit::const_iterator first = circ.begin();
+        circuit::const_iterator last  = circ.end();
+
+        cost_t final_t_costs = 0ull;
+
+        while (first != last) {
+            final_t_costs = final_t_costs + my_transistor_costs(*first, lines);
+            ++first;
+        }
+        return final_t_costs;
+    }
+
+} // namespace revkit

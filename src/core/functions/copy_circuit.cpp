@@ -17,28 +17,24 @@
 
 #include "core/functions/copy_circuit.hpp"
 
-#include <algorithm>
-
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
-
 #include "core/circuit.hpp"
-
 #include "core/functions/add_circuit.hpp"
 #include "core/functions/copy_metadata.hpp"
 
+#include <algorithm>
+#include <boost/foreach.hpp>
+#include <boost/tuple/tuple.hpp>
+
 #define foreach_ BOOST_FOREACH
 
-namespace revkit
-{
+namespace revkit {
 
-  void copy_circuit( const circuit& src, circuit& dest )
-  {
-    assert( !dest.num_gates() );
-    assert( !dest.lines() );
+    void copy_circuit(const circuit& src, circuit& dest) {
+        assert(!dest.num_gates());
+        assert(!dest.lines());
 
-    append_circuit( dest, src );
-    copy_metadata( src, dest );
-  }
+        append_circuit(dest, src);
+        copy_metadata(src, dest);
+    }
 
-}
+} // namespace revkit

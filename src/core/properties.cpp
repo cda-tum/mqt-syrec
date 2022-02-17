@@ -17,49 +17,39 @@
 
 #include "core/properties.hpp"
 
-namespace revkit
-{
+namespace revkit {
 
-  properties::properties()
-  {
-  }
-
-  const properties::value_type& properties::operator[]( const properties::key_type& k ) const
-  {
-    return map.find( k )->second;
-  }
-
-  void properties::set( const properties::key_type& k, const properties::value_type& value )
-  {
-    map[k] = value;
-  }
-
-  properties::storage_type::const_iterator properties::begin() const
-  {
-    return map.begin();
-  }
-
-  properties::storage_type::const_iterator properties::end() const
-  {
-    return map.end();
-  }
-
-  unsigned properties::size() const
-  {
-    return map.size();
-  }
-
-  void properties::clear()
-  {
-    map.clear();
-  }
-
-  void set_error_message( properties::ptr statistics, const std::string& error )
-  {
-    if ( statistics )
-    {
-      statistics->set( "error", error );
+    properties::properties() {
     }
-  }
 
-}
+    const properties::value_type& properties::operator[](const properties::key_type& k) const {
+        return map.find(k)->second;
+    }
+
+    void properties::set(const properties::key_type& k, const properties::value_type& value) {
+        map[k] = value;
+    }
+
+    properties::storage_type::const_iterator properties::begin() const {
+        return map.begin();
+    }
+
+    properties::storage_type::const_iterator properties::end() const {
+        return map.end();
+    }
+
+    unsigned properties::size() const {
+        return map.size();
+    }
+
+    void properties::clear() {
+        map.clear();
+    }
+
+    void set_error_message(properties::ptr statistics, const std::string& error) {
+        if (statistics) {
+            statistics->set("error", error);
+        }
+    }
+
+} // namespace revkit

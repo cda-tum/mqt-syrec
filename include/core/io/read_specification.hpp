@@ -27,20 +27,17 @@
 #ifndef READ_SPECIFICATION_HPP
 #define READ_SPECIFICATION_HPP
 
+#include <core/io/revlib_processor.hpp>
+#include <core/truth_table.hpp>
 #include <iosfwd>
 #include <vector>
-
-#include <core/truth_table.hpp>
-
-#include <core/io/revlib_processor.hpp>
 
 /**
  * @brief Main namespace
  */
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief Implementation of revlib_processor to construct a reversible_truth_table
    *
    * This class inherits from revlib_processor and constructs
@@ -52,10 +49,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  class specification_processor : public revlib_processor
-  {
-  public:
-    /**
+    class specification_processor: public revlib_processor {
+    public:
+        /**
      * @brief Default constructor
      *
      * Initializes private data
@@ -67,10 +63,9 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    explicit specification_processor( binary_truth_table& spec );
+        explicit specification_processor(binary_truth_table& spec);
 
-
-    /**
+        /**
      * @brief Default deconstructor
      *
      * Clears private data
@@ -78,21 +73,21 @@ namespace revkit
      * @author RevKit
      * @since  1.0
      */
-    virtual ~specification_processor();
+        virtual ~specification_processor();
 
-  protected:
-    virtual void on_inputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
-    virtual void on_outputs( std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last ) const;
-    virtual void on_constants( std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last ) const;
-    virtual void on_garbage( std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last ) const;
-    virtual void on_truth_table_line( unsigned line_index, const std::vector<boost::optional<bool> >::const_iterator first, const std::vector<boost::optional<bool> >::const_iterator last ) const;
+    protected:
+        virtual void on_inputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
+        virtual void on_outputs(std::vector<std::string>::const_iterator first, std::vector<std::string>::const_iterator last) const;
+        virtual void on_constants(std::vector<constant>::const_iterator first, std::vector<constant>::const_iterator last) const;
+        virtual void on_garbage(std::vector<bool>::const_iterator first, std::vector<bool>::const_iterator last) const;
+        virtual void on_truth_table_line(unsigned line_index, const std::vector<boost::optional<bool>>::const_iterator first, const std::vector<boost::optional<bool>>::const_iterator last) const;
 
-  private:
-    class priv;
-    priv* const d;
-  };
+    private:
+        class priv;
+        priv* const d;
+    };
 
-  /**
+    /**
    * @brief Read a specification into a truth table from stream
    *
    * This method uses revlib_parser(std::istream&, revlib_processor&, std::string*)
@@ -109,9 +104,9 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool read_specification( binary_truth_table& spec, std::istream& in, std::string* error = 0 );
+    bool read_specification(binary_truth_table& spec, std::istream& in, std::string* error = 0);
 
-  /**
+    /**
    * @brief Read a specification into a truth table from filename
    *
    * This method construts a \b std::ifstream of the given \p filename
@@ -151,7 +146,7 @@ namespace revkit
    * @author RevKit
    * @since  1.0
    */
-  bool read_specification( binary_truth_table& spec, const std::string& filename, std::string* error = 0 );
-}
+    bool read_specification(binary_truth_table& spec, const std::string& filename, std::string* error = 0);
+} // namespace revkit
 
 #endif /* READ_SPECIFICATION_HPP */

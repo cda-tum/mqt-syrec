@@ -17,37 +17,34 @@
 
 #include "core/functions/add_line_to_circuit.hpp"
 
-#include <vector>
-
 #include <boost/assign/std/vector.hpp>
+#include <vector>
 
 using namespace boost::assign;
 
-namespace revkit
-{
+namespace revkit {
 
-  unsigned add_line_to_circuit( circuit& circ, const std::string& input, const std::string& output, const constant& c, bool g )
-  {
-    std::vector<std::string> ins = circ.inputs();
-    std::vector<std::string> outs = circ.outputs();
-    std::vector<constant> cs = circ.constants();
-    std::vector<bool> gar = circ.garbage();
+    unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c, bool g) {
+        std::vector<std::string> ins  = circ.inputs();
+        std::vector<std::string> outs = circ.outputs();
+        std::vector<constant>    cs   = circ.constants();
+        std::vector<bool>        gar  = circ.garbage();
 
-    circ.set_lines( circ.lines() + 1u );
+        circ.set_lines(circ.lines() + 1u);
 
-    ins += input;
-    circ.set_inputs( ins );
-    
-    outs += output;
-    circ.set_outputs( outs );
-    
-    cs += c;
-    circ.set_constants( cs );
+        ins += input;
+        circ.set_inputs(ins);
 
-    gar += g;
-    circ.set_garbage( gar );
+        outs += output;
+        circ.set_outputs(outs);
 
-    return circ.lines() - 1u;
-  }
+        cs += c;
+        circ.set_constants(cs);
 
-}
+        gar += g;
+        circ.set_garbage(gar);
+
+        return circ.lines() - 1u;
+    }
+
+} // namespace revkit

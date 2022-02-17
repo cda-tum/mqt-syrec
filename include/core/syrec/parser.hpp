@@ -25,26 +25,23 @@
 
 #include <string>
 
-namespace revkit
-{
+namespace revkit {
 
-  /**
+    /**
    * @brief SyReC Namespace
    */
-  namespace syrec
-  {
-    class program;
-  }
+    namespace syrec {
+        class program;
+    }
 
-  /** 
+    /**
    * @brief Settings for read_program function
    * 
    * @author RevKit
    * @since  1.1
    */
-  struct read_program_settings
-  {
-    /** 
+    struct read_program_settings {
+        /**
      * @brief Standard constructor
      *
      * Initializes default values
@@ -52,19 +49,19 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    read_program_settings();
+        read_program_settings();
 
-    /**
+        /**
      * @brief Default Bit-width
      *
      * Variables can be defined without specifying the bit-width.
      * In this case, this default bit-width is assigned.
      * The default value is \b 32u.
      */
-    unsigned default_bitwidth;
-  };
+        unsigned default_bitwidth;
+    };
 
-  /** 
+    /**
    * @brief Parser for a SyReC program
    *
    * This function call performs both the lexical parsing
@@ -82,8 +79,8 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  bool read_program( syrec::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = 0 );
-  
-}
+    bool read_program(syrec::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = 0);
+
+} // namespace revkit
 
 #endif /* PARSER_HPP */

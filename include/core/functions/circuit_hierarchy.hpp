@@ -24,12 +24,11 @@
 #ifndef CIRCUIT_HIERARCHY_HPP
 #define CIRCUIT_HIERARCHY_HPP
 
-#include <iostream>
-
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_as_tree.hpp>
+#include <iostream>
 
 /** @cond 0 */
 #define foreach_ BOOST_FOREACH
@@ -37,11 +36,10 @@
 
 using namespace boost::assign;
 
-namespace revkit
-{
-  class circuit;
+namespace revkit {
+    class circuit;
 
-  /** 
+    /**
    * @brief Hierarchy Graph
    * 
    * Graph concept class for holding a hierarchy graph which
@@ -55,10 +53,9 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, boost::property<boost::vertex_name_t, boost::tuple<std::string, const circuit*> > > hierarchy_graph;
+    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, boost::property<boost::vertex_name_t, boost::tuple<std::string, const circuit*>>> hierarchy_graph;
 
-
-  /** 
+    /**
    * @brief This class represents a tree based on a Boost.Graph
    *
    * This class uses the boost::graph_as_tree, but offers
@@ -68,40 +65,37 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  template<typename Graph>
-  class constructible_tree
-    : public boost::graph_as_tree<Graph,
-                                  boost::iterator_property_map<typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::iterator, typename boost::property_map<Graph, boost::vertex_index_t>::type>,
-                                  typename boost::graph_traits<Graph>::vertex_descriptor>
-  {
-  public:
-    /**
+    template<typename Graph>
+    class constructible_tree: public boost::graph_as_tree<Graph, boost::iterator_property_map<typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::iterator, typename boost::property_map<Graph, boost::vertex_index_t>::type>, typename boost::graph_traits<Graph>::vertex_descriptor> {
+    public:
+        /**
      * @brief Type of super class
      *
      * @author RevKit
      * @since  1.1
      */
-    typedef boost::graph_as_tree<Graph,
-                                 boost::iterator_property_map<typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::iterator, typename boost::property_map<Graph, boost::vertex_index_t>::type>,
-                                 typename boost::graph_traits<Graph>::vertex_descriptor> super;
+        typedef boost::graph_as_tree<Graph,
+                                     boost::iterator_property_map<typename std::vector<typename boost::graph_traits<Graph>::vertex_descriptor>::iterator, typename boost::property_map<Graph, boost::vertex_index_t>::type>,
+                                     typename boost::graph_traits<Graph>::vertex_descriptor>
+                super;
 
-    /** 
+        /**
      * @brief Type of the graph
      *
      * @author RevKit
      * @since  1.1
      */
-    typedef Graph graph_type;
+        typedef Graph graph_type;
 
-    /** 
+        /**
      * @brief Type of a node
      *
      * @author RevKit
      * @since  1.1
      */
-    typedef typename boost::graph_traits<Graph>::vertex_descriptor node_type;
+        typedef typename boost::graph_traits<Graph>::vertex_descriptor node_type;
 
-    /** 
+        /**
      * @brief Standard constructor
      * 
      * Initializes default values
@@ -109,27 +103,27 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    constructible_tree() : super( g, 0 )
-    {
-    }
+        constructible_tree():
+            super(g, 0) {
+        }
 
-    /** 
+        /**
      * @brief Returns the underlying graph
      * 
      * @author RevKit
      * @since  1.1
      */
-    const Graph& graph() const { return g; }
+        const Graph& graph() const { return g; }
 
-    /** 
+        /**
      * @brief Returns a mutable reference to the underlying graph
      *
      * @author RevKit
      * @since  1.1
      */
-    Graph& graph() { return g; }
+        Graph& graph() { return g; }
 
-    /** 
+        /**
      * @brief Returns the root of the graph
      * 
      * @return Node
@@ -137,9 +131,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    node_type root() const { return super::_root; }
+        node_type root() const { return super::_root; }
 
-    /** 
+        /**
      * @brief Sets the root of the graph 
      * 
      * @param root Node
@@ -147,9 +141,9 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void set_root( node_type root ) { super::_root = root; }
+        void set_root(node_type root) { super::_root = root; }
 
-    /** 
+        /**
      * @brief Returns the parent of a node
      * 
      * @param n Node
@@ -159,26 +153,21 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    node_type parent( node_type n ) const
-    {
-      typename boost::graph_traits<Graph>::in_edge_iterator it, itEnd;
-      boost::tie( it, itEnd ) = boost::in_edges( n, g );
-      
-      if ( it == itEnd ) /* root */
-      {
-        return super::_root; // return root as parent of root
-      }
-      else if ( std::distance( it, itEnd ) == 1u )
-      {
-        return boost::source( *it, g );
-      }
-      else
-      {
-        assert( false );
-      }
-    }
+        node_type parent(node_type n) const {
+            typename boost::graph_traits<Graph>::in_edge_iterator it, itEnd;
+            boost::tie(it, itEnd) = boost::in_edges(n, g);
 
-    /** 
+            if (it == itEnd) /* root */
+            {
+                return super::_root; // return root as parent of root
+            } else if (std::distance(it, itEnd) == 1u) {
+                return boost::source(*it, g);
+            } else {
+                assert(false);
+            }
+        }
+
+        /**
      * @brief Returns the children of a node
      * 
      * @param n Node
@@ -187,19 +176,17 @@ namespace revkit
      * @author RevKit
      * @since  1.1
      */
-    void children( node_type n, std::vector<node_type>& children ) const
-    {
-      foreach_ ( const node_type& child, boost::adjacent_vertices( n, g ) )
-      {
-        children += child;
-      }
-    }
+        void children(node_type n, std::vector<node_type>& children) const {
+            foreach_(const node_type& child, boost::adjacent_vertices(n, g)) {
+                children += child;
+            }
+        }
 
-  private:
-    Graph g;
-  };
+    private:
+        Graph g;
+    };
 
-  /** 
+    /**
    * @brief Hierarchy Tree
    *
    * This tree is used to store the hierarchy of a tree.
@@ -208,9 +195,9 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  typedef constructible_tree<hierarchy_graph> hierarchy_tree;
+    typedef constructible_tree<hierarchy_graph> hierarchy_tree;
 
-  /** 
+    /**
    * @brief Calculates the hierarchy of a circuit by its modules
    *
    * This function traverses all modules starting from a top
@@ -223,7 +210,7 @@ namespace revkit
    * @author RevKit
    * @since  1.1
    */
-  void circuit_hierarchy( const circuit& circ, hierarchy_tree& tree );
-}
+    void circuit_hierarchy(const circuit& circ, hierarchy_tree& tree);
+} // namespace revkit
 
 #endif /* CIRCUIT_HIERARCHY_HPP */
