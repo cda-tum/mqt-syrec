@@ -92,11 +92,9 @@ namespace revkit {
         namespace qi    = boost::spirit::qi;
 
         std::string::const_iterator it = line.begin();
-        bool                        r  = qi::parse(it, line.end(),
-                                                   *(
-                                   (qi::lexeme['"' >> +(qi::char_ - '"') >> '"'] // string with quotes
-                                    | +(qi::char_ - ' '))                        // without quotes
-                                   >> -qi::lit(' ')),
+        bool                        r  = qi::parse(it, line.end(), *((qi::lexeme['"' >> +(qi::char_ - '"') >> '"'] // string with quotes
+                                              | +(qi::char_ - ' '))                        // without quotes
+                                             >> -qi::lit(' ')),
                                                    params);
 
         return (r && it == line.end());
@@ -107,11 +105,9 @@ namespace revkit {
         namespace qi    = boost::spirit::qi;
 
         std::string::const_iterator it = line.begin();
-        bool                        r  = qi::parse(it, line.end(),
-                                                   *(qi::lexeme[+(ascii::alnum | '-')] >> '=' >>
-                             (qi::lexeme['"' >> +(qi::char_ - '"') >> '"'] // string with quotes
-                              | +(qi::char_ - ' '))                        // without quotes
-                             >> *qi::lit(' ')),
+        bool                        r  = qi::parse(it, line.end(), *(qi::lexeme[+(ascii::alnum | '-')] >> '=' >> (qi::lexeme['"' >> +(qi::char_ - '"') >> '"'] // string with quotes
+                                                                                          | +(qi::char_ - ' '))                        // without quotes
+                                             >> *qi::lit(' ')),
                                                    annotations);
 
         return (r && it == line.end());

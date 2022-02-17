@@ -162,10 +162,10 @@ namespace revkit {
         circuit&                           circ() const;
         std::stack<syrec::statement::ptr>& stmts();
 
-        bool     get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
-        bool     unget_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
-        bool     array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
-        unsigned get_constant_line(bool value);
+        bool         get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
+        bool         unget_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
+        bool         array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
+        unsigned     get_constant_line(bool value);
         bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
         virtual void release_constant_line(unsigned index, bool value);
 

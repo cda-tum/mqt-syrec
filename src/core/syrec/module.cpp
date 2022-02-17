@@ -29,12 +29,11 @@
 
 using namespace boost::assign;
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         class module::priv {
         public:
-            priv() {}
+            priv() = default;
 
             std::string    name;
             variable::vec  parameters;
@@ -42,8 +41,7 @@ namespace revkit {
             statement::vec statements;
         };
 
-        module::module() :d(new priv()) {
-        }
+        module::module() :d(new priv()) {}
 
         module::module(const std::string& name) :d(new priv()) {
             d->name = name;
@@ -90,7 +88,7 @@ namespace revkit {
                 }
             }
 
-            return variable::ptr();
+            return {};
         }
 
         void module::add_statement(statement::ptr statement) {
@@ -124,5 +122,4 @@ namespace revkit {
             return os;
         }
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

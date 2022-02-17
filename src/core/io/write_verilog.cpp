@@ -98,9 +98,9 @@ namespace revkit {
 
         // adjust inputs: states
         {
-                foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()){
-                        for (unsigned i = 0u; i < bus.second.size(); ++i){
-                                std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s_in[%d]") % bus.first % i));
+            foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()){
+                    for (unsigned i = 0u; i < bus.second.size(); ++i){
+                            std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s_in[%d]") % bus.first % i));
     }
 } // namespace revkit
 }
