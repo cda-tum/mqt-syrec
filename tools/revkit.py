@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #from revkit_python import *
-from algorithm import *
-#from mqt.syrec import *
+#from algorithm import *
+from mqt.syrec import *
 def error_msg( statistics ):
     "Returns the error message contained in statistics"
     return "Error: " + statistics.get_string( "error", "" )
