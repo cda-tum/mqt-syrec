@@ -1,0 +1,8 @@
+module alu( in op( 1 ), out x0(16), inout x1(16), inout x2(16))
+
+  if op 
+    then
+      x0 ^ = ( x1 + x2 )
+    else
+      x0 ^ = ( x1 -  x2 )
+fi op

@@ -1,0 +1,4 @@
+module statements(out y(32), inout x(32))
+y ^ = ( x ^ x )
+
+
