@@ -7,6 +7,7 @@
 #ifndef SYREC_SYNTHESIS_GARBAGEFREE_HPP
 #define SYREC_SYNTHESIS_GARBAGEFREE_HPP
 
+#include "syrec_synthesis.hpp"
 /* #include <core/circuit.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
 #include <boost/assign/std/set.hpp>
@@ -32,25 +33,25 @@ namespace revkit {
     public:
         garbagefree_syrec_synthesizer(circuit& circ, const syrec::program& prog);
 
-        void initialize_changing_variables(const syrec::program& program);
+        void initialize_changing_variables(const syrec::program& program) override;
 
-        bool on_module(syrec::module::ptr);
-        bool on_statement(syrec::statement::ptr statement);
-        bool on_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines);
+        bool on_module(syrec::module::ptr) override;
+        bool on_statement(syrec::statement::ptr statement) override;
+        bool on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines);
 
-        void set_settings(properties::ptr settings);
-        void set_main_module(syrec::module::ptr main_module);
+        void set_settings(properties::ptr settings) override;
+        void set_main_module(syrec::module::ptr main_module) override;
 
     protected:
         // statements
-        bool on_statement(const syrec::swap_statement& statement);
-        bool on_statement(const syrec::unary_statement& statement);
-        bool on_statement(const syrec::assign_statement& statement);
-        bool on_statement(const syrec::if_statement& statement);
-        bool on_statement(const syrec::for_statement& statement);
-        bool on_statement(const syrec::call_statement& statement);
-        bool on_statement(const syrec::uncall_statement& statement);
-        bool on_statement(const syrec::skip_statement& statement);
+        bool on_statement(const syrec::swap_statement& statement) override;
+        bool on_statement(const syrec::unary_statement& statement) override;
+        bool on_statement(const syrec::assign_statement& statement) override;
+        bool on_statement(const syrec::if_statement& statement) override;
+        bool on_statement(const syrec::for_statement& statement) override;
+        bool on_statement(const syrec::call_statement& statement) override;
+        bool on_statement(const syrec::uncall_statement& statement) override;
+        bool on_statement(const syrec::skip_statement& statement) override;
 
         // expressions
         bool on_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines);
@@ -59,7 +60,7 @@ namespace revkit {
         bool on_expression(const syrec::binary_expression& expression, std::vector<unsigned>& lines);
         bool on_expression(const syrec::unary_expression& expression, std::vector<unsigned>& lines);
 
-        bool on_condition(const syrec::expression::ptr condition, unsigned result_line);
+        bool on_condition(const syrec::expression::ptr& condition, unsigned result_line);
         bool on_condition(const syrec::numeric_expression& condition, unsigned result_line);
         bool on_condition(const syrec::variable_expression& condition, unsigned result_line);
         bool on_condition(const syrec::shift_expression& condition, unsigned result_line);
@@ -107,7 +108,7 @@ namespace revkit {
         unsigned get_reusable_constant_line(bool value);
         //void release_constant_lines( std::map< bool, std::vector<unsigned> > const_lines );
         //void release_inv_constant_lines( std::map< bool, std::vector<unsigned> > const_lines );
-        void release_constant_lines(std::list<boost::tuple<bool, bool, unsigned>> const_lines);
+        void release_constant_lines(const std::list<boost::tuple<bool, bool, unsigned>>& const_lines);
         void release_constant_line(boost::tuple<bool, bool, unsigned> const_line);
         void release_constant_line(unsigned index, bool value);
 
@@ -131,14 +132,14 @@ namespace revkit {
         bool off_expression(const syrec::shift_expression& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
         bool off_expression(const syrec::binary_expression& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
         bool off_expression(const syrec::unary_expression& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
-        bool off_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
+        bool off_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
 
         bool get_subexpr_lines(const syrec::binary_expression& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
         bool get_subexpr_lines(const syrec::unary_expression& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
         bool get_subexpr_lines(const syrec::numeric_expression& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
         bool get_subexpr_lines(const syrec::variable_expression& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
         bool get_subexpr_lines(const syrec::shift_expression& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
-        bool get_subexpr_lines(syrec::expression::ptr expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
+        bool get_subexpr_lines(const syrec::expression::ptr& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl);
 
         // unary operations
         bool reverse_bitwise_negation(const std::vector<unsigned>& dest);
@@ -181,7 +182,7 @@ namespace revkit {
         syrec::number::loop_variable_mapping  intern_variable_mapping;
 
         syrec::expression::ptr      evaluate_to_numeric_expression(syrec::expression::ptr expression);
-        syrec::variable_access::ptr evaluate_to_numeric_expression(syrec::variable_access::ptr var_access);
+        syrec::variable_access::ptr evaluate_to_numeric_expression(const syrec::variable_access::ptr& var_access);
 
         template<typename T>
         struct is_type {

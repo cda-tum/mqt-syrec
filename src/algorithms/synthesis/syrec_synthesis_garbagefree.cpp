@@ -1,7 +1,12 @@
 #include "algorithms/synthesis/syrec_synthesis_garbagefree.hpp"
 
-// TODO: welche includes sind wirklich nötig ???
-
+#include <boost/assign.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/range/adaptors.hpp>
+#include <boost/range/algorithm.hpp>
+#include <boost/range/algorithm_ext.hpp>
 #include <core/circuit.hpp>
 #include <core/functions/add_gates.hpp>
 #include <core/functions/add_line_to_circuit.hpp>
@@ -13,6 +18,7 @@
 #include <core/syrec/variable.hpp>
 #include <core/utils/costs.hpp>
 #include <core/utils/timer.hpp>
+#include <memory>
 
 #define foreach_ BOOST_FOREACH
 #define reverse_foreach_ BOOST_REVERSE_FOREACH
@@ -77,21 +83,21 @@ namespace revkit {
       var_inv_used_const_lines.push_back( std::map< bool, std::vector<unsigned> >() );
     }*/
         bool okay = false;
-        if (syrec::swap_statement* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::unary_statement* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::assign_statement* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::if_statement* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::for_statement* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::call_statement* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::uncall_statement* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (syrec::skip_statement* stat = dynamic_cast<syrec::skip_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::skip_statement*>(statement.get())) {
             okay = on_statement(*stat);
         } else {
             std::cout << "Synthesize" << std::endl;
@@ -181,7 +187,7 @@ namespace revkit {
             default:
                 std::cout << "Assign Statement" << std::endl;
                 return false;
-        };
+        }
 
         std::vector<unsigned>                         rhs2, lhs2;
         std::list<boost::tuple<bool, bool, unsigned>> rhs_cl, lhs_cl;
@@ -265,7 +271,7 @@ namespace revkit {
         syrec::expression::ptr condition    = evaluate_to_numeric_expression(statement.condition());
         syrec::expression::ptr fi_condition = evaluate_to_numeric_expression(statement.fi_condition());
 
-        if (syrec::numeric_expression* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
+        if (auto* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
             if (cond->value()->evaluate(intern_variable_mapping)) {
                 foreach_(syrec::statement::ptr stat, statement.then_statements()) {
                     if (!on_statement(stat)) return false;
@@ -315,7 +321,7 @@ namespace revkit {
                 // std::cout << "if statement" << std::endl;
                 std::map<std::pair<syrec::variable_access::ptr, unsigned>, syrec::variable_access::ptr, cmp_vptr> then_var_mapping = dupl_if_var_mapping;
                 foreach_(syrec::variable_access::ptr var, _changing_variables.find(&statement)->second) {
-                    syrec::variable_access::ptr dupl_var = syrec::variable_access::ptr(new syrec::variable_access(syrec::variable::ptr(new syrec::variable(syrec::variable::wire, ("dupl_" + var->var()->name() + "_" + boost::lexical_cast<std::string>(dupl_count)), var->var()->dimensions(), var->var()->bitwidth()))));
+                    syrec::variable_access::ptr dupl_var = std::make_shared<syrec::variable_access>(std::make_shared<syrec::variable>(syrec::variable::wire, ("dupl_" + var->var()->name() + "_" + boost::lexical_cast<std::string>(dupl_count)), var->var()->dimensions(), var->var()->bitwidth()));
                     // NEU NEU NEU
                     dupl_var->set_range(var->range());
                     dupl_var->set_indexes(var->indexes());
@@ -569,14 +575,14 @@ namespace revkit {
     }
 
     syrec::expression::ptr garbagefree_syrec_synthesizer::evaluate_to_numeric_expression(syrec::expression::ptr expression) {
-        if (syrec::unary_expression* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
+        if (auto* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
             syrec::expression::ptr sub_expression = evaluate_to_numeric_expression(exp->expr());
-            if (syrec::numeric_expression* sub_exp = dynamic_cast<syrec::numeric_expression*>(sub_expression.get())) {
+            if (auto* sub_exp = dynamic_cast<syrec::numeric_expression*>(sub_expression.get())) {
                 switch (exp->op()) {
                     case syrec::unary_expression::logical_not: // !
                     {
                         unsigned value = (sub_exp->value()->evaluate(intern_variable_mapping) == 0) ? 1 : 0;
-                        return syrec::expression::ptr(new syrec::numeric_expression(syrec::number::ptr(new syrec::number(value)), 1));
+                        return syrec::expression::ptr(new syrec::numeric_expression(std::make_shared<syrec::number>(value), 1));
                     } break;
                     case syrec::unary_expression::bitwise_not: // should not occur
                     {
@@ -589,11 +595,11 @@ namespace revkit {
                 }
             }
             return syrec::expression::ptr(new syrec::unary_expression(exp->op(), sub_expression));
-        } else if (syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             syrec::expression::ptr lhs = evaluate_to_numeric_expression(exp->lhs());
             syrec::expression::ptr rhs = evaluate_to_numeric_expression(exp->rhs());
-            if (syrec::numeric_expression* lhs_exp = dynamic_cast<syrec::numeric_expression*>(lhs.get())) {
-                if (syrec::numeric_expression* rhs_exp = dynamic_cast<syrec::numeric_expression*>(rhs.get())) {
+            if (auto* lhs_exp = dynamic_cast<syrec::numeric_expression*>(lhs.get())) {
+                if (auto* rhs_exp = dynamic_cast<syrec::numeric_expression*>(rhs.get())) {
                     unsigned lhs_value = lhs_exp->value()->evaluate(intern_variable_mapping);
                     unsigned rhs_value = rhs_exp->value()->evaluate(intern_variable_mapping);
                     unsigned num_value;
@@ -690,13 +696,13 @@ namespace revkit {
                             assert(false);
                     }
 
-                    return syrec::expression::ptr(new syrec::numeric_expression(syrec::number::ptr(new syrec::number(num_value)), exp->lhs()->bitwidth()));
+                    return syrec::expression::ptr(new syrec::numeric_expression(std::make_shared<syrec::number>(num_value), exp->lhs()->bitwidth()));
                 }
             }
             return syrec::expression::ptr(new syrec::binary_expression(lhs, exp->op(), rhs));
-        } else if (syrec::shift_expression* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
             syrec::expression::ptr lhs = evaluate_to_numeric_expression(exp->lhs());
-            if (syrec::numeric_expression* lhs_no = dynamic_cast<syrec::numeric_expression*>(lhs.get())) {
+            if (auto* lhs_no = dynamic_cast<syrec::numeric_expression*>(lhs.get())) {
                 unsigned value    = lhs_no->value()->evaluate(intern_variable_mapping);
                 unsigned shft_amt = exp->rhs()->evaluate(intern_variable_mapping);
                 unsigned result;
@@ -716,20 +722,20 @@ namespace revkit {
                         std::cerr << "Invalid operator in shift expression" << std::endl;
                         assert(false);
                 }
-                return syrec::expression::ptr(new syrec::numeric_expression(syrec::number::ptr(new syrec::number(result)), lhs->bitwidth()));
+                return syrec::expression::ptr(new syrec::numeric_expression(std::make_shared<syrec::number>(result), lhs->bitwidth()));
             }
             return syrec::expression::ptr(new syrec::shift_expression(lhs, exp->op(), exp->rhs()));
-        } else if (syrec::variable_expression* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return syrec::expression::ptr(new syrec::variable_expression(evaluate_to_numeric_expression(exp->var())));
         }
         // if it's already a numeric expression, there's nothing to do here
         return expression;
     }
 
-    syrec::variable_access::ptr garbagefree_syrec_synthesizer::evaluate_to_numeric_expression(syrec::variable_access::ptr var_access) {
+    syrec::variable_access::ptr garbagefree_syrec_synthesizer::evaluate_to_numeric_expression(const syrec::variable_access::ptr& var_access) {
         std::vector<std::shared_ptr<syrec::expression>> new_indexes;
-        for (unsigned i = 0u; i < var_access->indexes().size(); ++i) {
-            new_indexes.push_back(evaluate_to_numeric_expression(var_access->indexes().at(i)));
+        for (const auto& i: var_access->indexes()) {
+            new_indexes.push_back(evaluate_to_numeric_expression(i));
         }
         syrec::variable_access::ptr new_var(new syrec::variable_access(var_access->var()));
         new_var->set_range(var_access->range());
@@ -815,9 +821,9 @@ namespace revkit {
   }
   */
 
-    void garbagefree_syrec_synthesizer::release_constant_lines(std::list<boost::tuple<bool, bool, unsigned>> const_lines) {
-        for (std::list<boost::tuple<bool, bool, unsigned>>::iterator it = const_lines.begin(); it != const_lines.end(); ++it) {
-            release_constant_line(*it);
+    void garbagefree_syrec_synthesizer::release_constant_lines(const std::list<boost::tuple<bool, bool, unsigned>>& const_lines) {
+        for (auto& const_line: const_lines) {
+            release_constant_line(const_line);
         }
     }
 
@@ -1067,16 +1073,16 @@ namespace revkit {
         return true;
     }
 
-    bool garbagefree_syrec_synthesizer::on_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines) {
-        if (syrec::numeric_expression* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
+    bool garbagefree_syrec_synthesizer::on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines) {
+        if (auto* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
             return on_expression(*exp, lines);
-        } else if (syrec::variable_expression* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return on_expression(*exp, lines);
-        } else if (syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             return on_expression(*exp, lines);
-        } else if (syrec::unary_expression* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
             return on_expression(*exp, lines);
-        } else if (syrec::shift_expression* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
             return on_expression(*exp, lines);
         } else {
             std::cout << "Expression" << std::endl;
@@ -1324,16 +1330,16 @@ namespace revkit {
         return off_expression(expression.lhs(), lhs, lhs_cl);
     }
 
-    bool garbagefree_syrec_synthesizer::off_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
-        if (syrec::numeric_expression* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
+    bool garbagefree_syrec_synthesizer::off_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
+        if (auto* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
             return off_expression(*exp, lines, expr_cl);
-        } else if (syrec::variable_expression* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return off_expression(*exp, lines, expr_cl);
-        } else if (syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             return off_expression(*exp, lines, expr_cl);
-        } else if (syrec::unary_expression* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
             return off_expression(*exp, lines, expr_cl);
-        } else if (syrec::shift_expression* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
             return off_expression(*exp, lines, expr_cl);
         } else {
             std::cout << "Expression" << std::endl;
@@ -1419,16 +1425,16 @@ namespace revkit {
         return get_subexpr_lines(expression.lhs(), se_cl);
     }
 
-    bool garbagefree_syrec_synthesizer::get_subexpr_lines(syrec::expression::ptr expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl) {
-        if (syrec::numeric_expression* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
+    bool garbagefree_syrec_synthesizer::get_subexpr_lines(const syrec::expression::ptr& expression, std::stack<boost::tuple<bool, bool, unsigned>>& se_cl) {
+        if (auto* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
             return get_subexpr_lines(*exp, se_cl);
-        } else if (syrec::variable_expression* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return get_subexpr_lines(*exp, se_cl);
-        } else if (syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             return get_subexpr_lines(*exp, se_cl);
-        } else if (syrec::unary_expression* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::unary_expression*>(expression.get())) {
             return get_subexpr_lines(*exp, se_cl);
-        } else if (syrec::shift_expression* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
             return get_subexpr_lines(*exp, se_cl);
         } else {
             std::cout << "Expression" << std::endl;
@@ -2155,7 +2161,7 @@ namespace revkit {
         return true;
     }
 
-    bool garbagefree_syrec_synthesizer::on_condition(const syrec::expression::ptr condition, unsigned result_line) {
+    bool garbagefree_syrec_synthesizer::on_condition(const syrec::expression::ptr& condition, unsigned result_line) {
         if (syrec::numeric_expression* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
         } else if (syrec::variable_expression* cond = dynamic_cast<syrec::variable_expression*>(condition.get())) {

@@ -48,10 +48,10 @@ namespace revkit {
         virtual ~standard_syrec_synthesizer();
 #endif
 
-        void initialize_changing_variables(const syrec::program& program);
+        virtual void initialize_changing_variables(const syrec::program& program);
 
-        bool         on_module(syrec::module::ptr);
-        bool         on_statement(syrec::statement::ptr statement);
+        virtual bool on_module(syrec::module::ptr);
+        virtual bool on_statement(syrec::statement::ptr statement);
         bool         on_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
         bool         expression_op_inverse(syrec::expression::ptr expression);                           //new
         bool         var_expression(syrec::expression::ptr expression, std::vector<unsigned>& v);        //new
@@ -60,7 +60,7 @@ namespace revkit {
         bool         full_statement(syrec::statement::ptr statement);                                    //new
         bool         flow(syrec::expression::ptr expression, std::vector<unsigned>& v);                  // new
         virtual void set_settings(properties::ptr settings);
-        void         set_main_module(syrec::module::ptr main_module);
+        virtual void set_main_module(syrec::module::ptr main_module);
         bool         solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs);
         bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
@@ -90,12 +90,13 @@ namespace revkit {
         virtual bool flow(const syrec::binary_expression& expression, std::vector<unsigned>& v);   //new
                                                                                                    // Helper methods (can also be used by custom synthesizers)
     protected:
-        // unary operations
-        bool bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
-        bool decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
-        bool decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
-        bool increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
-        bool increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
+        virtual // unary operations
+                bool
+                     bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
+        virtual bool decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
+        bool         decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
+        virtual bool increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
+        bool         increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
 
         // binary operations
         bool bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
@@ -165,8 +166,8 @@ namespace revkit {
         bool     unget_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
         bool     array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
         unsigned get_constant_line(bool value);
-        bool     get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
-        void     release_constant_line(unsigned index, bool value);
+        bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
+        virtual void release_constant_line(unsigned index, bool value);
 
     private:
         circuit&                                                           _circ;
