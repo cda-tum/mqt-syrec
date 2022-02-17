@@ -24,7 +24,7 @@ namespace revkit {
 
     namespace syrec {
         struct set_comperator {
-            bool operator()(syrec::variable_access::ptr var1, syrec::variable_access::ptr var2) {
+            bool operator()(syrec::variable_access::ptr var1, syrec::variable_access::ptr var2) const {
                 return var1->var().get() < var2->var().get();
             }
         };
