@@ -493,7 +493,7 @@ py::list target_lines1( const gate& g )
 }
 
 
-PYBIND11_MODULE(algorithm, m) {
+PYBIND11_MODULE(pysyrec, m) {
     //m.doc() = "pybind11 example plugin"; // optional module docstring
 
     m.def("py_syrec_synthesisi", &syrec_synthesis);
