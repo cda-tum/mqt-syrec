@@ -35,23 +35,23 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif ()
 
-#macro(check_submodule_present MODULENAME)
-#	if (NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/${MODULENAME}/CMakeLists.txt")
-#		message(FATAL_ERROR "${MODULENAME} submodule not cloned properly. Please run `git submodule update --init --recursive` from the main project directory")
-#	endif ()
-#endmacro()
+macro(check_submodule_present MODULENAME)
+	if (NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/${MODULENAME}/CMakeLists.txt")
+		message(FATAL_ERROR "${MODULENAME} submodule not cloned properly. Please run `git submodule update --init --recursive` from the main project directory")
+	endif ()
+endmacro()
 
-#check_submodule_present(qfr)
+check_submodule_present(qfr)
 
 # add main library code
 add_subdirectory(src)
 
 # add test code
-#if (BUILD_SYREC_TESTS)
-#	enable_testing()
-#	include(GoogleTest)
-#	add_subdirectory(test)
-#endif ()
+if (BUILD_SYREC_TESTS)
+	enable_testing()
+	include(GoogleTest)
+	add_subdirectory(test)
+endif ()
 
 # add Python binding code
 if (BINDINGS)
