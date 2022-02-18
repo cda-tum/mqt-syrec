@@ -97,7 +97,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install boost
-        run:  sudo apt install libboost-all-dev
+        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
       - name: Install dependencies
         run:  pip install -q build
       - name: Build sdist
