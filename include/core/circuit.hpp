@@ -99,8 +99,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    //typedef boost::optional<bool> constant;
-    typedef bool constant;
+    typedef boost::optional<bool> constant;
 
     /**
    * @brief Represents a circuit

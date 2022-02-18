@@ -488,7 +488,7 @@ namespace revkit {
                 //std::cout << module.outputs().at(i) << std::endl;
                 // damit keine out-Variablen nochmal hinzugefügt werden! (wires schon?!) stimmt das so?
                 if (c && module.garbage().at(i)) {
-                    targets += get_reusable_constant_line(c);
+                    targets += get_reusable_constant_line(*c);
                     used_const_lines.pop();
                 }
                 ++i;

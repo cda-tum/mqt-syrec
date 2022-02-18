@@ -971,7 +971,7 @@ return ok;
             const circuit& module = *(_circ.modules().find(module_name)->second);
             foreach_(const constant& c, module.constants()) {
                 if (c) {
-                    targets += get_constant_line(c);
+                    targets += get_constant_line(*c);
                 }
             }
 

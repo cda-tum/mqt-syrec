@@ -121,10 +121,10 @@ if (!settings.propagate_constants) {
     for (unsigned i = 0u; i < circ.lines(); ++i) {
         if (circ.constants().at(i)) {
             if (circ.inputs().at(i) == "0" || circ.inputs().at(i) == "1") {
-                current_signals.at(i) = boost::str(boost::format("constant%d_%d") % (circ.constants().at(i)) % i);
+                current_signals.at(i) = boost::str(boost::format("constant%d_%d") % (*circ.constants().at(i)) % i);
             }
 
-            const_assignments += boost::str(boost::format("%s == %d") % current_signals.at(i) % circ.constants().at(i));
+            const_assignments += boost::str(boost::format("%s == %d") % current_signals.at(i) % *circ.constants().at(i));
         }
     }
     body << boost::algorithm::join(const_assignments, " && ") << std::endl;
