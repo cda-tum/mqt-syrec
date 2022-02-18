@@ -254,13 +254,13 @@ namespace revkit {
 
         /* constants */
         tmp_signal = 0;
-        foreach_(const constant& c, circ.constants()) {
+        for (const constant& c: circ.constants()) {
             if (c) {
                 os << ".names " << settings.tmp_signal_name << tmp_signal++ << std::endl; //<< ".def " << ( *c ? "1" : "0" ) << std::endl;  ABC
             }
         }
 
-        foreach_(const gate& g, circ) {
+        for (const gate& g: circ) {
             using boost::adaptors::transformed;
             write_blif_settings::truth_table_map ttm;
 
@@ -272,7 +272,8 @@ namespace revkit {
                     boost::join(boost::make_iterator_range(g.begin_targets(), g.end_targets()) | transformed(make_random_access(signals)), " ") + " " +
                     boost::join(boost::make_iterator_range(g.begin_controls(), g.end_controls()) | transformed(make_random_access(signals)), " ");
 
-            foreach_(unsigned target, boost::make_iterator_range(g.begin_targets(), g.end_targets())) {
+            for (auto it = g.begin_targets(); it != g.end_targets(); ++it) {
+                const unsigned target = *it;
                 // update name
                 signals.at(target) = boost::str(boost::format("%s%d") % settings.tmp_signal_name % tmp_signal);
 
@@ -282,7 +283,7 @@ namespace revkit {
                 //os << ".def 0" << std::endl; ABC
 
                 // write truth table
-                foreach_(const write_blif_settings::truth_table_map::mapped_type::value_type& pair, ttm[target]) {
+                for (const write_blif_settings::truth_table_map::mapped_type::value_type& pair: ttm[target]) {
                     if (!pair.second) continue; // omit 0 outputs
                     boost::function<std::string(const boost::optional<bool>&)> transformer;
                     if (settings.blif_mv) {
@@ -299,7 +300,7 @@ namespace revkit {
             }
         }
 
-        foreach_(const out_tuple& t, outputs) {
+        for (const out_tuple& t: outputs) {
             if (!boost::get<1>(t)) {
                 os << ".names "
                    << signals.at(std::find(_outputs.begin(), _outputs.end(), boost::get<0>(t)) - _outputs.begin())

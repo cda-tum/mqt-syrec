@@ -148,7 +148,7 @@ namespace revkit {
             std::vector<unsigned> target_lines(line_indices.begin() + num_controls, line_indices.end());
             std::vector<unsigned> target_lines_sorted(target_lines.begin(), target_lines.end());
             boost::sort(target_lines_sorted);
-            foreach_(unsigned index, target_lines) {
+            for (unsigned index: target_lines) {
                 module.target_sort_order += std::distance(boost::begin(target_lines_sorted), boost::find(target_lines_sorted, index));
             }
 

@@ -145,7 +145,7 @@ namespace revkit {
 
         cost_t operator()(const costs_by_gate_func& f) const {
             cost_t sum = 0ull;
-            foreach_(const gate& g, circ) {
+            for (const gate& g: circ) {
                 // respect modules
                 if (is_module(g)) {
                     sum += costs(*boost::any_cast<module_tag>(g.type()).reference.get(), f);

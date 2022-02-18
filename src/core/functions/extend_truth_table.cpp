@@ -91,7 +91,7 @@ namespace revkit {
             {
                 pos = 1u << spec.num_inputs();
             } else {
-                foreach_(const binary_truth_table::value_type& in_bit, it->first) {
+                BOOST_FOREACH (const binary_truth_table::value_type& in_bit, it->first) {
                     pos |= *in_bit << --i;
                 }
             }

@@ -116,7 +116,7 @@ namespace revkit {
     }
 
     bool is_number(const std::string& str) {
-        foreach_(const char& c, str) {
+        for (const char& c: str) {
             if (!std::isdigit(c)) {
                 return false;
             }
@@ -148,7 +148,7 @@ namespace revkit {
                     parse_annotations(sannotations, annotations);
 
                     typedef boost::fusion::vector<std::string, std::string> pair_t;
-                    foreach_(const pair_t& pair, annotations) {
+                    for (const pair_t& pair: annotations) {
                         reader.add_annotation(boost::fusion::at_c<0>(pair), boost::fusion::at_c<1>(pair));
                     }
                 } else {

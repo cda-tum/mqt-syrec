@@ -98,21 +98,21 @@ namespace revkit {
 
         // adjust inputs: states
         {
-                foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()){
-                        for (unsigned i = 0u; i < bus.second.size(); ++i){
-                                std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s_in[%d]") % bus.first % i));
-    }
-} // namespace revkit
-}
-
-// adjust inputs: blocks
-{
-    foreach_(const bus_collection::map::value_type& bus, circ.inputbuses().buses()) {
-        for (unsigned i = 0u; i < bus.second.size(); ++i) {
-            std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s[%d]") % bus.first % i));
+            for (const bus_collection::map::value_type& bus: circ.statesignals().buses()) {
+                for (unsigned i = 0u; i < bus.second.size(); ++i) {
+                    std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s_in[%d]") % bus.first % i));
+                }
+            }
         }
-    }
-}
+
+        // adjust inputs: blocks
+        {
+            for (const bus_collection::map::value_type& bus: circ.inputbuses().buses()) {
+                for (unsigned i = 0u; i < bus.second.size(); ++i) {
+                    std::replace(current_signals.begin(), current_signals.end(), circ.inputs().at(bus.second.at(i)), boost::str(boost::format("%s[%d]") % bus.first % i));
+                }
+            }
+        }
 
 // adjust inputs: constants
 if (!settings.propagate_constants) {
@@ -137,9 +137,9 @@ for (unsigned i = 0u; i < current_constants.size(); ++i) {
     }
 }
 
-unsigned pos = 0u;
-foreach_(const gate& g, circ) {
-    body << "  // gate " << pos++ << std::endl;
+        unsigned pos = 0u;
+        for (const gate& g: circ) {
+            body << "  // gate " << pos++ << std::endl;
 
     if (is_toffoli(g)) {
         unsigned    target_pos      = *g.begin_targets();
@@ -398,27 +398,27 @@ if (inputs.size()) {
     os << "  input " << boost::algorithm::join(inputs, ", ") << ";" << std::endl;
 }
 
-foreach_(const bus_collection::map::value_type& bus, circ.inputbuses().buses()) {
-    os << boost::format("  input [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;
-}
+        for (const bus_collection::map::value_type& bus: circ.inputbuses().buses()) {
+            os << boost::format("  input [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;
+        }
 
 if (outputs.size()) {
     os << "  output " << boost::algorithm::join(outputs, ", ") << ";" << std::endl;
 }
 
-foreach_(const bus_collection::map::value_type& bus, circ.outputbuses().buses()) {
-    os << boost::format("  output [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;
-}
+        for (const bus_collection::map::value_type& bus: circ.outputbuses().buses()) {
+            os << boost::format("  output [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;
+        }
 
 os << "  wire " << boost::algorithm::join(wires, ", ") << ";" << std::endl;
 
-foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()) {
-    os << boost::format("  wire [%d:0] %s_in;") % (bus.second.size() - 1u) % bus.first << std::endl;
-}
+        for (const bus_collection::map::value_type& bus: circ.statesignals().buses()) {
+            os << boost::format("  wire [%d:0] %s_in;") % (bus.second.size() - 1u) % bus.first << std::endl;
+        }
 
-foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()) {
-    os << boost::format("  output [%d:0] %s_out;") % (bus.second.size() - 1u) % bus.first << std::endl;
-}
+        for (const bus_collection::map::value_type& bus: circ.statesignals().buses()) {
+            os << boost::format("  output [%d:0] %s_out;") % (bus.second.size() - 1u) % bus.first << std::endl;
+        }
 
 os << body.str() << std::endl;
 
@@ -446,14 +446,14 @@ for (unsigned i = 0u; i < circ.lines(); ++i) {
     }
 }
 
-// map state signals
-os << std::endl
-   << "  // map state signals" << std::endl;
-foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()) {
-    for (unsigned i = 0u; i < bus.second.size(); ++i) {
-        os << boost::format("  DFF( clk, %1%_out[%2%], %1%_in[%2%] );") % bus.first % i << std::endl;
-    }
-}
+        // map state signals
+        os << std::endl
+           << "  // map state signals" << std::endl;
+        for (const bus_collection::map::value_type& bus: circ.statesignals().buses()) {
+            for (unsigned i = 0u; i < bus.second.size(); ++i) {
+                os << boost::format("  DFF( clk, %1%_out[%2%], %1%_in[%2%] );") % bus.first % i << std::endl;
+            }
+        }
 
 os << "endmodule" << std::endl;
 }

@@ -24,6 +24,7 @@
 #ifndef TRUTH_TABLE_HPP
 #define TRUTH_TABLE_HPP
 
+#include <boost/foreach.hpp>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/permutation_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>

@@ -24,7 +24,6 @@
 #ifndef CIRCUIT_HPP
 #define CIRCUIT_HPP
 
-#include <boost/foreach.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/optional.hpp>
@@ -34,15 +33,6 @@
 #include <core/gate.hpp>
 #include <core/meta/bus_collection.hpp>
 #include <map>
-
-/**
- * For a more convenient use in foreach_ loops.
- * You can use the name foreach_ instead of BOOST_FOREACH.
- *
- * @author RevKit
- * @since  1.0
- */
-#define foreach_ BOOST_FOREACH
 
 namespace revkit {
     /**

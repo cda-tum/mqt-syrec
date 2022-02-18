@@ -212,7 +212,7 @@ namespace revkit {
         // sort order
         std::vector<unsigned> targets_sorted(targets.begin(), targets.end());
         boost::sort(targets_sorted);
-        foreach_(unsigned index, targets) {
+        for (unsigned index: targets) {
             module.target_sort_order += std::distance(boost::begin(targets_sorted), boost::find(targets_sorted, index));
         }
 

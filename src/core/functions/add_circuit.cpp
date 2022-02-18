@@ -34,18 +34,18 @@ namespace revkit {
     void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls) {
         typedef std::pair<std::string, std::string> pair_t;
         if (controls.empty()) {
-            foreach_(const gate& g, src) {
+            for (const gate& g: src) {
                 gate& new_gate                                                         = circ.insert_gate(pos++);
                 new_gate                                                               = g;
                 boost::optional<const std::map<std::string, std::string>&> annotations = src.annotations(g);
                 if (annotations) {
-                    foreach_(const pair_t& p, *annotations) {
+                    for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);
                     }
                 }
             }
         } else {
-            foreach_(const gate& g, src) {
+            for (const gate& g: src) {
                 gate& new_gate = circ.insert_gate(pos++);
                 boost::for_each(controls, boost::bind(&gate::add_control, &new_gate, _1));
                 std::for_each(g.begin_controls(), g.end_controls(), boost::bind(&gate::add_control, &new_gate, _1));
@@ -53,7 +53,7 @@ namespace revkit {
                 new_gate.set_type(g.type());
                 boost::optional<const std::map<std::string, std::string>&> annotations = src.annotations(g);
                 if (annotations) {
-                    foreach_(const pair_t& p, *annotations) {
+                    for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);
                     }
                 }

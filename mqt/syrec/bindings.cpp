@@ -88,7 +88,7 @@ py::dict circuit_annotations(const circuit& c, const gate& g) {
 
     if (annotations) {
         typedef std::pair<std::string, std::string> pair_t;
-        foreach_(const pair_t& p, *annotations) {
+        for (const pair_t p: *annotations) {
             d[py::cast(p.first)] = p.second;
         }
     }

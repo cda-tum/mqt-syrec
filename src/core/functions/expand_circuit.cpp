@@ -35,7 +35,7 @@ namespace revkit {
         } else {
             circ.set_lines(num_lines);
 
-            foreach_(const gate& g, base) {
+            for (const gate& g: base) {
                 gate& new_g = circ.append_gate();
 
                 for (gate::const_iterator it = g.begin_controls(); it != g.end_controls(); ++it) {

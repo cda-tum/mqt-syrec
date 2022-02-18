@@ -22,14 +22,14 @@ namespace revkit {
     std::ostream& operator<<(std::ostream& os, const binary_truth_table& spec) {
         for (binary_truth_table::const_iterator it = spec.begin(); it != spec.end(); ++it) {
             // iterate through input cube (bit by bit)
-            foreach_(const binary_truth_table::value_type& in_bit, it->first) {
+            BOOST_FOREACH (const binary_truth_table::value_type& in_bit, it->first) {
                 os << (in_bit ? (*in_bit ? "1" : "0") : "-");
             }
 
             os << " ";
 
             // iterate through output cube (bit by bit)
-            foreach_(const binary_truth_table::value_type& out_bit, it->second) {
+            BOOST_FOREACH (const binary_truth_table::value_type& out_bit, it->second) {
                 os << (out_bit ? (*out_bit ? "1" : "0") : "-");
             }
 
