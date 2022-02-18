@@ -402,9 +402,9 @@ if (inputs.size()) {
             os << boost::format("  input [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;
         }
 
-if (outputs.size()) {
-    os << "  output " << boost::algorithm::join(outputs, ", ") << ";" << std::endl;
-}
+        if (!outputs.empty()) {
+            os << "  output " << boost::algorithm::join(outputs, ", ") << ";" << std::endl;
+        }
 
         for (const bus_collection::map::value_type& bus: circ.outputbuses().buses()) {
             os << boost::format("  output [%d:0] %s;") % (bus.second.size() - 1u) % bus.first << std::endl;

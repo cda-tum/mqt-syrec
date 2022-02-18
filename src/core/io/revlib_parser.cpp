@@ -161,7 +161,7 @@ namespace revkit {
             boost::algorithm::trim(line);
 
             /* skip empty lines */
-            if (!line.size()) {
+            if (line.empty()) {
                 continue;
             }
 
@@ -171,7 +171,7 @@ namespace revkit {
             /* It is possible that there are empty elements in params,
          e.g. when line contains two spaces between identifiers instead of one.
          These should be removed. */
-            std::vector<std::string>::iterator newEnd = std::remove(params.begin(), params.end(), "");
+            auto newEnd = std::remove(params.begin(), params.end(), "");
             params.erase(newEnd, params.end());
 
             /* By means of the first element we can determine the command */

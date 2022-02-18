@@ -29,7 +29,7 @@ namespace revkit {
             return false;
         }
 
-        if (num_lines == 0u || !filter.size()) {
+        if (num_lines == 0u || filter.empty()) {
             copy_circuit(base, circ);
             return true;
         } else {

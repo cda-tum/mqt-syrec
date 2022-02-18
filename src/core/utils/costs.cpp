@@ -148,7 +148,7 @@ namespace revkit {
             for (const gate& g: circ) {
                 // respect modules
                 if (is_module(g)) {
-                    sum += costs(*boost::any_cast<module_tag>(g.type()).reference.get(), f);
+                    sum += costs(*boost::any_cast<module_tag>(g.type()).reference, f);
                 } else {
                     sum += f(g, circ.lines());
                 }
