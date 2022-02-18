@@ -42,12 +42,7 @@ namespace revkit {
 
         standard_syrec_synthesizer(circuit& circ, const syrec::program& prog);
 
-        // zum Kompilieren unter MacOS
-#ifdef __APPLE__
-        virtual ~standard_syrec_synthesizer();
-#else
-        virtual ~standard_syrec_synthesizer();
-#endif
+        virtual ~standard_syrec_synthesizer() = default;
 
         virtual void initialize_changing_variables(const syrec::program& program);
 

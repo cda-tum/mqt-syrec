@@ -82,9 +82,6 @@ namespace revkit {
         add_edge(cct_man.root, cct_man.current, cct_man.tree);
     }
 
-    // for compiling with MacOS
-    standard_syrec_synthesizer::~standard_syrec_synthesizer(){};
-
     void standard_syrec_synthesizer::set_settings(properties::ptr settings) {
         _settings = settings;
 
