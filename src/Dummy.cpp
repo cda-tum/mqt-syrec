@@ -1,6 +1,6 @@
 #include "Dummy.hpp"
 
-namespace syrec {
+namespace dum {
     double Dummy::getVal() const {
         return val;
     }
