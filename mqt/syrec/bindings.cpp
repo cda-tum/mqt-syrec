@@ -592,7 +592,7 @@ PYBIND11_MODULE(pysyrec, m) {
 
             ;
   
-     py::class_<Dummy>(m, "Dummy")
+     py::class_<syrec::Dummy>(m, "Dummy")
                 .def(py::init<>())
                 .def(py::init<double>())
                 .def("setVal", &Dummy::setVal)
