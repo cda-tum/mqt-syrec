@@ -25,12 +25,13 @@
 #define TIMER_HPP
 
 #include <cassert>
+#include <chrono>
 #include <core/properties.hpp>
+#include <cstdarg>
+#include <cstdio>
 #include <iostream>
-#include <stdarg.h>
-#include <stdio.h>
-#include <sys/times.h>
 #include <unistd.h>
+#include <utility>
 
 namespace revkit {
 
@@ -86,7 +87,7 @@ namespace revkit {
      * @since  1.0
      */
         void operator()(double runtime) const {
-            std::cout << "Runtime: " << runtime << " secs" << std::endl;
+            os << "Runtime: " << runtime << " secs" << std::endl;
         }
 
     private:
@@ -135,7 +136,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        reference_timer() {}
+        reference_timer() = default;
 
         /**
      * @brief Default constructor
@@ -161,7 +162,7 @@ namespace revkit {
         }
 
     private:
-        double* runtime;
+        double* runtime{};
     };
 
     /**
@@ -196,7 +197,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        properties_timer() {}
+        properties_timer() = default;
 
         /**
      * @brief Default constructor
@@ -206,8 +207,8 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        properties_timer(properties::ptr _statistics):
-            statistics(_statistics) {}
+        explicit properties_timer(properties::ptr _statistics):
+            statistics(std::move(_statistics)) {}
 
         /**
      * @brief Saves the run-time to the \b runtime field of the statistics variable
@@ -226,27 +227,6 @@ namespace revkit {
 
     private:
         properties::ptr statistics;
-    };
-
-    /**
-   * @brief Measure Method for timer
-   *
-   * This class is only holding one enumeration
-   * used for the timer::set_measure_method method.
-   */
-    struct measure_method {
-        /**
-     * @brief Flags for different times to measure
-     *
-     * Flags which can be used (also in combination) by the
-     * timer::set_measure_method method.
-     *
-     * @author RevKit
-     * @since  1.1
-     */
-        enum { none        = 0,
-               user_time   = 1,
-               system_time = 2 };
     };
 
     /**
@@ -319,8 +299,7 @@ namespace revkit {
      * @since  1.0
      */
         timer():
-            started(false),
-            _measure_method(measure_method::user_time) {
+            started(false) {
         }
 
         /**
@@ -336,9 +315,8 @@ namespace revkit {
      */
         explicit timer(const Outputter& outputter):
             p(outputter),
-            started(true),
-            _measure_method(measure_method::user_time) {
-            times(&_start);
+            started(true) {
+            begin = std::chrono::steady_clock::now();
         }
 
         /**
@@ -356,21 +334,7 @@ namespace revkit {
         void start(const Outputter& outputter) {
             p       = outputter;
             started = true;
-            times(&_start);
-        }
-
-        /**
-     * @brief Specify the measure method
-     *
-     * Use the flags of the timer class to specify the measure method,
-     * e.g. measure_method::user_time or measure_method::system_time. The flags can also
-     * be merged to capture both and return the sum, i.e. measure_method::user_time | measure_method::system_time.
-     *
-     * @author RevKit
-     * @since  1.1
-     */
-        void set_measure_method(unsigned method) {
-            _measure_method = method;
+            begin   = std::chrono::steady_clock::now();
         }
 
         /**
@@ -403,21 +367,7 @@ namespace revkit {
      */
         typename Outputter::result_type operator()() const {
             assert(started);
-
-            struct tms end;
-            times(&end);
-
-            clock_t end_t = 0, start_t = 0;
-
-            if (_measure_method & measure_method::user_time) {
-                end_t += end.tms_utime + end.tms_cutime;
-                start_t += _start.tms_utime + _start.tms_cutime;
-            } else if (_measure_method & measure_method::system_time) {
-                end_t += end.tms_stime + end.tms_cstime;
-                start_t += _start.tms_stime + _start.tms_cstime;
-            }
-
-            double runtime = (double(end_t - start_t)) / (double)sysconf(_SC_CLK_TCK);
+            double runtime = (std::chrono::steady_clock::now() - begin).count();
             return p(runtime);
         }
 
@@ -437,10 +387,9 @@ namespace revkit {
         }
 
     private:
-        struct tms _start;
-        Outputter  p; // NOTE: has to be copy
+        decltype(std::chrono::steady_clock::now()) begin;
+        Outputter                                  p; // NOTE: has to be copy
         bool       started;
-        unsigned   _measure_method;
     };
 
 } // namespace revkit
