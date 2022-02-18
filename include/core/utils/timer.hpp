@@ -30,7 +30,6 @@
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
-#include <unistd.h>
 #include <utility>
 
 namespace revkit {
