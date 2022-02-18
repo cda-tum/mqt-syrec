@@ -8,4 +8,4 @@ namespace dum {
     void Dummy::setVal(double v) {
         val = v;
     }
-} // namespace syrec
+} // namespace dum

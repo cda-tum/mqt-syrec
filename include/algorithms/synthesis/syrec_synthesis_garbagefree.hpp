@@ -279,7 +279,7 @@ namespace revkit {
     };*/
 
         struct cmp_vptr {
-            bool operator()(const std::pair<syrec::variable_access::ptr, unsigned> a, const std::pair<syrec::variable_access::ptr, unsigned> b) const{
+            bool operator()(const std::pair<syrec::variable_access::ptr, unsigned> a, const std::pair<syrec::variable_access::ptr, unsigned> b) const {
                 return ((a.first->var() < b.first->var()) || ((a.first->var() == b.first->var()) && (a.second < b.second)));
             }
         };

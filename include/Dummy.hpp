@@ -18,4 +18,4 @@ namespace dum {
         double                  val{};
         boost::dynamic_bitset<> bitset{};
     };
-} // namespace syrec
+} // namespace dum

@@ -26,4 +26,4 @@ namespace dum {
 
         EXPECT_EQ(dummy.getVal(), dummyVal);
     }
-} // namespace syrec
+} // namespace dum

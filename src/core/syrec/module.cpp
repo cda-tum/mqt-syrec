@@ -31,95 +31,95 @@ using namespace boost::assign;
 
 namespace revkit::syrec {
 
-        class module::priv {
-        public:
-            priv() = default;
+    class module::priv {
+    public:
+        priv() = default;
 
-            std::string    name;
-            variable::vec  parameters;
-            variable::vec  variables;
-            statement::vec statements;
-        };
+        std::string    name;
+        variable::vec  parameters;
+        variable::vec  variables;
+        statement::vec statements;
+    };
 
-        module::module() :d(new priv()) {}
+    module::module() :d(new priv()) {}
 
-        module::module(const std::string& name) :d(new priv()) {
-            d->name = name;
-        }
+    module::module(const std::string& name) :d(new priv()) {
+        d->name = name;
+    }
 
-        module::~module() {
-            delete d;
-        }
+    module::~module() {
+        delete d;
+    }
 
-        void module::set_name(const std::string& name) {
-            d->name = name;
-        }
+    void module::set_name(const std::string& name) {
+        d->name = name;
+    }
 
-        const std::string& module::name() const {
-            return d->name;
-        }
+    const std::string& module::name() const {
+        return d->name;
+    }
 
-        void module::add_parameter(variable::ptr parameter) {
-            d->parameters += parameter;
-        }
+    void module::add_parameter(variable::ptr parameter) {
+        d->parameters += parameter;
+    }
 
-        const variable::vec& module::parameters() const {
-            return d->parameters;
-        }
+    const variable::vec& module::parameters() const {
+        return d->parameters;
+    }
 
-        void module::add_variable(variable::ptr variable) {
-            d->variables += variable;
-        }
+    void module::add_variable(variable::ptr variable) {
+        d->variables += variable;
+    }
 
-        const variable::vec& module::variables() const {
-            return d->variables;
-        }
+    const variable::vec& module::variables() const {
+        return d->variables;
+    }
 
-        variable::ptr module::find_parameter_or_variable(const std::string& name) const {
-            foreach_(variable::ptr var, d->parameters) {
-                if (var->name() == name) {
-                    return var;
-                }
+    variable::ptr module::find_parameter_or_variable(const std::string& name) const {
+        foreach_(variable::ptr var, d->parameters) {
+            if (var->name() == name) {
+                return var;
             }
+        }
 
-            foreach_(variable::ptr var, d->variables) {
-                if (var->name() == name) {
-                    return var;
-                }
+        foreach_(variable::ptr var, d->variables) {
+            if (var->name() == name) {
+                return var;
             }
-
-            return {};
         }
 
-        void module::add_statement(statement::ptr statement) {
-            d->statements += statement;
+        return {};
+    }
+
+    void module::add_statement(statement::ptr statement) {
+        d->statements += statement;
+    }
+
+    const statement::vec& module::statements() const {
+        return d->statements;
+    }
+
+    /* helper function which creates a string from a output stream */
+    struct to_string {
+        typedef std::string result_type;
+
+        template<typename T>
+        std::string operator()(const T& t) const {
+            std::stringstream oss;
+            oss.precision(0u);
+            oss << t;
+            return oss.str();
         }
+    };
 
-        const statement::vec& module::statements() const {
-            return d->statements;
-        }
+    std::ostream& operator<<(std::ostream& os, const module& m) {
+        using boost::adaptors::indirected;
+        using boost::adaptors::transformed;
 
-        /* helper function which creates a string from a output stream */
-        struct to_string {
-            typedef std::string result_type;
+        os << "module " << m.name() << "(" << boost::algorithm::join(m.parameters() | indirected | transformed(to_string()), ", ") << ")" << std::endl;
+        boost::copy(m.variables() | indirected, std::ostream_iterator<const variable>(os, "\n"));
+        boost::copy(m.statements() | indirected, std::ostream_iterator<const statement>(os));
+        return os;
+    }
 
-            template<typename T>
-            std::string operator()(const T& t) const {
-                std::stringstream oss;
-                oss.precision(0u);
-                oss << t;
-                return oss.str();
-            }
-        };
-
-        std::ostream& operator<<(std::ostream& os, const module& m) {
-            using boost::adaptors::indirected;
-            using boost::adaptors::transformed;
-
-            os << "module " << m.name() << "(" << boost::algorithm::join(m.parameters() | indirected | transformed(to_string()), ", ") << ")" << std::endl;
-            boost::copy(m.variables() | indirected, std::ostream_iterator<const variable>(os, "\n"));
-            boost::copy(m.statements() | indirected, std::ostream_iterator<const statement>(os));
-            return os;
-        }
-
-    } // namespace revkit
+} // namespace revkit::syrec
