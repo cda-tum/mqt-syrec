@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace syrec {
+namespace dum {
     class DummyTest: public ::testing::Test {
     protected:
         // any objects needed by all tests
