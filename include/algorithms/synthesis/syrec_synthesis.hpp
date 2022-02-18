@@ -43,7 +43,7 @@ namespace revkit {
 
         // zum Kompilieren unter MacOS
 #ifdef __APPLE__
-        virtual standard_syrec_synthesizer::~standard_syrec_synthesizer();
+        virtual ~standard_syrec_synthesizer();
 #else
         virtual ~standard_syrec_synthesizer();
 #endif
