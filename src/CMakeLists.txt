@@ -2,7 +2,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/Dummy.hpp
             ${CMAKE_CURRENT_SOURCE_DIR}/Dummy.cpp
 
-            ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_p.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_garbagefree.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp

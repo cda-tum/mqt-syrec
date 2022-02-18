@@ -23,32 +23,28 @@
     #include <core/circuit.hpp>
     #include <core/gate.hpp>
 
-namespace revkit {
+namespace revkit::internal {
+    struct node_properties {
+        node_properties() = default;
 
-    namespace internal {
-        struct node_properties {
-            node_properties() {}
+        unsigned                 control{};
+        gate::line_container     controls;
+        std::shared_ptr<circuit> circ;
+    };
 
-            unsigned                 control;
-            gate::line_container     controls;
-            std::shared_ptr<circuit> circ;
-        };
+    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                  boost::property<boost::vertex_name_t, node_properties>>
+            cct;
 
-        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                                      boost::property<boost::vertex_name_t, node_properties>>
-                cct;
+    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+    typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
 
-        typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
-        typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
-
-        struct cct_manager {
-            cct      tree;
-            cct_node current;
-            cct_node root;
-        };
-    } // namespace internal
-
-} // namespace revkit
+    struct cct_manager {
+        cct      tree;
+        cct_node current;
+        cct_node root;
+    };
+} // namespace revkit::internal
 
 #endif /* SYREC_SYNTHESIS_P_HPP */
 /** @endcond */
