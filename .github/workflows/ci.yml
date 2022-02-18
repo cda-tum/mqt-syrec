@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install boost
-        run:  sudo apt install libboost-all-dev
+        run: sudo apt-get -y install libboost-all-dev
       - name: Configure CMake
         run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
       - name: Build
