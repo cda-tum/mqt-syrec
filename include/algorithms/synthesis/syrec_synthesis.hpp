@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis_p.hpp>
+#include <cmath>
 #include <core/circuit.hpp>
 #include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
@@ -18,7 +19,6 @@
 #include <core/syrec/expression.hpp>
 #include <core/syrec/program.hpp>
 #include <core/truth_table.hpp>
-#include <math.h>
 #include <stack>
 
 namespace revkit {

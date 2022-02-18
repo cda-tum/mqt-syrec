@@ -1,9 +1,6 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 
-#include "algorithms/synthesis/syrec_synthesis_garbagefree.hpp"
-
 #include <algorithm>
-#include <boost/assign/std/set.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/bind.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -18,9 +15,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <core/functions/add_gates.hpp>
 #include <core/functions/add_line_to_circuit.hpp>
-#include <core/functor.hpp>
-#include <core/io/print_circuit.hpp>
-#include <core/io/write_realization.hpp>
 #include <core/syrec/expression.hpp>
 #include <core/syrec/program.hpp>
 #include <core/syrec/reverse_statements.hpp>
