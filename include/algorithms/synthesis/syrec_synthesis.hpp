@@ -144,9 +144,9 @@ namespace revkit {
 
         virtual bool optimization_decision(const cct_node&);
         unsigned     bestCost(const cct_node& current);
-        unsigned standardCost(const cct_node& current, unsigned controls);
-        unsigned optimizationCost(const cct_node& current);
-        unsigned successorsCost(const cct_node& current);
+        unsigned     standardCost(const cct_node& current, unsigned controls);
+        unsigned     optimizationCost(const cct_node& current);
+        unsigned     successorsCost(const cct_node& current);
 
         cct_manager cct_man;
 
