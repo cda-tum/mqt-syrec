@@ -9,6 +9,7 @@
 //#include <boost/python/stl_iterator.hpp>
 //#include <boost/python/dict.hpp>
 //#include <boost/python/extract.hpp>
+#include "Dummy.hpp"
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
@@ -590,6 +591,12 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_property_readonly("module_name", gate_module_name)
 
             ;
+  
+     py::class_<Dummy>(m, "Dummy")
+                .def(py::init<>())
+                .def(py::init<double>())
+                .def("setVal", &Dummy::setVal)
+                .def("getVal", &Dummy::getVal);
 
     m.def("control_linesi", control_lines1);
     m.def("target_linesi", target_lines1);
