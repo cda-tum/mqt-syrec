@@ -83,7 +83,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        std::string header;
+        std::string header{};
     };
 
     /**

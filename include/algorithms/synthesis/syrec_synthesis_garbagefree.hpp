@@ -296,7 +296,7 @@ namespace revkit {
         syrec::variable_access::ptr get_dupl(syrec::variable_access::ptr var);
 
         void compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::module::ptr module, std::map<const syrec::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables);
         void compute_changing_variables(const syrec::statement::ptr statement, std::map<const syrec::statement*, var_set>& changing_variables);
     };
 

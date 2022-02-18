@@ -78,7 +78,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        std::string header;
+        std::string header{};
 
         /**
      * @brief Order of literals in the output cubes

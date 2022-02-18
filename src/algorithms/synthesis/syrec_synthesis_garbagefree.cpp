@@ -3194,7 +3194,7 @@ namespace revkit {
         }
     }
 
-    void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::module::ptr module, std::map<const syrec::statement*, var_set>& changing_variables) {
+    void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables) {
         foreach_(syrec::statement::ptr stat, module->statements()) {
             compute_changing_variables(stat, changing_variables);
         }

@@ -24,11 +24,8 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
-#include <cassert>
 #include <chrono>
 #include <core/properties.hpp>
-#include <cstdarg>
-#include <cstdio>
 #include <iostream>
 #include <utility>
 

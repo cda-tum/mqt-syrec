@@ -19,19 +19,13 @@
 
 #include "core/circuit.hpp"
 #include "core/target_tags.hpp"
-#include "core/version.hpp"
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/spirit/include/karma.hpp>
 #include <fstream>
-
-#define foreach_ BOOST_FOREACH
 
 using namespace boost::assign;
 
@@ -56,8 +50,7 @@ namespace revkit {
     };
 
     write_realization_settings::write_realization_settings():
-        version("2.0"),
-        header(boost::str(boost::format("This file has been generated using RevKit %s (www.revkit.org)") % revkit_version())) {
+        version("2.0") {
     }
 
     void write_realization(const circuit& circ, std::ostream& os, const write_realization_settings& settings) {
@@ -99,28 +92,18 @@ namespace revkit {
 
         os << ".variables " << boost::algorithm::join(variables, " ") << std::endl;
 
-        namespace karma = boost::spirit::karma;
-        namespace ascii = boost::spirit::ascii;
-
         os << ".inputs";
-        //std::ostream_iterator<char> outit( os );
-        //karma::generate_delimited( outit, *( karma::no_delimit['"' << karma::string] << '"' ), ascii::space, _inputs );
-
-        foreach_(const std::string& _input, _inputs) {
-            std::string quote = (_input.find(" ") != std::string::npos) ? "\"" : "";
+        for (const std::string& _input: _inputs) {
+            std::string quote = (_input.find(' ') != std::string::npos) ? "\"" : "";
             os << boost::format(" %s%s%s") % quote % _input % quote;
         }
-
         os << std::endl;
 
         os << ".outputs ";
-        //karma::generate_delimited( outit, *( karma::no_delimit['"' << karma::string] << '"' ), ascii::space, _outputs );
-
-        foreach_(const std::string& _output, _outputs) {
-            std::string quote = (_output.find(" ") != std::string::npos) ? "\"" : "";
+        for (const std::string& _output: _outputs) {
+            std::string quote = (_output.find(' ') != std::string::npos) ? "\"" : "";
             os << boost::format(" %s%s%s") % quote % _output % quote;
         }
-
         os << std::endl;
 
         std::string _constants(circ.lines(), '-');
@@ -132,26 +115,26 @@ namespace revkit {
         os << ".constants " << _constants << std::endl
            << ".garbage " << _garbage << std::endl;
 
-        foreach_(const bus_collection::map::value_type& bus, circ.inputbuses().buses()) {
+        for (const bus_collection::map::value_type& bus: circ.inputbuses().buses()) {
             std::vector<std::string> lines;
             std::transform(bus.second.begin(), bus.second.end(), std::back_inserter(lines), line_to_variable());
             os << ".inputbus " << bus.first << " " << boost::algorithm::join(lines, " ") << std::endl;
         }
 
-        foreach_(const bus_collection::map::value_type& bus, circ.outputbuses().buses()) {
+        for (const bus_collection::map::value_type& bus: circ.outputbuses().buses()) {
             std::vector<std::string> lines;
             std::transform(bus.second.begin(), bus.second.end(), std::back_inserter(lines), line_to_variable());
             os << ".outputbus " << bus.first << " " << boost::algorithm::join(lines, " ") << std::endl;
         }
 
-        foreach_(const bus_collection::map::value_type& bus, circ.statesignals().buses()) {
+        for (const bus_collection::map::value_type& bus: circ.statesignals().buses()) {
             std::vector<std::string> lines;
             std::transform(bus.second.begin(), bus.second.end(), std::back_inserter(lines), line_to_variable());
             os << ".state " << bus.first << " " << boost::algorithm::join(lines, " ") << std::endl;
         }
 
         typedef std::pair<std::string, std::shared_ptr<circuit>> pair_t;
-        foreach_(const pair_t& module, circ.modules()) {
+        for (const pair_t module: circ.modules()) {
             os << ".module " << module.first << std::endl;
 
             write_realization_settings module_settings;
@@ -164,7 +147,7 @@ namespace revkit {
 
         std::string cmd;
 
-        foreach_(const gate& g, circ) {
+        for (const gate& g: circ) {
             if (is_toffoli(g)) {
                 cmd = boost::str(boost::format("t%d") % g.size());
             } else if (is_fredkin(g)) {
@@ -196,7 +179,7 @@ namespace revkit {
             } else {
                 std::transform(g.begin_controls(), g.end_controls(), std::back_inserter(lines), line_to_variable());
                 std::vector<unsigned> targets(g.begin_targets(), g.end_targets());
-                foreach_(unsigned index, boost::any_cast<module_tag>(g.type()).target_sort_order) {
+                for (unsigned index: boost::any_cast<module_tag>(g.type()).target_sort_order) {
                     lines += line_to_variable()(targets.at(index));
                 }
             }
@@ -207,7 +190,7 @@ namespace revkit {
             if (annotations) {
                 std::string                                 sannotations;
                 typedef std::pair<std::string, std::string> pair_t;
-                foreach_(const pair_t& p, *annotations) {
+                for (const pair_t p: *annotations) {
                     sannotations += boost::str(boost::format(" %s=\"%s\"") % p.first % p.second);
                 }
                 os << " #@" << sannotations;

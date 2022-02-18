@@ -13,14 +13,12 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_garbagefree.hpp
 
-
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/pattern.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/properties.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/target_tags.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/truth_table.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/version.cpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/io/create_image.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/io/print_circuit.cpp
@@ -72,15 +70,12 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/costs.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/program_options.cpp
 
-
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/pattern.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/truth_table.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/version.hpp
-
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/create_image.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/print_circuit.hpp
@@ -96,7 +91,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/write_realization.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/write_specification.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/write_verilog.hpp
-
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/active_controls.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
@@ -130,7 +124,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/write_systemc.hpp
-
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/costs.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/program_options.hpp

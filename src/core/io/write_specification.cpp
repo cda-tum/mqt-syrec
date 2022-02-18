@@ -18,7 +18,6 @@
 #include "core/io/write_specification.hpp"
 
 #include "core/io/io_utils_p.hpp"
-#include "core/version.hpp"
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -49,8 +48,7 @@ namespace revkit {
     };
 
     write_specification_settings::write_specification_settings():
-        version("2.0"),
-        header(boost::str(boost::format("This file has been generated using RevKit %s (www.revkit.org)") % revkit_version())){};
+        version("2.0") {}
 
     bool write_specification(const binary_truth_table& spec, const std::string& filename, const write_specification_settings& settings) {
         std::filebuf fb;
@@ -64,7 +62,7 @@ namespace revkit {
 
         unsigned oldsize = 0;
 
-        if (settings.header.size()) {
+        if (!settings.header.empty()) {
             std::string header = settings.header;
             boost::algorithm::replace_all(header, "\n", "\n# ");
             os << "# " << header << std::endl;

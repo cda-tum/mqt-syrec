@@ -13,6 +13,7 @@
 #include <boost/range/algorithm_ext/push_back.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
 #include <core/functions/add_gates.hpp>
 #include <core/functions/add_line_to_circuit.hpp>
 #include <core/syrec/expression.hpp>
@@ -22,7 +23,6 @@
 #include <core/utils/costs.hpp>
 #include <core/utils/timer.hpp>
 #include <functional>
-#include <math.h>
 #include <numeric>
 
 #define foreach_ BOOST_FOREACH
@@ -2243,15 +2243,15 @@ return ok;
     }
 
     unsigned standard_syrec_synthesizer::bestCost(const cct_node& current) {
-        unsigned stdCost = standardCost(current, get(boost::vertex_name, cct_man.tree)[current].controls.size());
+        const auto stdCost = standardCost(current, get(boost::vertex_name, cct_man.tree)[current].controls.size());
 
         // leaf
         if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
             return stdCost;
         }
 
-        unsigned optCost  = optimizationCost(current);
-        unsigned succCost = successorsCost(current);
+        const auto optCost  = optimizationCost(current);
+        const auto succCost = successorsCost(current);
 
         return std::min({stdCost, optCost, succCost});
     }

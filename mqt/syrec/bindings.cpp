@@ -28,7 +28,6 @@
 #include <core/target_tags.hpp>
 #include <core/truth_table.hpp>
 #include <core/utils/costs.hpp>
-#include <core/version.hpp>
 
 //using namespace boost::python;
 namespace py = pybind11;

@@ -142,8 +142,8 @@ namespace revkit {
         bool assemble_circuit(const cct_node&);
         bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
 
-        bool     optimization_decision(const cct_node&);
-        unsigned bestCost(const cct_node& current);
+        virtual bool optimization_decision(const cct_node&);
+        unsigned     bestCost(const cct_node& current);
         unsigned standardCost(const cct_node& current, unsigned controls);
         unsigned optimizationCost(const cct_node& current);
         unsigned successorsCost(const cct_node& current);
