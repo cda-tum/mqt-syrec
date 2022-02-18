@@ -2253,7 +2253,7 @@ return ok;
         const auto optCost  = optimizationCost(current);
         const auto succCost = successorsCost(current);
 
-        return std::min({stdCost, optCost, succCost});
+        return (std::min)({stdCost, optCost, succCost});
     }
 
     unsigned standard_syrec_synthesizer::standardCost(const cct_node& current, unsigned controls) {
