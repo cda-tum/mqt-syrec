@@ -389,7 +389,7 @@ namespace revkit {
     private:
         decltype(std::chrono::steady_clock::now()) begin;
         Outputter                                  p; // NOTE: has to be copy
-        bool       started;
+        bool                                       started;
     };
 
 } // namespace revkit
