@@ -41,9 +41,11 @@ namespace revkit::syrec {
         statement::vec statements;
     };
 
-    module::module() :d(new priv()) {}
+    module::module():
+            d(new priv()) {}
 
-    module::module(const std::string& name) :d(new priv()) {
+    module::module(const std::string& name):
+        d(new priv()) {
         d->name = name;
     }
 
