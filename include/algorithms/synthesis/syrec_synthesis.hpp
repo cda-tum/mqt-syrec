@@ -7,6 +7,7 @@
 #ifndef SYREC_SYNTHESIS_HPP
 #define SYREC_SYNTHESIS_HPP
 
+#include <algorithm>
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis_p.hpp>
 #include <core/circuit.hpp>

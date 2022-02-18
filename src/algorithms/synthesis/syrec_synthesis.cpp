@@ -2251,11 +2251,6 @@ return ok;
         return false;
     }
 
-    unsigned min(unsigned a, unsigned b, unsigned c) {
-        unsigned tmp = (a < b) ? a : b;
-        return ((tmp < c) ? tmp : c);
-    }
-
     unsigned standard_syrec_synthesizer::bestCost(const cct_node& current) {
         unsigned stdCost = standardCost(current, get(boost::vertex_name, cct_man.tree)[current].controls.size());
 
@@ -2267,7 +2262,7 @@ return ok;
         unsigned optCost  = optimizationCost(current);
         unsigned succCost = successorsCost(current);
 
-        return min(stdCost, optCost, succCost);
+        return std::min({stdCost, optCost, succCost});
     }
 
     unsigned standard_syrec_synthesizer::standardCost(const cct_node& current, unsigned controls) {
