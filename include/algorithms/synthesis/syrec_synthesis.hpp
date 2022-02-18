@@ -25,7 +25,7 @@ namespace revkit {
 
     namespace syrec {
         struct set_comperator {
-            bool operator()(syrec::variable_access::ptr var1, syrec::variable_access::ptr var2) const {
+            bool operator()(const syrec::variable_access::ptr& var1, const syrec::variable_access::ptr& var2) const {
                 return var1->var().get() < var2->var().get();
             }
         };
@@ -48,16 +48,16 @@ namespace revkit {
 
         virtual bool on_module(syrec::module::ptr);
         virtual bool on_statement(syrec::statement::ptr statement);
-        bool         on_expression(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        bool         expression_op_inverse(syrec::expression::ptr expression);                           //new
-        bool         var_expression(syrec::expression::ptr expression, std::vector<unsigned>& v);        //new
-        bool         on_full_statement(syrec::statement::ptr statement);                                 //new
-        bool         op_rhs_lhs_expression(syrec::expression::ptr expression, std::vector<unsigned>& v); //new
-        bool         full_statement(syrec::statement::ptr statement);                                    //new
-        bool         flow(syrec::expression::ptr expression, std::vector<unsigned>& v);                  // new
+        bool         on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
+        bool         var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
+        bool         on_full_statement(const syrec::statement::ptr& statement);                                 //new
+        bool         op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
+        bool         full_statement(const syrec::statement::ptr& statement);                                    //new
+        bool         flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v);                  // new
         virtual void set_settings(properties::ptr settings);
         virtual void set_main_module(syrec::module::ptr main_module);
-        bool         solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs);
+        bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
         bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
     protected:
@@ -127,9 +127,9 @@ namespace revkit {
         bool decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool expression_op_inverse(unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs);
+        bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
         bool expression_single_op(unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs);
-        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, std::vector<unsigned> lhs, std::vector<unsigned> rhs);
+        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
         //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
         // shift operations
         bool left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // << TODO: testen
@@ -159,7 +159,7 @@ namespace revkit {
         std::stack<syrec::statement::ptr>& stmts();
 
         bool         get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
-        bool         unget_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
+        bool         unget_variables(const syrec::variable_access::ptr& var, std::vector<unsigned>& lines);
         bool         array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
         unsigned     get_constant_line(bool value);
         bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
@@ -180,8 +180,8 @@ namespace revkit {
         std::stack<syrec::module::ptr>             modules;
 
         void compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::module::ptr module, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::statement::ptr statement, std::map<const syrec::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const syrec::statement::ptr& statement, std::map<const syrec::statement*, var_set>& changing_variables);
 
         std::string variable_name_format;
 
@@ -228,7 +228,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    bool syrec_synthesis(circuit& circ, const syrec::program& program, properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr());
+    bool syrec_synthesis(circuit& circ, const syrec::program& program, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr());
 
     /**
    * @brief Functor for the syrec_synthesis algorithm
@@ -241,7 +241,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    hdl_synthesis_func syrec_synthesis_func(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
+    hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = properties::ptr(new properties()), const properties::ptr& statistics = properties::ptr(new properties()));
 
 } // namespace revkit
 
