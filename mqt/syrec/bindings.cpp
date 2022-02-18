@@ -592,11 +592,11 @@ PYBIND11_MODULE(pysyrec, m) {
 
             ;
   
-     py::class_<syrec::Dummy>(m, "Dummy")
+     py::class_<dum::Dummy>(m, "Dummy")
                 .def(py::init<>())
                 .def(py::init<double>())
-                .def("setVal", &syrec::Dummy::setVal)
-                .def("getVal", &syrec::Dummy::getVal);
+                .def("setVal", &dum::Dummy::setVal)
+                .def("getVal", &dum::Dummy::getVal);
 
     m.def("control_linesi", control_lines1);
     m.def("target_linesi", target_lines1);
