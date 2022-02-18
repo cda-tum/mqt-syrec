@@ -2,7 +2,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace syrec {
+namespace dum {
     class Dummy {
     public:
         Dummy() = default;
