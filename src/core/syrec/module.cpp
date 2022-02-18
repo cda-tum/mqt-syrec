@@ -42,7 +42,7 @@ namespace revkit::syrec {
     };
 
     module::module():
-            d(new priv()) {}
+        d(new priv()) {}
 
     module::module(const std::string& name):
         d(new priv()) {
