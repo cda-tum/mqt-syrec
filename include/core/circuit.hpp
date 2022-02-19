@@ -33,6 +33,7 @@
 #include <core/gate.hpp>
 #include <core/meta/bus_collection.hpp>
 #include <map>
+#include <optional>
 
 namespace revkit {
     /**
