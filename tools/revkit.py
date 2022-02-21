@@ -17,6 +17,9 @@
 #from revkit_python import *
 #from algorithm import *
 from mqt.syrec import *
+
+__all__ = ['error_msg', 'read_programi', 'syrec_synthesisi', 'init_gui', 'display_circuit']
+
 def error_msg( statistics ):
     "Returns the error message contained in statistics"
     return "Error: " + statistics.get_string( "error", "" )
