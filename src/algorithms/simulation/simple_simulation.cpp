@@ -116,6 +116,8 @@ namespace revkit {
         } else {
             assert(false);
         }
+    
+        return input;
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
