@@ -24,6 +24,9 @@ from PyQt4 import QtCore
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 #QString=type("")
+
+__all__ = ['CircuitLineItem', 'GateItem', 'CircuitView', 'HierarchyModel', 'SyReCEditor', 'SyReCHighligher', 'QtSyReCEditor', 'RevLibEditor', 'RevLibHighlighter', 'CodeEditor', 'LineNumberArea']
+
 class CircuitLineItem( QGraphicsItemGroup ):
     def __init__( self, index, width, parent = None ):
         QGraphicsItemGroup.__init__( self, parent )
