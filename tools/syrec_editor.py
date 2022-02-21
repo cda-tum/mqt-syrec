@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import os, re, sys
+import re, sys
 
 from PyQt4 import * #QtCore, QtGui, Qsci
 from PyQt4.QtCore import *
