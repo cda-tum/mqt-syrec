@@ -695,7 +695,6 @@ namespace revkit {
     }
 
     std::string systemc_writer::statement_to_systemc(const syrec::skip_statement& statement) {
-        
         UNUSED(statement);    
         return "";
     }
