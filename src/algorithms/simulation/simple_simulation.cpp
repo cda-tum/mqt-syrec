@@ -116,8 +116,6 @@ namespace revkit {
         } else {
             assert(false);
         }
-        
-    
         return input;
     }
 
