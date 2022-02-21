@@ -58,7 +58,7 @@ namespace revkit {
         } else {
             assert(false);
         }
-        
+       
         std::vector<unsigned> v;
         return v;
     }
