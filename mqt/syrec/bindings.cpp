@@ -10,6 +10,7 @@
 //#include <boost/python/dict.hpp>
 //#include <boost/python/extract.hpp>
 #include "Dummy.hpp"
+
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
