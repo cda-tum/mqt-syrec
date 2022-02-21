@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
-import sys
+#import sys
 
 from revkit import *
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -92,7 +92,8 @@ class GateItem( QGraphicsItemGroup ):
 
             for t in range( min_target + 1, max_target ):
                 if t not in target_linesi( g ):
-                    line = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
+                    #line = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
+		    continue
 
             text = QGraphicsSimpleTextItem( g.module_name, self )
             width = QFontMetrics( text.font() ).width( g.module_name )
@@ -564,7 +565,7 @@ class SyReCEditor:
         msg.setInformativeText(output)
         msg.setWindowTitle("Statistics")
         msg.setStandardButtons(QMessageBox.Ok)
-        retval = msg.exec_()
+        msg.exec_()
        
        
     def sim(self):
@@ -595,7 +596,7 @@ class SyReCEditor:
 
     def simOnce(self, circ) :
 
-        const_garbage = 0
+        #const_garbage = 0
 
         bit_mask = 0
         bit_pos  = 0
@@ -649,9 +650,9 @@ class SyReCEditor:
 
         print (final_inp)
         print (final_out)
-        int_new=5
+        #int_new=5
 #--------------------------------------------------------------------------------
-        inp_string   = circ.inputs + circ.outputs
+        #inp_string   = circ.inputs + circ.outputs
         num_inputs    = len(circ.inputs)
 
         #app 	= QApplication(sys.argv)
