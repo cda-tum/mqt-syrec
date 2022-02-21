@@ -17,6 +17,7 @@ import os
 #import sys
 
 from revkit import *
+from mqt.syrec import *
 
 from PyQt4 import QtCore
 
