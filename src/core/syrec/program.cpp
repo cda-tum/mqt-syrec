@@ -55,8 +55,7 @@ namespace revkit {
         }
 
         module::ptr program::find_module(const std::string& name) const {
-            
-            for (module::ptr & p: d->modules) {
+            for (module::ptr& p: d->modules) {
                 if (p->name() == name) {
                     return p;
                 }
