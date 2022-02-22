@@ -25,9 +25,7 @@
 #define TRUTH_TABLE_HPP
 
 #include <boost/foreach.hpp>
-#include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/permutation_iterator.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include <boost/optional.hpp>
 #include <core/circuit.hpp>
 #include <iostream>
@@ -156,7 +154,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        unsigned num_inputs() const {
+        [[nodiscard]] unsigned num_inputs() const {
             if (_cubes.size()) {
                 return _cubes.begin()->first.size();
             } else {
@@ -233,10 +231,9 @@ namespace revkit {
 
             if (!_cubes.size()) {
                 /* first entry -> create permutation */
-                std::copy(boost::counting_iterator<unsigned>(0),
-                          boost::counting_iterator<unsigned>(output.size()),
-                          std::back_inserter(_permutation));
-
+                for (std::size_t i = 0; i < output.size(); ++i) {
+                    _permutation.emplace_back(i);
+                }
                 _constants.resize(input.size(), constant());
                 _garbage.resize(output.size(), false);
             }

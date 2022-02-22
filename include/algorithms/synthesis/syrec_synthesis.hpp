@@ -11,14 +11,12 @@
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis_p.hpp>
 #include <cmath>
-//#include <core/circuit.hpp>
 #include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
-//#include <core/functor.hpp>
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
 #include <core/syrec/program.hpp>
-//#include <core/truth_table.hpp>
+#include <memory>
 #include <stack>
 
 namespace revkit {
@@ -46,8 +44,8 @@ namespace revkit {
 
         virtual void initialize_changing_variables(const syrec::program& program);
 
-        virtual bool on_module(syrec::module::ptr);
-        virtual bool on_statement(syrec::statement::ptr statement);
+        virtual bool on_module(const syrec::module::ptr&);
+        virtual bool on_statement(const syrec::statement::ptr& statement);
         bool         on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
         bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
         bool         var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
@@ -55,8 +53,8 @@ namespace revkit {
         bool         op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
         bool         full_statement(const syrec::statement::ptr& statement);                                    //new
         bool         flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v);                  // new
-        virtual void set_settings(properties::ptr settings);
-        virtual void set_main_module(syrec::module::ptr main_module);
+        virtual void set_settings(const properties::ptr& settings);
+        virtual void set_main_module(const syrec::module::ptr& main_module);
         bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
         bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
@@ -94,27 +92,28 @@ namespace revkit {
         virtual bool increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
         bool         increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
 
-        // binary operations
-        bool bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
-        bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // & TODO: test
-        bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // && TODO: test
-        bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
-        bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // || TODO: test
-        bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
-        bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // > TODO: test
-        bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // > TODO: test
-        bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                     // +=
-        bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                             // <= TODO: test
-        bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                               // < TODO: test
-        bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);              // % TODO: testen
-        bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);      // *
-        bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *%* TODO: testen
-        bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                              // !=
-        bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                                 // <=>
+        virtual // binary operations
+                bool
+                     bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
+        virtual bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
+        virtual bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // & TODO: test
+        virtual bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // && TODO: test
+        virtual bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
+        virtual bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        virtual bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // || TODO: test
+        virtual bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
+        virtual bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
+        virtual bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // > TODO: test
+        virtual bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // > TODO: test
+        virtual bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                     // +=
+        virtual bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        virtual bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                             // <= TODO: test
+        virtual bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                               // < TODO: test
+        virtual bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);              // % TODO: testen
+        virtual bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);      // *
+        virtual bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *%* TODO: testen
+        virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                              // !=
+        virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                                 // <=>
         //new
         bool findDuplicates();
         bool findInVector(std::vector<std::vector<unsigned>> vecOfElements, std::vector<unsigned> element);
@@ -128,19 +127,20 @@ namespace revkit {
         bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool expression_single_op(unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs);
+        bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
         bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
-        //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
-        // shift operations
-        bool left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // << TODO: testen
-        bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >> TODO: testen
+        virtual //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
+                // shift operations
+                bool
+                     left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // << TODO: testen
+        virtual bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >> TODO: testen
 
         // efficient controls
         bool add_active_control(unsigned);
         bool remove_active_control(unsigned);
 
-        bool assemble_circuit(const cct_node&);
-        bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
+        virtual bool assemble_circuit(const cct_node&);
+        virtual bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
 
         virtual bool optimization_decision(const cct_node&);
         unsigned     bestCost(const cct_node& current);
@@ -155,12 +155,12 @@ namespace revkit {
         //syrec::expression::ptr syrec::expression::binary_expression::lhs();
 
     protected:
-        circuit&                           circ() const;
+        [[nodiscard]] circuit&             circ() const;
         std::stack<syrec::statement::ptr>& stmts();
 
-        bool         get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
+        virtual bool get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
         bool         unget_variables(const syrec::variable_access::ptr& var, std::vector<unsigned>& lines);
-        bool         array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
+        virtual bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
         unsigned     get_constant_line(bool value);
         bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
         virtual void release_constant_line(unsigned index, bool value);
@@ -228,7 +228,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    bool syrec_synthesis(circuit& circ, const syrec::program& program, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr());
+    bool syrec_synthesis(circuit& circ, const syrec::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
     /**
    * @brief Functor for the syrec_synthesis algorithm
@@ -241,7 +241,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = properties::ptr(new properties()), const properties::ptr& statistics = properties::ptr(new properties()));
+    hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
 } // namespace revkit
 

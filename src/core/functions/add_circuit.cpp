@@ -17,7 +17,6 @@
 
 #include "core/functions/add_circuit.hpp"
 
-//#include <boost/bind.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/insert.hpp>
 #include <functional>
@@ -36,9 +35,9 @@ namespace revkit {
         typedef std::pair<std::string, std::string> pair_t;
         if (controls.empty()) {
             for (const gate& g: src) {
-                gate& new_gate                                                         = circ.insert_gate(pos++);
-                new_gate                                                               = g;
-                boost::optional<const std::map<std::string, std::string>&> annotations = src.annotations(g);
+                gate& new_gate   = circ.insert_gate(pos++);
+                new_gate         = g;
+                auto annotations = src.annotations(g);
                 if (annotations) {
                     for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);
@@ -48,11 +47,13 @@ namespace revkit {
         } else {
             for (const gate& g: src) {
                 gate& new_gate = circ.insert_gate(pos++);
-                boost::for_each(controls, std::bind(&gate::add_control, &new_gate, std::placeholders::_1));
-                std::for_each(g.begin_controls(), g.end_controls(), std::bind(&gate::add_control, &new_gate, std::placeholders::_1));
-                std::for_each(g.begin_targets(), g.end_targets(), std::bind(&gate::add_target, &new_gate, std::placeholders::_1));
+                for (const auto& control: controls) {
+                    new_gate.add_control(control);
+                }
+                std::for_each(g.begin_controls(), g.end_controls(), [ObjectPtr = &new_gate](auto&& PH1) { ObjectPtr->add_control(std::forward<decltype(PH1)>(PH1)); });
+                std::for_each(g.begin_targets(), g.end_targets(), [ObjectPtr = &new_gate](auto&& PH1) { ObjectPtr->add_target(std::forward<decltype(PH1)>(PH1)); });
                 new_gate.set_type(g.type());
-                boost::optional<const std::map<std::string, std::string>&> annotations = src.annotations(g);
+                auto annotations = src.annotations(g);
                 if (annotations) {
                     for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);

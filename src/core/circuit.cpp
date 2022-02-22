@@ -20,18 +20,15 @@
 #include "core/functions/copy_circuit.hpp"
 #include "core/gate.hpp"
 
-#include <boost/bind.hpp>
 #include <boost/range/adaptors.hpp>
 #include <iostream>
-#include <string>
-
-#define UNUSED(x) (void)(x)
+#include <memory>
 
 namespace revkit {
     using boost::adaptors::indirected;
     using boost::adaptors::transformed;
 
-    struct num_gates_visitor: public boost::static_visitor<unsigned> {
+    struct num_gates_visitor {
         unsigned operator()(const standard_circuit& circ) const {
             return circ.gates.size();
         }
@@ -41,7 +38,7 @@ namespace revkit {
         }
     };
 
-    struct lines_setter: public boost::static_visitor<> {
+    struct lines_setter {
         explicit lines_setter(unsigned _lines):
             lines(_lines) {}
 
@@ -53,9 +50,8 @@ namespace revkit {
             circ.garbage.resize(lines, false);
         }
 
-        void operator()(subcircuit& circ) const {
+        void operator()(subcircuit& circ [[maybe_unused]]) const {
             // NOTE expand the sub-circuit and therewith automatically the base circuit (in future version)
-            UNUSED(circ);
             assert(false);
         }
 
@@ -63,13 +59,13 @@ namespace revkit {
         unsigned lines;
     };
 
-    struct lines_visitor: public boost::static_visitor<unsigned> {
+    struct lines_visitor {
         unsigned operator()(const standard_circuit& circ) const {
             return circ.lines;
         }
 
         unsigned operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return circ.filter.size();
             } else {
                 return circ.base.lines;
@@ -84,7 +80,7 @@ namespace revkit {
         }
 
         circuit::const_iterator operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), const_filter_circuit());
@@ -98,7 +94,7 @@ namespace revkit {
         }
 
         circuit::const_iterator operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), const_filter_circuit());
@@ -112,7 +108,7 @@ namespace revkit {
         }
 
         circuit::iterator operator()(subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), filter_circuit());
@@ -126,7 +122,7 @@ namespace revkit {
         }
 
         circuit::iterator operator()(subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), filter_circuit());
@@ -140,7 +136,7 @@ namespace revkit {
         }
 
         circuit::const_reverse_iterator operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), const_filter_circuit());
@@ -154,7 +150,7 @@ namespace revkit {
         }
 
         circuit::const_reverse_iterator operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), const_filter_circuit());
@@ -168,7 +164,7 @@ namespace revkit {
         }
 
         circuit::reverse_iterator operator()(subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), filter_circuit());
@@ -182,7 +178,7 @@ namespace revkit {
         }
 
         circuit::reverse_iterator operator()(subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), filter_circuit());
@@ -202,10 +198,10 @@ namespace revkit {
         }
 
         gate& operator()(subcircuit& circ) const {
-            circ.base.gates.insert(circ.base.gates.begin() + circ.to, std::shared_ptr<gate>(new gate()));
+            circ.base.gates.insert(circ.base.gates.begin() + circ.to, std::make_shared<gate>());
             ++circ.to;
 
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 gate& orig_gate = *((circ.base.gates.begin() + circ.to - 1u)->get());
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.to - 1)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
@@ -233,10 +229,10 @@ namespace revkit {
         }
 
         gate& operator()(subcircuit& circ) const {
-            circ.base.gates.insert(circ.base.gates.begin() + circ.from, std::shared_ptr<gate>(new gate()));
+            circ.base.gates.insert(circ.base.gates.begin() + circ.from, std::make_shared<gate>());
             ++circ.to;
 
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 gate& orig_gate = *((circ.base.gates.begin() + circ.from)->get());
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.from)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
@@ -264,10 +260,10 @@ namespace revkit {
         }
 
         gate& operator()(subcircuit& circ) const {
-            circ.base.gates.insert(circ.base.gates.begin() + circ.from + pos, std::shared_ptr<gate>(new gate()));
+            circ.base.gates.insert(circ.base.gates.begin() + circ.from + pos, std::make_shared<gate>());
             ++circ.to;
 
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 gate& orig_gate = *((circ.base.gates.begin() + circ.from + pos)->get());
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.from + pos)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
@@ -325,7 +321,7 @@ namespace revkit {
         const std::vector<std::string>& inputs;
     };
 
-    struct inputs_visitor: public boost::static_visitor<const std::vector<std::string>&> {
+    struct inputs_visitor {
         const std::vector<std::string>& operator()(const standard_circuit& circ) const {
             return circ.inputs;
         }
@@ -335,7 +331,7 @@ namespace revkit {
         }
     };
 
-    struct outputs_setter: public boost::static_visitor<> {
+    struct outputs_setter {
         explicit outputs_setter(const std::vector<std::string>& _outputs):
             outputs(_outputs) {}
 
@@ -355,7 +351,7 @@ namespace revkit {
         const std::vector<std::string>& outputs;
     };
 
-    struct outputs_visitor: public boost::static_visitor<const std::vector<std::string>&> {
+    struct outputs_visitor {
         const std::vector<std::string>& operator()(const standard_circuit& circ) const {
             return circ.outputs;
         }
@@ -365,7 +361,7 @@ namespace revkit {
         }
     };
 
-    struct constants_setter: public boost::static_visitor<> {
+    struct constants_setter {
         explicit constants_setter(const std::vector<constant>& _constants):
             constants(_constants) {}
 
@@ -385,7 +381,7 @@ namespace revkit {
         const std::vector<constant>& constants;
     };
 
-    struct constants_visitor: public boost::static_visitor<const std::vector<constant>&> {
+    struct constants_visitor {
         const std::vector<constant>& operator()(const standard_circuit& circ) const {
             return circ.constants;
         }
@@ -395,7 +391,7 @@ namespace revkit {
         }
     };
 
-    struct garbage_setter: public boost::static_visitor<> {
+    struct garbage_setter {
         explicit garbage_setter(const std::vector<bool>& _garbage):
             garbage(_garbage) {}
 
@@ -415,7 +411,7 @@ namespace revkit {
         const std::vector<bool>& garbage;
     };
 
-    struct garbage_visitor: public boost::static_visitor<const std::vector<bool>&> {
+    struct garbage_visitor {
         const std::vector<bool>& operator()(const standard_circuit& circ) const {
             return circ.garbage;
         }
@@ -425,7 +421,7 @@ namespace revkit {
         }
     };
 
-    struct circuit_name_setter: public boost::static_visitor<> {
+    struct circuit_name_setter {
         explicit circuit_name_setter(const std::string& _name):
             name(_name) {}
 
@@ -441,7 +437,7 @@ namespace revkit {
         const std::string& name;
     };
 
-    struct circuit_name_visitor: public boost::static_visitor<const std::string&> {
+    struct circuit_name_visitor {
         const std::string& operator()(const standard_circuit& circ) const {
             return circ.name;
         }
@@ -451,7 +447,7 @@ namespace revkit {
         }
     };
 
-    struct const_inputbuses_visitor: public boost::static_visitor<const bus_collection&> {
+    struct const_inputbuses_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.inputbuses;
         }
@@ -461,7 +457,7 @@ namespace revkit {
         }
     };
 
-    struct inputbuses_visitor: public boost::static_visitor<bus_collection&> {
+    struct inputbuses_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.inputbuses;
         }
@@ -471,7 +467,7 @@ namespace revkit {
         }
     };
 
-    struct const_outputbuses_visitor: public boost::static_visitor<const bus_collection&> {
+    struct const_outputbuses_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.outputbuses;
         }
@@ -481,7 +477,7 @@ namespace revkit {
         }
     };
 
-    struct outputbuses_visitor: public boost::static_visitor<bus_collection&> {
+    struct outputbuses_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.outputbuses;
         }
@@ -491,7 +487,7 @@ namespace revkit {
         }
     };
 
-    struct const_statesignals_visitor: public boost::static_visitor<const bus_collection&> {
+    struct const_statesignals_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.statesignals;
         }
@@ -501,7 +497,7 @@ namespace revkit {
         }
     };
 
-    struct statesignals_visitor: public boost::static_visitor<bus_collection&> {
+    struct statesignals_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.statesignals;
         }
@@ -511,26 +507,23 @@ namespace revkit {
         }
     };
 
-    struct is_subcircuit_visitor: public boost::static_visitor<bool> {
-        bool operator()(const standard_circuit& circ) const {
-            UNUSED(circ);
+    struct is_subcircuit_visitor {
+        bool operator()(const standard_circuit& circ [[maybe_unused]]) const {
             return false;
         }
 
-        bool operator()(const subcircuit& circ) const {
-            UNUSED(circ);
+        bool operator()(const subcircuit& circ [[maybe_unused]]) const {
             return true;
         }
     };
 
-    struct filter_visitor: public boost::static_visitor<std::pair<unsigned, std::vector<unsigned>>> {
-        std::pair<unsigned, std::vector<unsigned>> operator()(const standard_circuit& circ) const {
-            UNUSED(circ);
+    struct filter_visitor {
+        std::pair<unsigned, std::vector<unsigned>> operator()(const standard_circuit& circ [[maybe_unused]]) const {
             return std::make_pair(0u, std::vector<unsigned>());
         }
 
         std::pair<unsigned, std::vector<unsigned>> operator()(const subcircuit& circ) const {
-            if (circ.filter.size()) {
+            if (!circ.filter.empty()) {
                 return std::make_pair(circ.base.lines, circ.filter);
             } else {
                 return std::make_pair(0u, std::vector<unsigned>());
@@ -538,9 +531,8 @@ namespace revkit {
         }
     };
 
-    struct offset_visitor: public boost::static_visitor<unsigned> {
-        unsigned operator()(const standard_circuit& circ) const {
-            UNUSED(circ);
+    struct offset_visitor {
+        unsigned operator()(const standard_circuit& circ [[maybe_unused]]) const {
             return 0u;
         }
 
@@ -549,15 +541,15 @@ namespace revkit {
         }
     };
 
-    struct annotation_visitor: public boost::static_visitor<const std::string&> {
+    struct annotation_visitor {
         annotation_visitor(const gate& g, const std::string& key, const std::string& default_value):
             g(g), key(key), default_value(default_value) {
         }
 
         const std::string& operator()(const standard_circuit& circ) const {
-            std::map<const gate*, std::map<std::string, std::string>>::const_iterator it = circ.annotations.find(&g);
+            auto it = circ.annotations.find(&g);
             if (it != circ.annotations.end()) {
-                std::map<std::string, std::string>::const_iterator it2 = it->second.find(key);
+                auto it2 = it->second.find(key);
                 if (it2 != it->second.end()) {
                     return it2->second;
                 } else {
@@ -578,20 +570,20 @@ namespace revkit {
         const std::string& default_value;
     };
 
-    struct annotations_visitor: public boost::static_visitor<boost::optional<const std::map<std::string, std::string>&>> {
+    struct annotations_visitor {
         explicit annotations_visitor(const gate& g):
             g(g) {}
 
-        boost::optional<const std::map<std::string, std::string>&> operator()(const standard_circuit& circ) const {
-            std::map<const gate*, std::map<std::string, std::string>>::const_iterator it = circ.annotations.find(&g);
+        std::optional<const std::map<std::string, std::string>> operator()(const standard_circuit& circ) const {
+            auto it = circ.annotations.find(&g);
             if (it != circ.annotations.end()) {
-                return boost::optional<const std::map<std::string, std::string>&>(it->second);
+                return {it->second};
             } else {
-                return boost::optional<const std::map<std::string, std::string>&>();
+                return {};
             }
         }
 
-        boost::optional<const std::map<std::string, std::string>&> operator()(const subcircuit& circ) const {
+        std::optional<const std::map<std::string, std::string>> operator()(const subcircuit& circ) const {
             return operator()(circ.base);
         }
 
@@ -599,7 +591,7 @@ namespace revkit {
         const gate& g;
     };
 
-    struct annotate_visitor: public boost::static_visitor<> {
+    struct annotate_visitor {
         annotate_visitor(const gate& g, const std::string& key, const std::string& value):
             g(g), key(key), value(value) {
         }
@@ -619,47 +611,47 @@ namespace revkit {
     };
 
     unsigned circuit::num_gates() const {
-        return boost::apply_visitor(num_gates_visitor(), circ);
+        return std::visit(num_gates_visitor(), circ);
     }
 
     void circuit::set_lines(unsigned lines) {
-        boost::apply_visitor(lines_setter(lines), circ);
+        std::visit(lines_setter(lines), circ);
     }
 
     unsigned circuit::lines() const {
-        return boost::apply_visitor(lines_visitor(), circ);
+        return std::visit(lines_visitor(), circ);
     }
 
     circuit::const_iterator circuit::begin() const {
-        return boost::apply_visitor(const_begin_visitor(), circ);
+        return std::visit(const_begin_visitor(), circ);
     }
 
     circuit::const_iterator circuit::end() const {
-        return boost::apply_visitor(const_end_visitor(), circ);
+        return std::visit(const_end_visitor(), circ);
     }
 
     circuit::iterator circuit::begin() {
-        return boost::apply_visitor(begin_visitor(), circ);
+        return std::visit(begin_visitor(), circ);
     }
 
     circuit::iterator circuit::end() {
-        return boost::apply_visitor(end_visitor(), circ);
+        return std::visit(end_visitor(), circ);
     }
 
     circuit::const_reverse_iterator circuit::rbegin() const {
-        return boost::apply_visitor(const_rbegin_visitor(), circ);
+        return std::visit(const_rbegin_visitor(), circ);
     }
 
     circuit::const_reverse_iterator circuit::rend() const {
-        return boost::apply_visitor(const_rend_visitor(), circ);
+        return std::visit(const_rend_visitor(), circ);
     }
 
     circuit::reverse_iterator circuit::rbegin() {
-        return boost::apply_visitor(rbegin_visitor(), circ);
+        return std::visit(rbegin_visitor(), circ);
     }
 
     circuit::reverse_iterator circuit::rend() {
-        return boost::apply_visitor(rend_visitor(), circ);
+        return std::visit(rend_visitor(), circ);
     }
 
     const gate& circuit::operator[](unsigned index) const {
@@ -671,95 +663,95 @@ namespace revkit {
     }
 
     gate& circuit::append_gate() {
-        return boost::apply_visitor(append_gate_visitor(*this), circ);
+        return std::visit(append_gate_visitor(*this), circ);
     }
 
     gate& circuit::prepend_gate() {
-        return boost::apply_visitor(prepend_gate_visitor(*this), circ);
+        return std::visit(prepend_gate_visitor(*this), circ);
     }
 
     gate& circuit::insert_gate(unsigned pos) {
-        return boost::apply_visitor(insert_gate_visitor(pos, *this), circ);
+        return std::visit(insert_gate_visitor(pos, *this), circ);
     }
 
     void circuit::remove_gate_at(unsigned pos) {
-        boost::apply_visitor(remove_gate_at_visitor(pos), circ);
+        std::visit(remove_gate_at_visitor(pos), circ);
     }
 
     void circuit::set_inputs(const std::vector<std::string>& inputs) {
-        boost::apply_visitor(inputs_setter(inputs), circ);
+        std::visit(inputs_setter(inputs), circ);
     }
 
     const std::vector<std::string>& circuit::inputs() const {
-        return boost::apply_visitor(inputs_visitor(), circ);
+        return std::visit(inputs_visitor(), circ);
     }
 
     void circuit::set_outputs(const std::vector<std::string>& outputs) {
-        boost::apply_visitor(outputs_setter(outputs), circ);
+        std::visit(outputs_setter(outputs), circ);
     }
 
     const std::vector<std::string>& circuit::outputs() const {
-        return boost::apply_visitor(outputs_visitor(), circ);
+        return std::visit(outputs_visitor(), circ);
     }
 
     void circuit::set_constants(const std::vector<constant>& constants) {
-        boost::apply_visitor(constants_setter(constants), circ);
+        std::visit(constants_setter(constants), circ);
     }
 
     const std::vector<constant>& circuit::constants() const {
-        return boost::apply_visitor(constants_visitor(), circ);
+        return std::visit(constants_visitor(), circ);
     }
 
     void circuit::set_garbage(const std::vector<bool>& garbage) {
-        boost::apply_visitor(garbage_setter(garbage), circ);
+        std::visit(garbage_setter(garbage), circ);
     }
 
     const std::vector<bool>& circuit::garbage() const {
-        return boost::apply_visitor(garbage_visitor(), circ);
+        return std::visit(garbage_visitor(), circ);
     }
 
     void circuit::set_circuit_name(const std::string& name) {
-        boost::apply_visitor(circuit_name_setter(name), circ);
+        std::visit(circuit_name_setter(name), circ);
     }
 
     const std::string& circuit::circuit_name() const {
-        return boost::apply_visitor(circuit_name_visitor(), circ);
+        return std::visit(circuit_name_visitor(), circ);
     }
 
     const bus_collection& circuit::inputbuses() const {
-        return boost::apply_visitor(const_inputbuses_visitor(), circ);
+        return std::visit(const_inputbuses_visitor(), circ);
     }
 
     bus_collection& circuit::inputbuses() {
-        return boost::apply_visitor(inputbuses_visitor(), circ);
+        return std::visit(inputbuses_visitor(), circ);
     }
 
     const bus_collection& circuit::outputbuses() const {
-        return boost::apply_visitor(const_outputbuses_visitor(), circ);
+        return std::visit(const_outputbuses_visitor(), circ);
     }
 
     bus_collection& circuit::outputbuses() {
-        return boost::apply_visitor(outputbuses_visitor(), circ);
+        return std::visit(outputbuses_visitor(), circ);
     }
 
     const bus_collection& circuit::statesignals() const {
-        return boost::apply_visitor(const_statesignals_visitor(), circ);
+        return std::visit(const_statesignals_visitor(), circ);
     }
 
     bus_collection& circuit::statesignals() {
-        return boost::apply_visitor(statesignals_visitor(), circ);
+        return std::visit(statesignals_visitor(), circ);
     }
 
     bool circuit::is_subcircuit() const {
-        return boost::apply_visitor(is_subcircuit_visitor(), circ);
+        return std::visit(is_subcircuit_visitor(), circ);
     }
 
     std::pair<unsigned, std::vector<unsigned>> circuit::filter() const {
-        return boost::apply_visitor(filter_visitor(), circ);
+        return std::visit(filter_visitor(), circ);
     }
 
     unsigned circuit::offset() const {
-        return boost::apply_visitor(offset_visitor(), circ);
+        return std::visit(offset_visitor(), circ);
     }
 
     void circuit::add_module(const std::string& name, const std::shared_ptr<circuit>& module) {
@@ -767,7 +759,7 @@ namespace revkit {
     }
 
     void circuit::add_module(const std::string& name, const circuit& module) {
-        circuit* copy = new circuit();
+        auto* copy = new circuit();
         copy_circuit(module, *copy);
         add_module(name, std::shared_ptr<circuit>(copy));
     }
@@ -777,15 +769,15 @@ namespace revkit {
     }
 
     const std::string& circuit::annotation(const gate& g, const std::string& key, const std::string& default_value) const {
-        return boost::apply_visitor(annotation_visitor(g, key, default_value), circ);
+        return std::visit(annotation_visitor(g, key, default_value), circ);
     }
 
-    boost::optional<const std::map<std::string, std::string>&> circuit::annotations(const gate& g) const {
-        return boost::apply_visitor(annotations_visitor(g), circ);
+    std::optional<const std::map<std::string, std::string>> circuit::annotations(const gate& g) const {
+        return std::visit(annotations_visitor(g), circ);
     }
 
     void circuit::annotate(const gate& g, const std::string& key, const std::string& value) {
-        boost::apply_visitor(annotate_visitor(g, key, value), circ);
+        std::visit(annotate_visitor(g, key, value), circ);
     }
 
 } // namespace revkit

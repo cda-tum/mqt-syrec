@@ -19,14 +19,8 @@
 
 namespace revkit {
 
-    class gate::priv {
-    public:
-        priv() {}
-
-        priv(priv& other):
-            controls(other.controls),
-            targets(other.targets),
-            target_type(other.target_type) {}
+    struct gate::priv {
+        priv() = default;
 
         line_container controls;
         line_container targets;
@@ -119,15 +113,10 @@ namespace revkit {
 
     // filtered_gate //////////
 
-    class filtered_gate::priv {
-    public:
+    struct filtered_gate::priv {
         priv(gate& base, std::vector<unsigned>& filter):
             base(base),
             filter(filter) {}
-
-        priv(priv& other):
-            base(other.base),
-            filter(other.filter) {}
 
         gate&                  base;
         std::vector<unsigned>& filter;
@@ -138,7 +127,7 @@ namespace revkit {
     }
 
     filtered_gate::filtered_gate(const filtered_gate& other):
-        gate(), d(new priv(*other.d)) {
+        gate(other), d(new priv(*other.d)) {
     }
 
     filtered_gate::~filtered_gate() {

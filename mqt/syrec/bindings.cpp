@@ -3,12 +3,8 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-//#include <boost/python.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-//#include <boost/python/stl_iterator.hpp>
-//#include <boost/python/dict.hpp>
-//#include <boost/python/extract.hpp>
 #include "Dummy.hpp"
 
 #include <algorithms/simulation/simple_simulation.hpp>
@@ -28,7 +24,6 @@
 #include <core/truth_table.hpp>
 #include <core/utils/costs.hpp>
 
-//using namespace boost::python;
 namespace py = pybind11;
 using namespace revkit;
 using namespace revkit::syrec;
@@ -82,7 +77,7 @@ dict circuit_modules( const circuit& c )
 py::dict circuit_annotations(const circuit& c, const gate& g) {
     py::dict d;
 
-    boost::optional<const std::map<std::string, std::string>&> annotations = c.annotations(g);
+    std::optional<const std::map<std::string, std::string>> annotations = c.annotations(g);
 
     if (annotations) {
         typedef std::pair<std::string, std::string> pair_t;
@@ -94,16 +89,12 @@ py::dict circuit_annotations(const circuit& c, const gate& g) {
     return d;
 }
 
-template<typename T>
-py::list my_append(py::list l, T a) {
-    l.append(a);
-    return l;
-}
-
 template<typename T, typename C>
 py::list list_getter(const C& circ, std::function<const std::vector<T>&(const C*)> fgetter) {
     py::list l;
-    std::for_each(fgetter(&circ).begin(), fgetter(&circ).end(), std::bind(my_append<T>, l, std::placeholders::_1));
+    for (auto&& elem: fgetter(&circ)) {
+        l.append(static_cast<T>(elem));
+    }
     return l;
 }
 
@@ -319,7 +310,7 @@ std::string py_read_program(program& prog, const std::string& filename, const re
     if (!read_program(prog, filename, settings, &error_message)) {
         return error_message;
     } else {
-        return std::string();
+        return {};
     }
 }
 
@@ -417,7 +408,7 @@ std::string gate_module_name(const gate& g) {
     if (is_module(g)) {
         return boost::any_cast<module_tag>(g.type()).name;
     } else {
-        return std::string();
+        return {};
     }
 }
 
@@ -426,7 +417,9 @@ py::list control_lines1(const gate& g) {
     gate::line_container c;
     py::list             l;
     control_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
-    std::for_each(c.begin(), c.end(), std::bind(my_append<unsigned>, l, std::placeholders::_1));
+    for (const auto& control: c) {
+        l.append(control);
+    }
     return l;
 }
 
@@ -434,7 +427,9 @@ py::list target_lines1(const gate& g) {
     gate::line_container c;
     py::list             l;
     target_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
-    std::for_each(c.begin(), c.end(), std::bind(my_append<unsigned>, l, std::placeholders::_1));
+    for (const auto& target: c) {
+        l.append(target);
+    }
     return l;
 }
 

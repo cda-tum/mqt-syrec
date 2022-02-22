@@ -68,7 +68,7 @@ namespace revkit {
 
         if (settings.copy_modules) {
             typedef std::pair<std::string, std::shared_ptr<circuit>> pair2_t;
-            for (const pair2_t& p: base.modules()) {
+            for (const pair2_t p: base.modules()) {
                 circ.add_module(p.first, p.second);
             }
         }

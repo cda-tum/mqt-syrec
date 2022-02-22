@@ -19,9 +19,7 @@
 #include <core/utils/timer.hpp>
 #include <memory>
 
-//#define foreach_ BOOST_FOREACH
 #define reverse_foreach_ BOOST_REVERSE_FOREACH
-#define UNUSED(x) (void)(x)
 
 using namespace boost::assign;
 
@@ -37,7 +35,7 @@ namespace revkit {
         //var_inv_used_const_lines.push_back( std::map< bool, std::vector<unsigned> >() );
     }
 
-    void garbagefree_syrec_synthesizer::set_settings(properties::ptr settings) {
+    void garbagefree_syrec_synthesizer::set_settings(const properties::ptr& settings) {
         _settings = settings;
 
         variable_name_format = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
@@ -49,14 +47,14 @@ namespace revkit {
         }
     }
 
-    void garbagefree_syrec_synthesizer::set_main_module(syrec::module::ptr main_module) {
+    void garbagefree_syrec_synthesizer::set_main_module(const syrec::module::ptr& main_module) {
         assert(modules.empty());
         modules.push(main_module);
     }
 
-    bool garbagefree_syrec_synthesizer::on_module(syrec::module::ptr main) {
+    bool garbagefree_syrec_synthesizer::on_module(const syrec::module::ptr& main) {
         //std::cout << "on_module " << main->name() << std::endl;
-        for (syrec::statement::ptr stat: main->statements()) {
+        for (const syrec::statement::ptr& stat: main->statements()) {
             //std::cout << "on_statement " << *stat << std::endl;
             if (!on_statement(stat)) return false;
         }
@@ -67,7 +65,7 @@ namespace revkit {
     // TODO sind lines und const_lines beide notwendig?
     //TODO muss bei den generellen Sachen (vor on_statement) noch was geändert werden?)
 
-    bool garbagefree_syrec_synthesizer::on_statement(syrec::statement::ptr statement) {
+    bool garbagefree_syrec_synthesizer::on_statement(const syrec::statement::ptr& statement) {
         stmts().push(statement);
         //depth++;
         /*if( used_const_lines.size() <= depth){
@@ -250,7 +248,7 @@ namespace revkit {
     }
 
     void add_variables2(circuit& circ, garbagefree_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const syrec::variable::vec& variables) {
-        for (syrec::variable::ptr var: variables) {
+        for (const syrec::variable::ptr& var: variables) {
             // entry in var lines map
             synthesizer.var_lines().insert(std::make_pair(var, circ.lines()));
 
@@ -273,11 +271,11 @@ namespace revkit {
 
         if (auto* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
             if (cond->value()->evaluate(intern_variable_mapping)) {
-                for (syrec::statement::ptr stat: statement.then_statements()) {
+                for (const syrec::statement::ptr& stat: statement.then_statements()) {
                     if (!on_statement(stat)) return false;
                 }
             } else {
-                for (syrec::statement::ptr stat: statement.else_statements()) {
+                for (const syrec::statement::ptr& stat: statement.else_statements()) {
                     if (!on_statement(stat)) return false;
                 }
             }
@@ -295,7 +293,7 @@ namespace revkit {
                 // activate this line
                 add_active_control(helper_line.get<2>());
 
-                for (syrec::statement::ptr stat: statement.then_statements()) {
+                for (const syrec::statement::ptr& stat: statement.then_statements()) {
                     if (!on_statement(stat)) return false;
                 }
 
@@ -304,7 +302,7 @@ namespace revkit {
                 append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), helper_line.get<2>());
                 add_active_control(helper_line.get<2>());
 
-                for (syrec::statement::ptr stat: statement.else_statements()) {
+                for (const syrec::statement::ptr& stat: statement.else_statements()) {
                     if (!on_statement(stat)) return false;
                 }
 
@@ -320,7 +318,7 @@ namespace revkit {
             case syrec_synthesis_if_realization_duplication: {
                 // std::cout << "if statement" << std::endl;
                 std::map<std::pair<syrec::variable_access::ptr, unsigned>, syrec::variable_access::ptr, cmp_vptr> then_var_mapping = dupl_if_var_mapping;
-                for (syrec::variable_access::ptr var: _changing_variables.find(&statement)->second) {
+                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
                     syrec::variable_access::ptr dupl_var = std::make_shared<syrec::variable_access>(std::make_shared<syrec::variable>(syrec::variable::wire, ("dupl_" + var->var()->name() + "_" + boost::lexical_cast<std::string>(dupl_count)), var->var()->dimensions(), var->var()->bitwidth()));
                     // NEU NEU NEU
                     dupl_var->set_range(var->range());
@@ -353,7 +351,7 @@ namespace revkit {
 
                 // then branch
                 // std::cout << "then depth: " << depth << std::endl;
-                for (syrec::statement::ptr stat: statement.then_statements()) {
+                for (const syrec::statement::ptr& stat: statement.then_statements()) {
                     if (!on_statement(stat)) return false;
                 }
 
@@ -362,7 +360,7 @@ namespace revkit {
                 // else branch
                 --depth;
                 //  std::cout << "else depth: " << depth << std::endl;
-                for (syrec::statement::ptr stat: statement.else_statements()) {
+                for (const syrec::statement::ptr& stat: statement.else_statements()) {
                     if (!on_statement(stat)) return false;
                 }
                 //  std::cout << "synthesized then stmts " << std::endl;
@@ -372,7 +370,7 @@ namespace revkit {
                 // {
                 //std::cout << it->first.first->var()->name() << ", " << it->first.second << ": " << it->second->var()->name() << std::endl;
                 //  }
-                for (syrec::variable_access::ptr var: _changing_variables.find(&statement)->second) {
+                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
                     std::vector<unsigned> lhs, rhs;
                     // std::cout << "search for " << var->var()->name() << ", " << (depth+1) << std::endl;
                     ++depth;
@@ -442,7 +440,7 @@ namespace revkit {
                 intern_variable_mapping[loop_variable] = i;
             }
 
-            for (syrec::statement::ptr stat: statement.statements()) {
+            for (const syrec::statement::ptr& stat: statement.statements()) {
                 if (!on_statement(stat)) return false;
             }
 
@@ -528,13 +526,13 @@ namespace revkit {
             add_variables2(circ(), *this, variable_name_format, statement.target()->variables());
 
             modules.push(statement.target());
-            for (syrec::statement::ptr stat: statement.target()->statements()) {
+            for (const syrec::statement::ptr& stat: statement.target()->statements()) {
                 if (!on_statement(stat)) return false;
             }
             modules.pop();
 
             // Map-Einträge löschen damit sie nicht wiederverwendet werden bei erneutem Aufruf des gleichen Moduls
-            for (syrec::variable::ptr var: statement.target()->variables()) {
+            for (const syrec::variable::ptr& var: statement.target()->variables()) {
                 var_lines().erase(var);
             }
         }
@@ -563,15 +561,14 @@ namespace revkit {
         }
         modules.pop();
 
-        for (syrec::variable::ptr var: statement.target()->variables()) {
+        for (const syrec::variable::ptr& var: statement.target()->variables()) {
             var_lines().erase(var);
         }
 
         return true;
     }
 
-    bool garbagefree_syrec_synthesizer::on_statement(const syrec::skip_statement& statement) {
-        UNUSED(statement);
+    bool garbagefree_syrec_synthesizer::on_statement(const syrec::skip_statement& statement [[maybe_unused]]) {
         return true;
     }
 
@@ -1255,9 +1252,7 @@ namespace revkit {
         return (off_expression(expression.rhs(), rhs, rhs_cl) && off_expression(expression.lhs(), lhs, lhs_cl));
     }
 
-    bool garbagefree_syrec_synthesizer::off_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
-        UNUSED(expression);
-        UNUSED(lines);
+    bool garbagefree_syrec_synthesizer::off_expression(const syrec::numeric_expression& expression [[maybe_unused]], std::vector<unsigned>& lines [[maybe_unused]], std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
         release_constant_lines(expr_cl);
         return true;
     }
@@ -1464,21 +1459,21 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::decrement(const std::vector<unsigned>& dest) {
-        for (unsigned i = 0u; i < dest.size(); ++i) {
-            append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest.at(i));
-            add_active_control(dest.at(i));
+        for (unsigned int i: dest) {
+            append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), i);
+            add_active_control(i);
         }
 
-        for (unsigned i = 0; i < dest.size(); ++i) {
-            remove_active_control(dest.at(i));
+        for (unsigned int i: dest) {
+            remove_active_control(i);
         }
 
         return true;
     }
 
     bool garbagefree_syrec_synthesizer::increment(const std::vector<unsigned>& dest) {
-        for (unsigned i = 0; i < dest.size(); ++i) {
-            add_active_control(dest.at(i));
+        for (unsigned int i: dest) {
+            add_active_control(i);
         }
 
         for (int i = int(dest.size()) - 1; i >= 0; --i) {
@@ -1800,7 +1795,7 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if ((src1.size() <= 0) || (dest.size() <= 0)) return true;
+        if ((src1.empty()) || (dest.empty())) return true;
 
         std::vector<unsigned> sum     = dest;
         std::vector<unsigned> partial = src2;
@@ -1823,7 +1818,7 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if ((src1.size() <= 0) || (src2.size() <= 0)) return true;
+        if ((src1.empty()) || (src2.empty())) return true;
 
         std::vector<unsigned> sum(dest.begin(), dest.begin() + src2.size());
         std::vector<unsigned> partial = src2;
@@ -2055,7 +2050,7 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::reverse_multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if ((src1.size() <= 0) || (src2.size() <= 0) || (dest.size() <= 0)) return true;
+        if ((src1.empty()) || (src2.empty()) || (dest.empty())) return true;
 
         std::vector<unsigned> sum(1, dest.at(dest.size() - 1));
         std::vector<unsigned> partial(1, src2.at(0));
@@ -2078,7 +2073,7 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::reverse_multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if ((src1.size() <= 0) || (src2.size() <= 0)) return true;
+        if ((src1.empty()) || (src2.empty())) return true;
 
         std::vector<unsigned> sum(dest.begin() + src2.size() - 1, dest.end() - 1);
         std::vector<unsigned> partial = src2;
@@ -2165,15 +2160,15 @@ namespace revkit {
     }
 
     bool garbagefree_syrec_synthesizer::on_condition(const syrec::expression::ptr& condition, unsigned result_line) {
-        if (syrec::numeric_expression* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
+        if (auto* cond = dynamic_cast<syrec::numeric_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
-        } else if (syrec::variable_expression* cond = dynamic_cast<syrec::variable_expression*>(condition.get())) {
+        } else if (auto* cond = dynamic_cast<syrec::variable_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
-        } else if (syrec::binary_expression* cond = dynamic_cast<syrec::binary_expression*>(condition.get())) {
+        } else if (auto* cond = dynamic_cast<syrec::binary_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
-        } else if (syrec::unary_expression* cond = dynamic_cast<syrec::unary_expression*>(condition.get())) {
+        } else if (auto* cond = dynamic_cast<syrec::unary_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
-        } else if (syrec::shift_expression* cond = dynamic_cast<syrec::shift_expression*>(condition.get())) {
+        } else if (auto* cond = dynamic_cast<syrec::shift_expression*>(condition.get())) {
             return on_condition(*cond, result_line);
         } else {
             std::cout << "Condition" << std::endl;
@@ -2328,7 +2323,7 @@ namespace revkit {
         std::stack<boost::tuple<bool, bool, unsigned>> rhs_se_cl;
         get_expr_lines(condition.rhs(), rhs2, rhs_cl);
         //rhs-Anhängsel vom stack nehmen
-        if (syrec::variable_expression* exp = dynamic_cast<syrec::variable_expression*>(condition.rhs().get())) {
+        if (auto* exp = dynamic_cast<syrec::variable_expression*>(condition.rhs().get())) {
             syrec::variable_access::ptr var = exp->var();
             var                             = get_dupl(var);
 
@@ -2346,11 +2341,11 @@ namespace revkit {
                     }
                 }
             }
-        } else if (syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>(condition.rhs().get())) {
+        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(condition.rhs().get())) {
             if (!get_subexpr_lines(exp->rhs(), rhs_se_cl) || !get_subexpr_lines(exp->lhs(), rhs_se_cl)) {
                 return false;
             }
-        } else if (syrec::shift_expression* exp = dynamic_cast<syrec::shift_expression*>(condition.rhs().get())) {
+        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(condition.rhs().get())) {
             if (!get_subexpr_lines(exp->lhs(), rhs_se_cl)) {
                 return false;
             }
@@ -2390,7 +2385,7 @@ namespace revkit {
             if ((unsigned)boost::count_if(var->indexes(), is_type<syrec::numeric_expression>()) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(intern_variable_mapping) *
-                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
             } else {
@@ -2408,7 +2403,6 @@ namespace revkit {
             unsigned second = nsecond->evaluate(intern_variable_mapping);
 
             assert(first == second);
-            UNUSED(second);
             if (copied_array) {
                 append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), lines.at(first), result_line);
             } else {
@@ -2511,7 +2505,7 @@ namespace revkit {
             if ((unsigned)boost::count_if(var->indexes(), is_type<syrec::numeric_expression>()) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(intern_variable_mapping) *
-                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
             } else {
@@ -2596,7 +2590,7 @@ namespace revkit {
                 if (all_numbers) {
                     for (unsigned i = 0u; i < n; ++i) {
                         offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(intern_variable_mapping) *
-                                  std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                                  std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                                   var->var()->bitwidth();
                     }
                 }
@@ -2604,7 +2598,7 @@ namespace revkit {
                 all_numbers = false;
             }
             if (!all_numbers) {
-                limit = std::accumulate(var->var()->dimensions().begin(), var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                limit = std::accumulate(var->var()->dimensions().begin(), var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                         var->var()->bitwidth();
             }
         }
@@ -2632,7 +2626,7 @@ namespace revkit {
             if ((unsigned)boost::count_if(var->indexes(), is_type<syrec::numeric_expression>()) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(intern_variable_mapping) *
-                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
             } else {
@@ -2761,14 +2755,14 @@ namespace revkit {
     }
 
     // speichert in lines & expr_cl die für diesen Ausdruck benutzten Lines, entfernt sie in used_const_lines
-    void garbagefree_syrec_synthesizer::get_expr_lines(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
-        if (syrec::variable_expression* var = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+    void garbagefree_syrec_synthesizer::get_expr_lines(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl) {
+        if (auto* var = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return get_expr_lines(var->var(), lines, expr_cl);
         }
 
         std::stack<boost::tuple<bool, bool, unsigned>> extra_cl;
         unsigned                                       n = expression->bitwidth();
-        if (syrec::binary_expression* expr = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        if (auto* expr = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             /*if ( ( expr->op() == syrec::binary_expression::logical_and )
         || ( expr->op() == syrec::binary_expression::logical_or )
         || ( expr->op() == syrec::binary_expression::less_than )
@@ -2816,7 +2810,7 @@ namespace revkit {
                 expr_used_cl = false;
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(intern_variable_mapping) *
-                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<unsigned>()) *
+                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
             }
@@ -2901,7 +2895,7 @@ namespace revkit {
         if (dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())) //( is_type<syrec::numeric_expression>( indexes.at( 0 ) ) )
         {
             offset += dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())->value()->evaluate(intern_variable_mapping) *
-                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<>()) *
                       bitwidth;
             dimensions.erase(dimensions.begin());
             indexes.erase(indexes.begin());
@@ -2913,22 +2907,22 @@ namespace revkit {
             if (!on_expression(indexes.at(0), select_lines)) return false;
             indexes.erase(indexes.begin());
 
-            unsigned max_dimension    = unsigned(pow(2, select_lines.size()));
+            auto     max_dimension    = unsigned(pow(2, select_lines.size()));
             unsigned current_subarray = max_dimension - 1u;
             for (unsigned i = 1u; i <= max_dimension; ++i) {
                 if (current_subarray < dimension) {
                     // activate controls (select_lines)
-                    for (unsigned j = 0u; j < select_lines.size(); ++j) {
-                        add_active_control(select_lines.at(j));
+                    for (unsigned int select_line: select_lines) {
+                        add_active_control(select_line);
                     }
 
-                    if (!array_swapping(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                    if (!array_swapping(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<>()) *
                                                          bitwidth,
                                         dimensions, indexes, bitwidth, lines)) return false;
 
                     // deactivate controls
-                    for (unsigned j = 0u; j < select_lines.size(); ++j) {
-                        remove_active_control(select_lines.at(j));
+                    for (unsigned int select_line: select_lines) {
+                        remove_active_control(select_line);
                     }
                 }
 
@@ -2951,7 +2945,7 @@ namespace revkit {
         if (dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())) //( is_type<syrec::numeric_expression>( indexes.at( 0 ) ) )
         {
             offset += dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())->value()->evaluate(intern_variable_mapping) *
-                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<>()) *
                       bitwidth;
             dimensions.erase(dimensions.begin());
             indexes.erase(indexes.begin());
@@ -2963,22 +2957,22 @@ namespace revkit {
             if (!on_expression(indexes.at(0), select_lines)) return false;
             indexes.erase(indexes.begin());
 
-            unsigned max_dimension    = unsigned(pow(2, select_lines.size()));
+            auto     max_dimension    = unsigned(pow(2, select_lines.size()));
             unsigned current_subarray = max_dimension - 1u;
             for (unsigned i = 1u; i <= max_dimension; ++i) {
                 if (current_subarray < dimension) {
                     // activate controls (select_lines)
-                    for (unsigned j = 0u; j < select_lines.size(); ++j) {
-                        add_active_control(select_lines.at(j));
+                    for (unsigned int select_line: select_lines) {
+                        add_active_control(select_line);
                     }
 
-                    if (!array_copying(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                    if (!array_copying(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<>()) *
                                                         bitwidth,
                                        dimensions, indexes, bitwidth, lines)) return false;
 
                     // deactivate controls
-                    for (unsigned j = 0u; j < select_lines.size(); ++j) {
-                        remove_active_control(select_lines.at(j));
+                    for (unsigned int select_line: select_lines) {
+                        remove_active_control(select_line);
                     }
                 }
 
@@ -3001,7 +2995,7 @@ namespace revkit {
         if (dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())) //( is_type<syrec::numeric_expression>( indexes.at( 0 ) ) )
         {
             offset += dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())->value()->evaluate(intern_variable_mapping) *
-                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<>()) *
                       bitwidth;
             dimensions.erase(dimensions.begin());
             indexes.erase(indexes.begin());
@@ -3027,7 +3021,7 @@ namespace revkit {
                 se_cl.pop();
             }
 
-            unsigned max_dimension    = unsigned(pow(2, select_lines.size()));
+            auto     max_dimension    = unsigned(pow(2, select_lines.size()));
             unsigned current_subarray = max_dimension + (max_dimension / 2) - 1; // TODO stimmt das?
 
             for (unsigned i = max_dimension; i > 0u; --i) {
@@ -3036,17 +3030,17 @@ namespace revkit {
 
                 if (current_subarray < dimension) {
                     // activate controls (select_lines)
-                    for (unsigned k = 0u; k < select_lines.size(); ++k) {
-                        add_active_control(select_lines.at(k));
+                    for (unsigned int select_line: select_lines) {
+                        add_active_control(select_line);
                     }
 
-                    if (!reverse_array_swapping(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                    if (!reverse_array_swapping(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<>()) *
                                                                  bitwidth,
                                                 dimensions, indexes, bitwidth, lines)) return false;
 
                     // deactivate controls
-                    for (unsigned k = 0u; k < select_lines.size(); ++k) {
-                        remove_active_control(select_lines.at(k));
+                    for (unsigned int select_line: select_lines) {
+                        remove_active_control(select_line);
                     }
                 }
             }
@@ -3068,7 +3062,7 @@ namespace revkit {
         if (dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())) //( is_type<syrec::numeric_expression>( indexes.at( 0 ) ) )
         {
             offset += dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())->value()->evaluate(intern_variable_mapping) *
-                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                      std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<>()) *
                       bitwidth;
             dimensions.erase(dimensions.begin());
             indexes.erase(indexes.begin());
@@ -3094,7 +3088,7 @@ namespace revkit {
                 se_cl.pop();
             }
 
-            unsigned max_dimension    = unsigned(pow(2, select_lines.size()));
+            auto     max_dimension    = unsigned(pow(2, select_lines.size()));
             unsigned current_subarray = max_dimension + (max_dimension / 2) - 1; // TODO stimmt das?
 
             for (unsigned i = max_dimension; i > 0u; --i) {
@@ -3105,17 +3099,17 @@ namespace revkit {
 
                 if (current_subarray < dimension) {
                     // activate controls (select_lines)
-                    for (unsigned k = 0u; k < select_lines.size(); ++k) {
-                        add_active_control(select_lines.at(k));
+                    for (unsigned int select_line: select_lines) {
+                        add_active_control(select_line);
                     }
 
-                    if (!reverse_array_copying(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<unsigned>()) *
+                    if (!reverse_array_copying(offset + current_subarray * std::accumulate(dimensions.begin(), dimensions.end(), 1u, std::multiplies<>()) *
                                                                 bitwidth,
                                                dimensions, indexes, bitwidth, lines)) return false;
 
                     // deactivate controls
-                    for (unsigned k = 0u; k < select_lines.size(); ++k) {
-                        remove_active_control(select_lines.at(k));
+                    for (unsigned int select_line: select_lines) {
+                        remove_active_control(select_line);
                     }
                 }
             }
@@ -3134,7 +3128,7 @@ namespace revkit {
         if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ.get()->num_gates() > 0u*/) {
             // std::cout << "leaf ";
             // std::cout << ( *( ( get( boost::vertex_name, cct_man.tree )[current].circ ).get() ) ).num_gates() << std::endl;
-            append_circuit(circ(), *((get(boost::vertex_name, cct_man.tree)[current].circ).get()), get(boost::vertex_name, cct_man.tree)[current].controls);
+            append_circuit(circ(), *(get(boost::vertex_name, cct_man.tree)[current].circ), get(boost::vertex_name, cct_man.tree)[current].controls);
             return true;
         }
 
@@ -3165,7 +3159,7 @@ namespace revkit {
         if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
             // std::cout << " stdleaf ";
             // std::cout << ( *( ( get( boost::vertex_name, cct_man.tree )[current].circ ).get() ) ).num_gates() << std::endl;
-            append_circuit(circ, *((get(boost::vertex_name, cct_man.tree)[current].circ).get()), controls);
+            append_circuit(circ, *(get(boost::vertex_name, cct_man.tree)[current].circ), controls);
             return true;
         }
 
@@ -3193,33 +3187,33 @@ namespace revkit {
     }
 
     void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (syrec::module::ptr mod: program.modules()) {
+        for (const syrec::module::ptr& mod: program.modules()) {
             compute_changing_variables(mod, changing_variables);
         }
     }
 
     void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (syrec::statement::ptr stat: module->statements()) {
+        for (const syrec::statement::ptr& stat: module->statements()) {
             compute_changing_variables(stat, changing_variables);
         }
     }
 
-    void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::statement::ptr statement, std::map<const syrec::statement*, var_set>& changing_variables) {
+    void garbagefree_syrec_synthesizer::compute_changing_variables(const syrec::statement::ptr& statement, std::map<const syrec::statement*, var_set>& changing_variables) {
         var_set changed_variables;
-        if (syrec::swap_statement* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
             changed_variables.insert(stat->lhs());
             changed_variables.insert(stat->rhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::unary_statement* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
             changed_variables.insert(stat->var());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::assign_statement* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
             changed_variables.insert(stat->lhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::if_statement* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
             for (syrec::statement::ptr s: stat->then_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
@@ -3230,21 +3224,21 @@ namespace revkit {
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::for_statement* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
             for (syrec::statement::ptr s: stat->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::call_statement* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
             for (syrec::statement::ptr s: stat->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (syrec::uncall_statement* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
+        } else if (auto* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
             for (syrec::statement::ptr s: stat->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
@@ -3279,13 +3273,13 @@ namespace revkit {
     }*/
     }
 
-    bool syrec_synthesis_garbagefree(circuit& circ, const syrec::program& program, properties::ptr settings, properties::ptr statistics) {
+    bool syrec_synthesis_garbagefree(circuit& circ, const syrec::program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // just copied syrec_synthesis
 
         // Settings parsing
-        std::string                   variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
-        std::string                   main_module           = get<std::string>(settings, "main_module", std::string());
-        garbagefree_syrec_synthesizer statement_synthesizer = get<garbagefree_syrec_synthesizer>(settings, "statement_synthesizer", garbagefree_syrec_synthesizer(circ, program));
+        auto variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
+        auto main_module           = get<std::string>(settings, "main_module", std::string());
+        auto statement_synthesizer = get<garbagefree_syrec_synthesizer>(settings, "statement_synthesizer", garbagefree_syrec_synthesizer(circ, program));
 
         statement_synthesizer.set_settings(settings);
 

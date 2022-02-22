@@ -19,7 +19,6 @@
 
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
-#include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <iterator>
@@ -28,51 +27,49 @@
 
 using namespace boost::assign;
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
-        class program::priv {
-        public:
-            priv() {}
+    class program::priv {
+    public:
+        priv() = default;
 
-            module::vec modules;
-        };
+        module::vec modules;
+    };
 
-        program::program():
-            d(new priv()) {
-        }
+    program::program():
+        d(new priv()) {
+    }
 
-        program::~program() {
-            delete d;
-        }
+    program::~program() {
+        delete d;
+    }
 
-        void program::add_module(module::ptr module) {
-            d->modules += module;
-        }
+    void program::add_module(module::ptr module) {
+        d->modules += module;
+    }
 
-        const module::vec& program::modules() const {
-            return d->modules;
-        }
+    const module::vec& program::modules() const {
+        return d->modules;
+    }
 
-        module::ptr program::find_module(const std::string& name) const {
-            for (module::ptr& p: d->modules) {
-                if (p->name() == name) {
-                    return p;
-                }
+    module::ptr program::find_module(const std::string& name) const {
+        for (module::ptr& p: d->modules) {
+            if (p->name() == name) {
+                return p;
             }
-
-            return module::ptr();
         }
 
-        std::ostream& operator<<(std::ostream& os, const program& p) {
-            using boost::adaptors::indirected;
+        return {};
+    }
 
-            unsigned old_precision = os.precision(2u);
-            boost::copy(p.modules() | indirected, std::ostream_iterator<const module>(os));
-            os.precision(old_precision);
+    std::ostream& operator<<(std::ostream& os, const program& p) {
+        using boost::adaptors::indirected;
 
-            return os;
-        }
+        unsigned old_precision = os.precision(2u);
+        boost::copy(p.modules() | indirected, std::ostream_iterator<const module>(os));
+        os.precision(old_precision);
 
-    } // namespace syrec
-} // namespace revkit
+        return os;
+    }
+
+} // namespace revkit::syrec

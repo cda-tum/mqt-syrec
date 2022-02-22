@@ -1,12 +1,9 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 
-#include <algorithm>
 #include <boost/assign/std/vector.hpp>
-//#include <boost/bind.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
-#include <boost/iterator/counting_iterator.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
@@ -23,11 +20,10 @@
 #include <core/utils/costs.hpp>
 #include <core/utils/timer.hpp>
 #include <functional>
+#include <memory>
 #include <numeric>
 
-//#define foreach_ BOOST_FOREACH
 #define reverse_foreach_ BOOST_REVERSE_FOREACH
-#define UNUSED(x) (void)(x)
 
 using namespace boost::assign;
 
@@ -61,9 +57,8 @@ namespace revkit {
     // Helper Functions for the synthesis methods
     void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const syrec::variable::vec& variables);
     //syrec::expression::ptr syrec::binary_expression::lhs() const;
-    standard_syrec_synthesizer::standard_syrec_synthesizer(circuit& circ, const syrec::program& prog):
+    standard_syrec_synthesizer::standard_syrec_synthesizer(circuit& circ, const syrec::program& prog [[maybe_unused]]):
         _circ(circ) {
-        UNUSED(prog);
         free_const_lines_map.insert(std::make_pair(false, std::vector<unsigned>()));
         free_const_lines_map.insert(std::make_pair(true, std::vector<unsigned>()));
 
@@ -73,12 +68,12 @@ namespace revkit {
         // get( boost::vertex_name, cct_man.tree )[cct_man.current].circ = std::shared_ptr<circuit>( new circuit() );
         // Blatt anlegen
         cct_man.current                                             = add_vertex(cct_man.tree);
-        get(boost::vertex_name, cct_man.tree)[cct_man.current].circ = std::shared_ptr<circuit>(new circuit());
+        get(boost::vertex_name, cct_man.tree)[cct_man.current].circ = std::make_shared<circuit>();
         get(boost::vertex_name, cct_man.tree)[cct_man.current].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[cct_man.current].circ, _stmts));
         add_edge(cct_man.root, cct_man.current, cct_man.tree);
     }
 
-    void standard_syrec_synthesizer::set_settings(properties::ptr settings) {
+    void standard_syrec_synthesizer::set_settings(const properties::ptr& settings) {
         _settings = settings;
 
         variable_name_format     = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
@@ -87,13 +82,13 @@ namespace revkit {
         efficient_controls       = get<bool>(settings, "efficient_controls", false);
     }
 
-    void standard_syrec_synthesizer::set_main_module(syrec::module::ptr main_module) {
+    void standard_syrec_synthesizer::set_main_module(const syrec::module::ptr& main_module) {
         assert(modules.empty());
         modules.push(main_module);
     }
 
-    bool standard_syrec_synthesizer::on_module(syrec::module::ptr main) {
-        for (syrec::statement::ptr stat: main->statements()) {
+    bool standard_syrec_synthesizer::on_module(const syrec::module::ptr& main) {
+        for (const syrec::statement::ptr& stat: main->statements()) {
             if (!full_statement(stat)) {
                 //  if(! on_full_statement(stat ))
                 //{
@@ -124,8 +119,6 @@ namespace revkit {
         std::vector<unsigned> d, dd, stat_lhs, comp, ddd;
         std::vector<unsigned> lines;
         get_variables(statement.lhs(), stat_lhs);
-        bool okay = true;
-        UNUSED(okay);
 
         //std::cout<<op_vec.size()<<std::endl; //print
 
@@ -170,7 +163,7 @@ namespace revkit {
                 std::vector<unsigned> stat_assign_op;
                 if ((exp_op_vector.size() % 2) == 0) {
                     z = ((exp_op_vector.size()) / (2));
-                } else if ((exp_op_vector.size() % 2) == 1) {
+                } else {
                     z = (((exp_op_vector.size()) - 1) / (2));
                 }
 
@@ -183,11 +176,11 @@ namespace revkit {
 
                 ////////If reversible assignment is "-", the assignment operations must negated appropriately////
                 if (statement.op() == 1) {
-                    for (unsigned i = 0; i < stat_assign_op.size(); i++) {
-                        if (stat_assign_op.at(i) == 0) {
-                            stat_assign_op.at(i) = 1;
-                        } else if (stat_assign_op.at(i) == 1) {
-                            stat_assign_op.at(i) = 0;
+                    for (unsigned int& i: stat_assign_op) {
+                        if (i == 0) {
+                            i = 1;
+                        } else if (i == 1) {
+                            i = 0;
                         } else {
                             //stat_assign_op.at(i) == stat_assign_op.at(i);
                             continue;
@@ -272,13 +265,11 @@ namespace revkit {
     }
 
     bool standard_syrec_synthesizer::flow(const syrec::variable_expression& expression, std::vector<unsigned>& v) {
-        UNUSED(v);
         return get_variables(expression.var(), v);
     }
 
     /////////generating LHS and RHS (can be whole expressions as well)//////////////////
-    bool standard_syrec_synthesizer::flow(const syrec::binary_expression& expression, std::vector<unsigned>& v) {
-        UNUSED(v);
+    bool standard_syrec_synthesizer::flow(const syrec::binary_expression& expression, std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs, rhs, comp;
         assign_op_vector.push_back(expression.op());
 
@@ -446,8 +437,7 @@ return ok;
     bool standard_syrec_synthesizer::on_full_statement(const syrec::assign_statement& statement) {
         bool                  ok = false;
         std::vector<unsigned> d, stat_lhs;
-        unsigned              i, j;
-        UNUSED(j);
+        unsigned              i;
         get_variables(statement.lhs(), stat_lhs);
         op_rhs_lhs_expression(statement.rhs(), d);
         if (op_vec.empty()) {
@@ -552,7 +542,7 @@ return ok;
     }
 
     /////////When the input signals are not repeated//////////////////
-    bool standard_syrec_synthesizer::on_statement(syrec::statement::ptr statement) {
+    bool standard_syrec_synthesizer::on_statement(const syrec::statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
         if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
@@ -660,8 +650,6 @@ return ok;
         // op_vec.clear();
         lhs_vec1.clear();
         rhs_vec1.clear();
-        unsigned opp_size = exp_opp.size();
-        UNUSED(opp_size);
         // (experssion,lines,lhs_statement)
         // statement_lhs = lhs;
         // assert( lhs.size() == rhs.size() ); //stanmay
@@ -808,7 +796,7 @@ return ok;
                 // activate this line
                 add_active_control(helper_line);
 
-                for (syrec::statement::ptr stat: statement.then_statements()) {
+                for (const syrec::statement::ptr& stat: statement.then_statements()) {
                     if (!full_statement(stat)) {
                         //  if(! on_full_statement(stat ))
                         //{
@@ -824,7 +812,7 @@ return ok;
                 append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), helper_line);
                 add_active_control(helper_line);
 
-                for (syrec::statement::ptr stat: statement.else_statements()) {
+                for (const syrec::statement::ptr& stat: statement.else_statements()) {
                     if (!full_statement(stat)) {
                         //if(! on_full_statement(stat ))
                         //{
@@ -843,8 +831,8 @@ return ok;
             } break;
             case syrec_synthesis_if_realization_duplication: {
                 std::map<syrec::variable_access::ptr, syrec::variable_access::ptr> then_var_mapping = dupl_if_var_mapping;
-                for (syrec::variable_access::ptr var: _changing_variables.find(&statement)->second) {
-                    syrec::variable_access::ptr dupl_var = syrec::variable_access::ptr(new syrec::variable_access(syrec::variable::ptr(new syrec::variable(syrec::variable::wire, ("dupl_" + var->var()->name()), var->var()->dimensions(), var->var()->bitwidth()))));
+                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
+                    syrec::variable_access::ptr dupl_var = std::make_shared<syrec::variable_access>(std::make_shared<syrec::variable>(syrec::variable::wire, ("dupl_" + var->var()->name()), var->var()->dimensions(), var->var()->bitwidth()));
 
                     syrec::variable::vec var_vec;
                     var_vec.push_back(dupl_var->var());
@@ -863,7 +851,7 @@ return ok;
                 dupl_if_var_mapping.swap(then_var_mapping);
 
                 // then branch
-                for (syrec::statement::ptr stat: statement.then_statements()) {
+                for (const syrec::statement::ptr& stat: statement.then_statements()) {
                     if (!full_statement(stat)) {
                         // if(! on_full_statement(stat ))
                         //{
@@ -877,7 +865,7 @@ return ok;
                 dupl_if_var_mapping.swap(then_var_mapping);
 
                 // else branch
-                for (syrec::statement::ptr stat: statement.else_statements()) {
+                for (const syrec::statement::ptr& stat: statement.else_statements()) {
                     if (!full_statement(stat)) {
                         //if(! on_full_statement(stat ))
                         //{
@@ -889,7 +877,7 @@ return ok;
                 }
 
                 add_active_control(helper_line);
-                for (syrec::variable_access::ptr var: _changing_variables.find(&statement)->second) {
+                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
                     std::vector<unsigned> lhs, rhs;
                     get_variables(then_var_mapping.find(var)->second, lhs);
                     get_variables(var, rhs);
@@ -924,7 +912,7 @@ return ok;
                 loop_map[loop_variable] = i;
             }
 
-            for (syrec::statement::ptr stat: statement.statements()) {
+            for (const syrec::statement::ptr& stat: statement.statements()) {
                 if (!full_statement(stat)) {
                     // if(! on_full_statement(stat ))
                     //{
@@ -1002,7 +990,7 @@ return ok;
             add_variables(_circ, *this, variable_name_format, statement.target()->variables());
 
             modules.push(statement.target());
-            for (syrec::statement::ptr stat: statement.target()->statements()) {
+            for (const syrec::statement::ptr& stat: statement.target()->statements()) {
                 if (!full_statement(stat)) {
                     // if(! on_full_statement(stat ))
                     //{
@@ -1050,8 +1038,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::skip_statement& statement) {
-        UNUSED(statement);
+    bool standard_syrec_synthesizer::on_statement(const syrec::skip_statement& statement [[maybe_unused]]) {
         return true;
     }
 
@@ -1069,15 +1056,11 @@ return ok;
         }
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
-        UNUSED(lhs_stat);
-        UNUSED(op);
+    bool standard_syrec_synthesizer::on_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
         return get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
-        UNUSED(lhs_stat);
-        UNUSED(op);
+    bool standard_syrec_synthesizer::on_expression(const syrec::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
         return get_variables(expression.var(), lines); // TODO: in off_expression zurueckrechnen
     }
 
@@ -1966,7 +1949,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::expression_single_op(unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs) {
+    bool standard_syrec_synthesizer::expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
         //TODO: add assign decrease with a condition
         switch (op) {
             case syrec::binary_expression::add: // + tanmay
@@ -2168,7 +2151,6 @@ return ok;
 
     bool standard_syrec_synthesizer::add_active_control(unsigned control) {
         // aktuelles Blatt vollendet, zurueck zum parent
-        UNUSED(control);
         cct_man.current = source(*(in_edges(cct_man.current, cct_man.tree).first), cct_man.tree);
 
         // child fuer neuen control anlegen
@@ -2183,7 +2165,7 @@ return ok;
         // neues Blatt anlegen
         cct_node leaf                                        = add_vertex(cct_man.tree);
         get(boost::vertex_name, cct_man.tree)[leaf].controls = get(boost::vertex_name, cct_man.tree)[cct_man.current].controls;
-        get(boost::vertex_name, cct_man.tree)[leaf].circ     = std::shared_ptr<circuit>(new circuit());
+        get(boost::vertex_name, cct_man.tree)[leaf].circ     = std::make_shared<circuit>();
         get(boost::vertex_name, cct_man.tree)[leaf].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[leaf].circ, _stmts));
         add_edge(cct_man.current, leaf, cct_man.tree);
         cct_man.current = leaf;
@@ -2191,9 +2173,8 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::remove_active_control(unsigned control) {
+    bool standard_syrec_synthesizer::remove_active_control(unsigned control [[maybe_unused]]) {
         // aktuelles Blatt vollendet, zurueck zum parent
-        UNUSED(control);
         cct_man.current = source(*(in_edges(cct_man.current, cct_man.tree).first), cct_man.tree);
 
         // aktueller Knoten abgeschlossen, zurueck zum parent
@@ -2202,7 +2183,7 @@ return ok;
         // neues Blatt anlegen
         cct_node leaf                                        = add_vertex(cct_man.tree);
         get(boost::vertex_name, cct_man.tree)[leaf].controls = get(boost::vertex_name, cct_man.tree)[cct_man.current].controls;
-        get(boost::vertex_name, cct_man.tree)[leaf].circ     = std::shared_ptr<circuit>(new circuit());
+        get(boost::vertex_name, cct_man.tree)[leaf].circ     = std::make_shared<circuit>();
         get(boost::vertex_name, cct_man.tree)[leaf].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[leaf].circ, _stmts));
         add_edge(cct_man.current, leaf, cct_man.tree);
         cct_man.current = leaf;
@@ -2541,7 +2522,7 @@ return ok;
     }
 
     void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const syrec::variable::vec& variables) {
-        for (syrec::variable::ptr var: variables) {
+        for (const syrec::variable::ptr& var: variables) {
             // entry in var lines map
             synthesizer.var_lines().insert(std::make_pair(var, circ.lines()));
 
@@ -2609,13 +2590,13 @@ return ok;
     }
 
     void standard_syrec_synthesizer::compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (syrec::module::ptr mod: program.modules()) {
+        for (const syrec::module::ptr& mod: program.modules()) {
             compute_changing_variables(mod, changing_variables);
         }
     }
 
     void standard_syrec_synthesizer::compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (syrec::statement::ptr stat: module->statements()) {
+        for (const syrec::statement::ptr& stat: module->statements()) {
             compute_changing_variables(stat, changing_variables);
         }
     }
@@ -2636,32 +2617,32 @@ return ok;
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else if (auto* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
-            for (syrec::statement::ptr s: stat->then_statements()) {
+            for (const syrec::statement::ptr& s: stat->then_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
-            for (syrec::statement::ptr s: stat->else_statements()) {
+            for (const syrec::statement::ptr& s: stat->else_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else if (auto* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
-            for (syrec::statement::ptr s: stat->statements()) {
+            for (const syrec::statement::ptr& s: stat->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else if (auto* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
-            for (syrec::statement::ptr s: stat->target()->statements()) {
+            for (const syrec::statement::ptr& s: stat->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else if (auto* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
-            for (syrec::statement::ptr s: stat->target()->statements()) {
+            for (const syrec::statement::ptr& s: stat->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
@@ -2677,7 +2658,7 @@ return ok;
     }
 
     hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings, const properties::ptr& statistics) {
-        hdl_synthesis_func f = std::bind(syrec_synthesis, std::placeholders::_1, std::placeholders::_2, settings, statistics);
+        hdl_synthesis_func f = [settings, statistics](auto&& PH1, auto&& PH2) { return syrec_synthesis(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), settings, statistics); };
         f.init(settings, statistics);
         return f;
     }

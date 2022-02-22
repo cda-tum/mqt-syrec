@@ -26,14 +26,13 @@
 
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/signals2/signal.hpp>
-#include <boost/variant.hpp>
+#include <boost/signals2.hpp>
 #include <core/gate.hpp>
 #include <core/meta/bus_collection.hpp>
 #include <map>
 #include <optional>
+#include <utility>
+#include <variant>
 
 namespace revkit {
     /**
@@ -163,7 +162,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        standard_circuit(unsigned lines):
+        explicit standard_circuit(unsigned lines):
             lines(lines) {
             inputs.resize(lines, "i");
             outputs.resize(lines, "o");
@@ -211,7 +210,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    typedef boost::variant<standard_circuit, subcircuit> circuit_variant;
+    typedef std::variant<standard_circuit, subcircuit> circuit_variant;
 
     /**
    * @brief Represents a sub-circuit
@@ -255,7 +254,7 @@ namespace revkit {
      * @since  1.0
      */
         subcircuit(circuit_variant& base, unsigned from, unsigned to):
-            base(boost::get<standard_circuit>(base)), from(from), to(to) {}
+            base(std::get<standard_circuit>(base)), from(from), to(to) {}
 
         /**
      * @brief Default constructor
@@ -271,7 +270,7 @@ namespace revkit {
      * @since  1.0
      */
         subcircuit(const circuit_variant& base, unsigned from, unsigned to):
-            base(boost::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
+            base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
 
         /**
      * @brief Constructor with line filter
@@ -293,7 +292,7 @@ namespace revkit {
      * @since  1.0
      */
         subcircuit(standard_circuit& base, unsigned from, unsigned to, std::vector<unsigned> filter):
-            base(base), from(from), to(to), filter(filter) {
+            base(base), from(from), to(to), filter(std::move(filter)) {
             std::sort(this->filter.begin(), this->filter.end());
             this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
         }
@@ -313,7 +312,7 @@ namespace revkit {
      * @since  1.0
      */
         subcircuit(const circuit_variant& base, unsigned from, unsigned to, std::vector<unsigned> filter):
-            base(boost::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to), filter(filter) {
+            base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to), filter(std::move(filter)) {
             std::sort(this->filter.begin(), this->filter.end());
             this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
         }
@@ -348,8 +347,7 @@ namespace revkit {
     struct filter_circuit {
         typedef gate& result_type;
 
-        filter_circuit():
-            circ(0) {}
+        filter_circuit() = default;
         explicit filter_circuit(subcircuit& circ):
             circ(&circ) {}
 
@@ -365,7 +363,7 @@ namespace revkit {
         }
 
     private:
-        subcircuit* circ;
+        subcircuit* circ = nullptr;
     };
     /** @endcond */
 
@@ -373,8 +371,7 @@ namespace revkit {
     struct const_filter_circuit {
         typedef const gate& result_type;
 
-        const_filter_circuit():
-            circ(0) {}
+        const_filter_circuit() = default;
         explicit const_filter_circuit(const subcircuit& circ):
             circ(&circ) {}
 
@@ -391,7 +388,7 @@ namespace revkit {
         }
 
     private:
-        const subcircuit* circ;
+        const subcircuit* circ = nullptr;
     };
     /** @endcond */
 
@@ -414,7 +411,10 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        circuit() {}
+        circuit() = default;
+
+        explicit circuit(unsigned lines):
+            circ(standard_circuit(lines)) {}
 
         /**
      * @brief Cast Constructor for a standard_circuit
@@ -433,7 +433,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        circuit(const standard_circuit& std_circ):
+        explicit circuit(const standard_circuit& std_circ):
             circ(std_circ) {}
 
         /**
@@ -453,7 +453,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        circuit(standard_circuit& std_circ):
+        explicit circuit(standard_circuit& std_circ):
             circ(std_circ) {}
 
         /**
@@ -468,7 +468,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        circuit(const subcircuit& sub_circ):
+        explicit circuit(const subcircuit& sub_circ):
             circ(sub_circ) {}
 
         /**
@@ -483,7 +483,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        circuit(subcircuit& sub_circ):
+        explicit circuit(subcircuit& sub_circ):
             circ(sub_circ) {}
 
         /**
@@ -531,7 +531,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        unsigned num_gates() const;
+        [[nodiscard]] unsigned num_gates() const;
 
         /**
      * @brief Sets the number of line
@@ -563,7 +563,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        unsigned lines() const;
+        [[nodiscard]] unsigned lines() const;
 
         /**
      * @brief Constant begin iterator pointing to gates
@@ -573,7 +573,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const_iterator begin() const;
+        [[nodiscard]] const_iterator begin() const;
 
         /**
      * @brief Constant end iterator pointing to gates
@@ -583,7 +583,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const_iterator end() const;
+        [[nodiscard]] const_iterator end() const;
 
         /**
      * @brief Mutable begin iterator pointing to gates
@@ -613,7 +613,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const_reverse_iterator rbegin() const;
+        [[nodiscard]] const_reverse_iterator rbegin() const;
 
         /**
      * @brief Constant end reverse iterator pointing to gates
@@ -623,7 +623,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const_reverse_iterator rend() const;
+        [[nodiscard]] const_reverse_iterator rend() const;
 
         /**
      * @brief Mutable begin reverse iterator pointing to gates
@@ -743,7 +743,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const std::vector<std::string>& inputs() const;
+        [[nodiscard]] const std::vector<std::string>& inputs() const;
 
         /**
      * @brief Sets the output names of the lines in a circuit
@@ -771,7 +771,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const std::vector<std::string>& outputs() const;
+        [[nodiscard]] const std::vector<std::string>& outputs() const;
 
         /**
      * @brief Sets the constant input line specifications
@@ -801,7 +801,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const std::vector<constant>& constants() const;
+        [[nodiscard]] const std::vector<constant>& constants() const;
 
         /**
      * @brief Sets whether outputs are garbage or not
@@ -830,7 +830,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const std::vector<bool>& garbage() const;
+        [[nodiscard]] const std::vector<bool>& garbage() const;
 
         /**
      * @brief Sets a name of the circuit
@@ -856,7 +856,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        const std::string& circuit_name() const;
+        [[nodiscard]] const std::string& circuit_name() const;
 
         /**
      * @brief Constant access to the input buses
@@ -869,7 +869,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const bus_collection& inputbuses() const;
+        [[nodiscard]] const bus_collection& inputbuses() const;
 
         /**
      * @brief Mutable access to the input buses
@@ -895,7 +895,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const bus_collection& outputbuses() const;
+        [[nodiscard]] const bus_collection& outputbuses() const;
 
         /**
      * @brief Mutable access to the output buses
@@ -921,7 +921,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const bus_collection& statesignals() const;
+        [[nodiscard]] const bus_collection& statesignals() const;
 
         /**
      * @brief Mutable access to the state signals
@@ -948,7 +948,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        bool is_subcircuit() const;
+        [[nodiscard]] bool is_subcircuit() const;
 
         /**
      * @brief Returns the filter of a sub-circuit
@@ -965,7 +965,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        std::pair<unsigned, std::vector<unsigned>> filter() const;
+        [[nodiscard]] std::pair<unsigned, std::vector<unsigned>> filter() const;
 
         /**
      * @brief Returns the offset of the circuit (sub-circuit)
@@ -979,7 +979,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        unsigned offset() const;
+        [[nodiscard]] unsigned offset() const;
 
         /**
      * @brief Adds a module to the circuit
@@ -1030,7 +1030,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
+        [[nodiscard]] const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
 
         /**
      * @brief Returns the annotation for one gate and one key
@@ -1048,7 +1048,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
+        [[nodiscard]] const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
 
         /**
      * @brief Returns all annotations for a given gate
@@ -1081,7 +1081,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        boost::optional<const std::map<std::string, std::string>&> annotations(const gate& g) const;
+        [[nodiscard]] std::optional<const std::map<std::string, std::string>> annotations(const gate& g) const;
 
         /**
      * @brief Annotates a gate
@@ -1109,11 +1109,11 @@ namespace revkit {
         boost::signals2::signal<void(gate&)> gate_added;
 
         /** @cond */
-        operator circuit_variant&() {
+        explicit operator circuit_variant&() {
             return circ;
         }
 
-        operator const circuit_variant&() const {
+        explicit operator const circuit_variant&() const {
             return circ;
         }
         /** @endcond */

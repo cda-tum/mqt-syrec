@@ -8,23 +8,7 @@
 #define SYREC_SYNTHESIS_GARBAGEFREE_HPP
 
 #include "syrec_synthesis.hpp"
-/* #include <core/circuit.hpp>
-#include <algorithms/synthesis/syrec_synthesis.hpp>
-#include <boost/assign/std/set.hpp>
-#include <boost/assign/std/vector.hpp>
-#include <boost/bind.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/foreach.hpp>
-#include <boost/format.hpp>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <core/properties.hpp>
-#include <core/syrec/program.hpp>*/
+
 #include <functional>
 #include <numeric>
 
@@ -35,12 +19,12 @@ namespace revkit {
 
         void initialize_changing_variables(const syrec::program& program) override;
 
-        bool on_module(syrec::module::ptr) override;
-        bool on_statement(syrec::statement::ptr statement) override;
+        bool on_module(const syrec::module::ptr&) override;
+        bool on_statement(const syrec::statement::ptr& statement) override;
         bool on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines);
 
-        void set_settings(properties::ptr settings) override;
-        void set_main_module(syrec::module::ptr main_module) override;
+        void set_settings(const properties::ptr& settings) override;
+        void set_main_module(const syrec::module::ptr& main_module) override;
 
     protected:
         // statements
@@ -68,40 +52,40 @@ namespace revkit {
         bool on_condition(const syrec::unary_expression& condition, unsigned result_line);
 
         // unary operations
-        bool bitwise_negation(const std::vector<unsigned>& dest); // ~
-        bool decrement(const std::vector<unsigned>& dest);        // --
-        bool increment(const std::vector<unsigned>& dest);        // ++
+        bool bitwise_negation(const std::vector<unsigned>& dest) override; // ~
+        bool decrement(const std::vector<unsigned>& dest) override;        // --
+        bool increment(const std::vector<unsigned>& dest) override;        // ++
 
         // binary operations
-        bool bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
-        bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // |
-        bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // &&
-        bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
-        bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
-        bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
-        bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // >=
-        bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // >
-        bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                     // +=
-        bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                             // <=
-        bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                               // <
-        bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);              // %
-        bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);      // *
-        bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *%*
-        bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                              // !=
-        bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                                 // <=>
+        bool bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override; // &
+        bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src) override;                                    // ^=
+        bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;  // |
+        bool conjunction(unsigned dest, unsigned src1, unsigned src2) override;                                                             // &&
+        bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src) override;                                        // -=
+        bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry) override;
+        bool disjunction(unsigned dest, unsigned src1, unsigned src2) override;                                                          // ||
+        bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override; // /
+        bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;                       // =
+        bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;               // >=
+        bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;                 // >
+        bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src) override;                                     // +=
+        bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry) override;
+        bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;                             // <=
+        bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;                               // <
+        bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;              // %
+        bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;      // *
+        bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override; // *%*
+        bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) override;                              // !=
+        bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) override;                                                 // <=>
 
         // shift operations
-        bool left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // <<
-        bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >>
+        bool left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) override;  // <<
+        bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) override; // >>
 
-        bool get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
+        bool get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines) override;
         bool get_expr_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
         //bool unget_variables( syrec::variable_access::ptr var, std::vector<unsigned>& lines );
-        bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
+        bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines) override;
         bool array_copying(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
 
         bool     get_reusable_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
@@ -110,18 +94,18 @@ namespace revkit {
         //void release_inv_constant_lines( std::map< bool, std::vector<unsigned> > const_lines );
         void release_constant_lines(const std::list<boost::tuple<bool, bool, unsigned>>& const_lines);
         void release_constant_line(boost::tuple<bool, bool, unsigned> const_line);
-        void release_constant_line(unsigned index, bool value);
+        void release_constant_line(unsigned index, bool value) override;
 
         // efficient controls
-        bool assemble_circuit(const cct_node&);
-        bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
+        bool assemble_circuit(const cct_node&) override;
+        bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls) override;
 
-        bool optimization_decision(const cct_node&);
+        bool optimization_decision(const cct_node&) override;
 
         // stuff for reverse synthesis
         bool unget_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
         bool unget_expr_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
-        void get_expr_lines(syrec::expression::ptr expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
+        void get_expr_lines(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
         void get_expr_lines(syrec::variable_access::ptr var, std::vector<unsigned>& lines, std::list<boost::tuple<bool, bool, unsigned>>& expr_cl);
         bool reverse_array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
         bool reverse_array_copying(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
@@ -279,7 +263,7 @@ namespace revkit {
     };*/
 
         struct cmp_vptr {
-            bool operator()(const std::pair<syrec::variable_access::ptr, unsigned> a, const std::pair<syrec::variable_access::ptr, unsigned> b) const {
+            bool operator()(const std::pair<syrec::variable_access::ptr, unsigned> a, const std::pair<syrec::variable_access::ptr, unsigned>& b) const {
                 return ((a.first->var() < b.first->var()) || ((a.first->var() == b.first->var()) && (a.second < b.second)));
             }
         };
@@ -297,7 +281,7 @@ namespace revkit {
 
         void compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables);
         void compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::statement::ptr statement, std::map<const syrec::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const syrec::statement::ptr& statement, std::map<const syrec::statement*, var_set>& changing_variables);
     };
 
     /**
@@ -308,7 +292,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    bool syrec_synthesis_garbagefree(circuit& circ, const syrec::program& program, properties::ptr settings = properties::ptr(), properties::ptr statistics = properties::ptr());
+    bool syrec_synthesis_garbagefree(circuit& circ, const syrec::program& program, const properties::ptr& settings = properties::ptr(), const properties::ptr& statistics = properties::ptr());
 
 } // namespace revkit
 

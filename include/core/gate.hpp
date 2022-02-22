@@ -140,7 +140,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual const_iterator begin_controls() const;
+        [[nodiscard]] virtual const_iterator begin_controls() const;
 
         /**
      * @brief End iterator for accessing control lines (const).
@@ -150,7 +150,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual const_iterator end_controls() const;
+        [[nodiscard]] virtual const_iterator end_controls() const;
 
         /**
      * @brief Start iterator for accessing control lines (non-const).
@@ -180,7 +180,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual const_iterator begin_targets() const;
+        [[nodiscard]] virtual const_iterator begin_targets() const;
 
         /**
      * @brief End iterator for accessing target lines (const).
@@ -190,7 +190,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual const_iterator end_targets() const;
+        [[nodiscard]] virtual const_iterator end_targets() const;
 
         /**
      * @brief Start iterator for accessing target lines (const).
@@ -223,7 +223,7 @@ namespace revkit {
      *
      * @return Number of control and target lines.
      */
-        virtual unsigned size() const;
+        [[nodiscard]] virtual unsigned size() const;
 
         /**
      * @brief Adds a control line to the gate
@@ -283,12 +283,12 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        virtual const boost::any& type() const;
+        [[nodiscard]] virtual const boost::any& type() const;
 
         friend class filtered_gate;
 
     private:
-        class priv;
+        struct priv;
         priv* const d;
     };
 
@@ -330,12 +330,12 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        explicit filtered_gate(const filtered_gate& other);
+        filtered_gate(const filtered_gate& other);
 
         /**
      * @brief Deconstructor
      */
-        virtual ~filtered_gate();
+        ~filtered_gate() override;
 
         /**
      * @brief Assignment operator
@@ -349,27 +349,27 @@ namespace revkit {
      */
         filtered_gate& operator=(const filtered_gate& other);
 
-        const_iterator begin_controls() const;
-        const_iterator end_controls() const;
-        iterator       begin_controls();
-        iterator       end_controls();
+        [[nodiscard]] const_iterator begin_controls() const override;
+        [[nodiscard]] const_iterator end_controls() const override;
+        iterator                     begin_controls() override;
+        iterator                     end_controls() override;
 
-        const_iterator begin_targets() const;
-        const_iterator end_targets() const;
-        iterator       begin_targets();
-        iterator       end_targets();
+        [[nodiscard]] const_iterator begin_targets() const override;
+        [[nodiscard]] const_iterator end_targets() const override;
+        iterator                     begin_targets() override;
+        iterator                     end_targets() override;
 
-        unsigned size() const;
-        void     add_control(line c);
-        void     remove_control(line c);
-        void     add_target(line l);
-        void     remove_target(line l);
+        [[nodiscard]] unsigned size() const override;
+        void                   add_control(line c) override;
+        void                   remove_control(line c) override;
+        void                   add_target(line l) override;
+        void                   remove_target(line l) override;
 
-        void              set_type(const boost::any& t);
-        const boost::any& type() const;
+        void                            set_type(const boost::any& t) override;
+        [[nodiscard]] const boost::any& type() const override;
 
     private:
-        class priv;
+        struct priv;
         priv* const d;
     };
 
@@ -377,8 +377,7 @@ namespace revkit {
     struct transform_line {
         typedef gate::line result_type;
 
-        transform_line():
-            filter(0) {}
+        transform_line() = default;
 
         explicit transform_line(const std::vector<unsigned>& filter):
             filter(&filter) {}
@@ -389,14 +388,13 @@ namespace revkit {
         }
 
     private:
-        const std::vector<unsigned>* filter;
+        const std::vector<unsigned>* filter = nullptr;
     };
     /** @endcond */
 
     /** @cond */
     struct filter_line {
-        filter_line():
-            filter(0) {}
+        filter_line() = default;
 
         explicit filter_line(const std::vector<unsigned>& filter):
             filter(&filter) {}
@@ -406,7 +404,7 @@ namespace revkit {
         }
 
     private:
-        const std::vector<unsigned>* filter;
+        const std::vector<unsigned>* filter = nullptr;
     };
     /** @endcond */
 
