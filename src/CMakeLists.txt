@@ -3,7 +3,7 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/Dummy.cpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_garbagefree.cpp
+            
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simulation.hpp
@@ -11,7 +11,7 @@ add_library(${PROJECT_NAME}
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/synthesis.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_garbagefree.hpp
+            
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp

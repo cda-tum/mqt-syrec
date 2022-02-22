@@ -780,4 +780,4 @@ namespace revkit {
         std::visit(annotate_visitor(g, key, value), circ);
     }
 
-} // namespace rev
+} // namespace revkit
