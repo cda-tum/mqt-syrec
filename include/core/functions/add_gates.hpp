@@ -83,7 +83,7 @@ namespace revkit {
         gate& operator()(const gate::line& l1, const gate::line& l2);
 
     private:
-        gate* g;
+        gate* g = nullptr;
     };
 
     /**
@@ -286,7 +286,7 @@ namespace revkit {
         target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9);
 
     private:
-        gate* g;
+        gate* g = nullptr;
     };
 
     /**
@@ -417,7 +417,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder append_gate(circuit& circ, const boost::any& tag);
+    control_line_adder append_gate(circuit& circ, const std::any& tag);
 
     /**
    * @brief Helper function for appending a \b Toffoli gate using the control_line_adder
@@ -575,7 +575,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder prepend_gate(circuit& circ, const boost::any& tag);
+    control_line_adder prepend_gate(circuit& circ, const std::any& tag);
 
     /**
    * @brief Helper function for prepending a \b Toffoli gate using the control_line_adder
@@ -742,7 +742,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder insert_gate(circuit& circ, unsigned n, const boost::any& tag);
+    control_line_adder insert_gate(circuit& circ, unsigned n, const std::any& tag);
 
     /**
    * @brief Helper function for inserting a \b Toffoli gate using the control_line_adder

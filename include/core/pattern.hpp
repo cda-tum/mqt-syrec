@@ -164,7 +164,7 @@ namespace revkit {
 
     private:
         class priv;
-        priv* const d;
+        priv* const d = nullptr;
     };
 
 } // namespace revkit

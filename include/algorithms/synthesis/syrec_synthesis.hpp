@@ -8,13 +8,14 @@
 #define SYREC_SYNTHESIS_HPP
 
 #include <algorithm>
-#include <algorithms/synthesis/synthesis.hpp>
+//#include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis_p.hpp>
 #include <cmath>
 #include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
+#include <core/functor.hpp>
 #include <core/syrec/program.hpp>
 #include <memory>
 #include <stack>

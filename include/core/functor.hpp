@@ -24,8 +24,8 @@
 #ifndef FUNCTOR_HPP
 #define FUNCTOR_HPP
 
-#include <boost/function.hpp>
 #include <core/properties.hpp>
+#include <functional>
 
 namespace revkit {
 
@@ -44,7 +44,7 @@ namespace revkit {
    * @since  1.0
    */
     template<typename T>
-    class functor: public boost::function<T> {
+    class functor: public std::function<T> {
     public:
         /**
      * @brief Default constructor
@@ -55,7 +55,7 @@ namespace revkit {
      * @since  1.0
      */
         functor():
-            boost::function<T>() {}
+            std::function<T>() {}
 
         /**
      * @brief Copy constructor
@@ -73,7 +73,7 @@ namespace revkit {
      */
         template<typename F>
         functor(F f):
-            boost::function<T>(f) {}
+            std::function<T>(f) {}
 
         /**
      * @brief Initializes the settings and statistics fields.

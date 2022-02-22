@@ -24,11 +24,10 @@
 #ifndef GATE_HPP
 #define GATE_HPP
 
-#include <boost/any.hpp>
+#include <any>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
+#include <algorithm>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -273,7 +272,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        virtual void set_type(const boost::any& t);
+        virtual void set_type(const std::any& t);
 
         /**
      * @brief Returns the type of the target line(s)
@@ -283,7 +282,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] virtual const boost::any& type() const;
+        [[nodiscard]] virtual const std::any& type() const;
 
         friend class filtered_gate;
 
@@ -365,8 +364,8 @@ namespace revkit {
         void                   add_target(line l) override;
         void                   remove_target(line l) override;
 
-        void                            set_type(const boost::any& t) override;
-        [[nodiscard]] const boost::any& type() const override;
+        void                            set_type(const std::any& t) override;
+        [[nodiscard]] const std::any& type() const override;
 
     private:
         struct priv;

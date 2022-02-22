@@ -1,7 +1,7 @@
 #include "Dummy.hpp"
 
 #include <algorithms/simulation/simple_simulation.hpp>
-#include <algorithms/synthesis/synthesis.hpp>
+//#include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
@@ -16,7 +16,7 @@
 #include <core/syrec/parser.hpp>
 #include <core/syrec/program.hpp>
 #include <core/target_tags.hpp>
-#include <core/truth_table.hpp>
+//#include <core/truth_table.hpp>
 #include <core/utils/costs.hpp>
 #include <pybind11/chrono.h>
 #include <pybind11/complex.h>
@@ -406,7 +406,7 @@ unsigned gate_get_type(const gate& g) {
 
 std::string gate_module_name(const gate& g) {
     if (is_module(g)) {
-        return boost::any_cast<module_tag>(g.type()).name;
+        return std::any_cast<module_tag>(g.type()).name;
     } else {
         return {};
     }

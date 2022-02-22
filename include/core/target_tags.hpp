@@ -26,9 +26,10 @@
 #ifndef TARGET_TAGS_HPP
 #define TARGET_TAGS_HPP
 
-#include <boost/any.hpp>
+#include <any>
 #include <core/circuit.hpp>
 #include <core/gate.hpp>
+#include <memory>
 
 namespace revkit {
 
@@ -158,7 +159,7 @@ namespace revkit {
    * @since  1.0
    */
     template<typename T>
-    bool is_type(const boost::any& operand) {
+    bool is_type(const std::any& operand) {
         return operand.type() == typeid(T);
     }
 

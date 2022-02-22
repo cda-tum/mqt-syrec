@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
 
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/synthesis.hpp
+            #${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/synthesis.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
             
 
@@ -18,7 +18,7 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/pattern.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/properties.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/target_tags.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/truth_table.cpp
+           
 
             
 
@@ -27,10 +27,10 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_gates.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_line_to_circuit.cpp
            
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/copy_circuit.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/copy_metadata.cpp
+            
+            
            
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/flatten_circuit.cpp
+            
             
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/meta/bus_collection.cpp
@@ -55,7 +55,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/pattern.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/truth_table.hpp
+            #${${PROJECT_NAME}_SOURCE_DIR}/include/core/truth_table.hpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/active_controls.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
@@ -63,10 +63,9 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_line_to_circuit.hpp
            
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/control_lines.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/copy_circuit.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/copy_metadata.hpp
             
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/flatten_circuit.hpp
+            
+            
             
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/target_lines.hpp
             

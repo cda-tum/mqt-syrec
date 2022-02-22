@@ -33,6 +33,7 @@
 #include <optional>
 #include <utility>
 #include <variant>
+#include <memory>
 
 namespace revkit {
     /**

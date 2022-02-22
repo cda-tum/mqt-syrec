@@ -27,10 +27,10 @@
 #ifndef PROPERTIES_HPP
 #define PROPERTIES_HPP
 
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
+#include <any>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace revkit {
@@ -53,7 +53,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        typedef std::map<std::string, boost::any> storage_type;
+        typedef std::map<std::string, std::any> storage_type;
 
         /**
      * @brief Value type of the property map, i.e. \p std::string
@@ -131,7 +131,7 @@ namespace revkit {
      */
         template<typename T>
         T get(const key_type& k) const {
-            return boost::any_cast<T>(map.find(k)->second);
+            return std::any_cast<T>(map.find(k)->second);
         }
 
         /**
@@ -153,7 +153,7 @@ namespace revkit {
             if (map.find(k) == map.end()) {
                 return default_value;
             } else {
-                return boost::any_cast<T>(map.find(k)->second);
+                return std::any_cast<T>(map.find(k)->second);
             }
         }
 

@@ -24,7 +24,7 @@ namespace revkit {
 
         line_container controls;
         line_container targets;
-        boost::any     target_type;
+        std::any     target_type;
     };
 
     gate::gate():
@@ -103,11 +103,11 @@ namespace revkit {
         d->targets.erase(l);
     }
 
-    void gate::set_type(const boost::any& t) {
+    void gate::set_type(const std::any& t) {
         d->target_type = t;
     }
 
-    const boost::any& gate::type() const {
+    const std::any& gate::type() const {
         return d->target_type;
     }
 
@@ -214,11 +214,11 @@ namespace revkit {
         }
     }
 
-    void filtered_gate::set_type(const boost::any& t) {
+    void filtered_gate::set_type(const std::any& t) {
         d->base.set_type(t);
     }
 
-    const boost::any& filtered_gate::type() const {
+    const std::any& filtered_gate::type() const {
         return d->base.type();
     }
 

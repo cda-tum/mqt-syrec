@@ -68,7 +68,7 @@ namespace revkit {
                 unsigned             t1 = *it++;
                 unsigned             t2 = *it;
 
-                if (boost::any_cast<peres_tag>(&g.type())->swap_targets) {
+                if (std::any_cast<peres_tag>(&g.type())->swap_targets) {
                     unsigned tmp = t1;
                     t1           = t2;
                     t2           = tmp;
@@ -97,7 +97,7 @@ namespace revkit {
                 return input;
             }
 
-            const module_tag* tag = boost::any_cast<module_tag>(&g.type());
+            const module_tag* tag = std::any_cast<module_tag>(&g.type());
 
             // get the new input sub pattern
             std::vector<unsigned>   targets(g.begin_targets(), g.end_targets());

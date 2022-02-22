@@ -17,7 +17,7 @@
 
 #include "core/circuit.hpp"
 
-#include "core/functions/copy_circuit.hpp"
+//#include "core/functions/copy_circuit.hpp"
 #include "core/gate.hpp"
 
 #include <boost/range/adaptors.hpp>
@@ -760,7 +760,7 @@ namespace revkit {
 
     void circuit::add_module(const std::string& name, const circuit& module) {
         auto* copy = new circuit();
-        copy_circuit(module, *copy);
+        //copy_circuit(module, *copy);
         add_module(name, std::shared_ptr<circuit>(copy));
     }
 

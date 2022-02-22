@@ -2252,46 +2252,46 @@ return ok;
         return (std::min)({stdCost, optCost, succCost});
     }
 
-    unsigned standard_syrec_synthesizer::standardCost(const cct_node& current, unsigned controls) {
+    unsigned standard_syrec_synthesizer::standardCost(const cct_node& current [[maybe_unused]], unsigned controls [[maybe_unused]]) {
         unsigned      cost = 0u;
-        quantum_costs qc;
-        qc.controls_offset = controls;
+//        quantum_costs qc;
+//        qc.controls_offset = controls;
 
         // leaf
-        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
-            cost += costs(*(get(boost::vertex_name, cct_man.tree)[current].circ), costs_by_gate_func(qc));
-        } else {
-            for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-                cost += standardCost(target(*edge_it, cct_man.tree), controls + 1u);
-            }
-        }
+//        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
+//            cost += costs(*(get(boost::vertex_name, cct_man.tree)[current].circ), costs_by_gate_func(qc));
+//        } else {
+//            for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+//               cost += standardCost(target(*edge_it, cct_man.tree), controls + 1u);
+//           }
+//        }
 
         return cost;
     }
 
-    unsigned standard_syrec_synthesizer::optimizationCost(const cct_node& current) {
-        unsigned cost = 0u;
+    unsigned standard_syrec_synthesizer::optimizationCost(const cct_node& current [[maybe_unused]]) {
+        unsigned cost = 1u;
 
-        quantum_costs qc;
-        qc.controls_offset = get(boost::vertex_name, cct_man.tree)[current].controls.size();
+//        quantum_costs qc;
+//        qc.controls_offset = get(boost::vertex_name, cct_man.tree)[current].controls.size();
 
-        circuit tmp_circ;
-        append_not(tmp_circ, 1u);
-        cost += 2 * costs(tmp_circ, costs_by_gate_func(qc));
+//        circuit tmp_circ;
+//        append_not(tmp_circ, 1u);
+//        cost += 2 * costs(tmp_circ, costs_by_gate_func(qc));
 
-        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-            cost += standardCost(target(*edge_it, cct_man.tree), 1u);
-        }
+//        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+//            cost += standardCost(target(*edge_it, cct_man.tree), 1u);
+//        }
 
         return cost;
     }
 
-    unsigned standard_syrec_synthesizer::successorsCost(const cct_node& current) {
-        unsigned cost = 0u;
+    unsigned standard_syrec_synthesizer::successorsCost(const cct_node& current [[maybe_unused]]) {
+        unsigned cost = 1u;
 
-        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-            cost += bestCost(target(*edge_it, cct_man.tree));
-        }
+//        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+//            cost += bestCost(target(*edge_it, cct_man.tree));
+//        }
 
         return cost;
     }

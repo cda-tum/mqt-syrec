@@ -255,7 +255,7 @@ namespace revkit {
         return create_module(circ.append_gate(), circ, module_name, controls, targets);
     }
 
-    control_line_adder append_gate(circuit& circ, const boost::any& tag) {
+    control_line_adder append_gate(circuit& circ, const std::any& tag) {
         gate& g = circ.append_gate();
         g.set_type(tag);
         return control_line_adder(g);
@@ -311,7 +311,7 @@ namespace revkit {
         return create_module(circ.prepend_gate(), circ, module_name, controls, targets);
     }
 
-    control_line_adder prepend_gate(circuit& circ, const boost::any& tag) {
+    control_line_adder prepend_gate(circuit& circ, const std::any& tag) {
         gate& g = circ.prepend_gate();
         g.set_type(tag);
         return control_line_adder(g);
@@ -367,7 +367,7 @@ namespace revkit {
         return create_module(circ.insert_gate(n), circ, module_name, controls, targets);
     }
 
-    control_line_adder insert_gate(circuit& circ, unsigned n, const boost::any& tag) {
+    control_line_adder insert_gate(circuit& circ, unsigned n, const std::any& tag) {
         gate& g = circ.insert_gate(n);
         g.set_type(tag);
         return control_line_adder(g);
