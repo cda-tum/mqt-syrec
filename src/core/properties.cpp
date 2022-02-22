@@ -17,7 +17,6 @@
 
 #include "core/properties.hpp"
 
-
 namespace revkit {
 
     properties::properties() = default;

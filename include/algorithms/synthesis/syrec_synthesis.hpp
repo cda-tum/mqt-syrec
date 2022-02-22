@@ -13,9 +13,9 @@
 #include <cmath>
 #include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
+#include <core/functor.hpp>
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
-#include <core/functor.hpp>
 #include <core/syrec/program.hpp>
 #include <memory>
 #include <stack>
@@ -87,7 +87,7 @@ namespace revkit {
     protected:
         virtual // unary operations
                 bool
-                     bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
+                bitwise_negation(const std::vector<unsigned>& dest);                     // ~ TODO: test
         virtual bool decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
         bool         decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
         virtual bool increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
@@ -95,11 +95,11 @@ namespace revkit {
 
         virtual // binary operations
                 bool
-                     bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
-        virtual bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        virtual bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // & TODO: test
-        virtual bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // && TODO: test
-        virtual bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
+                bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);     // & TODO: test
+        virtual bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                   // ^=
+        virtual bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
+        virtual bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                            // && TODO: test
+        virtual bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                       // -=
         virtual bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
         virtual bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // || TODO: test
         virtual bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
@@ -133,7 +133,7 @@ namespace revkit {
         virtual //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
                 // shift operations
                 bool
-                     left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // << TODO: testen
+                left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);       // << TODO: testen
         virtual bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >> TODO: testen
 
         // efficient controls

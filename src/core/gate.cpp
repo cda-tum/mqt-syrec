@@ -24,7 +24,7 @@ namespace revkit {
 
         line_container controls;
         line_container targets;
-        std::any     target_type;
+        std::any       target_type;
     };
 
     gate::gate():
