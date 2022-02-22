@@ -28,6 +28,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/function.hpp>
 #include <core/circuit.hpp>
+#include <functional>
 
 namespace revkit {
 
@@ -41,7 +42,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    typedef boost::function<boost::dynamic_bitset<>&(const gate&, boost::dynamic_bitset<>&)> gate_simulation_func;
+    typedef std::function<boost::dynamic_bitset<>&(const gate&, boost::dynamic_bitset<>&)> gate_simulation_func;
 
     /**
    * @brief Functor which is called after a step result is calculated
@@ -53,7 +54,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    typedef boost::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
+    typedef std::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
 
     /**
    * @brief A gate simulation implementation of \ref revkit::gate_simulation_func "gate_simulation_func"

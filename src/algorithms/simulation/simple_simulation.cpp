@@ -171,7 +171,7 @@ namespace revkit {
     }
 
     simulation_func simple_simulation_func(properties::ptr settings, properties::ptr statistics) {
-        simulation_func f = std::bind(static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, properties::ptr, properties::ptr)>(simple_simulation), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, settings, statistics);
+        simulation_func f = [settings, statistics](auto&& PH1, auto&& PH2, auto&& PH3) { return simple_simulation(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), std::forward<decltype(PH3)>(PH3), settings, statistics); };
         f.init(settings, statistics);
         return f;
     }
