@@ -1,15 +1,10 @@
-#include <pybind11/chrono.h>
-#include <pybind11/complex.h>
-#include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include "Dummy.hpp"
 
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/synthesis.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <core/circuit.hpp>
@@ -23,6 +18,11 @@
 #include <core/target_tags.hpp>
 #include <core/truth_table.hpp>
 #include <core/utils/costs.hpp>
+#include <pybind11/chrono.h>
+#include <pybind11/complex.h>
+#include <pybind11/functional.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 using namespace revkit;
