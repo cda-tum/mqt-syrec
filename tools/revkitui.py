@@ -97,7 +97,7 @@ class GateItem( QGraphicsItemGroup ):
             for t in range( min_target + 1, max_target ):
                 if t not in target_linesi( g ):
                     #line = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
-		    continue
+                    continue
 
             text = QGraphicsSimpleTextItem( g.module_name, self )
             width = QFontMetrics( text.font() ).width( g.module_name )
