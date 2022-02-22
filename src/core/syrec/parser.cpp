@@ -34,7 +34,7 @@
 #include <fstream>
 
 //#define foreach_ BOOST_FOREACH
-#define UNUSED(x) (void)(x)
+
 
 using namespace boost::assign;
 
@@ -695,8 +695,7 @@ namespace revkit {
             }
         }
 
-        statement* operator()(const std::string& ast_skip_stat) const {
-            UNUSED(ast_skip_stat);
+        statement* operator()(const std::string& ast_skip_stat [[maybe_unused]]) const {
             return new skip_statement();
         }
 

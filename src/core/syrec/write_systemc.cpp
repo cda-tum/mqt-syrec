@@ -26,7 +26,6 @@
 #include <string>
 
 //#define foreach_ BOOST_FOREACH
-#define UNUSED(x) (void)(x)
 
 static const std::string TAB = "  ";
 
@@ -694,8 +693,7 @@ namespace revkit {
         return uncallstmt_str;
     }
 
-    std::string systemc_writer::statement_to_systemc(const syrec::skip_statement& statement) {
-        UNUSED(statement);
+    std::string systemc_writer::statement_to_systemc(const syrec::skip_statement& statement [[maybe_unused]]) {
         return "";
     }
 

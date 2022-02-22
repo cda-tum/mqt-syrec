@@ -758,7 +758,7 @@ namespace revkit {
         _modules.insert(std::make_pair(name, module));
     }
 
-    void circuit::add_module(const std::string& name, const circuit& module) {
+    void circuit::add_module(const std::string& name, const circuit& module [[maybe_unused]]) {
         auto* copy = new circuit();
         //copy_circuit(module, *copy);
         add_module(name, std::shared_ptr<circuit>(copy));
