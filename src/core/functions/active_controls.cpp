@@ -17,7 +17,6 @@
 
 #include "core/functions/active_controls.hpp"
 
-//#include <boost/bind.hpp>
 #include <functional>
 
 namespace revkit {
@@ -49,7 +48,10 @@ namespace revkit {
     }
 
     void active_controls::operator()(gate& g) const {
-        std::for_each(d->_active_controls.begin(), d->_active_controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
+        //std::for_each(d->_active_controls.begin(), d->_active_controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
+        for (auto&& elem: d->_active_controls) {
+            g.add_control(elem);
+        }
     }
 
 } // namespace revkit

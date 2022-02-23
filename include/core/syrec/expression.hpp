@@ -23,7 +23,7 @@
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <core/syrec/variable.hpp>
 #include <iostream>
 
@@ -98,7 +98,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -207,7 +207,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -295,7 +295,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -530,7 +530,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -661,7 +661,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -816,7 +816,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**

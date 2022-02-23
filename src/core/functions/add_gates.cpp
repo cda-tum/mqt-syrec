@@ -21,8 +21,9 @@
 
 #include <boost/assign/std/vector.hpp>
 //#include <boost/bind.hpp>
-#include <boost/range/algorithm.hpp>
+//#include <boost/range/algorithm.hpp>
 #include <functional>
+#include <algorithm>
 
 using namespace boost::assign;
 
@@ -137,8 +138,10 @@ namespace revkit {
     ////////////////////////////// create_ functions
 
     gate& create_toffoli(gate& g, const gate::line_container& controls, const gate::line& target) {
-        std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
-
+        //std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
+        for (const auto& control: controls) {
+            g.add_control(control);
+        }
         g.add_target(target);
         g.set_type(toffoli_tag());
 
@@ -146,8 +149,10 @@ namespace revkit {
     }
 
     gate& create_fredkin(gate& g, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
-        std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
-
+        //std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
+        for (const auto& control: controls) {
+            g.add_control(control);
+        }
         g.add_target(target1);
         g.add_target(target2);
         g.set_type(fredkin_tag());
@@ -203,18 +208,23 @@ namespace revkit {
         map_t::const_iterator                                   it      = modules.find(name);
         assert(it != modules.end());
 
-        boost::for_each(controls, std::bind(&gate::add_control, &g, std::placeholders::_1));
-        boost::for_each(targets, std::bind(&gate::add_target, &g, std::placeholders::_1));
-
+        //boost::for_each(controls, std::bind(&gate::add_control, &g, std::placeholders::_1));
+        for (const auto& control: controls) {
+            g.add_control(control);
+        }
+        //boost::for_each(targets, std::bind(&gate::add_target, &g, std::placeholders::_1));
+        for (const auto& target: targets) {
+            g.add_target(target);
+        }
         module_tag module;
         module.reference = it->second;
         module.name      = name;
 
         // sort order
         std::vector<unsigned> targets_sorted(targets.begin(), targets.end());
-        boost::sort(targets_sorted);
+        std::sort(targets_sorted.begin(), targets_sorted.end());
         for (unsigned index: targets) {
-            module.target_sort_order += std::distance(boost::begin(targets_sorted), boost::find(targets_sorted, index));
+            module.target_sort_order += std::distance(targets_sorted.begin(), std::find(targets_sorted.begin(), targets_sorted.end(),  index));
         }
 
         g.set_type(module);

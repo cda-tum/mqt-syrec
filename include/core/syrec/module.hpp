@@ -23,7 +23,7 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <core/syrec/statement.hpp>
 #include <core/syrec/variable.hpp>
 #include <iostream>
@@ -185,7 +185,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**

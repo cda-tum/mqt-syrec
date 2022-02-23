@@ -17,10 +17,7 @@
 
 #include "core/syrec/grammar.hpp"
 
-#include <boost/foreach.hpp>
 #include <fstream>
-
-#define foreach_ BOOST_FOREACH
 
 namespace revkit {
 

@@ -23,7 +23,7 @@
 #ifndef BUS_COLLECTION_HPP
 #define BUS_COLLECTION_HPP
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <map>
 #include <string>
 #include <vector>
@@ -81,7 +81,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        void add(const std::string& name, const std::vector<unsigned>& line_indices, const boost::optional<unsigned>& initial_value = boost::optional<unsigned>());
+        void add(const std::string& name, const std::vector<unsigned>& line_indices, const std::optional<unsigned>& initial_value = std::optional<unsigned>());
 
         /**
      * @brief Gets the corresponding lines of a bus by the name
@@ -207,7 +207,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        boost::optional<unsigned> initial_value(const std::string& name) const;
+        std::optional<unsigned> initial_value(const std::string& name) const;
 
     private:
         class priv;

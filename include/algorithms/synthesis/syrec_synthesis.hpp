@@ -9,7 +9,7 @@
 
 #include <algorithm>
 //#include <algorithms/synthesis/synthesis.hpp>
-#include <algorithms/synthesis/syrec_synthesis_p.hpp>
+//#include <algorithms/synthesis/syrec_synthesis_p.hpp>
 #include <cmath>
 #include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
@@ -17,8 +17,34 @@
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
 #include <core/syrec/program.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <core/circuit.hpp>
+#include <core/gate.hpp>
 #include <memory>
 #include <stack>
+
+namespace revkit::internal {
+    struct node_properties {
+        node_properties() = default;
+
+        unsigned                 control{};
+        gate::line_container     controls;
+        std::shared_ptr<circuit> circ;
+    };
+
+    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                  boost::property<boost::vertex_name_t, node_properties>>
+            cct;
+
+    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+    typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
+
+    struct cct_manager {
+        cct      tree;
+        cct_node current;
+        cct_node root;
+    };
+}
 
 namespace revkit {
 

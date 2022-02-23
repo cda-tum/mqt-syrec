@@ -23,8 +23,8 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <optional>
+#include <memory>
 #include <core/syrec/number.hpp>
 #include <iostream>
 #include <string>
@@ -199,7 +199,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**
@@ -282,7 +282,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_range(const boost::optional<std::pair<number::ptr, number::ptr>>& range);
+            void set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range);
 
             /**
        * @brief Returns the range of this access
@@ -292,7 +292,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const boost::optional<std::pair<number::ptr, number::ptr>>& range() const;
+            const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
 
             /**
        * @brief Returns the bit-width of the variable access
@@ -314,7 +314,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**

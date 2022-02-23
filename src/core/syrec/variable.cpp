@@ -21,13 +21,11 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/tuple/tuple.hpp>
-
-#define foreach_ BOOST_FOREACH
+#include <optional>
+#include <tuple>
 
 using namespace boost::assign;
 
@@ -113,7 +111,7 @@ namespace revkit {
             priv() {}
 
             variable::ptr                                        var;
-            boost::optional<std::pair<number::ptr, number::ptr>> range;
+            std::optional<std::pair<number::ptr, number::ptr>> range;
             expression::vec                                      indexes;
         };
 
@@ -142,18 +140,18 @@ namespace revkit {
             }
         }
 
-        void variable_access::set_range(const boost::optional<std::pair<number::ptr, number::ptr>>& range) {
+        void variable_access::set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range) {
             d->range = range;
         }
 
-        const boost::optional<std::pair<number::ptr, number::ptr>>& variable_access::range() const {
+        const std::optional<std::pair<number::ptr, number::ptr>>& variable_access::range() const {
             return d->range;
         }
 
         unsigned variable_access::bitwidth() const {
             if (d->range) {
                 number::ptr first, second;
-                boost::tie(first, second) = *d->range;
+                std::tie(first, second) = *d->range;
 
                 /* if both variables are loop variables but have the same name,
            then the bit-width is 1, otherwise we cannot determine it now. */
@@ -209,7 +207,7 @@ namespace revkit {
 
             if (v.range()) {
                 number::ptr first, second;
-                boost::tie(first, second) = *v.range();
+                std::tie(first, second) = *v.range();
 
                 os << "." << *first;
 

@@ -32,6 +32,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <fstream>
+#include <optional>
 
 //#define foreach_ BOOST_FOREACH
 
@@ -165,7 +166,7 @@ namespace revkit {
         variable_access::ptr va(new variable_access());
         va->set_var(var);
 
-        boost::optional<std::pair<number::ptr, number::ptr>> var_range;
+        std::optional<std::pair<number::ptr, number::ptr>> var_range;
 
         ast_range range = ast_var.range;
         if (range) {

@@ -37,7 +37,7 @@ namespace revkit {
         public:
             priv() {}
 
-            number::ptr value;
+            number::ptr value = nullptr;
             unsigned    bitwidth;
         };
 
@@ -75,7 +75,7 @@ namespace revkit {
         public:
             priv() {}
 
-            variable_access::ptr var;
+            variable_access::ptr var = nullptr;
         };
 
         variable_expression::variable_expression():
@@ -111,8 +111,8 @@ namespace revkit {
         public:
             priv() {}
 
-            expression::ptr lhs;
-            expression::ptr rhs;
+            expression::ptr lhs = nullptr;
+            expression::ptr rhs = nullptr;
             unsigned        op;
         };
 
@@ -270,7 +270,7 @@ namespace revkit {
             priv() {}
 
             unsigned        op;
-            expression::ptr expr;
+            expression::ptr expr = nullptr;
         };
 
         unary_expression::unary_expression():
@@ -315,8 +315,8 @@ namespace revkit {
         public:
             priv() {}
 
-            expression::ptr lhs;
-            number::ptr     rhs;
+            expression::ptr lhs = nullptr;
+            number::ptr     rhs = nullptr;
             unsigned        op;
         };
 

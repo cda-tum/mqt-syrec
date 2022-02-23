@@ -19,13 +19,10 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
-//#include <boost/foreach.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <iterator>
 #include <sstream>
-
-//#define foreach_ BOOST_FOREACH
 
 using namespace boost::assign;
 

@@ -18,10 +18,7 @@
 #include "core/meta/bus_collection.hpp"
 
 #include <algorithm>
-#include <boost/foreach.hpp>
 #include <cassert>
-
-//#define foreach_ BOOST_FOREACH
 
 namespace revkit {
 
@@ -42,7 +39,7 @@ namespace revkit {
         //    delete d;
     }
 
-    void bus_collection::add(const map::key_type& name, const map::mapped_type& line_indices, const boost::optional<unsigned>& initial_value) {
+    void bus_collection::add(const map::key_type& name, const map::mapped_type& line_indices, const std::optional<unsigned>& initial_value) {
         d->buses.insert(std::make_pair(name, line_indices));
 
         if (initial_value) {
@@ -107,7 +104,7 @@ namespace revkit {
         }
     }
 
-    boost::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
+    std::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
         map::const_iterator it = d->buses.find(name);
 
         if (it != d->buses.end()) {
@@ -115,10 +112,10 @@ namespace revkit {
             if (it2 != d->initial_values.end()) {
                 return it2->second;
             } else {
-                return boost::optional<unsigned>();
+                return std::optional<unsigned>();
             }
         } else {
-            return boost::optional<unsigned>();
+            return std::optional<unsigned>();
         }
     }
 

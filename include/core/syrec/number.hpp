@@ -23,7 +23,7 @@
 #ifndef NUMBER_HPP
 #define NUMBER_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <map>
 #include <string>
 
@@ -198,7 +198,7 @@ namespace revkit {
 
         private:
             class priv;
-            priv* const d;
+            priv* const d = nullptr;
         };
 
         /**

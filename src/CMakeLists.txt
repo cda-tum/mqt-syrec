@@ -9,7 +9,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
 
-            #${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/synthesis.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
             
 
@@ -45,7 +44,7 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/reverse_statements.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/statement.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/write_systemc.cpp
+            
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/costs.cpp
             
@@ -55,7 +54,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/pattern.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
-            #${${PROJECT_NAME}_SOURCE_DIR}/include/core/truth_table.hpp
+            
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/active_controls.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
@@ -82,7 +81,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/reverse_statements.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/write_systemc.hpp
+            
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/costs.hpp
             
