@@ -112,7 +112,7 @@ namespace revkit {
             if (lhs->is_constant() && rhs->is_constant()) {
                 unsigned lhs_value = lhs->evaluate(number::loop_variable_mapping());
                 unsigned rhs_value = rhs->evaluate(number::loop_variable_mapping());
-                unsigned num_value;
+                unsigned num_value = 0;
 
                 switch (op) {
                     case numeric_expression::add: // +
@@ -291,7 +291,7 @@ namespace revkit {
                     if (lhs_exp->value()->is_constant() && rhs_exp->value()->is_constant()) {
                         unsigned lhs_value = lhs_exp->value()->evaluate(number::loop_variable_mapping());
                         unsigned rhs_value = rhs_exp->value()->evaluate(number::loop_variable_mapping());
-                        unsigned num_value;
+                        unsigned num_value = 0;
 
                         switch (op) {
                             case binary_expression::add: // +
@@ -467,7 +467,7 @@ namespace revkit {
                 if (lhs_no->value()->is_constant() && rhs->is_constant()) {
                     unsigned value    = lhs_no->value()->evaluate(number::loop_variable_mapping());
                     unsigned shft_amt = rhs->evaluate(number::loop_variable_mapping());
-                    unsigned result;
+                    unsigned result = 0;
 
                     switch (op) {
                         case shift_expression::left: // <<
