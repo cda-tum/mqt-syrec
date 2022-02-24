@@ -22,8 +22,8 @@
 #include <boost/assign/std/vector.hpp>
 //#include <boost/bind.hpp>
 //#include <boost/range/algorithm.hpp>
-#include <functional>
 #include <algorithm>
+#include <functional>
 
 using namespace boost::assign;
 
@@ -224,7 +224,7 @@ namespace revkit {
         std::vector<unsigned> targets_sorted(targets.begin(), targets.end());
         std::sort(targets_sorted.begin(), targets_sorted.end());
         for (unsigned index: targets) {
-            module.target_sort_order += std::distance(targets_sorted.begin(), std::find(targets_sorted.begin(), targets_sorted.end(),  index));
+            module.target_sort_order += std::distance(targets_sorted.begin(), std::find(targets_sorted.begin(), targets_sorted.end(), index));
         }
 
         g.set_type(module);

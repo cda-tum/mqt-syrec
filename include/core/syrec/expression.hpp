@@ -23,9 +23,9 @@
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include <memory>
 #include <core/syrec/variable.hpp>
 #include <iostream>
+#include <memory>
 
 namespace revkit {
     namespace syrec {

@@ -23,8 +23,8 @@
 #ifndef NUMBER_HPP
 #define NUMBER_HPP
 
-#include <memory>
 #include <map>
+#include <memory>
 #include <string>
 
 namespace revkit {

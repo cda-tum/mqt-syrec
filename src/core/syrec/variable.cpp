@@ -110,9 +110,9 @@ namespace revkit {
         public:
             priv() {}
 
-            variable::ptr                                        var;
+            variable::ptr                                      var;
             std::optional<std::pair<number::ptr, number::ptr>> range;
-            expression::vec                                      indexes;
+            expression::vec                                    indexes;
         };
 
         variable_access::variable_access():

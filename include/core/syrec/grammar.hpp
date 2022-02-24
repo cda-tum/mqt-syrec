@@ -115,7 +115,7 @@ namespace revkit {
                                                                    boost::recursive_wrapper<ast_for_statement>,
                                                                    ast_call_statement,
                                                                    std::string>>
-                ast_statement;
+                                                                                                                                                   ast_statement;
         typedef boost::fusion::vector<std::string, std::vector<unsigned>, boost::optional<unsigned>>                                               ast_variable_declaration;
         typedef boost::fusion::vector<std::string, std::vector<ast_variable_declaration>>                                                          ast_variable_declarations;
         typedef boost::fusion::vector<std::string, ast_variable_declaration>                                                                       ast_parameter;

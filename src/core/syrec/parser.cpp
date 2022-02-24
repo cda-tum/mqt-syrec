@@ -36,7 +36,6 @@
 
 //#define foreach_ BOOST_FOREACH
 
-
 using namespace boost::assign;
 
 namespace revkit {
@@ -467,7 +466,7 @@ namespace revkit {
                 if (lhs_no->value()->is_constant() && rhs->is_constant()) {
                     unsigned value    = lhs_no->value()->evaluate(number::loop_variable_mapping());
                     unsigned shft_amt = rhs->evaluate(number::loop_variable_mapping());
-                    unsigned result = 0;
+                    unsigned result   = 0;
 
                     switch (op) {
                         case shift_expression::left: // <<

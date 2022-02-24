@@ -23,10 +23,10 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include <optional>
-#include <memory>
 #include <core/syrec/number.hpp>
 #include <iostream>
+#include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>

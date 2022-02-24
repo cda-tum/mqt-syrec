@@ -23,8 +23,8 @@
 #ifndef BUS_COLLECTION_HPP
 #define BUS_COLLECTION_HPP
 
-#include <optional>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 

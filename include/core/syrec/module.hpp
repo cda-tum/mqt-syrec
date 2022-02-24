@@ -23,10 +23,10 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <memory>
 #include <core/syrec/statement.hpp>
 #include <core/syrec/variable.hpp>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
