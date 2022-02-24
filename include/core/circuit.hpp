@@ -30,10 +30,10 @@
 #include <core/gate.hpp>
 #include <core/meta/bus_collection.hpp>
 #include <map>
+#include <memory>
 #include <optional>
 #include <utility>
 #include <variant>
-#include <memory>
 
 namespace revkit {
     /**

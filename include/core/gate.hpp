@@ -24,10 +24,10 @@
 #ifndef GATE_HPP
 #define GATE_HPP
 
+#include <algorithm>
 #include <any>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <algorithm>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -364,7 +364,7 @@ namespace revkit {
         void                   add_target(line l) override;
         void                   remove_target(line l) override;
 
-        void                            set_type(const std::any& t) override;
+        void                          set_type(const std::any& t) override;
         [[nodiscard]] const std::any& type() const override;
 
     private:
