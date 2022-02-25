@@ -14,42 +14,42 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#from revkit_python import *
-#from algorithm import *
+
+import PyQt5
+
 from mqt.syrec import *
 
 __all__ = ['error_msg', 'read_programi', 'syrec_synthesisi', 'init_gui', 'display_circuit']
 
 def error_msg( statistics ):
     "Returns the error message contained in statistics"
+
     return "Error: " + statistics.get_string( "error", "" )
 
 def read_programi( prog, filename, default_bitwidth = 32 ):
     "Reads a SyReC program from a file"
+
     settings = read_program_settingsi()
     settings.default_bitwidth = default_bitwidth
-    e = py_read_programi( prog, filename, settings )
-    if e == "":
-        return True
-    else:
-        return e
 
-### CORE/UTILS
+    error = py_read_programi( prog, filename, settings )
+
+    return error
 
 
 ### ALGORITHMS
-
 def syrec_synthesisi( circ, prog, variable_name_format = "%1$s%3$s.%2$d", main_module = "", if_realization = 0, efficient_controls = True, modules_hierarchy = False ):
     # TODO implement functor
     "SyReC Synthesis"
+
     settings = propertiesi()
+
     settings.set_string( "variable_name_format", variable_name_format )
-   
     settings.set_string( "main_module", main_module )
     settings.set_unsigned( "if_realization", if_realization )
     settings.set_bool( "efficient_controls", efficient_controls )
-    
     settings.set_bool( "modules_hierarchy", modules_hierarchy )
+
     statistics = propertiesi()
 
     if py_syrec_synthesisi( circ, prog, settings, statistics ):
@@ -57,19 +57,20 @@ def syrec_synthesisi( circ, prog, variable_name_format = "%1$s%3$s.%2$d", main_m
     else:
         return error_msg( statistics )
 
+    return
+
 ### GUI
 def init_gui():
-    from PyQt4 import QtGui
-    return QtGui.QApplication([])
+
+    return PyQt5.QtGui.QApplication([])
 
 def display_circuit( circ ):
     import revkitui
-
     w = revkitui.CircuitView( circ )
     w.setWindowTitle( "Circuit View" )
     w.show()
     return w
-    #a.exec_()
+
 
 
 

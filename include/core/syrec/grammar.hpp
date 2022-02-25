@@ -335,7 +335,7 @@ namespace revkit {
                                       prog);
 
             if (!r || first != last) {
-                std::cerr << " error at: " << std::string(first, last) << std::endl;
+                std::cerr << "ERROR AT: " << std::string(first, last) << std::endl;
                 return false;
             }
 

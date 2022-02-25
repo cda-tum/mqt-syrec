@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import re, sys
 
-from PyQt4 import * #QtCore, QtGui, Qsci
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-#from PyQt4.Qsci import *
+from PyQt5 import * #QtCore, QtGui, Qsci
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 
 from revkit import *
 from revkitui import *
@@ -16,17 +17,22 @@ class LogWidget( QTreeWidget ):
         QTreeWidget.__init__( self, parent )
 
         self.setRootIsDecorated( False )
-        self.setHeaderLabels( [ "Line", "Message" ] )
+        #self.setHeaderLabels( [ "Line", "Message" ] )
+        self.setHeaderLabels( [ "Message" ] )
 
-    def addMessage( self, line, message ):
-        item = QTreeWidgetItem( [ str( line ), message ] )
+    def addMessage(self, message):
+        item = QTreeWidgetItem( [ message ] )
         self.addTopLevelItem( item )
+
+    #def addLineAndMessage( self, line, message ):
+    #    item = QTreeWidgetItem( [ str( int(line) + 1 ), message ] )
+    #    self.addTopLevelItem( item )
 
 class MainWindow( QMainWindow ):
     def __init__( self, parent = None ):
         QWidget.__init__( self, parent )
 
-        self.setWindowTitle( "Text Editor" )
+        self.setWindowTitle( "SyReC Editor" )
 
         self.setupWidgets()
         self.setupDockWidgets()
@@ -43,6 +49,7 @@ class MainWindow( QMainWindow ):
 
         self.setCentralWidget( splitter )
 
+
     def setupDockWidgets( self ):
         self.logWidget = LogWidget( self )
         self.logDockWidget = QDockWidget( "Log Messages", self )
@@ -52,8 +59,11 @@ class MainWindow( QMainWindow ):
     def setupActions( self ):
         self.editor.before_build = self.logWidget.clear
         self.editor.build_successful = lambda circ: self.viewer.load( circ )
-        self.editor.build_failed = lambda error_message: self.logWidget.addMessage( re.search ( 'In line (.*): (.*)', error_message ).group( 1 ), \
-                                                                                    re.search ( 'In line (.*): (.*)', error_message ).group( 2 ) )
+        self.editor.parser_failed = lambda error_message: self.logWidget.addMessage(error_message)
+        self.editor.build_failed = lambda error_message: self.logWidget.addMessage(re.search( 'In line (.*): (.*)', error_message ).group( 2 ))
+
+        #self.editor.build_failed = lambda error_message: self.logWidget.addLineAndMessage( re.search ( 'In line (.*): (.*)', error_message ).group( 1 ), \
+        #                                                                                   re.search ( 'In line (.*): (.*)', error_message ).group( 2 ) )
 
     def setupToolBar( self ):
         toolbar = self.addToolBar( 'Main' )
@@ -63,6 +73,7 @@ class MainWindow( QMainWindow ):
         toolbar.addAction( self.editor.buildAction )
         toolbar.addAction( self.editor.simAction )
         toolbar.addAction( self.editor.statAction )
+
 
 if __name__ == "__main__":
     a = QApplication([])

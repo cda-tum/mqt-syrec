@@ -787,6 +787,7 @@ namespace revkit {
     bool read_program_from_string(syrec::program& prog, const std::string& content, const read_program_settings& settings, std::string* error) {
         ast_program ast_prog;
         if (!parse_string(ast_prog, content)) {
+            *error = "PARSE_STRING_FAILED";
             return false;
         }
 
@@ -797,7 +798,7 @@ namespace revkit {
         for (const ast_module& ast_proc: ast_prog) {
             module::ptr proc(new module(bf::at_c<0>(ast_proc)));
             if (!parse_module(*proc, ast_proc, prog, context)) {
-                if (error) {
+                if (error!=nullptr) {
                     *error = boost::str(boost::format("In line %d: %s") % context.current_line_number % context.error_message);
                 }
                 return false;
