@@ -22,7 +22,7 @@
 namespace revkit {
     class active_controls::priv {
     public:
-        priv() {}
+        priv() = default;
 
         gate::line_container _active_controls;
     };

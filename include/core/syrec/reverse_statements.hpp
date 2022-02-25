@@ -6,8 +6,7 @@
 
 #include <core/syrec/statement.hpp>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         struct reverse_statements {
             typedef statement::ptr result_type;
@@ -15,5 +14,4 @@ namespace revkit {
             statement::ptr operator()(statement::ptr _statement) const;
         };
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

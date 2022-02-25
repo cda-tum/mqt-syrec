@@ -190,7 +190,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        storage_type::const_iterator begin() const;
+        [[nodiscard]] storage_type::const_iterator begin() const;
 
         /**
      * @brief End iterator for the properties
@@ -200,7 +200,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        storage_type::const_iterator end() const;
+        [[nodiscard]] storage_type::const_iterator end() const;
 
         /**
      * @brief Number of properties
@@ -210,7 +210,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        unsigned size() const;
+        [[nodiscard]] unsigned size() const;
 
         /**
      * @brief Clears all properties
@@ -261,7 +261,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    void set_error_message(properties::ptr statistics, const std::string& error);
+    [[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
 
 } // namespace revkit
 

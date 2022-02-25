@@ -27,8 +27,7 @@
 #include <memory>
 #include <string>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
         class binary_numeric_expr;
 
         /**
@@ -103,7 +102,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            explicit number(const number::ptr lhs, const unsigned op, const number::ptr rhs);
+            explicit number(const number::ptr& lhs, unsigned op, const number::ptr& rhs);
 
             /**
        * @brief Deconstructor
@@ -121,7 +120,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            bool is_loop_variable() const;
+            [[nodiscard]] bool is_loop_variable() const;
 
             /**
        * @brief Returns whether the number is a conjunction of two numbers
@@ -131,7 +130,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            bool is_conjunction() const;
+            [[nodiscard]] bool is_conjunction() const;
 
             /**
        * @brief Returns whether the number is a known constant number
@@ -141,7 +140,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            bool is_constant() const;
+            [[nodiscard]] bool is_constant() const;
 
             /**
        * @brief Returns the variable name in case it is a loop variable
@@ -155,7 +154,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::string& variable_name() const;
+            [[nodiscard]] const std::string& variable_name() const;
 
             /**
        * @brief Returns the binary expression in case it is a conjunction of two numbers
@@ -169,7 +168,7 @@ namespace revkit {
        * @author RevKit
        * @since 1.3
        */
-            binary_numeric_expr* conjunction_expr() const;
+            [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
             /**
        * @brief Evaluates the number in the context of an execution
@@ -190,7 +189,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned evaluate(const loop_variable_mapping& map) const;
+            [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
 
             /** @cond 0 */
             friend std::ostream& operator<<(std::ostream& os, const number& n);
@@ -214,7 +213,6 @@ namespace revkit {
      */
         std::ostream& operator<<(std::ostream& os, const number& n);
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 #endif /* NUMBER_HPP */

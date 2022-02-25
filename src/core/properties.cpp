@@ -45,7 +45,7 @@ namespace revkit {
         map.clear();
     }
 
-    void set_error_message(properties::ptr statistics, const std::string& error) {
+    [[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error) {
         if (statistics) {
             statistics->set("error", error);
         }

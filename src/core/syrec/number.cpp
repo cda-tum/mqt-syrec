@@ -20,25 +20,25 @@
 #include "core/syrec/expression.hpp"
 
 #include <boost/variant.hpp>
+#include <utility>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         class binary_numeric_expr {
         public:
-            explicit binary_numeric_expr(const number::ptr lhs, const unsigned op, const number::ptr rhs):
-                op(op), lhs(lhs), rhs(rhs) {
+            explicit binary_numeric_expr(number::ptr  lhs, const unsigned op, number::ptr  rhs):
+                op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {
             }
 
-            unsigned get_op() const {
+            [[nodiscard]] unsigned get_op() const {
                 return op;
             }
 
-            number::ptr get_lhs() const {
+            [[nodiscard]] number::ptr get_lhs() const {
                 return lhs;
             }
 
-            number::ptr get_rhs() const {
+            [[nodiscard]] number::ptr get_rhs() const {
                 return rhs;
             }
 
@@ -57,7 +57,7 @@ namespace revkit {
             }
 
             unsigned operator()(const std::string& value) const {
-                number::loop_variable_mapping::const_iterator it = map.find(value);
+                auto it = map.find(value);
                 assert(it != map.end());
                 return it->second;
             }
@@ -98,8 +98,8 @@ namespace revkit {
 
         class number::priv {
         public:
-            explicit priv(const boost::variant<unsigned, std::string, boost::recursive_wrapper<binary_numeric_expr>>& number):
-                number(number) {}
+            explicit priv(boost::variant<unsigned, std::string, boost::recursive_wrapper<binary_numeric_expr>>  number):
+                number(std::move(number)) {}
 
             boost::variant<unsigned, std::string, boost::recursive_wrapper<binary_numeric_expr>> number;
         };
@@ -112,7 +112,7 @@ namespace revkit {
             d(new priv(value)) {
         }
 
-        number::number(const number::ptr lhs, const unsigned op, const number::ptr rhs):
+        number::number(const number::ptr& lhs, const unsigned op, const number::ptr& rhs):
             d(new priv(binary_numeric_expr(lhs, op, rhs))) {
         }
 
@@ -197,5 +197,4 @@ namespace revkit {
             return boost::apply_visitor(output_visitor(os), n.d->number);
         }
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

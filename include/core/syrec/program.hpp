@@ -26,8 +26,7 @@
 #include <core/syrec/module.hpp>
 #include <vector>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         /**
      * @brief SyReC program
@@ -76,7 +75,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const module::vec& modules() const;
+            [[nodiscard]] const module::vec& modules() const;
 
             /**
        * @brief Finds a module by its name
@@ -89,7 +88,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            module::ptr find_module(const std::string& name) const;
+            [[nodiscard]] module::ptr find_module(const std::string& name) const;
 
         private:
             class priv;
@@ -109,7 +108,6 @@ namespace revkit {
      */
         std::ostream& operator<<(std::ostream& os, const program& p);
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 #endif /* PROGRAM_HPP */

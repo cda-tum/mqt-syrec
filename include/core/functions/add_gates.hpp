@@ -316,7 +316,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for appending a \b Peres gate
@@ -331,7 +331,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for appending a \b CNOT gate
@@ -359,7 +359,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& append_v(circuit& circ, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& append_v(circuit& circ, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for appending a \b V+ gate
@@ -373,7 +373,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for appending a \b NOT gate
@@ -459,7 +459,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
+    [[maybe_unused]] gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
 
     /**
    * @brief Helper function for prepending a \b Fredkin gate
@@ -474,7 +474,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for prepending a \b Peres gate
@@ -489,7 +489,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for prepending a \b CNOT gate
@@ -503,7 +503,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for prepending a \b V gate
@@ -517,7 +517,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for prepending a \b V+ gate
@@ -531,7 +531,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for prepending a \b NOT gate
@@ -544,7 +544,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& prepend_not(circuit& circ, const gate::line& target);
+    [[maybe_unused]] gate& prepend_not(circuit& circ, const gate::line& target);
 
     /**
    * @brief Helper function for prepending a module gate
@@ -559,7 +559,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
+    [[maybe_unused]] gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
     /**
    * @brief Helper function for prepending a generic gate using the control_line_adder
@@ -589,7 +589,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder prepend_toffoli(circuit& circ);
+    [[maybe_unused]] control_line_adder prepend_toffoli(circuit& circ);
 
     /**
    * @brief Helper function for prepending a \b Fredkin gate using the control_line_adder
@@ -603,7 +603,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder prepend_fredkin(circuit& circ);
+    [[maybe_unused]] control_line_adder prepend_fredkin(circuit& circ);
 
     /**
    * @brief Helper function for inserting a \b Toffoli gate
@@ -618,7 +618,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target);
+    [[maybe_unused]] gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target);
 
     /**
    * @brief Helper function for inserting a \b Fredkin gate
@@ -634,7 +634,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for inserting a \b Peres gate
@@ -650,7 +650,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2);
+    [[maybe_unused]] gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
     /**
    * @brief Helper function for inserting a \b CNOT gate
@@ -665,7 +665,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for inserting a \b V gate
@@ -680,7 +680,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for inserting a \b V+ gate
@@ -695,7 +695,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
+    [[maybe_unused]] gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
     /**
    * @brief Helper function for inserting a \b NOT gate
@@ -725,7 +725,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
+    [[maybe_unused]] gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
     /**
    * @brief Helper function for inserting a generic gate using the control_line_adder
@@ -757,7 +757,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder insert_toffoli(circuit& circ, unsigned n);
+    [[maybe_unused]] control_line_adder insert_toffoli(circuit& circ, unsigned n);
 
     /**
    * @brief Helper function for inserting a \b Fredkin gate using the control_line_adder
@@ -772,7 +772,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder insert_fredkin(circuit& circ, unsigned n);
+    [[maybe_unused]] control_line_adder insert_fredkin(circuit& circ, unsigned n);
 
 } // namespace revkit
 

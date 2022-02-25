@@ -159,7 +159,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual iterator begin_controls();
+        [[maybe_unused]] virtual iterator begin_controls();
 
         /**
      * @brief End iterator for accessing control lines (non-const).
@@ -169,7 +169,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual iterator end_controls();
+        [[maybe_unused]] virtual iterator end_controls();
 
         /**
      * @brief Start iterator for accessing target lines (const).
@@ -199,7 +199,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual iterator begin_targets();
+        [[maybe_unused]] virtual iterator begin_targets();
 
         /**
      * @brief End iterator for accessing target lines (non-const).
@@ -209,7 +209,7 @@ namespace revkit {
      * @author RevKit
      * @since 1.0
      */
-        virtual iterator end_targets();
+        [[maybe_unused]] virtual iterator end_targets();
 
         /**
      * @brief Returns the number of control and target lines as sum

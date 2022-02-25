@@ -116,7 +116,7 @@ namespace revkit {
      * 
      * @return A smart pointer to the settings
      */
-        const revkit::properties::ptr& settings() const {
+        [[nodiscard]] const revkit::properties::ptr& settings() const {
             return _settings;
         }
 
@@ -127,7 +127,7 @@ namespace revkit {
      * 
      * @return A smart pointer to the statistics
      */
-        const revkit::properties::ptr& statistics() const {
+        [[nodiscard]] const revkit::properties::ptr& statistics() const {
             return _statistics;
         }
 

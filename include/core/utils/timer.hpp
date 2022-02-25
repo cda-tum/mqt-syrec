@@ -40,7 +40,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    struct print_timer {
+    struct [[maybe_unused]] print_timer {
         /**
      * Result value of the print_timer is void,
      * since it does not return anything in the operator call.
@@ -142,7 +142,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        explicit reference_timer(double* _runtime):
+        [[maybe_unused]] explicit reference_timer(double* _runtime):
             runtime(_runtime) {}
 
         /**

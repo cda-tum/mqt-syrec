@@ -22,7 +22,7 @@ namespace revkit {
 
         class expression::priv {
         public:
-            priv() {}
+            priv() = default;
         };
 
         expression::expression():
@@ -35,7 +35,7 @@ namespace revkit {
 
         class numeric_expression::priv {
         public:
-            priv() {}
+            priv() = default;
 
             number::ptr value = nullptr;
             unsigned    bitwidth;
@@ -73,7 +73,7 @@ namespace revkit {
 
         class variable_expression::priv {
         public:
-            priv() {}
+            priv() = default;
 
             variable_access::ptr var = nullptr;
         };
@@ -109,7 +109,7 @@ namespace revkit {
 
         class binary_expression::priv {
         public:
-            priv() {}
+            priv() = default;
 
             expression::ptr lhs = nullptr;
             expression::ptr rhs = nullptr;
@@ -133,7 +133,7 @@ namespace revkit {
             delete d;
         }
 
-        void binary_expression::set_lhs(expression::ptr lhs) {
+        [[maybe_unused]] void binary_expression::set_lhs(expression::ptr lhs) {
             d->lhs = lhs;
         }
 
@@ -141,7 +141,7 @@ namespace revkit {
             return d->lhs;
         }
 
-        void binary_expression::set_rhs(expression::ptr rhs) {
+        [[maybe_unused]] void binary_expression::set_rhs(expression::ptr rhs) {
             d->rhs = rhs;
         }
 
@@ -186,7 +186,7 @@ namespace revkit {
                 default:
                     // lhs and rhs are assumed to have the same bit-width
                     return d->lhs->bitwidth();
-            };
+            }
         }
 
         std::ostream& binary_expression::print(std::ostream& os) const {
@@ -260,14 +260,14 @@ namespace revkit {
                 case greater_equals:
                     os << ">=";
                     break;
-            };
+            }
 
             return os << " " << *d->rhs << ")";
         }
 
         class unary_expression::priv {
         public:
-            priv() {}
+            priv() = default;
 
             unsigned        op;
             expression::ptr expr = nullptr;
@@ -313,7 +313,7 @@ namespace revkit {
 
         class shift_expression::priv {
         public:
-            priv() {}
+            priv() = default;
 
             expression::ptr lhs = nullptr;
             number::ptr     rhs = nullptr;
@@ -337,7 +337,7 @@ namespace revkit {
             delete d;
         }
 
-        void shift_expression::set_lhs(expression::ptr lhs) {
+        [[maybe_unused]] void shift_expression::set_lhs(expression::ptr lhs) {
             d->lhs = lhs;
         }
 
@@ -345,7 +345,7 @@ namespace revkit {
             return d->lhs;
         }
 
-        void shift_expression::set_rhs(const number::ptr& rhs) {
+        [[maybe_unused]] void shift_expression::set_rhs(const number::ptr& rhs) {
             d->rhs = rhs;
         }
 

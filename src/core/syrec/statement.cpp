@@ -19,21 +19,20 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/assign/std/vector.hpp>
-#include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <iterator>
+#include <utility>
 
 using namespace boost::assign;
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         using boost::adaptors::indirected;
 
         class statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             unsigned line_number;
         };
@@ -60,7 +59,7 @@ namespace revkit {
 
         class swap_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             variable_access::ptr lhs;
             variable_access::ptr rhs;
@@ -73,24 +72,24 @@ namespace revkit {
         swap_statement::swap_statement(variable_access::ptr lhs,
                                        variable_access::ptr rhs):
             d(new priv()) {
-            d->lhs = lhs;
-            d->rhs = rhs;
+            d->lhs = std::move(lhs);
+            d->rhs = std::move(rhs);
         }
 
         swap_statement::~swap_statement() {
             delete d;
         }
 
-        void swap_statement::set_lhs(variable_access::ptr lhs) {
-            d->lhs = lhs;
+        [[maybe_unused]] void swap_statement::set_lhs(variable_access::ptr lhs) {
+            d->lhs = std::move(lhs);
         }
 
         variable_access::ptr swap_statement::lhs() const {
             return d->lhs;
         }
 
-        void swap_statement::set_rhs(variable_access::ptr rhs) {
-            d->rhs = rhs;
+        [[maybe_unused]] void swap_statement::set_rhs(variable_access::ptr rhs) {
+            d->rhs = std::move(rhs);
         }
 
         variable_access::ptr swap_statement::rhs() const {
@@ -103,7 +102,7 @@ namespace revkit {
 
         class unary_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             unsigned             op;
             variable_access::ptr var;
@@ -117,7 +116,7 @@ namespace revkit {
                                          variable_access::ptr var):
             d(new priv()) {
             d->op  = op;
-            d->var = var;
+            d->var = std::move(var);
         }
 
         unary_statement::~unary_statement() {
@@ -133,7 +132,7 @@ namespace revkit {
         }
 
         void unary_statement::set_var(variable_access::ptr var) {
-            d->var = var;
+            d->var = std::move(var);
         }
 
         variable_access::ptr unary_statement::var() const {
@@ -154,14 +153,14 @@ namespace revkit {
                 case decrement:
                     os << "--";
                     break;
-            };
+            }
             os << "= " << *d->var << ";" << std::endl;
             return os;
         }
 
         class assign_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             variable_access::ptr lhs;
             expression::ptr      rhs;
@@ -176,25 +175,25 @@ namespace revkit {
                                            unsigned             op,
                                            expression::ptr      rhs):
             d(new priv()) {
-            d->lhs = lhs;
+            d->lhs = std::move(lhs);
             d->op  = op;
-            d->rhs = rhs;
+            d->rhs = std::move(rhs);
         }
 
         assign_statement::~assign_statement() {
             delete d;
         }
 
-        void assign_statement::set_lhs(variable_access::ptr lhs) {
-            d->lhs = lhs;
+        [[maybe_unused]] void assign_statement::set_lhs(variable_access::ptr lhs) {
+            d->lhs = std::move(lhs);
         }
 
         variable_access::ptr assign_statement::lhs() const {
             return d->lhs;
         }
 
-        void assign_statement::set_rhs(expression::ptr rhs) {
-            d->rhs = rhs;
+        [[maybe_unused]] void assign_statement::set_rhs(expression::ptr rhs) {
+            d->rhs = std::move(rhs);
         }
 
         expression::ptr assign_statement::rhs() const {
@@ -223,14 +222,14 @@ namespace revkit {
                 case exor:
                     os << '^';
                     break;
-            };
+            }
             os << "= " << *d->rhs << ";" << std::endl;
             return os;
         }
 
         class if_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             expression::ptr condition;
             statement::vec  then_statements;
@@ -247,7 +246,7 @@ namespace revkit {
         }
 
         void if_statement::set_condition(expression::ptr condition) {
-            d->condition = condition;
+            d->condition = std::move(condition);
         }
 
         expression::ptr if_statement::condition() const {
@@ -271,7 +270,7 @@ namespace revkit {
         }
 
         void if_statement::set_fi_condition(expression::ptr fi_condition) {
-            d->fi_condition = fi_condition;
+            d->fi_condition = std::move(fi_condition);
         }
 
         expression::ptr if_statement::fi_condition() const {
@@ -393,7 +392,7 @@ namespace revkit {
 
         class call_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             module::ptr              target;
             std::vector<std::string> parameters;
@@ -403,14 +402,14 @@ namespace revkit {
             d(new priv()) {
         }
 
-        call_statement::call_statement(module::ptr target):
+        [[maybe_unused]] call_statement::call_statement(module::ptr target):
             d(new priv()) {
-            d->target = target;
+            d->target = std::move(target);
         }
 
         call_statement::call_statement(module::ptr target, const std::vector<std::string>& parameters):
             d(new priv()) {
-            d->target     = target;
+            d->target     = std::move(target);
             d->parameters = parameters;
         }
 
@@ -419,14 +418,14 @@ namespace revkit {
         }
 
         void call_statement::set_target(module::ptr target) {
-            d->target = target;
+            d->target = std::move(target);
         }
 
         module::ptr call_statement::target() const {
             return d->target;
         }
 
-        void call_statement::set_parameters(const std::vector<std::string>& parameters) {
+        [[maybe_unused]] void call_statement::set_parameters(const std::vector<std::string>& parameters) {
             d->parameters = parameters;
         }
 
@@ -440,7 +439,7 @@ namespace revkit {
 
         class uncall_statement::priv {
         public:
-            priv() {}
+            priv() = default;
 
             module::ptr              target;
             std::vector<std::string> parameters;
@@ -450,14 +449,14 @@ namespace revkit {
             d(new priv()) {
         }
 
-        uncall_statement::uncall_statement(module::ptr target):
+        [[maybe_unused]] uncall_statement::uncall_statement(module::ptr target):
             d(new priv()) {
-            d->target = target;
+            d->target = std::move(target);
         }
 
         uncall_statement::uncall_statement(module::ptr target, const std::vector<std::string>& parameters):
             d(new priv()) {
-            d->target     = target;
+            d->target     = std::move(target);
             d->parameters = parameters;
         }
 
@@ -466,14 +465,14 @@ namespace revkit {
         }
 
         void uncall_statement::set_target(module::ptr target) {
-            d->target = target;
+            d->target = std::move(target);
         }
 
         module::ptr uncall_statement::target() const {
             return d->target;
         }
 
-        void uncall_statement::set_parameters(const std::vector<std::string>& parameters) {
+        [[maybe_unused]] void uncall_statement::set_parameters(const std::vector<std::string>& parameters) {
             d->parameters = parameters;
         }
 
@@ -485,7 +484,7 @@ namespace revkit {
             return os << std::string(os.precision(), ' ') << "uncall " << d->target->name() << "(" << boost::algorithm::join(d->parameters, ", ") << ");" << std::endl;
         }
 
-        skip_statement::~skip_statement() {}
+        skip_statement::~skip_statement() = default;
 
         std::ostream& skip_statement::print(std::ostream& os) const {
             return os << std::string(os.precision(), ' ') << "skip;" << std::endl;
@@ -495,5 +494,4 @@ namespace revkit {
             return s.print(os);
         }
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

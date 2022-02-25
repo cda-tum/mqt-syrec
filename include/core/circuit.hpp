@@ -716,7 +716,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        void remove_gate_at(unsigned pos);
+        [[maybe_unused]] void remove_gate_at(unsigned pos);
 
         /**
      * @brief Sets the input names of the lines in a circuit
@@ -844,7 +844,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        void set_circuit_name(const std::string& name);
+        [[maybe_unused]] void set_circuit_name(const std::string& name);
 
         /**
      * @brief Returns the name of the circuit
@@ -857,7 +857,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] const std::string& circuit_name() const;
+        [[maybe_unused]] [[nodiscard]] const std::string& circuit_name() const;
 
         /**
      * @brief Constant access to the input buses
@@ -870,7 +870,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] const bus_collection& inputbuses() const;
+        [[maybe_unused]] [[nodiscard]] const bus_collection& inputbuses() const;
 
         /**
      * @brief Mutable access to the input buses
@@ -896,7 +896,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] const bus_collection& outputbuses() const;
+        [[maybe_unused]] [[nodiscard]] const bus_collection& outputbuses() const;
 
         /**
      * @brief Mutable access to the output buses
@@ -949,7 +949,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] bool is_subcircuit() const;
+        [[maybe_unused]] [[nodiscard]] bool is_subcircuit() const;
 
         /**
      * @brief Returns the filter of a sub-circuit

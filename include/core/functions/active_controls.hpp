@@ -113,7 +113,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const gate::line_container& controls() const;
+        [[nodiscard]] const gate::line_container& controls() const;
 
         /**
      * @brief Operator implementation

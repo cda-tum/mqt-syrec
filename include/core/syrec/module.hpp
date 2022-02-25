@@ -107,7 +107,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::string& name() const;
+            [[nodiscard]] const std::string& name() const;
 
             /**
        * @brief Adds a parameter to the module
@@ -127,7 +127,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const variable::vec& parameters() const;
+            [[nodiscard]] const variable::vec& parameters() const;
 
             /**
        * @brief Adds a variable to the module
@@ -147,7 +147,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const variable::vec& variables() const;
+            [[nodiscard]] const variable::vec& variables() const;
 
             /**
        * @brief Finds a parameter or variable in the module
@@ -161,7 +161,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable::ptr find_parameter_or_variable(const std::string& name) const;
+            [[nodiscard]] variable::ptr find_parameter_or_variable(const std::string& name) const;
 
             /**
        * @brief Adds a statement to the module
@@ -181,7 +181,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::vector<std::shared_ptr<statement>>& statements() const;
+            [[nodiscard]] const std::vector<std::shared_ptr<statement>>& statements() const;
 
         private:
             class priv;

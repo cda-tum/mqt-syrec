@@ -13,7 +13,7 @@
 namespace revkit {
     namespace syrec {
 
-        void modified_variables(const program& prog,
+        [[maybe_unused]] void modified_variables(const program& prog,
                                 std::map<statement::ptr, std::set<variable::ptr>>&);
 
     }

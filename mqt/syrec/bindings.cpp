@@ -5,8 +5,6 @@
 #include <algorithms/synthesis/syrec_synthesis.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
 #include <core/circuit.hpp>
 #include <core/functions/control_lines.hpp>
 #include <core/functions/target_lines.hpp>
@@ -18,10 +16,6 @@
 #include <core/target_tags.hpp>
 //#include <core/truth_table.hpp>
 #include <core/utils/costs.hpp>
-#include <pybind11/chrono.h>
-#include <pybind11/complex.h>
-#include <pybind11/functional.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
@@ -29,15 +23,15 @@ using namespace revkit;
 using namespace revkit::syrec;
 // Algorithms / Optimization
 
-circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
-circuit::const_iterator (circuit::*end1)() const   = &circuit::end;
-circuit::iterator (circuit::*begin2)()             = &circuit::begin;
-circuit::iterator (circuit::*end2)()               = &circuit::end;
+[[maybe_unused]] circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
+[[maybe_unused]] circuit::const_iterator (circuit::*end1)() const   = &circuit::end;
+[[maybe_unused]] circuit::iterator (circuit::*begin2)()             = &circuit::begin;
+[[maybe_unused]] circuit::iterator (circuit::*end2)()               = &circuit::end;
 
-circuit::const_reverse_iterator (circuit::*rbegin1)() const = &circuit::rbegin;
-circuit::const_reverse_iterator (circuit::*rend1)() const   = &circuit::rend;
-circuit::reverse_iterator (circuit::*rbegin2)()             = &circuit::rbegin;
-circuit::reverse_iterator (circuit::*rend2)()               = &circuit::rend;
+[[maybe_unused]] circuit::const_reverse_iterator (circuit::*rbegin1)() const = &circuit::rbegin;
+[[maybe_unused]] circuit::const_reverse_iterator (circuit::*rend1)() const   = &circuit::rend;
+[[maybe_unused]] circuit::reverse_iterator (circuit::*rbegin2)()             = &circuit::rbegin;
+[[maybe_unused]] circuit::reverse_iterator (circuit::*rend2)()               = &circuit::rend;
 
 /*
 bus_collection& (circuit::*inputbuses1)() = &circuit::inputbuses;

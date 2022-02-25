@@ -112,7 +112,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.2
      */
-        void add_initializer(const std::string& name, unsigned value);
+        [[maybe_unused]] void add_initializer(const std::string& name, unsigned value);
 
         /**
      * @brief Adds an input signal
@@ -122,7 +122,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.2
      */
-        void add_input(const std::string& name);
+        [[maybe_unused]] void add_input(const std::string& name);
 
         /**
      * @brief Adds a pattern sequence
@@ -135,7 +135,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.2
      */
-        void add_pattern(const std::vector<unsigned>& pattern);
+        [[maybe_unused]] void add_pattern(const std::vector<unsigned>& pattern);
 
         /**
      * @brief Returns the initializers
@@ -146,21 +146,21 @@ namespace revkit {
      *
      * @return Map of initializers
      */
-        const initializer_map& initializers() const;
+        [[maybe_unused]] [[nodiscard]] const initializer_map& initializers() const;
 
         /**
      * @brief Returns the list of input signals
      *
      * @return List of input signals
      */
-        const std::vector<std::string>& inputs() const;
+        [[nodiscard]] const std::vector<std::string>& inputs() const;
 
         /**
      * @brief Returns the list of pattern sequences
      *
      * @return List of pattern sequences
      */
-        const pattern_vec& patterns() const;
+        [[nodiscard]] const pattern_vec& patterns() const;
 
     private:
         class priv;

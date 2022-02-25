@@ -17,7 +17,6 @@
 #include <core/syrec/program.hpp>
 #include <core/syrec/reverse_statements.hpp>
 #include <core/syrec/variable.hpp>
-#include <core/utils/costs.hpp>
 #include <core/utils/timer.hpp>
 #include <functional>
 #include <memory>
@@ -30,7 +29,7 @@ using namespace boost::assign;
 namespace revkit {
     static std::stack<unsigned>               exp_opp;
     static std::stack<std::vector<unsigned>>  exp_lhss, exp_rhss;
-    unsigned                                  statement_op;
+    [[maybe_unused]] unsigned                                  statement_op;
     bool                                      rhs_equal = false;
     bool                                      sub_flag  = false;
     static std::vector<unsigned>              op_vec, assign_op_vector, exp_op_vector;
@@ -309,7 +308,7 @@ namespace revkit {
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_full_statement(const syrec::statement::ptr& statement) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::on_full_statement(const syrec::statement::ptr& statement) {
         bool okay = false;
         if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
             okay = on_full_statement(*stat);
@@ -1066,7 +1065,7 @@ return ok;
 
     /////////////////////////////
     //to check if
-    bool standard_syrec_synthesizer::var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
             return var_expression(*exp, v);
         } else {
@@ -1257,7 +1256,7 @@ return ok;
             {
                 // get_constant_lines( expression.bitwidth(), 0u, lines );-[
                 //bitwise_cnot( lines, lhs ); // duplicate lhs
-                if (sub_flag == true) {
+                if (sub_flag) {
                     decrease_new_assign(rhs, lhs);
                     lines = rhs;
                 } else {
@@ -1485,7 +1484,7 @@ return ok;
     */
     }
 
-    bool standard_syrec_synthesizer::decrement_additionalLineMerging(const std::vector<unsigned>& dest) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::decrement_additionalLineMerging(const std::vector<unsigned>& dest) {
         // Optimized version via additional lines optimization
         gate::line_container controls;
         gate::line_container helpercontrols;
@@ -1536,7 +1535,7 @@ return ok;
     */
     }
 
-    bool standard_syrec_synthesizer::increment_additionalLineMerging(const std::vector<unsigned>& dest) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::increment_additionalLineMerging(const std::vector<unsigned>& dest) {
         // Optimized Version via additional lines optimization
         gate::line_container controls;
         gate::line_container helpercontrols;
@@ -1807,12 +1806,12 @@ return ok;
     //end of increase
 
     ////////////////////////////////NEW INCREASE FUNCTION /////////
-    bool standard_syrec_synthesizer::maj_2(unsigned in1, unsigned in2) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::maj_2(unsigned in1, unsigned in2) {
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in2, in1);
         return true;
     }
 
-    bool standard_syrec_synthesizer::maj(unsigned in1, unsigned in2, unsigned in3) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::maj(unsigned in1, unsigned in2, unsigned in3) {
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in3, in2);
 
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in3, in1);
@@ -1822,7 +1821,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::uma(unsigned in1, unsigned in2, unsigned in3) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::uma(unsigned in1, unsigned in2, unsigned in3) {
         append_toffoli (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ))(in1, in2)(in3);
 
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in3, in1);
@@ -1831,7 +1830,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::uma_3cnot(unsigned in1, unsigned in2, unsigned in3) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::uma_3cnot(unsigned in1, unsigned in2, unsigned in3) {
         append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in2);
 
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in1, in2);
@@ -1959,7 +1958,7 @@ return ok;
 
             case syrec::binary_expression::subtract: // -
             {
-                if (sub_flag == true) {
+                if (sub_flag) {
                     decrease_new_assign(exp_rhs, exp_lhs);
                 } else {
                     decrease_new(exp_rhs, exp_lhs);
@@ -2099,7 +2098,7 @@ return ok;
     // dest.size = 2 * srcX.size
     bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         std::vector<unsigned> sum(dest.begin(), dest.begin() + src2.size());
-        std::vector<unsigned> partial = src2;
+        const std::vector<unsigned>& partial = src2;
 
         bool ok = true;
 
@@ -2300,7 +2299,7 @@ return ok;
         return _circ;
     }
 
-    std::stack<syrec::statement::ptr>& standard_syrec_synthesizer::stmts() {
+    [[maybe_unused]] std::stack<syrec::statement::ptr>& standard_syrec_synthesizer::stmts() {
         return _stmts;
     }
 
@@ -2657,7 +2656,7 @@ return ok;
         changing_variables.insert(std::make_pair(statement.get(), changed_variables));
     }
 
-    hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings, const properties::ptr& statistics) {
+    [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings, const properties::ptr& statistics) {
         hdl_synthesis_func f = [settings, statistics](auto&& PH1, auto&& PH2) { return syrec_synthesis(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), settings, statistics); };
         f.init(settings, statistics);
         return f;

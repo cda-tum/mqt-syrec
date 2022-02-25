@@ -30,8 +30,7 @@
 #include <memory>
 #include <vector>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         class module;
 
@@ -111,7 +110,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned line_number() const;
+            [[nodiscard]] unsigned line_number() const;
 
         private:
             class priv;
@@ -157,7 +156,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~swap_statement();
+            ~swap_statement() override;
 
             /**
        * @brief Sets variable access on left hand side
@@ -167,7 +166,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_lhs(variable_access::ptr lhs);
+            [[maybe_unused]] void set_lhs(variable_access::ptr lhs);
 
             /**
        * @brief Returns variable access on left hand side
@@ -177,7 +176,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access::ptr lhs() const;
+            [[nodiscard]] variable_access::ptr lhs() const;
 
             /**
        * @brief Sets variable access on right hand side
@@ -187,7 +186,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_rhs(variable_access::ptr rhs);
+            [[maybe_unused]] void set_rhs(variable_access::ptr rhs);
 
             /**
        * @brief Returns variable access on right hand side
@@ -197,7 +196,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access::ptr rhs() const;
+            [[nodiscard]] variable_access::ptr rhs() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -209,7 +208,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -278,7 +277,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~unary_statement();
+            ~unary_statement() override;
 
             /**
        * @brief Sets the operation of the statement
@@ -298,7 +297,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned op() const;
+            [[nodiscard]] unsigned op() const;
 
             /**
        * @brief Sets the variable access of the statement
@@ -318,7 +317,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access::ptr var() const;
+            [[nodiscard]] variable_access::ptr var() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -330,7 +329,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -401,7 +400,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~assign_statement();
+            ~assign_statement() override;
 
             /**
        * @brief Sets variable access to which the operation is applied
@@ -411,7 +410,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_lhs(variable_access::ptr lhs);
+            [[maybe_unused]] void set_lhs(variable_access::ptr lhs);
 
             /**
        * @brief Returns variable access to which the operation is applied
@@ -421,7 +420,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access::ptr lhs() const;
+            [[nodiscard]] variable_access::ptr lhs() const;
 
             /**
        * @brief Sets the expression to be evaluated
@@ -431,7 +430,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_rhs(expression::ptr rhs);
+            [[maybe_unused]] void set_rhs(expression::ptr rhs);
 
             /**
        * @brief Returns the expression to be evaluated
@@ -441,7 +440,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            expression::ptr rhs() const;
+            [[nodiscard]] expression::ptr rhs() const;
 
             /**
        * @brief Sets the operation to be applied
@@ -462,7 +461,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned op() const;
+            [[nodiscard]] unsigned op() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -474,7 +473,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -507,7 +506,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~if_statement();
+            ~if_statement() override;
 
             /**
        * @brief Sets the condition for the execution of the then_statements()
@@ -529,7 +528,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            expression::ptr condition() const;
+            [[nodiscard]] expression::ptr condition() const;
 
             /**
        * @brief Adds a statement to the then branch
@@ -549,7 +548,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const statement::vec& then_statements() const;
+            [[nodiscard]] const statement::vec& then_statements() const;
 
             /**
        * @brief Adds a statement to the else branch
@@ -569,7 +568,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const statement::vec& else_statements() const;
+            [[nodiscard]] const statement::vec& else_statements() const;
 
             /**
        * @brief Sets the reverse condition for the execution of the if_statements()
@@ -594,7 +593,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            expression::ptr fi_condition() const;
+            [[nodiscard]] expression::ptr fi_condition() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -606,7 +605,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -639,7 +638,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~for_statement();
+            ~for_statement() override;
 
             /**
        * @brief Sets the name of the loop variable.
@@ -662,7 +661,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::string& loop_variable() const;
+            [[nodiscard]] const std::string& loop_variable() const;
 
             /**
        * @brief Sets the range of the loop
@@ -687,7 +686,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::pair<number::ptr, number::ptr>& range() const;
+            [[nodiscard]] const std::pair<number::ptr, number::ptr>& range() const;
 
             /**
        * @brief Sets the step of the loop
@@ -712,7 +711,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const number::ptr& step() const;
+            [[nodiscard]] const number::ptr& step() const;
 
             /**
        * @brief Sets whether the step is substracted
@@ -732,7 +731,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            bool is_negative_step() const;
+            [[nodiscard]] bool is_negative_step() const;
 
             /**
        * @brief Adds a statement to be executed in the loop
@@ -752,7 +751,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const statement::vec& statements() const;
+            [[nodiscard]] const statement::vec& statements() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -764,7 +763,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -799,7 +798,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            explicit call_statement(std::shared_ptr<module> target);
+            [[maybe_unused]] explicit call_statement(std::shared_ptr<module> target);
 
             /**
        * @brief Constructor with module and parameters
@@ -818,7 +817,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~call_statement();
+            ~call_statement() override;
 
             /**
        * @brief Sets the target module to call
@@ -838,7 +837,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::shared_ptr<module> target() const;
+            [[nodiscard]] std::shared_ptr<module> target() const;
 
             /**
        * @brief Sets the parameters to assign with the module call
@@ -848,7 +847,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_parameters(const std::vector<std::string>& parameters);
+            [[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
             /**
        * @brief Returns the parameters to assign with the module call
@@ -858,7 +857,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::vector<std::string>& parameters() const;
+            [[nodiscard]] const std::vector<std::string>& parameters() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -870,7 +869,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -905,7 +904,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            explicit uncall_statement(std::shared_ptr<module> target);
+            [[maybe_unused]] explicit uncall_statement(std::shared_ptr<module> target);
 
             /**
        * @brief Constructor with module and parameters
@@ -924,7 +923,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~uncall_statement();
+            ~uncall_statement() override;
 
             /**
        * @brief Sets the target module to uncall
@@ -944,7 +943,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::shared_ptr<module> target() const;
+            [[nodiscard]] std::shared_ptr<module> target() const;
 
             /**
        * @brief Sets the parameters to assign with the module uncall
@@ -954,7 +953,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_parameters(const std::vector<std::string>& parameters);
+            [[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
             /**
        * @brief Returns the parameters to assign with the module uncall
@@ -964,7 +963,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::vector<std::string>& parameters() const;
+            [[nodiscard]] const std::vector<std::string>& parameters() const;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -976,7 +975,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -1000,7 +999,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            virtual ~skip_statement();
+            ~skip_statement() override;
 
             /**
        * @brief Prints the statement to the output stream \p os
@@ -1012,7 +1011,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
         };
 
         /**
@@ -1028,7 +1027,6 @@ namespace revkit {
      */
         std::ostream& operator<<(std::ostream& os, const statement& s);
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 #endif /* STATEMENT_HPP */

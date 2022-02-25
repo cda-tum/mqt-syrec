@@ -29,6 +29,7 @@
 #include <boost/function.hpp>
 #include <core/circuit.hpp>
 #include <functional>
+#include <memory>
 
 namespace revkit {
 
@@ -191,8 +192,8 @@ namespace revkit {
    * @since  1.0
    */
     bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings   = properties::ptr(),
-                           properties::ptr statistics = properties::ptr());
+                           const properties::ptr& settings   = properties::ptr(),
+                           const properties::ptr& statistics = properties::ptr());
 
     /**
    * @brief Simple Simulation function for a range of gates
@@ -252,8 +253,8 @@ namespace revkit {
    * @since  1.0
    */
     bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings   = properties::ptr(),
-                           properties::ptr statistics = properties::ptr());
+                           const properties::ptr& settings   = properties::ptr(),
+                           const properties::ptr& statistics = properties::ptr());
 
     /**
    * @brief Simple Simulation function for a circuit
@@ -326,7 +327,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    simulation_func simple_simulation_func(properties::ptr settings = properties::ptr(new properties()), properties::ptr statistics = properties::ptr(new properties()));
+    [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>());
 
 } // namespace revkit
 

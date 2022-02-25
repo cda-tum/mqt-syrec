@@ -22,6 +22,7 @@
 #include <core/gate.hpp>
 #include <core/target_tags.hpp>
 #include <core/utils/timer.hpp>
+#include <utility>
 
 namespace revkit {
 
@@ -97,7 +98,7 @@ namespace revkit {
                 return input;
             }
 
-            const module_tag* tag = std::any_cast<module_tag>(&g.type());
+            const auto* tag = std::any_cast<module_tag>(&g.type());
 
             // get the new input sub pattern
             std::vector<unsigned>   targets(g.begin_targets(), g.end_targets());
@@ -120,10 +121,10 @@ namespace revkit {
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings,
-                           properties::ptr statistics) {
-        gate_simulation_func gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        step_result_func     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
+                           const properties::ptr& settings,
+                           const properties::ptr& statistics) {
+        auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
+        auto     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
 
         timer<properties_timer> t;
 
@@ -141,10 +142,10 @@ namespace revkit {
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings,
-                           properties::ptr statistics) {
-        gate_simulation_func gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        step_result_func     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
+                           const properties::ptr& settings,
+                           const properties::ptr& statistics) {
+        auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
+        auto     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
 
         timer<properties_timer> t;
 
@@ -167,10 +168,10 @@ namespace revkit {
     bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
                            properties::ptr settings,
                            properties::ptr statistics) {
-        return simple_simulation(output, circ.begin(), circ.end(), input, settings, statistics);
+        return simple_simulation(output, circ.begin(), circ.end(), input, std::move(settings), std::move(statistics));
     }
 
-    simulation_func simple_simulation_func(properties::ptr settings, properties::ptr statistics) {
+    [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings, properties::ptr statistics) {
         simulation_func f = [settings, statistics](auto&& PH1, auto&& PH2, auto&& PH3) { return simple_simulation(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), std::forward<decltype(PH3)>(PH3), settings, statistics); };
         f.init(settings, statistics);
         return f;

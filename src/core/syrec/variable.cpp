@@ -23,18 +23,17 @@
 #include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <optional>
 #include <tuple>
+#include <utility>
 
 using namespace boost::assign;
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         class variable::priv {
         public:
-            priv() {}
+            priv() = default;
 
             unsigned              type;
             std::string           name;
@@ -82,7 +81,7 @@ namespace revkit {
             return d->name;
         }
 
-        void variable::set_bitwidth(unsigned bitwidth) {
+        [[maybe_unused]] void variable::set_bitwidth(unsigned bitwidth) {
             d->bitwidth = bitwidth;
         }
 
@@ -91,14 +90,14 @@ namespace revkit {
         }
 
         void variable::set_reference(variable::ptr reference) {
-            d->reference = reference;
+            d->reference = std::move(reference);
         }
 
         variable::ptr variable::reference() const {
             return d->reference;
         }
 
-        void variable::set_dimensions(const std::vector<unsigned>& dimensions) {
+        [[maybe_unused]] void variable::set_dimensions(const std::vector<unsigned>& dimensions) {
             d->dimensions = dimensions;
         }
 
@@ -108,7 +107,7 @@ namespace revkit {
 
         class variable_access::priv {
         public:
-            priv() {}
+            priv() = default;
 
             variable::ptr                                      var;
             std::optional<std::pair<number::ptr, number::ptr>> range;
@@ -121,7 +120,7 @@ namespace revkit {
 
         variable_access::variable_access(variable::ptr var):
             d(new priv()) {
-            d->var = var;
+            d->var = std::move(var);
         }
 
         variable_access::~variable_access() {
@@ -129,7 +128,7 @@ namespace revkit {
         }
 
         void variable_access::set_var(variable::ptr var) {
-            d->var = var;
+            d->var = std::move(var);
         }
 
         variable::ptr variable_access::var() const {
@@ -219,5 +218,4 @@ namespace revkit {
             return os;
         }
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

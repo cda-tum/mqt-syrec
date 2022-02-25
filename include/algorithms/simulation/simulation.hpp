@@ -41,6 +41,6 @@ namespace revkit {
    * @author RevKit
    * @since  1.2
    */
-    typedef functor<bool(std::vector<boost::dynamic_bitset<>>&, const circuit&, const std::vector<boost::dynamic_bitset<>>&)> multi_step_simulation_func;
+    [[maybe_unused]] typedef functor<bool(std::vector<boost::dynamic_bitset<>>&, const circuit&, const std::vector<boost::dynamic_bitset<>>&)> multi_step_simulation_func;
 
 } // namespace revkit

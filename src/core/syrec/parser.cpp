@@ -32,6 +32,7 @@
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <fstream>
+#include <memory>
 #include <optional>
 
 //#define foreach_ BOOST_FOREACH
@@ -44,7 +45,7 @@ namespace revkit {
     namespace bf = boost::fusion;
 
     struct parser_context {
-        parser_context(const read_program_settings& settings):
+        explicit parser_context(const read_program_settings& settings):
             current_line_number(0u),
             settings(settings) {
         }
@@ -64,7 +65,7 @@ namespace revkit {
             context(context) {}
 
         number::ptr operator()(unsigned value) const {
-            return number::ptr(new number(value));
+            return std::make_shared<number>(value);
         }
 
         number::ptr operator()(const ast_variable& ast_var) const {
@@ -74,12 +75,12 @@ namespace revkit {
                 return number::ptr();
             }
 
-            return number::ptr(new number(var->bitwidth()));
+            return std::make_shared<number>(var->bitwidth());
         }
 
         number::ptr operator()(const std::string& loop_variable) const {
             if (boost::find(context.loop_variables, loop_variable) != context.loop_variables.end()) {
-                return number::ptr(new number(loop_variable));
+                return std::make_shared<number>(loop_variable);
             } else {
                 context.error_message = boost::str(boost::format("Unkown loop variable $%s") % loop_variable);
                 return number::ptr();
@@ -138,9 +139,9 @@ namespace revkit {
                         return number::ptr();
                 }
 
-                return number::ptr(new number(num_value));
+                return std::make_shared<number>(num_value);
             }
-            return number::ptr(new number(lhs, op, rhs));
+            return std::make_shared<number>(lhs, op, rhs);
         }
 
     private:
@@ -227,13 +228,13 @@ namespace revkit {
 
         expression* operator()(const ast_number& ast_num) const {
             number::ptr num = parse_number(ast_num, proc, context);
-            if (!num) return 0;
+            if (!num) return nullptr;
             return new numeric_expression(num, bitwidth);
         }
 
         expression* operator()(const ast_variable& ast_var) const {
             variable_access::ptr access = parse_variable_access(ast_var, proc, context);
-            if (!access) return 0;
+            if (!access) return nullptr;
             return new variable_expression(access);
         }
 
@@ -280,13 +281,13 @@ namespace revkit {
             }
 
             expression::ptr lhs = parse_expression(ast_exp1, proc, 0u, context);
-            if (!lhs) return 0;
+            if (!lhs) return nullptr;
 
             expression::ptr rhs = parse_expression(ast_exp2, proc, lhs->bitwidth(), context);
-            if (!rhs) return 0;
+            if (!rhs) return nullptr;
 
-            if (numeric_expression* lhs_exp = dynamic_cast<numeric_expression*>(lhs.get())) {
-                if (numeric_expression* rhs_exp = dynamic_cast<numeric_expression*>(rhs.get())) {
+            if (auto* lhs_exp = dynamic_cast<numeric_expression*>(lhs.get())) {
+                if (auto* rhs_exp = dynamic_cast<numeric_expression*>(rhs.get())) {
                     if (lhs_exp->value()->is_constant() && rhs_exp->value()->is_constant()) {
                         unsigned lhs_value = lhs_exp->value()->evaluate(number::loop_variable_mapping());
                         unsigned rhs_value = rhs_exp->value()->evaluate(number::loop_variable_mapping());
@@ -327,7 +328,7 @@ namespace revkit {
                             {
                                 std::cerr << boost::format("Operator *> is undefined for numbers w/o specified bit width: ( %d *> %d )") % lhs_value % rhs_value << std::endl;
                                 assert(false);
-                                return 0;
+                                return nullptr;
                             } break;
 
                             case binary_expression::logical_and: // &&
@@ -385,7 +386,7 @@ namespace revkit {
                                 assert(false);
                         }
 
-                        return new numeric_expression(number::ptr(new number(num_value)), lhs->bitwidth());
+                        return new numeric_expression(std::make_shared<number>(num_value), lhs->bitwidth());
                     }
                 } else {
                     lhs_exp = new numeric_expression(lhs_exp->value(), rhs->bitwidth());
@@ -407,10 +408,10 @@ namespace revkit {
             }
 
             expression::ptr expr = parse_expression(ast_expr, proc, bitwidth, context);
-            if (!expr) return 0;
+            if (!expr) return nullptr;
 
             // double negative elimination
-            if (unary_expression* sub_expr = dynamic_cast<unary_expression*>(expr.get())) {
+            if (auto* sub_expr = dynamic_cast<unary_expression*>(expr.get())) {
                 if (((op == unary_expression::bitwise_not) && (sub_expr->op() == unary_expression::bitwise_not)) || ((sub_expr->expr()->bitwidth() == 1u) && ((op == unary_expression::bitwise_not) || (op == unary_expression::logical_not)) && ((sub_expr->op() == unary_expression::bitwise_not) || (sub_expr->op() == unary_expression::logical_not)))) {
                     //TODO geht das auch einfacher?
                     if (numeric_expression* ep = dynamic_cast<numeric_expression*>(sub_expr->expr().get())) {
@@ -429,16 +430,16 @@ namespace revkit {
                         return new shift_expression(ep->lhs(), ep->op(), ep->rhs());
                     }
                 }
-            } else if (numeric_expression* sub_expr = dynamic_cast<numeric_expression*>(expr.get())) {
+            } else if (auto* sub_expr_1 = dynamic_cast<numeric_expression*>(expr.get())) {
                 if (op == unary_expression::logical_not) {
-                    if (sub_expr->value()->is_constant()) {
-                        unsigned value = (sub_expr->value()->evaluate(number::loop_variable_mapping()) == 0) ? 1 : 0;
-                        return new numeric_expression(number::ptr(new number(value)), 1);
+                    if (sub_expr_1->value()->is_constant()) {
+                        unsigned value = (sub_expr_1->value()->evaluate(number::loop_variable_mapping()) == 0) ? 1 : 0;
+                        return new numeric_expression(std::make_shared<number>(value), 1);
                     }
                 } else if (op == unary_expression::bitwise_not) {
                     std::cerr << boost::format("Bitwise NOT is undefined for numbers w/o specified bit width: ~%s") % *expr << std::endl;
                     assert(false);
-                    return 0;
+                    return nullptr;
                 }
             }
             return new unary_expression(op, expr);
@@ -457,12 +458,12 @@ namespace revkit {
             }
 
             expression::ptr lhs = parse_expression(ast_exp1, proc, bitwidth, context);
-            if (!lhs) return 0;
+            if (!lhs) return nullptr;
 
             number::ptr rhs = parse_number(ast_num, proc, context);
-            if (!rhs) return 0;
+            if (!rhs) return nullptr;
 
-            if (numeric_expression* lhs_no = dynamic_cast<numeric_expression*>(lhs.get())) {
+            if (auto* lhs_no = dynamic_cast<numeric_expression*>(lhs.get())) {
                 if (lhs_no->value()->is_constant() && rhs->is_constant()) {
                     unsigned value    = lhs_no->value()->evaluate(number::loop_variable_mapping());
                     unsigned shft_amt = rhs->evaluate(number::loop_variable_mapping());
@@ -483,7 +484,7 @@ namespace revkit {
                             std::cerr << "Invalid operator in shift expression" << std::endl;
                             assert(false);
                     }
-                    return new numeric_expression(number::ptr(new number(result)), lhs->bitwidth());
+                    return new numeric_expression(std::make_shared<number>(result), lhs->bitwidth());
                 }
             }
 
@@ -514,14 +515,14 @@ namespace revkit {
             const ast_variable& ast_var2 = bf::at_c<1>(ast_swap_stat);
 
             variable_access::ptr va1 = parse_variable_access(ast_var1, proc, context);
-            if (!va1) return 0;
+            if (!va1) return nullptr;
             variable_access::ptr va2 = parse_variable_access(ast_var2, proc, context);
-            if (!va2) return 0;
+            if (!va2) return nullptr;
 
             if (va1->bitwidth() != va2->bitwidth()) {
                 std::cerr << boost::format("Different bit-widths in <=> statement: %s (%d), %s (%d)") % va1->var()->name() % va1->bitwidth() % va2->var()->name() % va2->bitwidth() << std::endl;
                 assert(false);
-                return 0;
+                return nullptr;
             }
 
             return new swap_statement(va1, va2);
@@ -532,7 +533,7 @@ namespace revkit {
             const ast_variable& ast_var = bf::at_c<1>(ast_unary_stat);
 
             variable_access::ptr var = parse_variable_access(ast_var, proc, context);
-            if (!var) return 0;
+            if (!var) return nullptr;
 
             unsigned op = 0u;
 
@@ -553,42 +554,42 @@ namespace revkit {
             const ast_expression& ast_exp = bf::at_c<2>(ast_assign_stat);
 
             variable_access::ptr lhs = parse_variable_access(ast_var, proc, context);
-            if (!lhs) return 0;
+            if (!lhs) return nullptr;
 
             unsigned op = ast_op == '+' ? assign_statement::add :
                                           (ast_op == '-' ? assign_statement::subtract : assign_statement::exor);
 
             expression::ptr rhs = parse_expression(ast_exp, proc, lhs->bitwidth(), context);
-            if (!rhs) return 0;
+            if (!rhs) return nullptr;
 
             if (lhs->bitwidth() != rhs->bitwidth()) {
                 context.error_message = boost::str(boost::format("Wrong bit-width in assignment to %s") % lhs->var()->name());
-                return 0;
+                return nullptr;
             }
 
             return new assign_statement(lhs, op, rhs);
         }
 
         statement* operator()(const ast_if_statement& ast_if_stat) const {
-            if_statement* if_stat = new if_statement();
+            auto* if_stat = new if_statement();
 
             expression::ptr condition = parse_expression(ast_if_stat.condition, proc, 1u, context);
-            if (!condition) return 0;
+            if (!condition) return nullptr;
             if_stat->set_condition(condition);
 
             expression::ptr fi_condition = parse_expression(ast_if_stat.fi_condition, proc, 1u, context);
-            if (!fi_condition) return 0;
+            if (!fi_condition) return nullptr;
             if_stat->set_fi_condition(fi_condition);
 
             for (const ast_statement& ast_stat: ast_if_stat.if_statement) {
                 statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return 0;
+                if (!stat) return nullptr;
                 if_stat->add_then_statement(stat);
             }
 
             for (const ast_statement& ast_stat: ast_if_stat.else_statement) {
                 statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return 0;
+                if (!stat) return nullptr;
                 if_stat->add_else_statement(stat);
             }
 
@@ -596,16 +597,16 @@ namespace revkit {
         }
 
         statement* operator()(const ast_for_statement& ast_for_stat) const {
-            for_statement* for_stat = new for_statement();
+            auto* for_stat = new for_statement();
 
             number::ptr from;
             number::ptr to = parse_number(ast_for_stat.to, proc, context);
-            if (!to) return 0;
+            if (!to) return nullptr;
 
             std::string loop_variable;
             if (ast_for_stat.from) {
                 from = parse_number(bf::at_c<1>(*ast_for_stat.from), proc, context);
-                if (!from) return 0;
+                if (!from) return nullptr;
 
                 // is there a loop variable?
                 if (bf::at_c<0>(*ast_for_stat.from)) {
@@ -614,7 +615,7 @@ namespace revkit {
                     // does the loop variable exist already?
                     if (boost::find(context.loop_variables, loop_variable) != context.loop_variables.end()) {
                         context.error_message = boost::str(boost::format("Redefinition of loop variable $%s") % loop_variable);
-                        return 0;
+                        return nullptr;
                     }
 
                     for_stat->set_loop_variable(loop_variable);
@@ -628,7 +629,7 @@ namespace revkit {
             // step
             if (ast_for_stat.step) {
                 number::ptr step = parse_number(bf::at_c<1>(*ast_for_stat.step), proc, context);
-                if (!step) return 0;
+                if (!step) return nullptr;
 
                 for_stat->set_step(step);
 
@@ -639,7 +640,7 @@ namespace revkit {
 
             for (const ast_statement& ast_stat: ast_for_stat.do_statement) {
                 statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return 0;
+                if (!stat) return nullptr;
                 for_stat->add_statement(stat);
             }
 
@@ -658,7 +659,7 @@ namespace revkit {
             // found no module
             if (!other_proc.get()) {
                 context.error_message = boost::str(boost::format("Unknown module %s") % proc_name);
-                return 0;
+                return nullptr;
             }
 
             const std::vector<std::string>& parameters = bf::at_c<2>(ast_call_stat);
@@ -666,14 +667,14 @@ namespace revkit {
             // wrong number of parameters
             if (parameters.size() != other_proc->parameters().size()) {
                 context.error_message = boost::str(boost::format("Wrong number of arguments in (un)call of %s. Expected %d, got %d") % other_proc->name() % other_proc->parameters().size() % parameters.size());
-                return 0;
+                return nullptr;
             }
 
             // unknown variable name in parameters
             for (const std::string& parameter: parameters) {
                 if (!proc.find_parameter_or_variable(parameter)) {
                     context.error_message = boost::str(boost::format("Unknown variable %s in (un)call of %s") % parameter % other_proc->name());
-                    return 0;
+                    return nullptr;
                 }
             }
 
@@ -684,7 +685,7 @@ namespace revkit {
 
                 if (vOther->bitwidth() != parameter->bitwidth()) {
                     context.error_message = boost::str(boost::format("%d. parameter (%s) in (un)call of %s has bit-width of %d, but %d is required") % (i + 1) % parameters.at(i) % other_proc->name() % parameter->bitwidth() % vOther->bitwidth());
-                    return 0;
+                    return nullptr;
                 }
             }
 
@@ -746,11 +747,11 @@ namespace revkit {
             }
 
             unsigned type = parse_variable_type(bf::at_c<0>(ast_param));
-            proc.add_parameter(variable::ptr(
-                    new variable(type,
+            proc.add_parameter(std::make_shared<variable>(
+                    type,
                                  variable_name,
                                  bf::at_c<1>(bf::at_c<1>(ast_param)),
-                                 bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth))));
+                                 bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
         }
 
         for (const ast_variable_declarations& ast_decls: bf::at_c<2>(ast_proc)) {
@@ -766,11 +767,11 @@ namespace revkit {
                     variable_names += variable_name;
                 }
 
-                proc.add_variable(variable::ptr(
-                        new variable(type,
+                proc.add_variable(std::make_shared<variable>(
+                        type,
                                      variable_name,
                                      bf::at_c<1>(ast_decl),
-                                     bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth))));
+                                     bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth)));
             }
         }
 

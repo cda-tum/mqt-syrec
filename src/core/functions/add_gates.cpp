@@ -22,7 +22,6 @@
 #include <boost/assign/std/vector.hpp>
 //#include <boost/bind.hpp>
 //#include <boost/range/algorithm.hpp>
-#include <algorithm>
 #include <functional>
 
 using namespace boost::assign;
@@ -165,7 +164,7 @@ namespace revkit {
         g.add_target(target1);
         g.add_target(target2);
 
-        peres_tag tag;
+        peres_tag tag{};
         tag.swap_targets = target1 > target2;
         g.set_type(tag);
 
@@ -205,7 +204,7 @@ namespace revkit {
     gate& create_module(gate& g, const circuit& circ, const std::string& name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         typedef std::map<std::string, std::shared_ptr<circuit>> map_t;
         const map_t&                                            modules = circ.modules();
-        map_t::const_iterator                                   it      = modules.find(name);
+        auto                                   it      = modules.find(name);
         assert(it != modules.end());
 
         //boost::for_each(controls, std::bind(&gate::add_control, &g, std::placeholders::_1));
@@ -237,11 +236,11 @@ namespace revkit {
         return create_toffoli(circ.append_gate(), controls, target);
     }
 
-    gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
         return create_fredkin(circ.append_gate(), controls, target1, target2);
     }
 
-    gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2) {
         return create_peres(circ.append_gate(), control, target1, target2);
     }
 
@@ -249,11 +248,11 @@ namespace revkit {
         return create_cnot(circ.append_gate(), control, target);
     }
 
-    gate& append_v(circuit& circ, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& append_v(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_v(circ.append_gate(), control, target);
     }
 
-    gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_vplus(circ.append_gate(), control, target);
     }
 
@@ -279,45 +278,45 @@ namespace revkit {
         return append_gate(circ, fredkin_tag());
     }
 
-    control_line_adder append_v(circuit& circ) {
+    [[maybe_unused]] control_line_adder append_v(circuit& circ) {
         return append_gate(circ, v_tag());
     }
 
-    control_line_adder append_vnot(circuit& circ) {
+    [[maybe_unused]] control_line_adder append_vnot(circuit& circ) {
         return append_gate(circ, vplus_tag());
     }
 
     ////////////////////////////// prepend_ functions
 
-    gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target) {
+    [[maybe_unused]] gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target) {
         return create_toffoli(circ.prepend_gate(), controls, target);
     }
 
-    gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
         return create_fredkin(circ.prepend_gate(), controls, target1, target2);
     }
 
-    gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2) {
         return create_peres(circ.prepend_gate(), control, target1, target2);
     }
 
-    gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_cnot(circ.prepend_gate(), control, target);
     }
 
-    gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_v(circ.prepend_gate(), control, target);
     }
 
-    gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_vplus(circ.prepend_gate(), control, target);
     }
 
-    gate& prepend_not(circuit& circ, const gate::line& target) {
+    [[maybe_unused]] gate& prepend_not(circuit& circ, const gate::line& target) {
         return create_not(circ.prepend_gate(), target);
     }
 
-    gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
+    [[maybe_unused]] gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         return create_module(circ.prepend_gate(), circ, module_name, controls, targets);
     }
 
@@ -327,45 +326,45 @@ namespace revkit {
         return control_line_adder(g);
     }
 
-    control_line_adder prepend_toffoli(circuit& circ) {
+    [[maybe_unused]] control_line_adder prepend_toffoli(circuit& circ) {
         return prepend_gate(circ, toffoli_tag());
     }
 
-    control_line_adder prepend_fredkin(circuit& circ) {
+    [[maybe_unused]] control_line_adder prepend_fredkin(circuit& circ) {
         return prepend_gate(circ, fredkin_tag());
     }
 
-    control_line_adder prepend_v(circuit& circ) {
+    [[maybe_unused]] control_line_adder prepend_v(circuit& circ) {
         return prepend_gate(circ, v_tag());
     }
 
-    control_line_adder prepend_vnot(circuit& circ) {
+    [[maybe_unused]] control_line_adder prepend_vnot(circuit& circ) {
         return prepend_gate(circ, vplus_tag());
     }
 
     ////////////////////////////// insert_ functions
 
-    gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target) {
+    [[maybe_unused]] gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target) {
         return create_toffoli(circ.insert_gate(n), controls, target);
     }
 
-    gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
         return create_fredkin(circ.insert_gate(n), controls, target1, target2);
     }
 
-    gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2) {
+    [[maybe_unused]] gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2) {
         return create_peres(circ.insert_gate(n), control, target1, target2);
     }
 
-    gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
         return create_cnot(circ.insert_gate(n), control, target);
     }
 
-    gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
         return create_v(circ.insert_gate(n), control, target);
     }
 
-    gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
+    [[maybe_unused]] gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target) {
         return create_vplus(circ.insert_gate(n), control, target);
     }
 
@@ -373,7 +372,7 @@ namespace revkit {
         return create_not(circ.insert_gate(n), target);
     }
 
-    gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
+    [[maybe_unused]] gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         return create_module(circ.insert_gate(n), circ, module_name, controls, targets);
     }
 
@@ -383,19 +382,19 @@ namespace revkit {
         return control_line_adder(g);
     }
 
-    control_line_adder insert_toffoli(circuit& circ, unsigned n) {
+    [[maybe_unused]] control_line_adder insert_toffoli(circuit& circ, unsigned n) {
         return insert_gate(circ, n, toffoli_tag());
     }
 
-    control_line_adder insert_fredkin(circuit& circ, unsigned n) {
+    [[maybe_unused]] control_line_adder insert_fredkin(circuit& circ, unsigned n) {
         return insert_gate(circ, n, fredkin_tag());
     }
 
-    control_line_adder insert_v(circuit& circ, unsigned n) {
+    [[maybe_unused]] control_line_adder insert_v(circuit& circ, unsigned n) {
         return insert_gate(circ, n, v_tag());
     }
 
-    control_line_adder insert_vnot(circuit& circ, unsigned n) {
+    [[maybe_unused]] control_line_adder insert_vnot(circuit& circ, unsigned n) {
         return insert_gate(circ, n, vplus_tag());
     }
 

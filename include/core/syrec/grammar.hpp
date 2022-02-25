@@ -32,24 +32,16 @@
 #include <iostream>
 
 // Custom Parser iterator
-namespace revkit {
-    namespace syrec {
-        namespace parser {
+namespace revkit::syrec::parser {
             BOOST_SPIRIT_TERMINAL(iter_pos)
-        }
-    } // namespace syrec
-} // namespace revkit
+        } // namespace revkit
 
-namespace boost {
-    namespace spirit {
+namespace boost::spirit {
         template<>
         struct use_terminal<qi::domain, revkit::syrec::parser::tag::iter_pos>: mpl::true_ {};
-    } // namespace spirit
-} // namespace boost
+    } // namespace boost
 
-namespace revkit {
-    namespace syrec {
-        namespace parser {
+namespace revkit::syrec::parser {
             struct iter_pos_parser: boost::spirit::qi::primitive_parser<iter_pos_parser> {
                 template<typename Context, typename Iterator>
                 struct attribute {
@@ -68,27 +60,20 @@ namespace revkit {
                     return boost::spirit::info("iter_pos");
                 }
             };
-        } // namespace parser
-    }     // namespace syrec
-} // namespace revkit
+        } // namespace revkit
 
-namespace boost {
-    namespace spirit {
-        namespace qi {
+namespace boost::spirit::qi {
             template<typename Modifiers>
-            struct make_primitive<revkit::syrec::parser::tag::iter_pos, Modifiers> {
+            struct [[maybe_unused]] make_primitive<revkit::syrec::parser::tag::iter_pos, Modifiers> {
                 typedef revkit::syrec::parser::iter_pos_parser result_type;
 
                 result_type operator()(unused_type, unused_type) const {
                     return result_type();
                 }
             };
-        } // namespace qi
-    }     // namespace spirit
-} // namespace boost
+        } // namespace boost
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
         namespace qi    = boost::spirit::qi;
         namespace ascii = boost::spirit::ascii;
 
@@ -167,8 +152,7 @@ namespace revkit {
             step_t                     step;
             std::vector<ast_statement> do_statement;
         };
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 BOOST_FUSION_ADAPT_STRUCT(
         revkit::syrec::ast_variable,

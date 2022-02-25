@@ -31,8 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         class expression;
 
@@ -149,7 +148,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned type() const;
+            [[nodiscard]] unsigned type() const;
 
             /**
        * @brief Sets the name of the variable
@@ -169,7 +168,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::string& name() const;
+            [[nodiscard]] const std::string& name() const;
 
             /**
        * @brief Sets the bit-width of the variable
@@ -179,7 +178,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_bitwidth(unsigned bitwidth);
+            [[maybe_unused]] void set_bitwidth(unsigned bitwidth);
 
             /**
        * @brief Returns the bit-width of the variable
@@ -189,13 +188,13 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const;
 
             void          set_reference(variable::ptr reference);
-            variable::ptr reference() const;
+            [[nodiscard]] variable::ptr reference() const;
 
-            void                         set_dimensions(const std::vector<unsigned>& dimensions);
-            const std::vector<unsigned>& dimensions() const;
+            [[maybe_unused]] void                         set_dimensions(const std::vector<unsigned>& dimensions);
+            [[nodiscard]] const std::vector<unsigned>& dimensions() const;
 
         private:
             class priv;
@@ -239,7 +238,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access(variable::ptr var);
+            explicit variable_access(variable::ptr var);
 
             /**
        * @brief Deconstructor
@@ -267,7 +266,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable::ptr var() const;
+            [[nodiscard]] variable::ptr var() const;
 
             /**
        * @brief Sets the range of this access
@@ -292,7 +291,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
+            [[nodiscard]] const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
 
             /**
        * @brief Returns the bit-width of the variable access
@@ -307,10 +306,10 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const;
 
             void                                            set_indexes(const std::vector<std::shared_ptr<expression>>& indexes);
-            const std::vector<std::shared_ptr<expression>>& indexes() const;
+            [[nodiscard]] const std::vector<std::shared_ptr<expression>>& indexes() const;
 
         private:
             class priv;
@@ -343,7 +342,6 @@ namespace revkit {
      */
         std::ostream& operator<<(std::ostream& os, const variable_access& v);
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 #endif /* VARIABLE_HPP */

@@ -137,9 +137,9 @@ namespace revkit {
 
         circuit::const_reverse_iterator operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), const_filter_circuit(circ));
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.to)), const_filter_circuit(circ));
             } else {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), const_filter_circuit());
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.to)), const_filter_circuit());
             }
         }
     };
@@ -151,9 +151,9 @@ namespace revkit {
 
         circuit::const_reverse_iterator operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), const_filter_circuit(circ));
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.from)), const_filter_circuit(circ));
             } else {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), const_filter_circuit());
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.from)), const_filter_circuit());
             }
         }
     };
@@ -165,9 +165,9 @@ namespace revkit {
 
         circuit::reverse_iterator operator()(subcircuit& circ) const {
             if (!circ.filter.empty()) {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), filter_circuit(circ));
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.to)), filter_circuit(circ));
             } else {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.to)), filter_circuit());
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.to)), filter_circuit());
             }
         }
     };
@@ -179,9 +179,9 @@ namespace revkit {
 
         circuit::reverse_iterator operator()(subcircuit& circ) const {
             if (!circ.filter.empty()) {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), filter_circuit(circ));
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.from)), filter_circuit(circ));
             } else {
-                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (circ.base.gates.size() - circ.from)), filter_circuit());
+                return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.from)), filter_circuit());
             }
         }
     };
@@ -674,7 +674,7 @@ namespace revkit {
         return std::visit(insert_gate_visitor(pos, *this), circ);
     }
 
-    void circuit::remove_gate_at(unsigned pos) {
+    [[maybe_unused]] void circuit::remove_gate_at(unsigned pos) {
         std::visit(remove_gate_at_visitor(pos), circ);
     }
 
@@ -710,15 +710,15 @@ namespace revkit {
         return std::visit(garbage_visitor(), circ);
     }
 
-    void circuit::set_circuit_name(const std::string& name) {
+    [[maybe_unused]] void circuit::set_circuit_name(const std::string& name) {
         std::visit(circuit_name_setter(name), circ);
     }
 
-    const std::string& circuit::circuit_name() const {
+    [[maybe_unused]] const std::string& circuit::circuit_name() const {
         return std::visit(circuit_name_visitor(), circ);
     }
 
-    const bus_collection& circuit::inputbuses() const {
+    [[maybe_unused]] const bus_collection& circuit::inputbuses() const {
         return std::visit(const_inputbuses_visitor(), circ);
     }
 
@@ -726,7 +726,7 @@ namespace revkit {
         return std::visit(inputbuses_visitor(), circ);
     }
 
-    const bus_collection& circuit::outputbuses() const {
+    [[maybe_unused]] const bus_collection& circuit::outputbuses() const {
         return std::visit(const_outputbuses_visitor(), circ);
     }
 
@@ -742,7 +742,7 @@ namespace revkit {
         return std::visit(statesignals_visitor(), circ);
     }
 
-    bool circuit::is_subcircuit() const {
+    [[maybe_unused]] bool circuit::is_subcircuit() const {
         return std::visit(is_subcircuit_visitor(), circ);
     }
 

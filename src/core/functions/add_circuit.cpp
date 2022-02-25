@@ -27,7 +27,7 @@ namespace revkit {
         insert_circuit(circ, circ.num_gates(), src, controls);
     }
 
-    void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls) {
+    [[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls) {
         insert_circuit(circ, 0, src, controls);
     }
 

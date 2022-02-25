@@ -22,13 +22,12 @@
 namespace revkit {
 
     cost_t my_quantum_costs(const gate& g, unsigned lines) {
-        cost_t costs = 0ull;
+        cost_t costs;
 
         unsigned n = lines;
         unsigned c = std::distance(g.begin_controls(), g.end_controls());
 
         if (is_fredkin(g)) {
-            costs = 2ull;
             c += 1u;
         }
 

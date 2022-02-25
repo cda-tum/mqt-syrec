@@ -25,7 +25,7 @@ namespace revkit {
 
     class pattern::priv {
     public:
-        priv() {}
+        priv() = default;
 
         initializer_map                    initializers;
         std::vector<std::string>           inputs;
@@ -40,19 +40,19 @@ namespace revkit {
         delete d;
     }
 
-    void pattern::add_initializer(const std::string& name, unsigned value) {
+    [[maybe_unused]] void pattern::add_initializer(const std::string& name, unsigned value) {
         d->initializers[name] = value;
     }
 
-    void pattern::add_input(const std::string& name) {
+    [[maybe_unused]] void pattern::add_input(const std::string& name) {
         d->inputs += name;
     }
 
-    void pattern::add_pattern(const std::vector<unsigned>& pattern) {
+    [[maybe_unused]] void pattern::add_pattern(const std::vector<unsigned>& pattern) {
         d->patterns += pattern;
     }
 
-    const pattern::initializer_map& pattern::initializers() const {
+    [[maybe_unused]] const pattern::initializer_map& pattern::initializers() const {
         return d->initializers;
     }
 

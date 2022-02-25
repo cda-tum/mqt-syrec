@@ -97,7 +97,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const std::vector<unsigned> get(const std::string& name) const;
+        [[nodiscard]] std::vector<unsigned> get(const std::string& name) const;
 
         /**
      * @brief Returns all buses of the collection
@@ -109,7 +109,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        const map& buses() const;
+        [[nodiscard]] const map& buses() const;
 
         /**
      * @brief This method finds the bus for a line
@@ -127,7 +127,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        std::string find_bus(unsigned line_index) const;
+        [[nodiscard]] std::string find_bus(unsigned line_index) const;
 
         /**
      * @brief This method determines whether there exists a bus for a given line
@@ -142,7 +142,7 @@ namespace revkit {
      *
      * @return \b true, if line at \p line_index is contained in a bus
      */
-        bool has_bus(unsigned line_index) const;
+        [[nodiscard]] bool has_bus(unsigned line_index) const;
 
         /**
      * @brief Returns the signal index relative to the bus
@@ -161,7 +161,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        unsigned signal_index(unsigned line_index) const;
+        [[nodiscard]] unsigned signal_index(unsigned line_index) const;
 
         /**
      * @brief Sets the initial value of a bus
@@ -207,7 +207,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        std::optional<unsigned> initial_value(const std::string& name) const;
+        [[nodiscard]] std::optional<unsigned> initial_value(const std::string& name) const;
 
     private:
         class priv;
@@ -216,4 +216,4 @@ namespace revkit {
 
 } // namespace revkit
 
-#endif /* BUS_HPP */
+#endif /* BUS_COLLECTION_HPP */

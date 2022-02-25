@@ -27,8 +27,7 @@
 #include <iostream>
 #include <memory>
 
-namespace revkit {
-    namespace syrec {
+namespace revkit::syrec {
 
         /**
      * @brief SyReC expression
@@ -78,7 +77,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            virtual unsigned bitwidth() const = 0;
+            [[nodiscard]] virtual unsigned bitwidth() const = 0;
 
             /**
        * @brief Helper function used by the ostream operator<< function
@@ -161,7 +160,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~numeric_expression();
+            ~numeric_expression() override;
 
             /**
        * @brief Sets the value of the expression
@@ -181,7 +180,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            const number::ptr& value() const;
+            [[nodiscard]] const number::ptr& value() const;
 
             /**
        * @brief Returns the bit-width of the expression
@@ -191,7 +190,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const override;
 
             /**
        * @brief Prints the expression to an output stream
@@ -203,7 +202,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -247,7 +246,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~variable_expression();
+            ~variable_expression() override;
 
             /**
        * @brief Sets the variable of the expression
@@ -267,7 +266,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            variable_access::ptr var() const;
+            [[nodiscard]] variable_access::ptr var() const;
 
             /**
        * @brief Returns the bit-width of the variable access
@@ -279,7 +278,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const override;
 
             /**
        * @brief Prints the expression to an output stream
@@ -291,7 +290,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -438,7 +437,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            ~binary_expression();
+            ~binary_expression() override;
 
             /**
        * @brief Sets the left hand side of the expression
@@ -448,7 +447,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_lhs(expression::ptr lhs);
+            [[maybe_unused]] void set_lhs(expression::ptr lhs);
 
             /**
        * @brief Returns the left hand side of the expression
@@ -458,7 +457,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            expression::ptr lhs() const;
+            [[nodiscard]] expression::ptr lhs() const;
 
             /**
        * @brief Sets the right hand side of the expression
@@ -468,7 +467,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_rhs(expression::ptr rhs);
+            [[maybe_unused]] void set_rhs(expression::ptr rhs);
 
             /**
        * @brief Returns the right hand side of the expression
@@ -478,7 +477,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            expression::ptr rhs() const;
+            [[nodiscard]] expression::ptr rhs() const;
 
             /**
        * @brief Sets the operation to be performed
@@ -498,7 +497,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned op() const;
+            [[nodiscard]] unsigned op() const;
 
             /**
        * @brief Bit-width of the expression
@@ -514,7 +513,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const override;
 
             /**
        * @brief Prints the expression to an output stream
@@ -526,7 +525,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -590,7 +589,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            ~unary_expression();
+            ~unary_expression() override;
 
             /**
        * @brief Sets the sub expression
@@ -610,7 +609,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            expression::ptr expr() const;
+            [[nodiscard]] expression::ptr expr() const;
 
             /**
        * @brief Sets the operation to be performed
@@ -630,7 +629,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            unsigned op() const;
+            [[nodiscard]] unsigned op() const;
 
             /**
        * @brief Bit-width of the expression
@@ -645,7 +644,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const override;
 
             /**
        * @brief Prints the expression to an output stream
@@ -657,7 +656,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.3
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -727,7 +726,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1 
        */
-            ~shift_expression();
+            ~shift_expression() override;
 
             /**
        * @brief Sets the left-hand side expression
@@ -737,7 +736,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_lhs(expression::ptr lhs);
+            [[maybe_unused]] void set_lhs(expression::ptr lhs);
 
             /**
        * @brief Returns the left-hand side expression
@@ -747,7 +746,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1 
        */
-            expression::ptr lhs() const;
+            [[nodiscard]] expression::ptr lhs() const;
 
             /**
        * @brief Sets the number of bits to shift
@@ -757,7 +756,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            void set_rhs(const number::ptr& rhs);
+            [[maybe_unused]] void set_rhs(const number::ptr& rhs);
 
             /**
        * @brief Returns the number of bits to shift
@@ -767,7 +766,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1 
        */
-            const number::ptr& rhs() const;
+            [[nodiscard]] const number::ptr& rhs() const;
 
             /**
        * @brief Sets the shift operation
@@ -787,7 +786,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1 
        */
-            unsigned op() const;
+            [[nodiscard]] unsigned op() const;
 
             /**
        * @brief Returns the bit-width of the expression
@@ -800,7 +799,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1 
        */
-            unsigned bitwidth() const;
+            [[nodiscard]] unsigned bitwidth() const override;
 
             /**
        * @brief Prints the expression to an output stream
@@ -812,7 +811,7 @@ namespace revkit {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const;
+            std::ostream& print(std::ostream& os) const override;
 
         private:
             class priv;
@@ -832,7 +831,6 @@ namespace revkit {
      */
         std::ostream& operator<<(std::ostream& os, const expression& e);
 
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit
 
 #endif /* EXPRESSION_HPP */

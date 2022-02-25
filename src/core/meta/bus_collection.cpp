@@ -24,7 +24,7 @@ namespace revkit {
 
     class bus_collection::priv {
     public:
-        priv() {}
+        priv() = default;
 
         bus_collection::map             buses;
         std::map<std::string, unsigned> initial_values;
@@ -47,8 +47,8 @@ namespace revkit {
         }
     }
 
-    const bus_collection::map::mapped_type bus_collection::get(const map::key_type& name) const {
-        map::const_iterator it = d->buses.find(name);
+    bus_collection::map::mapped_type bus_collection::get(const map::key_type& name) const {
+        auto it = d->buses.find(name);
 
         if (it != d->buses.end()) {
             return it->second;
@@ -86,7 +86,7 @@ namespace revkit {
 
     unsigned bus_collection::signal_index(unsigned line_index) const {
         for (const map::value_type& p: d->buses) {
-            map::mapped_type::const_iterator it = std::find(p.second.begin(), p.second.end(), line_index);
+            auto it = std::find(p.second.begin(), p.second.end(), line_index);
             if (it != p.second.end()) {
                 return std::distance(p.second.begin(), it);
             }
@@ -97,7 +97,7 @@ namespace revkit {
     }
 
     void bus_collection::set_initial_value(const std::string& name, unsigned initial_value) {
-        map::const_iterator it = d->buses.find(name);
+        auto it = d->buses.find(name);
 
         if (it != d->buses.end()) {
             d->initial_values[name] = initial_value;
@@ -105,10 +105,10 @@ namespace revkit {
     }
 
     std::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
-        map::const_iterator it = d->buses.find(name);
+        auto it = d->buses.find(name);
 
         if (it != d->buses.end()) {
-            std::map<std::string, unsigned>::const_iterator it2 = d->initial_values.find(name);
+            auto it2 = d->initial_values.find(name);
             if (it2 != d->initial_values.end()) {
                 return it2->second;
             } else {
