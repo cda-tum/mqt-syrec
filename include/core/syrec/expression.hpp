@@ -29,7 +29,7 @@
 
 namespace revkit::syrec {
 
-        /**
+    /**
      * @brief SyReC expression
      *
      * This abstract class represents the base of an SyReC expression.
@@ -39,35 +39,35 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class expression {
-        public:
-            /**
+    class expression {
+    public:
+        /**
        * @brief Shared Pointer interface to the class
        *
        * @author RevKit
        * @since  1.1
        */
-            typedef std::shared_ptr<expression> ptr;
+        typedef std::shared_ptr<expression> ptr;
 
-            typedef std::vector<ptr> vec;
+        typedef std::vector<ptr> vec;
 
-            /**
+        /**
        * @brief Standard constructor
        *
        * @author RevKit
        * @since  1.1
        */
-            expression();
+        expression();
 
-            /**
+        /**
        * @brief Standard deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            virtual ~expression();
+        virtual ~expression();
 
-            /**
+        /**
        * @brief Bit-width of the expression
        *
        * This method returns the bit-width of an expression.
@@ -77,9 +77,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] virtual unsigned bitwidth() const = 0;
+        [[nodiscard]] virtual unsigned bitwidth() const = 0;
 
-            /**
+        /**
        * @brief Helper function used by the ostream operator<< function
        *
        * This method has to be implemented by all child
@@ -93,57 +93,57 @@ namespace revkit::syrec {
        *
        * @return Output Stream
        */
-            virtual std::ostream& print(std::ostream& os) const = 0;
+        virtual std::ostream& print(std::ostream& os) const = 0;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Numeric Expression
      *
      * @author RevKit
      * @since  1.1
      */
-        class numeric_expression: public expression {
-        public:
-            /**
+    class numeric_expression: public expression {
+    public:
+        /**
        * @brief Operation to perform in case of binary numeric expression
        *
        * @author RevKit
        * @since  1.1
        */
-            enum {
-                /**
+        enum {
+            /**
          * @brief Addition
          */
-                add,
+            add,
 
-                /**
+            /**
          * @brief Subtraction
          */
-                subtract,
+            subtract,
 
-                /**
+            /**
          * @brief Multiplication
          */
-                multiply,
+            multiply,
 
-                /**
+            /**
          * @brief Division
          */
-                divide
-            };
-            /**
+            divide
+        };
+        /**
        * @brief Standard Constructor
        *
        * @author RevKit
        * @since  1.1
        */
-            numeric_expression();
+        numeric_expression();
 
-            /**
+        /**
        * @brief Creates a numeric expression with a value and a bit-width
        *
        * @param value Value
@@ -152,17 +152,17 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            numeric_expression(const number::ptr& value, unsigned bitwidth);
+        numeric_expression(const number::ptr& value, unsigned bitwidth);
 
-            /**
+        /**
        * @brief Standard Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            ~numeric_expression() override;
+        ~numeric_expression() override;
 
-            /**
+        /**
        * @brief Sets the value of the expression
        *
        * @param value Value
@@ -170,9 +170,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_value(const number::ptr& value);
+        void set_value(const number::ptr& value);
 
-            /**
+        /**
        * @brief Returns the value of the expression
        *
        * @return Value of the expression
@@ -180,9 +180,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] const number::ptr& value() const;
+        [[nodiscard]] const number::ptr& value() const;
 
-            /**
+        /**
        * @brief Returns the bit-width of the expression
        *
        * @return Bit-width
@@ -190,9 +190,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override;
 
-            /**
+        /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -202,14 +202,14 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const override;
+        std::ostream& print(std::ostream& os) const override;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Variable expression
      *
      * This class represents a variable expression and
@@ -218,9 +218,9 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class variable_expression: public expression {
-        public:
-            /**
+    class variable_expression: public expression {
+    public:
+        /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -228,9 +228,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            variable_expression();
+        variable_expression();
 
-            /**
+        /**
        * @brief Constructor with variable
        * 
        * @param var Variable access
@@ -238,17 +238,17 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            explicit variable_expression(variable_access::ptr var);
+        explicit variable_expression(variable_access::ptr var);
 
-            /**
+        /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            ~variable_expression() override;
+        ~variable_expression() override;
 
-            /**
+        /**
        * @brief Sets the variable of the expression
        * 
        * @param var Variable access
@@ -256,9 +256,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_var(variable_access::ptr var);
+        void set_var(variable_access::ptr var);
 
-            /**
+        /**
        * @brief Returns the variable of the expression
        * 
        * @return Variable access
@@ -266,9 +266,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] variable_access::ptr var() const;
+        [[nodiscard]] variable_access::ptr var() const;
 
-            /**
+        /**
        * @brief Returns the bit-width of the variable access
        * 
        * This method calls variable_access::bitwidth() internally.
@@ -278,9 +278,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override;
 
-            /**
+        /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -290,14 +290,14 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const override;
+        std::ostream& print(std::ostream& os) const override;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Binary expression
      *
      * This class represents a binary expression between two sub
@@ -306,108 +306,108 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class binary_expression: public expression {
-        public:
-            /**
+    class binary_expression: public expression {
+    public:
+        /**
        * @brief Operation to perform
        *
        * @author RevKit
        * @since  1.1
        */
-            enum {
-                /**
+        enum {
+            /**
          * @brief Addition
          */
-                add,
+            add,
 
-                /**
+            /**
          * @brief Subtraction
          */
-                subtract,
+            subtract,
 
-                /**
+            /**
          * @brief Bit-wise EXOR
          */
-                exor,
+            exor,
 
-                /**
+            /**
          * @brief Multiplication
          *
          * Returns n least significant bits, where n is the bit-width of lhs() and rhs()
          */
-                multiply,
+            multiply,
 
-                /**
+            /**
          * @brief Division
          *
          * Returns n least significant bits, where n is the bit-width of lhs() and rhs()
          */
-                divide,
+            divide,
 
-                /**
+            /**
          * @brief Modulo Operation
          */
-                modulo,
+            modulo,
 
-                /**
+            /**
          * @brief Multiplication (most significant bits)
          *
          * Performs multiplication and returns the n most significant bits, where n is the bit-width of lhs() and rhs()
          */
-                frac_divide,
-
-                /**
-         * @brief Logical AND
-         */
-                logical_and,
-
-                /**
-         * @brief Logical OR
-         */
-                logical_or,
-
-                /**
-         * @brief Bitwise AND
-         */
-                bitwise_and,
-
-                /**
-         * @brief Bitwise OR
-         */
-                bitwise_or,
-
-                /**
-         * @brief Less than
-         */
-                less_than,
-
-                /**
-         * @brief Greater than
-         */
-                greater_than,
-
-                /**
-         * @brief Equals
-         */
-                equals,
-
-                /**
-         * @brief Not equals
-         */
-                not_equals,
-
-                /**
-         * @brief Less equals
-         */
-                less_equals,
-
-                /**
-         * @brief Greater equals
-         */
-                greater_equals
-            };
+            frac_divide,
 
             /**
+         * @brief Logical AND
+         */
+            logical_and,
+
+            /**
+         * @brief Logical OR
+         */
+            logical_or,
+
+            /**
+         * @brief Bitwise AND
+         */
+            bitwise_and,
+
+            /**
+         * @brief Bitwise OR
+         */
+            bitwise_or,
+
+            /**
+         * @brief Less than
+         */
+            less_than,
+
+            /**
+         * @brief Greater than
+         */
+            greater_than,
+
+            /**
+         * @brief Equals
+         */
+            equals,
+
+            /**
+         * @brief Not equals
+         */
+            not_equals,
+
+            /**
+         * @brief Less equals
+         */
+            less_equals,
+
+            /**
+         * @brief Greater equals
+         */
+            greater_equals
+        };
+
+        /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -415,9 +415,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            binary_expression();
+        binary_expression();
 
-            /**
+        /**
        * @brief Constructor which initializes a operation
        * 
        * @param lhs Expression on left hand side
@@ -427,19 +427,19 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            binary_expression(expression::ptr lhs,
-                              unsigned        op,
-                              expression::ptr rhs);
+        binary_expression(expression::ptr lhs,
+                          unsigned        op,
+                          expression::ptr rhs);
 
-            /**
+        /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            ~binary_expression() override;
+        ~binary_expression() override;
 
-            /**
+        /**
        * @brief Sets the left hand side of the expression
        * 
        * @param lhs Expression
@@ -447,9 +447,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[maybe_unused]] void set_lhs(expression::ptr lhs);
+        [[maybe_unused]] void set_lhs(expression::ptr lhs);
 
-            /**
+        /**
        * @brief Returns the left hand side of the expression
        * 
        * @return Expression
@@ -457,9 +457,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] expression::ptr lhs() const;
+        [[nodiscard]] expression::ptr lhs() const;
 
-            /**
+        /**
        * @brief Sets the right hand side of the expression
        * 
        * @param rhs Expression
@@ -467,9 +467,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[maybe_unused]] void set_rhs(expression::ptr rhs);
+        [[maybe_unused]] void set_rhs(expression::ptr rhs);
 
-            /**
+        /**
        * @brief Returns the right hand side of the expression
        * 
        * @return Expression
@@ -477,9 +477,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] expression::ptr rhs() const;
+        [[nodiscard]] expression::ptr rhs() const;
 
-            /**
+        /**
        * @brief Sets the operation to be performed
        * 
        * @param op Operation
@@ -487,9 +487,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_op(unsigned op);
+        void set_op(unsigned op);
 
-            /**
+        /**
        * @brief Returns the operation to be performed
        *
        * @return Operation
@@ -497,9 +497,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned op() const;
+        [[nodiscard]] unsigned op() const;
 
-            /**
+        /**
        * @brief Bit-width of the expression
        * 
        * It is assumed that the bit-width of the left
@@ -513,9 +513,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override;
 
-            /**
+        /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -525,14 +525,14 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const override;
+        std::ostream& print(std::ostream& os) const override;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Unary expression
      * 
      * This class represents a unary expression composed of a 
@@ -541,28 +541,28 @@ namespace revkit::syrec {
      * @author RevKit
      * @since 1.3
      */
-        class unary_expression: public expression {
-        public:
-            /**
+    class unary_expression: public expression {
+    public:
+        /**
        * @brief Operation to perform
        *
        * @author RevKit
        * @since  1.3
        */
-            enum {
-                /**
+        enum {
+            /**
          * @brief Logical NOT
          *
          * Returns 1 iff expr() evaluates to 0.
          */
-                logical_not,
-                /**
+            logical_not,
+            /**
          * @brief Bitwise NOT
          */
-                bitwise_not
-            };
+            bitwise_not
+        };
 
-            /**
+        /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -570,9 +570,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            unary_expression();
+        unary_expression();
 
-            /**
+        /**
        * @brief Constructor which initializes an operation
        * 
        * @param op Operation to be performed
@@ -581,17 +581,17 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            unary_expression(unsigned op, expression::ptr expr);
+        unary_expression(unsigned op, expression::ptr expr);
 
-            /**
+        /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.3
        */
-            ~unary_expression() override;
+        ~unary_expression() override;
 
-            /**
+        /**
        * @brief Sets the sub expression
        * 
        * @param expr Expression
@@ -599,9 +599,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            void set_expr(expression::ptr expr);
+        void set_expr(expression::ptr expr);
 
-            /**
+        /**
        * @brief Returns the sub expression
        * 
        * @return Expression
@@ -609,9 +609,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            [[nodiscard]] expression::ptr expr() const;
+        [[nodiscard]] expression::ptr expr() const;
 
-            /**
+        /**
        * @brief Sets the operation to be performed
        * 
        * @param op Operation
@@ -619,9 +619,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            void set_op(unsigned op);
+        void set_op(unsigned op);
 
-            /**
+        /**
        * @brief Returns the operation to be performed
        *
        * @return Operation
@@ -629,9 +629,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            [[nodiscard]] unsigned op() const;
+        [[nodiscard]] unsigned op() const;
 
-            /**
+        /**
        * @brief Bit-width of the expression
        * 
        * If a logical operation is performed, 
@@ -644,9 +644,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override;
 
-            /**
+        /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -656,14 +656,14 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.3
        */
-            std::ostream& print(std::ostream& os) const override;
+        std::ostream& print(std::ostream& os) const override;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Shift expression
      *
      * This class represents a binary expression with a
@@ -672,27 +672,27 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class shift_expression: public expression {
-        public:
-            /**
+    class shift_expression: public expression {
+    public:
+        /**
        * @brief Shft Operation
        * 
        * @author RevKit
        * @since  1.1 
        */
-            enum {
-                /**
+        enum {
+            /**
          * @brief Left-Shift
          */
-                left,
-
-                /**
-         * @brief Right-Shift
-         */
-                right
-            };
+            left,
 
             /**
+         * @brief Right-Shift
+         */
+            right
+        };
+
+        /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -700,9 +700,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1 
        */
-            shift_expression();
+        shift_expression();
 
-            /**
+        /**
        * @brief Constructor
        *
        * This constructs a shift expression with a sub-expression
@@ -716,19 +716,19 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            shift_expression(expression::ptr    lhs,
-                             unsigned           op,
-                             const number::ptr& rhs);
+        shift_expression(expression::ptr    lhs,
+                         unsigned           op,
+                         const number::ptr& rhs);
 
-            /**
+        /**
        * @brief Deconstructor
        * 
        * @author RevKit
        * @since  1.1 
        */
-            ~shift_expression() override;
+        ~shift_expression() override;
 
-            /**
+        /**
        * @brief Sets the left-hand side expression
        * 
        * @param lhs Expression
@@ -736,9 +736,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[maybe_unused]] void set_lhs(expression::ptr lhs);
+        [[maybe_unused]] void set_lhs(expression::ptr lhs);
 
-            /**
+        /**
        * @brief Returns the left-hand side expression
        * 
        * @return Expression
@@ -746,9 +746,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1 
        */
-            [[nodiscard]] expression::ptr lhs() const;
+        [[nodiscard]] expression::ptr lhs() const;
 
-            /**
+        /**
        * @brief Sets the number of bits to shift
        * 
        * @param rhs Number
@@ -756,9 +756,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[maybe_unused]] void set_rhs(const number::ptr& rhs);
+        [[maybe_unused]] void set_rhs(const number::ptr& rhs);
 
-            /**
+        /**
        * @brief Returns the number of bits to shift
        * 
        * @return Number
@@ -766,9 +766,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1 
        */
-            [[nodiscard]] const number::ptr& rhs() const;
+        [[nodiscard]] const number::ptr& rhs() const;
 
-            /**
+        /**
        * @brief Sets the shift operation
        * 
        * @param op Shift operation
@@ -776,9 +776,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_op(unsigned op);
+        void set_op(unsigned op);
 
-            /**
+        /**
        * @brief Returns the shift operation
        * 
        * @return Shift operation
@@ -786,9 +786,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1 
        */
-            [[nodiscard]] unsigned op() const;
+        [[nodiscard]] unsigned op() const;
 
-            /**
+        /**
        * @brief Returns the bit-width of the expression
        *
        * The bit-width of a shift expression is the bit-width
@@ -799,9 +799,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1 
        */
-            [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override;
 
-            /**
+        /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -811,14 +811,14 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            std::ostream& print(std::ostream& os) const override;
+        std::ostream& print(std::ostream& os) const override;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Prints an expression
      * 
      * @param os Output stream
@@ -829,8 +829,8 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        std::ostream& operator<<(std::ostream& os, const expression& e);
+    std::ostream& operator<<(std::ostream& os, const expression& e);
 
-    } // namespace revkit
+} // namespace revkit::syrec
 
 #endif /* EXPRESSION_HPP */

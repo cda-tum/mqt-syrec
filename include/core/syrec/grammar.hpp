@@ -33,126 +33,126 @@
 
 // Custom Parser iterator
 namespace revkit::syrec::parser {
-            BOOST_SPIRIT_TERMINAL(iter_pos)
-        } // namespace revkit
+    BOOST_SPIRIT_TERMINAL(iter_pos)
+} // namespace revkit::syrec::parser
 
 namespace boost::spirit {
-        template<>
-        struct use_terminal<qi::domain, revkit::syrec::parser::tag::iter_pos>: mpl::true_ {};
-    } // namespace boost
+    template<>
+    struct use_terminal<qi::domain, revkit::syrec::parser::tag::iter_pos>: mpl::true_ {};
+} // namespace boost::spirit
 
 namespace revkit::syrec::parser {
-            struct iter_pos_parser: boost::spirit::qi::primitive_parser<iter_pos_parser> {
-                template<typename Context, typename Iterator>
-                struct attribute {
-                    typedef Iterator type;
-                };
+    struct iter_pos_parser: boost::spirit::qi::primitive_parser<iter_pos_parser> {
+        template<typename Context, typename Iterator>
+        struct attribute {
+            typedef Iterator type;
+        };
 
-                template<typename Iterator, typename Context, typename Skipper, typename Attribute>
-                bool parse(Iterator& first, Iterator const& last, Context&, Skipper const& skipper, Attribute& attr) const {
-                    boost::spirit::qi::skip_over(first, last, skipper);
-                    boost::spirit::traits::assign_to(first, attr);
-                    return true;
-                }
+        template<typename Iterator, typename Context, typename Skipper, typename Attribute>
+        bool parse(Iterator& first, Iterator const& last, Context&, Skipper const& skipper, Attribute& attr) const {
+            boost::spirit::qi::skip_over(first, last, skipper);
+            boost::spirit::traits::assign_to(first, attr);
+            return true;
+        }
 
-                template<typename Context>
-                boost::spirit::info what(Context&) const {
-                    return boost::spirit::info("iter_pos");
-                }
-            };
-        } // namespace revkit
+        template<typename Context>
+        boost::spirit::info what(Context&) const {
+            return boost::spirit::info("iter_pos");
+        }
+    };
+} // namespace revkit::syrec::parser
 
 namespace boost::spirit::qi {
-            template<typename Modifiers>
-            struct [[maybe_unused]] make_primitive<revkit::syrec::parser::tag::iter_pos, Modifiers> {
-                typedef revkit::syrec::parser::iter_pos_parser result_type;
+    template<typename Modifiers>
+    struct [[maybe_unused]] make_primitive<revkit::syrec::parser::tag::iter_pos, Modifiers> {
+        typedef revkit::syrec::parser::iter_pos_parser result_type;
 
-                result_type operator()(unused_type, unused_type) const {
-                    return {};
-                }
-            };
-        } // namespace boost
+        result_type operator()(unused_type, unused_type) const {
+            return {};
+        }
+    };
+} // namespace boost::spirit::qi
 
 namespace revkit::syrec {
-        namespace qi    = boost::spirit::qi;
-        namespace ascii = boost::spirit::ascii;
+    namespace qi    = boost::spirit::qi;
+    namespace ascii = boost::spirit::ascii;
 
-        struct ast_variable;
-        struct ast_number_expression;
-        struct ast_binary_expression;
-        struct ast_unary_expression;
-        struct ast_shift_expression;
-        struct ast_if_statement;
-        struct ast_for_statement;
+    struct ast_variable;
+    struct ast_number_expression;
+    struct ast_binary_expression;
+    struct ast_unary_expression;
+    struct ast_shift_expression;
+    struct ast_if_statement;
+    struct ast_for_statement;
 
-        typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
-        typedef boost::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                      ast_number;
-        typedef boost::optional<boost::fusion::vector<revkit::syrec::ast_number, boost::optional<revkit::syrec::ast_number>>>                                                                                                       ast_range;
-        typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
-        typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
-        typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
-        typedef boost::fusion::vector<ast_variable, char, ast_expression>                                                                                                                                                           ast_assign_statement;
-        typedef boost::fusion::vector<std::string, std::string, std::vector<std::string>>                                                                                                                                           ast_call_statement;
-        typedef boost::fusion::vector<ast_iterator, boost::variant<ast_swap_statement,
-                                                                   ast_unary_statement,
-                                                                   ast_assign_statement,
-                                                                   boost::recursive_wrapper<ast_if_statement>,
-                                                                   boost::recursive_wrapper<ast_for_statement>,
-                                                                   ast_call_statement,
-                                                                   std::string>>
-                                                                                                                                                   ast_statement;
-        typedef boost::fusion::vector<std::string, std::vector<unsigned>, boost::optional<unsigned>>                                               ast_variable_declaration;
-        typedef boost::fusion::vector<std::string, std::vector<ast_variable_declaration>>                                                          ast_variable_declarations;
-        typedef boost::fusion::vector<std::string, ast_variable_declaration>                                                                       ast_parameter;
-        typedef boost::fusion::vector<std::string, std::vector<ast_parameter>, std::vector<ast_variable_declarations>, std::vector<ast_statement>> ast_module;
-        typedef std::vector<ast_module>                                                                                                            ast_program;
+    typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
+    typedef boost::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                      ast_number;
+    typedef boost::optional<boost::fusion::vector<revkit::syrec::ast_number, boost::optional<revkit::syrec::ast_number>>>                                                                                                       ast_range;
+    typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
+    typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
+    typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
+    typedef boost::fusion::vector<ast_variable, char, ast_expression>                                                                                                                                                           ast_assign_statement;
+    typedef boost::fusion::vector<std::string, std::string, std::vector<std::string>>                                                                                                                                           ast_call_statement;
+    typedef boost::fusion::vector<ast_iterator, boost::variant<ast_swap_statement,
+                                                               ast_unary_statement,
+                                                               ast_assign_statement,
+                                                               boost::recursive_wrapper<ast_if_statement>,
+                                                               boost::recursive_wrapper<ast_for_statement>,
+                                                               ast_call_statement,
+                                                               std::string>>
+                                                                                                                                               ast_statement;
+    typedef boost::fusion::vector<std::string, std::vector<unsigned>, boost::optional<unsigned>>                                               ast_variable_declaration;
+    typedef boost::fusion::vector<std::string, std::vector<ast_variable_declaration>>                                                          ast_variable_declarations;
+    typedef boost::fusion::vector<std::string, ast_variable_declaration>                                                                       ast_parameter;
+    typedef boost::fusion::vector<std::string, std::vector<ast_parameter>, std::vector<ast_variable_declarations>, std::vector<ast_statement>> ast_module;
+    typedef std::vector<ast_module>                                                                                                            ast_program;
 
-        struct ast_variable {
-            std::string                 name;
-            std::vector<ast_expression> indexes;
-            ast_range                   range;
-        };
+    struct ast_variable {
+        std::string                 name;
+        std::vector<ast_expression> indexes;
+        ast_range                   range;
+    };
 
-        struct ast_number_expression {
-            ast_number  operand1;
-            std::string op;
-            ast_number  operand2;
-        };
+    struct ast_number_expression {
+        ast_number  operand1;
+        std::string op;
+        ast_number  operand2;
+    };
 
-        struct ast_binary_expression {
-            ast_expression operand1;
-            std::string    op;
-            ast_expression operand2;
-        };
+    struct ast_binary_expression {
+        ast_expression operand1;
+        std::string    op;
+        ast_expression operand2;
+    };
 
-        struct ast_unary_expression {
-            std::string    op;
-            ast_expression operand;
-        };
+    struct ast_unary_expression {
+        std::string    op;
+        ast_expression operand;
+    };
 
-        struct ast_shift_expression {
-            ast_expression operand1;
-            std::string    op;
-            ast_number     operand2;
-        };
+    struct ast_shift_expression {
+        ast_expression operand1;
+        std::string    op;
+        ast_number     operand2;
+    };
 
-        struct ast_if_statement {
-            ast_expression             condition;
-            std::vector<ast_statement> if_statement;
-            std::vector<ast_statement> else_statement;
-            ast_expression             fi_condition;
-        };
+    struct ast_if_statement {
+        ast_expression             condition;
+        std::vector<ast_statement> if_statement;
+        std::vector<ast_statement> else_statement;
+        ast_expression             fi_condition;
+    };
 
-        struct ast_for_statement {
-            typedef boost::optional<boost::fusion::vector<boost::optional<std::string>, ast_number>> from_t;
-            typedef boost::optional<boost::fusion::vector<boost::optional<char>, ast_number>>        step_t;
+    struct ast_for_statement {
+        typedef boost::optional<boost::fusion::vector<boost::optional<std::string>, ast_number>> from_t;
+        typedef boost::optional<boost::fusion::vector<boost::optional<char>, ast_number>>        step_t;
 
-            from_t                     from;
-            ast_number                 to;
-            step_t                     step;
-            std::vector<ast_statement> do_statement;
-        };
-    } // namespace revkit
+        from_t                     from;
+        ast_number                 to;
+        step_t                     step;
+        std::vector<ast_statement> do_statement;
+    };
+} // namespace revkit::syrec
 
 BOOST_FUSION_ADAPT_STRUCT(
         revkit::syrec::ast_variable,

@@ -8,10 +8,10 @@
 
 namespace revkit::syrec {
 
-        struct reverse_statements {
-            typedef statement::ptr result_type;
+    struct reverse_statements {
+        typedef statement::ptr result_type;
 
-            statement::ptr operator()(statement::ptr _statement) const;
-        };
+        statement::ptr operator()(statement::ptr _statement) const;
+    };
 
-    } // namespace revkit
+} // namespace revkit::syrec

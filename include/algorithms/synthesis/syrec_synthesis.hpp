@@ -36,8 +36,8 @@ namespace revkit::internal {
                                   boost::property<boost::vertex_name_t, node_properties>>
             cct;
 
-    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
-    [[maybe_unused]] typedef boost::graph_traits<cct>::edge_descriptor   cct_edge;
+    typedef boost::graph_traits<cct>::vertex_descriptor                cct_node;
+    [[maybe_unused]] typedef boost::graph_traits<cct>::edge_descriptor cct_edge;
 
     struct cct_manager {
         cct      tree;
@@ -74,16 +74,16 @@ namespace revkit {
         virtual bool on_module(const syrec::module::ptr&);
         virtual bool on_statement(const syrec::statement::ptr& statement);
         bool         on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-    //    [[maybe_unused]] bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
-        [[maybe_unused]] bool         var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
-        [[maybe_unused]] bool         on_full_statement(const syrec::statement::ptr& statement);                                 //new
-        bool         op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
-        bool         full_statement(const syrec::statement::ptr& statement);                                    //new
-        bool         flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v);                  // new
-        virtual void set_settings(const properties::ptr& settings);
-        virtual void set_main_module(const syrec::module::ptr& main_module);
-        bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
-     //   [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
+        //    [[maybe_unused]] bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
+        [[maybe_unused]] bool var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
+        [[maybe_unused]] bool on_full_statement(const syrec::statement::ptr& statement);                                 //new
+        bool                  op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
+        bool                  full_statement(const syrec::statement::ptr& statement);                                    //new
+        bool                  flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v);                  // new
+        virtual void          set_settings(const properties::ptr& settings);
+        virtual void          set_main_module(const syrec::module::ptr& main_module);
+        bool                  solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
+        //   [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
     protected:
         // statements
@@ -113,11 +113,11 @@ namespace revkit {
     protected:
         virtual // unary operations
                 bool
-                     bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
-        virtual bool decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
-        [[maybe_unused]] bool         decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
-        virtual bool increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
-        [[maybe_unused]] bool         increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
+                              bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
+        virtual bool          decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
+        [[maybe_unused]] bool decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
+        virtual bool          increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
+        [[maybe_unused]] bool increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
 
         virtual // binary operations
                 bool
@@ -150,12 +150,12 @@ namespace revkit {
         [[maybe_unused]] bool maj(unsigned in1, unsigned in2, unsigned in3);
         [[maybe_unused]] bool uma(unsigned in1, unsigned in2, unsigned in3);
         [[maybe_unused]] bool uma_3cnot(unsigned in1, unsigned in2, unsigned in3);
-        bool decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
+        bool                  decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool                  decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool                  increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool                  expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
+        bool                  expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
+        bool                  exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
         virtual //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
                 // shift operations
                 bool
@@ -182,7 +182,7 @@ namespace revkit {
         //syrec::expression::ptr syrec::expression::binary_expression::lhs();
 
     protected:
-        [[nodiscard]] circuit&             circ() const;
+        [[nodiscard]] circuit&                              circ() const;
         [[maybe_unused]] std::stack<syrec::statement::ptr>& stmts();
 
         virtual bool get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);

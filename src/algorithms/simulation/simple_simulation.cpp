@@ -124,7 +124,7 @@ namespace revkit {
                            const properties::ptr& settings,
                            const properties::ptr& statistics) {
         auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        auto     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
+        auto step_result     = get<step_result_func>(settings, "step_result", step_result_func());
 
         timer<properties_timer> t;
 
@@ -145,7 +145,7 @@ namespace revkit {
                            const properties::ptr& settings,
                            const properties::ptr& statistics) {
         auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        auto     step_result     = get<step_result_func>(settings, "step_result", step_result_func());
+        auto step_result     = get<step_result_func>(settings, "step_result", step_result_func());
 
         timer<properties_timer> t;
 

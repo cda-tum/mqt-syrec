@@ -749,9 +749,9 @@ namespace revkit {
             unsigned type = parse_variable_type(bf::at_c<0>(ast_param));
             proc.add_parameter(std::make_shared<variable>(
                     type,
-                                 variable_name,
-                                 bf::at_c<1>(bf::at_c<1>(ast_param)),
-                                 bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
+                    variable_name,
+                    bf::at_c<1>(bf::at_c<1>(ast_param)),
+                    bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
         }
 
         for (const ast_variable_declarations& ast_decls: bf::at_c<2>(ast_proc)) {
@@ -769,9 +769,9 @@ namespace revkit {
 
                 proc.add_variable(std::make_shared<variable>(
                         type,
-                                     variable_name,
-                                     bf::at_c<1>(ast_decl),
-                                     bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth)));
+                        variable_name,
+                        bf::at_c<1>(ast_decl),
+                        bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth)));
             }
         }
 
@@ -798,7 +798,7 @@ namespace revkit {
         for (const ast_module& ast_proc: ast_prog) {
             module::ptr proc(new module(bf::at_c<0>(ast_proc)));
             if (!parse_module(*proc, ast_proc, prog, context)) {
-                if (error!=nullptr) {
+                if (error != nullptr) {
                     *error = boost::str(boost::format("In line %d: %s") % context.current_line_number % context.error_message);
                 }
                 return false;

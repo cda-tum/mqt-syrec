@@ -29,7 +29,7 @@ using namespace boost::assign;
 namespace revkit {
     static std::stack<unsigned>               exp_opp;
     static std::stack<std::vector<unsigned>>  exp_lhss, exp_rhss;
-    [[maybe_unused]] unsigned                                  statement_op;
+    [[maybe_unused]] unsigned                 statement_op;
     bool                                      rhs_equal = false;
     bool                                      sub_flag  = false;
     static std::vector<unsigned>              op_vec, assign_op_vector, exp_op_vector;
@@ -2097,7 +2097,7 @@ return ok;
 
     // dest.size = 2 * srcX.size
     bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        std::vector<unsigned> sum(dest.begin(), dest.begin() + src2.size());
+        std::vector<unsigned>        sum(dest.begin(), dest.begin() + src2.size());
         const std::vector<unsigned>& partial = src2;
 
         bool ok = true;

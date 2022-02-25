@@ -33,9 +33,9 @@
 
 namespace revkit::syrec {
 
-        class expression;
+    class expression;
 
-        /**
+    /**
      * @brief SyReC variable data type
      *
      * This class represents variable data type. A variable
@@ -45,58 +45,58 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class variable {
-        public:
-            /**
+    class variable {
+    public:
+        /**
        * @brief Type of variable
        *
        * @author RevKit
        * @since  1.1
        */
-            enum types {
-                /**
+        enum types {
+            /**
          * @brief Module Input Parameter (garbage output)
          */
-                in,
-
-                /**
-         * @brief Module Output Parameter (constant inputs with value 0)
-         */
-                out,
-
-                /**
-         * @brief Module Input/Output Parameter
-         */
-                inout,
-
-                /**
-         * @brief State Variable (local in top module)
-         */
-                state,
-
-                /**
-         * @brief Local variable (constant inputs with value 0 and garbage output)
-         */
-                wire
-            };
+            in,
 
             /**
+         * @brief Module Output Parameter (constant inputs with value 0)
+         */
+            out,
+
+            /**
+         * @brief Module Input/Output Parameter
+         */
+            inout,
+
+            /**
+         * @brief State Variable (local in top module)
+         */
+            state,
+
+            /**
+         * @brief Local variable (constant inputs with value 0 and garbage output)
+         */
+            wire
+        };
+
+        /**
        * @brief Smart pointer
        *
        * @author RevKit
        * @since  1.1
        */
-            typedef std::shared_ptr<variable> ptr;
+        typedef std::shared_ptr<variable> ptr;
 
-            /**
+        /**
        * @brief Vector of smart pointers
        *
        * @author RevKit
        * @since  1.1
        */
-            typedef std::vector<ptr> vec;
+        typedef std::vector<ptr> vec;
 
-            /**
+        /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -104,9 +104,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            variable();
+        variable();
 
-            /**
+        /**
        * @brief Constructor
        *
        * Initializes the type, the name, and the bit-width of the variable
@@ -118,19 +118,19 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            variable(unsigned type, const std::string& name, unsigned bitwidth);
+        variable(unsigned type, const std::string& name, unsigned bitwidth);
 
-            variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth);
+        variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth);
 
-            /**
+        /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            ~variable();
+        ~variable();
 
-            /**
+        /**
        * @brief Sets the type of the variable
        *
        * @param type Type
@@ -138,9 +138,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_type(unsigned type);
+        void set_type(unsigned type);
 
-            /**
+        /**
        * @brief Returns the type of the variable
        *
        * @return Type
@@ -148,9 +148,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned type() const;
+        [[nodiscard]] unsigned type() const;
 
-            /**
+        /**
        * @brief Sets the name of the variable
        *
        * @param name Name
@@ -158,9 +158,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_name(const std::string& name);
+        void set_name(const std::string& name);
 
-            /**
+        /**
        * @brief Returns the name of the variable
        *
        * @return Name
@@ -168,9 +168,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] const std::string& name() const;
+        [[nodiscard]] const std::string& name() const;
 
-            /**
+        /**
        * @brief Sets the bit-width of the variable
        *
        * @param bitwidth Bit-width
@@ -178,9 +178,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[maybe_unused]] void set_bitwidth(unsigned bitwidth);
+        [[maybe_unused]] void set_bitwidth(unsigned bitwidth);
 
-            /**
+        /**
        * @brief Returns the bit-width of the variable
        *
        * @return Bit-width
@@ -188,20 +188,20 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned bitwidth() const;
+        [[nodiscard]] unsigned bitwidth() const;
 
-            void          set_reference(variable::ptr reference);
-            [[nodiscard]] variable::ptr reference() const;
+        void                        set_reference(variable::ptr reference);
+        [[nodiscard]] variable::ptr reference() const;
 
-            [[maybe_unused]] void                         set_dimensions(const std::vector<unsigned>& dimensions);
-            [[nodiscard]] const std::vector<unsigned>& dimensions() const;
+        [[maybe_unused]] void                      set_dimensions(const std::vector<unsigned>& dimensions);
+        [[nodiscard]] const std::vector<unsigned>& dimensions() const;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Variable Access
      *
      * This class represents the access of a variable inside
@@ -210,17 +210,17 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        class variable_access {
-        public:
-            /**
+    class variable_access {
+    public:
+        /**
        * @brief Smart pointer
        *
        * @author RevKit
        * @since  1.1
        */
-            typedef std::shared_ptr<variable_access> ptr;
+        typedef std::shared_ptr<variable_access> ptr;
 
-            /**
+        /**
        * @brief Standard constructor
        *
        * Initializes default values
@@ -228,9 +228,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            variable_access();
+        variable_access();
 
-            /**
+        /**
        * @brief Constructor with variable
        *
        * @param var Variable
@@ -238,17 +238,17 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            explicit variable_access(variable::ptr var);
+        explicit variable_access(variable::ptr var);
 
-            /**
+        /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.1
        */
-            ~variable_access();
+        ~variable_access();
 
-            /**
+        /**
        * @brief Sets the variable of this access
        *
        * @param var Variable
@@ -256,9 +256,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_var(variable::ptr var);
+        void set_var(variable::ptr var);
 
-            /**
+        /**
        * @brief Returns the variable of this access
        *
        * @return Variable
@@ -266,9 +266,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] variable::ptr var() const;
+        [[nodiscard]] variable::ptr var() const;
 
-            /**
+        /**
        * @brief Sets the range of this access
        *
        * If the parameter is empty, i.e. the default vaule @code boost::optional<std::pair<number::ptr, number::ptr> >() @endcode
@@ -281,9 +281,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            void set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range);
+        void set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range);
 
-            /**
+        /**
        * @brief Returns the range of this access
        *
        * @return Range
@@ -291,9 +291,9 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
+        [[nodiscard]] const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
 
-            /**
+        /**
        * @brief Returns the bit-width of the variable access
        *
        * The bit-width can only be evaluated, if
@@ -306,17 +306,17 @@ namespace revkit::syrec {
        * @author RevKit
        * @since  1.1
        */
-            [[nodiscard]] unsigned bitwidth() const;
+        [[nodiscard]] unsigned bitwidth() const;
 
-            void                                            set_indexes(const std::vector<std::shared_ptr<expression>>& indexes);
-            [[nodiscard]] const std::vector<std::shared_ptr<expression>>& indexes() const;
+        void                                                          set_indexes(const std::vector<std::shared_ptr<expression>>& indexes);
+        [[nodiscard]] const std::vector<std::shared_ptr<expression>>& indexes() const;
 
-        private:
-            class priv;
-            priv* const d = nullptr;
-        };
+    private:
+        class priv;
+        priv* const d = nullptr;
+    };
 
-        /**
+    /**
      * @brief Prints variable to output stream
      *
      * @param os Output Stream
@@ -327,9 +327,9 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        std::ostream& operator<<(std::ostream& os, const variable& v);
+    std::ostream& operator<<(std::ostream& os, const variable& v);
 
-        /**
+    /**
      * @brief Prints variable access to output stream
      *
      * @param os Output Stream
@@ -340,8 +340,8 @@ namespace revkit::syrec {
      * @author RevKit
      * @since  1.1
      */
-        std::ostream& operator<<(std::ostream& os, const variable_access& v);
+    std::ostream& operator<<(std::ostream& os, const variable_access& v);
 
-    } // namespace revkit
+} // namespace revkit::syrec
 
 #endif /* VARIABLE_HPP */

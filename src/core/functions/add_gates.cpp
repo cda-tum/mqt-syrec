@@ -204,7 +204,7 @@ namespace revkit {
     gate& create_module(gate& g, const circuit& circ, const std::string& name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         typedef std::map<std::string, std::shared_ptr<circuit>> map_t;
         const map_t&                                            modules = circ.modules();
-        auto                                   it      = modules.find(name);
+        auto                                                    it      = modules.find(name);
         assert(it != modules.end());
 
         //boost::for_each(controls, std::bind(&gate::add_control, &g, std::placeholders::_1));
