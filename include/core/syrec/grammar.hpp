@@ -68,7 +68,7 @@ namespace boost::spirit::qi {
                 typedef revkit::syrec::parser::iter_pos_parser result_type;
 
                 result_type operator()(unused_type, unused_type) const {
-                    return result_type();
+                    return {};
                 }
             };
         } // namespace boost

@@ -32,7 +32,7 @@ namespace revkit {
     }
 
     active_controls::~active_controls() {
-        //delete d;
+        delete d;
     }
 
     void active_controls::add(gate::line control) {

@@ -64,17 +64,17 @@ namespace revkit {
         return d->buses;
     }
 
-    bus_collection::map::key_type bus_collection::find_bus(map::mapped_type::value_type line_index) const {
+    [[maybe_unused]] bus_collection::map::key_type bus_collection::find_bus(map::mapped_type::value_type line_index) const {
         for (const map::value_type& p: d->buses) {
             if (std::find(p.second.begin(), p.second.end(), line_index) != p.second.end()) {
                 return p.first;
             }
         }
 
-        return map::key_type();
+        return {};
     }
 
-    bool bus_collection::has_bus(map::mapped_type::value_type line_index) const {
+    [[maybe_unused]] bool bus_collection::has_bus(map::mapped_type::value_type line_index) const {
         for (const map::value_type& p: d->buses) {
             if (std::find(p.second.begin(), p.second.end(), line_index) != p.second.end()) {
                 return true;
@@ -84,7 +84,7 @@ namespace revkit {
         return false;
     }
 
-    unsigned bus_collection::signal_index(unsigned line_index) const {
+    [[maybe_unused]] unsigned bus_collection::signal_index(unsigned line_index) const {
         for (const map::value_type& p: d->buses) {
             auto it = std::find(p.second.begin(), p.second.end(), line_index);
             if (it != p.second.end()) {
@@ -96,7 +96,7 @@ namespace revkit {
         return 0u;
     }
 
-    void bus_collection::set_initial_value(const std::string& name, unsigned initial_value) {
+    [[maybe_unused]] void bus_collection::set_initial_value(const std::string& name, unsigned initial_value) {
         auto it = d->buses.find(name);
 
         if (it != d->buses.end()) {
@@ -104,7 +104,7 @@ namespace revkit {
         }
     }
 
-    std::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
+    [[maybe_unused]] std::optional<unsigned> bus_collection::initial_value(const std::string& name) const {
         auto it = d->buses.find(name);
 
         if (it != d->buses.end()) {
@@ -112,10 +112,10 @@ namespace revkit {
             if (it2 != d->initial_values.end()) {
                 return it2->second;
             } else {
-                return std::optional<unsigned>();
+                return {};
             }
         } else {
-            return std::optional<unsigned>();
+            return {};
         }
     }
 

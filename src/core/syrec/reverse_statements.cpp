@@ -2,7 +2,6 @@
 
 #include <boost/foreach.hpp>
 
-#define foreach_ BOOST_FOREACH
 #define reverse_foreach_ BOOST_REVERSE_FOREACH
 
 namespace revkit::syrec {

@@ -124,7 +124,7 @@ namespace revkit::syrec {
             return boost::get<std::string>(&d->number);
         }
 
-        bool number::is_conjunction() const {
+        [[maybe_unused]] bool number::is_conjunction() const {
             return boost::get<binary_numeric_expr>(&d->number);
         }
 
@@ -136,7 +136,7 @@ namespace revkit::syrec {
             return *boost::get<std::string>(&d->number);
         }
 
-        binary_numeric_expr* number::conjunction_expr() const {
+        [[maybe_unused]] binary_numeric_expr* number::conjunction_expr() const {
             return boost::get<binary_numeric_expr>(&d->number);
         }
 

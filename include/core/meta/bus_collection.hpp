@@ -127,7 +127,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] std::string find_bus(unsigned line_index) const;
+        [[maybe_unused]] [[nodiscard]] std::string find_bus(unsigned line_index) const;
 
         /**
      * @brief This method determines whether there exists a bus for a given line
@@ -142,7 +142,7 @@ namespace revkit {
      *
      * @return \b true, if line at \p line_index is contained in a bus
      */
-        [[nodiscard]] bool has_bus(unsigned line_index) const;
+        [[maybe_unused]] [[nodiscard]] bool has_bus(unsigned line_index) const;
 
         /**
      * @brief Returns the signal index relative to the bus
@@ -161,7 +161,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] unsigned signal_index(unsigned line_index) const;
+        [[maybe_unused]] [[nodiscard]] unsigned signal_index(unsigned line_index) const;
 
         /**
      * @brief Sets the initial value of a bus
@@ -177,7 +177,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        void set_initial_value(const std::string& name, unsigned initial_value);
+        [[maybe_unused]] void set_initial_value(const std::string& name, unsigned initial_value);
 
         /**
      * @brief Retrieves the initial value of a bus
@@ -207,7 +207,7 @@ namespace revkit {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] std::optional<unsigned> initial_value(const std::string& name) const;
+        [[maybe_unused]] [[nodiscard]] std::optional<unsigned> initial_value(const std::string& name) const;
 
     private:
         class priv;

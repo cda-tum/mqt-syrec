@@ -72,7 +72,7 @@ namespace revkit {
             variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
             if (!var) {
                 context.error_message = boost::str(boost::format("Unknown variable %s") % ast_var.name);
-                return number::ptr();
+                return {};
             }
 
             return std::make_shared<number>(var->bitwidth());
@@ -83,7 +83,7 @@ namespace revkit {
                 return std::make_shared<number>(loop_variable);
             } else {
                 context.error_message = boost::str(boost::format("Unkown loop variable $%s") % loop_variable);
-                return number::ptr();
+                return {};
             }
         }
 
@@ -104,10 +104,10 @@ namespace revkit {
             }
 
             number::ptr lhs = parse_number(ast_no1, proc, context);
-            if (!lhs) return number::ptr();
+            if (!lhs) return {};
 
             number::ptr rhs = parse_number(ast_no2, proc, context);
-            if (!rhs) return number::ptr();
+            if (!rhs) return {};
 
             if (lhs->is_constant() && rhs->is_constant()) {
                 unsigned lhs_value = lhs->evaluate(number::loop_variable_mapping());
@@ -136,7 +136,7 @@ namespace revkit {
                     } break;
 
                     default:
-                        return number::ptr();
+                        return {};
                 }
 
                 return std::make_shared<number>(num_value);
@@ -160,7 +160,7 @@ namespace revkit {
 
         if (!var) {
             context.error_message = boost::str(boost::format("Unknown variable %s") % ast_var.name);
-            return variable_access::ptr();
+            return {};
         }
 
         variable_access::ptr va(new variable_access());
@@ -171,14 +171,14 @@ namespace revkit {
         ast_range range = ast_var.range;
         if (range) {
             number::ptr first = parse_number(bf::at_c<0>(*range), proc, context);
-            if (!first) return variable_access::ptr();
+            if (!first) return {};
 
             // is in range?
             if (!first->is_loop_variable()) {
                 unsigned bound = first->evaluate(number::loop_variable_mapping());
                 if (bound >= var->bitwidth()) {
                     context.error_message = boost::str(boost::format("Bound %d out of range in variable %s(%d)") % bound % var->name() % var->bitwidth());
-                    return variable_access::ptr();
+                    return {};
                 }
             }
 
@@ -186,14 +186,14 @@ namespace revkit {
 
             if (bf::at_c<1>(*range)) {
                 second = parse_number(*bf::at_c<1>(*range), proc, context);
-                if (!second) return variable_access::ptr();
+                if (!second) return {};
 
                 // is in range?
                 if (!second->is_loop_variable()) {
                     unsigned bound = second->evaluate(number::loop_variable_mapping());
                     if (bound >= var->bitwidth()) {
                         context.error_message = boost::str(boost::format("Bound %d out of range in variable %s(%d)") % bound % var->name() % var->bitwidth());
-                        return variable_access::ptr();
+                        return {};
                     }
                 }
             }
@@ -206,13 +206,13 @@ namespace revkit {
         // indexes
         if (var->dimensions().size() != ast_var.indexes.size()) {
             context.error_message = boost::str(boost::format("Invalid number of array indexes in variable %s. Expected %d, got %d") % var->name() % var->dimensions().size() % ast_var.indexes.size());
-            return variable_access::ptr();
+            return {};
         }
 
         expression::vec indexes;
         for (const ast_expression& ast_exp: ast_var.indexes) {
             expression::ptr index = parse_expression(ast_exp, proc, var->bitwidth(), context);
-            if (!index) return variable_access::ptr();
+            if (!index) return {};
             indexes += index;
         }
         va->set_indexes(indexes);
@@ -712,7 +712,7 @@ namespace revkit {
             stat->set_line_number(context.current_line_number);
             return statement::ptr(stat);
         } else {
-            return statement::ptr();
+            return {};
         }
     }
 

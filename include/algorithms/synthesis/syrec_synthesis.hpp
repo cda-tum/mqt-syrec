@@ -74,7 +74,7 @@ namespace revkit {
         virtual bool on_module(const syrec::module::ptr&);
         virtual bool on_statement(const syrec::statement::ptr& statement);
         bool         on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        [[maybe_unused]] bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
+    //    [[maybe_unused]] bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
         [[maybe_unused]] bool         var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
         [[maybe_unused]] bool         on_full_statement(const syrec::statement::ptr& statement);                                 //new
         bool         op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
@@ -83,7 +83,7 @@ namespace revkit {
         virtual void set_settings(const properties::ptr& settings);
         virtual void set_main_module(const syrec::module::ptr& main_module);
         bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
-        [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
+     //   [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
     protected:
         // statements
@@ -142,8 +142,8 @@ namespace revkit {
         virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                              // !=
         virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                                 // <=>
         //new
-        [[maybe_unused]] bool findDuplicates();
-        [[maybe_unused]] bool findInVector(std::vector<std::vector<unsigned>> vecOfElements, std::vector<unsigned> element);
+        //[[maybe_unused]] bool findDuplicates();
+        //[[maybe_unused]] bool findInVector(std::vector<std::vector<unsigned>> vecOfElements, std::vector<unsigned> element);
         bool check_repeats();
 
         [[maybe_unused]] bool maj_2(unsigned in1, unsigned in2);

@@ -110,7 +110,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.0
    */
-    struct reference_timer {
+    struct [[maybe_unused]] reference_timer {
         /**
      * Result value of the reference_timer is double,
      * since it returns the value of the reference value, the run-time

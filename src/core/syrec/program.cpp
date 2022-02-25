@@ -18,12 +18,9 @@
 #include "core/syrec/program.hpp"
 
 #include <boost/assign/std/vector.hpp>
-#include <boost/foreach.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <iterator>
-
-#define foreach_ BOOST_FOREACH
 
 using namespace boost::assign;
 

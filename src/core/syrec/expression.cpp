@@ -17,8 +17,9 @@
 
 #include "core/syrec/expression.hpp"
 
-namespace revkit {
-    namespace syrec {
+#include <utility>
+
+namespace revkit::syrec {
 
         class expression::priv {
         public:
@@ -84,7 +85,7 @@ namespace revkit {
 
         variable_expression::variable_expression(variable_access::ptr var):
             d(new priv()) {
-            d->var = var;
+            d->var = std::move(var);
         }
 
         variable_expression::~variable_expression() {
@@ -92,7 +93,7 @@ namespace revkit {
         }
 
         void variable_expression::set_var(variable_access::ptr var) {
-            d->var = var;
+            d->var = std::move(var);
         }
 
         variable_access::ptr variable_expression::var() const {
@@ -124,9 +125,9 @@ namespace revkit {
                                              unsigned        op,
                                              expression::ptr rhs):
             d(new priv()) {
-            d->lhs = lhs;
+            d->lhs = std::move(lhs);
             d->op  = op;
-            d->rhs = rhs;
+            d->rhs = std::move(rhs);
         }
 
         binary_expression::~binary_expression() {
@@ -134,7 +135,7 @@ namespace revkit {
         }
 
         [[maybe_unused]] void binary_expression::set_lhs(expression::ptr lhs) {
-            d->lhs = lhs;
+            d->lhs = std::move(lhs);
         }
 
         expression::ptr binary_expression::lhs() const {
@@ -142,7 +143,7 @@ namespace revkit {
         }
 
         [[maybe_unused]] void binary_expression::set_rhs(expression::ptr rhs) {
-            d->rhs = rhs;
+            d->rhs = std::move(rhs);
         }
 
         expression::ptr binary_expression::rhs() const {
@@ -280,7 +281,7 @@ namespace revkit {
         unary_expression::unary_expression(unsigned op, expression::ptr expr):
             d(new priv()) {
             d->op   = op;
-            d->expr = expr;
+            d->expr = std::move(expr);
         }
 
         unary_expression::~unary_expression() {
@@ -288,7 +289,7 @@ namespace revkit {
         }
 
         void unary_expression::set_expr(expression::ptr expr) {
-            d->expr = expr;
+            d->expr = std::move(expr);
         }
 
         expression::ptr unary_expression::expr() const {
@@ -328,7 +329,7 @@ namespace revkit {
                                            unsigned           op,
                                            const number::ptr& rhs):
             d(new priv()) {
-            d->lhs = lhs;
+            d->lhs = std::move(lhs);
             d->op  = op;
             d->rhs = rhs;
         }
@@ -338,7 +339,7 @@ namespace revkit {
         }
 
         [[maybe_unused]] void shift_expression::set_lhs(expression::ptr lhs) {
-            d->lhs = lhs;
+            d->lhs = std::move(lhs);
         }
 
         expression::ptr shift_expression::lhs() const {
@@ -372,5 +373,4 @@ namespace revkit {
         std::ostream& operator<<(std::ostream& os, const expression& e) {
             return e.print(os);
         }
-    } // namespace syrec
-} // namespace revkit
+    } // namespace revkit

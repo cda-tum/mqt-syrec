@@ -256,8 +256,8 @@ namespace revkit {
     bool standard_syrec_synthesizer::flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             return flow(*exp, v);
-        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
-            return flow(*exp, v);
+        } else if (auto* exp_1 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+            return flow(*exp_1, v);
         } else {
             return false;
         }
@@ -513,8 +513,8 @@ return ok;
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
             return op_rhs_lhs_expression(*exp, v);
-        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*exp, v);
+        } else if (auto* exp_2 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+            return op_rhs_lhs_expression(*exp_2, v);
         } else {
             return false;
         }
@@ -546,20 +546,20 @@ return ok;
         bool okay = false;
         if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat = dynamic_cast<syrec::skip_statement*>(statement.get())) {
-            okay = on_statement(*stat);
+        } else if (auto* stat_1 = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+            okay = on_statement(*stat_1);
+        } else if (auto* stat_2 = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+            okay = on_statement(*stat_2);
+        } else if (auto* stat_3 = dynamic_cast<syrec::if_statement*>(statement.get())) {
+            okay = on_statement(*stat_3);
+        } else if (auto* stat_4 = dynamic_cast<syrec::for_statement*>(statement.get())) {
+            okay = on_statement(*stat_4);
+        } else if (auto* stat_5 = dynamic_cast<syrec::call_statement*>(statement.get())) {
+            okay = on_statement(*stat_5);
+        } else if (auto* stat_6 = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
+            okay = on_statement(*stat_6);
+        } else if (auto* stat_7 = dynamic_cast<syrec::skip_statement*>(statement.get())) {
+            okay = on_statement(*stat_7);
         } else {
             return false;
         }
@@ -1044,12 +1044,12 @@ return ok;
     bool standard_syrec_synthesizer::on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
         if (auto* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
             return on_expression(*exp, lines, lhs_stat, op);
-        } else if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
-            return on_expression(*exp, lines, lhs_stat, op);
-        } else if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
-            return on_expression(*exp, lines, lhs_stat, op);
-        } else if (auto* exp = dynamic_cast<syrec::shift_expression*>(expression.get())) {
-            return on_expression(*exp, lines, lhs_stat, op);
+        } else if (auto* exp_3 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+            return on_expression(*exp_3, lines, lhs_stat, op);
+        } else if (auto* exp_4 = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+            return on_expression(*exp_4, lines, lhs_stat, op);
+        } else if (auto* exp_5 = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+            return on_expression(*exp_5, lines, lhs_stat, op);
         } else {
             return false;
         }
@@ -2607,41 +2607,41 @@ return ok;
             changed_variables.insert(stat->rhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat = dynamic_cast<syrec::unary_statement*>(statement.get())) {
-            changed_variables.insert(stat->var());
+        } else if (auto* stat_8 = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+            changed_variables.insert(stat_8->var());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
-            changed_variables.insert(stat->lhs());
+        } else if (auto* stat_9 = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+            changed_variables.insert(stat_9->lhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat = dynamic_cast<syrec::if_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat->then_statements()) {
+        } else if (auto* stat_10 = dynamic_cast<syrec::if_statement*>(statement.get())) {
+            for (const syrec::statement::ptr& s: stat_10->then_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
-            for (const syrec::statement::ptr& s: stat->else_statements()) {
-                compute_changing_variables(s, changing_variables);
-                changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
-            }
-            // changing_variables.insert( std::make_pair( stat, changed_variables ) );
-            // return;
-        } else if (auto* stat = dynamic_cast<syrec::for_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat->statements()) {
+            for (const syrec::statement::ptr& s: stat_10->else_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat = dynamic_cast<syrec::call_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat->target()->statements()) {
+        } else if (auto* stat_11 = dynamic_cast<syrec::for_statement*>(statement.get())) {
+            for (const syrec::statement::ptr& s: stat_11->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat->target()->statements()) {
+        } else if (auto* stat_12 = dynamic_cast<syrec::call_statement*>(statement.get())) {
+            for (const syrec::statement::ptr& s: stat_12->target()->statements()) {
+                compute_changing_variables(s, changing_variables);
+                changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
+            }
+            // changing_variables.insert( std::make_pair( stat, changed_variables ) );
+            // return;
+        } else if (auto* stat_13 = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
+            for (const syrec::statement::ptr& s: stat_13->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
