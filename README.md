@@ -1,5 +1,5 @@
-[![CI](https://github.com/iic-jku/syrec/actions/workflows/ci.yml/badge.svg)](https://github.com/iic-jku/syrec/actions/workflows/ci.yml)
-[![Codecov branch](https://img.shields.io/codecov/c/github/iic-jku/syrec/master?label=codecov&logo=codecov&style=plastic&token=JQO5NqY4oM)](https://codecov.io/gh/iic-jku/syrec)
+[![CI](https://github.com/cda-tum/syrec/actions/workflows/ci.yml/badge.svg)](https://github.com/cda-tum/syrec/actions/workflows/ci.yml)
+[![Codecov branch](https://img.shields.io/codecov/c/github/cda-tum/syrec/master?label=codecov&logo=codecov&style=plastic)](https://codecov.io/gh/cda-tum/syrec)
 
 # SyReC - A Programming Language for the Synthesis of Reversible Circuits
 
@@ -43,7 +43,7 @@ found [here](https://docs.microsoft.com/en-us/cpp/build/clang-support-msbuild?vi
 To start off, clone this repository using
 
 ```shell
-git clone --recurse-submodules -j8 https://github.com/iic-jku/syrec 
+git clone --recurse-submodules -j8 https://github.com/cda-tum/syrec 
 ```
 
 Note the `--recurse-submodules` flag. It is required to also clone all the required submodules. If you happen to forget passing the flag on your initial clone, you can initialize all the submodules by
