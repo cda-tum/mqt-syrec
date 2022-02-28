@@ -102,8 +102,8 @@ setup(
     ],
     keywords="mqt reversible_computing synthesis",
     project_urls={
-        'Source': 'https://github.com/iic-jku/syrec/',
-        'Tracker': 'https://github.com/iic-jku/syrec/issues',
+        'Source': 'https://github.com/cda-tum/syrec/',
+        'Tracker': 'https://github.com/cda-tum/syrec/issues',
         # 'Research': ''
     }
 )
