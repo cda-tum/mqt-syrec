@@ -49,7 +49,7 @@ namespace syrec {
         }
 
     private:
-        circuit&                                 _circ;
+        circuit&                                        _circ;
         const std::stack<applications::statement::ptr>& _stmts;
     };
 
@@ -936,7 +936,7 @@ return ok;
             // Alternative implementation
             const std::string& module_name = statement.target()->name();
             if (_circ.modules().find(module_name) == _circ.modules().end()) {
-                circuit        c_module;
+                circuit               c_module;
                 applications::program prog_module;
                 prog_module.add_module(statement.target());
 
@@ -979,7 +979,7 @@ return ok;
         } else {
             // 1. Adjust the references module's parameters to the call arguments
             for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
-                const std::string&          parameter        = statement.parameters().at(i);
+                const std::string&                 parameter        = statement.parameters().at(i);
                 const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
 
                 module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
@@ -1011,7 +1011,7 @@ return ok;
 
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
-            const std::string&          parameter        = statement.parameters().at(i);
+            const std::string&                 parameter        = statement.parameters().at(i);
             const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
 
             module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
@@ -2097,7 +2097,7 @@ return ok;
 
     // dest.size = 2 * srcX.size
     bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        std::vector<unsigned>        sum(dest.begin(), dest.begin() + (unsigned) src2.size());
+        std::vector<unsigned>        sum(dest.begin(), dest.begin() + (unsigned)src2.size());
         const std::vector<unsigned>& partial = src2;
 
         bool ok = true;

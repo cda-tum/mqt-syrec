@@ -109,7 +109,7 @@ namespace syrec {
 
         virtual bool flow(const applications::variable_expression& expression, std::vector<unsigned>& v); //new
         virtual bool flow(const applications::binary_expression& expression, std::vector<unsigned>& v);   //new
-                                                                                                   // Helper methods (can also be used by custom synthesizers)
+                                                                                                          // Helper methods (can also be used by custom synthesizers)
     protected:
         virtual // unary operations
                 bool
@@ -182,7 +182,7 @@ namespace syrec {
         //applications::expression::ptr applications::expression::binary_expression::lhs();
 
     protected:
-        [[nodiscard]] circuit&                              circ() const;
+        [[nodiscard]] circuit&                                     circ() const;
         [[maybe_unused]] std::stack<applications::statement::ptr>& stmts();
 
         virtual bool get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines);
@@ -193,12 +193,12 @@ namespace syrec {
         virtual void release_constant_line(unsigned index, bool value);
 
     private:
-        circuit&                                                           _circ;
-        properties::ptr                                                    _settings; // Settings to use them recursively in module call
-        std::stack<applications::statement::ptr>                                  _stmts;
-        var_lines_map                                                      _var_lines;
-        std::map<bool, std::vector<unsigned>>                              free_const_lines_map; // TODO: set statt vector?
-        applications::number::loop_variable_mapping                               loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
+        circuit&                                                                         _circ;
+        properties::ptr                                                                  _settings; // Settings to use them recursively in module call
+        std::stack<applications::statement::ptr>                                         _stmts;
+        var_lines_map                                                                    _var_lines;
+        std::map<bool, std::vector<unsigned>>                                            free_const_lines_map; // TODO: set statt vector?
+        applications::number::loop_variable_mapping                                      loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
         std::map<applications::variable_access::ptr, applications::variable_access::ptr> dupl_if_var_mapping;  // duplication if: mapping of variables to there duplicates
 
         typedef std::set<applications::variable_access::ptr, applications::set_comperator> var_set;

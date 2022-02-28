@@ -87,7 +87,7 @@ namespace syrec::applications {
 
     typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
     typedef boost::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                      ast_number;
-    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, boost::optional<syrec::applications::ast_number>>>                                                                                                       ast_range;
+    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, boost::optional<syrec::applications::ast_number>>>                                                                                           ast_range;
     typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
     typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
     typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
