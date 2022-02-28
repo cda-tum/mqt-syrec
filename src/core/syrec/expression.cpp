@@ -19,7 +19,7 @@
 
 #include <utility>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     class expression::priv {
     public:
@@ -373,4 +373,4 @@ namespace revkit::syrec {
     std::ostream& operator<<(std::ostream& os, const expression& e) {
         return e.print(os);
     }
-} // namespace revkit::syrec
+} // namespace syrec::applications

@@ -22,7 +22,7 @@
 #include <boost/variant.hpp>
 #include <utility>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     class binary_numeric_expr {
     public:
@@ -197,4 +197,4 @@ namespace revkit::syrec {
         return boost::apply_visitor(output_visitor(os), n.d->number);
     }
 
-} // namespace revkit::syrec
+} // namespace syrec::applications

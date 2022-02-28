@@ -22,7 +22,7 @@
 
 using namespace boost::assign;
 
-namespace revkit {
+namespace syrec {
 
     unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c, bool g) {
         std::vector<std::string> ins  = circ.inputs();
@@ -47,4 +47,4 @@ namespace revkit {
         return circ.lines() - 1u;
     }
 
-} // namespace revkit
+} // namespace syrec

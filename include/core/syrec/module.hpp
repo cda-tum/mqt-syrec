@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     class statement;
 
@@ -200,6 +200,6 @@ namespace revkit::syrec {
      */
     std::ostream& operator<<(std::ostream& os, const module& m);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 #endif /* MODULE_HPP */

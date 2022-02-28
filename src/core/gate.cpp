@@ -17,7 +17,7 @@
 
 #include "core/gate.hpp"
 
-namespace revkit {
+namespace syrec {
 
     struct gate::priv {
         priv() = default;
@@ -222,4 +222,4 @@ namespace revkit {
         return d->base.type();
     }
 
-} // namespace revkit
+} // namespace syrec

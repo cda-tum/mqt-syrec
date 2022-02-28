@@ -35,7 +35,7 @@
 #include <utility>
 #include <variant>
 
-namespace revkit {
+namespace syrec {
     /**
    * @brief Type for determine whether line is constant or not
    *
@@ -1125,6 +1125,6 @@ namespace revkit {
         /** @endcond */
     };
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* CIRCUIT_HPP */

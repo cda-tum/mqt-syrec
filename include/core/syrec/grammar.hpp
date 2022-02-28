@@ -32,16 +32,16 @@
 #include <iostream>
 
 // Custom Parser iterator
-namespace revkit::syrec::parser {
+namespace syrec::applications::parser {
     BOOST_SPIRIT_TERMINAL(iter_pos)
-} // namespace revkit::syrec::parser
+} // namespace syrec::applications::parser
 
 namespace boost::spirit {
     template<>
-    struct use_terminal<qi::domain, revkit::syrec::parser::tag::iter_pos>: mpl::true_ {};
+    struct use_terminal<qi::domain, syrec::applications::parser::tag::iter_pos>: mpl::true_ {};
 } // namespace boost::spirit
 
-namespace revkit::syrec::parser {
+namespace syrec::applications::parser {
     struct iter_pos_parser: boost::spirit::qi::primitive_parser<iter_pos_parser> {
         template<typename Context, typename Iterator>
         struct attribute {
@@ -60,12 +60,12 @@ namespace revkit::syrec::parser {
             return boost::spirit::info("iter_pos");
         }
     };
-} // namespace revkit::syrec::parser
+} // namespace syrec::applications::parser
 
 namespace boost::spirit::qi {
     template<typename Modifiers>
-    struct [[maybe_unused]] make_primitive<revkit::syrec::parser::tag::iter_pos, Modifiers> {
-        typedef revkit::syrec::parser::iter_pos_parser result_type;
+    struct [[maybe_unused]] make_primitive<syrec::applications::parser::tag::iter_pos, Modifiers> {
+        typedef syrec::applications::parser::iter_pos_parser result_type;
 
         result_type operator()(unused_type, unused_type) const {
             return {};
@@ -73,7 +73,7 @@ namespace boost::spirit::qi {
     };
 } // namespace boost::spirit::qi
 
-namespace revkit::syrec {
+namespace syrec::applications {
     namespace qi    = boost::spirit::qi;
     namespace ascii = boost::spirit::ascii;
 
@@ -87,7 +87,7 @@ namespace revkit::syrec {
 
     typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
     typedef boost::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                      ast_number;
-    typedef boost::optional<boost::fusion::vector<revkit::syrec::ast_number, boost::optional<revkit::syrec::ast_number>>>                                                                                                       ast_range;
+    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, boost::optional<syrec::applications::ast_number>>>                                                                                                       ast_range;
     typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
     typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
     typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
@@ -152,38 +152,38 @@ namespace revkit::syrec {
         step_t                     step;
         std::vector<ast_statement> do_statement;
     };
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_variable,
-        (std::string, name)(std::vector<revkit::syrec::ast_expression>, indexes)(revkit::syrec::ast_range, range))
+        syrec::applications::ast_variable,
+        (std::string, name)(std::vector<syrec::applications::ast_expression>, indexes)(syrec::applications::ast_range, range))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_number_expression,
-        (revkit::syrec::ast_number, operand1)(std::string, op)(revkit::syrec::ast_number, operand2))
+        syrec::applications::ast_number_expression,
+        (syrec::applications::ast_number, operand1)(std::string, op)(syrec::applications::ast_number, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_binary_expression,
-        (revkit::syrec::ast_expression, operand1)(std::string, op)(revkit::syrec::ast_expression, operand2))
+        syrec::applications::ast_binary_expression,
+        (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_expression, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_unary_expression,
-        (std::string, op)(revkit::syrec::ast_expression, operand))
+        syrec::applications::ast_unary_expression,
+        (std::string, op)(syrec::applications::ast_expression, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_shift_expression,
-        (revkit::syrec::ast_expression, operand1)(std::string, op)(revkit::syrec::ast_number, operand2))
+        syrec::applications::ast_shift_expression,
+        (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_number, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_if_statement,
-        (revkit::syrec::ast_expression, condition)(std::vector<revkit::syrec::ast_statement>, if_statement)(std::vector<revkit::syrec::ast_statement>, else_statement)(revkit::syrec::ast_expression, fi_condition))
+        syrec::applications::ast_if_statement,
+        (syrec::applications::ast_expression, condition)(std::vector<syrec::applications::ast_statement>, if_statement)(std::vector<syrec::applications::ast_statement>, else_statement)(syrec::applications::ast_expression, fi_condition))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        revkit::syrec::ast_for_statement,
-        (revkit::syrec::ast_for_statement::from_t, from)(revkit::syrec::ast_number, to)(revkit::syrec::ast_for_statement::step_t, step)(std::vector<revkit::syrec::ast_statement>, do_statement))
+        syrec::applications::ast_for_statement,
+        (syrec::applications::ast_for_statement::from_t, from)(syrec::applications::ast_number, to)(syrec::applications::ast_for_statement::step_t, step)(std::vector<syrec::applications::ast_statement>, do_statement))
 
-namespace revkit {
-    namespace syrec {
+namespace syrec {
+    namespace applications {
 
         template<typename Iterator>
         struct syrec_skip_parser: qi::grammar<Iterator> {
@@ -341,12 +341,12 @@ namespace revkit {
 
             return true;
         }
-    } // namespace syrec
+    } // namespace applications
 
-    bool parse(syrec::ast_program& prog, const std::string& filename);
-    bool parse_string(syrec::ast_program& prog, const std::string& program);
+    bool parse(applications::ast_program& prog, const std::string& filename);
+    bool parse_string(applications::ast_program& prog, const std::string& program);
 
-} // namespace revkit
+} // namespace syrec
 
 /** @endcond */
 

@@ -27,7 +27,7 @@
 #include <iostream>
 #include <memory>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     /**
      * @brief SyReC expression
@@ -831,6 +831,6 @@ namespace revkit::syrec {
      */
     std::ostream& operator<<(std::ostream& os, const expression& e);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 #endif /* EXPRESSION_HPP */

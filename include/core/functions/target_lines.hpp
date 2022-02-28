@@ -25,7 +25,7 @@
 #ifndef TARGET_LINES_HPP
 #define TARGET_LINES_HPP
 
-namespace revkit {
+namespace syrec {
 
     class gate;
 
@@ -57,6 +57,6 @@ namespace revkit {
         return result;
     }
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* TARGET_LINES_HPP */

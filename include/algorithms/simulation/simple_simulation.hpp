@@ -31,14 +31,14 @@
 #include <functional>
 #include <memory>
 
-namespace revkit {
+namespace syrec {
 
     class gate;
 
     /**
-   * @brief Functor for gate-wise simulation, used as a setting for \ref revkit::simple_simulation "simple_simulation"
+   * @brief Functor for gate-wise simulation, used as a setting for \ref syrec::simple_simulation "simple_simulation"
    *
-   * For more information, see the concrete implementation \ref revkit::core_gate_simulation "core_gate_simulation"
+   * For more information, see the concrete implementation \ref syrec::core_gate_simulation "core_gate_simulation"
    *
    * @author RevKit
    * @since  1.0
@@ -48,7 +48,7 @@ namespace revkit {
     /**
    * @brief Functor which is called after a step result is calculated
    *
-   * If set, this functor is called in \ref revkit::simple_simulation "simple_simulation"
+   * If set, this functor is called in \ref syrec::simple_simulation "simple_simulation"
    * after every gate simulation with the current gate and the calculated output pattern
    * as parameter.
    *
@@ -58,7 +58,7 @@ namespace revkit {
     typedef std::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
 
     /**
-   * @brief A gate simulation implementation of \ref revkit::gate_simulation_func "gate_simulation_func"
+   * @brief A gate simulation implementation of \ref syrec::gate_simulation_func "gate_simulation_func"
    *
    * This functor performs simulation on a boost::dynamic_bitset<> for Toffoli, Fredkin, and Peres gates
    * for binary values only.
@@ -122,7 +122,7 @@ namespace revkit {
      * @brief Simulation for a single gate \p g
      *
      * This operator performs simulation for a single gate and is called by
-     * \ref revkit::simple_simulation "simple_simulation".
+     * \ref syrec::simple_simulation "simple_simulation".
      *
      * \b Important: The return value always has to be \p input, and the
      * operator should modify \p input directly.
@@ -159,16 +159,16 @@ namespace revkit {
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">gate_simulation</td>
-   *     <td class="indexvalue">\ref revkit::gate_simulation_func "gate_simulation_func"</td>
-   *     <td class="indexvalue">\ref revkit::core_gate_simulation "core_gate_simulation()"</td>
+   *     <td class="indexvalue">\ref syrec::gate_simulation_func "gate_simulation_func"</td>
+   *     <td class="indexvalue">\ref syrec::core_gate_simulation "core_gate_simulation()"</td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">The gate-wise simulation functor to use.</td>
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">step_result</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func"</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func()" <i>(empty)</i></td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func"</td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func()" <i>(empty)</i></td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">A functor called with the last simulated gate and the last calculated output pattern.</td>
@@ -220,16 +220,16 @@ namespace revkit {
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">gate_simulation</td>
-   *     <td class="indexvalue">\ref revkit::gate_simulation_func "gate_simulation_func"</td>
-   *     <td class="indexvalue">\ref revkit::core_gate_simulation "core_gate_simulation()"</td>
+   *     <td class="indexvalue">\ref syrec::gate_simulation_func "gate_simulation_func"</td>
+   *     <td class="indexvalue">\ref syrec::core_gate_simulation "core_gate_simulation()"</td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">The gate-wise simulation functor to use.</td>
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">step_result</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func"</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func()" <i>(empty)</i></td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func"</td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func()" <i>(empty)</i></td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">A functor called with the last simulated gate and the last calculated output pattern.</td>
@@ -280,16 +280,16 @@ namespace revkit {
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">gate_simulation</td>
-   *     <td class="indexvalue">\ref revkit::gate_simulation_func "gate_simulation_func"</td>
-   *     <td class="indexvalue">\ref revkit::core_gate_simulation "core_gate_simulation()"</td>
+   *     <td class="indexvalue">\ref syrec::gate_simulation_func "gate_simulation_func"</td>
+   *     <td class="indexvalue">\ref syrec::core_gate_simulation "core_gate_simulation()"</td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">The gate-wise simulation functor to use.</td>
    *   </tr>
    *   <tr>
    *     <td rowspan="2" class="indexvalue">step_result</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func"</td>
-   *     <td class="indexvalue">\ref revkit::step_result_func "step_result_func()" <i>(empty)</i></td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func"</td>
+   *     <td class="indexvalue">\ref syrec::step_result_func "step_result_func()" <i>(empty)</i></td>
    *   </tr>
    *   <tr>
    *     <td colspan="2" class="indexvalue">A functor called with the last simulated gate and the last calculated output pattern.</td>
@@ -317,18 +317,18 @@ namespace revkit {
                            properties::ptr statistics = properties::ptr());
 
     /**
-   * @brief Functor for the \ref revkit::simple_simulation "simple_simulation" algorithm
+   * @brief Functor for the \ref syrec::simple_simulation "simple_simulation" algorithm
    *
-   * @param settings Settings (see \ref revkit::simple_simulation "simple_simulation")
-   * @param statistics Statistics (see \ref revkit::simple_simulation "simple_simulation")
+   * @param settings Settings (see \ref syrec::simple_simulation "simple_simulation")
+   * @param statistics Statistics (see \ref syrec::simple_simulation "simple_simulation")
    *
-   * @return A functor which complies with the \ref revkit::simulation_func "simulation_func" interface
+   * @return A functor which complies with the \ref syrec::simulation_func "simulation_func" interface
    *
    * @author RevKit
    * @since  1.0
    */
     [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>());
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* SIMPLE_SIMULATION_HPP */

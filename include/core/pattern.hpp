@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Pattern file for sequential simulation
@@ -167,4 +167,4 @@ namespace revkit {
         priv* const d = nullptr;
     };
 
-} // namespace revkit
+} // namespace syrec

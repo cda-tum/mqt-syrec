@@ -25,7 +25,7 @@
 #include <core/circuit.hpp>
 #include <core/functor.hpp>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Simulation functor
@@ -43,4 +43,4 @@ namespace revkit {
    */
     [[maybe_unused]] typedef functor<bool(std::vector<boost::dynamic_bitset<>>&, const circuit&, const std::vector<boost::dynamic_bitset<>>&)> multi_step_simulation_func;
 
-} // namespace revkit
+} // namespace syrec

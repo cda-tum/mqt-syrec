@@ -24,7 +24,7 @@
 #include <iostream>
 #include <memory>
 
-namespace revkit {
+namespace syrec {
     using boost::adaptors::indirected;
     using boost::adaptors::transformed;
 
@@ -780,4 +780,4 @@ namespace revkit {
         std::visit(annotate_visitor(g, key, value), circ);
     }
 
-} // namespace revkit
+} // namespace syrec

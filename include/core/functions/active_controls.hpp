@@ -26,7 +26,7 @@
 
 #include <core/gate.hpp>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Slot for adding control lines automatically
@@ -51,15 +51,15 @@ namespace revkit {
    * #include <core/functions/active_controls.hpp>
    * #include <core/functions/add_gates.hpp>
    *
-   * revkit::circuit circ( 3 );
+   * syrec::circuit circ( 3 );
    * 
-   * revkit::active_controls controller;
+   * syrec::active_controls controller;
    * controller.add( 0u );
    *
    * circ.gate_added.connect( controller );
    *
-   * revkit::append_cnot( circ, 1u, 2u );
-   * revkit::append_not( circ, 1u );
+   * syrec::append_cnot( circ, 1u, 2u );
+   * syrec::append_not( circ, 1u );
    * @endcode
    */
     class active_controls {
@@ -133,6 +133,6 @@ namespace revkit {
         priv* const d = nullptr;
     };
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* ACTIVE_CONTROLS_HPP */

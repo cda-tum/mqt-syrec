@@ -27,7 +27,7 @@
 #include <core/circuit.hpp>
 #include <string>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Add a line to a circuit with specifying all meta-data
@@ -49,6 +49,6 @@ namespace revkit {
    */
     unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false);
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* ADD_LINE_TO_CIRCUIT_HPP */

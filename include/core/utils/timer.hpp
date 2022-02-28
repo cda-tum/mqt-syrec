@@ -29,7 +29,7 @@
 #include <iostream>
 #include <utility>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Functor for the timer class which prints the run-time to an output stream
@@ -101,8 +101,8 @@ namespace revkit {
    * @code
    * double runtime;
    * {
-   *   revkit::reference_timer rt( &runtime );
-   *   revkit::timer<revkit::reference_timer> t( rt );
+   *   syrec::reference_timer rt( &runtime );
+   *   syrec::timer<syrec::reference_timer> t( rt );
    *   // code for which time should be measured
    * }
    * @endcode
@@ -271,7 +271,7 @@ namespace revkit {
    * // some other code for which no time should be measured
    * {
    *   output_timer ot;
-   *   revkit::timer<output_timer> t( ot );
+   *   syrec::timer<output_timer> t( ot );
    *   // code for which time should be measured
    * }
    * // some other code for which no time should be measured
@@ -388,6 +388,6 @@ namespace revkit {
         bool                                       started;
     };
 
-} // namespace revkit
+} // namespace syrec
 
 #endif

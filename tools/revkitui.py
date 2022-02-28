@@ -55,8 +55,8 @@ class GateItem( QGraphicsItemGroup ):
         QGraphicsItemGroup.__init__( self, parent )
         self.setFlag( QGraphicsItem.ItemIsSelectable )
 
-        l = control_linesi( g )
-        l.extend( target_linesi( g ) )
+        l = control_lines( g )
+        l.extend( target_lines( g ) )
         l.sort()
 
         self.gate = g
@@ -67,38 +67,38 @@ class GateItem( QGraphicsItemGroup ):
             circuitLine = QGraphicsLineItem( 0, l[0] * 30, 0, l[-1] * 30, self )
             self.addToGroup( circuitLine )
 
-        for t in target_linesi( g ):
-            if g.type == gate_typei.toffoli:
+        for t in target_lines( g ):
+            if g.type == gate_type.toffoli:
                 target = QGraphicsEllipseItem( -10, t * 30 - 10, 20, 20, self )
                 targetLine = QGraphicsLineItem( 0, t * 30 - 10, 0, t * 30 + 10, self )
                 targetLine2 = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
                 self.addToGroup( target )
                 self.addToGroup( targetLine )
                 self.addToGroup( targetLine2 )
-            if g.type == gate_typei.fredkin:
+            if g.type == gate_type.fredkin:
                 crossTL_BR = QGraphicsLineItem( -5, t * 30 - 5, 5, t * 30 + 5, self )
                 crossTR_BL = QGraphicsLineItem( 5, t * 30 - 5, -5, t * 30 + 5, self )
                 self.addToGroup( crossTL_BR )
                 self.addToGroup( crossTR_BL )
-            if g.type == gate_typei.v:
+            if g.type == gate_type.v:
                 target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
                 target.setBrush( Qt.white )
                 text = QGraphicsSimpleTextItem( "V", self )
                 text.setPos( -4, t * 30 - 7 )
-            if g.type == gate_typei.vplus:
+            if g.type == gate_type.vplus:
                 target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
                 target.setBrush( Qt.white )
                 text = QGraphicsSimpleTextItem( "V+", self )
                 text.setPos( -4, t * 30 - 7 )
 
-        if g.type == gate_typei.module:
-            min_target = min( target_linesi( g ) )
-            max_target = max( target_linesi( g ) )
+        if g.type == gate_type.module:
+            min_target = min( target_lines( g ) )
+            max_target = max( target_lines( g ) )
             box = QGraphicsRectItem( -10, min_target * 30 - 5, 20, ( max_target - min_target ) * 30 + 10, self )
             box.setBrush( Qt.white )
 
             for t in range( min_target + 1, max_target ):
-                if t not in target_linesi( g ):
+                if t not in target_lines( g ):
                     #line = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
                     continue
 
@@ -111,7 +111,7 @@ class GateItem( QGraphicsItemGroup ):
 
             self.addToGroup( box )
 
-        for c in control_linesi( g ):
+        for c in control_lines( g ):
             control = QGraphicsEllipseItem( -5, c * 30 - 5, 10, 10, self )
             control.setBrush( Qt.black )
             self.addToGroup( control )
@@ -513,10 +513,10 @@ class SyReCEditor(QWidget):
         self.writeEditorContentsToFile()
 
         # TODO : Change Name of syrec_programi to syrec_program
-        prog = syrec_programi()
+        prog = syrec_program()
 
         # TODO : Change Name of read_programi to read_program
-        error_string = read_programi( prog, "/tmp/out.src" )
+        error_string = read_program( prog, "/tmp/out.src" )
 
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None :
@@ -529,9 +529,9 @@ class SyReCEditor(QWidget):
             return
 
         # TODO : Change Name of circuiti to circuit
-        circ = circuiti()
+        circ = circuit()
 
-        syrec_synthesisi( circ, prog )
+        syrec_synthesis( circ, prog )
 
         print("Number Of Gates         : ", circ.num_gates)
         print("Number Of Lines         : ", circ.lines)
@@ -551,10 +551,10 @@ class SyReCEditor(QWidget):
         self.writeEditorContentsToFile()
 
         # TODO : Change Name of syrec_programi to syrec_program
-        prog = syrec_programi()
+        prog = syrec_program()
 
         # TODO : Change Name of read_programi to read_program
-        error_string = read_programi(prog, "/tmp/out.src" )
+        error_string = read_program(prog, "/tmp/out.src" )
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None :
                 self.parser_failed( "Editor is Empty" )
@@ -566,17 +566,17 @@ class SyReCEditor(QWidget):
             return
 
         # TODO : Change Name of circuiti to circuit
-        circ = circuiti()
-        syrec_synthesisi(circ, prog)
+        circ = circuit()
+        syrec_synthesis(circ, prog)
         
         gates = circ.num_gates
         lines = circ.lines
 
         # TODO : Change Name of quantum_costsi to quantum_costs
-        qc = quantum_costsi(circ, circ.lines)
+        qc = quantum_costs(circ, circ.lines)
 
         # TODO : Change Name of transistor_costsi to transistor_costs
-        tc = transistor_costsi(circ, circ.lines)
+        tc = transistor_costs(circ, circ.lines)
 
         temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
 
@@ -597,9 +597,9 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        prog = syrec_programi()
+        prog = syrec_program()
 
-        error_string = read_programi( prog, "/tmp/out.src" )
+        error_string = read_program( prog, "/tmp/out.src" )
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None :
                 self.parser_failed("Editor is Empty")
@@ -609,9 +609,9 @@ class SyReCEditor(QWidget):
                 self.build_failed(error_string)
             return
 
-        circ = circuiti()
+        circ = circuit()
         
-        syrec_synthesisi( circ, prog )
+        syrec_synthesis( circ, prog )
 
         bit_mask = 0
         bit_pos  = 0
@@ -639,15 +639,15 @@ class SyReCEditor(QWidget):
         final_inp = list()
         final_out = list()
 
-        p1 = propertiesi()
-        p2 = propertiesi()
+        p1 = properties()
+        p2 = properties()
 
         for i in input_list :
             
-            my_inp_bitset = bitseti(circ.lines, i)
-            my_out_bitset = bitseti(circ.lines)
+            my_inp_bitset = bitset(circ.lines, i)
+            my_out_bitset = bitset(circ.lines)
 
-            py_simple_simulationi(my_out_bitset, circ, my_inp_bitset, p1, p2)
+            py_simple_simulation(my_out_bitset, circ, my_inp_bitset, p1, p2)
             combination_inp.append(str(my_inp_bitset))
             combination_out.append(str(my_out_bitset))
         

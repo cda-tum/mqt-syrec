@@ -17,7 +17,7 @@
 
 #include "core/target_tags.hpp"
 
-namespace revkit {
+namespace syrec {
 
     bool same_type(const gate& g1, const gate& g2) {
         return g1.type().type() == g2.type().type();
@@ -47,4 +47,4 @@ namespace revkit {
         return is_type<module_tag>(g.type());
     }
 
-} // namespace revkit
+} // namespace syrec

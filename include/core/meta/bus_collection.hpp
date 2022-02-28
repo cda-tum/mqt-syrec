@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Collection for buses
@@ -214,6 +214,6 @@ namespace revkit {
         priv* const d;
     };
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* BUS_COLLECTION_HPP */

@@ -26,7 +26,7 @@
 
 using namespace boost::assign;
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     class module::priv {
     public:
@@ -121,4 +121,4 @@ namespace revkit::syrec {
         return os;
     }
 
-} // namespace revkit::syrec
+} // namespace syrec::applications

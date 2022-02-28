@@ -26,7 +26,7 @@
 
 using namespace boost::assign;
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     using boost::adaptors::indirected;
 
@@ -494,4 +494,4 @@ namespace revkit::syrec {
         return s.print(os);
     }
 
-} // namespace revkit::syrec
+} // namespace syrec::applications

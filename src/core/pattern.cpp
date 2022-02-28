@@ -21,7 +21,7 @@
 
 using namespace boost::assign;
 
-namespace revkit {
+namespace syrec {
 
     class pattern::priv {
     public:
@@ -64,4 +64,4 @@ namespace revkit {
         return d->patterns;
     }
 
-} // namespace revkit
+} // namespace syrec

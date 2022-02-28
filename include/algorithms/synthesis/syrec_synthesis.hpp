@@ -23,7 +23,7 @@
 #include <memory>
 #include <stack>
 
-namespace revkit::internal {
+namespace syrec::internal {
     struct node_properties {
         node_properties() = default;
 
@@ -44,71 +44,71 @@ namespace revkit::internal {
         cct_node current;
         cct_node root;
     };
-} // namespace revkit::internal
+} // namespace syrec::internal
 
-namespace revkit {
+namespace syrec {
 
-    namespace syrec {
+    namespace applications {
         struct set_comperator {
-            bool operator()(const syrec::variable_access::ptr& var1, const syrec::variable_access::ptr& var2) const {
+            bool operator()(const applications::variable_access::ptr& var1, const applications::variable_access::ptr& var2) const {
                 return var1->var().get() < var2->var().get();
             }
         };
 
         class program;
-    } // namespace syrec
+    } // namespace applications
     using namespace internal;
 
-    typedef functor<bool(circuit&, const syrec::program&)> hdl_synthesis_func;
+    typedef functor<bool(circuit&, const applications::program&)> hdl_synthesis_func;
 
     class standard_syrec_synthesizer {
     public:
-        typedef std::map<syrec::variable::ptr, unsigned> var_lines_map;
+        typedef std::map<applications::variable::ptr, unsigned> var_lines_map;
 
-        standard_syrec_synthesizer(circuit& circ, const syrec::program& prog);
+        standard_syrec_synthesizer(circuit& circ, const applications::program& prog);
 
         virtual ~standard_syrec_synthesizer() = default;
 
-        virtual void initialize_changing_variables(const syrec::program& program);
+        virtual void initialize_changing_variables(const applications::program& program);
 
-        virtual bool on_module(const syrec::module::ptr&);
-        virtual bool on_statement(const syrec::statement::ptr& statement);
-        bool         on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        //    [[maybe_unused]] bool         expression_op_inverse(syrec::expression::ptr expression);                                  //new
-        [[maybe_unused]] bool var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v);        //new
-        [[maybe_unused]] bool on_full_statement(const syrec::statement::ptr& statement);                                 //new
-        bool                  op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v); //new
-        bool                  full_statement(const syrec::statement::ptr& statement);                                    //new
-        bool                  flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v);                  // new
+        virtual bool on_module(const applications::module::ptr&);
+        virtual bool on_statement(const applications::statement::ptr& statement);
+        bool         on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        //    [[maybe_unused]] bool         expression_op_inverse(applications::expression::ptr expression);                                  //new
+        [[maybe_unused]] bool var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v);        //new
+        [[maybe_unused]] bool on_full_statement(const applications::statement::ptr& statement);                                 //new
+        bool                  op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
+        bool                  full_statement(const applications::statement::ptr& statement);                                    //new
+        bool                  flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);                  // new
         virtual void          set_settings(const properties::ptr& settings);
-        virtual void          set_main_module(const syrec::module::ptr& main_module);
+        virtual void          set_main_module(const applications::module::ptr& main_module);
         bool                  solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
         //   [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
     protected:
         // statements
-        virtual bool on_statement(const syrec::swap_statement& statement);
-        virtual bool on_statement(const syrec::unary_statement& statement);
-        virtual bool on_statement(const syrec::assign_statement& statement);
-        virtual bool on_statement(const syrec::if_statement& statement);
-        virtual bool on_statement(const syrec::for_statement& statement);
-        virtual bool on_statement(const syrec::call_statement& statement);
-        virtual bool on_statement(const syrec::uncall_statement& statement);
-        virtual bool on_statement(const syrec::skip_statement& statement);
-        virtual bool on_full_statement(const syrec::assign_statement& statement);                                   //new
-        virtual bool var_expression(const syrec::variable_expression& expression, std::vector<unsigned>& v);        //new
-        virtual bool op_rhs_lhs_expression(const syrec::variable_expression& expression, std::vector<unsigned>& v); //new
-        virtual bool op_rhs_lhs_expression(const syrec::binary_expression& expression, std::vector<unsigned>& v);   //new
-        virtual bool full_statement(const syrec::assign_statement& statement);                                      //new
+        virtual bool on_statement(const applications::swap_statement& statement);
+        virtual bool on_statement(const applications::unary_statement& statement);
+        virtual bool on_statement(const applications::assign_statement& statement);
+        virtual bool on_statement(const applications::if_statement& statement);
+        virtual bool on_statement(const applications::for_statement& statement);
+        virtual bool on_statement(const applications::call_statement& statement);
+        virtual bool on_statement(const applications::uncall_statement& statement);
+        virtual bool on_statement(const applications::skip_statement& statement);
+        virtual bool on_full_statement(const applications::assign_statement& statement);                                   //new
+        virtual bool var_expression(const applications::variable_expression& expression, std::vector<unsigned>& v);        //new
+        virtual bool op_rhs_lhs_expression(const applications::variable_expression& expression, std::vector<unsigned>& v); //new
+        virtual bool op_rhs_lhs_expression(const applications::binary_expression& expression, std::vector<unsigned>& v);   //new
+        virtual bool full_statement(const applications::assign_statement& statement);                                      //new
 
         // expressions
-        virtual bool on_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        virtual bool on_expression(const syrec::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        virtual bool on_expression(const syrec::binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        virtual bool on_expression(const syrec::shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        virtual bool on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        virtual bool on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        virtual bool on_expression(const applications::binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        virtual bool on_expression(const applications::shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
 
-        virtual bool flow(const syrec::variable_expression& expression, std::vector<unsigned>& v); //new
-        virtual bool flow(const syrec::binary_expression& expression, std::vector<unsigned>& v);   //new
+        virtual bool flow(const applications::variable_expression& expression, std::vector<unsigned>& v); //new
+        virtual bool flow(const applications::binary_expression& expression, std::vector<unsigned>& v);   //new
                                                                                                    // Helper methods (can also be used by custom synthesizers)
     protected:
         virtual // unary operations
@@ -179,15 +179,15 @@ namespace revkit {
 
     public:
         var_lines_map& var_lines();
-        //syrec::expression::ptr syrec::expression::binary_expression::lhs();
+        //applications::expression::ptr applications::expression::binary_expression::lhs();
 
     protected:
         [[nodiscard]] circuit&                              circ() const;
-        [[maybe_unused]] std::stack<syrec::statement::ptr>& stmts();
+        [[maybe_unused]] std::stack<applications::statement::ptr>& stmts();
 
-        virtual bool get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines);
-        bool         unget_variables(const syrec::variable_access::ptr& var, std::vector<unsigned>& lines);
-        virtual bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
+        virtual bool get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines);
+        bool         unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
+        virtual bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
         unsigned     get_constant_line(bool value);
         bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
         virtual void release_constant_line(unsigned index, bool value);
@@ -195,20 +195,20 @@ namespace revkit {
     private:
         circuit&                                                           _circ;
         properties::ptr                                                    _settings; // Settings to use them recursively in module call
-        std::stack<syrec::statement::ptr>                                  _stmts;
+        std::stack<applications::statement::ptr>                                  _stmts;
         var_lines_map                                                      _var_lines;
         std::map<bool, std::vector<unsigned>>                              free_const_lines_map; // TODO: set statt vector?
-        syrec::number::loop_variable_mapping                               loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
-        std::map<syrec::variable_access::ptr, syrec::variable_access::ptr> dupl_if_var_mapping;  // duplication if: mapping of variables to there duplicates
+        applications::number::loop_variable_mapping                               loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
+        std::map<applications::variable_access::ptr, applications::variable_access::ptr> dupl_if_var_mapping;  // duplication if: mapping of variables to there duplicates
 
-        typedef std::set<syrec::variable_access::ptr, syrec::set_comperator> var_set;
+        typedef std::set<applications::variable_access::ptr, applications::set_comperator> var_set;
 
-        std::map<const syrec::statement*, var_set> _changing_variables; // for if_realization_duplication
-        std::stack<syrec::module::ptr>             modules;
+        std::map<const applications::statement*, var_set> _changing_variables; // for if_realization_duplication
+        std::stack<applications::module::ptr>             modules;
 
-        void compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const syrec::statement::ptr& statement, std::map<const syrec::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const applications::program& program, std::map<const applications::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const applications::module::ptr& module, std::map<const applications::statement*, var_set>& changing_variables);
+        void compute_changing_variables(const applications::statement::ptr& statement, std::map<const applications::statement*, var_set>& changing_variables);
 
         std::string variable_name_format;
 
@@ -255,7 +255,7 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    bool syrec_synthesis(circuit& circ, const syrec::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
+    bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
     /**
    * @brief Functor for the syrec_synthesis algorithm
@@ -270,6 +270,6 @@ namespace revkit {
    */
     [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* SYREC_SYNTHESIS_HPP */

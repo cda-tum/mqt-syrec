@@ -17,7 +17,7 @@
 
 #include "core/properties.hpp"
 
-namespace revkit {
+namespace syrec {
 
     properties::properties() = default;
 
@@ -51,4 +51,4 @@ namespace revkit {
         }
     }
 
-} // namespace revkit
+} // namespace syrec

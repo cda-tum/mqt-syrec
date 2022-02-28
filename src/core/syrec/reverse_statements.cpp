@@ -4,7 +4,7 @@
 
 #define reverse_foreach_ BOOST_REVERSE_FOREACH
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     statement::ptr reverse_statements::operator()(statement::ptr _statement) const {
         if (dynamic_cast<swap_statement*>(_statement.get())) {
@@ -78,4 +78,4 @@ namespace revkit::syrec {
         return _statement;
     }
 
-} // namespace revkit::syrec
+} // namespace syrec::applications

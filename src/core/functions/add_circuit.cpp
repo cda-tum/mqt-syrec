@@ -21,7 +21,7 @@
 //#include <boost/range/algorithm_ext/insert.hpp>
 #include <functional>
 
-namespace revkit {
+namespace syrec {
 
     void append_circuit(circuit& circ, const circuit& src, const gate::line_container& controls) {
         insert_circuit(circ, circ.num_gates(), src, controls);
@@ -63,4 +63,4 @@ namespace revkit {
         }
     }
 
-} // namespace revkit
+} // namespace syrec

@@ -26,7 +26,7 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Type for costs
@@ -47,6 +47,6 @@ namespace revkit {
     cost_t my_transistor_costs(const gate& g, unsigned lines);
 
     cost_t final_transistor_cost(const circuit& circ, unsigned lines);
-} // namespace revkit
+} // namespace syrec
 
 #endif /* COSTS_HPP */

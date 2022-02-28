@@ -26,7 +26,7 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Helper class for adding lines in an easier way
@@ -774,6 +774,6 @@ namespace revkit {
    */
     [[maybe_unused]] control_line_adder insert_fredkin(circuit& circ, unsigned n);
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* ADD_GATES_HPP */

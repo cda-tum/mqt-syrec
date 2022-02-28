@@ -33,7 +33,7 @@
 #include <memory>
 #include <string>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Property Map for storing settings and statistical information
@@ -263,6 +263,6 @@ namespace revkit {
    */
     [[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* PROPERTIES_HPP */

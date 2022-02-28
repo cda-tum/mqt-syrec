@@ -19,7 +19,7 @@
 
 #include "core/target_tags.hpp"
 
-namespace revkit {
+namespace syrec {
 
     cost_t my_quantum_costs(const gate& g, unsigned lines) {
         cost_t costs;
@@ -138,4 +138,4 @@ namespace revkit {
         return final_t_costs;
     }
 
-} // namespace revkit
+} // namespace syrec

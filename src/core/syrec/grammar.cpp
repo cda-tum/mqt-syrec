@@ -19,9 +19,9 @@
 
 #include <fstream>
 
-namespace revkit {
+namespace syrec {
 
-    bool parse(syrec::ast_program& prog, const std::string& filename) {
+    bool parse(applications::ast_program& prog, const std::string& filename) {
         std::string content, line;
 
         std::ifstream is;
@@ -34,12 +34,12 @@ namespace revkit {
         return parse_string(prog, content);
     }
 
-    bool parse_string(syrec::ast_program& prog, const std::string& program) {
-        if (!syrec::parse(prog, program.begin(), program.end())) {
+    bool parse_string(applications::ast_program& prog, const std::string& program) {
+        if (!applications::parse(prog, program.begin(), program.end())) {
             return false;
         }
 
         return true;
     }
 
-} // namespace revkit
+} // namespace syrec

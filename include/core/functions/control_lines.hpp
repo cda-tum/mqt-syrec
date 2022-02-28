@@ -27,7 +27,7 @@
 
 #include <core/gate.hpp>
 
-namespace revkit {
+namespace syrec {
     /**
    * @brief Gets the control lines of a gate
    *
@@ -56,6 +56,6 @@ namespace revkit {
         return result;
     }
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* CONTROL_LINES_HPP */

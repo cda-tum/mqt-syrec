@@ -32,7 +32,7 @@
 #include <set>
 #include <vector>
 
-namespace revkit {
+namespace syrec {
 
     struct transform_line;
     struct filter_line;
@@ -407,6 +407,6 @@ namespace revkit {
     };
     /** @endcond */
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* GATE_HPP */

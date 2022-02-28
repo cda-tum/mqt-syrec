@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace revkit {
+namespace syrec {
 
     class bus_collection::priv {
     public:
@@ -119,4 +119,4 @@ namespace revkit {
         }
     }
 
-} // namespace revkit
+} // namespace syrec

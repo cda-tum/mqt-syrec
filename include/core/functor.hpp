@@ -27,7 +27,7 @@
 #include <core/properties.hpp>
 #include <functional>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Functor class for interfacing algorithms
@@ -116,7 +116,7 @@ namespace revkit {
      * 
      * @return A smart pointer to the settings
      */
-        [[nodiscard]] const revkit::properties::ptr& settings() const {
+        [[nodiscard]] const syrec::properties::ptr& settings() const {
             return _settings;
         }
 
@@ -127,7 +127,7 @@ namespace revkit {
      * 
      * @return A smart pointer to the statistics
      */
-        [[nodiscard]] const revkit::properties::ptr& statistics() const {
+        [[nodiscard]] const syrec::properties::ptr& statistics() const {
             return _statistics;
         }
 
@@ -138,6 +138,6 @@ namespace revkit {
         /** @endcond */
     };
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* FUNCTOR_HPP */

@@ -26,7 +26,7 @@
 
 using namespace boost::assign;
 
-namespace revkit {
+namespace syrec {
 
     ////////////////////////////// class target_line_adder
     target_line_adder::target_line_adder(gate* gate):
@@ -398,4 +398,4 @@ namespace revkit {
         return insert_gate(circ, n, vplus_tag());
     }
 
-} // namespace revkit
+} // namespace syrec

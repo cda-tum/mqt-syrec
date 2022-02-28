@@ -19,8 +19,8 @@
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
-using namespace revkit;
-using namespace revkit::syrec;
+using namespace syrec;
+using namespace syrec::applications;
 // Algorithms / Optimization
 
 [[maybe_unused]] circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
@@ -430,17 +430,17 @@ py::list target_lines1(const gate& g) {
 PYBIND11_MODULE(pysyrec, m) {
     //m.doc() = "pybind11 example plugin"; // optional module docstring
 
-    m.def("py_syrec_synthesisi", &syrec_synthesis);
-    m.def("py_simple_simulationi", static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, properties::ptr, properties::ptr)>(simple_simulation));
+    m.def("py_syrec_synthesis", &syrec_synthesis);
+    m.def("py_simple_simulation", static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, properties::ptr, properties::ptr)>(simple_simulation));
     //m.def("py_syrec_synthesis_func", &syrec_synthesis_func);
-    //m.def("py_syrec_synthesis", (bool (*)(circuit& circ, const syrec::program&, properties::ptr, properties::ptr)) &syrec_synthesis,"doc", pybind11::arg("circ"), //pybind11::arg("program"),pybind11::arg("settings")= properties::ptr(), pybind11::arg("statistics")= properties::ptr());
-    //m.def("py_syrec_synthesis_func", (hdl_synthesis_func (*)(circuit& circ, const syrec::program&)) &syrec_synthesis_func);
+    //m.def("py_syrec_synthesis", (bool (*)(circuit& circ, const applicationsprogram&, properties::ptr, properties::ptr)) &syrec_synthesis,"doc", pybind11::arg("circ"), //pybind11::arg("program"),pybind11::arg("settings")= properties::ptr(), pybind11::arg("statistics")= properties::ptr());
+    //m.def("py_syrec_synthesis_func", (hdl_synthesis_func (*)(circuit& circ, const applicationsprogram&)) &syrec_synthesis_func);
 
     //m.def("foo", (std::string (*)(int, int) ) &foo, "doc", pybind11::arg("a"), pybind11::arg("b"));
     //m.def("foo", (std::string (*)(int, int, int) ) &foo, "doc", pybind11::arg("a"), pybind11::arg("b"), pybind11::arg("c"));
     //return m.ptr();
 
-    py::class_<circuit, std::shared_ptr<circuit>>(m, "circuiti")
+    py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
             .def(py::init<unsigned>())
 
@@ -480,7 +480,7 @@ PYBIND11_MODULE(pysyrec, m) {
 
     m.def("add_new", &add_new, "A function that adds two numbers");
 
-    py::class_<properties, std::shared_ptr<properties>>(m, "propertiesi")
+    py::class_<properties, std::shared_ptr<properties>>(m, "properties")
             .def(py::init<>())
             .def("set_string", &properties_set<std::string>)
             .def("set_bool", &properties_set<bool>)
@@ -541,31 +541,31 @@ PYBIND11_MODULE(pysyrec, m) {
             //.def( "get_vector_unsigned", &properties_get_vector2<unsigned> )
             ;
 
-    py::class_<program>(m, "syrec_programi")
+    py::class_<program>(m, "syrec_program")
             .def(py::init<>())
             //.def( boost::python::self_ns::str( self ) )
             //.def( boost::python::self_ns::repr( self ) )
             .def("add_module", &program::add_module);
 
-    m.def("py_read_programi", py_read_program);
+    m.def("py_read_program", py_read_program);
 
-    py::class_<read_program_settings>(m, "read_program_settingsi")
+    py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
 
-    m.def("quantum_costsi", final_quantum_cost);
-    m.def("transistor_costsi", final_transistor_cost);
+    m.def("quantum_costs", final_quantum_cost);
+    m.def("transistor_costs", final_transistor_cost);
 
     //m.def( "py_costsi", costs1 );
     //m.def( "py_costsi", costs2 );
 
-    py::class_<boost::dynamic_bitset<>>(m, "bitseti")
+    py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
             .def(py::init<int>())
             .def(py::init<int, unsigned long>())
             .def("__str__", bitset_to_string);
 
-    py::enum_<gate_types::_types>(m, "gate_typei")
+    py::enum_<gate_types::_types>(m, "gate_type")
             .value("toffoli", gate_types::toffoli)
             .value("peres", gate_types::peres)
             .value("fredkin", gate_types::fredkin)
@@ -574,7 +574,7 @@ PYBIND11_MODULE(pysyrec, m) {
             .value("module", gate_types::module)
             .export_values();
 
-    py::class_<gate>(m, "gatei")
+    py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type)
             .def_property_readonly("module_name", gate_module_name)
@@ -587,6 +587,6 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("setVal", &dum::Dummy::setVal)
             .def("getVal", &dum::Dummy::getVal);
 
-    m.def("control_linesi", control_lines1);
-    m.def("target_linesi", target_lines1);
+    m.def("control_lines", control_lines1);
+    m.def("target_lines", target_lines1);
 }

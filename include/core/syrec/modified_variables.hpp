@@ -10,9 +10,9 @@
 #include <map>
 #include <set>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     [[maybe_unused]] void modified_variables(const program& prog,
                                              std::map<statement::ptr, std::set<variable::ptr>>&);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications

@@ -19,7 +19,7 @@
 
 #include <functional>
 
-namespace revkit {
+namespace syrec {
     class active_controls::priv {
     public:
         priv() = default;
@@ -54,4 +54,4 @@ namespace revkit {
         }
     }
 
-} // namespace revkit
+} // namespace syrec

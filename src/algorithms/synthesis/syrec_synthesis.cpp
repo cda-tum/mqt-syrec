@@ -26,7 +26,7 @@
 
 using namespace boost::assign;
 
-namespace revkit {
+namespace syrec {
     static std::stack<unsigned>               exp_opp;
     static std::stack<std::vector<unsigned>>  exp_lhss, exp_rhss;
     [[maybe_unused]] unsigned                 statement_op;
@@ -37,7 +37,7 @@ namespace revkit {
     static std::vector<std::vector<unsigned>> lhs_vec1, rhs_vec1;
 
     struct annotater {
-        explicit annotater(circuit& circ, const std::stack<syrec::statement::ptr>& stmts):
+        explicit annotater(circuit& circ, const std::stack<applications::statement::ptr>& stmts):
             _circ(circ),
             _stmts(stmts) {}
 
@@ -50,13 +50,13 @@ namespace revkit {
 
     private:
         circuit&                                 _circ;
-        const std::stack<syrec::statement::ptr>& _stmts;
+        const std::stack<applications::statement::ptr>& _stmts;
     };
 
     // Helper Functions for the synthesis methods
-    void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const syrec::variable::vec& variables);
-    //syrec::expression::ptr syrec::binary_expression::lhs() const;
-    standard_syrec_synthesizer::standard_syrec_synthesizer(circuit& circ, const syrec::program& prog [[maybe_unused]]):
+    void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const applications::variable::vec& variables);
+    //applications::expression::ptr applications::binary_expression::lhs() const;
+    standard_syrec_synthesizer::standard_syrec_synthesizer(circuit& circ, const applications::program& prog [[maybe_unused]]):
         _circ(circ) {
         free_const_lines_map.insert(std::make_pair(false, std::vector<unsigned>()));
         free_const_lines_map.insert(std::make_pair(true, std::vector<unsigned>()));
@@ -81,13 +81,13 @@ namespace revkit {
         efficient_controls       = get<bool>(settings, "efficient_controls", false);
     }
 
-    void standard_syrec_synthesizer::set_main_module(const syrec::module::ptr& main_module) {
+    void standard_syrec_synthesizer::set_main_module(const applications::module::ptr& main_module) {
         assert(modules.empty());
         modules.push(main_module);
     }
 
-    bool standard_syrec_synthesizer::on_module(const syrec::module::ptr& main) {
-        for (const syrec::statement::ptr& stat: main->statements()) {
+    bool standard_syrec_synthesizer::on_module(const applications::module::ptr& main) {
+        for (const applications::statement::ptr& stat: main->statements()) {
             if (!full_statement(stat)) {
                 //  if(! on_full_statement(stat ))
                 //{
@@ -100,9 +100,9 @@ namespace revkit {
         return assemble_circuit(cct_man.root);
     }
     //// checking the entire statement ///////*
-    bool standard_syrec_synthesizer::full_statement(const syrec::statement::ptr& statement) {
+    bool standard_syrec_synthesizer::full_statement(const applications::statement::ptr& statement) {
         bool okay = false;
-        if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<applications::assign_statement*>(statement.get())) {
             okay = full_statement(*stat);
 
         } else {
@@ -114,7 +114,7 @@ namespace revkit {
 
     ////Expression Evaluator when the input signals are equal (the output signals are initially assigned to "0")////
 
-    bool standard_syrec_synthesizer::full_statement(const syrec::assign_statement& statement) {
+    bool standard_syrec_synthesizer::full_statement(const applications::assign_statement& statement) {
         std::vector<unsigned> d, dd, stat_lhs, comp, ddd;
         std::vector<unsigned> lines;
         get_variables(statement.lhs(), stat_lhs);
@@ -253,22 +253,22 @@ namespace revkit {
         return true;
     }
 
-    bool standard_syrec_synthesizer::flow(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+    bool standard_syrec_synthesizer::flow(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
+        if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
             return flow(*exp, v);
-        } else if (auto* exp_1 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp_1 = dynamic_cast<applications::variable_expression*>(expression.get())) {
             return flow(*exp_1, v);
         } else {
             return false;
         }
     }
 
-    bool standard_syrec_synthesizer::flow(const syrec::variable_expression& expression, std::vector<unsigned>& v) {
+    bool standard_syrec_synthesizer::flow(const applications::variable_expression& expression, std::vector<unsigned>& v) {
         return get_variables(expression.var(), v);
     }
 
     /////////generating LHS and RHS (can be whole expressions as well)//////////////////
-    bool standard_syrec_synthesizer::flow(const syrec::binary_expression& expression, std::vector<unsigned>& v [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::flow(const applications::binary_expression& expression, std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs, rhs, comp;
         assign_op_vector.push_back(expression.op());
 
@@ -308,9 +308,9 @@ namespace revkit {
         return true;
     }
 
-    [[maybe_unused]] bool standard_syrec_synthesizer::on_full_statement(const syrec::statement::ptr& statement) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::on_full_statement(const applications::statement::ptr& statement) {
         bool okay = false;
-        if (auto* stat = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<applications::assign_statement*>(statement.get())) {
             okay = on_full_statement(*stat);
 
         } else {
@@ -433,7 +433,7 @@ return ok;
     }
 
     //////////////Currently not used (when all operations are same)///////////////
-    bool standard_syrec_synthesizer::on_full_statement(const syrec::assign_statement& statement) {
+    bool standard_syrec_synthesizer::on_full_statement(const applications::assign_statement& statement) {
         bool                  ok = false;
         std::vector<unsigned> d, stat_lhs;
         unsigned              i;
@@ -510,21 +510,21 @@ return ok;
     }
 
     /////////generating LHS and RHS (not whole expressions, just the corresponding variables)//////////////////
-    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto* exp = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
+        if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
             return op_rhs_lhs_expression(*exp, v);
-        } else if (auto* exp_2 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp_2 = dynamic_cast<applications::variable_expression*>(expression.get())) {
             return op_rhs_lhs_expression(*exp_2, v);
         } else {
             return false;
         }
     }
 
-    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const syrec::variable_expression& expression, std::vector<unsigned>& v) {
+    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::variable_expression& expression, std::vector<unsigned>& v) {
         return get_variables(expression.var(), v);
     }
 
-    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const syrec::binary_expression& expression, std::vector<unsigned>& v) {
+    bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::binary_expression& expression, std::vector<unsigned>& v) {
         std::vector<unsigned> lhs, rhs;
 
         if (!op_rhs_lhs_expression(expression.lhs(), lhs) || !op_rhs_lhs_expression(expression.rhs(), rhs)) {
@@ -541,24 +541,24 @@ return ok;
     }
 
     /////////When the input signals are not repeated//////////////////
-    bool standard_syrec_synthesizer::on_statement(const syrec::statement::ptr& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
-        if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<applications::swap_statement*>(statement.get())) {
             okay = on_statement(*stat);
-        } else if (auto* stat_1 = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+        } else if (auto* stat_1 = dynamic_cast<applications::unary_statement*>(statement.get())) {
             okay = on_statement(*stat_1);
-        } else if (auto* stat_2 = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        } else if (auto* stat_2 = dynamic_cast<applications::assign_statement*>(statement.get())) {
             okay = on_statement(*stat_2);
-        } else if (auto* stat_3 = dynamic_cast<syrec::if_statement*>(statement.get())) {
+        } else if (auto* stat_3 = dynamic_cast<applications::if_statement*>(statement.get())) {
             okay = on_statement(*stat_3);
-        } else if (auto* stat_4 = dynamic_cast<syrec::for_statement*>(statement.get())) {
+        } else if (auto* stat_4 = dynamic_cast<applications::for_statement*>(statement.get())) {
             okay = on_statement(*stat_4);
-        } else if (auto* stat_5 = dynamic_cast<syrec::call_statement*>(statement.get())) {
+        } else if (auto* stat_5 = dynamic_cast<applications::call_statement*>(statement.get())) {
             okay = on_statement(*stat_5);
-        } else if (auto* stat_6 = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
+        } else if (auto* stat_6 = dynamic_cast<applications::uncall_statement*>(statement.get())) {
             okay = on_statement(*stat_6);
-        } else if (auto* stat_7 = dynamic_cast<syrec::skip_statement*>(statement.get())) {
+        } else if (auto* stat_7 = dynamic_cast<applications::skip_statement*>(statement.get())) {
             okay = on_statement(*stat_7);
         } else {
             return false;
@@ -568,7 +568,7 @@ return ok;
         return okay;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::swap_statement& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::swap_statement& statement) {
         // TODO: wenn keine controlling line aktiv, einfach die Lines tauschen statt dem Fredkin-Gate
 
         std::vector<unsigned> lhs, rhs;
@@ -586,18 +586,18 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::unary_statement& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::unary_statement& statement) {
         // load variable
         std::vector<unsigned> var;
         get_variables(statement.var(), var);
 
         switch (statement.op()) {
             // TODO name for invert
-            case syrec::unary_statement::invert: {
+            case applications::unary_statement::invert: {
                 bitwise_negation(var);
             } break;
 
-            case syrec::unary_statement::increment: {
+            case applications::unary_statement::increment: {
                 /*if ( crement_merge_line_count > 1u && crement_merge_line_count < var.size() )
       {
         // Optimized Version via additional lines optimization
@@ -610,7 +610,7 @@ return ok;
                 //}
             } break;
 
-            case syrec::unary_statement::decrement: {
+            case applications::unary_statement::decrement: {
                 /*if ( ( crement_merge_line_count > 1u ) && ( crement_merge_line_count < var.size() ) )
       {
         // Optimized version via additional lines optimization
@@ -631,8 +631,8 @@ return ok;
         return true;
     }
 
-    /////////Function when the assignment stattments does not include repeated input signals//////////////////
-    bool standard_syrec_synthesizer::on_statement(const syrec::assign_statement& statement) {
+    /////////Function when the assignment statements does not include repeated input signals//////////////////
+    bool standard_syrec_synthesizer::on_statement(const applications::assign_statement& statement) {
         std::stack<std::vector<unsigned>> exp_lhs, exp_rhs;
         std::stack<unsigned>              exp_op;
         std::vector<unsigned>             lhs, rhs, d;
@@ -656,7 +656,7 @@ return ok;
         bool status = false;
 
         switch (statement.op()) {
-            case syrec::assign_statement::add: {
+            case applications::assign_statement::add: {
                 if (exp_opp.empty()) {
                     status = increase_new(lhs, rhs);
                     while (!exp_opp.empty()) {
@@ -691,7 +691,7 @@ return ok;
                 }
             } break;
 
-            case syrec::assign_statement::subtract: {
+            case applications::assign_statement::subtract: {
                 if (exp_opp.empty()) {
                     status = decrease_new(lhs, rhs);
                     while (!exp_opp.empty()) {
@@ -726,7 +726,7 @@ return ok;
                 }
             } break;
 
-            case syrec::assign_statement::exor: {
+            case applications::assign_statement::exor: {
                 if (exp_opp.empty()) {
                     status = bitwise_cnot(lhs, rhs);
                     while (!exp_opp.empty()) {
@@ -778,7 +778,7 @@ return ok;
         return status;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::if_statement& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::if_statement& statement) {
         // calculate expression
         std::vector<unsigned>             expression_result, lhs_stat;
         std::stack<unsigned>              dummy;
@@ -795,7 +795,7 @@ return ok;
                 // activate this line
                 add_active_control(helper_line);
 
-                for (const syrec::statement::ptr& stat: statement.then_statements()) {
+                for (const applications::statement::ptr& stat: statement.then_statements()) {
                     if (!full_statement(stat)) {
                         //  if(! on_full_statement(stat ))
                         //{
@@ -811,7 +811,7 @@ return ok;
                 append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), helper_line);
                 add_active_control(helper_line);
 
-                for (const syrec::statement::ptr& stat: statement.else_statements()) {
+                for (const applications::statement::ptr& stat: statement.else_statements()) {
                     if (!full_statement(stat)) {
                         //if(! on_full_statement(stat ))
                         //{
@@ -829,11 +829,11 @@ return ok;
                 // TODO: off_expression( statement.condition(), expression_result ); lines wieder freigeben etc.
             } break;
             case syrec_synthesis_if_realization_duplication: {
-                std::map<syrec::variable_access::ptr, syrec::variable_access::ptr> then_var_mapping = dupl_if_var_mapping;
-                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
-                    syrec::variable_access::ptr dupl_var = std::make_shared<syrec::variable_access>(std::make_shared<syrec::variable>(syrec::variable::wire, ("dupl_" + var->var()->name()), var->var()->dimensions(), var->var()->bitwidth()));
+                std::map<applications::variable_access::ptr, applications::variable_access::ptr> then_var_mapping = dupl_if_var_mapping;
+                for (const applications::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
+                    applications::variable_access::ptr dupl_var = std::make_shared<applications::variable_access>(std::make_shared<applications::variable>(applications::variable::wire, ("dupl_" + var->var()->name()), var->var()->dimensions(), var->var()->bitwidth()));
 
-                    syrec::variable::vec var_vec;
+                    applications::variable::vec var_vec;
                     var_vec.push_back(dupl_var->var());
 
                     add_variables(_circ, *this, variable_name_format, var_vec);
@@ -850,7 +850,7 @@ return ok;
                 dupl_if_var_mapping.swap(then_var_mapping);
 
                 // then branch
-                for (const syrec::statement::ptr& stat: statement.then_statements()) {
+                for (const applications::statement::ptr& stat: statement.then_statements()) {
                     if (!full_statement(stat)) {
                         // if(! on_full_statement(stat ))
                         //{
@@ -864,7 +864,7 @@ return ok;
                 dupl_if_var_mapping.swap(then_var_mapping);
 
                 // else branch
-                for (const syrec::statement::ptr& stat: statement.else_statements()) {
+                for (const applications::statement::ptr& stat: statement.else_statements()) {
                     if (!full_statement(stat)) {
                         //if(! on_full_statement(stat ))
                         //{
@@ -876,7 +876,7 @@ return ok;
                 }
 
                 add_active_control(helper_line);
-                for (const syrec::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
+                for (const applications::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
                     std::vector<unsigned> lhs, rhs;
                     get_variables(then_var_mapping.find(var)->second, lhs);
                     get_variables(var, rhs);
@@ -892,8 +892,8 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::for_statement& statement) {
-        syrec::number::ptr nfrom, nto;
+    bool standard_syrec_synthesizer::on_statement(const applications::for_statement& statement) {
+        applications::number::ptr nfrom, nto;
         boost::tie(nfrom, nto) = statement.range();
 
         unsigned from = nfrom ? nfrom->evaluate(loop_map) : 1u; // default value is 1u
@@ -911,7 +911,7 @@ return ok;
                 loop_map[loop_variable] = i;
             }
 
-            for (const syrec::statement::ptr& stat: statement.statements()) {
+            for (const applications::statement::ptr& stat: statement.statements()) {
                 if (!full_statement(stat)) {
                     // if(! on_full_statement(stat ))
                     //{
@@ -931,13 +931,13 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::call_statement& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::call_statement& statement) {
         if (_settings->get<bool>("modules_hierarchy", false)) {
             // Alternative implementation
             const std::string& module_name = statement.target()->name();
             if (_circ.modules().find(module_name) == _circ.modules().end()) {
                 circuit        c_module;
-                syrec::program prog_module;
+                applications::program prog_module;
                 prog_module.add_module(statement.target());
 
                 syrec_synthesis(c_module, prog_module, _settings);
@@ -949,7 +949,7 @@ return ok;
             // create targets, first parameters
             std::vector<unsigned> targets;
             for (const std::string& parameter: statement.parameters()) {
-                syrec::variable::ptr var = modules.top()->find_parameter_or_variable(parameter);
+                applications::variable::ptr var = modules.top()->find_parameter_or_variable(parameter);
                 boost::push_back(targets, boost::irange(_var_lines[var], _var_lines[var] + var->bitwidth()));
             }
 
@@ -980,7 +980,7 @@ return ok;
             // 1. Adjust the references module's parameters to the call arguments
             for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
                 const std::string&          parameter        = statement.parameters().at(i);
-                const syrec::variable::ptr& module_parameter = statement.target()->parameters().at(i);
+                const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
 
                 module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
             }
@@ -989,7 +989,7 @@ return ok;
             add_variables(_circ, *this, variable_name_format, statement.target()->variables());
 
             modules.push(statement.target());
-            for (const syrec::statement::ptr& stat: statement.target()->statements()) {
+            for (const applications::statement::ptr& stat: statement.target()->statements()) {
                 if (!full_statement(stat)) {
                     // if(! on_full_statement(stat ))
                     //{
@@ -1005,14 +1005,14 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::uncall_statement& statement) {
+    bool standard_syrec_synthesizer::on_statement(const applications::uncall_statement& statement) {
         using boost::adaptors::reversed;
         using boost::adaptors::transformed;
 
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
             const std::string&          parameter        = statement.parameters().at(i);
-            const syrec::variable::ptr& module_parameter = statement.target()->parameters().at(i);
+            const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
 
             module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
         }
@@ -1021,7 +1021,7 @@ return ok;
         add_variables(_circ, *this, variable_name_format, statement.target()->variables());
 
         modules.push(statement.target());
-        for (syrec::statement::ptr stat: statement.target()->statements() | reversed | transformed(syrec::reverse_statements())) {
+        for (applications::statement::ptr stat: statement.target()->statements() | reversed | transformed(applications::reverse_statements())) {
             if (!full_statement(stat)) {
                 //  if(! on_full_statement(stat ))
                 //{
@@ -1037,48 +1037,48 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_statement(const syrec::skip_statement& statement [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::on_statement(const applications::skip_statement& statement [[maybe_unused]]) {
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
-        if (auto* exp = dynamic_cast<syrec::numeric_expression*>(expression.get())) {
+    bool standard_syrec_synthesizer::on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+        if (auto* exp = dynamic_cast<applications::numeric_expression*>(expression.get())) {
             return on_expression(*exp, lines, lhs_stat, op);
-        } else if (auto* exp_3 = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+        } else if (auto* exp_3 = dynamic_cast<applications::variable_expression*>(expression.get())) {
             return on_expression(*exp_3, lines, lhs_stat, op);
-        } else if (auto* exp_4 = dynamic_cast<syrec::binary_expression*>(expression.get())) {
+        } else if (auto* exp_4 = dynamic_cast<applications::binary_expression*>(expression.get())) {
             return on_expression(*exp_4, lines, lhs_stat, op);
-        } else if (auto* exp_5 = dynamic_cast<syrec::shift_expression*>(expression.get())) {
+        } else if (auto* exp_5 = dynamic_cast<applications::shift_expression*>(expression.get())) {
             return on_expression(*exp_5, lines, lhs_stat, op);
         } else {
             return false;
         }
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
         return get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
         return get_variables(expression.var(), lines); // TODO: in off_expression zurueckrechnen
     }
 
     /////////////////////////////
     //to check if
-    [[maybe_unused]] bool standard_syrec_synthesizer::var_expression(const syrec::expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto* exp = dynamic_cast<syrec::variable_expression*>(expression.get())) {
+    [[maybe_unused]] bool standard_syrec_synthesizer::var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
+        if (auto* exp = dynamic_cast<applications::variable_expression*>(expression.get())) {
             return var_expression(*exp, v);
         } else {
             return false;
         }
     }
-    bool standard_syrec_synthesizer::var_expression(const syrec::variable_expression& expression, std::vector<unsigned>& v) {
+    bool standard_syrec_synthesizer::var_expression(const applications::variable_expression& expression, std::vector<unsigned>& v) {
         return get_variables(expression.var(), v);
     }
 
     /////////Function when the assignment statements consist of binary expressions and does not include repeted input signals//////////////////
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+    bool standard_syrec_synthesizer::on_expression(const applications::binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
         std::vector<unsigned>             lhs, rhs;
         std::stack<unsigned>              exp_op1, exp_op2;
         std::stack<std::vector<unsigned>> exp_lhs1, exp_rhs1, exp_lhs2, exp_rhs2;
@@ -1100,14 +1100,14 @@ return ok;
         }
 
         switch (expression.op()) {
-            case syrec::binary_expression::add: // +tanmay
+            case applications::binary_expression::add: // +tanmay
             {
                 increase_new(rhs, lhs); // edited_by_st (lines,rhs)
                 lines = rhs;
 
             } break;
 
-            case syrec::binary_expression::subtract: // -
+            case applications::binary_expression::subtract: // -
             {
                 // get_constant_lines( expression.bitwidth(), 0u, lines );-[
                 //bitwise_cnot( lines, lhs ); // duplicate lhs
@@ -1116,7 +1116,7 @@ return ok;
                 lines = rhs;
             } break;
 
-            case syrec::binary_expression::exor: // ^
+            case applications::binary_expression::exor: // ^
             {
                 //get_constant_lines( expression.bitwidth(), 0u, lines );
 
@@ -1125,7 +1125,7 @@ return ok;
                 // bitwise_cnot( lines, rhs );
             } break;
 
-            case syrec::binary_expression::multiply: // *
+            case applications::binary_expression::multiply: // *
             {
                 get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
 
@@ -1133,14 +1133,14 @@ return ok;
 
             } break;
 
-            case syrec::binary_expression::divide: // /
+            case applications::binary_expression::divide: // /
             {
                 get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
 
                 division(lines, lhs, rhs);
             } break;
 
-            case syrec::binary_expression::modulo: // % TODO: unbedingt line-effektivere Variante finden
+            case applications::binary_expression::modulo: // % TODO: unbedingt line-effektivere Variante finden
             {
                 get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
                 std::vector<unsigned> quot;
@@ -1150,7 +1150,7 @@ return ok;
                 modulo(quot, lines, rhs);
             } break;
 
-            case syrec::binary_expression::frac_divide: // *% TODO: anderen Namen; ist line-effektivere Variante moeglich?
+            case applications::binary_expression::frac_divide: // *% TODO: anderen Namen; ist line-effektivere Variante moeglich?
             {
                 std::vector<unsigned> product;
                 get_constant_lines((expression.bitwidth()), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), product);
@@ -1160,70 +1160,70 @@ return ok;
                 multiplication_full(product, lhs, rhs);
             } break;
 
-            case syrec::binary_expression::logical_and: // &&
+            case applications::binary_expression::logical_and: // &&
             {
                 lines += get_constant_line(true);
 
                 conjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
 
-            case syrec::binary_expression::logical_or: // ||
+            case applications::binary_expression::logical_or: // ||
             {
                 lines += get_constant_line(true);
 
                 disjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
 
-            case syrec::binary_expression::bitwise_and: // &
+            case applications::binary_expression::bitwise_and: // &
             {
                 get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
 
                 bitwise_and(lines, lhs, rhs);
             } break;
 
-            case syrec::binary_expression::bitwise_or: // |
+            case applications::binary_expression::bitwise_or: // |
             {
                 get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
 
                 bitwise_or(lines, lhs, rhs);
             } break;
 
-            case syrec::binary_expression::less_than: // <
+            case applications::binary_expression::less_than: // <
             {
                 lines += get_constant_line(true);
 
                 less_than(lines.at(0), lhs, rhs);
             } break;
 
-            case syrec::binary_expression::greater_than: // >
+            case applications::binary_expression::greater_than: // >
             {
                 lines += get_constant_line(true);
 
                 greater_than(lines.at(0), lhs, rhs);
             } break;
 
-            case syrec::binary_expression::equals: // =
+            case applications::binary_expression::equals: // =
             {
                 lines += get_constant_line(true);
 
                 equals(lines.at(0), lhs, rhs);
             } break;
 
-            case syrec::binary_expression::not_equals: // !=
+            case applications::binary_expression::not_equals: // !=
             {
                 lines += get_constant_line(true);
 
                 not_equals(lines.at(0), lhs, rhs);
             } break;
 
-            case syrec::binary_expression::less_equals: // <=
+            case applications::binary_expression::less_equals: // <=
             {
                 lines += get_constant_line(true);
 
                 less_equals(lines.at(0), lhs, rhs);
             } break;
 
-            case syrec::binary_expression::greater_equals: // >=
+            case applications::binary_expression::greater_equals: // >=
             {
                 lines += get_constant_line(true);
 
@@ -1245,14 +1245,14 @@ return ok;
     bool standard_syrec_synthesizer::exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
         lines = rhs;
         switch (op) {
-            case syrec::binary_expression::add: // +tanmay
+            case applications::binary_expression::add: // +tanmay
             {
                 increase_new(rhs, lhs); // edited_by_st (lines,rhs)
                 lines = rhs;
 
             } break;
 
-            case syrec::binary_expression::subtract: // -
+            case applications::binary_expression::subtract: // -
             {
                 // get_constant_lines( expression.bitwidth(), 0u, lines );-[
                 //bitwise_cnot( lines, lhs ); // duplicate lhs
@@ -1266,7 +1266,7 @@ return ok;
 
             } break;
 
-            case syrec::binary_expression::exor: // ^
+            case applications::binary_expression::exor: // ^
             {
                 //get_constant_lines( expression.bitwidth(), 0u, lines );
 
@@ -1275,7 +1275,7 @@ return ok;
                 // bitwise_cnot( lines, rhs );
             } break;
 
-            case syrec::binary_expression::multiply: // *
+            case applications::binary_expression::multiply: // *
             {
                 std::vector<unsigned> extra_lines_1;
                 get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_1);
@@ -1284,7 +1284,7 @@ return ok;
                 lines = extra_lines_1;
             } break;
 
-            case syrec::binary_expression::divide: // /
+            case applications::binary_expression::divide: // /
             {
                 std::vector<unsigned> extra_lines_2;
                 get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_2);
@@ -1293,7 +1293,7 @@ return ok;
                 lines = extra_lines_2;
             } break;
 
-            case syrec::binary_expression::modulo: // % TODO: unbedingt line-effektivere Variante finden
+            case applications::binary_expression::modulo: // % TODO: unbedingt line-effektivere Variante finden
             {
                 std::vector<unsigned> extra_lines_3;
                 get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_3);
@@ -1305,7 +1305,7 @@ return ok;
                 lines = extra_lines_3;
             } break;
 
-            case syrec::binary_expression::frac_divide: // *% TODO: anderen Namen; ist line-effektivere Variante moeglich?
+            case applications::binary_expression::frac_divide: // *% TODO: anderen Namen; ist line-effektivere Variante moeglich?
             {
                 std::vector<unsigned> product;
                 get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), product);
@@ -1315,7 +1315,7 @@ return ok;
                 multiplication_full(product, lhs, rhs);
             } break;
 
-            case syrec::binary_expression::logical_and: // &&
+            case applications::binary_expression::logical_and: // &&
             {
                 std::vector<unsigned> extra_lines_5;
                 extra_lines_5 += get_constant_line(true);
@@ -1324,7 +1324,7 @@ return ok;
                 lines = extra_lines_5;
             } break;
 
-            case syrec::binary_expression::logical_or: // ||
+            case applications::binary_expression::logical_or: // ||
             {
                 std::vector<unsigned> extra_lines_6;
                 extra_lines_6 += get_constant_line(true);
@@ -1333,7 +1333,7 @@ return ok;
                 lines = extra_lines_6;
             } break;
 
-            case syrec::binary_expression::bitwise_and: // &
+            case applications::binary_expression::bitwise_and: // &
             {
                 std::vector<unsigned> extra_lines_7;
 
@@ -1343,7 +1343,7 @@ return ok;
                 lines = extra_lines_7;
             } break;
 
-            case syrec::binary_expression::bitwise_or: // |
+            case applications::binary_expression::bitwise_or: // |
             {
                 std::vector<unsigned> extra_lines_8;
 
@@ -1353,7 +1353,7 @@ return ok;
                 lines = extra_lines_8;
             } break;
 
-            case syrec::binary_expression::less_than: // <
+            case applications::binary_expression::less_than: // <
             {
                 std::vector<unsigned> extra_lines_9;
                 extra_lines_9 += get_constant_line(true);
@@ -1362,7 +1362,7 @@ return ok;
                 lines = extra_lines_9;
             } break;
 
-            case syrec::binary_expression::greater_than: // >
+            case applications::binary_expression::greater_than: // >
             {
                 std::vector<unsigned> extra_lines_10;
                 extra_lines_10 += get_constant_line(true);
@@ -1371,7 +1371,7 @@ return ok;
                 lines = extra_lines_10;
             } break;
 
-            case syrec::binary_expression::equals: // =
+            case applications::binary_expression::equals: // =
             {
                 std::vector<unsigned> extra_lines_11;
                 extra_lines_11 += get_constant_line(true);
@@ -1380,7 +1380,7 @@ return ok;
                 lines = extra_lines_11;
             } break;
 
-            case syrec::binary_expression::not_equals: // !=
+            case applications::binary_expression::not_equals: // !=
             {
                 std::vector<unsigned> extra_lines_12;
                 extra_lines_12 += get_constant_line(true);
@@ -1389,7 +1389,7 @@ return ok;
                 lines = extra_lines_12;
             } break;
 
-            case syrec::binary_expression::less_equals: // <=
+            case applications::binary_expression::less_equals: // <=
             {
                 std::vector<unsigned> extra_lines_13;
                 extra_lines_13 += get_constant_line(true);
@@ -1398,7 +1398,7 @@ return ok;
                 lines = extra_lines_13;
             } break;
 
-            case syrec::binary_expression::greater_equals: // >=
+            case applications::binary_expression::greater_equals: // >=
             {
                 std::vector<unsigned> extra_lines_14;
                 extra_lines_14 += get_constant_line(true);
@@ -1418,7 +1418,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::on_expression(const syrec::shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+    bool standard_syrec_synthesizer::on_expression(const applications::shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
         std::vector<unsigned>             lhs;
         std::stack<unsigned>              exp_op1;
         std::stack<std::vector<unsigned>> exp_lhs1, exp_rhs1;
@@ -1429,14 +1429,14 @@ return ok;
         unsigned rhs = expression.rhs()->evaluate(loop_map);
 
         switch (expression.op()) {
-            case syrec::shift_expression::left: // <<
+            case applications::shift_expression::left: // <<
             {
                 get_constant_lines(expression.bitwidth(), 0u, lines);
 
                 left_shift(lines, lhs, rhs);
             } break;
 
-            case syrec::shift_expression::right: // <<
+            case applications::shift_expression::right: // <<
             {
                 get_constant_lines(expression.bitwidth(), 0u, lines);
 
@@ -1557,7 +1557,7 @@ return ok;
             if (((i % crement_merge_line_count) == 0) && (i > 0)) {
                 // empty helperline and prepare next merging
                 append_toffoli(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), helpercontrols, helperline);
-                for (int j = (i - crement_merge_line_count); j < i; ++j) {
+                for (int j = (i - (int)crement_merge_line_count); j < i; ++j) {
                     helpercontrols.erase(dest.at(j));
                     controls.insert(dest.at(j));
                 }
@@ -1911,9 +1911,9 @@ return ok;
         return true;
     }
 
-    /*bool standard_syrec_synthesizer::expression_op_inverse( syrec::expression::ptr expression)
+    /*bool standard_syrec_synthesizer::expression_op_inverse( applications::expression::ptr expression)
   {
-    if ( syrec::binary_expression* exp = dynamic_cast<syrec::binary_expression*>( expression.get() ) )
+    if ( applications::binary_expression* exp = dynamic_cast<applications::binary_expression*>( expression.get() ) )
     {
       return expression_op_inverse(*exp);
     }
@@ -1929,16 +1929,16 @@ return ok;
     }*/
 
         switch (op) {
-            case syrec::binary_expression::add: // + tanmay
+            case applications::binary_expression::add: // + tanmay
             {
                 decrease_new(exp_rhs, exp_lhs);
             } break;
 
-            case syrec::binary_expression::subtract: // -
+            case applications::binary_expression::subtract: // -
             {
                 decrease_new_assign(exp_rhs, exp_lhs);
             } break;
-            case syrec::binary_expression::exor: // ^
+            case applications::binary_expression::exor: // ^
             {
                 bitwise_cnot(exp_rhs, exp_lhs);
             } break;
@@ -1951,12 +1951,12 @@ return ok;
     bool standard_syrec_synthesizer::expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
         //TODO: add assign decrease with a condition
         switch (op) {
-            case syrec::binary_expression::add: // + tanmay
+            case applications::binary_expression::add: // + tanmay
             {
                 increase_new(exp_rhs, exp_lhs);
             } break;
 
-            case syrec::binary_expression::subtract: // -
+            case applications::binary_expression::subtract: // -
             {
                 if (sub_flag) {
                     decrease_new_assign(exp_rhs, exp_lhs);
@@ -1964,7 +1964,7 @@ return ok;
                     decrease_new(exp_rhs, exp_lhs);
                 }
             } break;
-            case syrec::binary_expression::exor: // ^
+            case applications::binary_expression::exor: // ^
             {
                 bitwise_cnot(exp_rhs, exp_lhs);
             } break;
@@ -2097,7 +2097,7 @@ return ok;
 
     // dest.size = 2 * srcX.size
     bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        std::vector<unsigned>        sum(dest.begin(), dest.begin() + src2.size());
+        std::vector<unsigned>        sum(dest.begin(), dest.begin() + (unsigned) src2.size());
         const std::vector<unsigned>& partial = src2;
 
         bool ok = true;
@@ -2299,7 +2299,7 @@ return ok;
         return _circ;
     }
 
-    [[maybe_unused]] std::stack<syrec::statement::ptr>& standard_syrec_synthesizer::stmts() {
+    [[maybe_unused]] std::stack<applications::statement::ptr>& standard_syrec_synthesizer::stmts() {
         return _stmts;
     }
 
@@ -2311,7 +2311,7 @@ return ok;
         }
     };
 
-    bool standard_syrec_synthesizer::get_variables(syrec::variable_access::ptr var, std::vector<unsigned>& lines) {
+    bool standard_syrec_synthesizer::get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines) {
         if (dupl_if_var_mapping.find(var) != dupl_if_var_mapping.end()) {
             var = dupl_if_var_mapping.find(var)->second;
         }
@@ -2323,9 +2323,9 @@ return ok;
 
             // check if it is all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)boost::count_if(var->indexes(), is_type<syrec::numeric_expression>()) == n) {
+            if ((unsigned)boost::count_if(var->indexes(), is_type<applications::numeric_expression>()) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
-                    offset += dynamic_cast<syrec::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(loop_map) *
+                    offset += dynamic_cast<applications::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(loop_map) *
                               std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
@@ -2337,7 +2337,7 @@ return ok;
         }
 
         if (var->range()) {
-            syrec::number::ptr nfirst, nsecond;
+            applications::number::ptr nfirst, nsecond;
             boost::tie(nfirst, nsecond) = *var->range();
 
             unsigned first  = nfirst->evaluate(loop_map);
@@ -2360,7 +2360,7 @@ return ok;
         return true;
     }
 
-    bool standard_syrec_synthesizer::unget_variables(const syrec::variable_access::ptr& var, std::vector<unsigned>& lines) {
+    bool standard_syrec_synthesizer::unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines) {
         unsigned offset = _var_lines[var->var()];
 
         if (!var->indexes().empty()) {
@@ -2368,7 +2368,7 @@ return ok;
 
             // check if it is not all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)boost::count_if(var->indexes(), is_type<syrec::numeric_expression>()) != n) {
+            if ((unsigned)boost::count_if(var->indexes(), is_type<applications::numeric_expression>()) != n) {
                 array_swapping(offset, var->var()->dimensions(), var->indexes(), var->var()->bitwidth(), lines);
             }
         }
@@ -2396,7 +2396,7 @@ return ok;
    * \param bitwidth is the bitwidth of the variables within the array
    * \param lines is the destination, where
    */
-    bool standard_syrec_synthesizer::array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<syrec::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines) {
+    bool standard_syrec_synthesizer::array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines) {
         unsigned op = 0u;
         if (indexes.empty()) {
             std::vector<unsigned> dest_lines;
@@ -2406,9 +2406,9 @@ return ok;
             return swap(dest_lines, lines);
         }
 
-        if (dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())) //( is_type<syrec::numeric_expression>( indexes.at( 0 ) ) )
+        if (dynamic_cast<applications::numeric_expression*>(indexes.at(0).get())) //( is_type<applications::numeric_expression>( indexes.at( 0 ) ) )
         {
-            offset += dynamic_cast<syrec::numeric_expression*>(indexes.at(0).get())->value()->evaluate(loop_map) *
+            offset += dynamic_cast<applications::numeric_expression*>(indexes.at(0).get())->value()->evaluate(loop_map) *
                       std::accumulate(dimensions.begin() + 1u, dimensions.end(), 1u, std::multiplies<>()) *
                       bitwidth;
             dimensions.erase(dimensions.begin());
@@ -2487,7 +2487,7 @@ return ok;
     }
 
     // helper function
-    void _add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const syrec::variable::ptr& var, const std::string& variable_name_format,
+    void _add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const applications::variable::ptr& var, const std::string& variable_name_format,
                        constant _constant, bool _garbage, const std::string& arraystr) {
         if (dimensions.empty()) {
             for (unsigned i = 0u; i < var->bitwidth(); ++i) {
@@ -2500,13 +2500,13 @@ return ok;
             boost::push_back(affected_lines, boost::irange(circ.lines() - var->bitwidth(), circ.lines()));
             std::string name = boost::str(boost::format("%s%s") % var->name() % arraystr);
 
-            if (var->type() == syrec::variable::in || var->type() == syrec::variable::inout) {
+            if (var->type() == applications::variable::in || var->type() == applications::variable::inout) {
                 circ.inputbuses().add(name, affected_lines);
             }
-            if (var->type() == syrec::variable::out || var->type() == syrec::variable::inout) {
+            if (var->type() == applications::variable::out || var->type() == applications::variable::inout) {
                 circ.outputbuses().add(name, affected_lines);
             }
-            if (var->type() == syrec::variable::state) {
+            if (var->type() == applications::variable::state) {
                 circ.statesignals().add(name, affected_lines);
             }
         } else {
@@ -2520,21 +2520,21 @@ return ok;
         }
     }
 
-    void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const syrec::variable::vec& variables) {
-        for (const syrec::variable::ptr& var: variables) {
+    void add_variables(circuit& circ, standard_syrec_synthesizer& synthesizer, const std::string& variable_name_format, const applications::variable::vec& variables) {
+        for (const applications::variable::ptr& var: variables) {
             // entry in var lines map
             synthesizer.var_lines().insert(std::make_pair(var, circ.lines()));
 
             // types of constant and garbage
-            constant _constant = (var->type() == syrec::variable::out || var->type() == syrec::variable::wire) ? constant(true) : constant(false);
-            bool     _garbage  = (var->type() == syrec::variable::in || var->type() == syrec::variable::wire);
+            constant _constant = (var->type() == applications::variable::out || var->type() == applications::variable::wire) ? constant(true) : constant(false);
+            bool     _garbage  = (var->type() == applications::variable::in || var->type() == applications::variable::wire);
 
             _add_variable(circ, var->dimensions(), var, variable_name_format,
                           _constant, _garbage, std::string());
         }
     }
 
-    bool syrec_synthesis(circuit& circ, const syrec::program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // Settings parsing
         auto variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto main_module           = get<std::string>(settings, "main_module", std::string());
@@ -2554,7 +2554,7 @@ return ok;
         statement_synthesizer.initialize_changing_variables(program);
 
         // get the main module
-        syrec::module::ptr main;
+        applications::module::ptr main;
 
         if (!main_module.empty()) {
             main = program.find_module(main_module);
@@ -2581,73 +2581,73 @@ return ok;
         //write_realization( circ,std::cout); //tanmay
     }
 
-    void standard_syrec_synthesizer::initialize_changing_variables(const syrec::program& program) {
+    void standard_syrec_synthesizer::initialize_changing_variables(const applications::program& program) {
         // Compute changed variable map for if_realization via duplication
         if (if_realization == syrec_synthesis_if_realization_duplication) {
             compute_changing_variables(program, _changing_variables);
         }
     }
 
-    void standard_syrec_synthesizer::compute_changing_variables(const syrec::program& program, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (const syrec::module::ptr& mod: program.modules()) {
+    void standard_syrec_synthesizer::compute_changing_variables(const applications::program& program, std::map<const applications::statement*, var_set>& changing_variables) {
+        for (const applications::module::ptr& mod: program.modules()) {
             compute_changing_variables(mod, changing_variables);
         }
     }
 
-    void standard_syrec_synthesizer::compute_changing_variables(const syrec::module::ptr& module, std::map<const syrec::statement*, var_set>& changing_variables) {
-        for (const syrec::statement::ptr& stat: module->statements()) {
+    void standard_syrec_synthesizer::compute_changing_variables(const applications::module::ptr& module, std::map<const applications::statement*, var_set>& changing_variables) {
+        for (const applications::statement::ptr& stat: module->statements()) {
             compute_changing_variables(stat, changing_variables);
         }
     }
 
-    void standard_syrec_synthesizer::compute_changing_variables(const syrec::statement::ptr& statement, std::map<const syrec::statement*, var_set>& changing_variables) {
+    void standard_syrec_synthesizer::compute_changing_variables(const applications::statement::ptr& statement, std::map<const applications::statement*, var_set>& changing_variables) {
         var_set changed_variables;
-        if (auto* stat = dynamic_cast<syrec::swap_statement*>(statement.get())) {
+        if (auto* stat = dynamic_cast<applications::swap_statement*>(statement.get())) {
             changed_variables.insert(stat->lhs());
             changed_variables.insert(stat->rhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat_8 = dynamic_cast<syrec::unary_statement*>(statement.get())) {
+        } else if (auto* stat_8 = dynamic_cast<applications::unary_statement*>(statement.get())) {
             changed_variables.insert(stat_8->var());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat_9 = dynamic_cast<syrec::assign_statement*>(statement.get())) {
+        } else if (auto* stat_9 = dynamic_cast<applications::assign_statement*>(statement.get())) {
             changed_variables.insert(stat_9->lhs());
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat_10 = dynamic_cast<syrec::if_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat_10->then_statements()) {
+        } else if (auto* stat_10 = dynamic_cast<applications::if_statement*>(statement.get())) {
+            for (const applications::statement::ptr& s: stat_10->then_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
-            for (const syrec::statement::ptr& s: stat_10->else_statements()) {
-                compute_changing_variables(s, changing_variables);
-                changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
-            }
-            // changing_variables.insert( std::make_pair( stat, changed_variables ) );
-            // return;
-        } else if (auto* stat_11 = dynamic_cast<syrec::for_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat_11->statements()) {
+            for (const applications::statement::ptr& s: stat_10->else_statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat_12 = dynamic_cast<syrec::call_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat_12->target()->statements()) {
+        } else if (auto* stat_11 = dynamic_cast<applications::for_statement*>(statement.get())) {
+            for (const applications::statement::ptr& s: stat_11->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (auto* stat_13 = dynamic_cast<syrec::uncall_statement*>(statement.get())) {
-            for (const syrec::statement::ptr& s: stat_13->target()->statements()) {
+        } else if (auto* stat_12 = dynamic_cast<applications::call_statement*>(statement.get())) {
+            for (const applications::statement::ptr& s: stat_12->target()->statements()) {
                 compute_changing_variables(s, changing_variables);
                 changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (/*syrec::skip_statement* stat = */ dynamic_cast<syrec::skip_statement*>(statement.get())) {
+        } else if (auto* stat_13 = dynamic_cast<applications::uncall_statement*>(statement.get())) {
+            for (const applications::statement::ptr& s: stat_13->target()->statements()) {
+                compute_changing_variables(s, changing_variables);
+                changed_variables.insert(changing_variables.find(s.get())->second.begin(), changing_variables.find(s.get())->second.end());
+            }
+            // changing_variables.insert( std::make_pair( stat, changed_variables ) );
+            // return;
+        } else if (/*applications::skip_statement* stat = */ dynamic_cast<applications::skip_statement*>(statement.get())) {
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else {
@@ -2662,4 +2662,4 @@ return ok;
         return f;
     }
 
-} // namespace revkit
+} // namespace syrec

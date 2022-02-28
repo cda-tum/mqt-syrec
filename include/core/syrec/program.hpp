@@ -26,7 +26,7 @@
 #include <core/syrec/module.hpp>
 #include <vector>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     /**
      * @brief SyReC program
@@ -108,6 +108,6 @@ namespace revkit::syrec {
      */
     std::ostream& operator<<(std::ostream& os, const program& p);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 #endif /* PROGRAM_HPP */

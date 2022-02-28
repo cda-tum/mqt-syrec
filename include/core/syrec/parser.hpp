@@ -25,12 +25,12 @@
 
 #include <string>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief SyReC Namespace
    */
-    namespace syrec {
+    namespace applications {
         class program;
     }
 
@@ -79,8 +79,8 @@ namespace revkit {
    * @author RevKit
    * @since  1.1
    */
-    bool read_program(syrec::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = nullptr);
+    bool read_program(applications::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = nullptr);
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* PARSER_HPP */

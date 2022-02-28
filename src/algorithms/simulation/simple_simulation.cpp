@@ -24,7 +24,7 @@
 #include <core/utils/timer.hpp>
 #include <utility>
 
-namespace revkit {
+namespace syrec {
 
     boost::dynamic_bitset<>& core_gate_simulation::operator()(const gate& g, boost::dynamic_bitset<>& input) const {
         if (is_toffoli(g)) {
@@ -177,4 +177,4 @@ namespace revkit {
         return f;
     }
 
-} // namespace revkit
+} // namespace syrec

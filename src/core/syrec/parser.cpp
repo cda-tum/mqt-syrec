@@ -39,9 +39,9 @@
 
 using namespace boost::assign;
 
-namespace revkit {
+namespace syrec {
 
-    using namespace syrec;
+    using namespace applications;
     namespace bf = boost::fusion;
 
     struct parser_context {
@@ -718,22 +718,22 @@ namespace revkit {
 
     unsigned parse_variable_type(const std::string& name) {
         if (name == "in") {
-            return syrec::variable::in;
+            return applications::variable::in;
         } else if (name == "out") {
-            return syrec::variable::out;
+            return applications::variable::out;
         } else if (name == "inout") {
-            return syrec::variable::inout;
+            return applications::variable::inout;
         } else if (name == "state") {
-            return syrec::variable::state;
+            return applications::variable::state;
         } else if (name == "wire") {
-            return syrec::variable::wire;
+            return applications::variable::wire;
         }
 
         assert(false);
         return 0u;
     }
 
-    bool parse_module(syrec::module& proc, const ast_module& ast_proc, const syrec::program& prog, parser_context& context) {
+    bool parse_module(applications::module& proc, const ast_module& ast_proc, const applications::program& prog, parser_context& context) {
         std::set<std::string> variable_names;
 
         for (const ast_parameter& ast_param: bf::at_c<1>(ast_proc)) {
@@ -784,7 +784,7 @@ namespace revkit {
         return true;
     }
 
-    bool read_program_from_string(syrec::program& prog, const std::string& content, const read_program_settings& settings, std::string* error) {
+    bool read_program_from_string(applications::program& prog, const std::string& content, const read_program_settings& settings, std::string* error) {
         ast_program ast_prog;
         if (!parse_string(ast_prog, content)) {
             *error = "PARSE_STRING_FAILED";
@@ -813,7 +813,7 @@ namespace revkit {
         default_bitwidth(32u) {
     }
 
-    bool read_program(syrec::program& prog, const std::string& filename, const read_program_settings& settings, std::string* error) {
+    bool read_program(applications::program& prog, const std::string& filename, const read_program_settings& settings, std::string* error) {
         std::string content, line;
 
         std::ifstream is;
@@ -826,4 +826,4 @@ namespace revkit {
         return read_program_from_string(prog, content, settings, error);
     }
 
-} // namespace revkit
+} // namespace syrec

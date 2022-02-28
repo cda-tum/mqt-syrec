@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace revkit::syrec {
+namespace syrec::applications {
 
     class expression;
 
@@ -342,6 +342,6 @@ namespace revkit::syrec {
      */
     std::ostream& operator<<(std::ostream& os, const variable_access& v);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 #endif /* VARIABLE_HPP */

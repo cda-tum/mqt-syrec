@@ -31,7 +31,7 @@
 #include <core/gate.hpp>
 #include <memory>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Target Tag for Toffoli gates.
@@ -244,6 +244,6 @@ namespace revkit {
    */
     bool is_module(const gate& g);
 
-} // namespace revkit
+} // namespace syrec
 
 #endif /* TARGET_TAGS_HPP */

@@ -23,7 +23,7 @@
 
 #include <core/circuit.hpp>
 
-namespace revkit {
+namespace syrec {
 
     /**
    * @brief Insert a circuit \p src at the end of another circuit \p circ
@@ -62,4 +62,4 @@ namespace revkit {
    */
     void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls = gate::line_container());
 
-} // namespace revkit
+} // namespace syrec

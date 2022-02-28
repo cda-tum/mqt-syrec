@@ -27,7 +27,7 @@
 #include <memory>
 #include <string>
 
-namespace revkit::syrec {
+namespace syrec::applications {
     class binary_numeric_expr;
 
     /**
@@ -213,6 +213,6 @@ namespace revkit::syrec {
      */
     std::ostream& operator<<(std::ostream& os, const number& n);
 
-} // namespace revkit::syrec
+} // namespace syrec::applications
 
 #endif /* NUMBER_HPP */
