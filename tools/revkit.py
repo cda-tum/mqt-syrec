@@ -56,8 +56,7 @@ def syrec_synthesis( circ, prog, variable_name_format = "%1$s%3$s.%2$d", main_mo
         return dict( runtime = statistics.get_double( "runtime" ) )
     else:
         return error_msg( statistics )
-
-    return
+    
 
 ### GUI
 def init_gui():
