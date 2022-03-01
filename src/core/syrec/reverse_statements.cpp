@@ -1,9 +1,5 @@
 #include "core/syrec/reverse_statements.hpp"
 
-#include <boost/foreach.hpp>
-
-#define reverse_foreach_ BOOST_REVERSE_FOREACH
-
 namespace syrec::applications {
 
     statement::ptr reverse_statements::operator()(statement::ptr _statement) const {
@@ -39,12 +35,11 @@ namespace syrec::applications {
             if_stat->set_fi_condition(stat_2->condition());
 
             // TODO: ohne Schleife (neue add-Funktionen notwendig)
-            reverse_foreach_(statement::ptr s, stat_2->then_statements()) {
-                if_stat->add_then_statement(s);
+            for (auto it = stat_2->then_statements().rbegin(); it != stat_2->then_statements().rend(); ++it) {
+                if_stat->add_then_statement(*it);
             }
-
-            reverse_foreach_(statement::ptr s, stat_2->else_statements()) {
-                if_stat->add_else_statement(s);
+            for (auto it = stat_2->else_statements().rbegin(); it != stat_2->else_statements().rend(); ++it) {
+                if_stat->add_else_statement(*it);
             }
 
             return statement::ptr(if_stat); // TODO: ist das korrekt (auch s.u. beim FOR).
@@ -60,8 +55,8 @@ namespace syrec::applications {
             for_stat->set_negative_step(!stat_3->is_negative_step());
 
             // TODO: einfacher
-            reverse_foreach_(statement::ptr s, stat_3->statements()) {
-                for_stat->add_statement(s);
+            for (auto it = stat_3->statements().rbegin(); it != stat_3->statements().rend(); ++it) {
+                for_stat->add_statement(*it);
             }
 
             return statement::ptr(for_stat); // TODO: hier ist FOR (v.o.)

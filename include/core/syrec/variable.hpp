@@ -23,7 +23,8 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include <core/syrec/number.hpp>
+#include "core/syrec/number.hpp"
+
 #include <iostream>
 #include <memory>
 #include <optional>

@@ -16,18 +16,11 @@
  */
 
 #include "core/circuit.hpp"
-
-//#include "core/functions/copy_circuit.hpp"
 #include "core/gate.hpp"
 
-#include <boost/range/adaptors.hpp>
-#include <iostream>
 #include <memory>
 
 namespace syrec {
-    using boost::adaptors::indirected;
-    using boost::adaptors::transformed;
-
     struct num_gates_visitor {
         unsigned operator()(const standard_circuit& circ) const {
             return circ.gates.size();
@@ -202,7 +195,7 @@ namespace syrec {
             ++circ.to;
 
             if (!circ.filter.empty()) {
-                gate& orig_gate = *((circ.base.gates.begin() + circ.to - 1u)->get());
+                gate& orig_gate = *(*(circ.base.gates.begin() + circ.to - 1u));
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.to - 1)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
                 return g;
@@ -233,7 +226,7 @@ namespace syrec {
             ++circ.to;
 
             if (!circ.filter.empty()) {
-                gate& orig_gate = *((circ.base.gates.begin() + circ.from)->get());
+                gate& orig_gate = *(*(circ.base.gates.begin() + circ.from));
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.from)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
                 return g;
@@ -264,7 +257,7 @@ namespace syrec {
             ++circ.to;
 
             if (!circ.filter.empty()) {
-                gate& orig_gate = *((circ.base.gates.begin() + circ.from + pos)->get());
+                gate& orig_gate = *(*(circ.base.gates.begin() + circ.from + pos));
                 gate& g         = *(circ.filter_cache[(circ.base.gates.begin() + circ.from + pos)->get()] = new filtered_gate(orig_gate, circ.filter));
                 c.gate_added(g);
                 return g;

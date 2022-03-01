@@ -166,9 +166,9 @@ namespace syrec {
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings,
-                           properties::ptr statistics) {
-        return simple_simulation(output, circ.begin(), circ.end(), input, std::move(settings), std::move(statistics));
+                           const properties::ptr& settings,
+                           const properties::ptr& statistics) {
+        return simple_simulation(output, circ.begin(), circ.end(), input, settings, statistics);
     }
 
     [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings, properties::ptr statistics) {

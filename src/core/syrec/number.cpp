@@ -16,11 +16,11 @@
  */
 
 #include "core/syrec/number.hpp"
-
 #include "core/syrec/expression.hpp"
 
-#include <boost/variant.hpp>
+#include <cassert>
 #include <utility>
+#include <variant>
 
 namespace syrec::applications {
 
@@ -48,7 +48,7 @@ namespace syrec::applications {
         number::ptr rhs;
     };
 
-    struct evaluate_visitor: public boost::static_visitor<unsigned> {
+    struct evaluate_visitor {
         explicit evaluate_visitor(const number::loop_variable_mapping& map):
             map(map) {}
 
@@ -62,11 +62,11 @@ namespace syrec::applications {
             return it->second;
         }
 
-        unsigned operator()(const binary_numeric_expr& value) const {
-            unsigned lhs_value = value.get_lhs()->evaluate(map);
-            unsigned rhs_value = value.get_rhs()->evaluate(map);
+        unsigned operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
+            unsigned lhs_value = value->get_lhs()->evaluate(map);
+            unsigned rhs_value = value->get_rhs()->evaluate(map);
 
-            switch (value.get_op()) {
+            switch (value->get_op()) {
                 case numeric_expression::add: // +
                 {
                     return lhs_value + rhs_value;
@@ -98,10 +98,10 @@ namespace syrec::applications {
 
     class number::priv {
     public:
-        explicit priv(boost::variant<unsigned, std::string, boost::recursive_wrapper<binary_numeric_expr>> number):
+        explicit priv(std::variant<unsigned, std::string, std::unique_ptr<binary_numeric_expr>> number):
             number(std::move(number)) {}
 
-        boost::variant<unsigned, std::string, boost::recursive_wrapper<binary_numeric_expr>> number;
+        std::variant<unsigned, std::string, std::unique_ptr<binary_numeric_expr>> number;
     };
 
     number::number(unsigned value):
@@ -113,7 +113,7 @@ namespace syrec::applications {
     }
 
     number::number(const number::ptr& lhs, const unsigned op, const number::ptr& rhs):
-        d(new priv(binary_numeric_expr(lhs, op, rhs))) {
+        d(new priv(std::make_unique<binary_numeric_expr>(binary_numeric_expr(lhs, op, rhs)))) {
     }
 
     number::~number() {
@@ -121,30 +121,30 @@ namespace syrec::applications {
     }
 
     bool number::is_loop_variable() const {
-        return boost::get<std::string>(&d->number);
+        return std::holds_alternative<std::string>(d->number);
     }
 
     [[maybe_unused]] bool number::is_conjunction() const {
-        return boost::get<binary_numeric_expr>(&d->number);
+        return std::holds_alternative<std::unique_ptr<binary_numeric_expr>>(d->number);
     }
 
     bool number::is_constant() const {
-        return boost::get<unsigned>(&d->number);
+        return std::holds_alternative<unsigned>(d->number);
     }
 
     const std::string& number::variable_name() const {
-        return *boost::get<std::string>(&d->number);
+        return std::get<std::string>(d->number);
     }
 
     [[maybe_unused]] binary_numeric_expr* number::conjunction_expr() const {
-        return boost::get<binary_numeric_expr>(&d->number);
+        return std::get<std::unique_ptr<binary_numeric_expr>>(d->number).get();
     }
 
     unsigned number::evaluate(const loop_variable_mapping& map) const {
-        return boost::apply_visitor(evaluate_visitor(map), d->number);
+        return std::visit(evaluate_visitor(map), d->number);
     }
 
-    struct output_visitor: public boost::static_visitor<std::ostream&> {
+    struct output_visitor {
         explicit output_visitor(std::ostream& os):
             os(os) {}
 
@@ -156,10 +156,10 @@ namespace syrec::applications {
             return os << '$' << value;
         }
 
-        std::ostream& operator()(const binary_numeric_expr& value) const {
-            os << "( " << *value.get_lhs();
+        std::ostream& operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
+            os << "( " << *value->get_lhs();
 
-            switch (value.get_op()) {
+            switch (value->get_op()) {
                 case numeric_expression::add: // +
                 {
                     os << " + ";
@@ -184,7 +184,7 @@ namespace syrec::applications {
                     os << "Invalid Op";
             }
 
-            os << *value.get_rhs() << " )";
+            os << *value->get_rhs() << " )";
 
             return os;
         }
@@ -194,7 +194,7 @@ namespace syrec::applications {
     };
 
     std::ostream& operator<<(std::ostream& os, const number& n) {
-        return boost::apply_visitor(output_visitor(os), n.d->number);
+        return std::visit(output_visitor(os), n.d->number);
     }
 
 } // namespace syrec::applications

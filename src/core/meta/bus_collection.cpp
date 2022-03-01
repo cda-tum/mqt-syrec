@@ -75,13 +75,7 @@ namespace syrec {
     }
 
     [[maybe_unused]] bool bus_collection::has_bus(map::mapped_type::value_type line_index) const {
-        for (const map::value_type& p: d->buses) {
-            if (std::find(p.second.begin(), p.second.end(), line_index) != p.second.end()) {
-                return true;
-            }
-        }
-
-        return false;
+        return std::any_of(d->buses.cbegin(), d->buses.cend(), [&](const auto& p) { return std::find(p.second.begin(), p.second.end(), line_index) != p.second.end(); });
     }
 
     [[maybe_unused]] unsigned bus_collection::signal_index(unsigned line_index) const {

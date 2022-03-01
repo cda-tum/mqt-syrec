@@ -39,7 +39,7 @@ namespace syrec::applications {
         priv() = default;
 
         number::ptr value = nullptr;
-        unsigned    bitwidth;
+        unsigned    bitwidth{};
     };
 
     numeric_expression::numeric_expression():
@@ -114,7 +114,7 @@ namespace syrec::applications {
 
         expression::ptr lhs = nullptr;
         expression::ptr rhs = nullptr;
-        unsigned        op;
+        unsigned        op{};
     };
 
     binary_expression::binary_expression():
@@ -161,26 +161,12 @@ namespace syrec::applications {
     unsigned binary_expression::bitwidth() const {
         switch (d->op) {
             case logical_and:
-                return 1;
-
             case logical_or:
-                return 1;
-
             case less_than:
-                return 1;
-
             case greater_than:
-                return 1;
-
             case equals:
-                return 1;
-
             case not_equals:
-                return 1;
-
             case less_equals:
-                return 1;
-
             case greater_equals:
                 return 1;
 
@@ -270,7 +256,7 @@ namespace syrec::applications {
     public:
         priv() = default;
 
-        unsigned        op;
+        unsigned        op{};
         expression::ptr expr = nullptr;
     };
 
@@ -318,7 +304,7 @@ namespace syrec::applications {
 
         expression::ptr lhs = nullptr;
         number::ptr     rhs = nullptr;
-        unsigned        op;
+        unsigned        op{};
     };
 
     shift_expression::shift_expression():

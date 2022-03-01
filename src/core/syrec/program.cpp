@@ -17,12 +17,7 @@
 
 #include "core/syrec/program.hpp"
 
-#include <boost/assign/std/vector.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
 #include <iterator>
-
-using namespace boost::assign;
 
 namespace syrec::applications {
 
@@ -41,8 +36,8 @@ namespace syrec::applications {
         delete d;
     }
 
-    void program::add_module(module::ptr module) {
-        d->modules += module;
+    void program::add_module(const module::ptr& module) {
+        d->modules.emplace_back(module);
     }
 
     const module::vec& program::modules() const {
@@ -60,10 +55,10 @@ namespace syrec::applications {
     }
 
     std::ostream& operator<<(std::ostream& os, const program& p) {
-        using boost::adaptors::indirected;
-
         unsigned old_precision = os.precision(2u);
-        boost::copy(p.modules() | indirected, std::ostream_iterator<const module>(os));
+        for (const auto& module: p.modules()) {
+            os << *module;
+        }
         os.precision(old_precision);
 
         return os;

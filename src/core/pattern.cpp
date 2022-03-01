@@ -17,10 +17,6 @@
 
 #include "core/pattern.hpp"
 
-#include <boost/assign/std/vector.hpp>
-
-using namespace boost::assign;
-
 namespace syrec {
 
     class pattern::priv {
@@ -45,11 +41,11 @@ namespace syrec {
     }
 
     [[maybe_unused]] void pattern::add_input(const std::string& name) {
-        d->inputs += name;
+        d->inputs.emplace_back(name);
     }
 
     [[maybe_unused]] void pattern::add_pattern(const std::vector<unsigned>& pattern) {
-        d->patterns += pattern;
+        d->patterns.emplace_back(pattern);
     }
 
     [[maybe_unused]] const pattern::initializer_map& pattern::initializers() const {

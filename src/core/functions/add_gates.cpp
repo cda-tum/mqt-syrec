@@ -16,15 +16,9 @@
  */
 
 #include "core/functions/add_gates.hpp"
-
 #include "core/target_tags.hpp"
 
-#include <boost/assign/std/vector.hpp>
-//#include <boost/bind.hpp>
-//#include <boost/range/algorithm.hpp>
 #include <functional>
-
-using namespace boost::assign;
 
 namespace syrec {
 
@@ -207,11 +201,9 @@ namespace syrec {
         auto                                                    it      = modules.find(name);
         assert(it != modules.end());
 
-        //boost::for_each(controls, std::bind(&gate::add_control, &g, std::placeholders::_1));
         for (const auto& control: controls) {
             g.add_control(control);
         }
-        //boost::for_each(targets, std::bind(&gate::add_target, &g, std::placeholders::_1));
         for (const auto& target: targets) {
             g.add_target(target);
         }
@@ -223,7 +215,7 @@ namespace syrec {
         std::vector<unsigned> targets_sorted(targets.begin(), targets.end());
         std::sort(targets_sorted.begin(), targets_sorted.end());
         for (unsigned index: targets) {
-            module.target_sort_order += std::distance(targets_sorted.begin(), std::find(targets_sorted.begin(), targets_sorted.end(), index));
+            module.target_sort_order.emplace_back(std::distance(targets_sorted.begin(), std::find(targets_sorted.begin(), targets_sorted.end(), index)));
         }
 
         g.set_type(module);

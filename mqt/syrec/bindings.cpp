@@ -431,7 +431,7 @@ PYBIND11_MODULE(pysyrec, m) {
     //m.doc() = "pybind11 example plugin"; // optional module docstring
 
     m.def("py_syrec_synthesis", &syrec_synthesis);
-    m.def("py_simple_simulation", static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, properties::ptr, properties::ptr)>(simple_simulation));
+    m.def("py_simple_simulation", static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation));
     //m.def("py_syrec_synthesis_func", &syrec_synthesis_func);
     //m.def("py_syrec_synthesis", (bool (*)(circuit& circ, const applicationsprogram&, properties::ptr, properties::ptr)) &syrec_synthesis,"doc", pybind11::arg("circ"), //pybind11::arg("program"),pybind11::arg("settings")= properties::ptr(), pybind11::arg("statistics")= properties::ptr());
     //m.def("py_syrec_synthesis_func", (hdl_synthesis_func (*)(circuit& circ, const applicationsprogram&)) &syrec_synthesis_func);
@@ -577,9 +577,7 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type)
-            .def_property_readonly("module_name", gate_module_name)
-
-            ;
+            .def_property_readonly("module_name", gate_module_name);
 
     py::class_<dum::Dummy>(m, "Dummy")
             .def(py::init<>())

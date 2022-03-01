@@ -23,7 +23,8 @@
 #ifndef PROGRAM_HPP
 #define PROGRAM_HPP
 
-#include <core/syrec/module.hpp>
+#include "core/syrec/module.hpp"
+
 #include <vector>
 
 namespace syrec::applications {
@@ -65,7 +66,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_module(module::ptr module);
+        void add_module(const module::ptr& module);
 
         /**
        * @brief Returns all modules of the program

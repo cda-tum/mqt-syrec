@@ -16,18 +16,12 @@
  */
 
 #include "core/syrec/variable.hpp"
-
 #include "core/syrec/expression.hpp"
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
-#include <boost/format.hpp>
-#include <boost/range/adaptors.hpp>
 #include <optional>
 #include <tuple>
 #include <utility>
-
-using namespace boost::assign;
+#include <cassert>
 
 namespace syrec::applications {
 
@@ -35,11 +29,11 @@ namespace syrec::applications {
     public:
         priv() = default;
 
-        unsigned              type;
-        std::string           name;
-        unsigned              bitwidth;
-        variable::ptr         reference;
-        std::vector<unsigned> dimensions;
+        unsigned              type{};
+        std::string           name{};
+        unsigned              bitwidth{};
+        variable::ptr         reference = nullptr;
+        std::vector<unsigned> dimensions{};
     };
 
     variable::variable():
@@ -177,31 +171,25 @@ namespace syrec::applications {
         return d->indexes;
     }
 
-    struct to_array {
-        typedef std::string result_type;
-
-        std::string operator()(unsigned dimension) const {
-            return boost::str(boost::format("[%d]") % dimension);
-        }
-    };
-
     std::ostream& operator<<(std::ostream& os, const variable& v) {
-        using boost::adaptors::transformed;
 
-        std::vector<std::string> types;
-        types += "in", "out", "inout", "state", "wire";
+        std::vector<std::string> types{"in", "out", "inout", "state", "wire"};
 
-        os << std::string(os.precision(), ' ') << boost::format("%s %s%s(%d)") % types.at(v.type()) % v.name() % boost::join(v.dimensions() | transformed(to_array()), " ") % v.bitwidth();
+        os << std::string(os.precision(), ' ')
+           << types.at(v.type()) << " "
+           << v.name();
+        for (const auto& dim: v.dimensions()) {
+            os << "[" << dim << "] ";
+        }
+        os << "(" << v.bitwidth() << ")";
         return os;
     }
 
     std::ostream& operator<<(std::ostream& os, const variable_access& v) {
-        using boost::adaptors::indirected;
-
         os << v.var()->name();
 
-        for (const expression& expr: v.indexes() | indirected) {
-            os << "[" << expr << "]";
+        for (const auto& expr: v.indexes()) {
+            os << "[" << *expr << "]";
         }
 
         if (v.range()) {

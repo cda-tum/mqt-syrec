@@ -4,7 +4,7 @@
  * @file reverse_statements.hpp
  */
 
-#include <core/syrec/statement.hpp>
+#include "core/syrec/statement.hpp"
 
 namespace syrec::applications {
 

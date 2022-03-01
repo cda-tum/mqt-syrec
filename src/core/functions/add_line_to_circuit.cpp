@@ -17,10 +17,7 @@
 
 #include "core/functions/add_line_to_circuit.hpp"
 
-#include <boost/assign/std/vector.hpp>
 #include <vector>
-
-using namespace boost::assign;
 
 namespace syrec {
 
@@ -32,16 +29,16 @@ namespace syrec {
 
         circ.set_lines(circ.lines() + 1u);
 
-        ins += input;
+        ins.emplace_back(input);
         circ.set_inputs(ins);
 
-        outs += output;
+        outs.emplace_back(output);
         circ.set_outputs(outs);
 
-        cs += c;
+        cs.emplace_back(c);
         circ.set_constants(cs);
 
-        gar += g;
+        gar.emplace_back(g);
         circ.set_garbage(gar);
 
         return circ.lines() - 1u;

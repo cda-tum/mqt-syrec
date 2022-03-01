@@ -17,14 +17,8 @@
 
 #include "core/syrec/module.hpp"
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
 #include <iterator>
 #include <sstream>
-
-using namespace boost::assign;
 
 namespace syrec::applications {
 
@@ -58,16 +52,16 @@ namespace syrec::applications {
         return d->name;
     }
 
-    void module::add_parameter(variable::ptr parameter) {
-        d->parameters += parameter;
+    void module::add_parameter(const variable::ptr& parameter) {
+        d->parameters.emplace_back(parameter);
     }
 
     const variable::vec& module::parameters() const {
         return d->parameters;
     }
 
-    void module::add_variable(variable::ptr variable) {
-        d->variables += variable;
+    void module::add_variable(const variable::ptr& variable) {
+        d->variables.emplace_back(variable);
     }
 
     const variable::vec& module::variables() const {
@@ -90,8 +84,8 @@ namespace syrec::applications {
         return {};
     }
 
-    void module::add_statement(statement::ptr statement) {
-        d->statements += statement;
+    void module::add_statement(const statement::ptr& statement) {
+        d->statements.emplace_back(statement);
     }
 
     const statement::vec& module::statements() const {
@@ -112,12 +106,20 @@ namespace syrec::applications {
     };
 
     std::ostream& operator<<(std::ostream& os, const module& m) {
-        using boost::adaptors::indirected;
-        using boost::adaptors::transformed;
-
-        os << "module " << m.name() << "(" << boost::algorithm::join(m.parameters() | indirected | transformed(to_string()), ", ") << ")" << std::endl;
-        boost::copy(m.variables() | indirected, std::ostream_iterator<const variable>(os, "\n"));
-        boost::copy(m.statements() | indirected, std::ostream_iterator<const statement>(os));
+        os << "module " << m.name() << "(";
+        for (const auto& parameter: m.parameters()) {
+            if (parameter != m.parameters().front()) {
+                os << ", ";
+            }
+            os << to_string()(*parameter);
+        }
+        os << ")" << std::endl;
+        for (const auto& variable: m.variables()) {
+            os << *variable << "\n";
+        }
+        for (const auto& statement: m.statements()) {
+            os << *statement;
+        }
         return os;
     }
 

@@ -17,24 +17,16 @@
 
 #include "core/syrec/statement.hpp"
 
-#include <boost/algorithm/string/join.hpp>
-#include <boost/assign/std/vector.hpp>
-#include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
 #include <iterator>
 #include <utility>
 
-using namespace boost::assign;
-
 namespace syrec::applications {
-
-    using boost::adaptors::indirected;
 
     class statement::priv {
     public:
         priv() = default;
 
-        unsigned line_number;
+        unsigned line_number{};
     };
 
     statement::statement():
@@ -104,7 +96,7 @@ namespace syrec::applications {
     public:
         priv() = default;
 
-        unsigned             op;
+        unsigned             op{};
         variable_access::ptr var;
     };
 
@@ -164,7 +156,7 @@ namespace syrec::applications {
 
         variable_access::ptr lhs;
         expression::ptr      rhs;
-        unsigned             op;
+        unsigned             op{};
     };
 
     assign_statement::assign_statement():
@@ -253,16 +245,16 @@ namespace syrec::applications {
         return d->condition;
     }
 
-    void if_statement::add_then_statement(statement::ptr then_statement) {
-        d->then_statements += then_statement;
+    void if_statement::add_then_statement(const statement::ptr& then_statement) {
+        d->then_statements.emplace_back(then_statement);
     }
 
     const statement::vec& if_statement::then_statements() const {
         return d->then_statements;
     }
 
-    void if_statement::add_else_statement(statement::ptr else_statement) {
-        d->else_statements += else_statement;
+    void if_statement::add_else_statement(const statement::ptr& else_statement) {
+        d->else_statements.emplace_back(else_statement);
     }
 
     const statement::vec& if_statement::else_statements() const {
@@ -282,13 +274,13 @@ namespace syrec::applications {
         os.precision(indent + 2u);
 
         os << std::string(indent, ' ') << "if " << *d->condition << " then" << std::endl;
-
-        boost::copy(d->then_statements | indirected, std::ostream_iterator<const statement>(os));
-
+        for (const auto& statement: d->then_statements) {
+            os << *statement;
+        }
         os << std::string(indent, ' ') << "else" << std::endl;
-
-        boost::copy(d->else_statements | indirected, std::ostream_iterator<const statement>(os));
-
+        for (const auto& statement: d->else_statements) {
+            os << *statement;
+        }
         os << std::string(indent, ' ') << "fi " << *d->fi_condition << ";" << std::endl;
 
         os.precision(indent);
@@ -297,13 +289,12 @@ namespace syrec::applications {
 
     class for_statement::priv {
     public:
-        priv():
-            negative_step(false) {}
+        priv() = default;
 
         std::string                         loop_variable;
         std::pair<number::ptr, number::ptr> range;
         number::ptr                         step;
-        bool                                negative_step;
+        bool                                negative_step = false;
         statement::vec                      statements;
     };
 
@@ -339,8 +330,8 @@ namespace syrec::applications {
         return d->step;
     }
 
-    void for_statement::add_statement(statement::ptr statement) {
-        d->statements += statement;
+    void for_statement::add_statement(const statement::ptr& statement) {
+        d->statements.emplace_back(statement);
     }
 
     void for_statement::set_negative_step(bool negative_step) {
@@ -380,8 +371,9 @@ namespace syrec::applications {
         }
 
         os << " do" << std::endl;
-
-        boost::copy(d->statements | indirected, std::ostream_iterator<const statement>(os));
+        for (const auto& statement: d->statements) {
+            os << *statement;
+        }
 
         os << std::string(indent, ' ') << "rof"
            << ";" << std::endl;
@@ -434,7 +426,15 @@ namespace syrec::applications {
     }
 
     std::ostream& call_statement::print(std::ostream& os) const {
-        return os << std::string(os.precision(), ' ') << "call " << d->target->name() << "(" << boost::algorithm::join(d->parameters, ", ") << ");" << std::endl;
+        os << std::string(os.precision(), ' ') << "call " << d->target->name() << "(";
+        for (const auto& parameter: d->parameters) {
+            if (parameter != d->parameters.front()) {
+                os << ", ";
+            }
+            os << parameter;
+        }
+        os << ");" << std::endl;
+        return os;
     }
 
     class uncall_statement::priv {
@@ -481,7 +481,15 @@ namespace syrec::applications {
     }
 
     std::ostream& uncall_statement::print(std::ostream& os) const {
-        return os << std::string(os.precision(), ' ') << "uncall " << d->target->name() << "(" << boost::algorithm::join(d->parameters, ", ") << ");" << std::endl;
+        os << std::string(os.precision(), ' ') << "uncall " << d->target->name() << "(";
+        for (const auto& parameter: d->parameters) {
+            if (parameter != d->parameters.front()) {
+                os << ", ";
+            }
+            os << parameter;
+        }
+        os << ");" << std::endl;
+        return os;
     }
 
     skip_statement::~skip_statement() = default;

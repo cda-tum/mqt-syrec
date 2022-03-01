@@ -23,7 +23,8 @@
 #ifndef EXPRESSION_HPP
 #define EXPRESSION_HPP
 
-#include <core/syrec/variable.hpp>
+#include "core/syrec/variable.hpp"
+
 #include <iostream>
 #include <memory>
 

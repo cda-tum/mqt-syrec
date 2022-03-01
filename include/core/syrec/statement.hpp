@@ -23,9 +23,10 @@
 #ifndef STATEMENT_HPP
 #define STATEMENT_HPP
 
-#include <core/syrec/expression.hpp>
-#include <core/syrec/module.hpp>
-#include <core/syrec/variable.hpp>
+#include "core/syrec/expression.hpp"
+#include "core/syrec/module.hpp"
+#include "core/syrec/variable.hpp"
+
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -538,7 +539,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_then_statement(statement::ptr then_statement);
+        void add_then_statement(const statement::ptr& then_statement);
 
         /**
        * @brief Returns all statements in the if branch
@@ -558,7 +559,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_else_statement(statement::ptr else_statement);
+        void add_else_statement(const statement::ptr& else_statement);
 
         /**
        * @brief Returns all statements in the else branch
@@ -741,7 +742,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_statement(statement::ptr statement);
+        void add_statement(const statement::ptr& statement);
 
         /**
        * @brief Returns the statements to be executed in the loop

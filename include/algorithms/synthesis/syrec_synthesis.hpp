@@ -144,7 +144,7 @@ namespace syrec {
         //new
         //[[maybe_unused]] bool findDuplicates();
         //[[maybe_unused]] bool findInVector(std::vector<std::vector<unsigned>> vecOfElements, std::vector<unsigned> element);
-        bool check_repeats();
+        static bool check_repeats();
 
         [[maybe_unused]] bool maj_2(unsigned in1, unsigned in2);
         [[maybe_unused]] bool maj(unsigned in1, unsigned in2, unsigned in3);

@@ -313,8 +313,8 @@ namespace syrec {
    * @since  1.0
    */
     bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                           properties::ptr settings   = properties::ptr(),
-                           properties::ptr statistics = properties::ptr());
+                           const properties::ptr& settings   = properties::ptr(),
+                           const properties::ptr& statistics = properties::ptr());
 
     /**
    * @brief Functor for the \ref syrec::simple_simulation "simple_simulation" algorithm

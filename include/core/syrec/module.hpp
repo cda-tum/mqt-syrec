@@ -23,8 +23,9 @@
 #ifndef MODULE_HPP
 #define MODULE_HPP
 
-#include <core/syrec/statement.hpp>
-#include <core/syrec/variable.hpp>
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -116,7 +117,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_parameter(variable::ptr parameter);
+        void add_parameter(const variable::ptr& parameter);
 
         /**
        * @brief Returns all parameters of the module
@@ -136,7 +137,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_variable(variable::ptr variable);
+        void add_variable(const variable::ptr& variable);
 
         /**
        * @brief Returns all variables of the module
@@ -170,7 +171,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_statement(std::shared_ptr<statement> statement);
+        void add_statement(const std::shared_ptr<statement>& statement);
 
         /**
        * @brief Returns all statements of the module
