@@ -25,19 +25,9 @@
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
 
-#include <boost/assign/std/set.hpp>
-#include <boost/assign/std/vector.hpp>
-//#include <boost/foreach.hpp>
-#include <boost/format.hpp>
-#include <boost/range/algorithm.hpp>
-#include <boost/range/algorithm_ext/erase.hpp>
 #include <fstream>
 #include <memory>
 #include <optional>
-
-//#define foreach_ BOOST_FOREACH
-
-using namespace boost::assign;
 
 namespace syrec {
 
@@ -71,7 +61,7 @@ namespace syrec {
         number::ptr operator()(const ast_variable& ast_var) const {
             variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
             if (!var) {
-                context.error_message = boost::str(boost::format("Unknown variable %s") % ast_var.name);
+                context.error_message = "Unknown variable " + ast_var.name;
                 return {};
             }
 
@@ -79,10 +69,10 @@ namespace syrec {
         }
 
         number::ptr operator()(const std::string& loop_variable) const {
-            if (boost::find(context.loop_variables, loop_variable) != context.loop_variables.end()) {
+            if (std::find(context.loop_variables.begin(), context.loop_variables.end(), loop_variable) != context.loop_variables.end()) {
                 return std::make_shared<number>(loop_variable);
             } else {
-                context.error_message = boost::str(boost::format("Unkown loop variable $%s") % loop_variable);
+                context.error_message = "Unkown loop variable $" + loop_variable;
                 return {};
             }
         }
@@ -159,7 +149,7 @@ namespace syrec {
         variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
 
         if (!var) {
-            context.error_message = boost::str(boost::format("Unknown variable %s") % ast_var.name);
+            context.error_message = "Unknown variable %s" + ast_var.name;
             return {};
         }
 
@@ -177,7 +167,7 @@ namespace syrec {
             if (!first->is_loop_variable()) {
                 unsigned bound = first->evaluate(number::loop_variable_mapping());
                 if (bound >= var->bitwidth()) {
-                    context.error_message = boost::str(boost::format("Bound %d out of range in variable %s(%d)") % bound % var->name() % var->bitwidth());
+                    context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name() + "(" + std::to_string(var->bitwidth()) + ")";
                     return {};
                 }
             }
@@ -192,7 +182,7 @@ namespace syrec {
                 if (!second->is_loop_variable()) {
                     unsigned bound = second->evaluate(number::loop_variable_mapping());
                     if (bound >= var->bitwidth()) {
-                        context.error_message = boost::str(boost::format("Bound %d out of range in variable %s(%d)") % bound % var->name() % var->bitwidth());
+                        context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name() + "(" + std::to_string(var->bitwidth()) + ")";
                         return {};
                     }
                 }
@@ -205,7 +195,7 @@ namespace syrec {
 
         // indexes
         if (var->dimensions().size() != ast_var.indexes.size()) {
-            context.error_message = boost::str(boost::format("Invalid number of array indexes in variable %s. Expected %d, got %d") % var->name() % var->dimensions().size() % ast_var.indexes.size());
+            context.error_message = "Invalid number of array indexes in variable " + var->name() + ". Expected " + std::to_string(var->dimensions().size()) + ", got " + std::to_string(ast_var.indexes.size());
             return {};
         }
 
@@ -213,7 +203,7 @@ namespace syrec {
         for (const ast_expression& ast_exp: ast_var.indexes) {
             expression::ptr index = parse_expression(ast_exp, proc, var->bitwidth(), context);
             if (!index) return {};
-            indexes += index;
+            indexes.emplace_back(index);
         }
         va->set_indexes(indexes);
 
@@ -326,7 +316,7 @@ namespace syrec {
 
                             case binary_expression::frac_divide: // *>
                             {
-                                std::cerr << boost::format("Operator *> is undefined for numbers w/o specified bit width: ( %d *> %d )") % lhs_value % rhs_value << std::endl;
+                                std::cerr << "Operator *> is undefined for numbers w/o specified bit width: ( " + std::to_string(lhs_value) + " *> " + std::to_string(rhs_value) + " )" << std::endl;
                                 assert(false);
                                 return nullptr;
                             } break;
@@ -437,7 +427,7 @@ namespace syrec {
                         return new numeric_expression(std::make_shared<number>(value), 1);
                     }
                 } else if (op == unary_expression::bitwise_not) {
-                    std::cerr << boost::format("Bitwise NOT is undefined for numbers w/o specified bit width: ~%s") % *expr << std::endl;
+                    std::cerr << "Bitwise NOT is undefined for numbers w/o specified bit width: ~" << *expr << std::endl;
                     assert(false);
                     return nullptr;
                 }
@@ -520,7 +510,7 @@ namespace syrec {
             if (!va2) return nullptr;
 
             if (va1->bitwidth() != va2->bitwidth()) {
-                std::cerr << boost::format("Different bit-widths in <=> statement: %s (%d), %s (%d)") % va1->var()->name() % va1->bitwidth() % va2->var()->name() % va2->bitwidth() << std::endl;
+                std::cerr << "Different bit-widths in <=> statement: " + va1->var()->name() + " (" + std::to_string(va1->bitwidth()) + "), " + va2->var()->name() + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
                 assert(false);
                 return nullptr;
             }
@@ -563,7 +553,7 @@ namespace syrec {
             if (!rhs) return nullptr;
 
             if (lhs->bitwidth() != rhs->bitwidth()) {
-                context.error_message = boost::str(boost::format("Wrong bit-width in assignment to %s") % lhs->var()->name());
+                context.error_message = "Wrong bit-width in assignment to " + lhs->var()->name();
                 return nullptr;
             }
 
@@ -613,14 +603,14 @@ namespace syrec {
                     loop_variable = *bf::at_c<0>(*ast_for_stat.from);
 
                     // does the loop variable exist already?
-                    if (boost::find(context.loop_variables, loop_variable) != context.loop_variables.end()) {
-                        context.error_message = boost::str(boost::format("Redefinition of loop variable $%s") % loop_variable);
+                    if (std::find(context.loop_variables.begin(), context.loop_variables.end(), loop_variable) != context.loop_variables.end()) {
+                        context.error_message = "Redefinition of loop variable $" + loop_variable;
                         return nullptr;
                     }
 
                     for_stat->set_loop_variable(loop_variable);
 
-                    context.loop_variables += loop_variable;
+                    context.loop_variables.emplace_back(loop_variable);
                 }
             }
 
@@ -646,7 +636,7 @@ namespace syrec {
 
             if (!loop_variable.empty()) {
                 // release loop variable
-                boost::remove_erase(context.loop_variables, loop_variable);
+                context.loop_variables.erase(std::remove_if(context.loop_variables.begin(), context.loop_variables.end(), [&](const auto& s) { return s == loop_variable; }), context.loop_variables.end());
             }
 
             return for_stat;
@@ -658,7 +648,7 @@ namespace syrec {
 
             // found no module
             if (!other_proc.get()) {
-                context.error_message = boost::str(boost::format("Unknown module %s") % proc_name);
+                context.error_message = "Unknown module " + proc_name;
                 return nullptr;
             }
 
@@ -666,14 +656,14 @@ namespace syrec {
 
             // wrong number of parameters
             if (parameters.size() != other_proc->parameters().size()) {
-                context.error_message = boost::str(boost::format("Wrong number of arguments in (un)call of %s. Expected %d, got %d") % other_proc->name() % other_proc->parameters().size() % parameters.size());
+                context.error_message = "Wrong number of arguments in (un)call of " + other_proc->name() + ". Expected " + std::to_string(other_proc->parameters().size()) + ", got " + std::to_string(parameters.size());
                 return nullptr;
             }
 
             // unknown variable name in parameters
             for (const std::string& parameter: parameters) {
                 if (!proc.find_parameter_or_variable(parameter)) {
-                    context.error_message = boost::str(boost::format("Unknown variable %s in (un)call of %s") % parameter % other_proc->name());
+                    context.error_message = "Unknown variable " + parameter + " in (un)call of " + other_proc->name();
                     return nullptr;
                 }
             }
@@ -684,7 +674,7 @@ namespace syrec {
                 variable::ptr parameter = proc.find_parameter_or_variable(parameters.at(i)); // must exist (see above)
 
                 if (vOther->bitwidth() != parameter->bitwidth()) {
-                    context.error_message = boost::str(boost::format("%d. parameter (%s) in (un)call of %s has bit-width of %d, but %d is required") % (i + 1) % parameters.at(i) % other_proc->name() % parameter->bitwidth() % vOther->bitwidth());
+                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name() + " has bit-width of " + std::to_string(parameter->bitwidth()) + ", but " + std::to_string(vOther->bitwidth()) + " is required";
                     return nullptr;
                 }
             }
@@ -739,11 +729,11 @@ namespace syrec {
         for (const ast_parameter& ast_param: bf::at_c<1>(ast_proc)) {
             const std::string& variable_name = bf::at_c<0>(bf::at_c<1>(ast_param));
 
-            if (boost::find(variable_names, variable_name) != variable_names.end()) {
-                context.error_message = boost::str(boost::format("Redefinition of variable %s") % variable_name);
+            if (variable_names.find(variable_name) != variable_names.end()) {
+                context.error_message = "Redefinition of variable " + variable_name;
                 return false;
             } else {
-                variable_names += variable_name;
+                variable_names.emplace(variable_name);
             }
 
             unsigned type = parse_variable_type(bf::at_c<0>(ast_param));
@@ -760,11 +750,11 @@ namespace syrec {
             for (const ast_variable_declaration& ast_decl: bf::at_c<1>(ast_decls)) {
                 const std::string& variable_name = bf::at_c<0>(ast_decl);
 
-                if (boost::find(variable_names, variable_name) != variable_names.end()) {
-                    context.error_message = boost::str(boost::format("Redefinition of variable %s") % variable_name);
+                if (variable_names.find(variable_name) != variable_names.end()) {
+                    context.error_message = "Redefinition of variable " + variable_name;
                     return false;
                 } else {
-                    variable_names += variable_name;
+                    variable_names.emplace(variable_name);
                 }
 
                 proc.add_variable(std::make_shared<variable>(
@@ -799,7 +789,7 @@ namespace syrec {
             module::ptr proc(new module(bf::at_c<0>(ast_proc)));
             if (!parse_module(*proc, ast_proc, prog, context)) {
                 if (error != nullptr) {
-                    *error = boost::str(boost::format("In line %d: %s") % context.current_line_number % context.error_message);
+                    *error = "In line " + std::to_string(context.current_line_number) + ": " + context.error_message;
                 }
                 return false;
             }
