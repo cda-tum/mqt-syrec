@@ -39,8 +39,6 @@ def read_program( prog, filename, default_bitwidth = 32 ):
 
 ### ALGORITHMS
 def syrec_synthesis( circ, prog, variable_name_format = "%1$s%3$s.%2$d", main_module = "", if_realization = 0, efficient_controls = True, modules_hierarchy = False ):
-    # TODO implement functor
-    "SyReC Synthesis"
 
     settings = properties()
 

@@ -34,7 +34,6 @@ namespace syrec::applications {
 
             if_stat->set_fi_condition(stat_2->condition());
 
-            // TODO: ohne Schleife (neue add-Funktionen notwendig)
             for (auto it = stat_2->then_statements().rbegin(); it != stat_2->then_statements().rend(); ++it) {
                 if_stat->add_then_statement(*it);
             }
@@ -42,24 +41,23 @@ namespace syrec::applications {
                 if_stat->add_else_statement(*it);
             }
 
-            return statement::ptr(if_stat); // TODO: ist das korrekt (auch s.u. beim FOR).
+            return statement::ptr(if_stat);
         } else if (auto* stat_3 = dynamic_cast<for_statement*>(_statement.get())) {
             auto* for_stat = new for_statement();
 
             for_stat->set_loop_variable(stat_3->loop_variable());
 
-            for_stat->set_range(std::make_pair(stat_3->range().second, stat_3->range().first)); // TODO: das geht doch sicher auch einfacher
+            for_stat->set_range(std::make_pair(stat_3->range().second, stat_3->range().first));
 
             for_stat->set_step(stat_3->step());
 
             for_stat->set_negative_step(!stat_3->is_negative_step());
 
-            // TODO: einfacher
             for (auto it = stat_3->statements().rbegin(); it != stat_3->statements().rend(); ++it) {
                 for_stat->add_statement(*it);
             }
 
-            return statement::ptr(for_stat); // TODO: hier ist FOR (v.o.)
+            return statement::ptr(for_stat);
         } else if (auto* stat_4 = dynamic_cast<call_statement*>(_statement.get())) {
             return statement::ptr(new uncall_statement(stat_4->target(), stat_4->parameters()));
         } else if (auto* stat_5 = dynamic_cast<uncall_statement*>(_statement.get())) {

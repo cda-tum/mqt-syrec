@@ -403,7 +403,6 @@ namespace syrec {
             // double negative elimination
             if (auto* sub_expr = dynamic_cast<unary_expression*>(expr.get())) {
                 if (((op == unary_expression::bitwise_not) && (sub_expr->op() == unary_expression::bitwise_not)) || ((sub_expr->expr()->bitwidth() == 1u) && ((op == unary_expression::bitwise_not) || (op == unary_expression::logical_not)) && ((sub_expr->op() == unary_expression::bitwise_not) || (sub_expr->op() == unary_expression::logical_not)))) {
-                    //TODO geht das auch einfacher?
                     if (numeric_expression* ep = dynamic_cast<numeric_expression*>(sub_expr->expr().get())) {
                         return new numeric_expression(ep->value(), ep->bitwidth());
                     }

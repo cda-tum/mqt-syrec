@@ -157,8 +157,7 @@ class CircuitView( QGraphicsView ):
 
     def setupActions( self ):
         path = os.path.realpath( os.path.abspath( __file__ ) )
-        path = path.replace( os.path.basename( __file__ ), '../tools/icons/' ) # TODO
-
+        path = path.replace( os.path.basename( __file__ ), '../tools/icons/' )
         self.latexToClipboardAction = QAction( QIcon( path + 'text-x-tex.png' ), '&LaTeX to Clipboard', self )
 
         #self.connect( self.latexToClipboardAction, SIGNAL( 'triggered()' ), self.latexToClipboard )
@@ -268,7 +267,7 @@ class CircuitView( QGraphicsView ):
             self.outputs[i].setPlainText( self.circ.outputs[i] )
             self.lines[i].clear_simulation_results()
 
-    def wheelEvent( self, event ):
+    def wheelEvent( self, event ): # TODO
         factor = 1.2
         if event.angleDelta().y() < 0 or event.angleDelta().x() < 0:
             factor = 1.0/factor
@@ -282,7 +281,7 @@ class CircuitView( QGraphicsView ):
         print("Zoom Widget Entered")
         if self.zoom_widget is None:
             path = os.path.realpath( os.path.abspath( __file__ ) )
-            path = path.replace( os.path.basename( __file__ ), '../tools/icons/' ) # TODO
+            path = path.replace( os.path.basename( __file__ ), '../tools/icons/' )
 
             self.zoom_widget = QWidget( self )
 
@@ -511,10 +510,8 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        # TODO : Change Name of syrec_programi to syrec_program
         prog = syrec_program()
 
-        # TODO : Change Name of read_programi to read_program
         error_string = read_program( prog, "/tmp/out.src" )
 
         if error_string == "PARSE_STRING_FAILED":
@@ -527,7 +524,6 @@ class SyReCEditor(QWidget):
                 self.build_failed( error_string )
             return
 
-        # TODO : Change Name of circuiti to circuit
         circ = circuit()
 
         syrec_synthesis( circ, prog )
@@ -549,10 +545,8 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        # TODO : Change Name of syrec_programi to syrec_program
         prog = syrec_program()
 
-        # TODO : Change Name of read_programi to read_program
         error_string = read_program(prog, "/tmp/out.src" )
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None :
@@ -564,17 +558,14 @@ class SyReCEditor(QWidget):
                 self.build_failed( error_string )
             return
 
-        # TODO : Change Name of circuiti to circuit
         circ = circuit()
         syrec_synthesis(circ, prog)
         
         gates = circ.num_gates
         lines = circ.lines
 
-        # TODO : Change Name of quantum_costsi to quantum_costs
         qc = quantum_costs(circ, circ.lines)
 
-        # TODO : Change Name of transistor_costsi to transistor_costs
         tc = transistor_costs(circ, circ.lines)
 
         temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
