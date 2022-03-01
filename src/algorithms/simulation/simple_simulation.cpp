@@ -17,11 +17,10 @@
 
 #include "algorithms/simulation/simple_simulation.hpp"
 
-//#include <boost/bind.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <core/gate.hpp>
-#include <core/target_tags.hpp>
-#include <core/utils/timer.hpp>
+#include "core/gate.hpp"
+#include "core/target_tags.hpp"
+#include "core/utils/timer.hpp"
+
 #include <utility>
 
 namespace syrec {

@@ -19,7 +19,6 @@
 #ifndef GRAMMAR_HPP
 #define GRAMMAR_HPP
 
-#include <boost/config/warning_disable.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -28,8 +27,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/variant.hpp>
 #include <iostream>
+#include <variant>
 
 // Custom Parser iterator
 namespace syrec::applications::parser {
@@ -86,8 +85,8 @@ namespace syrec::applications {
     struct ast_for_statement;
 
     typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
-    typedef boost::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                      ast_number;
-    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, boost::optional<syrec::applications::ast_number>>>                                                                                           ast_range;
+    typedef std::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                        ast_number;
+    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, std::optional<syrec::applications::ast_number>>>                                                                                             ast_range;
     typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
     typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
     typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
@@ -144,8 +143,8 @@ namespace syrec::applications {
     };
 
     struct ast_for_statement {
-        typedef boost::optional<boost::fusion::vector<boost::optional<std::string>, ast_number>> from_t;
-        typedef boost::optional<boost::fusion::vector<boost::optional<char>, ast_number>>        step_t;
+        typedef boost::optional<boost::fusion::vector<std::optional<std::string>, ast_number>> from_t;
+        typedef boost::optional<boost::fusion::vector<std::optional<char>, ast_number>>        step_t;
 
         from_t                     from;
         ast_number                 to;
@@ -292,12 +291,6 @@ namespace syrec {
                 using namespace qi::labels;
                 using boost::phoenix::construct;
                 using boost::phoenix::val;
-
-                /*on_error<fail>
-        (
-         program_rule,
-         std::cout << val( "Error! Expecting " ) << _4 << val( " here: \"" ) << construct<std::string>( _3, _2 ) << val( "\"" ) << std::endl
-         );*/
             }
 
             qi::rule<Iterator, ast_program(), qi::locals<std::string>, SpaceT>               program_rule;
@@ -343,11 +336,14 @@ namespace syrec {
         }
     } // namespace applications
 
-    bool parse(applications::ast_program& prog, const std::string& filename);
-    bool parse_string(applications::ast_program& prog, const std::string& program);
+    inline bool parse_string(applications::ast_program& prog, const std::string& program) {
+        if (!applications::parse(prog, program.begin(), program.end())) {
+            return false;
+        }
+
+        return true;
+    }
 
 } // namespace syrec
-
-/** @endcond */
 
 #endif /* GRAMMAR_HPP */

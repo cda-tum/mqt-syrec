@@ -1,30 +1,21 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 
-#include <boost/assign/std/vector.hpp>
+#include "core/functions/add_gates.hpp"
+#include "core/functions/add_line_to_circuit.hpp"
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/reverse_statements.hpp"
+#include "core/syrec/variable.hpp"
+#include "core/utils/timer.hpp"
+
 #include <boost/dynamic_bitset.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/range/adaptors.hpp>
-#include <boost/range/algorithm.hpp>
-#include <boost/range/algorithm_ext/push_back.hpp>
-#include <boost/range/irange.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <cmath>
-#include <core/functions/add_gates.hpp>
-#include <core/functions/add_line_to_circuit.hpp>
-#include <core/syrec/expression.hpp>
-#include <core/syrec/program.hpp>
-#include <core/syrec/reverse_statements.hpp>
-#include <core/syrec/variable.hpp>
-#include <core/utils/timer.hpp>
 #include <functional>
 #include <memory>
 #include <numeric>
-
-#define reverse_foreach_ BOOST_REVERSE_FOREACH
-
-using namespace boost::assign;
 
 namespace syrec {
     static std::stack<unsigned>               exp_opp;
@@ -893,8 +884,7 @@ return ok;
     }
 
     bool standard_syrec_synthesizer::on_statement(const applications::for_statement& statement) {
-        applications::number::ptr nfrom, nto;
-        boost::tie(nfrom, nto) = statement.range();
+        auto [nfrom, nto] = statement.range();
 
         unsigned from = nfrom ? nfrom->evaluate(loop_map) : 1u; // default value is 1u
         unsigned to   = nto->evaluate(loop_map);
@@ -950,14 +940,16 @@ return ok;
             std::vector<unsigned> targets;
             for (const std::string& parameter: statement.parameters()) {
                 applications::variable::ptr var = modules.top()->find_parameter_or_variable(parameter);
-                boost::push_back(targets, boost::irange(_var_lines[var], _var_lines[var] + var->bitwidth()));
+                for (std::size_t v = 0U; v < var->bitwidth(); ++v) {
+                    targets.emplace_back(_var_lines[var] + v);
+                }
             }
 
             // now constant lines (they are always in order)
             const circuit& module = *(_circ.modules().find(module_name)->second);
             for (const constant& c: module.constants()) {
                 if (c) {
-                    targets += get_constant_line(*c);
+                    targets.emplace_back(get_constant_line(*c));
                 }
             }
 
@@ -968,9 +960,9 @@ return ok;
             for (const constant& c: module.constants()) {
                 if (c) {
                     if (module.outputs().at(i) == "const_0") {
-                        free_const_lines_map[false] += targets.at(i);
+                        free_const_lines_map[false].emplace_back(targets.at(i));
                     } else if (module.outputs().at(i) == "const_1") {
-                        free_const_lines_map[true] += targets.at(i);
+                        free_const_lines_map[true].emplace_back(targets.at(i));
                     }
                 }
 
@@ -1162,14 +1154,14 @@ return ok;
 
             case applications::binary_expression::logical_and: // &&
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 conjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
 
             case applications::binary_expression::logical_or: // ||
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 disjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
@@ -1190,42 +1182,42 @@ return ok;
 
             case applications::binary_expression::less_than: // <
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 less_than(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::greater_than: // >
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 greater_than(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::equals: // =
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::not_equals: // !=
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 not_equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::less_equals: // <=
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 less_equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::greater_equals: // >=
             {
-                lines += get_constant_line(true);
+                lines.emplace_back(get_constant_line(true));
 
                 greater_equals(lines.at(0), lhs, rhs);
             } break;
@@ -1318,7 +1310,7 @@ return ok;
             case applications::binary_expression::logical_and: // &&
             {
                 std::vector<unsigned> extra_lines_5;
-                extra_lines_5 += get_constant_line(true);
+                extra_lines_5.emplace_back(get_constant_line(true));
 
                 conjunction(extra_lines_5.at(0), extra_lines_5.at(0), extra_lines_5.at(0));
                 lines = extra_lines_5;
@@ -1327,7 +1319,7 @@ return ok;
             case applications::binary_expression::logical_or: // ||
             {
                 std::vector<unsigned> extra_lines_6;
-                extra_lines_6 += get_constant_line(true);
+                extra_lines_6.emplace_back(get_constant_line(true));
 
                 disjunction(extra_lines_6.at(0), extra_lines_6.at(0), extra_lines_6.at(0));
                 lines = extra_lines_6;
@@ -1356,7 +1348,7 @@ return ok;
             case applications::binary_expression::less_than: // <
             {
                 std::vector<unsigned> extra_lines_9;
-                extra_lines_9 += get_constant_line(true);
+                extra_lines_9.emplace_back(get_constant_line(true));
 
                 less_than(extra_lines_9.at(0), lhs, rhs);
                 lines = extra_lines_9;
@@ -1365,7 +1357,7 @@ return ok;
             case applications::binary_expression::greater_than: // >
             {
                 std::vector<unsigned> extra_lines_10;
-                extra_lines_10 += get_constant_line(true);
+                extra_lines_10.emplace_back(get_constant_line(true));
 
                 greater_than(extra_lines_10.at(0), lhs, rhs);
                 lines = extra_lines_10;
@@ -1374,7 +1366,7 @@ return ok;
             case applications::binary_expression::equals: // =
             {
                 std::vector<unsigned> extra_lines_11;
-                extra_lines_11 += get_constant_line(true);
+                extra_lines_11.emplace_back(get_constant_line(true));
 
                 equals(extra_lines_11.at(0), lhs, rhs);
                 lines = extra_lines_11;
@@ -1383,7 +1375,7 @@ return ok;
             case applications::binary_expression::not_equals: // !=
             {
                 std::vector<unsigned> extra_lines_12;
-                extra_lines_12 += get_constant_line(true);
+                extra_lines_12.emplace_back(get_constant_line(true));
 
                 not_equals(extra_lines_12.at(0), lhs, rhs);
                 lines = extra_lines_12;
@@ -1392,7 +1384,7 @@ return ok;
             case applications::binary_expression::less_equals: // <=
             {
                 std::vector<unsigned> extra_lines_13;
-                extra_lines_13 += get_constant_line(true);
+                extra_lines_13.emplace_back(get_constant_line(true));
 
                 less_equals(extra_lines_13.at(0), lhs, rhs);
                 lines = extra_lines_13;
@@ -1401,7 +1393,7 @@ return ok;
             case applications::binary_expression::greater_equals: // >=
             {
                 std::vector<unsigned> extra_lines_14;
-                extra_lines_14 += get_constant_line(true);
+                extra_lines_14.emplace_back(get_constant_line(true));
 
                 greater_equals(extra_lines_14.at(0), lhs, rhs);
                 lines = extra_lines_14;
@@ -1750,7 +1742,7 @@ return ok;
         unsigned bitwidth = src.size();
 
         // set module name and check whether it exists already
-        std::string module_name          = boost::str(boost::format("increase_%d") % bitwidth);
+        std::string module_name          = "increase_" + std::to_string(bitwidth);
         bool        circ_has_module      = _circ.modules().find(module_name) != _circ.modules().end();
         bool        tree_circ_has_module = get(boost::vertex_name, cct_man.tree)[cct_man.current].circ->modules().find(module_name) != get(boost::vertex_name, cct_man.tree)[cct_man.current].circ->modules().end();
 
@@ -1759,32 +1751,32 @@ return ok;
             // signals src .. dest
             circuit c_increase(bitwidth * 2); // TODO inputs and outputs
 
-            for (unsigned i: boost::irange(1u, bitwidth)) {
+            for (unsigned i = 1U; i < bitwidth; ++i) {
                 append_cnot(c_increase, i, bitwidth + i);
             }
 
             if (bitwidth >= 2u) {
-                reverse_foreach_(unsigned i, boost::irange(1u, bitwidth - 1u)) {
+                for (unsigned i = bitwidth - 2U; i > 0; --i) {
                     append_cnot(c_increase, i, i + 1);
                 }
             }
 
-            for (unsigned i: boost::irange(0u, bitwidth - 1u)) {
+            for (unsigned i = 0U; i < bitwidth - 1U; ++i) {
                 append_toffoli(c_increase)(i, bitwidth + i)(i + 1);
             }
 
-            reverse_foreach_(unsigned i, boost::irange(1u, bitwidth)) {
+            for (unsigned i = bitwidth - 1U; i > 0; --i) {
                 append_cnot(c_increase, i, bitwidth + i);
                 append_toffoli(c_increase)(bitwidth + i - 1, i - 1)(i);
             }
 
             if (bitwidth >= 2u) {
-                for (unsigned i: boost::irange(1u, bitwidth - 1u)) {
+                for (unsigned i = 1U; i < bitwidth - 1U; ++i) {
                     append_cnot(c_increase, i, i + 1);
                 }
             }
 
-            for (unsigned i: boost::irange(0u, bitwidth)) {
+            for (unsigned i = 0U; i < bitwidth; ++i) {
                 append_cnot(c_increase, i, bitwidth + i);
             }
 
@@ -1797,9 +1789,8 @@ return ok;
             }
         }
 
-        std::vector<unsigned> targets;
-        boost::push_back(targets, src);
-        boost::push_back(targets, dest);
+        std::vector<unsigned> targets {src.begin(), src.end()};
+        targets.insert(targets.end(), dest.begin(), dest.end());
         append_module(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), module_name, gate::line_container(), targets);
         return true;
     }
@@ -2323,7 +2314,7 @@ return ok;
 
             // check if it is all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)boost::count_if(var->indexes(), is_type<applications::numeric_expression>()) == n) {
+            if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), is_type<applications::numeric_expression>()) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<applications::numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(loop_map) *
                               std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
@@ -2337,24 +2328,23 @@ return ok;
         }
 
         if (var->range()) {
-            applications::number::ptr nfirst, nsecond;
-            boost::tie(nfirst, nsecond) = *var->range();
+            auto [nfirst, nsecond] = *var->range();
 
             unsigned first  = nfirst->evaluate(loop_map);
             unsigned second = nsecond->evaluate(loop_map);
 
             if (first < second) {
                 for (unsigned i = first; i <= second; ++i) {
-                    lines += offset + i;
+                    lines.emplace_back(offset + i);
                 }
             } else {
                 for (int i = (int)first; i >= (int)second; --i) {
-                    lines += offset + i;
+                    lines.emplace_back(offset + i);
                 }
             }
         } else {
             for (unsigned i = 0u; i < var->var()->bitwidth(); ++i) {
-                lines += offset + i;
+                lines.emplace_back(offset + i);
             }
         }
         return true;
@@ -2368,7 +2358,7 @@ return ok;
 
             // check if it is not all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)boost::count_if(var->indexes(), is_type<applications::numeric_expression>()) != n) {
+            if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), is_type<applications::numeric_expression>()) != n) {
                 array_swapping(offset, var->var()->dimensions(), var->indexes(), var->var()->bitwidth(), lines);
             }
         }
@@ -2401,7 +2391,7 @@ return ok;
         if (indexes.empty()) {
             std::vector<unsigned> dest_lines;
             for (unsigned i = 0; i < bitwidth; ++i) {
-                dest_lines += offset + i;
+                dest_lines.emplace_back(offset + i);
             }
             return swap(dest_lines, lines);
         }
@@ -2467,7 +2457,7 @@ return ok;
         boost::dynamic_bitset<> number(bitwidth, value);
 
         for (unsigned i = 0u; i < bitwidth; ++i) {
-            lines += get_constant_line(number.test(i));
+            lines.emplace_back(get_constant_line(number.test(i)));
         }
 
         return true;
@@ -2497,8 +2487,10 @@ return ok;
 
             // busses
             std::vector<unsigned> affected_lines;
-            boost::push_back(affected_lines, boost::irange(circ.lines() - var->bitwidth(), circ.lines()));
-            std::string name = boost::str(boost::format("%s%s") % var->name() % arraystr);
+            for (std::size_t i= circ.lines() - var->bitwidth(); i < circ.lines(); ++i) {
+                affected_lines.emplace_back(i);
+            }
+            std::string name = var->name() + arraystr;
 
             if (var->type() == applications::variable::in || var->type() == applications::variable::inout) {
                 circ.inputbuses().add(name, affected_lines);
@@ -2515,7 +2507,7 @@ return ok;
 
             for (unsigned i = 0u; i < len; ++i) {
                 _add_variable(circ, new_dimensions, var, variable_name_format,
-                              _constant, _garbage, boost::str(boost::format("%s[%d]") % arraystr % i));
+                              _constant, _garbage, arraystr + "[" + std::to_string(i) + "]");
             }
         }
     }

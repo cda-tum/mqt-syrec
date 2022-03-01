@@ -49,7 +49,7 @@ namespace syrec {
 
     number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context);
 
-    struct parse_number_visitor: public boost::static_visitor<number::ptr> {
+    struct parse_number_visitor {
         explicit parse_number_visitor(const module& proc, parser_context& context):
             proc(proc),
             context(context) {}
@@ -58,10 +58,10 @@ namespace syrec {
             return std::make_shared<number>(value);
         }
 
-        number::ptr operator()(const ast_variable& ast_var) const {
-            variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
+        number::ptr operator()(const boost::recursive_wrapper<ast_variable>& ast_var) const {
+            variable::ptr var = proc.find_parameter_or_variable(ast_var.get().name);
             if (!var) {
-                context.error_message = "Unknown variable " + ast_var.name;
+                context.error_message = "Unknown variable " + ast_var.get().name;
                 return {};
             }
 
@@ -77,10 +77,10 @@ namespace syrec {
             }
         }
 
-        number::ptr operator()(const ast_number_expression& ast_ne) const {
-            ast_number  ast_no1 = ast_ne.operand1;
-            std::string ast_op  = ast_ne.op;
-            ast_number  ast_no2 = ast_ne.operand2;
+        number::ptr operator()(const boost::recursive_wrapper<ast_number_expression>& ast_ne) const {
+            ast_number  ast_no1 = ast_ne.get().operand1;
+            std::string ast_op  = ast_ne.get().op;
+            ast_number  ast_no2 = ast_ne.get().operand2;
 
             unsigned op = 0u;
             if (ast_op == "+") {
@@ -140,7 +140,7 @@ namespace syrec {
     };
 
     number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context) {
-        return boost::apply_visitor(parse_number_visitor(proc, context), ast_num);
+        return std::visit(parse_number_visitor(proc, context), ast_num);
     }
 
     expression::ptr parse_expression(const ast_expression& ast_exp, const module& proc, unsigned bitwidth, parser_context& context);
@@ -210,7 +210,7 @@ namespace syrec {
         return va;
     }
 
-    struct expression_visitor: public boost::static_visitor<expression*> {
+    struct expression_visitor {
         expression_visitor(const module& proc, unsigned bitwidth, parser_context& context):
             proc(proc),
             bitwidth(bitwidth),
@@ -494,7 +494,7 @@ namespace syrec {
 
     statement::ptr parse_statement(const ast_statement& ast_stat, const program& prog, const module& proc, parser_context& context);
 
-    struct statement_visitor: public boost::static_visitor<statement*> {
+    struct statement_visitor {
         statement_visitor(const program& prog, const module& proc, parser_context& context):
             prog(prog),
             proc(proc),

@@ -22,7 +22,6 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_line_to_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/meta/bus_collection.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/expression.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/grammar.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/module.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/number.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp

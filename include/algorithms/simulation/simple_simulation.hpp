@@ -24,10 +24,10 @@
 #ifndef SIMPLE_SIMULATION_HPP
 #define SIMPLE_SIMULATION_HPP
 
-#include <algorithms/simulation/simulation.hpp>
+#include "algorithms/simulation/simulation.hpp"
+#include "core/circuit.hpp"
+
 #include <boost/dynamic_bitset.hpp>
-#include <boost/function.hpp>
-#include <core/circuit.hpp>
 #include <functional>
 #include <memory>
 

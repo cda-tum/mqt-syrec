@@ -67,7 +67,7 @@ namespace syrec {
         }
     };
 
-    struct const_begin_visitor: public boost::static_visitor<circuit::const_iterator> {
+    struct const_begin_visitor {
         circuit::const_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.begin()), const_filter_circuit());
             //return boost::begin( circ.gates | indirected | transformed( const_filter_circuit() ) );
@@ -82,7 +82,7 @@ namespace syrec {
         }
     };
 
-    struct const_end_visitor: public boost::static_visitor<circuit::const_iterator> {
+    struct const_end_visitor {
         circuit::const_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.end()), const_filter_circuit());
         }
@@ -96,7 +96,7 @@ namespace syrec {
         }
     };
 
-    struct begin_visitor: public boost::static_visitor<circuit::iterator> {
+    struct begin_visitor {
         circuit::iterator operator()(standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.begin()), filter_circuit());
         }
@@ -110,7 +110,7 @@ namespace syrec {
         }
     };
 
-    struct end_visitor: public boost::static_visitor<circuit::iterator> {
+    struct end_visitor {
         circuit::iterator operator()(standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.end()), filter_circuit());
         }
@@ -124,7 +124,7 @@ namespace syrec {
         }
     };
 
-    struct const_rbegin_visitor: public boost::static_visitor<circuit::const_reverse_iterator> {
+    struct const_rbegin_visitor {
         circuit::const_reverse_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.rbegin()), const_filter_circuit());
         }
@@ -138,7 +138,7 @@ namespace syrec {
         }
     };
 
-    struct const_rend_visitor: public boost::static_visitor<circuit::const_reverse_iterator> {
+    struct const_rend_visitor {
         circuit::const_reverse_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.rend()), const_filter_circuit());
         }
@@ -152,7 +152,7 @@ namespace syrec {
         }
     };
 
-    struct rbegin_visitor: public boost::static_visitor<circuit::reverse_iterator> {
+    struct rbegin_visitor {
         circuit::reverse_iterator operator()(standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.rbegin()), filter_circuit());
         }
@@ -166,7 +166,7 @@ namespace syrec {
         }
     };
 
-    struct rend_visitor: public boost::static_visitor<circuit::reverse_iterator> {
+    struct rend_visitor {
         circuit::reverse_iterator operator()(standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.rend()), filter_circuit());
         }
@@ -180,7 +180,7 @@ namespace syrec {
         }
     };
 
-    struct append_gate_visitor: public boost::static_visitor<gate&> {
+    struct append_gate_visitor {
         explicit append_gate_visitor(circuit& c):
             c(c) {}
 
@@ -211,7 +211,7 @@ namespace syrec {
         circuit& c;
     };
 
-    struct prepend_gate_visitor: public boost::static_visitor<gate&> {
+    struct prepend_gate_visitor {
         explicit prepend_gate_visitor(circuit& c):
             c(c) {}
 
@@ -242,7 +242,7 @@ namespace syrec {
         circuit& c;
     };
 
-    struct insert_gate_visitor: public boost::static_visitor<gate&> {
+    struct insert_gate_visitor {
         insert_gate_visitor(unsigned _pos, circuit& c):
             pos(_pos), c(c) {}
 
@@ -274,7 +274,7 @@ namespace syrec {
         circuit& c;
     };
 
-    struct remove_gate_at_visitor: public boost::static_visitor<> {
+    struct remove_gate_at_visitor {
         explicit remove_gate_at_visitor(unsigned _pos):
             pos(_pos) {}
 
@@ -295,7 +295,7 @@ namespace syrec {
         unsigned pos;
     };
 
-    struct inputs_setter: public boost::static_visitor<> {
+    struct inputs_setter {
         explicit inputs_setter(const std::vector<std::string>& _inputs):
             inputs(_inputs) {}
 
