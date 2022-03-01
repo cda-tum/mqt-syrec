@@ -16,12 +16,13 @@
  */
 
 #include "core/syrec/variable.hpp"
+
 #include "core/syrec/expression.hpp"
 
+#include <cassert>
 #include <optional>
 #include <tuple>
 #include <utility>
-#include <cassert>
 
 namespace syrec::applications {
 
@@ -172,7 +173,6 @@ namespace syrec::applications {
     }
 
     std::ostream& operator<<(std::ostream& os, const variable& v) {
-
         std::vector<std::string> types{"in", "out", "inout", "state", "wire"};
 
         os << std::string(os.precision(), ' ')

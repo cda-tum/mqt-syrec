@@ -16,6 +16,7 @@
  */
 
 #include "core/syrec/number.hpp"
+
 #include "core/syrec/expression.hpp"
 
 #include <cassert>

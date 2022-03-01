@@ -16,6 +16,7 @@
  */
 
 #include "core/functions/add_gates.hpp"
+
 #include "core/target_tags.hpp"
 
 #include <functional>

@@ -16,6 +16,7 @@
  */
 
 #include "core/circuit.hpp"
+
 #include "core/gate.hpp"
 
 #include <memory>
