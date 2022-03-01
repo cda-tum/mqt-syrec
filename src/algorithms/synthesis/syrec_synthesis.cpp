@@ -1789,7 +1789,7 @@ return ok;
             }
         }
 
-        std::vector<unsigned> targets {src.begin(), src.end()};
+        std::vector<unsigned> targets{src.begin(), src.end()};
         targets.insert(targets.end(), dest.begin(), dest.end());
         append_module(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), module_name, gate::line_container(), targets);
         return true;
@@ -2487,7 +2487,7 @@ return ok;
 
             // busses
             std::vector<unsigned> affected_lines;
-            for (std::size_t i= circ.lines() - var->bitwidth(); i < circ.lines(); ++i) {
+            for (std::size_t i = circ.lines() - var->bitwidth(); i < circ.lines(); ++i) {
                 affected_lines.emplace_back(i);
             }
             std::string name = var->name() + arraystr;
