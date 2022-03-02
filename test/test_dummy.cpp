@@ -39,7 +39,7 @@ int main() {
     //[[maybe_unused]] syrec::read_program_settings prog_settings;
     std::string            error_string = my_read_program(prog, "./circuits/simple_add.src");
     syrec::circuit         circ;
-    syrec::properties::ptr property1;
+    //syrec::properties::ptr property1;
     //std::string variable_name_format = "%1$s%3$s.%2$d";
     //std::string main_module = "";
     //unsigned if_realization = 0u;
@@ -50,12 +50,12 @@ int main() {
     //properties_set<unsigned>(property1, "if_realization", if_realization);
     //properties_set<bool>(property1, "efficient_controls", efficient_controls);
     //properties_set<bool>(property1, "modules_hierarchy", modules_hierarchy );
-    syrec::properties::ptr property2;
-    //syrec::syrec_synthesis(circ, prog, property1, property2);
+    //syrec::properties::ptr property2;
+    syrec::syrec_synthesis(circ, prog);
     //if (syrec::syrec_synthesis(circ, prog, property1, property2)) {
     //    //std::cout << "Inside syrec_synthesis" << std::endl;
-        //std::cout << circ.num_gates() << std::endl;
-        //std::cout << circ.lines() << std::endl;
+    std::cout << circ.num_gates() << std::endl;
+    std::cout << circ.lines() << std::endl;
     //} else {
      //   std::cout << "not inside syrec_synthesis" << std::endl;
     //}
