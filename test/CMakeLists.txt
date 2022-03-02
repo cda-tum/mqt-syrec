@@ -41,7 +41,7 @@ endmacro()
 
 # TODO: add any source files containing tests here
 package_add_test(${PROJECT_NAME}_test
-                 test_dummy.cpp)
+                 main.cpp)
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD
