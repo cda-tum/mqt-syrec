@@ -28,10 +28,10 @@ std::string my_read_program(syrec::applications::program& prog, const std::strin
     return error;
 }
 
-template<typename T>
-void properties_set(syrec::properties& prop, const std::string& key, const T& value) {
-    prop.set(key, value);
-}
+//template<typename T>
+//void properties_set(syrec::properties& prop, const std::string& key, const T& value) {
+//    prop.set(key, value);
+//}
 
 int main() {
     /// build the circuit
@@ -51,13 +51,14 @@ int main() {
     //properties_set<bool>(property1, "efficient_controls", efficient_controls);
     //properties_set<bool>(property1, "modules_hierarchy", modules_hierarchy );
     syrec::properties::ptr property2;
-    if (syrec::syrec_synthesis(circ, prog, property1, property2)) {
-        std::cout << "Inside syrec_synthesis" << std::endl;
-        std::cout << circ.num_gates() << std::endl;
-        std::cout << circ.lines() << std::endl;
-    } else {
-        std::cout << "not inside syrec_synthesis" << std::endl;
-    }
+    //syrec::syrec_synthesis(circ, prog, property1, property2);
+    //if (syrec::syrec_synthesis(circ, prog, property1, property2)) {
+    //    //std::cout << "Inside syrec_synthesis" << std::endl;
+        //std::cout << circ.num_gates() << std::endl;
+        //std::cout << circ.lines() << std::endl;
+    //} else {
+     //   std::cout << "not inside syrec_synthesis" << std::endl;
+    //}
     //std::cout<<"working"<<std::endl;
     return 0;
 } // namespace dum
