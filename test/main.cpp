@@ -40,14 +40,14 @@ int main() {
     syrec::circuit         circ;
     syrec::syrec_synthesis(circ, prog);
     
-    std::cout<<circ.lines()<<std::endl;
-    std::cout<<circ.num_gates()<<std::endl;
+    //std::cout<<circ.lines()<<std::endl;
+    //std::cout<<circ.num_gates()<<std::endl;
 
     syrec::cost_t qc = syrec::final_quantum_cost(circ, circ.lines());
     syrec::cost_t tc = syrec::final_transistor_cost(circ, circ.lines());
 
-    std::cout<<qc<<std::endl;
-    std::cout<<tc<<std::endl;
+    //std::cout<<qc<<std::endl;
+    //std::cout<<tc<<std::endl;
 
     return 0;
 } // namespace dum
