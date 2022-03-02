@@ -54,8 +54,8 @@ int main() {
     syrec::syrec_synthesis(circ, prog);
     //if (syrec::syrec_synthesis(circ, prog, property1, property2)) {
     //    //std::cout << "Inside syrec_synthesis" << std::endl;
-    std::cout << circ.num_gates() << std::endl;
-    std::cout << circ.lines() << std::endl;
+    //std::cout << circ.num_gates() << std::endl;
+    //std::cout << circ.lines() << std::endl;
     //} else {
      //   std::cout << "not inside syrec_synthesis" << std::endl;
     //}
