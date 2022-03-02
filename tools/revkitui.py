@@ -267,7 +267,7 @@ class CircuitView( QGraphicsView ):
             self.outputs[i].setPlainText( self.circ.outputs[i] )
             self.lines[i].clear_simulation_results()
 
-    def wheelEvent( self, event ): # TODO
+    def wheelEvent( self, event ):
         factor = 1.2
         if event.angleDelta().y() < 0 or event.angleDelta().x() < 0:
             factor = 1.0/factor
