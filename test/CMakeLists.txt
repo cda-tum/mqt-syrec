@@ -28,25 +28,25 @@ add_custom_command(TARGET ${PROJECT_NAME}_example
 		COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_example"
 		VERBATIM)
 
-#macro(package_add_test TESTNAME)
+macro(package_add_test TESTNAME)
 	# create an exectuable in which the tests will be stored
-#	add_executable(${TESTNAME} ${ARGN})
+	add_executable(${TESTNAME} ${ARGN})
 	# link the Google test infrastructure and a default main fuction to the test executable.
-#	target_link_libraries(${TESTNAME} PUBLIC MQT::${PROJECT_NAME} gmock gtest_main)
+	target_link_libraries(${TESTNAME} PUBLIC MQT::${PROJECT_NAME} gmock gtest_main)
 	# discover tests
-#	gtest_discover_tests(${TESTNAME} WORKING_DIRECTORY ${PROJECT_DIR} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}")
-#	set_target_properties(${TESTNAME} PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-#	enable_lto(${TESTNAME})
-#endmacro()
+	gtest_discover_tests(${TESTNAME} WORKING_DIRECTORY ${PROJECT_DIR} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}")
+	set_target_properties(${TESTNAME} PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+	enable_lto(${TESTNAME})
+endmacro()
 
 # TODO: add any source files containing tests here
-#package_add_test(${PROJECT_NAME}_test
- #                test_dummy.cpp)
+package_add_test(${PROJECT_NAME}_test
+                 test_dummy.cpp)
 
-#add_custom_command(TARGET ${PROJECT_NAME}_test
-#                   POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/${PROJECT_NAME}_test ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test
-#                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
-#                   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits ${CMAKE_BINARY_DIR}/circuits
-#                   COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
-#                   VERBATIM)
+add_custom_command(TARGET ${PROJECT_NAME}_test
+                   POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/${PROJECT_NAME}_test ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
+                   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits ${CMAKE_BINARY_DIR}/circuits
+                   COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
+                   VERBATIM)
