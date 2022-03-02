@@ -40,7 +40,7 @@ namespace syrec {
     };
 
     TEST_F(syrec_test, GenericTest) {
-        EXPECT_EQ(6, circ.lines());
+        EXPECT_EQ(5, circ.lines());
     }
 
 } // namespace dum
