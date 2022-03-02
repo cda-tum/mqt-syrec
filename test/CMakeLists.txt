@@ -15,18 +15,18 @@ if (NOT TARGET gtest OR NOT TARGET gmock)
 	endif ()
 endif ()
 
-add_executable(${PROJECT_NAME}_example ${CMAKE_CURRENT_SOURCE_DIR}/test_dummy.cpp)
+add_executable(${PROJECT_NAME}_example ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 target_link_libraries(${PROJECT_NAME}_example PRIVATE ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}_example PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 enable_lto(${PROJECT_NAME}_example)
 
-add_custom_command(TARGET ${PROJECT_NAME}_example
-		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/${PROJECT_NAME}_example ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_example
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits/ $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/circuits
-		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/circuits ${CMAKE_BINARY_DIR}/circuits
-		COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_example"
-		VERBATIM)
+#add_custom_command(TARGET ${PROJECT_NAME}_example
+#		POST_BUILD
+#		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/${PROJECT_NAME}_example ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_example
+#		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits/ $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/circuits
+#		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_example>/circuits ${CMAKE_BINARY_DIR}/circuits
+#		COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_example"
+#		VERBATIM)
 
 macro(package_add_test TESTNAME)
 	# create an exectuable in which the tests will be stored
