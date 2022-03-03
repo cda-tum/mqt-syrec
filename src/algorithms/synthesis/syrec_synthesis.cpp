@@ -1650,7 +1650,7 @@ namespace syrec {
             partial.push_back(src2.at(src1.size() - 1u - i));
             sum.insert(sum.begin(), src1.at(i));
             add_active_control(dest.at(i));
-            increase(sum, partial);
+            increase_new(sum, partial);
             remove_active_control(dest.at(i));
             if (i > 0) {
                 for (unsigned j = (src1.size() - i); j < src1.size(); ++j) {
@@ -1969,7 +1969,7 @@ namespace syrec {
             sum.insert(sum.begin(), src1.at(i));
             decrease_with_carry(sum, partial, dest.at(i));
             add_active_control(dest.at(i));
-            increase(sum, partial);
+            increase_new(sum, partial);
             remove_active_control(dest.at(i));
             append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest.at(i));
             if (i > 0) {

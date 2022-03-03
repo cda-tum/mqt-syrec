@@ -1,0 +1,3 @@
+module alu( out x0(1), inout x1(1), inout x2(1))
+x0 + = ( x1 && x2 )
+

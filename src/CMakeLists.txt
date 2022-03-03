@@ -5,11 +5,14 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
+		    ${${PROJECT_NAME}_SOURCE_DIR}/test/unittests/functions.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
+
+		    ${${PROJECT_NAME}_SOURCE_DIR}/test/unittests/functions.hpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
