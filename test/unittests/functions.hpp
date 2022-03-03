@@ -9,4 +9,3 @@ std::string py_read_program(syrec::applications::program& prog, const std::strin
 
 std::string my_read_program(syrec::applications::program& prog, const std::string& filename, unsigned default_bitwidth = 32);
 std::string bitset_to_string(boost::dynamic_bitset<> const& bitset);
-

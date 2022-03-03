@@ -1,6 +1,5 @@
 #include "functions.hpp"
 
-
 std::string py_read_program(syrec::applications::program& prog, const std::string& filename, const syrec::read_program_settings& settings) {
     std::string error_message;
 
@@ -25,4 +24,3 @@ std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
     }
     return res;
 }
-

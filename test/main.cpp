@@ -3,6 +3,7 @@
 #include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
 #include "core/utils/costs.hpp"
+
 #include <algorithms/synthesis/syrec_synthesis.hpp>
 #include <core/properties.hpp>
 //#include "gtest/gtest.h"
@@ -36,18 +37,18 @@ std::string my_read_program(syrec::applications::program& prog, const std::strin
 int main() {
     /// build the circuit
     syrec::applications::program prog;
-    std::string            error_string = my_read_program(prog, "./circuits/simple_add.src");
-    syrec::circuit         circ;
+    std::string                  error_string = my_read_program(prog, "./circuits/simple_add.src");
+    syrec::circuit               circ;
     syrec::syrec_synthesis(circ, prog);
-    
-    std::cout<<circ.lines()<<std::endl;
-    std::cout<<circ.num_gates()<<std::endl;
+
+    std::cout << circ.lines() << std::endl;
+    std::cout << circ.num_gates() << std::endl;
 
     syrec::cost_t qc = syrec::final_quantum_cost(circ, circ.lines());
     syrec::cost_t tc = syrec::final_transistor_cost(circ, circ.lines());
 
-    std::cout<<qc<<std::endl;
-    std::cout<<tc<<std::endl;
+    std::cout << qc << std::endl;
+    std::cout << tc << std::endl;
 
     return 0;
 } // namespace dum

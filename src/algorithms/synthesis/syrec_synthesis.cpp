@@ -2508,7 +2508,6 @@ namespace syrec {
         // synthesize the statements
         return statement_synthesizer.on_module(main);
         //write_realization( circ,std::cout); //tanmay
-
     }
 
     void standard_syrec_synthesizer::initialize_changing_variables(const applications::program& program) {
