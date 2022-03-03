@@ -179,7 +179,7 @@ class CircuitView( QGraphicsView ):
             line = CircuitLineItem( i, circ.num_gates )
             self.lines.append( line )
             self.scene().addItem( line )
-            self.inputs.append( self.addLineLabel( 0, i * 30, circ.inputs[i], Qt.AlignRight, circ.constants[i] != False ) )
+            self.inputs.append( self.addLineLabel( 0, i * 30, circ.inputs[i], Qt.AlignRight, circ.constants[i] != None ) )
             self.outputs.append( self.addLineLabel( width, i * 30, circ.outputs[i], Qt.AlignLeft, circ.garbage[i] ) )
 
         index = 0
@@ -605,13 +605,14 @@ class SyReCEditor(QWidget):
 
         bit_mask = 0
         bit_pos  = 0
+        bit1_mask = 0
 
         for i in range(len(circ.inputs)):
             print(circ.inputs[i])
 
         for i in circ.constants:
 
-            if i == False:
+            if i == None:
                bit_mask=bit_mask + 2**bit_pos
 
             bit_pos=bit_pos + 1
@@ -619,6 +620,14 @@ class SyReCEditor(QWidget):
         no_of_bits = len(circ.constants)
 
         input_list = [ x & bit_mask for x in range(2**no_of_bits) ]
+
+        for i in range(len(circ.constants)):
+            if circ.constants[i]==True:
+                bit1_mask = bit1_mask + 2**(i)
+
+        input_list = [i+bit1_mask for i in input_list]
+
+        print (input_list)
         input_list = list(set(input_list))
         
         input_list_len = len(input_list)

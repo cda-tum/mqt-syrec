@@ -320,7 +320,7 @@ namespace syrec {
         sub_flag = false;
         return true;
     }
-
+    /*
     [[maybe_unused]] bool standard_syrec_synthesizer::on_full_statement(const applications::statement::ptr& statement) {
         bool okay = false;
         if (auto* stat = dynamic_cast<applications::assign_statement*>(statement.get())) {
@@ -332,7 +332,7 @@ namespace syrec {
 
         return okay;
     }
-
+*/
     /// If the input signals are repeated (i.e., rhs input signals are repeated)
     bool standard_syrec_synthesizer::check_repeats() {
         std::vector<std::vector<unsigned>> check_lhs_vec, check_rhs_vec;
@@ -400,6 +400,7 @@ namespace syrec {
     }
 
     /// Currently not used (when all operations are same)
+    /*
     bool standard_syrec_synthesizer::on_full_statement(const applications::assign_statement& statement) {
         bool                  ok = false;
         std::vector<unsigned> d, stat_lhs;
@@ -475,7 +476,7 @@ namespace syrec {
 
         return true;
     }
-
+*/
     /// generating LHS and RHS (not whole expressions, just the corresponding variables)
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
@@ -951,6 +952,7 @@ namespace syrec {
 
             modules.push(statement.target());
             for (const applications::statement::ptr& stat: statement.target()->statements()) {
+                std::cout << "inside call" << std::endl;
                 if (!full_statement(stat)) {
                     // if(! on_full_statement(stat ))
                     //{
@@ -982,7 +984,8 @@ namespace syrec {
         add_variables(_circ, *this, variable_name_format, statement.target()->variables());
 
         modules.push(statement.target());
-        for (applications::statement::ptr stat: statement.target()->statements() | reversed | transformed(applications::reverse_statements())) {
+        for (applications::statement::ptr stat: statement.target()->statements() | reversed | transformed(syrec::applications::reverse_statements())) {
+            std::cout << "inside uncall" << std::endl;
             if (!full_statement(stat)) {
                 //  if(! on_full_statement(stat ))
                 //{
@@ -1086,7 +1089,7 @@ namespace syrec {
 
             case applications::binary_expression::multiply: // *
             {
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
+                get_constant_lines(expression.bitwidth(), 0u, lines);
 
                 multiplication(lines, lhs, rhs);
 
@@ -1094,15 +1097,15 @@ namespace syrec {
 
             case applications::binary_expression::divide: // /
             {
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
+                get_constant_lines(expression.bitwidth(), 0u, lines);
 
                 division(lines, lhs, rhs);
             } break;
 
             case applications::binary_expression::modulo: {
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
+                get_constant_lines(expression.bitwidth(), 0u, lines);
                 std::vector<unsigned> quot;
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), quot);
+                get_constant_lines(expression.bitwidth(), 0u, quot);
 
                 bitwise_cnot(lines, lhs); // duplicate lhs
                 modulo(quot, lines, rhs);
@@ -1110,7 +1113,7 @@ namespace syrec {
 
             case applications::binary_expression::frac_divide: {
                 std::vector<unsigned> product;
-                get_constant_lines((expression.bitwidth()), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), product);
+                get_constant_lines((expression.bitwidth()), 0u, product);
 
                 copy(lines.begin(), lines.end(), back_inserter(product));
 
@@ -1119,70 +1122,70 @@ namespace syrec {
 
             case applications::binary_expression::logical_and: // &&
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 conjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
 
             case applications::binary_expression::logical_or: // ||
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 disjunction(lines.at(0), lhs.at(0), rhs.at(0));
             } break;
 
             case applications::binary_expression::bitwise_and: // &
             {
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
+                get_constant_lines(expression.bitwidth(), 0u, lines);
 
                 bitwise_and(lines, lhs, rhs);
             } break;
 
             case applications::binary_expression::bitwise_or: // |
             {
-                get_constant_lines(expression.bitwidth(), (unsigned)(((int)pow(2, (int)expression.bitwidth())) - 1), lines);
+                get_constant_lines(expression.bitwidth(), 0u, lines);
 
                 bitwise_or(lines, lhs, rhs);
             } break;
 
             case applications::binary_expression::less_than: // <
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 less_than(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::greater_than: // >
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 greater_than(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::equals: // =
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::not_equals: // !=
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 not_equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::less_equals: // <=
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 less_equals(lines.at(0), lhs, rhs);
             } break;
 
             case applications::binary_expression::greater_equals: // >=
             {
-                lines.emplace_back(get_constant_line(true));
+                lines.emplace_back(get_constant_line(false));
 
                 greater_equals(lines.at(0), lhs, rhs);
             } break;
@@ -1231,7 +1234,7 @@ namespace syrec {
             case applications::binary_expression::multiply: // *
             {
                 std::vector<unsigned> extra_lines_1;
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_1);
+                get_constant_lines(rhs.size(), 0u, extra_lines_1);
 
                 multiplication(extra_lines_1, lhs, rhs);
                 lines = extra_lines_1;
@@ -1240,7 +1243,7 @@ namespace syrec {
             case applications::binary_expression::divide: // /
             {
                 std::vector<unsigned> extra_lines_2;
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_2);
+                get_constant_lines(rhs.size(), 0u, extra_lines_2);
 
                 division(extra_lines_2, lhs, rhs);
                 lines = extra_lines_2;
@@ -1248,9 +1251,9 @@ namespace syrec {
 
             case applications::binary_expression::modulo: {
                 std::vector<unsigned> extra_lines_3;
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_3);
+                get_constant_lines(rhs.size(), 0u, extra_lines_3);
                 std::vector<unsigned> quot;
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), quot);
+                get_constant_lines(rhs.size(), 0u, quot);
 
                 bitwise_cnot(extra_lines_3, lhs); // duplicate lhs
                 modulo(quot, extra_lines_3, rhs);
@@ -1259,7 +1262,7 @@ namespace syrec {
 
             case applications::binary_expression::frac_divide: {
                 std::vector<unsigned> product;
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), product);
+                get_constant_lines(rhs.size(), 0u, product);
 
                 copy(lines.begin(), lines.end(), back_inserter(product));
 
@@ -1269,7 +1272,7 @@ namespace syrec {
             case applications::binary_expression::logical_and: // &&
             {
                 std::vector<unsigned> extra_lines_5;
-                extra_lines_5.emplace_back(get_constant_line(true));
+                extra_lines_5.emplace_back(get_constant_line(false));
 
                 conjunction(extra_lines_5.at(0), extra_lines_5.at(0), extra_lines_5.at(0));
                 lines = extra_lines_5;
@@ -1278,7 +1281,7 @@ namespace syrec {
             case applications::binary_expression::logical_or: // ||
             {
                 std::vector<unsigned> extra_lines_6;
-                extra_lines_6.emplace_back(get_constant_line(true));
+                extra_lines_6.emplace_back(get_constant_line(false));
 
                 disjunction(extra_lines_6.at(0), extra_lines_6.at(0), extra_lines_6.at(0));
                 lines = extra_lines_6;
@@ -1288,7 +1291,7 @@ namespace syrec {
             {
                 std::vector<unsigned> extra_lines_7;
 
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_7);
+                get_constant_lines(rhs.size(), 0u, extra_lines_7);
 
                 bitwise_and(extra_lines_7, lhs, rhs);
                 lines = extra_lines_7;
@@ -1298,7 +1301,7 @@ namespace syrec {
             {
                 std::vector<unsigned> extra_lines_8;
 
-                get_constant_lines(rhs.size(), (unsigned)(((int)pow(2, (int)rhs.size())) - 1), extra_lines_8);
+                get_constant_lines(rhs.size(), 0u, extra_lines_8);
 
                 bitwise_or(extra_lines_8, lhs, rhs);
                 lines = extra_lines_8;
@@ -1307,7 +1310,7 @@ namespace syrec {
             case applications::binary_expression::less_than: // <
             {
                 std::vector<unsigned> extra_lines_9;
-                extra_lines_9.emplace_back(get_constant_line(true));
+                extra_lines_9.emplace_back(get_constant_line(false));
 
                 less_than(extra_lines_9.at(0), lhs, rhs);
                 lines = extra_lines_9;
@@ -1316,7 +1319,7 @@ namespace syrec {
             case applications::binary_expression::greater_than: // >
             {
                 std::vector<unsigned> extra_lines_10;
-                extra_lines_10.emplace_back(get_constant_line(true));
+                extra_lines_10.emplace_back(get_constant_line(false));
 
                 greater_than(extra_lines_10.at(0), lhs, rhs);
                 lines = extra_lines_10;
@@ -1325,7 +1328,7 @@ namespace syrec {
             case applications::binary_expression::equals: // =
             {
                 std::vector<unsigned> extra_lines_11;
-                extra_lines_11.emplace_back(get_constant_line(true));
+                extra_lines_11.emplace_back(get_constant_line(false));
 
                 equals(extra_lines_11.at(0), lhs, rhs);
                 lines = extra_lines_11;
@@ -1334,7 +1337,7 @@ namespace syrec {
             case applications::binary_expression::not_equals: // !=
             {
                 std::vector<unsigned> extra_lines_12;
-                extra_lines_12.emplace_back(get_constant_line(true));
+                extra_lines_12.emplace_back(get_constant_line(false));
 
                 not_equals(extra_lines_12.at(0), lhs, rhs);
                 lines = extra_lines_12;
@@ -1343,7 +1346,7 @@ namespace syrec {
             case applications::binary_expression::less_equals: // <=
             {
                 std::vector<unsigned> extra_lines_13;
-                extra_lines_13.emplace_back(get_constant_line(true));
+                extra_lines_13.emplace_back(get_constant_line(false));
 
                 less_equals(extra_lines_13.at(0), lhs, rhs);
                 lines = extra_lines_13;
@@ -1352,7 +1355,7 @@ namespace syrec {
             case applications::binary_expression::greater_equals: // >=
             {
                 std::vector<unsigned> extra_lines_14;
-                extra_lines_14.emplace_back(get_constant_line(true));
+                extra_lines_14.emplace_back(get_constant_line(false));
 
                 greater_equals(extra_lines_14.at(0), lhs, rhs);
                 lines = extra_lines_14;
@@ -1684,7 +1687,7 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!less_than(dest, src2, src1)) return false;
+        if (!greater_than(dest, src2, src1)) return false;
         append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest);
 
         return true;
@@ -1942,14 +1945,14 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!greater_than(dest, src2, src1)) return false;
+        if (!less_than(dest, src2, src1)) return false;
         append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest);
 
         return true;
     }
 
     bool standard_syrec_synthesizer::less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        return (decrease_with_carry(src1, src2, dest) && increase(src1, src2));
+        return (decrease_with_carry(src1, src2, dest) && increase_new(src1, src2));
     }
 
     bool standard_syrec_synthesizer::modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
@@ -2384,7 +2387,7 @@ namespace syrec {
             free_const_lines_map[!value].pop_back();
             append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), const_line);
         } else {
-            const_line = add_line_to_circuit(_circ, (std::string("const_") + boost::lexical_cast<std::string>(!value)), "garbage", value, true);
+            const_line = add_line_to_circuit(_circ, (std::string("const_") + boost::lexical_cast<std::string>(value)), "garbage", value, true);
         }
 
         return const_line;
@@ -2455,7 +2458,7 @@ namespace syrec {
             synthesizer.var_lines().insert(std::make_pair(var, circ.lines()));
 
             // types of constant and garbage
-            constant _constant = (var->type() == applications::variable::out || var->type() == applications::variable::wire) ? constant(true) : constant(false);
+            constant _constant = (var->type() == applications::variable::out || var->type() == applications::variable::wire) ? constant(false) : constant();
             bool     _garbage  = (var->type() == applications::variable::in || var->type() == applications::variable::wire);
 
             _add_variable(circ, var->dimensions(), var, variable_name_format,

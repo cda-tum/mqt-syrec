@@ -1,4 +1,4 @@
-#include "functions.hpp"
+#include "core/test_functions.hpp"
 
 std::string py_read_program(syrec::applications::program& prog, const std::string& filename, const syrec::read_program_settings& settings) {
     std::string error_message;

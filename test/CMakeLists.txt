@@ -60,7 +60,8 @@ package_add_test(${PROJECT_NAME}_test
 		unittests/test_bitwise_or.cpp
 		unittests/test_logical_and.cpp
 		unittests/test_logical_or.cpp
-		unittests/test_swap.cpp)
+		unittests/test_swap.cpp
+		unittests/test_shift.cpp)
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD

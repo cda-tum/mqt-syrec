@@ -13,7 +13,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <cmath>
 #include <core/circuit.hpp>
-#include <core/functions/active_controls.hpp>
 #include <core/functions/add_circuit.hpp>
 #include <core/functor.hpp>
 #include <core/gate.hpp>
@@ -75,14 +74,14 @@ namespace syrec {
         virtual bool on_statement(const applications::statement::ptr& statement);
         bool         on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
         //    [[maybe_unused]] bool         expression_op_inverse(applications::expression::ptr expression);                                  //new
-        [[maybe_unused]] bool var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v);        //new
-        [[maybe_unused]] bool on_full_statement(const applications::statement::ptr& statement);                                 //new
-        bool                  op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
-        bool                  full_statement(const applications::statement::ptr& statement);                                    //new
-        bool                  flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);                  // new
-        virtual void          set_settings(const properties::ptr& settings);
-        virtual void          set_main_module(const applications::module::ptr& main_module);
-        bool                  solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
+        [[maybe_unused]] bool var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
+        //[[maybe_unused]] bool on_full_statement(const applications::statement::ptr& statement);                                 //new
+        bool         op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
+        bool         full_statement(const applications::statement::ptr& statement);                                    //new
+        bool         flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);                  // new
+        virtual void set_settings(const properties::ptr& settings);
+        virtual void set_main_module(const applications::module::ptr& main_module);
+        bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
         //   [[maybe_unused]] bool         opt_solver(std::vector<unsigned> stat_lhs, unsigned stat_op, std::vector<unsigned> exp_lhs, unsigned exp_op, std::vector<unsigned> exp_rhs, unsigned a);
         // Virtual Methods to override for custom synthesizers
     protected:
@@ -95,7 +94,7 @@ namespace syrec {
         virtual bool on_statement(const applications::call_statement& statement);
         virtual bool on_statement(const applications::uncall_statement& statement);
         virtual bool on_statement(const applications::skip_statement& statement);
-        virtual bool on_full_statement(const applications::assign_statement& statement);                                   //new
+        //virtual bool on_full_statement(const applications::assign_statement& statement);                                   //new
         virtual bool var_expression(const applications::variable_expression& expression, std::vector<unsigned>& v);        //new
         virtual bool op_rhs_lhs_expression(const applications::variable_expression& expression, std::vector<unsigned>& v); //new
         virtual bool op_rhs_lhs_expression(const applications::binary_expression& expression, std::vector<unsigned>& v);   //new

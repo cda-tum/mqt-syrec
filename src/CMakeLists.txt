@@ -5,21 +5,20 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
-		    ${${PROJECT_NAME}_SOURCE_DIR}/test/unittests/functions.cpp
+
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
 
-		    ${${PROJECT_NAME}_SOURCE_DIR}/test/unittests/functions.hpp
+
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/pattern.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/properties.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/target_tags.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/active_controls.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_gates.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_line_to_circuit.cpp
@@ -36,10 +35,9 @@ add_library(${PROJECT_NAME}
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/pattern.hpp
+		    ${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/active_controls.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_gates.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_line_to_circuit.hpp

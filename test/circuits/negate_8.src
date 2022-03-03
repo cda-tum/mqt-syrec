@@ -1,3 +1,5 @@
 module statements(inout x(8))
 ~=x
+++=x
+--=x
 

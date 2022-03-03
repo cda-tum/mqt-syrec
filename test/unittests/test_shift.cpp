@@ -11,7 +11,7 @@
 #include <string>
 
 namespace syrec {
-    class syrec_test_logical_and: public ::testing::Test {
+    class syrec_test_shift: public ::testing::Test {
     protected:
         // any objects needed by all tests
         circuit               circ;
@@ -25,27 +25,27 @@ namespace syrec {
 
         void SetUp() override {
             // setup all the individual objects before each test
-            error_string = my_read_program(prog, "./circuits/logical_and_1.src");
+            error_string = my_read_program(prog, "./circuits/shift_4.src");
             okay1        = syrec::syrec_synthesis(circ, prog);
             qc           = syrec::final_quantum_cost(circ, circ.lines());
             tc           = syrec::final_transistor_cost(circ, circ.lines());
         }
     };
 
-    TEST_F(syrec_test_logical_and, GenericTest_logical_and1) {
-        EXPECT_EQ(52, circ.num_gates());
+    TEST_F(syrec_test_shift, GenericTest_shift1) {
+        EXPECT_EQ(11, circ.num_gates());
     }
 
-    TEST_F(syrec_test_logical_and, GenericTest_logical_and2) {
-        EXPECT_EQ(12, circ.lines());
+    TEST_F(syrec_test_shift, GenericTest_shift2) {
+        EXPECT_EQ(20, circ.lines());
     }
 
-    TEST_F(syrec_test_logical_and, GenericTest_logical_and3) {
-        EXPECT_EQ(100, qc);
+    TEST_F(syrec_test_shift, GenericTest_shift3) {
+        EXPECT_EQ(11, qc);
     }
 
-    TEST_F(syrec_test_logical_and, GenericTest_logical_and4) {
-        EXPECT_EQ(400, tc);
+    TEST_F(syrec_test_shift, GenericTest_shift4) {
+        EXPECT_EQ(88, tc);
     }
 
 } // namespace syrec

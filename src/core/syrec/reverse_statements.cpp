@@ -19,12 +19,15 @@ namespace syrec::applications {
         } else if (auto* stat_1 = dynamic_cast<assign_statement*>(_statement.get())) {
             switch (stat_1->op()) {
                 case assign_statement::add:
+                    std::cout << "add uncall" << std::endl;
                     return statement::ptr(new assign_statement(stat_1->lhs(), assign_statement::subtract, stat_1->rhs()));
 
                 case assign_statement::subtract:
+                    std::cout << "sub uncall" << std::endl;
                     return statement::ptr(new assign_statement(stat_1->lhs(), assign_statement::add, stat_1->rhs()));
 
                 case assign_statement::exor:
+                    std::cout << "exor uncall" << std::endl;
                     return _statement;
             }
         } else if (auto* stat_2 = dynamic_cast<if_statement*>(_statement.get())) {

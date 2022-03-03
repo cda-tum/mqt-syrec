@@ -2,7 +2,7 @@
 #include "core/circuit.hpp"
 #include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "functions.hpp"
+#include "core/test_functions.hpp"
 
 #include "gtest/gtest.h"
 #include <algorithms/synthesis/syrec_synthesis.hpp>
@@ -33,7 +33,7 @@ namespace syrec {
     };
 
     TEST_F(syrec_test_negate, GenericTest_negate1) {
-        EXPECT_EQ(8, circ.num_gates());
+        EXPECT_EQ(24, circ.num_gates());
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate2) {
@@ -41,11 +41,11 @@ namespace syrec {
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate3) {
-        EXPECT_EQ(8, qc);
+        EXPECT_EQ(870, qc);
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate4) {
-        EXPECT_EQ(0, tc);
+        EXPECT_EQ(448, tc);
     }
 
 } // namespace syrec

@@ -2,7 +2,7 @@
 #include "core/circuit.hpp"
 #include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "functions.hpp"
+#include "core/test_functions.hpp"
 
 #include "gtest/gtest.h"
 #include <algorithms/synthesis/syrec_synthesis.hpp>
