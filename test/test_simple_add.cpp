@@ -58,10 +58,10 @@ namespace syrec {
             // setup all the individual objects before each test
             error_string = my_read_program(prog, "./circuits/simple_add.src");
             okay1 = syrec::syrec_synthesis(circ, prog);
-            qc = syrec::final_transistor_cost(circ, circ.lines());
+            qc = syrec::final_quantum_cost(circ, circ.lines());
             tc = syrec::final_transistor_cost(circ, circ.lines());
             input.resize(circ.lines());
-            input.set(2);
+            input.set(3);
             output.resize(circ.lines());
             okay2 = simple_simulation(output, circ, input, settings, statistics);
 
