@@ -7,8 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 
-from revkit import *
-from revkitui import *
+from .revkitui import *
 
 
 
@@ -75,10 +74,10 @@ class MainWindow( QMainWindow ):
         toolbar.addAction( self.editor.statAction )
 
 
-if __name__ == "__main__":
+def main():
     a = QApplication([])
 
     w = MainWindow()
     w.show()
 
-    sys.exit( a.exec_() )
+    sys.exit(a.exec_())
