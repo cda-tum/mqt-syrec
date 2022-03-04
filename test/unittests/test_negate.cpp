@@ -19,11 +19,11 @@ namespace syrec {
         std::string           error_string;
         cost_t                qc;
         cost_t                tc;
-        std::vector<unsigned> cl;
-        std::vector<unsigned> tl;
-        properties::ptr       settings;
-        properties::ptr       statistics;
-        bool                  okay1;
+        //std::vector<unsigned> cl;
+        //std::vector<unsigned> tl;
+        properties::ptr settings;
+        properties::ptr statistics;
+        bool            okay1;
 
         void SetUp() override {
             // setup all the individual objects before each test
@@ -31,9 +31,8 @@ namespace syrec {
             okay1        = syrec::syrec_synthesis(circ, prog);
             qc           = syrec::final_quantum_cost(circ, circ.lines());
             tc           = syrec::final_transistor_cost(circ, circ.lines());
-            cl           = control_lines_check(*(circ.end()));
-            tl           = target_lines_check(*(circ.end()));
-
+            //cl           = control_lines_check(*(circ.end()));
+            //tl           = target_lines_check(*(circ.end()));
         }
     };
 
