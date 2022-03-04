@@ -68,6 +68,7 @@ class GateItem( QGraphicsItemGroup ):
 
         for t in target_lines( g ):
             if g.type == gate_type.toffoli:
+                print("toffoli")
                 target = QGraphicsEllipseItem( -10, t * 30 - 10, 20, 20, self )
                 targetLine = QGraphicsLineItem( 0, t * 30 - 10, 0, t * 30 + 10, self )
                 targetLine2 = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
@@ -75,40 +76,43 @@ class GateItem( QGraphicsItemGroup ):
                 self.addToGroup( targetLine )
                 self.addToGroup( targetLine2 )
             if g.type == gate_type.fredkin:
+                print("fredkin")
                 crossTL_BR = QGraphicsLineItem( -5, t * 30 - 5, 5, t * 30 + 5, self )
                 crossTR_BL = QGraphicsLineItem( 5, t * 30 - 5, -5, t * 30 + 5, self )
                 self.addToGroup( crossTL_BR )
                 self.addToGroup( crossTR_BL )
-            if g.type == gate_type.v:
-                target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
-                target.setBrush( Qt.white )
-                text = QGraphicsSimpleTextItem( "V", self )
-                text.setPos( -4, t * 30 - 7 )
-            if g.type == gate_type.vplus:
-                target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
-                target.setBrush( Qt.white )
-                text = QGraphicsSimpleTextItem( "V+", self )
-                text.setPos( -4, t * 30 - 7 )
+            #if g.type == gate_type.v:
+            #    print("v")
+            #    target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
+            #    target.setBrush( Qt.white )
+            #    text = QGraphicsSimpleTextItem( "V", self )
+            #    text.setPos( -4, t * 30 - 7 )
+            #if g.type == gate_type.vplus:
+            #    print("v+")
+            #    target = QGraphicsRectItem( -10, t * 30 - 10, 20, 20, self )
+            #    target.setBrush( Qt.white )
+            #    text = QGraphicsSimpleTextItem( "V+", self )
+            #    text.setPos( -4, t * 30 - 7 )
 
-        if g.type == gate_type.module:
-            min_target = min( target_lines( g ) )
-            max_target = max( target_lines( g ) )
-            box = QGraphicsRectItem( -10, min_target * 30 - 5, 20, ( max_target - min_target ) * 30 + 10, self )
-            box.setBrush( Qt.white )
+        #if g.type == gate_type.module:
+        #    min_target = min( target_lines( g ) )
+        #    max_target = max( target_lines( g ) )
+        #    box = QGraphicsRectItem( -10, min_target * 30 - 5, 20, ( max_target - min_target ) * 30 + 10, self )
+        #    box.setBrush( Qt.white )
 
-            for t in range( min_target + 1, max_target ):
-                if t not in target_lines( g ):
+            #for t in range( min_target + 1, max_target ):
+            #    if t not in target_lines( g ):
                     #line = QGraphicsLineItem( -10, t * 30, 10, t * 30, self )
-                    continue
+            #        continue
 
-            text = QGraphicsSimpleTextItem( g.module_name, self )
-            width = QFontMetrics( text.font() ).width( g.module_name )
-            height = QFontMetrics( text.font() ).height()
-            text.setPos( -width / 2, ( min_target + max_target ) / 2 * 30 + height / 2 )
-            text.setRotation( 270 )
-            text.setTransformOriginPoint( width / 2, height / 2 )
+            #text = QGraphicsSimpleTextItem( g.module_name, self )
+            #width = QFontMetrics( text.font() ).width( g.module_name )
+            #height = QFontMetrics( text.font() ).height()
+            #text.setPos( -width / 2, ( min_target + max_target ) / 2 * 30 + height / 2 )
+            #text.setRotation( 270 )
+            #text.setTransformOriginPoint( width / 2, height / 2 )
 
-            self.addToGroup( box )
+            #self.addToGroup( box )
 
         for c in control_lines( g ):
             control = QGraphicsEllipseItem( -5, c * 30 - 5, 10, 10, self )
