@@ -14,16 +14,17 @@ namespace syrec {
     class syrec_test_negate: public ::testing::Test {
     protected:
         // any objects needed by all tests
-        circuit               circ;
-        applications::program prog;
-        std::string           error_string;
-        cost_t                qc;
-        cost_t                tc;
-        //std::vector<unsigned> cl;
-        //std::vector<unsigned> tl;
-        properties::ptr settings;
-        properties::ptr statistics;
-        bool            okay1;
+        circuit                            circ;
+        applications::program              prog;
+        std::string                        error_string;
+        cost_t                             qc;
+        cost_t                             tc;
+        std::vector<std::vector<unsigned>> cl;
+        std::vector<std::vector<unsigned>> tl;
+        std::vector<gate>                  gates_vec;
+        properties::ptr                    settings;
+        properties::ptr                    statistics;
+        bool                               okay1;
 
         void SetUp() override {
             // setup all the individual objects before each test
@@ -31,8 +32,11 @@ namespace syrec {
             okay1        = syrec::syrec_synthesis(circ, prog);
             qc           = syrec::final_quantum_cost(circ, circ.lines());
             tc           = syrec::final_transistor_cost(circ, circ.lines());
-            //cl           = control_lines_check(*(circ.end()));
-            //tl           = target_lines_check(*(circ.end()));
+            gates_vec    = ct_gates(circ);
+            for (gate i: gates_vec) {
+                cl.push_back(control_lines_check(i));
+                tl.push_back(target_lines_check(i));
+            }
         }
     };
 

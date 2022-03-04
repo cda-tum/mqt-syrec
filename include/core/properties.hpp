@@ -261,7 +261,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    [[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
+    //[[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
 
 } // namespace syrec
 

@@ -1,5 +1,6 @@
 #include "core/test_functions.hpp"
 
+class const_iterator;
 std::string py_read_program(syrec::applications::program& prog, const std::string& filename, const syrec::read_program_settings& settings) {
     std::string error_message;
 
@@ -43,4 +44,15 @@ std::vector<unsigned> target_lines_check(const syrec::gate& g) {
         l.push_back(target);
     }
     return l;
+}
+
+std::vector<syrec::gate> ct_gates(const syrec::circuit& circ) {
+    std::vector<syrec::gate>       my_gates;
+    syrec::circuit::const_iterator first = circ.begin();
+    syrec::circuit::const_iterator last  = circ.end();
+    while (first != last) {
+        my_gates.push_back(*first);
+        ++first;
+    }
+    return my_gates;
 }

@@ -47,7 +47,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    [[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
+    //[[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
     /**
    * @brief Insert a circuit \p src before gate \p pos (counting from 0) of another circuit \p circ

@@ -19,9 +19,9 @@
 
 namespace syrec {
 
-    bool same_type(const gate& g1, const gate& g2) {
+    /*bool same_type(const gate& g1, const gate& g2) {
         return g1.type().type() == g2.type().type();
-    }
+    }*/
 
     bool is_toffoli(const gate& g) {
         return is_type<toffoli_tag>(g.type());

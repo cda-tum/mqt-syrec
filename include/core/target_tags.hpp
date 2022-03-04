@@ -176,7 +176,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    bool same_type(const gate& g1, const gate& g2);
+    //bool same_type(const gate& g1, const gate& g2);
 
     /**
    * @brief Returns whether a gate is a Toffoli gate

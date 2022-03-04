@@ -22,6 +22,10 @@ namespace syrec {
         properties::ptr       settings;
         properties::ptr       statistics;
         bool                  okay1;
+        bool                  okay2;
+
+        boost::dynamic_bitset<> input;
+        boost::dynamic_bitset<> output;
 
         void SetUp() override {
             // setup all the individual objects before each test
@@ -29,6 +33,11 @@ namespace syrec {
             okay1        = syrec::syrec_synthesis(circ, prog);
             qc           = syrec::final_quantum_cost(circ, circ.lines());
             tc           = syrec::final_transistor_cost(circ, circ.lines());
+            input.resize(circ.lines());
+            input.set(2);
+            input.set(3);
+            output.resize(circ.lines());
+            okay2 = simple_simulation(output, circ, input, settings, statistics);
         }
     };
 
@@ -46,6 +55,10 @@ namespace syrec {
 
     TEST_F(syrec_test_swap, GenericTest_swap4) {
         EXPECT_EQ(0, tc);
+    }
+
+    TEST_F(syrec_test_swap, GenericTest_swap5) {
+        EXPECT_EQ("1100", bitset_to_string(output));
     }
 
 } // namespace syrec
