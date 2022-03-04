@@ -269,7 +269,6 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_property("type", gate_get_type, gate_set_type)
             .def_property_readonly("module_name", gate_module_name);
 
-
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);
 }
