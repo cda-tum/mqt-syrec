@@ -16,8 +16,8 @@
 
 import os
 
-from revkit import *
-from mqt.syrec import *
+from .revkit import *
+from .pysyrec import *
 
 from PyQt5 import QtCore
 
@@ -25,7 +25,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-#QString=type("")
+# QString=type("")
 
 __all__ = ['CircuitLineItem', 'GateItem', 'CircuitView', 'HierarchyModel', 'SyReCEditor', 'SyReCHighligher', 'QtSyReCEditor', 'RevLibEditor', 'RevLibHighlighter', 'CodeEditor', 'LineNumberArea']
 
@@ -616,8 +616,8 @@ class SyReCEditor(QWidget):
 
         for i in circ.constants:
 
-            if i == None:
-               bit_mask=bit_mask + 2**bit_pos
+            if i is None:
+                bit_mask = bit_mask + 2 ** bit_pos
 
             bit_pos=bit_pos + 1
         
@@ -915,4 +915,3 @@ class RevLibEditor( CodeEditor ):
 
         self.highlighter = RevLibHighlighter( self.document() )
         self.setFont( QFont( "Monospace" ) )
-

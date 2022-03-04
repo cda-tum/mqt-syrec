@@ -16,8 +16,7 @@
 
 
 import PyQt5
-
-from mqt.syrec import *
+from .pysyrec import *
 
 __all__ = ['error_msg', 'read_program', 'syrec_synthesis', 'init_gui', 'display_circuit']
 
@@ -63,11 +62,7 @@ def init_gui():
 
 def display_circuit( circ ):
     import revkitui
-    w = revkitui.CircuitView( circ )
+    w = revkitui.CircuitView(circ)
     w.setWindowTitle( "Circuit View" )
     w.show()
     return w
-
-
-
-

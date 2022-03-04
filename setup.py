@@ -105,5 +105,11 @@ setup(
         'Source': 'https://github.com/cda-tum/syrec/',
         'Tracker': 'https://github.com/cda-tum/syrec/issues',
         # 'Research': ''
+    },
+    install_requires=[
+        'PyQt5==5.15.6',
+    ],
+    entry_points={
+        'console_scripts': ['syrec-editor=mqt.syrec.syrec_editor:main'],
     }
 )
