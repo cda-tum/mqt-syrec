@@ -30,7 +30,7 @@ namespace syrec {
     bool is_fredkin(const gate& g) {
         return is_type<fredkin_tag>(g.type());
     }
-/*
+    /*
     bool is_peres(const gate& g) {
         return is_type<peres_tag>(g.type());
     }

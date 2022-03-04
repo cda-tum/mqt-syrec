@@ -44,10 +44,10 @@ namespace syrec {
             circ.garbage.resize(lines, false);
         }
 
-       // void operator()(subcircuit& circ [[maybe_unused]]) const {
-       //     // NOTE expand the sub-circuit and therewith automatically the base circuit (in future version)
-       //     assert(false);
-       // }
+        // void operator()(subcircuit& circ [[maybe_unused]]) const {
+        //     // NOTE expand the sub-circuit and therewith automatically the base circuit (in future version)
+        //     assert(false);
+        // }
 
     private:
         unsigned lines;
@@ -58,7 +58,7 @@ namespace syrec {
             return circ.lines;
         }
 
-       /* unsigned operator()(const subcircuit& circ) const {
+        /* unsigned operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
                 return circ.filter.size();
             } else {
@@ -73,7 +73,7 @@ namespace syrec {
             //return boost::begin( circ.gates | indirected | transformed( const_filter_circuit() ) );
         }
 
-       /* circuit::const_iterator operator()(const subcircuit& circ) const {
+        /* circuit::const_iterator operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), const_filter_circuit(circ));
             } else {
@@ -305,7 +305,7 @@ namespace syrec {
             circ.inputs.resize(circ.lines, "i");
         }
 
-      /*  void operator()(subcircuit& circ) const {
+        /*  void operator()(subcircuit& circ) const {
             circ.base.inputs.clear();
             std::copy(inputs.begin(), inputs.end(), std::back_inserter(circ.base.inputs));
             circ.base.inputs.resize(circ.base.lines, "i");
@@ -335,7 +335,7 @@ namespace syrec {
             circ.outputs.resize(circ.lines, "o");
         }
 
-       /* void operator()(subcircuit& circ) const {
+        /* void operator()(subcircuit& circ) const {
             circ.base.outputs.clear();
             std::copy(outputs.begin(), outputs.end(), std::back_inserter(circ.base.outputs));
             circ.base.outputs.resize(circ.base.lines, "o");
@@ -415,7 +415,7 @@ namespace syrec {
         }*/
     };
 
-   /* struct circuit_name_setter {
+    /* struct circuit_name_setter {
         explicit circuit_name_setter(const std::string& _name):
             name(_name) {}
 
@@ -461,7 +461,7 @@ namespace syrec {
         }
     };*/
 
-   /* struct const_outputbuses_visitor {
+    /* struct const_outputbuses_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.outputbuses;
         }
@@ -535,7 +535,7 @@ namespace syrec {
         }
     };
 */
-  /*  struct annotation_visitor {
+    /*  struct annotation_visitor {
         annotation_visitor(const gate& g, const std::string& key, const std::string& default_value):
             g(g), key(key), default_value(default_value) {
         }
@@ -577,7 +577,7 @@ namespace syrec {
             }
         }
 
-       /* std::optional<const std::map<std::string, std::string>> operator()(const subcircuit& circ) const {
+        /* std::optional<const std::map<std::string, std::string>> operator()(const subcircuit& circ) const {
             return operator()(circ.base);
         }*/
 
@@ -623,7 +623,7 @@ namespace syrec {
     circuit::const_iterator circuit::end() const {
         return std::visit(const_end_visitor(), circ);
     }
-/*
+    /*
     circuit::iterator circuit::begin() {
         return std::visit(begin_visitor(), circ);
     }
@@ -724,7 +724,7 @@ namespace syrec {
         return std::visit(const_outputbuses_visitor(), circ);
     }*/
 
-   /* bus_collection& circuit::outputbuses() {
+    /* bus_collection& circuit::outputbuses() {
         return std::visit(outputbuses_visitor(), circ);
     }*/
 

@@ -21,7 +21,7 @@ namespace syrec {
 
     properties::properties() = default;
 
-   /* const properties::value_type& properties::operator[](const properties::key_type& k) const {
+    /* const properties::value_type& properties::operator[](const properties::key_type& k) const {
         return map.find(k)->second;
     }*/
 

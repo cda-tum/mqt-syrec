@@ -59,7 +59,7 @@ namespace syrec {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->controls.end(), d->controls.end()), transform_line());
     }
 
-   /*[[maybe_unused]] gate::iterator gate::begin_controls() {
+    /*[[maybe_unused]] gate::iterator gate::begin_controls() {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->controls.begin(), d->controls.end()), transform_line());
     }
 

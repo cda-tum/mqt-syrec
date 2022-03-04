@@ -200,7 +200,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-       // [[nodiscard]] storage_type::const_iterator end() const;
+        // [[nodiscard]] storage_type::const_iterator end() const;
 
         /**
      * @brief Number of properties
@@ -218,7 +218,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-     //   void clear();
+        //   void clear();
 
     private:
         storage_type map;

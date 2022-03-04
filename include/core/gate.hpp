@@ -242,7 +242,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0 
      */
-      //  virtual void remove_control(line c);
+        //  virtual void remove_control(line c);
 
         /**
      * @brief Adds a target to the desired line
@@ -284,7 +284,7 @@ namespace syrec {
      */
         [[nodiscard]] virtual const std::any& type() const;
 
-       // friend class filtered_gate;
+        // friend class filtered_gate;
 
     private:
         struct priv;
@@ -306,7 +306,7 @@ namespace syrec {
    */
     //class filtered_gate: public gate {
     //public:
-        /**
+    /**
      * @brief Standard constructor
      *
      * Creates a filtered_gate from a base gate and
@@ -319,9 +319,9 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-     //   filtered_gate(gate& base, std::vector<unsigned>& filter);
+    //   filtered_gate(gate& base, std::vector<unsigned>& filter);
 
-        /**
+    /**
      * @brief Copy constructor
      *
      * @param other Object to be copied from
@@ -329,14 +329,14 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-     //   filtered_gate(const filtered_gate& other);
+    //   filtered_gate(const filtered_gate& other);
 
-        /**
+    /**
      * @brief Deconstructor
      */
-     //   ~filtered_gate() override;
+    //   ~filtered_gate() override;
 
-        /**
+    /**
      * @brief Assignment operator
      *
      * @param other Gate to be assigned
@@ -346,7 +346,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-      /*  filtered_gate& operator=(const filtered_gate& other);
+    /*  filtered_gate& operator=(const filtered_gate& other);
 
         [[nodiscard]] const_iterator begin_controls() const override;
         [[nodiscard]] const_iterator end_controls() const override;
