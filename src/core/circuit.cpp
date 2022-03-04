@@ -27,9 +27,9 @@ namespace syrec {
             return circ.gates.size();
         }
 
-        unsigned operator()(const subcircuit& circ) const {
-            return circ.to - circ.from;
-        }
+        //unsigned operator()(const subcircuit& circ) const {
+        //    return circ.to - circ.from;
+        //}
     };
 
     struct lines_setter {
@@ -44,10 +44,10 @@ namespace syrec {
             circ.garbage.resize(lines, false);
         }
 
-        void operator()(subcircuit& circ [[maybe_unused]]) const {
-            // NOTE expand the sub-circuit and therewith automatically the base circuit (in future version)
-            assert(false);
-        }
+       // void operator()(subcircuit& circ [[maybe_unused]]) const {
+       //     // NOTE expand the sub-circuit and therewith automatically the base circuit (in future version)
+       //     assert(false);
+       // }
 
     private:
         unsigned lines;
@@ -58,13 +58,13 @@ namespace syrec {
             return circ.lines;
         }
 
-        unsigned operator()(const subcircuit& circ) const {
+       /* unsigned operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
                 return circ.filter.size();
             } else {
                 return circ.base.lines;
             }
-        }
+        }*/
     };
 
     struct const_begin_visitor {
@@ -73,13 +73,13 @@ namespace syrec {
             //return boost::begin( circ.gates | indirected | transformed( const_filter_circuit() ) );
         }
 
-        circuit::const_iterator operator()(const subcircuit& circ) const {
+       /* circuit::const_iterator operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.from), const_filter_circuit());
             }
-        }
+        }*/
     };
 
     struct const_end_visitor {
@@ -87,16 +87,16 @@ namespace syrec {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.end()), const_filter_circuit());
         }
 
-        circuit::const_iterator operator()(const subcircuit& circ) const {
+        /*circuit::const_iterator operator()(const subcircuit& circ) const {
             if (!circ.filter.empty()) {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), const_filter_circuit(circ));
             } else {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.begin() + circ.to), const_filter_circuit());
             }
-        }
+        }*/
     };
 
-    struct begin_visitor {
+    /*struct begin_visitor {
         circuit::iterator operator()(standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.begin()), filter_circuit());
         }
@@ -178,7 +178,7 @@ namespace syrec {
                 return boost::make_transform_iterator(boost::make_indirect_iterator(circ.base.gates.rbegin() + (int(circ.base.gates.size()) - circ.from)), filter_circuit());
             }
         }
-    };
+    };*/
 
     struct append_gate_visitor {
         explicit append_gate_visitor(circuit& c):
@@ -191,7 +191,7 @@ namespace syrec {
             return *g;
         }
 
-        gate& operator()(subcircuit& circ) const {
+        /*gate& operator()(subcircuit& circ) const {
             circ.base.gates.insert(circ.base.gates.begin() + circ.to, std::make_shared<gate>());
             ++circ.to;
 
@@ -205,13 +205,13 @@ namespace syrec {
                 c.gate_added(g);
                 return g;
             }
-        }
+        }*/
 
     private:
         circuit& c;
     };
 
-    struct prepend_gate_visitor {
+    /*struct prepend_gate_visitor {
         explicit prepend_gate_visitor(circuit& c):
             c(c) {}
 
@@ -240,7 +240,7 @@ namespace syrec {
 
     private:
         circuit& c;
-    };
+    };*/
 
     struct insert_gate_visitor {
         insert_gate_visitor(unsigned _pos, circuit& c):
@@ -253,7 +253,7 @@ namespace syrec {
             return *g;
         }
 
-        gate& operator()(subcircuit& circ) const {
+        /*gate& operator()(subcircuit& circ) const {
             circ.base.gates.insert(circ.base.gates.begin() + circ.from + pos, std::make_shared<gate>());
             ++circ.to;
 
@@ -267,14 +267,14 @@ namespace syrec {
                 c.gate_added(g);
                 return g;
             }
-        }
+        }*/
 
     private:
         unsigned pos;
         circuit& c;
     };
 
-    struct remove_gate_at_visitor {
+    /*struct remove_gate_at_visitor {
         explicit remove_gate_at_visitor(unsigned _pos):
             pos(_pos) {}
 
@@ -293,7 +293,7 @@ namespace syrec {
 
     private:
         unsigned pos;
-    };
+    };*/
 
     struct inputs_setter {
         explicit inputs_setter(const std::vector<std::string>& _inputs):
@@ -305,11 +305,11 @@ namespace syrec {
             circ.inputs.resize(circ.lines, "i");
         }
 
-        void operator()(subcircuit& circ) const {
+      /*  void operator()(subcircuit& circ) const {
             circ.base.inputs.clear();
             std::copy(inputs.begin(), inputs.end(), std::back_inserter(circ.base.inputs));
             circ.base.inputs.resize(circ.base.lines, "i");
-        }
+        }*/
 
     private:
         const std::vector<std::string>& inputs;
@@ -320,9 +320,9 @@ namespace syrec {
             return circ.inputs;
         }
 
-        const std::vector<std::string>& operator()(const subcircuit& circ) const {
+        /*const std::vector<std::string>& operator()(const subcircuit& circ) const {
             return circ.base.inputs;
-        }
+        }*/
     };
 
     struct outputs_setter {
@@ -335,11 +335,11 @@ namespace syrec {
             circ.outputs.resize(circ.lines, "o");
         }
 
-        void operator()(subcircuit& circ) const {
+       /* void operator()(subcircuit& circ) const {
             circ.base.outputs.clear();
             std::copy(outputs.begin(), outputs.end(), std::back_inserter(circ.base.outputs));
             circ.base.outputs.resize(circ.base.lines, "o");
-        }
+        }*/
 
     private:
         const std::vector<std::string>& outputs;
@@ -350,9 +350,9 @@ namespace syrec {
             return circ.outputs;
         }
 
-        const std::vector<std::string>& operator()(const subcircuit& circ) const {
+        /*const std::vector<std::string>& operator()(const subcircuit& circ) const {
             return circ.base.outputs;
-        }
+        }*/
     };
 
     struct constants_setter {
@@ -365,11 +365,11 @@ namespace syrec {
             circ.constants.resize(circ.lines, constant());
         }
 
-        void operator()(subcircuit& circ) const {
+        /*void operator()(subcircuit& circ) const {
             circ.base.constants.clear();
             std::copy(constants.begin(), constants.end(), std::back_inserter(circ.base.constants));
             circ.base.constants.resize(circ.base.lines, constant());
-        }
+        }*/
 
     private:
         const std::vector<constant>& constants;
@@ -380,9 +380,9 @@ namespace syrec {
             return circ.constants;
         }
 
-        const std::vector<constant>& operator()(const subcircuit& circ) const {
+        /*const std::vector<constant>& operator()(const subcircuit& circ) const {
             return circ.base.constants;
-        }
+        }*/
     };
 
     struct garbage_setter {
@@ -395,11 +395,11 @@ namespace syrec {
             circ.garbage.resize(circ.lines, false);
         }
 
-        void operator()(subcircuit& circ) const {
+        /*void operator()(subcircuit& circ) const {
             circ.base.garbage.clear();
             std::copy(garbage.begin(), garbage.end(), std::back_inserter(circ.base.garbage));
             circ.base.garbage.resize(circ.base.lines, false);
-        }
+        }*/
 
     private:
         const std::vector<bool>& garbage;
@@ -410,12 +410,12 @@ namespace syrec {
             return circ.garbage;
         }
 
-        const std::vector<bool>& operator()(const subcircuit& circ) const {
+        /*const std::vector<bool>& operator()(const subcircuit& circ) const {
             return circ.base.garbage;
-        }
+        }*/
     };
 
-    struct circuit_name_setter {
+   /* struct circuit_name_setter {
         explicit circuit_name_setter(const std::string& _name):
             name(_name) {}
 
@@ -450,8 +450,8 @@ namespace syrec {
             return circ.base.inputbuses;
         }
     };
-
-    struct inputbuses_visitor {
+*/
+    /*struct inputbuses_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.inputbuses;
         }
@@ -459,9 +459,9 @@ namespace syrec {
         bus_collection& operator()(subcircuit& circ) const {
             return circ.base.inputbuses;
         }
-    };
+    };*/
 
-    struct const_outputbuses_visitor {
+   /* struct const_outputbuses_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.outputbuses;
         }
@@ -469,9 +469,9 @@ namespace syrec {
         const bus_collection& operator()(const subcircuit& circ) const {
             return circ.base.outputbuses;
         }
-    };
+    };*/
 
-    struct outputbuses_visitor {
+    /*struct outputbuses_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.outputbuses;
         }
@@ -479,9 +479,9 @@ namespace syrec {
         bus_collection& operator()(subcircuit& circ) const {
             return circ.base.outputbuses;
         }
-    };
+    };*/
 
-    struct const_statesignals_visitor {
+    /*struct const_statesignals_visitor {
         const bus_collection& operator()(const standard_circuit& circ) const {
             return circ.statesignals;
         }
@@ -489,9 +489,9 @@ namespace syrec {
         const bus_collection& operator()(const subcircuit& circ) const {
             return circ.base.statesignals;
         }
-    };
+    };*/
 
-    struct statesignals_visitor {
+    /*struct statesignals_visitor {
         bus_collection& operator()(standard_circuit& circ) const {
             return circ.statesignals;
         }
@@ -534,8 +534,8 @@ namespace syrec {
             return circ.from;
         }
     };
-
-    struct annotation_visitor {
+*/
+  /*  struct annotation_visitor {
         annotation_visitor(const gate& g, const std::string& key, const std::string& default_value):
             g(g), key(key), default_value(default_value) {
         }
@@ -562,7 +562,7 @@ namespace syrec {
         const gate&        g;
         const std::string& key;
         const std::string& default_value;
-    };
+    };*/
 
     struct annotations_visitor {
         explicit annotations_visitor(const gate& g):
@@ -577,9 +577,9 @@ namespace syrec {
             }
         }
 
-        std::optional<const std::map<std::string, std::string>> operator()(const subcircuit& circ) const {
+       /* std::optional<const std::map<std::string, std::string>> operator()(const subcircuit& circ) const {
             return operator()(circ.base);
-        }
+        }*/
 
     private:
         const gate& g;
@@ -594,9 +594,9 @@ namespace syrec {
             circ.annotations[&g][key] = value;
         }
 
-        void operator()(subcircuit& circ) const {
+        /*void operator()(subcircuit& circ) const {
             operator()(circ.base);
-        }
+        }*/
 
     private:
         const gate&        g;
@@ -623,7 +623,7 @@ namespace syrec {
     circuit::const_iterator circuit::end() const {
         return std::visit(const_end_visitor(), circ);
     }
-
+/*
     circuit::iterator circuit::begin() {
         return std::visit(begin_visitor(), circ);
     }
@@ -654,23 +654,23 @@ namespace syrec {
 
     gate& circuit::operator[](unsigned index) {
         return *(begin() + index);
-    }
+    }*/
 
     gate& circuit::append_gate() {
         return std::visit(append_gate_visitor(*this), circ);
     }
 
-    gate& circuit::prepend_gate() {
+    /*gate& circuit::prepend_gate() {
         return std::visit(prepend_gate_visitor(*this), circ);
-    }
+    }*/
 
     gate& circuit::insert_gate(unsigned pos) {
         return std::visit(insert_gate_visitor(pos, *this), circ);
     }
 
-    [[maybe_unused]] void circuit::remove_gate_at(unsigned pos) {
+    /*[[maybe_unused]] void circuit::remove_gate_at(unsigned pos) {
         std::visit(remove_gate_at_visitor(pos), circ);
-    }
+    }*/
 
     void circuit::set_inputs(const std::vector<std::string>& inputs) {
         std::visit(inputs_setter(inputs), circ);
@@ -704,7 +704,7 @@ namespace syrec {
         return std::visit(garbage_visitor(), circ);
     }
 
-    [[maybe_unused]] void circuit::set_circuit_name(const std::string& name) {
+    /*[[maybe_unused]] void circuit::set_circuit_name(const std::string& name) {
         std::visit(circuit_name_setter(name), circ);
     }
 
@@ -714,21 +714,21 @@ namespace syrec {
 
     [[maybe_unused]] const bus_collection& circuit::inputbuses() const {
         return std::visit(const_inputbuses_visitor(), circ);
-    }
+    }*/
 
-    bus_collection& circuit::inputbuses() {
+    /*bus_collection& circuit::inputbuses() {
         return std::visit(inputbuses_visitor(), circ);
-    }
+    }*/
 
-    [[maybe_unused]] const bus_collection& circuit::outputbuses() const {
+    /*[[maybe_unused]] const bus_collection& circuit::outputbuses() const {
         return std::visit(const_outputbuses_visitor(), circ);
-    }
+    }*/
 
-    bus_collection& circuit::outputbuses() {
+   /* bus_collection& circuit::outputbuses() {
         return std::visit(outputbuses_visitor(), circ);
-    }
+    }*/
 
-    const bus_collection& circuit::statesignals() const {
+    /*const bus_collection& circuit::statesignals() const {
         return std::visit(const_statesignals_visitor(), circ);
     }
 
@@ -764,7 +764,7 @@ namespace syrec {
 
     const std::string& circuit::annotation(const gate& g, const std::string& key, const std::string& default_value) const {
         return std::visit(annotation_visitor(g, key, default_value), circ);
-    }
+    }*/
 
     std::optional<const std::map<std::string, std::string>> circuit::annotations(const gate& g) const {
         return std::visit(annotations_visitor(g), circ);

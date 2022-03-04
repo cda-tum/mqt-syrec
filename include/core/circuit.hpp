@@ -28,7 +28,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/signals2.hpp>
 #include <core/gate.hpp>
-#include <core/meta/bus_collection.hpp>
 #include <map>
 #include <memory>
 #include <optional>
@@ -163,13 +162,13 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        explicit standard_circuit(unsigned lines):
-            lines(lines) {
-            inputs.resize(lines, "i");
-            outputs.resize(lines, "o");
-            constants.resize(lines, constant());
-            garbage.resize(lines, false);
-        }
+        //explicit standard_circuit(unsigned lines):
+        //    lines(lines) {
+        //    inputs.resize(lines, "i");
+        //    outputs.resize(lines, "o");
+        //    constants.resize(lines, constant());
+        //    garbage.resize(lines, false);
+        //}
 
         /** @cond 0 */
         std::vector<std::shared_ptr<gate>> gates;
@@ -180,14 +179,14 @@ namespace syrec {
         std::vector<constant>                                     constants;
         std::vector<bool>                                         garbage;
         std::string                                               name;
-        bus_collection                                            inputbuses;
-        bus_collection                                            outputbuses;
-        bus_collection                                            statesignals;
+    //    bus_collection                                            inputbuses;
+    //    bus_collection                                            outputbuses;
+    //    bus_collection                                            statesignals;
         std::map<const gate*, std::map<std::string, std::string>> annotations;
         /** @endcond */
     };
 
-    class subcircuit;
+    //class subcircuit;
 
     /**
    * @brief Generic circuit
@@ -211,7 +210,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    typedef std::variant<standard_circuit, subcircuit> circuit_variant;
+   typedef std::variant<standard_circuit> circuit_variant;
 
     /**
    * @brief Represents a sub-circuit
@@ -221,8 +220,8 @@ namespace syrec {
    * specialized for the sub-circuit. But the gates are
    * references to the underlying circuit.
    */
-    class subcircuit {
-    public:
+    //class subcircuit {
+    //public:
         /**
      * @brief Default constructor
      *
@@ -238,8 +237,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        subcircuit(standard_circuit& base, unsigned from, unsigned to):
-            base(base), from(from), to(to) {}
+     //   subcircuit(standard_circuit& base, unsigned from, unsigned to):
+     //       base(base), from(from), to(to) {}
 
         /**
      * @brief Default constructor
@@ -254,8 +253,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        subcircuit(circuit_variant& base, unsigned from, unsigned to):
-            base(std::get<standard_circuit>(base)), from(from), to(to) {}
+     //   subcircuit(circuit_variant& base, unsigned from, unsigned to):
+     //       base(std::get<standard_circuit>(base)), from(from), to(to) {}
 
         /**
      * @brief Default constructor
@@ -270,8 +269,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        subcircuit(const circuit_variant& base, unsigned from, unsigned to):
-            base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
+      //  subcircuit(const circuit_variant& base, unsigned from, unsigned to):
+      //      base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
 
         /**
      * @brief Constructor with line filter
@@ -292,11 +291,11 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        subcircuit(standard_circuit& base, unsigned from, unsigned to, std::vector<unsigned> filter):
+      /*  subcircuit(standard_circuit& base, unsigned from, unsigned to, std::vector<unsigned> filter):
             base(base), from(from), to(to), filter(std::move(filter)) {
             std::sort(this->filter.begin(), this->filter.end());
             this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
-        }
+        }*/
 
         /**
      * @brief Constructor with line filter
@@ -312,11 +311,11 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        subcircuit(const circuit_variant& base, unsigned from, unsigned to, std::vector<unsigned> filter):
+     /*   subcircuit(const circuit_variant& base, unsigned from, unsigned to, std::vector<unsigned> filter):
             base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to), filter(std::move(filter)) {
             std::sort(this->filter.begin(), this->filter.end());
             this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
-        }
+        }*/
 
         /**
      * @brief Deconstructor
@@ -326,31 +325,31 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        ~subcircuit() {
+      /*  ~subcircuit() {
             std::map<gate*, filtered_gate*>::const_iterator it;
             for (it = filter_cache.begin(); it != filter_cache.end(); ++it) {
                 delete it->second;
             }
-        }
+        }*/
 
         /** @cond */
-        standard_circuit&     base;
-        unsigned              from;
-        unsigned              to;
-        std::vector<unsigned> filter;
+        //standard_circuit&     base;
+        //unsigned              from;
+        //unsigned              to;
+        //std::vector<unsigned> filter;
 
         // for the transform_iterator implementation
-        std::map<gate*, filtered_gate*> filter_cache;
+        //std::map<gate*, filtered_gate*> filter_cache;
         /** @endcond */
-    };
+    //};
 
     /** @cond */
-    struct filter_circuit {
+    /*struct filter_circuit {
         typedef gate& result_type;
 
-        filter_circuit() = default;
-        explicit filter_circuit(subcircuit& circ):
-            circ(&circ) {}
+       // filter_circuit() = default;
+       // explicit filter_circuit(subcircuit& circ):
+      //      circ(&circ) {}
 
         gate& operator()(gate& g) const {
             if (!circ) {
@@ -364,32 +363,33 @@ namespace syrec {
         }
 
     private:
-        subcircuit* circ = nullptr;
-    };
+    //    subcircuit* circ = nullptr;
+    };*/
     /** @endcond */
 
     /** @cond */
     struct const_filter_circuit {
         typedef const gate& result_type;
 
-        const_filter_circuit() = default;
+     /* const_filter_circuit() = default;
         explicit const_filter_circuit(const subcircuit& circ):
-            circ(&circ) {}
+            circ(&circ) {}*/
 
         const gate& operator()(const gate& g) const {
-            if (!circ) {
-                return g;
+            /*if (!circ) {
+
             } else {
                 // NOTE Works, but avoiding the const_cast would be better
                 if (circ->filter_cache.find(const_cast<gate*>(&g)) == circ->filter_cache.end()) {
                     const_cast<subcircuit*>(circ)->filter_cache[const_cast<gate*>(&g)] = new filtered_gate(const_cast<gate&>(g), const_cast<subcircuit*>(circ)->filter);
                 }
                 return *circ->filter_cache.find(const_cast<gate*>(&g))->second;
-            }
+            }*/
+            return g;
         }
 
     private:
-        const subcircuit* circ = nullptr;
+       // const subcircuit* circ = nullptr;
     };
     /** @endcond */
 
@@ -414,8 +414,8 @@ namespace syrec {
      */
         circuit() = default;
 
-        explicit circuit(unsigned lines):
-            circ(standard_circuit(lines)) {}
+        //explicit circuit(unsigned lines):
+        //    circ(standard_circuit(lines)) {}
 
         /**
      * @brief Cast Constructor for a standard_circuit
@@ -434,8 +434,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        explicit circuit(const standard_circuit& std_circ):
-            circ(std_circ) {}
+     //   explicit circuit(const standard_circuit& std_circ):
+     //       circ(std_circ) {}
 
         /**
      * @brief Cast Constructor for a standard_circuit
@@ -454,8 +454,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        explicit circuit(standard_circuit& std_circ):
-            circ(std_circ) {}
+      //  explicit circuit(standard_circuit& std_circ):
+      //      circ(std_circ) {}
 
         /**
      * @brief Cast Constructor for a subcircuit
@@ -469,8 +469,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        explicit circuit(const subcircuit& sub_circ):
-            circ(sub_circ) {}
+     //   explicit circuit(const subcircuit& sub_circ):
+     //       circ(sub_circ) {}
 
         /**
      * @brief Cast Constructor for a subcircuit
@@ -484,8 +484,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        explicit circuit(subcircuit& sub_circ):
-            circ(sub_circ) {}
+      //  explicit circuit(subcircuit& sub_circ):
+      //      circ(sub_circ) {}
 
         /**
      * @brief Copy Constructor
@@ -500,13 +500,13 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        circuit(const circuit& other):
-            circ(other.circ) {}
+     //   circuit(const circuit& other):
+     //       circ(other.circ) {}
 
         /**
      * @brief Mutable iterator for accessing the gates in a circuit
      */
-        typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::iterator>> iterator;
+        //typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::iterator>> iterator;
 
         /**
      * @brief Constant iterator for accessing the gates in a circuit
@@ -516,7 +516,7 @@ namespace syrec {
         /**
      * @brief Mutable reverse iterator for accessing the gates in a circuit
      */
-        typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::reverse_iterator>> reverse_iterator;
+       // typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::reverse_iterator>> reverse_iterator;
         /**
      * @brief Constant reverse iterator for accessing the gates in a circuit
      */
@@ -594,7 +594,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        iterator begin();
+      //  iterator begin();
 
         /**
      * @brief Mutable end iterator pointing to gates
@@ -604,7 +604,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        iterator end();
+      //  iterator end();
 
         /**
      * @brief Constant begin reverse iterator pointing to gates
@@ -614,7 +614,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] const_reverse_iterator rbegin() const;
+     //   [[nodiscard]] const_reverse_iterator rbegin() const;
 
         /**
      * @brief Constant end reverse iterator pointing to gates
@@ -624,7 +624,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] const_reverse_iterator rend() const;
+      //  [[nodiscard]] const_reverse_iterator rend() const;
 
         /**
      * @brief Mutable begin reverse iterator pointing to gates
@@ -634,7 +634,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        reverse_iterator rbegin();
+       // reverse_iterator rbegin();
 
         /**
      * @brief Mutable end reverse iterator pointing to gates
@@ -644,7 +644,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        reverse_iterator rend();
+       // reverse_iterator rend();
 
         /**
      * @brief Random access operator for access to gates by index
@@ -655,7 +655,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        const gate& operator[](unsigned index) const;
+      //  const gate& operator[](unsigned index) const;
 
         /**
      * @brief Random access operator for access to gates by index
@@ -666,7 +666,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        gate& operator[](unsigned index);
+      //  gate& operator[](unsigned index);
 
         /**
      * @brief Inserts a gate at the end of the circuit
@@ -690,7 +690,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        gate& prepend_gate();
+     //   gate& prepend_gate();
 
         /**
      * @brief Inserts a gate into the circuit
@@ -716,7 +716,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[maybe_unused]] void remove_gate_at(unsigned pos);
+     //   [[maybe_unused]] void remove_gate_at(unsigned pos);
 
         /**
      * @brief Sets the input names of the lines in a circuit
@@ -844,7 +844,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[maybe_unused]] void set_circuit_name(const std::string& name);
+      //  [[maybe_unused]] void set_circuit_name(const std::string& name);
 
         /**
      * @brief Returns the name of the circuit
@@ -857,7 +857,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[maybe_unused]] [[nodiscard]] const std::string& circuit_name() const;
+      //  [[maybe_unused]] [[nodiscard]] const std::string& circuit_name() const;
 
         /**
      * @brief Constant access to the input buses
@@ -870,7 +870,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[maybe_unused]] [[nodiscard]] const bus_collection& inputbuses() const;
+      //  [[maybe_unused]] [[nodiscard]] const bus_collection& inputbuses() const;
 
         /**
      * @brief Mutable access to the input buses
@@ -883,7 +883,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        bus_collection& inputbuses();
+     //   bus_collection& inputbuses();
 
         /**
      * @brief Constant access to the output buses
@@ -896,7 +896,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[maybe_unused]] [[nodiscard]] const bus_collection& outputbuses() const;
+      //  [[maybe_unused]] [[nodiscard]] const bus_collection& outputbuses() const;
 
         /**
      * @brief Mutable access to the output buses
@@ -909,7 +909,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        bus_collection& outputbuses();
+    //    bus_collection& outputbuses();
 
         /**
      * @brief Constant access to the state signals
@@ -922,7 +922,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] const bus_collection& statesignals() const;
+      //  [[nodiscard]] const bus_collection& statesignals() const;
 
         /**
      * @brief Mutable access to the state signals
@@ -935,7 +935,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        bus_collection& statesignals();
+      //  bus_collection& statesignals();
 
         /**
      * @brief Returns whether the circuit is a sub-circuit or not
@@ -949,7 +949,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[maybe_unused]] [[nodiscard]] bool is_subcircuit() const;
+      //  [[maybe_unused]] [[nodiscard]] bool is_subcircuit() const;
 
         /**
      * @brief Returns the filter of a sub-circuit
@@ -966,7 +966,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] std::pair<unsigned, std::vector<unsigned>> filter() const;
+      //  [[nodiscard]] std::pair<unsigned, std::vector<unsigned>> filter() const;
 
         /**
      * @brief Returns the offset of the circuit (sub-circuit)
@@ -980,7 +980,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] unsigned offset() const;
+      //  [[nodiscard]] unsigned offset() const;
 
         /**
      * @brief Adds a module to the circuit
@@ -1000,7 +1000,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        void add_module(const std::string& name, const std::shared_ptr<circuit>& module);
+       // void add_module(const std::string& name, const std::shared_ptr<circuit>& module);
 
         /**
      * @brief Adds a module to the circuit
@@ -1018,7 +1018,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        void add_module(const std::string& name, const circuit& module);
+      //  void add_module(const std::string& name, const circuit& module);
 
         /**
      * @brief Returns all modules in the circuit
@@ -1031,7 +1031,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
+      //  [[nodiscard]] const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
 
         /**
      * @brief Returns the annotation for one gate and one key
@@ -1049,7 +1049,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
+      //  [[nodiscard]] const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
 
         /**
      * @brief Returns all annotations for a given gate
@@ -1110,8 +1110,8 @@ namespace syrec {
         boost::signals2::signal<void(gate&)> gate_added;
 
         /** @cond */
-        explicit operator circuit_variant&() {
-            return circ;
+       explicit operator circuit_variant&() {
+           return circ;
         }
 
         explicit operator const circuit_variant&() const {
@@ -1121,7 +1121,7 @@ namespace syrec {
     private:
         /** @cond */
         circuit_variant                                 circ;
-        std::map<std::string, std::shared_ptr<circuit>> _modules;
+        //std::map<std::string, std::shared_ptr<circuit>> _modules;
         /** @endcond */
     };
 

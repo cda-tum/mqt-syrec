@@ -19,7 +19,6 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_gates.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_line_to_circuit.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/meta/bus_collection.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/expression.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/module.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/number.cpp
@@ -40,7 +39,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_line_to_circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/control_lines.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/target_lines.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/meta/bus_collection.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/expression.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/grammar.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/module.hpp

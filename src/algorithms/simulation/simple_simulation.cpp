@@ -60,7 +60,7 @@ namespace syrec {
             }
 
             return input;
-        } else if (is_peres(g)) {
+        } /*else if (is_peres(g)) {
             if (input.test(*g.begin_controls())) // is single control set
             {
                 // get both positions and value of t1
@@ -76,10 +76,10 @@ namespace syrec {
 
                 bool t1v = input.test(t1);
 
-                /* flip t1 */
+                // flip t1 //
                 input.flip(t1);
 
-                /* flip t2 if t1 was true */
+                // flip t2 if t1 was true //
                 if (t1v) {
                     input.flip(t2);
                 }
@@ -113,7 +113,8 @@ namespace syrec {
             }
 
             return input;
-        } else {
+        } */
+        else {
             assert(false);
         }
         return input;

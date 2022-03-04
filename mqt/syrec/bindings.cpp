@@ -22,13 +22,7 @@ using namespace syrec::applications;
 
 [[maybe_unused]] circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
 [[maybe_unused]] circuit::const_iterator (circuit::*end1)() const   = &circuit::end;
-[[maybe_unused]] circuit::iterator (circuit::*begin2)()             = &circuit::begin;
-[[maybe_unused]] circuit::iterator (circuit::*end2)()               = &circuit::end;
 
-[[maybe_unused]] circuit::const_reverse_iterator (circuit::*rbegin1)() const = &circuit::rbegin;
-[[maybe_unused]] circuit::const_reverse_iterator (circuit::*rend1)() const   = &circuit::rend;
-[[maybe_unused]] circuit::reverse_iterator (circuit::*rbegin2)()             = &circuit::rbegin;
-[[maybe_unused]] circuit::reverse_iterator (circuit::*rend2)()               = &circuit::rend;
 
 py::dict circuit_annotations(const circuit& c, const gate& g) {
     py::dict d;
@@ -124,11 +118,11 @@ std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
 namespace gate_types {
     enum _types {
         toffoli,
-        peres,
+   //     peres,
         fredkin,
-        v,
-        vplus,
-        module
+   //     v,
+   //     vplus,
+   //     module
     };
 }
 
@@ -137,11 +131,11 @@ void gate_set_type(gate& g, unsigned value) {
         case gate_types::toffoli:
             g.set_type(toffoli_tag());
             break;
-        case gate_types::peres:
-            g.set_type(peres_tag());
-            break;
         case gate_types::fredkin:
             g.set_type(fredkin_tag());
+            break;
+        /*case gate_types::peres:
+            g.set_type(peres_tag());
             break;
         case gate_types::v:
             g.set_type(v_tag());
@@ -151,7 +145,7 @@ void gate_set_type(gate& g, unsigned value) {
             break;
         case gate_types::module:
             g.set_type(module_tag());
-            break;
+            break;*/
         default:
             assert(false);
             break;
@@ -161,29 +155,29 @@ void gate_set_type(gate& g, unsigned value) {
 unsigned gate_get_type(const gate& g) {
     if (is_toffoli(g)) {
         return gate_types::toffoli;
-    } else if (is_peres(g)) {
-        return gate_types::peres;
     } else if (is_fredkin(g)) {
         return gate_types::fredkin;
-    } else if (is_v(g)) {
+    } /*else if (is_peres(g)) {
+        return gate_types::peres;
+    }else if (is_v(g)) {
         return gate_types::v;
     } else if (is_vplus(g)) {
         return gate_types::vplus;
     } else if (is_module(g)) {
         return gate_types::module;
-    }
+    }*/
 
     assert(false);
     return 0u;
 }
 
-std::string gate_module_name(const gate& g) {
+/*std::string gate_module_name(const gate& g) {
     if (is_module(g)) {
         return std::any_cast<module_tag>(g.type()).name;
     } else {
         return {};
     }
-}
+}*/
 
 /// control and target lines
 
@@ -213,7 +207,7 @@ PYBIND11_MODULE(pysyrec, m) {
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
-            .def(py::init<unsigned>())
+            //.def(py::init<unsigned>())
             .def_property("lines", &circuit::lines, &circuit::set_lines)
             .def_property_readonly("num_gates", &circuit::num_gates)
             .def("gates", new_gates)
@@ -257,17 +251,17 @@ PYBIND11_MODULE(pysyrec, m) {
 
     py::enum_<gate_types::_types>(m, "gate_type")
             .value("toffoli", gate_types::toffoli)
-            .value("peres", gate_types::peres)
+            //.value("peres", gate_types::peres)
             .value("fredkin", gate_types::fredkin)
-            .value("v", gate_types::v)
-            .value("vplus", gate_types::vplus)
-            .value("module", gate_types::module)
+            //.value("v", gate_types::v)
+            //.value("vplus", gate_types::vplus)
+            //.value("module", gate_types::module)
             .export_values();
 
     py::class_<gate>(m, "gate")
             .def(py::init<>())
-            .def_property("type", gate_get_type, gate_set_type)
-            .def_property_readonly("module_name", gate_module_name);
+            .def_property("type", gate_get_type, gate_set_type);
+            //.def_property_readonly("module_name", gate_module_name);
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);

@@ -21,15 +21,15 @@ namespace syrec {
 
     properties::properties() = default;
 
-    const properties::value_type& properties::operator[](const properties::key_type& k) const {
+   /* const properties::value_type& properties::operator[](const properties::key_type& k) const {
         return map.find(k)->second;
-    }
+    }*/
 
     void properties::set(const properties::key_type& k, const properties::value_type& value) {
         map[k] = value;
     }
 
-    properties::storage_type::const_iterator properties::begin() const {
+    /*properties::storage_type::const_iterator properties::begin() const {
         return map.begin();
     }
 
@@ -49,6 +49,6 @@ namespace syrec {
         if (statistics) {
             statistics->set("error", error);
         }
-    }
+    }*/
 
 } // namespace syrec

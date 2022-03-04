@@ -135,7 +135,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1);
+        //target_line_adder operator()(const gate::line& l1);
 
         /**
      * @brief Add two control lines
@@ -166,7 +166,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3);
 
         /**
      * @brief Add four control lines
@@ -183,7 +183,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4);
 
         /**
      * @brief Add five control lines
@@ -201,7 +201,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5);
 
         /**
      * @brief Add six control lines
@@ -220,7 +220,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6);
 
         /**
      * @brief Add seven control lines
@@ -240,7 +240,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7);
 
         /**
      * @brief Add eight control lines
@@ -261,7 +261,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8);
 
         /**
      * @brief Add nine control lines
@@ -283,7 +283,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9);
+        //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9);
 
     private:
         gate* g = nullptr;
@@ -401,7 +401,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.1
    */
-    gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
+    // gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
     /**
    * @brief Helper function for appending a generic gate using the control_line_adder
@@ -575,7 +575,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder prepend_gate(circuit& circ, const std::any& tag);
+    // control_line_adder prepend_gate(circuit& circ, const std::any& tag);
 
     /**
    * @brief Helper function for prepending a \b Toffoli gate using the control_line_adder
@@ -742,7 +742,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    control_line_adder insert_gate(circuit& circ, unsigned n, const std::any& tag);
+    // control_line_adder insert_gate(circuit& circ, unsigned n, const std::any& tag);
 
     /**
    * @brief Helper function for inserting a \b Toffoli gate using the control_line_adder

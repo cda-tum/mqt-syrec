@@ -1,7 +1,10 @@
 #include "core/circuit.hpp"
 #include "core/syrec/parser.hpp"
+#include "core/gate.hpp"
 #include "core/syrec/program.hpp"
 
+#include <core/functions/control_lines.hpp>
+#include <core/functions/target_lines.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <string>
 
@@ -9,3 +12,5 @@ std::string py_read_program(syrec::applications::program& prog, const std::strin
 
 std::string my_read_program(syrec::applications::program& prog, const std::string& filename, unsigned default_bitwidth = 32);
 std::string bitset_to_string(boost::dynamic_bitset<> const& bitset);
+std::vector<unsigned> control_lines_check(const syrec::gate& g);
+std::vector<unsigned>  target_lines_check(const syrec::gate& g);

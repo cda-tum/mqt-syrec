@@ -112,7 +112,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        const value_type& operator[](const key_type& k) const;
+        //const value_type& operator[](const key_type& k) const;
 
         /**
      * @brief Casted access to an existing element
@@ -190,7 +190,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] storage_type::const_iterator begin() const;
+        //[[nodiscard]] storage_type::const_iterator begin() const;
 
         /**
      * @brief End iterator for the properties
@@ -200,7 +200,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        [[nodiscard]] storage_type::const_iterator end() const;
+       // [[nodiscard]] storage_type::const_iterator end() const;
 
         /**
      * @brief Number of properties
@@ -210,7 +210,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        [[nodiscard]] unsigned size() const;
+        //[[nodiscard]] unsigned size() const;
 
         /**
      * @brief Clears all properties
@@ -218,7 +218,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        void clear();
+     //   void clear();
 
     private:
         storage_type map;

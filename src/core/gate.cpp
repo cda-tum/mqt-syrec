@@ -59,13 +59,13 @@ namespace syrec {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->controls.end(), d->controls.end()), transform_line());
     }
 
-    [[maybe_unused]] gate::iterator gate::begin_controls() {
+   /*[[maybe_unused]] gate::iterator gate::begin_controls() {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->controls.begin(), d->controls.end()), transform_line());
     }
 
     [[maybe_unused]] gate::iterator gate::end_controls() {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->controls.end(), d->controls.end()), transform_line());
-    }
+    }*/
 
     gate::const_iterator gate::begin_targets() const {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->targets.begin(), d->targets.end()), transform_line());
@@ -75,7 +75,7 @@ namespace syrec {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->targets.end(), d->targets.end()), transform_line());
     }
 
-    [[maybe_unused]] gate::iterator gate::begin_targets() {
+    /*[[maybe_unused]] gate::iterator gate::begin_targets() {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->targets.begin(), d->targets.end()), transform_line());
     }
 
@@ -85,23 +85,23 @@ namespace syrec {
 
     unsigned gate::size() const {
         return d->controls.size() + d->targets.size();
-    }
+    }*/
 
     void gate::add_control(line c) {
         d->controls.insert(c);
     }
 
-    void gate::remove_control(line c) {
+    /*void gate::remove_control(line c) {
         d->controls.erase(c);
-    }
+    }*/
 
     void gate::add_target(line l) {
         d->targets.insert(l);
     }
 
-    void gate::remove_target(line l) {
+    /*void gate::remove_target(line l) {
         d->targets.erase(l);
-    }
+    }*/
 
     void gate::set_type(const std::any& t) {
         d->target_type = t;
@@ -113,7 +113,7 @@ namespace syrec {
 
     // filtered_gate //////////
 
-    struct filtered_gate::priv {
+    /*struct filtered_gate::priv {
         priv(gate& base, std::vector<unsigned>& filter):
             base(base),
             filter(filter) {}
@@ -220,6 +220,6 @@ namespace syrec {
 
     const std::any& filtered_gate::type() const {
         return d->base.type();
-    }
+    }*/
 
 } // namespace syrec

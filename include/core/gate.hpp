@@ -36,7 +36,7 @@ namespace syrec {
 
     struct transform_line;
     struct filter_line;
-    class filtered_gate;
+    //class filtered_gate;
 
     /**
    * @brief Represents a gate in a circuit
@@ -159,7 +159,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0
      */
-        [[maybe_unused]] virtual iterator begin_controls();
+        //[[maybe_unused]] virtual iterator begin_controls();
 
         /**
      * @brief End iterator for accessing control lines (non-const).
@@ -169,7 +169,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0
      */
-        [[maybe_unused]] virtual iterator end_controls();
+        //[[maybe_unused]] virtual iterator end_controls();
 
         /**
      * @brief Start iterator for accessing target lines (const).
@@ -199,7 +199,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0
      */
-        [[maybe_unused]] virtual iterator begin_targets();
+        //[[maybe_unused]] virtual iterator begin_targets();
 
         /**
      * @brief End iterator for accessing target lines (non-const).
@@ -209,7 +209,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0
      */
-        [[maybe_unused]] virtual iterator end_targets();
+        //[[maybe_unused]] virtual iterator end_targets();
 
         /**
      * @brief Returns the number of control and target lines as sum
@@ -222,7 +222,7 @@ namespace syrec {
      *
      * @return Number of control and target lines.
      */
-        [[nodiscard]] virtual unsigned size() const;
+        //[[nodiscard]] virtual unsigned size() const;
 
         /**
      * @brief Adds a control line to the gate
@@ -242,7 +242,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0 
      */
-        virtual void remove_control(line c);
+      //  virtual void remove_control(line c);
 
         /**
      * @brief Adds a target to the desired line
@@ -262,7 +262,7 @@ namespace syrec {
      * @author RevKit
      * @since 1.0
      */
-        virtual void remove_target(line l);
+        //virtual void remove_target(line l);
 
         /**
      * @brief Sets the type of the target line(s)
@@ -284,7 +284,7 @@ namespace syrec {
      */
         [[nodiscard]] virtual const std::any& type() const;
 
-        friend class filtered_gate;
+       // friend class filtered_gate;
 
     private:
         struct priv;
@@ -304,8 +304,8 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    class filtered_gate: public gate {
-    public:
+    //class filtered_gate: public gate {
+    //public:
         /**
      * @brief Standard constructor
      *
@@ -319,7 +319,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        filtered_gate(gate& base, std::vector<unsigned>& filter);
+     //   filtered_gate(gate& base, std::vector<unsigned>& filter);
 
         /**
      * @brief Copy constructor
@@ -329,12 +329,12 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        filtered_gate(const filtered_gate& other);
+     //   filtered_gate(const filtered_gate& other);
 
         /**
      * @brief Deconstructor
      */
-        ~filtered_gate() override;
+     //   ~filtered_gate() override;
 
         /**
      * @brief Assignment operator
@@ -346,7 +346,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.0
      */
-        filtered_gate& operator=(const filtered_gate& other);
+      /*  filtered_gate& operator=(const filtered_gate& other);
 
         [[nodiscard]] const_iterator begin_controls() const override;
         [[nodiscard]] const_iterator end_controls() const override;
@@ -370,7 +370,7 @@ namespace syrec {
     private:
         struct priv;
         priv* const d;
-    };
+    };*/
 
     /** @cond */
     struct transform_line {
@@ -383,7 +383,7 @@ namespace syrec {
 
         gate::line operator()(gate::line l) const {
             return filter ? std::find(filter->begin(), filter->end(), l) - filter->begin() : l;
-            return l;
+            //return l;
         }
 
     private:

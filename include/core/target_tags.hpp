@@ -61,7 +61,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    struct peres_tag {
+    //struct peres_tag {
         /**
      * @brief Order of Target Lines
      *
@@ -76,8 +76,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.3
      */
-        bool swap_targets;
-    };
+     //   bool swap_targets;
+    //};
 
     /**
    * @brief Target Tag for V gates.
@@ -87,7 +87,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    struct v_tag {};
+    //struct v_tag {};
 
     /**
    * @brief Target Tag for V+ gates.
@@ -97,7 +97,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    struct vplus_tag {};
+    //struct vplus_tag {};
 
     /**
    * @brief Target Tag for Modules
@@ -107,14 +107,14 @@ namespace syrec {
    * @author RevKit
    * @since  1.1
    */
-    struct module_tag {
+    //struct module_tag {
         /**
      * @brief Name of the module
      *
      * @author RevKit
      * @since  1.1
      */
-        std::string name;
+      //  std::string name;
 
         /**
      * @brief Reference to the circuit
@@ -125,7 +125,7 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        std::shared_ptr<circuit> reference;
+      //  std::shared_ptr<circuit> reference;
 
         /**
      * @brief Sort order of the target tags
@@ -143,8 +143,8 @@ namespace syrec {
      * @author RevKit
      * @since  1.1
      */
-        std::vector<unsigned> target_sort_order;
-    };
+     //   std::vector<unsigned> target_sort_order;
+   // };
 
     /**
    * @brief Compares type of a boost::any variable
@@ -209,7 +209,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    bool is_peres(const gate& g);
+   // bool is_peres(const gate& g);
 
     /**
    * @brief Returns whether a gate is a V gate
@@ -220,7 +220,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    bool is_v(const gate& g);
+   // bool is_v(const gate& g);
 
     /**
    * @brief Returns whether a gate is a V+ gate
@@ -231,7 +231,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    bool is_vplus(const gate& g);
+   // bool is_vplus(const gate& g);
 
     /**
    * @brief Returns whether a gate is a module
@@ -242,7 +242,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.1
    */
-    bool is_module(const gate& g);
+   // bool is_module(const gate& g);
 
 } // namespace syrec
 

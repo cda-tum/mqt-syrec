@@ -2413,7 +2413,7 @@ namespace syrec {
             }
             std::string name = var->name() + arraystr;
 
-            if (var->type() == applications::variable::in || var->type() == applications::variable::inout) {
+            /*if (var->type() == applications::variable::in || var->type() == applications::variable::inout) {
                 circ.inputbuses().add(name, affected_lines);
             }
             if (var->type() == applications::variable::out || var->type() == applications::variable::inout) {
@@ -2421,7 +2421,7 @@ namespace syrec {
             }
             if (var->type() == applications::variable::state) {
                 circ.statesignals().add(name, affected_lines);
-            }
+            }*/
         } else {
             unsigned              len = dimensions.front();
             std::vector<unsigned> new_dimensions(dimensions.begin() + 1u, dimensions.end());

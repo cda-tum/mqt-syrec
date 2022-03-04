@@ -19,7 +19,7 @@
 
 #include "core/target_tags.hpp"
 
-#include <functional>
+//#include <functional>
 
 namespace syrec {
 
@@ -48,10 +48,10 @@ namespace syrec {
         return target_line_adder(g);
     }
 
-    target_line_adder control_line_adder::operator()(const gate::line& l1) {
+    /*target_line_adder control_line_adder::operator()(const gate::line& l1) {
         g->add_control(l1);
         return target_line_adder(g);
-    }
+    }*/
 
     target_line_adder control_line_adder::operator()(const gate::line& l1, const gate::line& l2) {
         g->add_control(l1);
@@ -59,7 +59,7 @@ namespace syrec {
         return target_line_adder(g);
     }
 
-    target_line_adder control_line_adder::operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3) {
+    /* target_line_adder control_line_adder::operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3) {
         g->add_control(l1);
         g->add_control(l2);
         g->add_control(l3);
@@ -127,7 +127,7 @@ namespace syrec {
         g->add_control(l8);
         g->add_control(l9);
         return target_line_adder(g);
-    }
+    }*/
 
     ////////////////////////////// create_ functions
 
@@ -142,7 +142,7 @@ namespace syrec {
         return g;
     }
 
-    gate& create_fredkin(gate& g, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
+    /* gate& create_fredkin(gate& g, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
         //std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
         for (const auto& control: controls) {
             g.add_control(control);
@@ -164,7 +164,7 @@ namespace syrec {
         g.set_type(tag);
 
         return g;
-    }
+    }*/
 
     gate& create_cnot(gate& g, const gate::line& control, const gate::line& target) {
         g.add_control(control);
@@ -174,7 +174,7 @@ namespace syrec {
         return g;
     }
 
-    gate& create_v(gate& g, const gate::line& control, const gate::line& target) {
+    /* gate& create_v(gate& g, const gate::line& control, const gate::line& target) {
         g.add_control(control);
         g.add_target(target);
         g.set_type(v_tag());
@@ -189,14 +189,14 @@ namespace syrec {
 
         return g;
     }
-
+*/
     gate& create_not(gate& g, const gate::line& target) {
         g.add_target(target);
         g.set_type(toffoli_tag());
         return g;
     }
 
-    gate& create_module(gate& g, const circuit& circ, const std::string& name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
+    /* gate& create_module(gate& g, const circuit& circ, const std::string& name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         typedef std::map<std::string, std::shared_ptr<circuit>> map_t;
         const map_t&                                            modules = circ.modules();
         auto                                                    it      = modules.find(name);
@@ -221,7 +221,7 @@ namespace syrec {
 
         g.set_type(module);
         return g;
-    }
+    }*/
 
     ////////////////////////////// append_ functions
 
@@ -229,33 +229,33 @@ namespace syrec {
         return create_toffoli(circ.append_gate(), controls, target);
     }
 
-    [[maybe_unused]] gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
+    /*[[maybe_unused]] gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2) {
         return create_fredkin(circ.append_gate(), controls, target1, target2);
     }
 
     [[maybe_unused]] gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2) {
         return create_peres(circ.append_gate(), control, target1, target2);
-    }
+    }*/
 
     gate& append_cnot(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_cnot(circ.append_gate(), control, target);
     }
 
-    [[maybe_unused]] gate& append_v(circuit& circ, const gate::line& control, const gate::line& target) {
+    /*[[maybe_unused]] gate& append_v(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_v(circ.append_gate(), control, target);
     }
 
     [[maybe_unused]] gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_vplus(circ.append_gate(), control, target);
-    }
+    }*/
 
     gate& append_not(circuit& circ, const gate::line& target) {
         return create_not(circ.append_gate(), target);
     }
 
-    gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
+    /* gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets) {
         return create_module(circ.append_gate(), circ, module_name, controls, targets);
-    }
+    }*/
 
     control_line_adder append_gate(circuit& circ, const std::any& tag) {
         gate& g = circ.append_gate();
@@ -271,7 +271,7 @@ namespace syrec {
         return append_gate(circ, fredkin_tag());
     }
 
-    [[maybe_unused]] control_line_adder append_v(circuit& circ) {
+    /*[[maybe_unused]] control_line_adder append_v(circuit& circ) {
         return append_gate(circ, v_tag());
     }
 
@@ -389,6 +389,6 @@ namespace syrec {
 
     [[maybe_unused]] control_line_adder insert_vnot(circuit& circ, unsigned n) {
         return insert_gate(circ, n, vplus_tag());
-    }
+    }*/
 
 } // namespace syrec
