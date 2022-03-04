@@ -1,3 +1,0 @@
-module statements(out y(16), inout x(16))
-~=x
-y ^ = ( x ^ x )
