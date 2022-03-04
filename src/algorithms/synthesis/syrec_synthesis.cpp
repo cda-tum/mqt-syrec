@@ -790,7 +790,7 @@ namespace syrec {
                 append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), helper_line);
 
             } break;
-            case syrec_synthesis_if_realization_duplication: {
+            /*case syrec_synthesis_if_realization_duplication: {
                 std::map<applications::variable_access::ptr, applications::variable_access::ptr> then_var_mapping = dupl_if_var_mapping;
                 for (const applications::variable_access::ptr& var: _changing_variables.find(&statement)->second) {
                     applications::variable_access::ptr dupl_var = std::make_shared<applications::variable_access>(std::make_shared<applications::variable>(applications::variable::wire, ("dupl_" + var->var()->name()), var->var()->dimensions(), var->var()->bitwidth()));
@@ -846,7 +846,7 @@ namespace syrec {
                     swap(lhs, rhs);
                 }
                 remove_active_control(helper_line);
-            } break;
+            }break;*/
             default: {
             }
         }
@@ -892,7 +892,7 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_statement(const applications::call_statement& statement) {
-        if (_settings->get<bool>("modules_hierarchy", false)) {
+        /*if (_settings->get<bool>("modules_hierarchy", false)) {
             // Alternative implementation
             const std::string& module_name = statement.target()->name();
             if (_circ.modules().find(module_name) == _circ.modules().end()) {
@@ -938,33 +938,33 @@ namespace syrec {
 
                 ++i;
             }
-        } else {
-            // 1. Adjust the references module's parameters to the call arguments
-            for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
-                const std::string&                 parameter        = statement.parameters().at(i);
-                const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
+        }*/
+        // 1. Adjust the references module's parameters to the call arguments
+        for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
+            const std::string&                 parameter        = statement.parameters().at(i);
+            const applications::variable::ptr& module_parameter = statement.target()->parameters().at(i);
 
-                module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
-            }
-
-            // 2. Create new lines for the module's variables
-            add_variables(_circ, *this, variable_name_format, statement.target()->variables());
-
-            modules.push(statement.target());
-            for (const applications::statement::ptr& stat: statement.target()->statements()) {
-                std::cout << "inside call" << std::endl;
-                if (!full_statement(stat)) {
-                    // if(! on_full_statement(stat ))
-                    //{
-                    if (!on_statement(stat)) {
-                        return false;
-                    }
-                    //}
-                }
-            }
-
-            modules.pop();
+            module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
         }
+
+        // 2. Create new lines for the module's variables
+        add_variables(_circ, *this, variable_name_format, statement.target()->variables());
+
+        modules.push(statement.target());
+        for (const applications::statement::ptr& stat: statement.target()->statements()) {
+            std::cout << "inside call" << std::endl;
+            if (!full_statement(stat)) {
+                // if(! on_full_statement(stat ))
+                //{
+                if (!on_statement(stat)) {
+                    return false;
+                }
+                //}
+            }
+        }
+
+        modules.pop();
+
         return true;
     }
 
@@ -1111,15 +1111,6 @@ namespace syrec {
                 modulo(quot, lines, rhs);
             } break;
 
-            case applications::binary_expression::frac_divide: {
-                std::vector<unsigned> product;
-                get_constant_lines((expression.bitwidth()), 0u, product);
-
-                copy(lines.begin(), lines.end(), back_inserter(product));
-
-                multiplication_full(product, lhs, rhs);
-            } break;
-
             case applications::binary_expression::logical_and: // &&
             {
                 lines.emplace_back(get_constant_line(false));
@@ -1231,7 +1222,7 @@ namespace syrec {
                 // bitwise_cnot( lines, rhs );
             } break;
 
-            case applications::binary_expression::multiply: // *
+                /* case applications::binary_expression::multiply: // *
             {
                 std::vector<unsigned> extra_lines_1;
                 get_constant_lines(rhs.size(), 0u, extra_lines_1);
@@ -1258,15 +1249,6 @@ namespace syrec {
                 bitwise_cnot(extra_lines_3, lhs); // duplicate lhs
                 modulo(quot, extra_lines_3, rhs);
                 lines = extra_lines_3;
-            } break;
-
-            case applications::binary_expression::frac_divide: {
-                std::vector<unsigned> product;
-                get_constant_lines(rhs.size(), 0u, product);
-
-                copy(lines.begin(), lines.end(), back_inserter(product));
-
-                multiplication_full(product, lhs, rhs);
             } break;
 
             case applications::binary_expression::logical_and: // &&
@@ -1360,7 +1342,7 @@ namespace syrec {
                 greater_equals(extra_lines_14.at(0), lhs, rhs);
                 lines = extra_lines_14;
             } break;
-
+            */
             default:
 
                 return false;
@@ -1435,7 +1417,7 @@ namespace syrec {
     */
     }
 
-    [[maybe_unused]] bool standard_syrec_synthesizer::decrement_additionalLineMerging(const std::vector<unsigned>& dest) {
+    /*   [[maybe_unused]] bool standard_syrec_synthesizer::decrement_additionalLineMerging(const std::vector<unsigned>& dest) {
         // Optimized version via additional lines optimization
         gate::line_container controls;
         gate::line_container helpercontrols;
@@ -1462,7 +1444,7 @@ namespace syrec {
         release_constant_line(helperline, false);
 
         return true;
-    }
+    }*/
 
     bool standard_syrec_synthesizer::increment(const std::vector<unsigned>& dest) {
         for (unsigned int i: dest) {
@@ -1486,7 +1468,7 @@ namespace syrec {
     */
     }
 
-    [[maybe_unused]] bool standard_syrec_synthesizer::increment_additionalLineMerging(const std::vector<unsigned>& dest) {
+    /*[[maybe_unused]] bool standard_syrec_synthesizer::increment_additionalLineMerging(const std::vector<unsigned>& dest) {
         // Optimized Version via additional lines optimization
         gate::line_container controls;
         gate::line_container helpercontrols;
@@ -1524,7 +1506,7 @@ namespace syrec {
 
         return true;
     }
-
+*/
     //**********************************************************************
     //*****                     Binary Operations                      *****
     //**********************************************************************
@@ -1557,7 +1539,7 @@ namespace syrec {
 
         return true;
     }
-
+    /*
     bool standard_syrec_synthesizer::decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src) {
         for (unsigned i = 0u; i < src.size(); ++i) {
             append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest.at(i));
@@ -1571,7 +1553,7 @@ namespace syrec {
 
         return true;
     }
-
+*/
     bool standard_syrec_synthesizer::decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry) {
         for (unsigned i = 0u; i < src.size(); ++i) {
             append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest.at(i));
@@ -1696,7 +1678,7 @@ namespace syrec {
     bool standard_syrec_synthesizer::greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         return less_than(dest, src2, src1);
     }
-
+    /*
     bool standard_syrec_synthesizer::increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src) {
         unsigned bitwidth = src.size();
 
@@ -1752,11 +1734,11 @@ namespace syrec {
         targets.insert(targets.end(), dest.begin(), dest.end());
         append_module(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), module_name, gate::line_container(), targets);
         return true;
-    }
+    }*/
     //end of increase
 
     ////////////////////////////////NEW INCREASE FUNCTION /////////
-    [[maybe_unused]] bool standard_syrec_synthesizer::maj_2(unsigned in1, unsigned in2) {
+    /*  [[maybe_unused]] bool standard_syrec_synthesizer::maj_2(unsigned in1, unsigned in2) {
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in2, in1);
         return true;
     }
@@ -1794,7 +1776,7 @@ namespace syrec {
         append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), in3, in2);
         return true;
     }
-
+*/
     bool standard_syrec_synthesizer::increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
         unsigned bitwidth = rhs.size();
 
@@ -2027,7 +2009,7 @@ namespace syrec {
     }
 
     // dest.size = 2 * srcX.size
-    bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
+    /*   bool standard_syrec_synthesizer::multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         std::vector<unsigned>        sum(dest.begin(), dest.begin() + (unsigned)src2.size());
         const std::vector<unsigned>& partial = src2;
 
@@ -2043,7 +2025,7 @@ namespace syrec {
 
         return ok;
     }
-
+*/
     bool standard_syrec_synthesizer::not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         if (!equals(dest, src1, src2)) return false;
         append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), dest);
@@ -2127,7 +2109,7 @@ namespace syrec {
             return true;
         }
 
-        if (optimization_decision(current)) {
+        /* if (optimization_decision(current)) {
             // optimize the controlled cascade of the current node
             unsigned             helper_line = get_constant_line(false);
             gate::line_container controls;
@@ -2138,101 +2120,100 @@ namespace syrec {
             }
             append_toffoli(_circ, get(boost::vertex_name, cct_man.tree)[current].controls, helper_line);
             release_constant_line(helper_line, false);
-        } else {
-            // assemble optimized circuits of successors
-            for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-                if (!assemble_circuit(target(*edge_it, cct_man.tree))) return false;
-            }
-        }
-        return true;
-    }
-
-    bool standard_syrec_synthesizer::assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls) {
-        // leaf
-        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
-            append_circuit(circ, *(get(boost::vertex_name, cct_man.tree)[current].circ), controls);
-            return true;
-        }
-
-        controls.insert(get(boost::vertex_name, cct_man.tree)[current].control);
+        } */
+        // assemble optimized circuits of successors
         for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-            if (!assemble_circuit(circ, target(*edge_it, cct_man.tree), controls)) return false;
+            if (!assemble_circuit(target(*edge_it, cct_man.tree))) return false;
         }
         return true;
     }
 
-    bool standard_syrec_synthesizer::optimization_decision(const cct_node& current) {
-        if (efficient_controls) {
-            return (optimizationCost(current) == bestCost(current));
-        }
-        return false;
-    }
+    //   bool standard_syrec_synthesizer::assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls) {
+    // leaf
+    //        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
+    //            append_circuit(circ, *(get(boost::vertex_name, cct_man.tree)[current].circ), controls);
+    //            return true;
+    //        }
 
-    unsigned standard_syrec_synthesizer::bestCost(const cct_node& current) {
-        const auto stdCost = standardCost(current, get(boost::vertex_name, cct_man.tree)[current].controls.size());
+    //        controls.insert(get(boost::vertex_name, cct_man.tree)[current].control);
+    //        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+    //            if (!assemble_circuit(circ, target(*edge_it, cct_man.tree), controls)) return false;
+    //        }
+    //        return true;
+    //    }
 
-        // leaf
-        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
-            return stdCost;
-        }
+    //   bool standard_syrec_synthesizer::optimization_decision(const cct_node& current) {
+    //        if (efficient_controls) {
+    //            return (optimizationCost(current) == bestCost(current));
+    //        }
+    //        return false;
+    //    }
 
-        const auto optCost  = optimizationCost(current);
-        const auto succCost = successorsCost(current);
+    //unsigned standard_syrec_synthesizer::bestCost(const cct_node& current) {
+    //   const auto stdCost = standardCost(current, get(boost::vertex_name, cct_man.tree)[current].controls.size());
 
-        return (std::min)({stdCost, optCost, succCost});
-    }
+    // leaf
+    //  if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
+    //       return stdCost;
+    //    }
 
-    unsigned standard_syrec_synthesizer::standardCost(const cct_node& current [[maybe_unused]], unsigned controls [[maybe_unused]]) {
-        unsigned cost = 0u;
-        //        quantum_costs qc;
-        //        qc.controls_offset = controls;
+    //    const auto optCost  = optimizationCost(current);
+    //    const auto succCost = successorsCost(current);
 
-        // leaf
-        //        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
-        //            cost += costs(*(get(boost::vertex_name, cct_man.tree)[current].circ), costs_by_gate_func(qc));
-        //        } else {
-        //            for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-        //               cost += standardCost(target(*edge_it, cct_man.tree), controls + 1u);
-        //           }
-        //        }
+    //    return (std::min)({stdCost, optCost, succCost});
+    // }
 
-        return cost;
-    }
+    //unsigned standard_syrec_synthesizer::standardCost(const cct_node& current [[maybe_unused]], unsigned controls [[maybe_unused]]) {
+    // unsigned cost = 0u;
+    //        quantum_costs qc;
+    //        qc.controls_offset = controls;
 
-    unsigned standard_syrec_synthesizer::optimizationCost(const cct_node& current [[maybe_unused]]) {
-        unsigned cost = 1u;
+    // leaf
+    //        if (out_edges(current, cct_man.tree).first == out_edges(current, cct_man.tree).second /*get( boost::vertex_name, cct_man.tree )[current].circ->num_gates() > 0*/) {
+    //            cost += costs(*(get(boost::vertex_name, cct_man.tree)[current].circ), costs_by_gate_func(qc));
+    //        } else {
+    //            for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+    //               cost += standardCost(target(*edge_it, cct_man.tree), controls + 1u);
+    //           }
+    //        }
 
-        //        quantum_costs qc;
-        //        qc.controls_offset = get(boost::vertex_name, cct_man.tree)[current].controls.size();
+    //   return cost;
+    //}
 
-        //        circuit tmp_circ;
-        //        append_not(tmp_circ, 1u);
-        //        cost += 2 * costs(tmp_circ, costs_by_gate_func(qc));
+    //   unsigned standard_syrec_synthesizer::optimizationCost(const cct_node& current [[maybe_unused]]) {
+    //       unsigned cost = 1u;
 
-        //        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-        //            cost += standardCost(target(*edge_it, cct_man.tree), 1u);
-        //        }
+    //        quantum_costs qc;
+    //        qc.controls_offset = get(boost::vertex_name, cct_man.tree)[current].controls.size();
 
-        return cost;
-    }
+    //        circuit tmp_circ;
+    //        append_not(tmp_circ, 1u);
+    //        cost += 2 * costs(tmp_circ, costs_by_gate_func(qc));
 
-    unsigned standard_syrec_synthesizer::successorsCost(const cct_node& current [[maybe_unused]]) {
-        unsigned cost = 1u;
+    //        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+    //            cost += standardCost(target(*edge_it, cct_man.tree), 1u);
+    //        }
 
-        //        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-        //            cost += bestCost(target(*edge_it, cct_man.tree));
-        //        }
+    //        return cost;
+    //    }
 
-        return cost;
-    }
+    //unsigned standard_syrec_synthesizer::successorsCost(const cct_node& current [[maybe_unused]]) {
+    // unsigned cost = 1u;
 
-    circuit& standard_syrec_synthesizer::circ() const {
+    //        for (boost::graph_traits<cct>::out_edge_iterator edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
+    //            cost += bestCost(target(*edge_it, cct_man.tree));
+    //        }
+
+    //   return cost;
+    //}
+
+    /*circuit& standard_syrec_synthesizer::circ() const {
         return _circ;
-    }
+    }*/
 
-    [[maybe_unused]] std::stack<applications::statement::ptr>& standard_syrec_synthesizer::stmts() {
+    /*[[maybe_unused]] std::stack<applications::statement::ptr>& standard_syrec_synthesizer::stmts() {
         return _stmts;
-    }
+    }*/
 
     template<typename T>
     struct is_type {
@@ -2243,9 +2224,9 @@ namespace syrec {
     };
 
     bool standard_syrec_synthesizer::get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines) {
-        if (dupl_if_var_mapping.find(var) != dupl_if_var_mapping.end()) {
+        /* if (dupl_if_var_mapping.find(var) != dupl_if_var_mapping.end()) {
             var = dupl_if_var_mapping.find(var)->second;
-        }
+        }*/
 
         unsigned offset = _var_lines[var->var()];
 
@@ -2261,9 +2242,9 @@ namespace syrec {
                               var->var()->bitwidth();
                 }
             } else {
-                get_constant_lines(var->var()->bitwidth(), 0u, lines);
+                /*   get_constant_lines(var->var()->bitwidth(), 0u, lines);
                 if (!array_swapping(offset, var->var()->dimensions(), var->indexes(), var->var()->bitwidth(), lines)) return false;
-                return true;
+                return true;*/
             }
         }
 
@@ -2290,8 +2271,8 @@ namespace syrec {
         return true;
     }
 
-    bool standard_syrec_synthesizer::unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines) {
-        unsigned offset = _var_lines[var->var()];
+    bool standard_syrec_synthesizer::unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines [[maybe_unused]]) {
+        [[maybe_unused]] unsigned offset = _var_lines[var->var()];
 
         if (!var->indexes().empty()) {
             // change offset
@@ -2299,7 +2280,7 @@ namespace syrec {
             // check if it is not all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
             if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), is_type<applications::numeric_expression>()) != n) {
-                array_swapping(offset, var->var()->dimensions(), var->indexes(), var->var()->bitwidth(), lines);
+                // array_swapping(offset, var->var()->dimensions(), var->indexes(), var->var()->bitwidth(), lines);
             }
         }
 
@@ -2307,13 +2288,13 @@ namespace syrec {
     }
 
     // Helper function
-    unsigned getLowestOneBit(unsigned number) {
+    /*unsigned getLowestOneBit(unsigned number) {
         for (unsigned i = 0u; number > 0; ++i) {
             if (number % 2) return i;
             number /= 2;
         }
         return 0;
-    }
+    }*/
 
     /**
    * Function to access array variables
@@ -2326,7 +2307,7 @@ namespace syrec {
    * \param bitwidth is the bitwidth of the variables within the array
    * \param lines is the destination, where
    */
-    bool standard_syrec_synthesizer::array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines) {
+    /*bool standard_syrec_synthesizer::array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines) {
         unsigned op = 0u;
         if (indexes.empty()) {
             std::vector<unsigned> dest_lines;
@@ -2375,7 +2356,7 @@ namespace syrec {
         }
         return true;
     }
-
+*/
     unsigned standard_syrec_synthesizer::get_constant_line(bool value) {
         unsigned const_line = 0u;
 
@@ -2403,14 +2384,14 @@ namespace syrec {
         return true;
     }
 
-    void standard_syrec_synthesizer::release_constant_line(unsigned index, bool value) {
+    /* void standard_syrec_synthesizer::release_constant_line(unsigned index, bool value) {
         free_const_lines_map[value].push_back(index);
 
         // output description is changed to constant;
         std::vector<std::string> outs = _circ.outputs();
         outs.at(index)                = (std::string("const_") + boost::lexical_cast<std::string>(value));
         _circ.set_outputs(outs);
-    }
+    }*/
 
     standard_syrec_synthesizer::var_lines_map& standard_syrec_synthesizer::var_lines() {
         return _var_lines;
@@ -2483,7 +2464,7 @@ namespace syrec {
             t.start(rt);
         }
 
-        statement_synthesizer.initialize_changing_variables(program);
+        //statement_synthesizer.initialize_changing_variables(program);
 
         // get the main module
         applications::module::ptr main;
@@ -2513,7 +2494,7 @@ namespace syrec {
         //write_realization( circ,std::cout); //tanmay
     }
 
-    void standard_syrec_synthesizer::initialize_changing_variables(const applications::program& program) {
+    /*void standard_syrec_synthesizer::initialize_changing_variables(const applications::program& program) {
         // Compute changed variable map for if_realization via duplication
         if (if_realization == syrec_synthesis_if_realization_duplication) {
             compute_changing_variables(program, _changing_variables);
@@ -2579,7 +2560,7 @@ namespace syrec {
             }
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
-        } else if (/*applications::skip_statement* stat = */ dynamic_cast<applications::skip_statement*>(statement.get())) {
+        }// else if (applications::skip_statement* stat =  dynamic_cast<applications::skip_statement*>(statement.get())) {
             // changing_variables.insert( std::make_pair( stat, changed_variables ) );
             // return;
         } else {
@@ -2587,11 +2568,11 @@ namespace syrec {
         }
         changing_variables.insert(std::make_pair(statement.get(), changed_variables));
     }
-
-    [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings, const properties::ptr& statistics) {
+*/
+    /* [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings, const properties::ptr& statistics) {
         hdl_synthesis_func f = [settings, statistics](auto&& PH1, auto&& PH2) { return syrec_synthesis(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), settings, statistics); };
         f.init(settings, statistics);
         return f;
-    }
+    }*/
 
 } // namespace syrec

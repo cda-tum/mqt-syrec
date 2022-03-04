@@ -24,8 +24,9 @@
 #ifndef SIMPLE_SIMULATION_HPP
 #define SIMPLE_SIMULATION_HPP
 
-#include "algorithms/simulation/simulation.hpp"
+//#include "algorithms/simulation/simulation.hpp"
 #include "core/circuit.hpp"
+#include "core/properties.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <functional>
@@ -191,10 +192,9 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
+    /* bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
                            const properties::ptr& settings   = properties::ptr(),
-                           const properties::ptr& statistics = properties::ptr());
-
+                           const properties::ptr& statistics = properties::ptr());*/
     /**
    * @brief Simple Simulation function for a range of gates
    *
@@ -327,7 +327,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>());
+    // [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>());
 
 } // namespace syrec
 

@@ -1,4 +1,3 @@
-#include "Dummy.hpp"
 
 #include <algorithms/simulation/simple_simulation.hpp>
 #include <algorithms/synthesis/syrec_synthesis.hpp>
@@ -270,11 +269,6 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_property("type", gate_get_type, gate_set_type)
             .def_property_readonly("module_name", gate_module_name);
 
-    py::class_<dum::Dummy>(m, "Dummy")
-            .def(py::init<>())
-            .def(py::init<double>())
-            .def("setVal", &dum::Dummy::setVal)
-            .def("getVal", &dum::Dummy::getVal);
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);

@@ -15,10 +15,10 @@ if (NOT TARGET gtest OR NOT TARGET gmock)
 	endif ()
 endif ()
 
-add_executable(${PROJECT_NAME}_example ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-target_link_libraries(${PROJECT_NAME}_example PRIVATE ${PROJECT_NAME})
-set_target_properties(${PROJECT_NAME}_example PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-enable_lto(${PROJECT_NAME}_example)
+#add_executable(${PROJECT_NAME}_example ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+#target_link_libraries(${PROJECT_NAME}_example PRIVATE ${PROJECT_NAME})
+#set_target_properties(${PROJECT_NAME}_example PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+#enable_lto(${PROJECT_NAME}_example)
 
 #add_custom_command(TARGET ${PROJECT_NAME}_example
 #		POST_BUILD
@@ -61,7 +61,8 @@ package_add_test(${PROJECT_NAME}_test
 		unittests/test_logical_and.cpp
 		unittests/test_logical_or.cpp
 		unittests/test_swap.cpp
-		unittests/test_shift.cpp)
+		unittests/test_shift.cpp
+		unittests/test_input_repeated_2.cpp)
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD

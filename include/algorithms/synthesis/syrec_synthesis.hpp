@@ -14,7 +14,7 @@
 #include <cmath>
 #include <core/circuit.hpp>
 #include <core/functions/add_circuit.hpp>
-#include <core/functor.hpp>
+//#include <core/functor.hpp>
 #include <core/gate.hpp>
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
@@ -58,7 +58,7 @@ namespace syrec {
     } // namespace applications
     using namespace internal;
 
-    typedef functor<bool(circuit&, const applications::program&)> hdl_synthesis_func;
+    //typedef functor<bool(circuit&, const applications::program&)> hdl_synthesis_func;
 
     class standard_syrec_synthesizer {
     public:
@@ -68,7 +68,7 @@ namespace syrec {
 
         virtual ~standard_syrec_synthesizer() = default;
 
-        virtual void initialize_changing_variables(const applications::program& program);
+        //virtual void initialize_changing_variables(const applications::program& program);
 
         virtual bool on_module(const applications::module::ptr&);
         virtual bool on_statement(const applications::statement::ptr& statement);
@@ -112,67 +112,67 @@ namespace syrec {
     protected:
         virtual // unary operations
                 bool
-                              bitwise_negation(const std::vector<unsigned>& dest);                // ~ TODO: test
-        virtual bool          decrement(const std::vector<unsigned>& dest);                       // -- TODO: test
-        [[maybe_unused]] bool decrement_additionalLineMerging(const std::vector<unsigned>& dest); // -- TODO: test
-        virtual bool          increment(const std::vector<unsigned>& dest);                       // ++ TODO: test
-        [[maybe_unused]] bool increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++ TODO: test
+                     bitwise_negation(const std::vector<unsigned>& dest); // ~
+        virtual bool decrement(const std::vector<unsigned>& dest);        // --
+        //[[maybe_unused]] bool decrement_additionalLineMerging(const std::vector<unsigned>& dest); // --
+        virtual bool increment(const std::vector<unsigned>& dest); // ++
+        //[[maybe_unused]] bool increment_additionalLineMerging(const std::vector<unsigned>& dest); // ++
 
         virtual // binary operations
                 bool
-                     bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // & TODO: test
+                     bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
         virtual bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        virtual bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // & TODO: test
-        virtual bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // && TODO: test
-        virtual bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
+        virtual bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // &
+        virtual bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // &&
+        //virtual bool decrease(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                        // -=
         virtual bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        virtual bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // || TODO: test
+        virtual bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
         virtual bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
         virtual bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        virtual bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // > TODO: test
-        virtual bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // > TODO: test
-        virtual bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                     // +=
+        virtual bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // >
+        virtual bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // >
+        //virtual bool increase(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                     // +=
         virtual bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        virtual bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                             // <= TODO: test
-        virtual bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                               // < TODO: test
-        virtual bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);              // % TODO: testen
-        virtual bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);      // *
-        virtual bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *%* TODO: testen
-        virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                              // !=
-        virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                                 // <=>
+        virtual bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                        // <=
+        virtual bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // <
+        virtual bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
+        virtual bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
+        //virtual bool multiplication_full(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *%*
+        virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // !=
+        virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                    // <=>
         //new
         //[[maybe_unused]] bool findDuplicates();
         //[[maybe_unused]] bool findInVector(std::vector<std::vector<unsigned>> vecOfElements, std::vector<unsigned> element);
         static bool check_repeats();
 
-        [[maybe_unused]] bool maj_2(unsigned in1, unsigned in2);
-        [[maybe_unused]] bool maj(unsigned in1, unsigned in2, unsigned in3);
-        [[maybe_unused]] bool uma(unsigned in1, unsigned in2, unsigned in3);
-        [[maybe_unused]] bool uma_3cnot(unsigned in1, unsigned in2, unsigned in3);
-        bool                  decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool                  decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool                  increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool                  expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool                  expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool                  exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
+        //[[maybe_unused]] bool maj_2(unsigned in1, unsigned in2);
+        //[[maybe_unused]] bool maj(unsigned in1, unsigned in2, unsigned in3);
+        //[[maybe_unused]] bool uma(unsigned in1, unsigned in2, unsigned in3);
+        // [[maybe_unused]] bool uma_3cnot(unsigned in1, unsigned in2, unsigned in3);
+        bool decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool increase_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
+        bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
+        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
         virtual //bool exp_eval( unsigned op, std::vector<unsigned> exp_lhs, std::vector<unsigned> exp_rhs, std::vector<unsigned>& lines, std::vector<unsigned> lhs_stat);
                 // shift operations
                 bool
-                     left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // << TODO: testen
-        virtual bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >> TODO: testen
+                     left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // <<
+        virtual bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >>
 
         // efficient controls
         bool add_active_control(unsigned);
         bool remove_active_control(unsigned);
 
         virtual bool assemble_circuit(const cct_node&);
-        virtual bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
+        //virtual bool assemble_circuit(circuit& circ, const cct_node& current, gate::line_container controls);
 
-        virtual bool optimization_decision(const cct_node&);
-        unsigned     bestCost(const cct_node& current);
-        unsigned     standardCost(const cct_node& current, unsigned controls);
-        unsigned     optimizationCost(const cct_node& current);
-        unsigned     successorsCost(const cct_node& current);
+        //virtual bool optimization_decision(const cct_node&);
+        //unsigned     bestCost(const cct_node& current);
+        //unsigned     standardCost(const cct_node& current, unsigned controls);
+        //unsigned     optimizationCost(const cct_node& current);
+        //unsigned     successorsCost(const cct_node& current);
 
         cct_manager cct_man;
 
@@ -181,33 +181,33 @@ namespace syrec {
         //applications::expression::ptr applications::expression::binary_expression::lhs();
 
     protected:
-        [[nodiscard]] circuit&                                     circ() const;
-        [[maybe_unused]] std::stack<applications::statement::ptr>& stmts();
+        // [[nodiscard]] circuit&                                     circ() const;
+        // [[maybe_unused]] std::stack<applications::statement::ptr>& stmts();
 
         virtual bool get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines);
         bool         unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
-        virtual bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
-        unsigned     get_constant_line(bool value);
-        bool         get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
-        virtual void release_constant_line(unsigned index, bool value);
+        //virtual bool array_swapping(unsigned offset, std::vector<unsigned> dimensions, std::vector<std::shared_ptr<applications::expression>> indexes, unsigned bitwidth, std::vector<unsigned>& lines);
+        unsigned get_constant_line(bool value);
+        bool     get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
+        //virtual void release_constant_line(unsigned index, bool value);
 
     private:
-        circuit&                                                                         _circ;
-        properties::ptr                                                                  _settings; // Settings to use them recursively in module call
-        std::stack<applications::statement::ptr>                                         _stmts;
-        var_lines_map                                                                    _var_lines;
-        std::map<bool, std::vector<unsigned>>                                            free_const_lines_map; // TODO: set statt vector?
-        applications::number::loop_variable_mapping                                      loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
-        std::map<applications::variable_access::ptr, applications::variable_access::ptr> dupl_if_var_mapping;  // duplication if: mapping of variables to there duplicates
+        circuit&                                    _circ;
+        properties::ptr                             _settings; // Settings to use them recursively in module call
+        std::stack<applications::statement::ptr>    _stmts;
+        var_lines_map                               _var_lines;
+        std::map<bool, std::vector<unsigned>>       free_const_lines_map; // TODO: set statt vector?
+        applications::number::loop_variable_mapping loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
+        //std::map<applications::variable_access::ptr, applications::variable_access::ptr> dupl_if_var_mapping;  // duplication if: mapping of variables to there duplicates
 
         typedef std::set<applications::variable_access::ptr, applications::set_comperator> var_set;
 
-        std::map<const applications::statement*, var_set> _changing_variables; // for if_realization_duplication
-        std::stack<applications::module::ptr>             modules;
+        //std::map<const applications::statement*, var_set> _changing_variables; // for if_realization_duplication
+        std::stack<applications::module::ptr> modules;
 
-        void compute_changing_variables(const applications::program& program, std::map<const applications::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const applications::module::ptr& module, std::map<const applications::statement*, var_set>& changing_variables);
-        void compute_changing_variables(const applications::statement::ptr& statement, std::map<const applications::statement*, var_set>& changing_variables);
+        //void compute_changing_variables(const applications::program& program, std::map<const applications::statement*, var_set>& changing_variables);
+        //void compute_changing_variables(const applications::module::ptr& module, std::map<const applications::statement*, var_set>& changing_variables);
+        //void compute_changing_variables(const applications::statement::ptr& statement, std::map<const applications::statement*, var_set>& changing_variables);
 
         std::string variable_name_format;
 
@@ -267,7 +267,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.1
    */
-    [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
+    // [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
 } // namespace syrec
 
