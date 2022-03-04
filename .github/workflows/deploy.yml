@@ -20,7 +20,7 @@ jobs:
     name:    Build wheels on Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Build wheels
@@ -33,7 +33,7 @@ jobs:
     name:    Build wheels on macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Install boost
@@ -48,7 +48,7 @@ jobs:
     name:    Build wheels on Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
@@ -70,7 +70,7 @@ jobs:
     name:    Build wheels for Apple Silicon
     runs-on: macos-11
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Install Boost
@@ -89,7 +89,7 @@ jobs:
     name:    Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       - uses: actions/setup-python@v3
