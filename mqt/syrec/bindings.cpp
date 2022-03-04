@@ -23,7 +23,6 @@ using namespace syrec::applications;
 [[maybe_unused]] circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
 [[maybe_unused]] circuit::const_iterator (circuit::*end1)() const   = &circuit::end;
 
-
 py::dict circuit_annotations(const circuit& c, const gate& g) {
     py::dict d;
 
@@ -118,11 +117,11 @@ std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
 namespace gate_types {
     enum _types {
         toffoli,
-   //     peres,
+        //     peres,
         fredkin,
-   //     v,
-   //     vplus,
-   //     module
+        //     v,
+        //     vplus,
+        //     module
     };
 }
 
@@ -261,7 +260,7 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type);
-            //.def_property_readonly("module_name", gate_module_name);
+    //.def_property_readonly("module_name", gate_module_name);
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);
