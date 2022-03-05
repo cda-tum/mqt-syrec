@@ -472,8 +472,8 @@ class SyReCEditor(QWidget):
 
         self.openAction     = QAction( QIcon.fromTheme( 'document-open' ), '&Open...', self.parent )
         self.buildAction    = QAction( QIcon.fromTheme( 'media-playback-start' ), '&Build...', self.parent )
-        self.simAction      = QAction( QIcon( './simulation1.png' ), '&Sim...', self.parent ) #system-run
-        self.statAction     = QAction( QIcon.fromTheme( 'x-office-spreadsheet' ), '&Stats...', self.parent )
+        self.simAction      = QAction( QIcon.fromTheme( 'x-office-spreadsheet'), '&Sim...', self.parent ) #system-run
+        self.statAction     = QAction( QIcon.fromTheme( 'applications-other' ), '&Stats...', self.parent )
 
         self.openAction.triggered.connect(self.open)
         self.buildAction.triggered.connect(self.build)

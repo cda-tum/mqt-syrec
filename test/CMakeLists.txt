@@ -62,7 +62,8 @@ package_add_test(${PROJECT_NAME}_test
 		unittests/test_logical_or.cpp
 		unittests/test_swap.cpp
 		unittests/test_shift.cpp
-		unittests/test_input_repeated_2.cpp)
+		unittests/test_input_repeated_2.cpp
+		unittests/test_for_32.cpp)
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD
