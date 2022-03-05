@@ -168,7 +168,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since 1.3
        */
-       // [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
+        // [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
         /**
        * @brief Evaluates the number in the context of an execution
