@@ -168,7 +168,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since 1.3
        */
-        //[[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
+       // [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
         /**
        * @brief Evaluates the number in the context of an execution
@@ -192,7 +192,7 @@ namespace syrec::applications {
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
 
         /** @cond 0 */
-        friend std::ostream& operator<<(std::ostream& os, const number& n);
+        //friend std::ostream& operator<<(std::ostream& os, const number& n);
         /** @endcond */
 
     private:
@@ -211,7 +211,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    //std::ostream& operator<<(std::ostream& os, const number& n);
+    std::ostream& operator<<(std::ostream& os, const number& n);
 
 } // namespace syrec::applications
 
