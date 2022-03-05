@@ -88,6 +88,61 @@ namespace syrec::applications {
                     return lhs_value / rhs_value;
                 }
 
+                case numeric_expression::modulo: // /
+                {
+                    return lhs_value % rhs_value;
+                }
+
+                case numeric_expression::logical_and: // /
+                {
+                    return lhs_value && rhs_value;
+                }
+
+                case numeric_expression::logical_or: // /
+                {
+                    return lhs_value || rhs_value;
+                }
+
+                case numeric_expression::bitwise_and: // /
+                {
+                    return lhs_value & rhs_value;
+                }
+
+                case numeric_expression::bitwise_or: // /
+                {
+                    return lhs_value | rhs_value;
+                }
+
+                case numeric_expression::less_than: // /
+                {
+                    return lhs_value < rhs_value;
+                }
+
+                case numeric_expression::greater_than: // /
+                {
+                    return lhs_value > rhs_value;
+                }
+
+                case numeric_expression::greater_equals: // /
+                {
+                    return lhs_value >= rhs_value;
+                }
+
+                case numeric_expression::less_equals: // /
+                {
+                    return lhs_value <= rhs_value;
+                }
+
+                case numeric_expression::equals: // /
+                {
+                    return lhs_value == rhs_value;
+                }
+
+                case numeric_expression::not_equals: // /
+                {
+                    return lhs_value != rhs_value;
+                }
+
                 default:
                     return 0;
             }
@@ -125,9 +180,9 @@ namespace syrec::applications {
         return std::holds_alternative<std::string>(d->number);
     }
 
-    [[maybe_unused]] bool number::is_conjunction() const {
+    /*[[maybe_unused]] bool number::is_conjunction() const {
         return std::holds_alternative<std::unique_ptr<binary_numeric_expr>>(d->number);
-    }
+    }*/
 
     bool number::is_constant() const {
         return std::holds_alternative<unsigned>(d->number);
@@ -137,15 +192,15 @@ namespace syrec::applications {
         return std::get<std::string>(d->number);
     }
 
-    [[maybe_unused]] binary_numeric_expr* number::conjunction_expr() const {
+    /* [[maybe_unused]] binary_numeric_expr* number::conjunction_expr() const {
         return std::get<std::unique_ptr<binary_numeric_expr>>(d->number).get();
-    }
+    }*/
 
     unsigned number::evaluate(const loop_variable_mapping& map) const {
         return std::visit(evaluate_visitor(map), d->number);
     }
 
-    struct output_visitor {
+    /*struct output_visitor {
         explicit output_visitor(std::ostream& os):
             os(os) {}
 
@@ -196,6 +251,6 @@ namespace syrec::applications {
 
     std::ostream& operator<<(std::ostream& os, const number& n) {
         return std::visit(output_visitor(os), n.d->number);
-    }
+    }*/
 
 } // namespace syrec::applications

@@ -11,7 +11,7 @@
 #include <string>
 
 namespace syrec {
-    class syrec_test_for: public ::testing::Test {
+    class syrec_test_binary_numeric: public ::testing::Test {
     protected:
         // any objects needed by all tests
         circuit               circ;
@@ -25,27 +25,27 @@ namespace syrec {
 
         void SetUp() override {
             // setup all the individual objects before each test
-            error_string = my_read_program(prog, "./circuits/for_4.src");
+            error_string = my_read_program(prog, "./circuits/binary_numeric.src");
             okay1        = syrec::syrec_synthesis(circ, prog);
             qc           = syrec::final_quantum_cost(circ, circ.lines());
             tc           = syrec::final_transistor_cost(circ, circ.lines());
         }
     };
 
-    TEST_F(syrec_test_for, GenericTest_for1) {
-        EXPECT_EQ(484, circ.num_gates());
+    TEST_F(syrec_test_binary_numeric, GenericTest_binary_numeric1) {
+        EXPECT_EQ(30, circ.num_gates());
     }
 
-    TEST_F(syrec_test_for, GenericTest_for2) {
-        EXPECT_EQ(25, circ.lines());
+    TEST_F(syrec_test_binary_numeric, GenericTest_binary_numeric2) {
+        EXPECT_EQ(60, circ.lines());
     }
 
-    TEST_F(syrec_test_for, GenericTest_for3) {
-        EXPECT_EQ(2660, qc);
+    TEST_F(syrec_test_binary_numeric, GenericTest_binary_numeric3) {
+        EXPECT_EQ(30, qc);
     }
 
-    TEST_F(syrec_test_for, GenericTest_for4) {
-        EXPECT_EQ(7424, tc);
+    TEST_F(syrec_test_binary_numeric, GenericTest_binary_numeric4) {
+        EXPECT_EQ(240, tc);
     }
 
 } // namespace syrec

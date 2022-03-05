@@ -42,9 +42,9 @@ namespace syrec::applications {
         unsigned    bitwidth{};
     };
 
-    numeric_expression::numeric_expression():
+    /* numeric_expression::numeric_expression():
         d(new priv()) {
-    }
+    }*/
 
     numeric_expression::numeric_expression(const number::ptr& value, unsigned bitwidth):
         d(new priv()) {
@@ -56,9 +56,9 @@ namespace syrec::applications {
         delete d;
     }
 
-    void numeric_expression::set_value(const number::ptr& value) {
+    /*void numeric_expression::set_value(const number::ptr& value) {
         d->value = value;
-    }
+    }*/
 
     const number::ptr& numeric_expression::value() const {
         return d->value;
@@ -68,9 +68,9 @@ namespace syrec::applications {
         return d->bitwidth;
     }
 
-    std::ostream& numeric_expression::print(std::ostream& os) const {
+    /*std::ostream& numeric_expression::print(std::ostream& os) const {
         return os << *d->value;
-    }
+    }*/
 
     class variable_expression::priv {
     public:
@@ -79,9 +79,9 @@ namespace syrec::applications {
         variable_access::ptr var = nullptr;
     };
 
-    variable_expression::variable_expression():
+    /*variable_expression::variable_expression():
         d(new priv()) {
-    }
+    }*/
 
     variable_expression::variable_expression(variable_access::ptr var):
         d(new priv()) {
@@ -92,9 +92,9 @@ namespace syrec::applications {
         delete d;
     }
 
-    void variable_expression::set_var(variable_access::ptr var) {
+    /* void variable_expression::set_var(variable_access::ptr var) {
         d->var = std::move(var);
-    }
+    }*/
 
     variable_access::ptr variable_expression::var() const {
         return d->var;
@@ -104,9 +104,9 @@ namespace syrec::applications {
         return d->var->bitwidth();
     }
 
-    std::ostream& variable_expression::print(std::ostream& os) const {
+    /*std::ostream& variable_expression::print(std::ostream& os) const {
         return os << *d->var;
-    }
+    }*/
 
     class binary_expression::priv {
     public:
@@ -117,9 +117,9 @@ namespace syrec::applications {
         unsigned        op{};
     };
 
-    binary_expression::binary_expression():
+    /*binary_expression::binary_expression():
         d(new priv()) {
-    }
+    }*/
 
     binary_expression::binary_expression(expression::ptr lhs,
                                          unsigned        op,
@@ -134,25 +134,25 @@ namespace syrec::applications {
         delete d;
     }
 
-    [[maybe_unused]] void binary_expression::set_lhs(expression::ptr lhs) {
+    /*[[maybe_unused]] void binary_expression::set_lhs(expression::ptr lhs) {
         d->lhs = std::move(lhs);
-    }
+    }*/
 
     expression::ptr binary_expression::lhs() const {
         return d->lhs;
     }
 
-    [[maybe_unused]] void binary_expression::set_rhs(expression::ptr rhs) {
+    /*[[maybe_unused]] void binary_expression::set_rhs(expression::ptr rhs) {
         d->rhs = std::move(rhs);
-    }
+    }*/
 
     expression::ptr binary_expression::rhs() const {
         return d->rhs;
     }
 
-    void binary_expression::set_op(unsigned op) {
+    /* void binary_expression::set_op(unsigned op) {
         d->op = op;
-    }
+    }*/
 
     unsigned binary_expression::op() const {
         return d->op;
@@ -176,7 +176,7 @@ namespace syrec::applications {
         }
     }
 
-    std::ostream& binary_expression::print(std::ostream& os) const {
+    /*std::ostream& binary_expression::print(std::ostream& os) const {
         os << "(" << *d->lhs << " ";
 
         switch (d->op) {
@@ -250,9 +250,9 @@ namespace syrec::applications {
         }
 
         return os << " " << *d->rhs << ")";
-    }
+    }*/
 
-    class unary_expression::priv {
+    /*class unary_expression::priv {
     public:
         priv() = default;
 
@@ -296,7 +296,7 @@ namespace syrec::applications {
 
     std::ostream& unary_expression::print(std::ostream& os) const {
         return os << (d->op == logical_not ? "!" : "~") << *d->expr;
-    }
+    }*/
 
     class shift_expression::priv {
     public:
@@ -307,9 +307,9 @@ namespace syrec::applications {
         unsigned        op{};
     };
 
-    shift_expression::shift_expression():
+    /*shift_expression::shift_expression():
         d(new priv()) {
-    }
+    }*/
 
     shift_expression::shift_expression(expression::ptr    lhs,
                                        unsigned           op,
@@ -324,25 +324,25 @@ namespace syrec::applications {
         delete d;
     }
 
-    [[maybe_unused]] void shift_expression::set_lhs(expression::ptr lhs) {
+    /*[[maybe_unused]] void shift_expression::set_lhs(expression::ptr lhs) {
         d->lhs = std::move(lhs);
-    }
+    }*/
 
     expression::ptr shift_expression::lhs() const {
         return d->lhs;
     }
 
-    [[maybe_unused]] void shift_expression::set_rhs(const number::ptr& rhs) {
+    /*[[maybe_unused]] void shift_expression::set_rhs(const number::ptr& rhs) {
         d->rhs = rhs;
-    }
+    }*/
 
     const number::ptr& shift_expression::rhs() const {
         return d->rhs;
     }
 
-    void shift_expression::set_op(unsigned op) {
+    /*void shift_expression::set_op(unsigned op) {
         d->op = op;
-    }
+    }*/
 
     unsigned shift_expression::op() const {
         return d->op;
@@ -352,11 +352,11 @@ namespace syrec::applications {
         return d->lhs->bitwidth();
     }
 
-    std::ostream& shift_expression::print(std::ostream& os) const {
+    /*std::ostream& shift_expression::print(std::ostream& os) const {
         return os << "(" << *d->lhs << " " << (d->op == left ? "<<" : ">>") << " " << *d->rhs << ")";
     }
 
     std::ostream& operator<<(std::ostream& os, const expression& e) {
         return e.print(os);
-    }
+    }*/
 } // namespace syrec::applications

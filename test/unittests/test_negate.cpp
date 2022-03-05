@@ -41,7 +41,7 @@ namespace syrec {
     };
 
     TEST_F(syrec_test_negate, GenericTest_negate1) {
-        EXPECT_EQ(24, circ.num_gates());
+        EXPECT_EQ(48, circ.num_gates());
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate2) {
@@ -49,11 +49,11 @@ namespace syrec {
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate3) {
-        EXPECT_EQ(870, qc);
+        EXPECT_EQ(1740, qc);
     }
 
     TEST_F(syrec_test_negate, GenericTest_negate4) {
-        EXPECT_EQ(448, tc);
+        EXPECT_EQ(896, tc);
     }
 
 } // namespace syrec

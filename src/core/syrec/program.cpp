@@ -54,7 +54,7 @@ namespace syrec::applications {
         return {};
     }
 
-    std::ostream& operator<<(std::ostream& os, const program& p) {
+    /*std::ostream& operator<<(std::ostream& os, const program& p) {
         unsigned old_precision = os.precision(2u);
         for (const auto& module: p.modules()) {
             os << *module;
@@ -62,6 +62,6 @@ namespace syrec::applications {
         os.precision(old_precision);
 
         return os;
-    }
+    }*/
 
 } // namespace syrec::applications

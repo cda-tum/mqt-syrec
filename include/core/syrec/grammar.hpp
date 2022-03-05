@@ -79,19 +79,19 @@ namespace syrec::applications {
     struct ast_variable;
     struct ast_number_expression;
     struct ast_binary_expression;
-    struct ast_unary_expression;
+    //struct ast_unary_expression;
     struct ast_shift_expression;
     struct ast_if_statement;
     struct ast_for_statement;
 
-    typedef std::string::const_iterator                                                                                                                                                                                         ast_iterator;
-    typedef std::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                                                                        ast_number;
-    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, std::optional<syrec::applications::ast_number>>>                                                                                             ast_range;
-    typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_unary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
-    typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                                                                   ast_swap_statement;
-    typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                                                                    ast_unary_statement;
-    typedef boost::fusion::vector<ast_variable, char, ast_expression>                                                                                                                                                           ast_assign_statement;
-    typedef boost::fusion::vector<std::string, std::string, std::vector<std::string>>                                                                                                                                           ast_call_statement;
+    typedef std::string::const_iterator                                                                                                                                         ast_iterator;
+    typedef std::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                        ast_number;
+    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, std::optional<syrec::applications::ast_number>>>                                             ast_range;
+    typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
+    typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                   ast_swap_statement;
+    typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                    ast_unary_statement;
+    typedef boost::fusion::vector<ast_variable, char, ast_expression>                                                                                                           ast_assign_statement;
+    typedef boost::fusion::vector<std::string, std::string, std::vector<std::string>>                                                                                           ast_call_statement;
     typedef boost::fusion::vector<ast_iterator, boost::variant<ast_swap_statement,
                                                                ast_unary_statement,
                                                                ast_assign_statement,
@@ -124,10 +124,10 @@ namespace syrec::applications {
         ast_expression operand2;
     };
 
-    struct ast_unary_expression {
+    /*struct ast_unary_expression {
         std::string    op;
         ast_expression operand;
-    };
+    };*/
 
     struct ast_shift_expression {
         ast_expression operand1;
@@ -165,9 +165,9 @@ BOOST_FUSION_ADAPT_STRUCT(
         syrec::applications::ast_binary_expression,
         (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_expression, operand2))
 
-BOOST_FUSION_ADAPT_STRUCT(
+/*BOOST_FUSION_ADAPT_STRUCT(
         syrec::applications::ast_unary_expression,
-        (std::string, op)(syrec::applications::ast_expression, operand))
+        (std::string, op)(syrec::applications::ast_expression, operand))*/
 
 BOOST_FUSION_ADAPT_STRUCT(
         syrec::applications::ast_shift_expression,
@@ -249,11 +249,11 @@ namespace syrec {
 
                 statement_rule %= iter_pos >> (swap_statement_rule | unary_statement_rule | assign_statement_rule | if_statement_rule | for_statement_rule | call_statement_rule | skip_rule);
 
-                expression_rule %= number_rule | variable_rule | binary_expression_rule | unary_expression_rule | shift_expression_rule;
+                expression_rule %= number_rule | variable_rule | binary_expression_rule | shift_expression_rule;
 
-                binary_expression_rule %= '(' >> expression_rule >> (string("+") | string("-") | string("^") | string("*>") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string("<=") | string(">=") | string("=") | string("!=") | string("<") | string(">")) >> expression_rule >> ')';
+                binary_expression_rule %= '(' >> expression_rule >> (string("+") | string("-") | string("^") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string("<=") | string(">=") | string("=") | string("!=") | string("<") | string(">")) >> expression_rule >> ')';
 
-                unary_expression_rule %= (string("!") | string("~")) >> expression_rule;
+                //unary_expression_rule %= (string("!") | string("~")) >> expression_rule;
 
                 shift_expression_rule %= '(' >> expression_rule >> (string("<<") | string(">>")) >> number_rule >> ')';
 
@@ -261,7 +261,7 @@ namespace syrec {
 
                 number_rule %= uint_ | ('#' >> variable_rule) | ('$' >> identifier) | number_expression_rule;
 
-                number_expression_rule %= '(' >> number_rule >> (string("+") | string("-") | string("*") | string("/")) >> number_rule >> ')';
+                number_expression_rule %= '(' >> number_rule >> (string("+") | string("-") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string(">=") | string("<=") | string(">") | string("<") | string("==") | string("!=")) >> number_rule >> ')';
 
                 program_rule.name("program");
                 variable_declaration_rule.name("variable_declaration");
@@ -278,7 +278,7 @@ namespace syrec {
                 statement_rule.name("statement");
                 expression_rule.name("expression");
                 binary_expression_rule.name("binary_expression");
-                unary_expression_rule.name("unary_expression");
+                //unary_expression_rule.name("unary_expression");
                 shift_expression_rule.name("shift_expression");
                 variable_rule.name("variable");
                 number_rule.name("number");
@@ -308,11 +308,11 @@ namespace syrec {
             qi::rule<Iterator, ast_statement(), qi::locals<std::string>, SpaceT>             statement_rule;
             qi::rule<Iterator, ast_expression(), qi::locals<std::string>, SpaceT>            expression_rule;
             qi::rule<Iterator, ast_binary_expression(), qi::locals<std::string>, SpaceT>     binary_expression_rule;
-            qi::rule<Iterator, ast_unary_expression(), qi::locals<std::string>, SpaceT>      unary_expression_rule;
-            qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>      shift_expression_rule;
-            qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>              variable_rule;
-            qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>                number_rule;
-            qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT>     number_expression_rule;
+            //qi::rule<Iterator, ast_unary_expression(), qi::locals<std::string>, SpaceT>      unary_expression_rule;
+            qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>  shift_expression_rule;
+            qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>          variable_rule;
+            qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>            number_rule;
+            qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT> number_expression_rule;
 
             qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT> identifier;
         };

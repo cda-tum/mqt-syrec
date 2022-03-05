@@ -91,6 +91,30 @@ namespace syrec {
                 op = numeric_expression::multiply;
             } else if (ast_op == "/") {
                 op = numeric_expression::divide;
+            } else if (ast_op == "%") {
+                op = numeric_expression::modulo;
+            } else if (ast_op == "&&") {
+                op = numeric_expression::logical_and;
+            }
+
+            else if (ast_op == "||") {
+                op = numeric_expression::logical_or;
+            } else if (ast_op == "&") {
+                op = numeric_expression::bitwise_and;
+            } else if (ast_op == "|") {
+                op = numeric_expression::bitwise_or;
+            } else if (ast_op == ">") {
+                op = numeric_expression::greater_than;
+            } else if (ast_op == "<") {
+                op = numeric_expression::less_than;
+            } else if (ast_op == ">=") {
+                op = numeric_expression::greater_equals;
+            } else if (ast_op == "<=") {
+                op = numeric_expression::less_equals;
+            } else if (ast_op == "==") {
+                op = numeric_expression::equals;
+            } else if (ast_op == "!=") {
+                op = numeric_expression::not_equals;
             }
 
             number::ptr lhs = parse_number(ast_no1, proc, context);
@@ -123,6 +147,61 @@ namespace syrec {
                     case numeric_expression::divide: // /
                     {
                         num_value = lhs_value / rhs_value;
+                    } break;
+
+                    case numeric_expression::modulo: // /
+                    {
+                        num_value = lhs_value % rhs_value;
+                    } break;
+
+                    case numeric_expression::logical_and: // /
+                    {
+                        num_value = lhs_value && rhs_value;
+                    } break;
+
+                    case numeric_expression::logical_or: // /
+                    {
+                        num_value = lhs_value || rhs_value;
+                    } break;
+
+                    case numeric_expression::bitwise_and: // /
+                    {
+                        num_value = lhs_value & rhs_value;
+                    } break;
+
+                    case numeric_expression::bitwise_or: // /
+                    {
+                        num_value = lhs_value | rhs_value;
+                    } break;
+
+                    case numeric_expression::less_than: // /
+                    {
+                        num_value = lhs_value < rhs_value;
+                    } break;
+
+                    case numeric_expression::greater_than: // /
+                    {
+                        num_value = lhs_value > rhs_value;
+                    } break;
+
+                    case numeric_expression::greater_equals: // /
+                    {
+                        num_value = lhs_value >= rhs_value;
+                    } break;
+
+                    case numeric_expression::less_equals: // /
+                    {
+                        num_value = lhs_value <= rhs_value;
+                    } break;
+
+                    case numeric_expression::equals: // /
+                    {
+                        num_value = lhs_value == rhs_value;
+                    } break;
+
+                    case numeric_expression::not_equals: // /
+                    {
+                        num_value = lhs_value != rhs_value;
                     } break;
 
                     default:
@@ -314,12 +393,12 @@ namespace syrec {
                                 num_value = lhs_value % rhs_value;
                             } break;
 
-                            case binary_expression::frac_divide: // *>
+                                /*case binary_expression::frac_divide: // *>
                             {
                                 std::cerr << "Operator *> is undefined for numbers w/o specified bit width: ( " + std::to_string(lhs_value) + " *> " + std::to_string(rhs_value) + " )" << std::endl;
                                 assert(false);
                                 return nullptr;
-                            } break;
+                            } break;*/
 
                             case binary_expression::logical_and: // &&
                             {
@@ -386,7 +465,7 @@ namespace syrec {
             return new binary_expression(lhs, op, rhs);
         }
 
-        expression* operator()(const ast_unary_expression& ast_exp) const {
+        /* expression* operator()(const ast_unary_expression& ast_exp) const {
             std::string    ast_op   = ast_exp.op;
             ast_expression ast_expr = ast_exp.operand;
 
@@ -432,7 +511,7 @@ namespace syrec {
                 }
             }
             return new unary_expression(op, expr);
-        }
+        }*/
 
         expression* operator()(const ast_shift_expression& ast_exp) const {
             ast_expression ast_exp1 = ast_exp.operand1;
@@ -743,7 +822,7 @@ namespace syrec {
                     bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
         }
 
-        for (const ast_variable_declarations& ast_decls: bf::at_c<2>(ast_proc)) {
+        /* for (const ast_variable_declarations& ast_decls: bf::at_c<2>(ast_proc)) {
             unsigned type = parse_variable_type(bf::at_c<0>(ast_decls));
 
             for (const ast_variable_declaration& ast_decl: bf::at_c<1>(ast_decls)) {
@@ -762,7 +841,7 @@ namespace syrec {
                         bf::at_c<1>(ast_decl),
                         bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth)));
             }
-        }
+        }*/
 
         for (const ast_statement& ast_stat: bf::at_c<3>(ast_proc)) {
             statement::ptr stat = parse_statement(ast_stat, prog, proc, context);

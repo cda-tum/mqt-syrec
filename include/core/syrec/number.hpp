@@ -130,7 +130,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        [[maybe_unused]] [[nodiscard]] bool is_conjunction() const;
+        //[[maybe_unused]] [[nodiscard]] bool is_conjunction() const;
 
         /**
        * @brief Returns whether the number is a known constant number
@@ -168,7 +168,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since 1.3
        */
-        [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
+        //[[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
         /**
        * @brief Evaluates the number in the context of an execution
@@ -211,7 +211,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const number& n);
+    //std::ostream& operator<<(std::ostream& os, const number& n);
 
 } // namespace syrec::applications
 

@@ -105,7 +105,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        variable();
+        //variable();
 
         /**
        * @brief Constructor
@@ -119,7 +119,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        variable(unsigned type, const std::string& name, unsigned bitwidth);
+        //variable(unsigned type, const std::string& name, unsigned bitwidth);
 
         variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth);
 
@@ -139,7 +139,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_type(unsigned type);
+        //void set_type(unsigned type);
 
         /**
        * @brief Returns the type of the variable
@@ -159,7 +159,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_name(const std::string& name);
+        //void set_name(const std::string& name);
 
         /**
        * @brief Returns the name of the variable
@@ -179,7 +179,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_bitwidth(unsigned bitwidth);
+        //[[maybe_unused]] void set_bitwidth(unsigned bitwidth);
 
         /**
        * @brief Returns the bit-width of the variable
@@ -194,7 +194,7 @@ namespace syrec::applications {
         void                        set_reference(variable::ptr reference);
         [[nodiscard]] variable::ptr reference() const;
 
-        [[maybe_unused]] void                      set_dimensions(const std::vector<unsigned>& dimensions);
+        //[[maybe_unused]] void                      set_dimensions(const std::vector<unsigned>& dimensions);
         [[nodiscard]] const std::vector<unsigned>& dimensions() const;
 
     private:
@@ -239,7 +239,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        explicit variable_access(variable::ptr var);
+        //explicit variable_access(variable::ptr var);
 
         /**
        * @brief Deconstructor
@@ -328,7 +328,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const variable& v);
+    // std::ostream& operator<<(std::ostream& os, const variable& v);
 
     /**
      * @brief Prints variable access to output stream
@@ -341,7 +341,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const variable_access& v);
+    //std::ostream& operator<<(std::ostream& os, const variable_access& v);
 
 } // namespace syrec::applications
 

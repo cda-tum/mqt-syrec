@@ -37,7 +37,7 @@ namespace syrec::applications {
         std::vector<unsigned> dimensions{};
     };
 
-    variable::variable():
+    /*variable::variable():
         d(new priv()) {
     }
 
@@ -46,7 +46,7 @@ namespace syrec::applications {
         d->type     = type;
         d->name     = name;
         d->bitwidth = bitwidth;
-    }
+    }*/
 
     variable::variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth):
         d(new priv()) {
@@ -60,25 +60,25 @@ namespace syrec::applications {
         delete d;
     }
 
-    void variable::set_type(unsigned type) {
+    /*void variable::set_type(unsigned type) {
         d->type = type;
-    }
+    }*/
 
     unsigned variable::type() const {
         return d->type;
     }
 
-    void variable::set_name(const std::string& name) {
+    /* void variable::set_name(const std::string& name) {
         d->name = name;
-    }
+    }*/
 
     const std::string& variable::name() const {
         return d->name;
     }
 
-    [[maybe_unused]] void variable::set_bitwidth(unsigned bitwidth) {
+    /*[[maybe_unused]] void variable::set_bitwidth(unsigned bitwidth) {
         d->bitwidth = bitwidth;
-    }
+    }*/
 
     unsigned variable::bitwidth() const {
         return d->bitwidth;
@@ -92,9 +92,9 @@ namespace syrec::applications {
         return d->reference;
     }
 
-    [[maybe_unused]] void variable::set_dimensions(const std::vector<unsigned>& dimensions) {
+    /*[[maybe_unused]] void variable::set_dimensions(const std::vector<unsigned>& dimensions) {
         d->dimensions = dimensions;
-    }
+    }*/
 
     const std::vector<unsigned>& variable::dimensions() const {
         return d->dimensions;
@@ -113,10 +113,10 @@ namespace syrec::applications {
         d(new priv()) {
     }
 
-    variable_access::variable_access(variable::ptr var):
+    /* variable_access::variable_access(variable::ptr var):
         d(new priv()) {
         d->var = std::move(var);
-    }
+    }*/
 
     variable_access::~variable_access() {
         delete d;
@@ -172,7 +172,7 @@ namespace syrec::applications {
         return d->indexes;
     }
 
-    std::ostream& operator<<(std::ostream& os, const variable& v) {
+    /*std::ostream& operator<<(std::ostream& os, const variable& v) {
         std::vector<std::string> types{"in", "out", "inout", "state", "wire"};
 
         os << std::string(os.precision(), ' ')
@@ -204,6 +204,6 @@ namespace syrec::applications {
         }
 
         return os;
-    }
+    }*/
 
 } // namespace syrec::applications

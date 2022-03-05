@@ -94,7 +94,7 @@ namespace syrec::applications {
        *
        * @return Output Stream
        */
-        virtual std::ostream& print(std::ostream& os) const = 0;
+        // virtual std::ostream& print(std::ostream& os) const = 0;
 
     private:
         class priv;
@@ -134,7 +134,30 @@ namespace syrec::applications {
             /**
          * @brief Division
          */
-            divide
+            divide,
+
+            modulo,
+
+            logical_and,
+
+            logical_or,
+
+            bitwise_and,
+
+            bitwise_or,
+
+            less_than,
+
+            greater_than,
+
+            less_equals,
+
+            greater_equals,
+
+            equals,
+
+            not_equals
+
         };
         /**
        * @brief Standard Constructor
@@ -171,7 +194,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_value(const number::ptr& value);
+        //void set_value(const number::ptr& value);
 
         /**
        * @brief Returns the value of the expression
@@ -203,7 +226,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -257,7 +280,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_var(variable_access::ptr var);
+        //void set_var(variable_access::ptr var);
 
         /**
        * @brief Returns the variable of the expression
@@ -291,7 +314,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -448,7 +471,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_lhs(expression::ptr lhs);
+        //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
         /**
        * @brief Returns the left hand side of the expression
@@ -468,7 +491,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_rhs(expression::ptr rhs);
+        //[[maybe_unused]] void set_rhs(expression::ptr rhs);
 
         /**
        * @brief Returns the right hand side of the expression
@@ -488,7 +511,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_op(unsigned op);
+        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation to be performed
@@ -526,7 +549,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -542,28 +565,28 @@ namespace syrec::applications {
      * @author RevKit
      * @since 1.3
      */
-    class unary_expression: public expression {
-    public:
-        /**
+    //class unary_expression: public expression {
+    //public:
+    /**
        * @brief Operation to perform
        *
        * @author RevKit
        * @since  1.3
        */
-        enum {
-            /**
+    //enum {
+    /**
          * @brief Logical NOT
          *
          * Returns 1 iff expr() evaluates to 0.
          */
-            logical_not,
-            /**
+    //   logical_not,
+    /**
          * @brief Bitwise NOT
          */
-            bitwise_not
-        };
+    //   bitwise_not
+    //};
 
-        /**
+    /**
        * @brief Standard constructor
        * 
        * Initializes default values
@@ -571,9 +594,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        unary_expression();
+    //unary_expression();
 
-        /**
+    /**
        * @brief Constructor which initializes an operation
        * 
        * @param op Operation to be performed
@@ -582,17 +605,17 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        unary_expression(unsigned op, expression::ptr expr);
+    //unary_expression(unsigned op, expression::ptr expr);
 
-        /**
+    /**
        * @brief Deconstructor
        *
        * @author RevKit
        * @since  1.3
        */
-        ~unary_expression() override;
+    //~unary_expression() override;
 
-        /**
+    /**
        * @brief Sets the sub expression
        * 
        * @param expr Expression
@@ -600,9 +623,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        void set_expr(expression::ptr expr);
+    //void set_expr(expression::ptr expr);
 
-        /**
+    /**
        * @brief Returns the sub expression
        * 
        * @return Expression
@@ -610,9 +633,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        [[nodiscard]] expression::ptr expr() const;
+    //[[nodiscard]] expression::ptr expr() const;
 
-        /**
+    /**
        * @brief Sets the operation to be performed
        * 
        * @param op Operation
@@ -620,9 +643,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        void set_op(unsigned op);
+    //void set_op(unsigned op);
 
-        /**
+    /**
        * @brief Returns the operation to be performed
        *
        * @return Operation
@@ -630,9 +653,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        [[nodiscard]] unsigned op() const;
+    //[[nodiscard]] unsigned op() const;
 
-        /**
+    /**
        * @brief Bit-width of the expression
        * 
        * If a logical operation is performed, 
@@ -645,9 +668,9 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        [[nodiscard]] unsigned bitwidth() const override;
+    //[[nodiscard]] unsigned bitwidth() const override;
 
-        /**
+    /**
        * @brief Prints the expression to an output stream
        *
        * @param os Output stream
@@ -657,12 +680,12 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        std::ostream& print(std::ostream& os) const override;
+    //std::ostream& print(std::ostream& os) const override;
 
-    private:
+    /* private:
         class priv;
         priv* const d = nullptr;
-    };
+    };*/
 
     /**
      * @brief Shift expression
@@ -737,7 +760,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_lhs(expression::ptr lhs);
+        //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
         /**
        * @brief Returns the left-hand side expression
@@ -757,7 +780,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_rhs(const number::ptr& rhs);
+        //[[maybe_unused]] void set_rhs(const number::ptr& rhs);
 
         /**
        * @brief Returns the number of bits to shift
@@ -777,7 +800,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_op(unsigned op);
+        //void set_op(unsigned op);
 
         /**
        * @brief Returns the shift operation
@@ -812,7 +835,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -830,7 +853,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const expression& e);
+    // std::ostream& operator<<(std::ostream& os, const expression& e);
 
 } // namespace syrec::applications
 

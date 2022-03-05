@@ -91,7 +91,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        virtual std::ostream& print(std::ostream& os) const;
+        //virtual std::ostream& print(std::ostream& os) const;
 
         /**
        * @brief Sets the line number of the SyReC code
@@ -137,7 +137,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        swap_statement();
+        //swap_statement();
 
         /**
        * @brief Constructor
@@ -167,7 +167,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_lhs(variable_access::ptr lhs);
+        //[[maybe_unused]] void set_lhs(variable_access::ptr lhs);
 
         /**
        * @brief Returns variable access on left hand side
@@ -187,7 +187,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_rhs(variable_access::ptr rhs);
+        //[[maybe_unused]] void set_rhs(variable_access::ptr rhs);
 
         /**
        * @brief Returns variable access on right hand side
@@ -209,7 +209,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -258,7 +258,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        unary_statement();
+        //unary_statement();
 
         /**
        * @brief Constructor
@@ -288,7 +288,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_op(unsigned op);
+        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation of the statement
@@ -308,7 +308,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_var(variable_access::ptr var);
+        //void set_var(variable_access::ptr var);
 
         /**
        * @brief Returns the variable access of the statement
@@ -330,7 +330,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -379,7 +379,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        assign_statement();
+        //assign_statement();
 
         /**
        * @brief Constructor
@@ -411,7 +411,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_lhs(variable_access::ptr lhs);
+        //[[maybe_unused]] void set_lhs(variable_access::ptr lhs);
 
         /**
        * @brief Returns variable access to which the operation is applied
@@ -431,7 +431,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_rhs(expression::ptr rhs);
+        //[[maybe_unused]] void set_rhs(expression::ptr rhs);
 
         /**
        * @brief Returns the expression to be evaluated
@@ -451,7 +451,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_op(unsigned op);
+        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation to be applied
@@ -474,7 +474,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -606,7 +606,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -764,7 +764,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //  std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -789,7 +789,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        call_statement();
+        //call_statement();
 
         /**
        * @brief Constructor with module
@@ -799,7 +799,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] explicit call_statement(std::shared_ptr<module> target);
+        //[[maybe_unused]] explicit call_statement(std::shared_ptr<module> target);
 
         /**
        * @brief Constructor with module and parameters
@@ -828,7 +828,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_target(std::shared_ptr<module> target);
+        //void set_target(std::shared_ptr<module> target);
 
         /**
        * @brief Returns the target module to call
@@ -848,7 +848,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
+        //[[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
         /**
        * @brief Returns the parameters to assign with the module call
@@ -870,7 +870,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -895,7 +895,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        uncall_statement();
+        //uncall_statement();
 
         /**
        * @brief Constructor with module
@@ -905,7 +905,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] explicit uncall_statement(std::shared_ptr<module> target);
+        //[[maybe_unused]] explicit uncall_statement(std::shared_ptr<module> target);
 
         /**
        * @brief Constructor with module and parameters
@@ -934,7 +934,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_target(std::shared_ptr<module> target);
+        //void set_target(std::shared_ptr<module> target);
 
         /**
        * @brief Returns the target module to uncall
@@ -954,7 +954,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
+        //[[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
         /**
        * @brief Returns the parameters to assign with the module uncall
@@ -976,7 +976,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -1012,7 +1012,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        std::ostream& print(std::ostream& os) const override;
+        // std::ostream& print(std::ostream& os) const override;
     };
 
     /**
@@ -1026,7 +1026,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const statement& s);
+    //std::ostream& operator<<(std::ostream& os, const statement& s);
 
 } // namespace syrec::applications
 

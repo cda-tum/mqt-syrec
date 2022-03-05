@@ -70,7 +70,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        module();
+        //module();
 
         /**
        * @brief Constructor
@@ -97,7 +97,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_name(const std::string& name);
+        //void set_name(const std::string& name);
 
         /**
        * @brief Returns the name of the module
@@ -137,7 +137,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void add_variable(const variable::ptr& variable);
+        //void add_variable(const variable::ptr& variable);
 
         /**
        * @brief Returns all variables of the module
@@ -199,7 +199,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const module& m);
+    //std::ostream& operator<<(std::ostream& os, const module& m);
 
 } // namespace syrec::applications
 

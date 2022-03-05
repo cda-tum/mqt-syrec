@@ -61,11 +61,13 @@ namespace syrec::applications {
             }
 
             return statement::ptr(for_stat);
-        } else if (auto* stat_4 = dynamic_cast<call_statement*>(_statement.get())) {
-            return statement::ptr(new uncall_statement(stat_4->target(), stat_4->parameters()));
-        } else if (auto* stat_5 = dynamic_cast<uncall_statement*>(_statement.get())) {
-            return statement::ptr(new call_statement(stat_5->target(), stat_5->parameters()));
-        } else if (dynamic_cast<skip_statement*>(_statement.get())) {
+        }
+        //else if (auto* stat_4 = dynamic_cast<call_statement*>(_statement.get())) {
+        //  return statement::ptr(new uncall_statement(stat_4->target(), stat_4->parameters()));
+        //} else if (auto* stat_5 = dynamic_cast<uncall_statement*>(_statement.get())) {
+        //    return statement::ptr(new call_statement(stat_5->target(), stat_5->parameters()));
+        //}
+        else if (dynamic_cast<skip_statement*>(_statement.get())) {
             return _statement;
         }
 

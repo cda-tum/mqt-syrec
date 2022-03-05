@@ -32,8 +32,8 @@ namespace syrec::applications {
         statement::vec statements;
     };
 
-    module::module():
-        d(new priv()) {}
+    /* module::module():
+        d(new priv()) {}*/
 
     module::module(const std::string& name):
         d(new priv()) {
@@ -44,9 +44,9 @@ namespace syrec::applications {
         delete d;
     }
 
-    void module::set_name(const std::string& name) {
+    /*void module::set_name(const std::string& name) {
         d->name = name;
-    }
+    }*/
 
     const std::string& module::name() const {
         return d->name;
@@ -60,9 +60,9 @@ namespace syrec::applications {
         return d->parameters;
     }
 
-    void module::add_variable(const variable::ptr& variable) {
+    /*void module::add_variable(const variable::ptr& variable) {
         d->variables.emplace_back(variable);
-    }
+    }*/
 
     const variable::vec& module::variables() const {
         return d->variables;
@@ -75,11 +75,11 @@ namespace syrec::applications {
             }
         }
 
-        for (variable::ptr var: d->variables) {
+        /*    for (variable::ptr var: d->variables) {
             if (var->name() == name) {
                 return var;
             }
-        }
+        }*/
 
         return {};
     }
@@ -93,7 +93,7 @@ namespace syrec::applications {
     }
 
     /* helper function which creates a string from a output stream */
-    struct to_string {
+    /* struct to_string {
         typedef std::string result_type;
 
         template<typename T>
@@ -103,9 +103,9 @@ namespace syrec::applications {
             oss << t;
             return oss.str();
         }
-    };
+    };*/
 
-    std::ostream& operator<<(std::ostream& os, const module& m) {
+    /*std::ostream& operator<<(std::ostream& os, const module& m) {
         os << "module " << m.name() << "(";
         for (const auto& parameter: m.parameters()) {
             if (parameter != m.parameters().front()) {
@@ -121,6 +121,6 @@ namespace syrec::applications {
             os << *statement;
         }
         return os;
-    }
+    }*/
 
 } // namespace syrec::applications

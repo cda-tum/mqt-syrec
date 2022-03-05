@@ -56,7 +56,7 @@ namespace syrec {
    * @author RevKit
    * @since  1.0
    */
-    typedef std::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
+    //typedef std::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
 
     /**
    * @brief A gate simulation implementation of \ref syrec::gate_simulation_func "gate_simulation_func"

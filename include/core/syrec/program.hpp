@@ -107,7 +107,7 @@ namespace syrec::applications {
      * @author RevKit
      * @since  1.1
      */
-    std::ostream& operator<<(std::ostream& os, const program& p);
+    // std::ostream& operator<<(std::ostream& os, const program& p);
 
 } // namespace syrec::applications
 

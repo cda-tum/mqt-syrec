@@ -1,11 +1,16 @@
-module main( in op(1),out c[2](4),inout a[2](4), inout b[2](4))
+module forloop( in op(1),out c[2](4),inout a[2](4), inout b[2](4))
 
 if op then
- for $i = 0 to 1 do  
+ for $i = 0 to 1 do
     c[$i] ^= (a[$i] + b[$i]);
   rof;
 else
- for $i = 0 to 1 do  
+ for $i = 0 to 1 do
     c[$i] ^= (a[$i] - b[$i]);
  rof;
 fi op
+
+
+module main(in po(1),out z[2](4),inout y[2](4), inout x[2](4) )
+  call forloop(po,z,y,x)
+  uncall forloop(po,z,y,x)

@@ -33,19 +33,19 @@ namespace syrec {
     };
 
     TEST_F(syrec_test_divide, GenericTest_divide1) {
-        EXPECT_EQ(38, circ.num_gates());
+        EXPECT_EQ(76, circ.num_gates());
     }
 
     TEST_F(syrec_test_divide, GenericTest_divide2) {
-        EXPECT_EQ(8, circ.lines());
+        EXPECT_EQ(10, circ.lines());
     }
 
     TEST_F(syrec_test_divide, GenericTest_divide3) {
-        EXPECT_EQ(170, qc);
+        EXPECT_EQ(340, qc);
     }
 
     TEST_F(syrec_test_divide, GenericTest_divide4) {
-        EXPECT_EQ(440, tc);
+        EXPECT_EQ(880, tc);
     }
 
 } // namespace syrec
