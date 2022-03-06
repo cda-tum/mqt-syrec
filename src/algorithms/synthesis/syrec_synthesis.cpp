@@ -856,35 +856,68 @@ namespace syrec {
 
     bool standard_syrec_synthesizer::on_statement(const applications::for_statement& statement) {
         auto [nfrom, nto] = statement.range();
-
+        std::cout << "for on 1" << std::endl;
         unsigned from = nfrom ? nfrom->evaluate(loop_map) : 1u; // default value is 1u
         unsigned to   = nto->evaluate(loop_map);
-
-        assert(to >= from);
+        std::cout << "for on 2" << std::endl;
+        std::cout << from << std::endl;
+        std::cout << to << std::endl;
+        //assert(to >= from);
         unsigned step = statement.step() ? statement.step()->evaluate(loop_map) : 1u; // default step is +1
-
+        std::cout << step << std::endl;
+        std::cout << "for on 3" << std::endl;
         const std::string& loop_variable = statement.loop_variable();
+        std::cout << "for on 4" << std::endl;
+        if (from <= to) {
+            for (unsigned i = from; i <= to; i += step) {
+                // adjust loop variable if necessary
+                std::cout << "for on 5" << std::endl;
+                if (!loop_variable.empty()) {
+                    std::cout << "for on 6" << std::endl;
+                    loop_map[loop_variable] = i;
+                }
 
-        for (unsigned i = from; i <= to; i += step) {
-            // adjust loop variable if necessary
-            if (!loop_variable.empty()) {
-                loop_map[loop_variable] = i;
-            }
-
-            for (const applications::statement::ptr& stat: statement.statements()) {
-                if (!full_statement(stat)) {
-                    // if(! on_full_statement(stat ))
-                    //{
-                    if (!on_statement(stat)) {
-                        return false;
+                for (const applications::statement::ptr& stat: statement.statements()) {
+                    if (!full_statement(stat)) {
+                        std::cout << "for on 7" << std::endl;
+                        // if(! on_full_statement(stat ))
+                        //{
+                        if (!on_statement(stat)) {
+                            std::cout << "for on 8" << std::endl;
+                            return false;
+                        }
+                        //}
                     }
-                    //}
                 }
             }
         }
 
+        else if (from > to) {
+            for (int i = (int)from; i >= (int)to; i -= (int)step) {
+                // adjust loop variable if necessary
+                std::cout << "for on 5" << std::endl;
+                if (!loop_variable.empty()) {
+                    std::cout << "for on 6" << std::endl;
+                    loop_map[loop_variable] = i;
+                }
+
+                for (const applications::statement::ptr& stat: statement.statements()) {
+                    if (!full_statement(stat)) {
+                        std::cout << "for on 7" << std::endl;
+                        // if(! on_full_statement(stat ))
+                        //{
+                        if (!on_statement(stat)) {
+                            std::cout << "for on 8" << std::endl;
+                            return false;
+                        }
+                        //}
+                    }
+                }
+            }
+        }
         // clear loop variable if necessary
         if (!loop_variable.empty()) {
+            std::cout << "for on 9" << std::endl;
             assert(loop_map.erase(loop_variable) == 1u);
         }
 

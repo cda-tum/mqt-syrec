@@ -45,24 +45,24 @@ namespace syrec::applications {
             }
 
             return statement::ptr(if_stat);
-        } /*else if (auto* stat_3 = dynamic_cast<for_statement*>(_statement.get())) {
+        } else if (auto* stat_3 = dynamic_cast<for_statement*>(_statement.get())) {
             auto* for_stat = new for_statement();
             std::cout << "for1" << std::endl;
             for_stat->set_loop_variable(stat_3->loop_variable());
             std::cout << "for2" << std::endl;
             for_stat->set_range(std::make_pair(stat_3->range().second, stat_3->range().first));
 
-            for_stat->set_step(stat_3->step());
+            /*for_stat->set_step(stat_3->step());
 
-            for_stat->set_negative_step(!stat_3->is_negative_step());
+            for_stat->set_negative_step(!stat_3->is_negative_step());*/
             std::cout << "for3" << std::endl;
-            for (auto it = stat_3->statements().begin(); it != stat_3->statements().end(); ++it) {
+            for (auto it = stat_3->statements().rbegin(); it != stat_3->statements().rend(); ++it) {
                 std::cout << "for5" << std::endl;
                 for_stat->add_statement(*it);
             }
             std::cout << "for4" << std::endl;
             return statement::ptr(for_stat);
-        }*/
+        }
         //else if (auto* stat_4 = dynamic_cast<call_statement*>(_statement.get())) {
         //  return statement::ptr(new uncall_statement(stat_4->target(), stat_4->parameters()));
         //} else if (auto* stat_5 = dynamic_cast<uncall_statement*>(_statement.get())) {
