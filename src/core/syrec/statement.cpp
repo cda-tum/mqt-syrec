@@ -322,9 +322,9 @@ namespace syrec::applications {
         return d->range;
     }
 
-    void for_statement::set_step(const number::ptr& step) {
+    /*void for_statement::set_step(const number::ptr& step) {
         d->step = step;
-    }
+    }*/
 
     const number::ptr& for_statement::step() const {
         return d->step;
@@ -334,13 +334,13 @@ namespace syrec::applications {
         d->statements.emplace_back(statement);
     }
 
-    void for_statement::set_negative_step(bool negative_step) {
+    /*void for_statement::set_negative_step(bool negative_step) {
         d->negative_step = negative_step;
-    }
+    }*/
 
-    bool for_statement::is_negative_step() const {
+    /*bool for_statement::is_negative_step() const {
         return d->negative_step;
-    }
+    }*/
 
     const statement::vec& for_statement::statements() const {
         return d->statements;

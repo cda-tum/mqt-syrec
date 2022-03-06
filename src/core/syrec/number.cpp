@@ -25,7 +25,7 @@
 
 namespace syrec::applications {
 
-    class binary_numeric_expr {
+    /* class binary_numeric_expr {
     public:
         explicit binary_numeric_expr(number::ptr lhs, const unsigned op, number::ptr rhs):
             op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {
@@ -47,7 +47,7 @@ namespace syrec::applications {
         unsigned    op;
         number::ptr lhs;
         number::ptr rhs;
-    };
+    };*/
 
     struct evaluate_visitor {
         explicit evaluate_visitor(const number::loop_variable_mapping& map):
@@ -63,7 +63,7 @@ namespace syrec::applications {
             return it->second;
         }
 
-        unsigned operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
+        /*unsigned operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
             unsigned lhs_value = value->get_lhs()->evaluate(map);
             unsigned rhs_value = value->get_rhs()->evaluate(map);
 
@@ -146,7 +146,7 @@ namespace syrec::applications {
                 default:
                     return 0;
             }
-        }
+        }*/
 
     private:
         const number::loop_variable_mapping& map;
@@ -154,10 +154,10 @@ namespace syrec::applications {
 
     class number::priv {
     public:
-        explicit priv(std::variant<unsigned, std::string, std::unique_ptr<binary_numeric_expr>> number):
+        explicit priv(std::variant<unsigned, std::string> number):
             number(std::move(number)) {}
 
-        std::variant<unsigned, std::string, std::unique_ptr<binary_numeric_expr>> number;
+        std::variant<unsigned, std::string> number;
     };
 
     number::number(unsigned value):
@@ -168,9 +168,9 @@ namespace syrec::applications {
         d(new priv(value)) {
     }
 
-    number::number(const number::ptr& lhs, const unsigned op, const number::ptr& rhs):
+    /*number::number(const number::ptr& lhs, const unsigned op, const number::ptr& rhs):
         d(new priv(std::make_unique<binary_numeric_expr>(binary_numeric_expr(lhs, op, rhs)))) {
-    }
+    }*/
 
     number::~number() {
         delete d;

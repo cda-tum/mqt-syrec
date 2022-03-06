@@ -122,7 +122,7 @@ namespace syrec {
 
             number::ptr rhs = parse_number(ast_no2, proc, context);
             if (!rhs) return {};
-
+            unsigned num = 0;
             if (lhs->is_constant() && rhs->is_constant()) {
                 unsigned lhs_value = lhs->evaluate(number::loop_variable_mapping());
                 unsigned rhs_value = rhs->evaluate(number::loop_variable_mapping());
@@ -210,7 +210,7 @@ namespace syrec {
 
                 return std::make_shared<number>(num_value);
             }
-            return std::make_shared<number>(lhs, op, rhs);
+            return std::make_shared<number>(num); //return std::make_shared<number>(lhs, op, rhs);
         }
 
     private:
@@ -355,7 +355,7 @@ namespace syrec {
             expression::ptr rhs = parse_expression(ast_exp2, proc, lhs->bitwidth(), context);
             if (!rhs) return nullptr;
 
-            if (auto* lhs_exp = dynamic_cast<numeric_expression*>(lhs.get())) {
+            /*if (auto* lhs_exp = dynamic_cast<numeric_expression*>(lhs.get())) {
                 if (auto* rhs_exp = dynamic_cast<numeric_expression*>(rhs.get())) {
                     if (lhs_exp->value()->is_constant() && rhs_exp->value()->is_constant()) {
                         unsigned lhs_value = lhs_exp->value()->evaluate(number::loop_variable_mapping());
@@ -393,12 +393,12 @@ namespace syrec {
                                 num_value = lhs_value % rhs_value;
                             } break;
 
-                                /*case binary_expression::frac_divide: // *>
+                                case binary_expression::frac_divide: // *>
                             {
                                 std::cerr << "Operator *> is undefined for numbers w/o specified bit width: ( " + std::to_string(lhs_value) + " *> " + std::to_string(rhs_value) + " )" << std::endl;
                                 assert(false);
                                 return nullptr;
-                            } break;*/
+                            } break;
 
                             case binary_expression::logical_and: // &&
                             {
@@ -461,7 +461,7 @@ namespace syrec {
                     lhs_exp = new numeric_expression(lhs_exp->value(), rhs->bitwidth());
                     lhs     = expression::ptr(lhs_exp);
                 }
-            }
+            }*/
             return new binary_expression(lhs, op, rhs);
         }
 
@@ -695,7 +695,7 @@ namespace syrec {
             for_stat->set_range(std::make_pair(from, to));
 
             // step
-            if (ast_for_stat.step) {
+            /*if (ast_for_stat.step) {
                 number::ptr step = parse_number(bf::at_c<1>(*ast_for_stat.step), proc, context);
                 if (!step) return nullptr;
 
@@ -704,7 +704,7 @@ namespace syrec {
                 if (bf::at_c<0>(*ast_for_stat.step)) {
                     for_stat->set_negative_step(true);
                 }
-            }
+            }*/
 
             for (const ast_statement& ast_stat: ast_for_stat.do_statement) {
                 statement::ptr stat = parse_statement(ast_stat, prog, proc, context);

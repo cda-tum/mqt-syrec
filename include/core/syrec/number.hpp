@@ -28,7 +28,7 @@
 #include <string>
 
 namespace syrec::applications {
-    class binary_numeric_expr;
+    //class binary_numeric_expr;
 
     /**
      * @brief SyReC number data type
@@ -102,7 +102,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.3
        */
-        explicit number(const number::ptr& lhs, unsigned op, const number::ptr& rhs);
+        //explicit number(const number::ptr& lhs, unsigned op, const number::ptr& rhs);
 
         /**
        * @brief Deconstructor

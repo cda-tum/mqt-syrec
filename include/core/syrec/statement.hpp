@@ -702,7 +702,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_step(const number::ptr& step);
+        //void set_step(const number::ptr& step);
 
         /**
        * @brief Returns the step of the loop
@@ -722,7 +722,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        void set_negative_step(bool negative_step);
+        //void set_negative_step(bool negative_step);
 
         /**
        * @brief Returns whether the step is substracted
@@ -732,7 +732,7 @@ namespace syrec::applications {
        * @author RevKit
        * @since  1.1
        */
-        [[nodiscard]] bool is_negative_step() const;
+        //[[nodiscard]] bool is_negative_step() const;
 
         /**
        * @brief Adds a statement to be executed in the loop
