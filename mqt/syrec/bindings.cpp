@@ -264,4 +264,10 @@ PYBIND11_MODULE(pysyrec, m) {
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);
+
+#ifdef VERSION_INFO
+    m.attr("__version__") = VERSION_INFO;
+#else
+    m.attr("__version__") = "dev";
+#endif
 }
