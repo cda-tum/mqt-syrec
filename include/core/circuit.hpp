@@ -86,8 +86,7 @@ namespace syrec {
    * }
    * @endcode
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     typedef std::optional<bool> constant;
 
@@ -136,8 +135,7 @@ namespace syrec {
    * } 
    * @endcode
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     class standard_circuit {
     public:
@@ -146,8 +144,7 @@ namespace syrec {
      *
      * Creates an empty circuit with zero lines.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         standard_circuit():
             lines(0) {}
@@ -159,8 +156,7 @@ namespace syrec {
      *
      * @param lines Number of lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //explicit standard_circuit(unsigned lines):
         //    lines(lines) {
@@ -207,8 +203,7 @@ namespace syrec {
    * <b>Sub-circuit from \p circ including gates [2,4)</b>
    * @code subcircuit subcirc( circ, 2, 4 ); @endcode
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     typedef std::variant<standard_circuit> circuit_variant;
 
@@ -234,8 +229,7 @@ namespace syrec {
      * @param from First gate to be included (starting from 0)
      * @param to First gate to be not included anymore
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     //   subcircuit(standard_circuit& base, unsigned from, unsigned to):
     //       base(base), from(from), to(to) {}
@@ -250,8 +244,7 @@ namespace syrec {
      * @param from First gate to be included (starting from 0)
      * @param to First gate to be not included anymore
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     //   subcircuit(circuit_variant& base, unsigned from, unsigned to):
     //       base(std::get<standard_circuit>(base)), from(from), to(to) {}
@@ -266,8 +259,7 @@ namespace syrec {
      * @param from First gate to be included (starting from 0)
      * @param to First gate to be not included anymore
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     //  subcircuit(const circuit_variant& base, unsigned from, unsigned to):
     //      base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
@@ -288,8 +280,7 @@ namespace syrec {
      * @param to First gate to be not included anymore
      * @param filter Line filter
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     /*  subcircuit(standard_circuit& base, unsigned from, unsigned to, std::vector<unsigned> filter):
             base(base), from(from), to(to), filter(std::move(filter)) {
@@ -308,8 +299,7 @@ namespace syrec {
      * @param to First gate to be not included anymore
      * @param filter Line filter
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     /*   subcircuit(const circuit_variant& base, unsigned from, unsigned to, std::vector<unsigned> filter):
             base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to), filter(std::move(filter)) {
@@ -322,8 +312,7 @@ namespace syrec {
      *
      * Deletes all filtered_gate objects in the filter cache
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     /*  ~subcircuit() {
             std::map<gate*, filtered_gate*>::const_iterator it;
@@ -398,8 +387,7 @@ namespace syrec {
    *
    * This class represents a circuit and can be used generically for standard circuits and sub circuits.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     class circuit {
     public:
@@ -409,8 +397,7 @@ namespace syrec {
      * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
      * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         circuit() = default;
 
@@ -431,8 +418,7 @@ namespace syrec {
      *
      * @param std_circ standard_circuit implementation
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   explicit circuit(const standard_circuit& std_circ):
         //       circ(std_circ) {}
@@ -451,8 +437,7 @@ namespace syrec {
      *
      * @param std_circ standard_circuit implementation
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  explicit circuit(standard_circuit& std_circ):
         //      circ(std_circ) {}
@@ -466,8 +451,7 @@ namespace syrec {
      *
      * @param sub_circ subcircuit implementation
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   explicit circuit(const subcircuit& sub_circ):
         //       circ(sub_circ) {}
@@ -481,8 +465,7 @@ namespace syrec {
      *
      * @param sub_circ subcircuit implementation
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  explicit circuit(subcircuit& sub_circ):
         //      circ(sub_circ) {}
@@ -497,8 +480,7 @@ namespace syrec {
      *
      * @param other Circuit to be copied
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   circuit(const circuit& other):
         //       circ(other.circ) {}
@@ -529,8 +511,7 @@ namespace syrec {
      * 
      * @return Number of gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] unsigned num_gates() const;
 
@@ -549,8 +530,7 @@ namespace syrec {
      *
      * @param lines Number of lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set_lines(unsigned lines);
 
@@ -561,8 +541,7 @@ namespace syrec {
      *
      * @return Number of lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] unsigned lines() const;
 
@@ -571,8 +550,7 @@ namespace syrec {
      *
      * @return Constant begin iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const_iterator begin() const;
 
@@ -581,8 +559,7 @@ namespace syrec {
      *
      * @return Constant end iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const_iterator end() const;
 
@@ -591,8 +568,7 @@ namespace syrec {
      *
      * @return Mutable begin iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  iterator begin();
 
@@ -601,8 +577,7 @@ namespace syrec {
      *
      * @return Mutable end iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  iterator end();
 
@@ -611,8 +586,7 @@ namespace syrec {
      *
      * @return Constant begin reverse iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   [[nodiscard]] const_reverse_iterator rbegin() const;
 
@@ -621,8 +595,7 @@ namespace syrec {
      *
      * @return Constant end reverse iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[nodiscard]] const_reverse_iterator rend() const;
 
@@ -631,8 +604,7 @@ namespace syrec {
      *
      * @return Mutable begin reverse iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         // reverse_iterator rbegin();
 
@@ -641,8 +613,7 @@ namespace syrec {
      *
      * @return Mutable end reverse iterator
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         // reverse_iterator rend();
 
@@ -652,8 +623,7 @@ namespace syrec {
      * @param index Index of the gate, starting from 0
      * @return constant access to the \p index gate in the circuit
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  const gate& operator[](unsigned index) const;
 
@@ -663,8 +633,7 @@ namespace syrec {
      * @param index Index of the gate, starting from 0
      * @return mutable access to the \p index gate in the circuit
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  gate& operator[](unsigned index);
 
@@ -675,8 +644,7 @@ namespace syrec {
      *
      * @return Reference to the newly created empty gate
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate& append_gate();
 
@@ -687,8 +655,7 @@ namespace syrec {
      *
      * @return Reference to the newly created empty gate
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   gate& prepend_gate();
 
@@ -701,8 +668,7 @@ namespace syrec {
      *
      * @return Reference to the newly created empty gate
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate& insert_gate(unsigned pos);
 
@@ -713,8 +679,7 @@ namespace syrec {
      *
      * @param pos  Index
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //   [[maybe_unused]] void remove_gate_at(unsigned pos);
 
@@ -727,8 +692,7 @@ namespace syrec {
      *
      * @param inputs Input names
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set_inputs(const std::vector<std::string>& inputs);
 
@@ -741,8 +705,7 @@ namespace syrec {
      *
      * @return Input names
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const std::vector<std::string>& inputs() const;
 
@@ -755,8 +718,7 @@ namespace syrec {
      *
      * @param outputs Output names
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set_outputs(const std::vector<std::string>& outputs);
 
@@ -769,8 +731,7 @@ namespace syrec {
      *
      * @return Output names
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const std::vector<std::string>& outputs() const;
 
@@ -787,8 +748,7 @@ namespace syrec {
      *
      * @param constants Constant Lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set_constants(const std::vector<constant>& constants);
 
@@ -799,8 +759,7 @@ namespace syrec {
      *
      * @return Constant input line specification
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const std::vector<constant>& constants() const;
 
@@ -816,8 +775,7 @@ namespace syrec {
      *
      * @param garbage Garbage line specification
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set_garbage(const std::vector<bool>& garbage);
 
@@ -828,8 +786,7 @@ namespace syrec {
      *
      * @return Garbage output line specification
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] const std::vector<bool>& garbage() const;
 
@@ -841,8 +798,7 @@ namespace syrec {
      *
      * @param name Name
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[maybe_unused]] void set_circuit_name(const std::string& name);
 
@@ -854,8 +810,7 @@ namespace syrec {
      *
      * @return Name of the circuit
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[maybe_unused]] [[nodiscard]] const std::string& circuit_name() const;
 
@@ -867,8 +822,7 @@ namespace syrec {
      * 
      * @return Input bus collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  [[maybe_unused]] [[nodiscard]] const bus_collection& inputbuses() const;
 
@@ -880,8 +834,7 @@ namespace syrec {
      * 
      * @return Input bus collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //   bus_collection& inputbuses();
 
@@ -893,8 +846,7 @@ namespace syrec {
      * 
      * @return Output bus collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  [[maybe_unused]] [[nodiscard]] const bus_collection& outputbuses() const;
 
@@ -906,8 +858,7 @@ namespace syrec {
      * 
      * @return Output bus collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //    bus_collection& outputbuses();
 
@@ -919,8 +870,7 @@ namespace syrec {
      * 
      * @return State signal collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  [[nodiscard]] const bus_collection& statesignals() const;
 
@@ -932,8 +882,7 @@ namespace syrec {
      * 
      * @return State signal collection
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  bus_collection& statesignals();
 
@@ -946,8 +895,7 @@ namespace syrec {
      *
      * @return true, if circuit is a sub-circuit, \p false otherwise
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[maybe_unused]] [[nodiscard]] bool is_subcircuit() const;
 
@@ -963,8 +911,7 @@ namespace syrec {
      *
      * @return Pair of information about the sub-circuit's base or \em empty pair
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[nodiscard]] std::pair<unsigned, std::vector<unsigned>> filter() const;
 
@@ -977,8 +924,7 @@ namespace syrec {
      *
      * @return Offset of the circuit
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //  [[nodiscard]] unsigned offset() const;
 
@@ -997,8 +943,7 @@ namespace syrec {
      * @param name Name of the module
      * @param module Reference to an existing module
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         // void add_module(const std::string& name, const std::shared_ptr<circuit>& module);
 
@@ -1015,8 +960,7 @@ namespace syrec {
      * @param name Name of the module
      * @param module Module to be copied
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  void add_module(const std::string& name, const circuit& module);
 
@@ -1028,8 +972,7 @@ namespace syrec {
      * 
      * @return Map of modules
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  [[nodiscard]] const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
 
@@ -1046,8 +989,7 @@ namespace syrec {
      * 
      * @return Value of the annotation or the default value
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //  [[nodiscard]] const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
 
@@ -1079,8 +1021,7 @@ namespace syrec {
      * 
      * @return Map of annotations encapsulated in an optional
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         [[nodiscard]] std::optional<const std::map<std::string, std::string>> annotations(const gate& g) const;
 
@@ -1094,8 +1035,7 @@ namespace syrec {
      * @param key Key of the annotation
      * @param value Value of the annotation
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         void annotate(const gate& g, const std::string& key, const std::string& value);
 

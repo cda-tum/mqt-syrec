@@ -38,23 +38,11 @@ namespace syrec {
 
     /**
    * @brief Functor for gate-wise simulation, used as a setting for \ref syrec::simple_simulation "simple_simulation"
-   *
-   * For more information, see the concrete implementation \ref syrec::core_gate_simulation "core_gate_simulation"
-   *
-   * @author RevKit
-   * @since  1.0
    */
     typedef std::function<boost::dynamic_bitset<>&(const gate&, boost::dynamic_bitset<>&)> gate_simulation_func;
 
     /**
    * @brief Functor which is called after a step result is calculated
-   *
-   * If set, this functor is called in \ref syrec::simple_simulation "simple_simulation"
-   * after every gate simulation with the current gate and the calculated output pattern
-   * as parameter.
-   *
-   * @author RevKit
-   * @since  1.0
    */
     //typedef std::function<void(const gate&, const boost::dynamic_bitset<>&)> step_result_func;
 
@@ -114,9 +102,6 @@ namespace syrec {
    * 
    * simple_simulation( output, circ, input, settings );
    * @endcode
-   *
-   * @author RevKit
-   * @since  1.0
    */
     struct core_gate_simulation {
         /**
@@ -132,9 +117,6 @@ namespace syrec {
      * @param input An input pattern
      *
      * @return Returns a output pattern, it will be the same reference as \p input
-     *
-     * @author RevKit
-     * @since 1.0
      */
         boost::dynamic_bitset<>& operator()(const gate& g, boost::dynamic_bitset<>& input) const;
     };
@@ -187,10 +169,6 @@ namespace syrec {
    *     <td class="indexvalue">Run-time consumed by the algorithm in CPU seconds.</td>
    *   </tr>
    * </table>
-   * @return true on success
-   *
-   * @author RevKit
-   * @since  1.0
    */
     /* bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
                            const properties::ptr& settings   = properties::ptr(),
@@ -248,9 +226,6 @@ namespace syrec {
    *   </tr>
    * </table>
    * @return true on success
-   *
-   * @author RevKit
-   * @since  1.0
    */
     bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
                            const properties::ptr& settings   = properties::ptr(),
@@ -308,9 +283,6 @@ namespace syrec {
    *   </tr>
    * </table>
    * @return true on success
-   *
-   * @author RevKit
-   * @since  1.0
    */
     bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
                            const properties::ptr& settings   = properties::ptr(),
@@ -324,8 +296,6 @@ namespace syrec {
    *
    * @return A functor which complies with the \ref syrec::simulation_func "simulation_func" interface
    *
-   * @author RevKit
-   * @since  1.0
    */
     // [[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings = std::make_shared<properties>(), properties::ptr statistics = std::make_shared<properties>());
 

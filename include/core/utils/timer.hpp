@@ -37,8 +37,7 @@ namespace syrec {
    * This functor prints the run-time to a given output stream which can be
    * specified in the constructor.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct [[maybe_unused]] print_timer {
         /**
@@ -47,8 +46,7 @@ namespace syrec {
      *
      * @sa timer::operator()()
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef void result_type;
 
@@ -57,8 +55,7 @@ namespace syrec {
      *
      * Available for delayed starting of the timer.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         print_timer():
             os(std::cout) {}
@@ -68,8 +65,7 @@ namespace syrec {
      *
      * @param _os Stream where to write the run-time after measuring
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         explicit print_timer(std::ostream& _os = std::cout):
             os(_os) {}
@@ -79,8 +75,7 @@ namespace syrec {
      *
      * @param runtime The run-time
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void operator()(double runtime) const {
             os << "Runtime: " << runtime << " secs" << std::endl;
@@ -107,8 +102,7 @@ namespace syrec {
    * }
    * @endcode
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct [[maybe_unused]] reference_timer {
         /**
@@ -119,8 +113,7 @@ namespace syrec {
      *
      * @sa timer::operator()()
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef double result_type;
 
@@ -129,8 +122,7 @@ namespace syrec {
      *
      * Available for delayed starting of the timer.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         reference_timer() = default;
 
@@ -139,8 +131,7 @@ namespace syrec {
      *
      * @param _runtime A pointer referencing to the variable where the run-time should be saved.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[maybe_unused]] explicit reference_timer(double* _runtime):
             runtime(_runtime) {}
@@ -150,8 +141,7 @@ namespace syrec {
      *
      * @param r The run-time
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         double operator()(double r) const {
             return (*runtime = r);
@@ -168,8 +158,7 @@ namespace syrec {
    * after the time was measured and is thus similar to the
    * reference_timer.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct properties_timer {
         /**
@@ -180,8 +169,7 @@ namespace syrec {
      *
      * @sa timer::operator()()
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef double result_type;
 
@@ -190,8 +178,7 @@ namespace syrec {
      *
      * Available for delayed starting of the timer.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         properties_timer() = default;
 
@@ -200,8 +187,7 @@ namespace syrec {
      *
      * @param _statistics A smart pointer to a statistics properties object. Can be empty.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         explicit properties_timer(properties::ptr _statistics):
             statistics(std::move(_statistics)) {}
@@ -211,8 +197,7 @@ namespace syrec {
      *
      * @param r The run-time
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         double operator()(double r) const {
             if (statistics) {
@@ -279,8 +264,7 @@ namespace syrec {
    * 
    * @endcode
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     template<typename Outputter>
     class timer {
@@ -291,8 +275,7 @@ namespace syrec {
      * When delayed starting should be done (using start(const Outputter&)) this
      * constructor has to be used.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         timer():
             started(false) {
@@ -306,8 +289,7 @@ namespace syrec {
      *
      * @param outputter Functor which does something with the measured run-time
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         explicit timer(const Outputter& outputter):
             p(outputter),
@@ -324,8 +306,7 @@ namespace syrec {
      *
      * @param outputter Functor which does something with the measured run-time
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void start(const Outputter& outputter) {
             p       = outputter;
@@ -358,8 +339,7 @@ namespace syrec {
      *
      * @return The result value of the functor operator (if available)
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typename Outputter::result_type operator()() const {
             assert(started);
@@ -373,8 +353,7 @@ namespace syrec {
      * In this function time is measured again and the functor
      * is called with the runtime.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         virtual ~timer() {
             if (started) {

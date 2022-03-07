@@ -18,7 +18,6 @@
 #include "core/syrec/module.hpp"
 
 #include <iterator>
-#include <sstream>
 
 namespace syrec::applications {
 

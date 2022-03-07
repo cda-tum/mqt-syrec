@@ -37,16 +37,15 @@ namespace syrec::applications {
      * Eeach expression is derived from this class and has to
      * implement the bitwidth() and the print() methods.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class expression {
     public:
         /**
        * @brief Shared Pointer interface to the class
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::shared_ptr<expression> ptr;
 
@@ -55,16 +54,16 @@ namespace syrec::applications {
         /**
        * @brief Standard constructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         expression();
 
         /**
        * @brief Standard deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         virtual ~expression();
 
@@ -75,8 +74,8 @@ namespace syrec::applications {
        *
        * @return Bit-width of the expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] virtual unsigned bitwidth() const = 0;
 
@@ -89,8 +88,8 @@ namespace syrec::applications {
        *
        * @param os Output Stream
        *
-       * @author RevKit
-       * @since  1.1
+
+
        *
        * @return Output Stream
        */
@@ -104,16 +103,15 @@ namespace syrec::applications {
     /**
      * @brief Numeric Expression
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class numeric_expression: public expression {
     public:
         /**
        * @brief Operation to perform in case of binary numeric expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         enum {
             /**
@@ -162,10 +160,10 @@ namespace syrec::applications {
         /**
        * @brief Standard Constructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
-        numeric_expression();
+        //numeric_expression();
 
         /**
        * @brief Creates a numeric expression with a value and a bit-width
@@ -173,16 +171,16 @@ namespace syrec::applications {
        * @param value Value
        * @param bitwidth Bit-width of the value
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         numeric_expression(const number::ptr& value, unsigned bitwidth);
 
         /**
        * @brief Standard Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~numeric_expression() override;
 
@@ -191,8 +189,8 @@ namespace syrec::applications {
        *
        * @param value Value
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_value(const number::ptr& value);
 
@@ -201,8 +199,8 @@ namespace syrec::applications {
        *
        * @return Value of the expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const number::ptr& value() const;
 
@@ -211,8 +209,8 @@ namespace syrec::applications {
        *
        * @return Bit-width
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
@@ -223,8 +221,8 @@ namespace syrec::applications {
        *
        * @return Output stream
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //std::ostream& print(std::ostream& os) const override;
 
@@ -239,8 +237,7 @@ namespace syrec::applications {
      * This class represents a variable expression and
      * capsulates a variable access pointer var().
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class variable_expression: public expression {
     public:
@@ -249,26 +246,26 @@ namespace syrec::applications {
        * 
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
-        variable_expression();
+        //variable_expression();
 
         /**
        * @brief Constructor with variable
        * 
        * @param var Variable access
        * 
-       * @author RevKit
-       * @since  1.1
+
+
        */
         explicit variable_expression(variable_access::ptr var);
 
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~variable_expression() override;
 
@@ -277,8 +274,8 @@ namespace syrec::applications {
        * 
        * @param var Variable access
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_var(variable_access::ptr var);
 
@@ -287,8 +284,8 @@ namespace syrec::applications {
        * 
        * @return Variable access
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] variable_access::ptr var() const;
 
@@ -299,8 +296,8 @@ namespace syrec::applications {
        *
        * @return Bit-width of the variable access
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
@@ -311,8 +308,8 @@ namespace syrec::applications {
        *
        * @return Output stream
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //std::ostream& print(std::ostream& os) const override;
 
@@ -327,16 +324,15 @@ namespace syrec::applications {
      * This class represents a binary expression between two sub
      * expressions lhs() and rhs() by an operation op(). 
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class binary_expression: public expression {
     public:
         /**
        * @brief Operation to perform
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         enum {
             /**
@@ -436,10 +432,10 @@ namespace syrec::applications {
        * 
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
-        binary_expression();
+        //binary_expression();
 
         /**
        * @brief Constructor which initializes a operation
@@ -448,8 +444,8 @@ namespace syrec::applications {
        * @param op Operation to be performed
        * @param rhs Expression on right hand side
        * 
-       * @author RevKit
-       * @since  1.1
+
+
        */
         binary_expression(expression::ptr lhs,
                           unsigned        op,
@@ -458,8 +454,8 @@ namespace syrec::applications {
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~binary_expression() override;
 
@@ -468,8 +464,8 @@ namespace syrec::applications {
        * 
        * @param lhs Expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
@@ -478,8 +474,8 @@ namespace syrec::applications {
        * 
        * @return Expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] expression::ptr lhs() const;
 
@@ -488,8 +484,8 @@ namespace syrec::applications {
        * 
        * @param rhs Expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //[[maybe_unused]] void set_rhs(expression::ptr rhs);
 
@@ -498,8 +494,8 @@ namespace syrec::applications {
        * 
        * @return Expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] expression::ptr rhs() const;
 
@@ -508,8 +504,8 @@ namespace syrec::applications {
        * 
        * @param op Operation
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_op(unsigned op);
 
@@ -518,8 +514,8 @@ namespace syrec::applications {
        *
        * @return Operation
        * 
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned op() const;
 
@@ -534,8 +530,8 @@ namespace syrec::applications {
        * 
        * @return Bit-width of the expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
@@ -546,8 +542,8 @@ namespace syrec::applications {
        *
        * @return Output stream
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //std::ostream& print(std::ostream& os) const override;
 
@@ -562,16 +558,16 @@ namespace syrec::applications {
      * This class represents a unary expression composed of a 
      * sub expression expr() and an operation op().
      * 
-     * @author RevKit
-     * @since 1.3
+
+
      */
     //class unary_expression: public expression {
     //public:
     /**
        * @brief Operation to perform
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //enum {
     /**
@@ -591,8 +587,8 @@ namespace syrec::applications {
        * 
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //unary_expression();
 
@@ -602,16 +598,16 @@ namespace syrec::applications {
        * @param op Operation to be performed
        * @param expr Expression to perform the operation on
        * 
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //unary_expression(unsigned op, expression::ptr expr);
 
     /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //~unary_expression() override;
 
@@ -620,8 +616,8 @@ namespace syrec::applications {
        * 
        * @param expr Expression
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //void set_expr(expression::ptr expr);
 
@@ -630,8 +626,8 @@ namespace syrec::applications {
        * 
        * @return Expression
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //[[nodiscard]] expression::ptr expr() const;
 
@@ -640,8 +636,8 @@ namespace syrec::applications {
        * 
        * @param op Operation
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //void set_op(unsigned op);
 
@@ -650,8 +646,8 @@ namespace syrec::applications {
        *
        * @return Operation
        * 
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //[[nodiscard]] unsigned op() const;
 
@@ -665,8 +661,8 @@ namespace syrec::applications {
        * 
        * @return Bit-width of the expression
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //[[nodiscard]] unsigned bitwidth() const override;
 
@@ -677,8 +673,8 @@ namespace syrec::applications {
        *
        * @return Output stream
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
     //std::ostream& print(std::ostream& os) const override;
 
@@ -693,16 +689,15 @@ namespace syrec::applications {
      * This class represents a binary expression with a
      * sub-expression lhs() and a number rhs() by a shift operation op(). 
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class shift_expression: public expression {
     public:
         /**
        * @brief Shft Operation
        * 
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         enum {
             /**
@@ -721,10 +716,10 @@ namespace syrec::applications {
        * 
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1 
+
+
        */
-        shift_expression();
+        //shift_expression();
 
         /**
        * @brief Constructor
@@ -737,8 +732,8 @@ namespace syrec::applications {
        * @param op Shift operation
        * @param rhs Number of bits to shift
        * 
-       * @author RevKit
-       * @since  1.1
+
+
        */
         shift_expression(expression::ptr    lhs,
                          unsigned           op,
@@ -747,8 +742,8 @@ namespace syrec::applications {
         /**
        * @brief Deconstructor
        * 
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         ~shift_expression() override;
 
@@ -757,8 +752,8 @@ namespace syrec::applications {
        * 
        * @param lhs Expression
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
@@ -767,8 +762,8 @@ namespace syrec::applications {
        * 
        * @return Expression
        *
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         [[nodiscard]] expression::ptr lhs() const;
 
@@ -777,8 +772,8 @@ namespace syrec::applications {
        * 
        * @param rhs Number
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //[[maybe_unused]] void set_rhs(const number::ptr& rhs);
 
@@ -787,8 +782,8 @@ namespace syrec::applications {
        * 
        * @return Number
        *
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         [[nodiscard]] const number::ptr& rhs() const;
 
@@ -797,8 +792,8 @@ namespace syrec::applications {
        * 
        * @param op Shift operation
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_op(unsigned op);
 
@@ -807,8 +802,8 @@ namespace syrec::applications {
        * 
        * @return Shift operation
        *
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         [[nodiscard]] unsigned op() const;
 
@@ -820,8 +815,8 @@ namespace syrec::applications {
        * 
        * @return Bit-width of the expression
        *
-       * @author RevKit
-       * @since  1.1 
+
+
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
@@ -832,8 +827,8 @@ namespace syrec::applications {
        *
        * @return Output stream
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //std::ostream& print(std::ostream& os) const override;
 
@@ -850,8 +845,7 @@ namespace syrec::applications {
      * 
      * @return Output stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     // std::ostream& operator<<(std::ostream& os, const expression& e);
 

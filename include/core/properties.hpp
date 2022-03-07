@@ -20,8 +20,8 @@
  *
  * @brief Property Map Implementation for Algorithms
  *
- * @author RevKit
- * @since  1.0
+
+
  */
 
 #ifndef PROPERTIES_HPP
@@ -43,23 +43,20 @@ namespace syrec {
    * can be of any type. To be type-safe, the getter corresponding get
    * functions have to be provided with a type.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct properties {
         /**
      * @brief Internal storage type used with the internal property map
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef std::map<std::string, std::any> storage_type;
 
         /**
      * @brief Value type of the property map, i.e. \p std::string
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef storage_type::mapped_type value_type;
 
@@ -69,8 +66,7 @@ namespace syrec {
      * There are pre-defined getter methods, which can be called with a
      * type identifier for explicit casting.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef storage_type::key_type key_type;
 
@@ -85,8 +81,7 @@ namespace syrec {
      * @sa get
      * @sa set_error_message
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef std::shared_ptr<properties> ptr;
 
@@ -95,8 +90,7 @@ namespace syrec {
      *
      * Creates the property map on base of the storage map
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         properties();
 
@@ -109,8 +103,7 @@ namespace syrec {
      * @param k Key to access the property map. Must exist.
      * @return The value associated with key \p k.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //const value_type& operator[](const key_type& k) const;
 
@@ -126,8 +119,7 @@ namespace syrec {
      * @param k Key to access the property map. Must exist.
      * @return The value associated with key \p k casted to its original type \p T.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         template<typename T>
         T get(const key_type& k) const {
@@ -145,8 +137,7 @@ namespace syrec {
      * @return The value associated with key \p k casted to its original type \p T. If the key \p k does not exist,
      *         \p default_value is returned.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         template<typename T>
         T get(const key_type& k, const T& default_value) const {
@@ -177,8 +168,7 @@ namespace syrec {
      * @param k Key of the property
      * @param value The new value of \p k. If \p k already existed, the type of \p value must not change.
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         void set(const key_type& k, const value_type& value);
 
@@ -187,8 +177,7 @@ namespace syrec {
      *
      * @return Iterator
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //[[nodiscard]] storage_type::const_iterator begin() const;
 
@@ -197,8 +186,7 @@ namespace syrec {
      *
      * @return Iterator
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         // [[nodiscard]] storage_type::const_iterator end() const;
 
@@ -207,16 +195,14 @@ namespace syrec {
      *
      * @return The number of properties
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //[[nodiscard]] unsigned size() const;
 
         /**
      * @brief Clears all properties
      *
-     * @author RevKit
-     * @since  1.1
+
      */
         //   void clear();
 
@@ -239,8 +225,7 @@ namespace syrec {
    *
    * @return The value addressed by \p k or the \p default_value.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     template<typename T>
     T get(const properties::ptr& settings, const properties::key_type& k, const T& default_value) {
@@ -258,8 +243,7 @@ namespace syrec {
    * @param error An error message, which should be written to the key \b error
    *              if the smart pointer \p statistics can be de-referenced.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //[[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
 

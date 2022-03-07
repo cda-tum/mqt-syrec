@@ -1,6 +1,5 @@
 #include "algorithms/simulation/simple_simulation.hpp"
 #include "core/circuit.hpp"
-#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
 #include "core/test_functions.hpp"
 
@@ -18,12 +17,10 @@ namespace syrec {
         circuit               circ;
         applications::program prog;
         std::string           error_string;
-        cost_t                qc;
-        cost_t                tc;
+        cost_t                qc = 0;
+        cost_t                tc = 0;
         properties::ptr       settings;
         properties::ptr       statistics;
-        bool                  okay1;
-        bool                  okay2;
 
         boost::dynamic_bitset<> input;
         boost::dynamic_bitset<> output;
@@ -31,14 +28,14 @@ namespace syrec {
         void SetUp() override {
             // setup all the individual objects before each test
             error_string = my_read_program(prog, "./circuits/alu_2.src");
-            okay1        = syrec::syrec_synthesis(circ, prog);
-            qc           = syrec::final_quantum_cost(circ, circ.lines());
-            tc           = syrec::final_transistor_cost(circ, circ.lines());
+            syrec::syrec_synthesis(circ, prog);
+            qc = syrec::final_quantum_cost(circ, circ.lines());
+            tc = syrec::final_transistor_cost(circ, circ.lines());
             input.resize(circ.lines());
             input.set(0);
             input.set(6);
             output.resize(circ.lines());
-            okay2 = simple_simulation(output, circ, input, settings, statistics);
+            simple_simulation(output, circ, input, settings, statistics);
         }
     };
 

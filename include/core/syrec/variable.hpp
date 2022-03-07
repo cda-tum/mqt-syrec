@@ -43,16 +43,15 @@ namespace syrec::applications {
      * can either be a parameter passed to a module, or a
      * local variable.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class variable {
     public:
         /**
        * @brief Type of variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         enum types {
             /**
@@ -84,16 +83,16 @@ namespace syrec::applications {
         /**
        * @brief Smart pointer
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::shared_ptr<variable> ptr;
 
         /**
        * @brief Vector of smart pointers
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::vector<ptr> vec;
 
@@ -102,8 +101,8 @@ namespace syrec::applications {
        *
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //variable();
 
@@ -116,8 +115,8 @@ namespace syrec::applications {
        * @param name Name
        * @param bitwidth Bitwidth of the variable (Default value: 32)
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //variable(unsigned type, const std::string& name, unsigned bitwidth);
 
@@ -126,8 +125,8 @@ namespace syrec::applications {
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~variable();
 
@@ -136,8 +135,8 @@ namespace syrec::applications {
        *
        * @param type Type
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_type(unsigned type);
 
@@ -146,8 +145,8 @@ namespace syrec::applications {
        *
        * @return Type
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned type() const;
 
@@ -156,8 +155,8 @@ namespace syrec::applications {
        *
        * @param name Name
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_name(const std::string& name);
 
@@ -166,8 +165,8 @@ namespace syrec::applications {
        *
        * @return Name
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const std::string& name() const;
 
@@ -176,8 +175,8 @@ namespace syrec::applications {
        *
        * @param bitwidth Bit-width
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //[[maybe_unused]] void set_bitwidth(unsigned bitwidth);
 
@@ -186,8 +185,8 @@ namespace syrec::applications {
        *
        * @return Bit-width
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned bitwidth() const;
 
@@ -208,16 +207,15 @@ namespace syrec::applications {
      * This class represents the access of a variable inside
      * a statement or an expression.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class variable_access {
     public:
         /**
        * @brief Smart pointer
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::shared_ptr<variable_access> ptr;
 
@@ -226,8 +224,8 @@ namespace syrec::applications {
        *
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         variable_access();
 
@@ -236,16 +234,16 @@ namespace syrec::applications {
        *
        * @param var Variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //explicit variable_access(variable::ptr var);
 
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~variable_access();
 
@@ -254,8 +252,8 @@ namespace syrec::applications {
        *
        * @param var Variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         void set_var(variable::ptr var);
 
@@ -264,8 +262,8 @@ namespace syrec::applications {
        *
        * @return Variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] variable::ptr var() const;
 
@@ -279,8 +277,8 @@ namespace syrec::applications {
        *
        * @param range Range
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         void set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range);
 
@@ -289,8 +287,8 @@ namespace syrec::applications {
        *
        * @return Range
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
 
@@ -304,8 +302,8 @@ namespace syrec::applications {
        *
        * @return Bit-width of the range, if possible to calculate
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned bitwidth() const;
 
@@ -325,8 +323,7 @@ namespace syrec::applications {
      *
      * @return Output Stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     // std::ostream& operator<<(std::ostream& os, const variable& v);
 
@@ -338,8 +335,7 @@ namespace syrec::applications {
      *
      * @return Output Stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     //std::ostream& operator<<(std::ostream& os, const variable_access& v);
 

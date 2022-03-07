@@ -8,13 +8,10 @@
 #define SYREC_SYNTHESIS_HPP
 
 #include <algorithm>
-//#include <algorithms/synthesis/synthesis.hpp>
-//#include <algorithms/synthesis/syrec_synthesis_p.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <cmath>
 #include <core/circuit.hpp>
 #include <core/functions/add_circuit.hpp>
-//#include <core/functor.hpp>
 #include <core/gate.hpp>
 #include <core/properties.hpp>
 #include <core/syrec/expression.hpp>
@@ -218,21 +215,19 @@ namespace syrec {
      * if set to less than 2 the merging is deactivated
      * default value is 8.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
-        unsigned crement_merge_line_count;
+        unsigned crement_merge_line_count{};
 
-        unsigned if_realization;
+        unsigned if_realization{};
 
-        bool efficient_controls;
+        bool efficient_controls{};
     };
 
     /**
    * @brief IF statement realization
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     enum {
         /**
@@ -251,8 +246,7 @@ namespace syrec {
    *
    * TODO
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
@@ -264,8 +258,7 @@ namespace syrec {
    *
    * @return A functor which complies with the hdl_synthesis_func interface
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     // [[maybe_unused]] hdl_synthesis_func syrec_synthesis_func(const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 

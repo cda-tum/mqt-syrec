@@ -40,16 +40,15 @@ namespace syrec::applications {
      * can only be determined in an execution context of the program,
      * i.e. in a synthesis procedure.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class number {
     public:
         /**
        * @brief Smart pointer
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::shared_ptr<number> ptr;
 
@@ -60,8 +59,8 @@ namespace syrec::applications {
        * to a loop variable by name. A loop variable mapping
        * is required in the evaluation of a variable.
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::map<std::string, unsigned> loop_variable_mapping;
 
@@ -72,8 +71,8 @@ namespace syrec::applications {
        *
        * @param value Value
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         explicit number(unsigned value);
 
@@ -84,8 +83,8 @@ namespace syrec::applications {
        *
        * @param value Name of the loop variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         explicit number(const std::string& value);
 
@@ -99,16 +98,16 @@ namespace syrec::applications {
        * @param op Binary conjunction 
        * @param rhs Number on the right-hand side
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
         //explicit number(const number::ptr& lhs, unsigned op, const number::ptr& rhs);
 
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~number();
 
@@ -117,8 +116,8 @@ namespace syrec::applications {
        *
        * @return true, if the number is a loop variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] bool is_loop_variable() const;
 
@@ -127,8 +126,8 @@ namespace syrec::applications {
        *
        * @return true, if the number is a conjunction
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
         //[[maybe_unused]] [[nodiscard]] bool is_conjunction() const;
 
@@ -137,8 +136,8 @@ namespace syrec::applications {
        *
        * @return true, if the number is a known constant number
        *
-       * @author RevKit
-       * @since  1.3
+
+
        */
         [[nodiscard]] bool is_constant() const;
 
@@ -151,8 +150,8 @@ namespace syrec::applications {
        *
        * @return The name of the loop variable
        * 
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const std::string& variable_name() const;
 
@@ -165,8 +164,8 @@ namespace syrec::applications {
        * 
        * @return The represented binary expression
        * 
-       * @author RevKit
-       * @since 1.3
+
+
        */
         // [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
@@ -186,8 +185,8 @@ namespace syrec::applications {
        * 
        * @return The evaluated number
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
 
@@ -208,8 +207,7 @@ namespace syrec::applications {
      *
      * @return Output stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     std::ostream& operator<<(std::ostream& os, const number& n);
 

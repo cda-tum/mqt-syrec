@@ -34,8 +34,7 @@ namespace syrec {
    * This class should not be used stand alone but just with the add_\em gate methods
    * designed for this purpose. See also \ref sub_add_gates.
    *
-   * @author RevKit
-   * @since  1.0
+
    *
    * @sa \ref sub_add_gates
    */
@@ -48,8 +47,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         explicit target_line_adder(gate* gate);
 
@@ -62,8 +60,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate& operator()(const gate::line& l1);
 
@@ -77,8 +74,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate& operator()(const gate::line& l1, const gate::line& l2);
 
@@ -92,8 +88,7 @@ namespace syrec {
    * This class should not be used stand alone but just with the add_\em gate methods
    * designed for this purpose. See also \ref sub_add_gates.
    *
-   * @author RevKit
-   * @since  1.0
+
    *
    * @sa \ref sub_add_gates
    */
@@ -106,8 +101,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         explicit control_line_adder(gate& g);
 
@@ -118,8 +112,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         target_line_adder operator()();
 
@@ -132,8 +125,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1);
 
@@ -147,8 +139,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         target_line_adder operator()(const gate::line& l1, const gate::line& l2);
 
@@ -163,8 +154,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3);
 
@@ -180,8 +170,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4);
 
@@ -198,8 +187,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5);
 
@@ -217,8 +205,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6);
 
@@ -237,8 +224,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7);
 
@@ -258,8 +244,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8);
 
@@ -280,8 +265,7 @@ namespace syrec {
      *
      * @sa \ref sub_add_gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         //target_line_adder operator()(const gate::line& l1, const gate::line& l2, const gate::line& l3, const gate::line& l4, const gate::line& l5, const gate::line& l6, const gate::line& l7, const gate::line& l8, const gate::line& l9);
 
@@ -298,8 +282,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     gate& append_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
 
@@ -313,8 +296,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& append_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
@@ -328,8 +310,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& append_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
@@ -342,8 +323,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     gate& append_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -356,8 +336,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& append_v(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -370,8 +349,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& append_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -383,8 +361,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     gate& append_not(circuit& circ, const gate::line& target);
 
@@ -398,8 +375,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     // gate& append_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
@@ -414,8 +390,7 @@ namespace syrec {
    * @sa \ref sub_add_gates
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     control_line_adder append_gate(circuit& circ, const std::any& tag);
 
@@ -428,8 +403,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     control_line_adder append_toffoli(circuit& circ);
 
@@ -442,8 +416,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     control_line_adder append_fredkin(circuit& circ);
 
@@ -456,8 +429,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_toffoli(circuit& circ, const gate::line_container& controls, const gate::line& target);
 
@@ -471,8 +443,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_fredkin(circuit& circ, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
@@ -486,8 +457,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_peres(circuit& circ, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
@@ -500,8 +470,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -514,8 +483,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_v(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -528,8 +496,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_vplus(circuit& circ, const gate::line& control, const gate::line& target);
 
@@ -541,8 +508,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& prepend_not(circuit& circ, const gate::line& target);
 
@@ -556,8 +522,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     [[maybe_unused]] gate& prepend_module(circuit& circ, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
@@ -572,8 +537,7 @@ namespace syrec {
    * @sa \ref sub_add_gates
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     // control_line_adder prepend_gate(circuit& circ, const std::any& tag);
 
@@ -586,8 +550,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] control_line_adder prepend_toffoli(circuit& circ);
 
@@ -600,8 +563,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] control_line_adder prepend_fredkin(circuit& circ);
 
@@ -615,8 +577,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_toffoli(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target);
 
@@ -631,8 +592,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_fredkin(circuit& circ, unsigned n, const gate::line_container& controls, const gate::line& target1, const gate::line& target2);
 
@@ -647,8 +607,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_peres(circuit& circ, unsigned n, const gate::line& control, const gate::line& target1, const gate::line& target2);
 
@@ -662,8 +621,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_cnot(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
@@ -677,8 +635,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_v(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
@@ -692,8 +649,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] gate& insert_vplus(circuit& circ, unsigned n, const gate::line& control, const gate::line& target);
 
@@ -706,8 +662,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     gate& insert_not(circuit& circ, unsigned n, const gate::line& target);
 
@@ -722,8 +677,7 @@ namespace syrec {
    *
    * @return Gate reference
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     [[maybe_unused]] gate& insert_module(circuit& circ, unsigned n, const std::string& module_name, const gate::line_container& controls, const std::vector<unsigned>& targets);
 
@@ -739,8 +693,7 @@ namespace syrec {
    * @sa \ref sub_add_gates
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     // control_line_adder insert_gate(circuit& circ, unsigned n, const std::any& tag);
 
@@ -754,8 +707,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] control_line_adder insert_toffoli(circuit& circ, unsigned n);
 
@@ -769,8 +721,7 @@ namespace syrec {
    *
    * @sa \ref sub_add_gates
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     [[maybe_unused]] control_line_adder insert_fredkin(circuit& circ, unsigned n);
 

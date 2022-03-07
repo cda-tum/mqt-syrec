@@ -37,8 +37,7 @@ namespace syrec {
     /**
    * @brief Settings for read_program function
    * 
-   * @author RevKit
-   * @since  1.1
+
    */
     struct read_program_settings {
         /**
@@ -46,8 +45,7 @@ namespace syrec {
      *
      * Initializes default values
      * 
-     * @author RevKit
-     * @since  1.1
+
      */
         read_program_settings();
 
@@ -76,8 +74,7 @@ namespace syrec {
    * 
    * @return true if parsing was successful, otherwise false
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     bool read_program(applications::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = nullptr);
 

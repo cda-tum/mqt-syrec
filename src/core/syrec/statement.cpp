@@ -294,8 +294,8 @@ namespace syrec::applications {
         std::string                         loop_variable;
         std::pair<number::ptr, number::ptr> range;
         number::ptr                         step;
-        bool                                negative_step = false;
-        statement::vec                      statements;
+        //[[maybe_unused]] bool                                negative_step = false;
+        statement::vec statements;
     };
 
     for_statement::for_statement():

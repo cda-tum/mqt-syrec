@@ -35,8 +35,7 @@ namespace syrec::applications {
      * This class represents a SyReC program, which
      * is a collection of modules.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class program {
     public:
@@ -45,16 +44,16 @@ namespace syrec::applications {
        * 
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         program();
 
         /**
        * @brief Deconstructor
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         ~program();
 
@@ -63,8 +62,8 @@ namespace syrec::applications {
        * 
        * @param module Module
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         void add_module(const module::ptr& module);
 
@@ -73,8 +72,8 @@ namespace syrec::applications {
        *
        * @return List of modules 
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const module::vec& modules() const;
 
@@ -86,8 +85,8 @@ namespace syrec::applications {
        * @return Returns a smart pointer to the module if there is a module with the name \p name.
        *         Otherwise, the empty smart pointer is returned.
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] module::ptr find_module(const std::string& name) const;
 
@@ -104,8 +103,7 @@ namespace syrec::applications {
      * 
      * @return Output stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     // std::ostream& operator<<(std::ostream& os, const program& p);
 

@@ -41,24 +41,23 @@ namespace syrec::applications {
      * This class represents a SyReC module. It containes of a name(), parameters(),
      * local variables(), and a list of statements().
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     class module {
     public:
         /**
        * @brief Smart pointer
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::shared_ptr<module> ptr;
 
         /**
        * @brief Vector of smart pointers
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         typedef std::vector<ptr> vec;
 
@@ -67,8 +66,8 @@ namespace syrec::applications {
        *
        * Initializes default values
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //module();
 
@@ -79,8 +78,8 @@ namespace syrec::applications {
        *
        * @param name Name of the module
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         explicit module(const std::string& name);
 
@@ -94,8 +93,8 @@ namespace syrec::applications {
        *
        * @param name Name
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void set_name(const std::string& name);
 
@@ -104,8 +103,8 @@ namespace syrec::applications {
        *
        * @return Name
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const std::string& name() const;
 
@@ -114,8 +113,8 @@ namespace syrec::applications {
        *
        * @param parameter Parameter
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         void add_parameter(const variable::ptr& parameter);
 
@@ -124,8 +123,8 @@ namespace syrec::applications {
        *
        * @return Vector of parameters
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const variable::vec& parameters() const;
 
@@ -134,8 +133,8 @@ namespace syrec::applications {
        *
        * @param variable Variable
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         //void add_variable(const variable::ptr& variable);
 
@@ -144,8 +143,8 @@ namespace syrec::applications {
        *
        * @return Vector of variables
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const variable::vec& variables() const;
 
@@ -158,8 +157,8 @@ namespace syrec::applications {
        * Otherwise, using the \ref variable::type() "type" it can
        * be determined, whether it is a parameter of a variable.
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] variable::ptr find_parameter_or_variable(const std::string& name) const;
 
@@ -168,8 +167,8 @@ namespace syrec::applications {
        *
        * @param statement Statement
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         void add_statement(const std::shared_ptr<statement>& statement);
 
@@ -178,8 +177,8 @@ namespace syrec::applications {
        *
        * @return Vector of statements
        *
-       * @author RevKit
-       * @since  1.1
+
+
        */
         [[nodiscard]] const std::vector<std::shared_ptr<statement>>& statements() const;
 
@@ -196,8 +195,7 @@ namespace syrec::applications {
      *
      * @return Output Stream
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     //std::ostream& operator<<(std::ostream& os, const module& m);
 

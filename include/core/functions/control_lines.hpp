@@ -45,8 +45,7 @@ namespace syrec {
    *
    * @return The iterator after adding the lines (pointing after the end)
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     template<typename Iterator>
     Iterator control_lines(const gate& g, Iterator result) {

@@ -44,8 +44,7 @@ namespace syrec {
    *
    * @return The index of the newly added line
    *
-   * @author RevKit
-   * @since  1.0 (Return value since 1.1)
+   (Return value since 1.1)
    */
     unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false);
 

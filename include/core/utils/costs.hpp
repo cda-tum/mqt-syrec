@@ -35,8 +35,7 @@ namespace syrec {
    * at least a 64-bit integer, but depending on the
    * platform.
    *
-   * @author RevKit
-   * @since  1.2
+
    */
     typedef unsigned long long cost_t;
 

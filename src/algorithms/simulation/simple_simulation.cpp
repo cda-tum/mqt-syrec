@@ -21,8 +21,6 @@
 #include "core/target_tags.hpp"
 #include "core/utils/timer.hpp"
 
-#include <utility>
-
 namespace syrec {
 
     boost::dynamic_bitset<>& core_gate_simulation::operator()(const gate& g, boost::dynamic_bitset<>& input) const {

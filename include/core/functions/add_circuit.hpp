@@ -32,8 +32,7 @@ namespace syrec {
    * @param src  Source circuit
    * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     void append_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
@@ -44,8 +43,7 @@ namespace syrec {
    * @param src  Source circuit
    * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //[[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
@@ -57,8 +55,7 @@ namespace syrec {
    * @param src  Source circuit
    * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls = gate::line_container());
 

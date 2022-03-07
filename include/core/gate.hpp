@@ -41,48 +41,42 @@ namespace syrec {
     /**
    * @brief Represents a gate in a circuit
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     class gate {
     public:
         /**
      * @brief Vector type of gates
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef std::vector<gate> vector;
 
         /**
      * @brief Type for accessing the line (line index)
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef unsigned line;
 
         /**
      * @brief Container for storing lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef std::set<line> line_container;
 
         /**
      * @brief Mutable Iterator for iterating through control or target lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::iterator>> iterator;
 
         /**
      * @brief Constant Iterator for iterating through control or target lines
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::const_iterator>> const_iterator;
 
@@ -92,8 +86,7 @@ namespace syrec {
      *
      * Initializes private data
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate();
 
@@ -104,8 +97,7 @@ namespace syrec {
      *
      * @param other Gate to be assigned
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate(const gate& other);
 
@@ -114,8 +106,7 @@ namespace syrec {
      *
      * Clears private data
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         virtual ~gate();
 
@@ -126,8 +117,7 @@ namespace syrec {
      *
      * @return Pointer to instance
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         gate& operator=(const gate& other);
 
@@ -136,8 +126,8 @@ namespace syrec {
      *
      * Returns The start iterator of the line_container for accessing control lines. 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         [[nodiscard]] virtual const_iterator begin_controls() const;
 
@@ -146,8 +136,8 @@ namespace syrec {
      *
      * Returns The end iterator of the line_container for accessing control lines (const).
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         [[nodiscard]] virtual const_iterator end_controls() const;
 
@@ -156,8 +146,8 @@ namespace syrec {
      *
      * Returns The start iterator of the line_container for accessing lines (non-const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         //[[maybe_unused]] virtual iterator begin_controls();
 
@@ -166,8 +156,8 @@ namespace syrec {
      *
      * Returns the end iterator of the line_container for accessing control lines (non-const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         //[[maybe_unused]] virtual iterator end_controls();
 
@@ -176,8 +166,8 @@ namespace syrec {
      *
      * Returns The start iterator of the line_container for accessing target lines (const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         [[nodiscard]] virtual const_iterator begin_targets() const;
 
@@ -186,8 +176,8 @@ namespace syrec {
      *
      * Returns The end iterator of the line_container for accessing target lines (const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         [[nodiscard]] virtual const_iterator end_targets() const;
 
@@ -196,8 +186,8 @@ namespace syrec {
      *
      * Returns The start iterator of the line_container for accessing target lines (const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         //[[maybe_unused]] virtual iterator begin_targets();
 
@@ -206,8 +196,8 @@ namespace syrec {
      *
      * Returns The start iterator of the line_container for accessing target lines (non-const). 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         //[[maybe_unused]] virtual iterator end_targets();
 
@@ -217,8 +207,7 @@ namespace syrec {
      * This method returns the number of control and target
      * lines as sum and can be used for e.g. calculating costs.
      *
-     * @author RevKit
-     * @since  1.0
+
      *
      * @return Number of control and target lines.
      */
@@ -229,8 +218,8 @@ namespace syrec {
      *
      * @param c control line to add
      *
-     * @author RevKit
-     * @since 1.0 
+
+
      */
         virtual void add_control(line c);
 
@@ -239,8 +228,8 @@ namespace syrec {
      *
      * @param c control line to remove
      *
-     * @author RevKit
-     * @since 1.0 
+
+
      */
         //  virtual void remove_control(line c);
 
@@ -249,8 +238,8 @@ namespace syrec {
      *
      * @param l target line 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         virtual void add_target(line l);
 
@@ -259,8 +248,8 @@ namespace syrec {
      *
      * @param l target line 
      *
-     * @author RevKit
-     * @since 1.0
+
+
      */
         //virtual void remove_target(line l);
 
@@ -269,8 +258,7 @@ namespace syrec {
      *
      * @param t target type
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         virtual void set_type(const std::any& t);
 
@@ -279,8 +267,7 @@ namespace syrec {
      *
      * @return target type
      *
-     * @author RevKit
-     * @since  1.0
+
      */
         [[nodiscard]] virtual const std::any& type() const;
 
@@ -301,8 +288,7 @@ namespace syrec {
    * on your own, but you will get this as reference object
    * to your iterators in a subcircuit.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //class filtered_gate: public gate {
     //public:
@@ -316,8 +302,7 @@ namespace syrec {
      * @param base   The underlying referenced gate
      * @param filter A vector with line indices which are included in this gate
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     //   filtered_gate(gate& base, std::vector<unsigned>& filter);
 
@@ -326,8 +311,7 @@ namespace syrec {
      *
      * @param other Object to be copied from
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     //   filtered_gate(const filtered_gate& other);
 
@@ -343,8 +327,7 @@ namespace syrec {
      *
      * @return Pointer to instance
      *
-     * @author RevKit
-     * @since  1.0
+
      */
     /*  filtered_gate& operator=(const filtered_gate& other);
 

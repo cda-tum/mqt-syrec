@@ -38,8 +38,7 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct toffoli_tag {};
 
@@ -48,8 +47,7 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     struct fredkin_tag {};
 
@@ -58,8 +56,7 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //struct peres_tag {
     /**
@@ -73,8 +70,7 @@ namespace syrec {
      * in a set in the gate container, such that the order
      * cannot be determined afterwards.
      *
-     * @author RevKit
-     * @since  1.3
+
      */
     //   bool swap_targets;
     //};
@@ -84,8 +80,7 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //struct v_tag {};
 
@@ -94,8 +89,7 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //struct vplus_tag {};
 
@@ -104,15 +98,13 @@ namespace syrec {
    *
    * @sa \ref sub_target_tags
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     //struct module_tag {
     /**
      * @brief Name of the module
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     //  std::string name;
 
@@ -122,8 +114,7 @@ namespace syrec {
      * Usually the circuit is inside of the
      * circuit modules list.
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     //  std::shared_ptr<circuit> reference;
 
@@ -140,8 +131,7 @@ namespace syrec {
      *
      * @return
      *
-     * @author RevKit
-     * @since  1.1
+
      */
     //   std::vector<unsigned> target_sort_order;
     // };
@@ -155,8 +145,7 @@ namespace syrec {
    * @param operand A variable of type boost::any
    * @return true, if \p operand is of type \p T.
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     template<typename T>
     bool is_type(const std::any& operand) {
@@ -173,8 +162,7 @@ namespace syrec {
    * @param g2 Second gate
    * @return true, if they have the same target tag, otherwise false
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     //bool same_type(const gate& g1, const gate& g2);
 
@@ -184,8 +172,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a Toffoli gate
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     bool is_toffoli(const gate& g);
 
@@ -195,8 +182,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a Fredkin gate
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     bool is_fredkin(const gate& g);
 
@@ -206,8 +192,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a Peres gate
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     // bool is_peres(const gate& g);
 
@@ -217,8 +202,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a V gate
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     // bool is_v(const gate& g);
 
@@ -228,8 +212,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a V+ gate
    *
-   * @author RevKit
-   * @since  1.0
+
    */
     // bool is_vplus(const gate& g);
 
@@ -239,8 +222,7 @@ namespace syrec {
    * @param g Gate
    * @return true, if \p g is a module
    *
-   * @author RevKit
-   * @since  1.1
+
    */
     // bool is_module(const gate& g);
 
