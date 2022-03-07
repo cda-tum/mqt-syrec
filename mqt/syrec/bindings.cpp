@@ -25,7 +25,6 @@ py::dict circuit_annotations(const circuit& c, const gate& g) {
     const auto annotations = c.annotations(g);
 
     if (annotations) {
-        typedef std::pair<std::string, std::string> pair_t;
         for (const auto& [first, second]: *annotations) {
             d[py::cast(first)] = second;
         }
@@ -166,14 +165,6 @@ unsigned gate_get_type(const gate& g) {
     return 0u;
 }
 
-/*std::string gate_module_name(const gate& g) {
-    if (is_module(g)) {
-        return std::any_cast<module_tag>(g.type()).name;
-    } else {
-        return {};
-    }
-}*/
-
 /// control and target lines
 
 py::list control_lines1(const gate& g) {
@@ -256,7 +247,6 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type);
-    //.def_property_readonly("module_name", gate_module_name);
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);
