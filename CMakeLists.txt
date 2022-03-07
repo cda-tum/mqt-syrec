@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 project(syrec
         LANGUAGES CXX
         VERSION 0.1.0
-        DESCRIPTION "SyReC - A Programming Language for Synthesis of Reversible Circuits"
+        DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits"
         )
 
 # enable organization of targets into folders
@@ -14,7 +14,7 @@ option(DEPLOY "Configure for deployment")
 option(BINDINGS "Configure for building Python bindings")
 option(COVERAGE "Configure for coverage report generation")
 option(GENERATE_POSITION_INDEPENDENT_CODE "Generate position independent code")
-#option(BUILD_SYREC_TESTS "Also build tests for SyReC project")
+option(BUILD_SYREC_TESTS "Also build tests for SyReC project")
 
 if (DEFINED ENV{DEPLOY})
 	set(DEPLOY $ENV{DEPLOY} CACHE BOOL "Use deployment configuration from environment" FORCE)

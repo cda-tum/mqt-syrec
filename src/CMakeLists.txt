@@ -1,18 +1,12 @@
 add_library(${PROJECT_NAME}
-
-
-		${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
-
+            ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
-
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
 
-
-
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
-		    ${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/properties.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/target_tags.cpp
@@ -31,7 +25,7 @@ add_library(${PROJECT_NAME}
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
-		    ${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
@@ -70,7 +64,6 @@ find_package(Boost 1.71 REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 
 # enable interprocedural optimization if it is supported
-
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported)
 if (ipo_supported)
