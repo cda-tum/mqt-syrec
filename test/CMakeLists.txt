@@ -66,8 +66,7 @@ package_add_test(${PROJECT_NAME}_test
 		unittests/test_for_32.cpp
 		unittests/test_numeric.cpp
 		unittests/test_binary_numeric.cpp
-		unittests/test_bn.cpp
-		unittests/test_skip.cpp)
+		unittests/test_bn.cpp)
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD

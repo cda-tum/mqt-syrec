@@ -1,6 +1,7 @@
 
-#include <algorithms/simulation/simple_simulation.hpp>
-#include <algorithms/synthesis/syrec_synthesis.hpp>
+#include "algorithms/simulation/simple_simulation.hpp"
+#include "algorithms/synthesis/syrec_synthesis.hpp"
+
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <core/circuit.hpp>
@@ -18,20 +19,14 @@ namespace py = pybind11;
 using namespace syrec;
 using namespace syrec::applications;
 
-/// Algorithms / Optimization
-
-[[maybe_unused]] circuit::const_iterator (circuit::*begin1)() const = &circuit::begin;
-[[maybe_unused]] circuit::const_iterator (circuit::*end1)() const   = &circuit::end;
-
 py::dict circuit_annotations(const circuit& c, const gate& g) {
-    py::dict d;
+    py::dict d{};
 
-    std::optional<const std::map<std::string, std::string>> annotations = c.annotations(g);
+    const auto annotations = c.annotations(g);
 
     if (annotations) {
-        typedef std::pair<std::string, std::string> pair_t;
-        for (const pair_t p: *annotations) {
-            d[py::cast(p.first)] = p.second;
+        for (const auto& [first, second]: *annotations) {
+            d[py::cast(first)] = second;
         }
     }
 
@@ -39,9 +34,9 @@ py::dict circuit_annotations(const circuit& c, const gate& g) {
 }
 
 std::vector<gate> new_gates(const circuit& circ) {
-    std::vector<gate>       my_gates;
-    circuit::const_iterator first = circ.begin();
-    circuit::const_iterator last  = circ.end();
+    std::vector<gate> my_gates{};
+    auto              first = circ.begin();
+    auto              last  = circ.end();
     while (first != last) {
         my_gates.push_back(*first);
         ++first;
@@ -170,14 +165,6 @@ unsigned gate_get_type(const gate& g) {
     return 0u;
 }
 
-/*std::string gate_module_name(const gate& g) {
-    if (is_module(g)) {
-        return std::any_cast<module_tag>(g.type()).name;
-    } else {
-        return {};
-    }
-}*/
-
 /// control and target lines
 
 py::list control_lines1(const gate& g) {
@@ -260,8 +247,13 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type);
-    //.def_property_readonly("module_name", gate_module_name);
 
     m.def("control_lines", control_lines1);
     m.def("target_lines", target_lines1);
+
+#ifdef VERSION_INFO
+    m.attr("__version__") = VERSION_INFO;
+#else
+    m.attr("__version__") = "dev";
+#endif
 }
