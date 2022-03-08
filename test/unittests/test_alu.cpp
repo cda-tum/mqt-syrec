@@ -57,11 +57,14 @@ namespace syrec {
                 content.push_back(row);
             }
 
+            std::cout<<content.size()<<std::endl;
+
             file.close();
         }
     };
 
     TEST_F(syrec_test_alu, GenericTest_alu1) {
+
         for (int i = 1; i < (int)content.size(); i++) {
             file_name.append("./circuits/");
             file_name.append(content[i][0]);
