@@ -28,6 +28,10 @@ namespace syrec {
         boost::dynamic_bitset<> input;
         boost::dynamic_bitset<> output;
 
+        std::vector<std::vector<unsigned>> cl;
+        std::vector<std::vector<unsigned>> tl;
+        std::vector<gate>                  gates_vec;
+
         unsigned    expected_num_gates;
         unsigned    expected_lines;
         cost_t      expected_qc;
@@ -40,7 +44,6 @@ namespace syrec {
         std::string                           line, word;
         std::fstream                          file;
         std::string                           file_name;
-        std::string                           output_string;
 
         void SetUp() override {
             // setup all the individual objects before each test
@@ -57,7 +60,6 @@ namespace syrec {
                 content.push_back(row);
             }
 
-            std::cout<<content.size()<<std::endl;
 
             file.close();
         }
@@ -66,9 +68,12 @@ namespace syrec {
     TEST_F(syrec_test_alu, GenericTest_alu1) {
 
         for (int i = 1; i < (int)content.size(); i++) {
+            file_name.clear();
             file_name.append("./circuits/");
             file_name.append(content[i][0]);
             file_name.append(".src");
+
+            std::cout<<"src file: " <<file_name<<std::endl;
 
             expected_num_gates = std::stoi(content[i][1]);
             expected_lines     = std::stoi(content[i][2]);
@@ -86,6 +91,12 @@ namespace syrec {
             EXPECT_TRUE(syrec::syrec_synthesis(circ, prog));
             qc = syrec::final_quantum_cost(circ, circ.lines());
             tc = syrec::final_transistor_cost(circ, circ.lines());
+            gates_vec = ct_gates(circ);
+            for (const gate& g: gates_vec) {
+                cl.push_back(control_lines_check(g));
+                tl.push_back(target_lines_check(g));
+            }
+
             input.resize(circ.lines());
 
             for (int line: set_lines)
@@ -93,13 +104,12 @@ namespace syrec {
 
             output.resize(circ.lines());
             EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
-            boost::to_string(output, output_string);
 
             EXPECT_EQ(expected_num_gates, circ.num_gates()) << content.size();
             EXPECT_EQ(expected_lines, circ.lines());
             EXPECT_EQ(expected_qc, qc);
             EXPECT_EQ(expected_tc, tc);
-            EXPECT_EQ(expected_sim_out, output_string);
+            EXPECT_EQ(expected_sim_out, bitset_to_string(output));
         }
     }
 
