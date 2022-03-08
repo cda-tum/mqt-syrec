@@ -33,7 +33,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/costs.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp)
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp ../test/unittests/test.cpp)
 
 # set include directories
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)

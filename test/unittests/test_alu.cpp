@@ -45,7 +45,7 @@ namespace syrec {
         void SetUp() override {
             // setup all the individual objects before each test
 
-            file.open("test.csv", std::ios::in);
+            file.open("./circuits/circuits.csv", std::ios::in);
 
             while (getline(file, line)) {
                 row.clear();
@@ -94,13 +94,13 @@ namespace syrec {
             output.resize(circ.lines());
             EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
             boost::to_string(output, output_string);
-        }
 
-        EXPECT_EQ(expected_num_gates, circ.num_gates())<<content.size();
-        EXPECT_EQ(expected_lines, circ.lines());
-        EXPECT_EQ(expected_qc, qc);
-        EXPECT_EQ(expected_tc, tc);
-        EXPECT_EQ(expected_sim_out, output_string);
+            EXPECT_EQ(expected_num_gates, circ.num_gates()) << content.size();
+            EXPECT_EQ(expected_lines, circ.lines());
+            EXPECT_EQ(expected_qc, qc);
+            EXPECT_EQ(expected_tc, tc);
+            EXPECT_EQ(expected_sim_out, output_string);
+        }
     }
 
 } // namespace syrec
