@@ -80,17 +80,6 @@ namespace syrec::applications {
        */
         virtual ~statement();
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        //virtual std::ostream& print(std::ostream& os) const;
 
         /**
        * @brief Sets the line number of the SyReC code
@@ -127,15 +116,6 @@ namespace syrec::applications {
      */
     class swap_statement: public statement {
     public:
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
-
-
-       */
-        //swap_statement();
 
         /**
        * @brief Constructor
@@ -157,15 +137,6 @@ namespace syrec::applications {
        */
         ~swap_statement() override;
 
-        /**
-       * @brief Sets variable access on left hand side
-       * 
-       * @param lhs Variable access
-       *
-
-
-       */
-        //[[maybe_unused]] void set_lhs(variable_access::ptr lhs);
 
         /**
        * @brief Returns variable access on left hand side
@@ -177,15 +148,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] variable_access::ptr lhs() const;
 
-        /**
-       * @brief Sets variable access on right hand side
-       * 
-       * @param rhs Variable access
-       *
-
-
-       */
-        //[[maybe_unused]] void set_rhs(variable_access::ptr rhs);
 
         /**
        * @brief Returns variable access on right hand side
@@ -197,17 +159,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] variable_access::ptr rhs() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -247,15 +198,6 @@ namespace syrec::applications {
             decrement
         };
 
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
-
-
-       */
-        //unary_statement();
 
         /**
        * @brief Constructor
@@ -277,15 +219,6 @@ namespace syrec::applications {
        */
         ~unary_statement() override;
 
-        /**
-       * @brief Sets the operation of the statement
-       * 
-       * @param op Operation
-       *
-
-
-       */
-        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation of the statement
@@ -297,15 +230,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned op() const;
 
-        /**
-       * @brief Sets the variable access of the statement
-       * 
-       * @param var Variable access
-       *
-
-
-       */
-        //void set_var(variable_access::ptr var);
 
         /**
        * @brief Returns the variable access of the statement
@@ -317,17 +241,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] variable_access::ptr var() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -367,15 +280,6 @@ namespace syrec::applications {
             exor
         };
 
-        /**
-       * @brief Standard constructor
-       *
-       * Initilizes default values
-       *
-
-
-       */
-        //assign_statement();
 
         /**
        * @brief Constructor
@@ -400,16 +304,6 @@ namespace syrec::applications {
         ~assign_statement() override;
 
         /**
-       * @brief Sets variable access to which the operation is applied
-       * 
-       * @param lhs Variable access
-       *
-
-
-       */
-        //[[maybe_unused]] void set_lhs(variable_access::ptr lhs);
-
-        /**
        * @brief Returns variable access to which the operation is applied
        * 
        * @return Variable access
@@ -418,16 +312,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] variable_access::ptr lhs() const;
-
-        /**
-       * @brief Sets the expression to be evaluated
-       * 
-       * @param rhs Expression
-       *
-
-
-       */
-        //[[maybe_unused]] void set_rhs(expression::ptr rhs);
 
         /**
        * @brief Returns the expression to be evaluated
@@ -439,15 +323,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr rhs() const;
 
-        /**
-       * @brief Sets the operation to be applied
-       * 
-       * @param op Operation
-       *
-
-
-       */
-        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation to be applied
@@ -460,17 +335,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned op() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -591,18 +455,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr fi_condition() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        // std::ostream& print(std::ostream& os) const override;
-
     private:
         class priv;
         priv* const d = nullptr;
@@ -683,20 +535,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::pair<number::ptr, number::ptr>& range() const;
 
-        /**
-       * @brief Sets the step of the loop
-       *
-       * The step of the loop is the incremental delta which is
-       * added or substracted after each loop execution. This
-       * value is always positive and can be negated with the
-       * set_negative_step() function. The default value is 1.
-       * 
-       * @param step Step of the loop
-       *
-
-
-       */
-        //void set_step(const number::ptr& step);
 
         /**
        * @brief Returns the step of the loop
@@ -708,25 +546,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const number::ptr& step() const;
 
-        /**
-       * @brief Sets whether the step is substracted
-       * 
-       * @param negative_step If true, the step is substracted after each loop execution from the current index
-       *
-
-
-       */
-        //void set_negative_step(bool negative_step);
-
-        /**
-       * @brief Returns whether the step is substracted
-       * 
-       * @return If true, the step is substracted after each loop execution from the current index
-       *
-
-
-       */
-        //[[nodiscard]] bool is_negative_step() const;
 
         /**
        * @brief Adds a statement to be executed in the loop
@@ -748,17 +567,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const statement::vec& statements() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        //  std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -774,25 +582,6 @@ namespace syrec::applications {
      */
     class call_statement: public statement {
     public:
-        /**
-       * @brief Standard constructor
-       *
-       * Initializes default values
-       *
-
-
-       */
-        //call_statement();
-
-        /**
-       * @brief Constructor with module
-       * 
-       * @param target Module to call
-       * 
-
-
-       */
-        //[[maybe_unused]] explicit call_statement(std::shared_ptr<module> target);
 
         /**
        * @brief Constructor with module and parameters
@@ -814,16 +603,6 @@ namespace syrec::applications {
         ~call_statement() override;
 
         /**
-       * @brief Sets the target module to call
-       * 
-       * @param target Module
-       *
-
-
-       */
-        //void set_target(std::shared_ptr<module> target);
-
-        /**
        * @brief Returns the target module to call
        * 
        * @return Module
@@ -833,15 +612,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] std::shared_ptr<module> target() const;
 
-        /**
-       * @brief Sets the parameters to assign with the module call
-       * 
-       * @param parameters List of parameter names
-       *
-
-
-       */
-        //[[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
         /**
        * @brief Returns the parameters to assign with the module call
@@ -852,18 +622,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const std::vector<std::string>& parameters() const;
-
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        // std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -879,25 +637,6 @@ namespace syrec::applications {
      */
     class uncall_statement: public statement {
     public:
-        /**
-       * @brief Standard constructor
-       *
-       * Initializes default values
-       *
-
-
-       */
-        //uncall_statement();
-
-        /**
-       * @brief Constructor with module
-       * 
-       * @param target Module to uncall
-       * 
-
-
-       */
-        //[[maybe_unused]] explicit uncall_statement(std::shared_ptr<module> target);
 
         /**
        * @brief Constructor with module and parameters
@@ -918,15 +657,6 @@ namespace syrec::applications {
        */
         ~uncall_statement() override;
 
-        /**
-       * @brief Sets the target module to uncall
-       * 
-       * @param target Module
-       *
-
-
-       */
-        //void set_target(std::shared_ptr<module> target);
 
         /**
        * @brief Returns the target module to uncall
@@ -938,15 +668,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] std::shared_ptr<module> target() const;
 
-        /**
-       * @brief Sets the parameters to assign with the module uncall
-       * 
-       * @param parameters List of parameter names
-       *
-
-
-       */
-        //[[maybe_unused]] void set_parameters(const std::vector<std::string>& parameters);
 
         /**
        * @brief Returns the parameters to assign with the module uncall
@@ -958,17 +679,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::vector<std::string>& parameters() const;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -993,30 +703,17 @@ namespace syrec::applications {
        */
         ~skip_statement() override;
 
-        /**
-       * @brief Prints the statement to the output stream \p os
-       * 
-       * @param os Output stream
-       * 
-       * @return Output stream
-       *
-
-
-       */
-        // std::ostream& print(std::ostream& os) const override;
     };
 
     /**
-     * @brief Prints the statement \p s to the output stream \p os
-     * 
-     * @param os Output stream
-     * @param s Statement
-     * 
-     * @return Output stream
-     *
+ * @brief Reverse Statements
+ */
 
-     */
-    //std::ostream& operator<<(std::ostream& os, const statement& s);
+    struct reverse_statements {
+        typedef statement::ptr result_type;
+
+        statement::ptr operator()(statement::ptr _statement) const;
+    };
 
 } // namespace syrec::applications
 

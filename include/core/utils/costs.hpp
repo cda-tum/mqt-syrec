@@ -24,7 +24,7 @@
 #ifndef COSTS_HPP
 #define COSTS_HPP
 
-#include <core/circuit.hpp>
+#include "core/circuit.hpp"
 
 namespace syrec {
 

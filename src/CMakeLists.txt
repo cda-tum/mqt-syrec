@@ -8,17 +8,13 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/properties.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/target_tags.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_circuit.cpp
+		    ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_gates.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_line_to_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/expression.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/module.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/number.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/reverse_statements.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/statement.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/costs.cpp
@@ -26,25 +22,18 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/properties.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/target_tags.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_gates.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_line_to_circuit.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/control_lines.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/target_lines.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/expression.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/grammar.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/module.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/number.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/parser.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/program.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/reverse_statements.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/costs.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp
-            )
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp)
 
 # set include directories
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)

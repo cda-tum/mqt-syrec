@@ -79,7 +79,6 @@ namespace syrec::applications {
     struct ast_variable;
     struct ast_number_expression;
     struct ast_binary_expression;
-    //struct ast_unary_expression;
     struct ast_shift_expression;
     struct ast_if_statement;
     struct ast_for_statement;
@@ -124,11 +123,6 @@ namespace syrec::applications {
         ast_expression operand2;
     };
 
-    /*struct ast_unary_expression {
-        std::string    op;
-        ast_expression operand;
-    };*/
-
     struct ast_shift_expression {
         ast_expression operand1;
         std::string    op;
@@ -164,10 +158,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
         syrec::applications::ast_binary_expression,
         (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_expression, operand2))
-
-/*BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_unary_expression,
-        (std::string, op)(syrec::applications::ast_expression, operand))*/
 
 BOOST_FUSION_ADAPT_STRUCT(
         syrec::applications::ast_shift_expression,
@@ -252,8 +242,6 @@ namespace syrec {
                 expression_rule %= number_rule | variable_rule | binary_expression_rule | shift_expression_rule;
 
                 binary_expression_rule %= '(' >> expression_rule >> (string("+") | string("-") | string("^") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string("<=") | string(">=") | string("=") | string("!=") | string("<") | string(">")) >> expression_rule >> ')';
-
-                //unary_expression_rule %= (string("!") | string("~")) >> expression_rule;
 
                 shift_expression_rule %= '(' >> expression_rule >> (string("<<") | string(">>")) >> number_rule >> ')';
 

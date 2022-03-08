@@ -95,18 +95,6 @@ namespace syrec::applications {
         priv* const d = nullptr;
     };
 
-    /**
-     * @brief Prints a program to an output stream
-     * 
-     * @param os Output stream
-     * @param p Program
-     * 
-     * @return Output stream
-     *
-
-     */
-    // std::ostream& operator<<(std::ostream& os, const program& p);
-
 } // namespace syrec::applications
 
 #endif /* PROGRAM_HPP */

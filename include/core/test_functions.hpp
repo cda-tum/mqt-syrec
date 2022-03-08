@@ -4,8 +4,6 @@
 #include "core/syrec/program.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <core/functions/control_lines.hpp>
-#include <core/functions/target_lines.hpp>
 #include <string>
 
 std::string py_read_program(syrec::applications::program& prog, const std::string& filename, const syrec::read_program_settings& settings);

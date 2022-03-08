@@ -79,21 +79,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] virtual unsigned bitwidth() const = 0;
 
-        /**
-       * @brief Helper function used by the ostream operator<< function
-       *
-       * This method has to be implemented by all child
-       * classes in order to print the expression to an output
-       * stream using the << operator.
-       *
-       * @param os Output Stream
-       *
-
-
-       *
-       * @return Output Stream
-       */
-        // virtual std::ostream& print(std::ostream& os) const = 0;
 
     private:
         class priv;
@@ -157,13 +142,6 @@ namespace syrec::applications {
             not_equals
 
         };
-        /**
-       * @brief Standard Constructor
-       *
-
-
-       */
-        //numeric_expression();
 
         /**
        * @brief Creates a numeric expression with a value and a bit-width
@@ -184,15 +162,6 @@ namespace syrec::applications {
        */
         ~numeric_expression() override;
 
-        /**
-       * @brief Sets the value of the expression
-       *
-       * @param value Value
-       *
-
-
-       */
-        //void set_value(const number::ptr& value);
 
         /**
        * @brief Returns the value of the expression
@@ -214,17 +183,7 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-        /**
-       * @brief Prints the expression to an output stream
-       *
-       * @param os Output stream
-       *
-       * @return Output stream
-       *
 
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -241,15 +200,7 @@ namespace syrec::applications {
      */
     class variable_expression: public expression {
     public:
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
 
-
-       */
-        //variable_expression();
 
         /**
        * @brief Constructor with variable
@@ -269,15 +220,6 @@ namespace syrec::applications {
        */
         ~variable_expression() override;
 
-        /**
-       * @brief Sets the variable of the expression
-       * 
-       * @param var Variable access
-       *
-
-
-       */
-        //void set_var(variable_access::ptr var);
 
         /**
        * @brief Returns the variable of the expression
@@ -301,17 +243,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-        /**
-       * @brief Prints the expression to an output stream
-       *
-       * @param os Output stream
-       *
-       * @return Output stream
-       *
-
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
@@ -427,15 +358,6 @@ namespace syrec::applications {
             greater_equals
         };
 
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
-
-
-       */
-        //binary_expression();
 
         /**
        * @brief Constructor which initializes a operation
@@ -459,15 +381,6 @@ namespace syrec::applications {
        */
         ~binary_expression() override;
 
-        /**
-       * @brief Sets the left hand side of the expression
-       * 
-       * @param lhs Expression
-       *
-
-
-       */
-        //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
         /**
        * @brief Returns the left hand side of the expression
@@ -479,15 +392,7 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr lhs() const;
 
-        /**
-       * @brief Sets the right hand side of the expression
-       * 
-       * @param rhs Expression
-       *
 
-
-       */
-        //[[maybe_unused]] void set_rhs(expression::ptr rhs);
 
         /**
        * @brief Returns the right hand side of the expression
@@ -499,15 +404,7 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr rhs() const;
 
-        /**
-       * @brief Sets the operation to be performed
-       * 
-       * @param op Operation
-       *
 
-
-       */
-        //void set_op(unsigned op);
 
         /**
        * @brief Returns the operation to be performed
@@ -535,153 +432,11 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-        /**
-       * @brief Prints the expression to an output stream
-       *
-       * @param os Output stream
-       *
-       * @return Output stream
-       *
-
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
         priv* const d = nullptr;
     };
-
-    /**
-     * @brief Unary expression
-     * 
-     * This class represents a unary expression composed of a 
-     * sub expression expr() and an operation op().
-     * 
-
-
-     */
-    //class unary_expression: public expression {
-    //public:
-    /**
-       * @brief Operation to perform
-       *
-
-
-       */
-    //enum {
-    /**
-         * @brief Logical NOT
-         *
-         * Returns 1 iff expr() evaluates to 0.
-         */
-    //   logical_not,
-    /**
-         * @brief Bitwise NOT
-         */
-    //   bitwise_not
-    //};
-
-    /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
-
-
-       */
-    //unary_expression();
-
-    /**
-       * @brief Constructor which initializes an operation
-       * 
-       * @param op Operation to be performed
-       * @param expr Expression to perform the operation on
-       * 
-
-
-       */
-    //unary_expression(unsigned op, expression::ptr expr);
-
-    /**
-       * @brief Deconstructor
-       *
-
-
-       */
-    //~unary_expression() override;
-
-    /**
-       * @brief Sets the sub expression
-       * 
-       * @param expr Expression
-       *
-
-
-       */
-    //void set_expr(expression::ptr expr);
-
-    /**
-       * @brief Returns the sub expression
-       * 
-       * @return Expression
-       *
-
-
-       */
-    //[[nodiscard]] expression::ptr expr() const;
-
-    /**
-       * @brief Sets the operation to be performed
-       * 
-       * @param op Operation
-       *
-
-
-       */
-    //void set_op(unsigned op);
-
-    /**
-       * @brief Returns the operation to be performed
-       *
-       * @return Operation
-       * 
-
-
-       */
-    //[[nodiscard]] unsigned op() const;
-
-    /**
-       * @brief Bit-width of the expression
-       * 
-       * If a logical operation is performed, 
-       * the returned bit-width is always 1. 
-       * Otherwise, the bit-width of the sub 
-       * expression is returned.
-       * 
-       * @return Bit-width of the expression
-       *
-
-
-       */
-    //[[nodiscard]] unsigned bitwidth() const override;
-
-    /**
-       * @brief Prints the expression to an output stream
-       *
-       * @param os Output stream
-       *
-       * @return Output stream
-       *
-
-
-       */
-    //std::ostream& print(std::ostream& os) const override;
-
-    /* private:
-        class priv;
-        priv* const d = nullptr;
-    };*/
 
     /**
      * @brief Shift expression
@@ -711,15 +466,7 @@ namespace syrec::applications {
             right
         };
 
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
 
-
-       */
-        //shift_expression();
 
         /**
        * @brief Constructor
@@ -747,15 +494,7 @@ namespace syrec::applications {
        */
         ~shift_expression() override;
 
-        /**
-       * @brief Sets the left-hand side expression
-       * 
-       * @param lhs Expression
-       *
 
-
-       */
-        //[[maybe_unused]] void set_lhs(expression::ptr lhs);
 
         /**
        * @brief Returns the left-hand side expression
@@ -767,15 +506,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr lhs() const;
 
-        /**
-       * @brief Sets the number of bits to shift
-       * 
-       * @param rhs Number
-       *
-
-
-       */
-        //[[maybe_unused]] void set_rhs(const number::ptr& rhs);
 
         /**
        * @brief Returns the number of bits to shift
@@ -787,15 +517,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const number::ptr& rhs() const;
 
-        /**
-       * @brief Sets the shift operation
-       * 
-       * @param op Shift operation
-       *
-
-
-       */
-        //void set_op(unsigned op);
 
         /**
        * @brief Returns the shift operation
@@ -820,34 +541,14 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-        /**
-       * @brief Prints the expression to an output stream
-       *
-       * @param os Output stream
-       *
-       * @return Output stream
-       *
 
-
-       */
-        //std::ostream& print(std::ostream& os) const override;
 
     private:
         class priv;
         priv* const d = nullptr;
     };
 
-    /**
-     * @brief Prints an expression
-     * 
-     * @param os Output stream
-     * @param e Expression
-     * 
-     * @return Output stream
-     *
 
-     */
-    // std::ostream& operator<<(std::ostream& os, const expression& e);
 
 } // namespace syrec::applications
 

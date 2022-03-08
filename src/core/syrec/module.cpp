@@ -31,8 +31,6 @@ namespace syrec::applications {
         statement::vec statements;
     };
 
-    /* module::module():
-        d(new priv()) {}*/
 
     module::module(const std::string& name):
         d(new priv()) {
@@ -42,10 +40,6 @@ namespace syrec::applications {
     module::~module() {
         delete d;
     }
-
-    /*void module::set_name(const std::string& name) {
-        d->name = name;
-    }*/
 
     const std::string& module::name() const {
         return d->name;
@@ -59,10 +53,6 @@ namespace syrec::applications {
         return d->parameters;
     }
 
-    /*void module::add_variable(const variable::ptr& variable) {
-        d->variables.emplace_back(variable);
-    }*/
-
     const variable::vec& module::variables() const {
         return d->variables;
     }
@@ -73,12 +63,6 @@ namespace syrec::applications {
                 return var;
             }
         }
-
-        /*    for (variable::ptr var: d->variables) {
-            if (var->name() == name) {
-                return var;
-            }
-        }*/
 
         return {};
     }
@@ -91,35 +75,5 @@ namespace syrec::applications {
         return d->statements;
     }
 
-    /* helper function which creates a string from a output stream */
-    /* struct to_string {
-        typedef std::string result_type;
-
-        template<typename T>
-        std::string operator()(const T& t) const {
-            std::stringstream oss;
-            oss.precision(0u);
-            oss << t;
-            return oss.str();
-        }
-    };*/
-
-    /*std::ostream& operator<<(std::ostream& os, const module& m) {
-        os << "module " << m.name() << "(";
-        for (const auto& parameter: m.parameters()) {
-            if (parameter != m.parameters().front()) {
-                os << ", ";
-            }
-            os << to_string()(*parameter);
-        }
-        os << ")" << std::endl;
-        for (const auto& variable: m.variables()) {
-            os << *variable << "\n";
-        }
-        for (const auto& statement: m.statements()) {
-            os << *statement;
-        }
-        return os;
-    }*/
 
 } // namespace syrec::applications

@@ -16,7 +16,6 @@
  */
 
 #include "core/syrec/variable.hpp"
-
 #include "core/syrec/expression.hpp"
 
 #include <cassert>
@@ -37,16 +36,6 @@ namespace syrec::applications {
         std::vector<unsigned> dimensions{};
     };
 
-    /*variable::variable():
-        d(new priv()) {
-    }
-
-    variable::variable(unsigned type, const std::string& name, unsigned bitwidth):
-        d(new priv()) {
-        d->type     = type;
-        d->name     = name;
-        d->bitwidth = bitwidth;
-    }*/
 
     variable::variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth):
         d(new priv()) {
@@ -60,25 +49,16 @@ namespace syrec::applications {
         delete d;
     }
 
-    /*void variable::set_type(unsigned type) {
-        d->type = type;
-    }*/
 
     unsigned variable::type() const {
         return d->type;
     }
 
-    /* void variable::set_name(const std::string& name) {
-        d->name = name;
-    }*/
 
     const std::string& variable::name() const {
         return d->name;
     }
 
-    /*[[maybe_unused]] void variable::set_bitwidth(unsigned bitwidth) {
-        d->bitwidth = bitwidth;
-    }*/
 
     unsigned variable::bitwidth() const {
         return d->bitwidth;
@@ -92,9 +72,6 @@ namespace syrec::applications {
         return d->reference;
     }
 
-    /*[[maybe_unused]] void variable::set_dimensions(const std::vector<unsigned>& dimensions) {
-        d->dimensions = dimensions;
-    }*/
 
     const std::vector<unsigned>& variable::dimensions() const {
         return d->dimensions;
@@ -113,10 +90,6 @@ namespace syrec::applications {
         d(new priv()) {
     }
 
-    /* variable_access::variable_access(variable::ptr var):
-        d(new priv()) {
-        d->var = std::move(var);
-    }*/
 
     variable_access::~variable_access() {
         delete d;
@@ -172,38 +145,5 @@ namespace syrec::applications {
         return d->indexes;
     }
 
-    /*std::ostream& operator<<(std::ostream& os, const variable& v) {
-        std::vector<std::string> types{"in", "out", "inout", "state", "wire"};
-
-        os << std::string(os.precision(), ' ')
-           << types.at(v.type()) << " "
-           << v.name();
-        for (const auto& dim: v.dimensions()) {
-            os << "[" << dim << "] ";
-        }
-        os << "(" << v.bitwidth() << ")";
-        return os;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const variable_access& v) {
-        os << v.var()->name();
-
-        for (const auto& expr: v.indexes()) {
-            os << "[" << *expr << "]";
-        }
-
-        if (v.range()) {
-            number::ptr first, second;
-            std::tie(first, second) = *v.range();
-
-            os << "." << *first;
-
-            if (second.get() != first.get()) {
-                os << ":" << *second;
-            }
-        }
-
-        return os;
-    }*/
 
 } // namespace syrec::applications

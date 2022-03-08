@@ -28,32 +28,7 @@
 #include <core/gate.hpp>
 
 namespace syrec {
-    /**
-   * @brief Gets the control lines of a gate
-   *
-   * This function stores all control lines of a gate into a container.
-   *
-   * @section Example
-   * @code
-   * gate g = ...;
-   * std::vector<gate::line> controls;
-   * control_lines( g, std::back_inserter( controls ) );
-   * @endcode
-   *
-   * @param g      Gate
-   * @param result Iterator to store the lines as gate::line type
-   *
-   * @return The iterator after adding the lines (pointing after the end)
-   *
 
-   */
-    template<typename Iterator>
-    Iterator control_lines(const gate& g, Iterator result) {
-        for (gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c) {
-            *result++ = *c;
-        }
-        return result;
-    }
 
 } // namespace syrec
 

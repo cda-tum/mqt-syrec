@@ -23,6 +23,14 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include "core/syrec/expression.hpp"
+#include "core/syrec/grammar.hpp"
+#include "core/syrec/module.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
+
 #include <string>
 
 namespace syrec {

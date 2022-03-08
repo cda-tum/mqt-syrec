@@ -18,10 +18,10 @@
 /**
  * @file add_circuit.hpp
  *
- * @brief Prepending, inserting and appending circuits to another circuit
+ * @brief inserting and appending circuits to another circuit
  */
 
-#include <core/circuit.hpp>
+#include "core/circuit.hpp"
 
 namespace syrec {
 
@@ -35,17 +35,6 @@ namespace syrec {
 
    */
     void append_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
-
-    /**
-   * @brief Insert a circuit \p src at the beginning of another circuit \p circ
-   *
-   * @param circ Destination circuit
-   * @param src  Source circuit
-   * @param controls Controls, which are added to each gate in \p src (introduced in version 1.1)
-   *
-
-   */
-    //[[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls = gate::line_container());
 
     /**
    * @brief Insert a circuit \p src before gate \p pos (counting from 0) of another circuit \p circ

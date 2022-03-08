@@ -1,3 +1,2 @@
 module alu(inout x1(2), inout x2(2))
 x1 <=> x2
-

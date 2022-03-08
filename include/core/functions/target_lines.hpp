@@ -27,34 +27,8 @@
 
 namespace syrec {
 
-    class gate;
 
-    /**
-   * @brief Gets the target lines of a gate
-   *
-   * This function stores all target lines of a gate into a container.
-   *
-   * @section Example
-   * @code
-   * gate g = ...;
-   * std::vector<gate::line> targets;
-   * target_lines( g, std::back_inserter( targets ) );
-   * @endcode
-   *
-   * @param g      Gate
-   * @param result Iterator to store the lines as gate::line type
-   *
-   * @return The iterator after adding the lines (pointing after the end)
-   *
 
-   */
-    template<typename Iterator>
-    Iterator target_lines(const gate& g, Iterator result) {
-        for (gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c) {
-            *result++ = *c;
-        }
-        return result;
-    }
 
 } // namespace syrec
 

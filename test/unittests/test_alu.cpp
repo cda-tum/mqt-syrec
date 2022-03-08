@@ -2,7 +2,6 @@
 #include "core/circuit.hpp"
 #include "core/syrec/program.hpp"
 #include "core/test_functions.hpp"
-
 #include "gtest/gtest.h"
 #include <algorithms/synthesis/syrec_synthesis.hpp>
 #include <boost/dynamic_bitset.hpp>
@@ -27,15 +26,21 @@ namespace syrec {
 
         void SetUp() override {
             // setup all the individual objects before each test
-            error_string = my_read_program(prog, "./circuits/alu_2.src");
-            syrec::syrec_synthesis(circ, prog);
-            qc = syrec::final_quantum_cost(circ, circ.lines());
-            tc = syrec::final_transistor_cost(circ, circ.lines());
-            input.resize(circ.lines());
-            input.set(0);
-            input.set(6);
-            output.resize(circ.lines());
-            simple_simulation(output, circ, input, settings, statistics);
+
+            file.open("test.csv", std::ios::in);
+
+            while (getline(file, line))
+            {
+                row.clear();
+
+                std::stringstream str(line);
+
+                while(getline(str, word, ','))
+                    row.push_back(word);
+                content.push_back(row);
+            }
+
+            file.close();
         }
     };
 

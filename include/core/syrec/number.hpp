@@ -28,8 +28,6 @@
 #include <string>
 
 namespace syrec::applications {
-    //class binary_numeric_expr;
-
     /**
      * @brief SyReC number data type
      *
@@ -88,20 +86,6 @@ namespace syrec::applications {
        */
         explicit number(const std::string& value);
 
-        /**
-       * @brief Construct by binary conjunction
-       *
-       * This constructor generates a number based on two numbers \p lhs and \p rhs and 
-       * the conjunction \p op.
-       *
-       * @param lhs Number on the left-hand side
-       * @param op Binary conjunction 
-       * @param rhs Number on the right-hand side
-       *
-
-
-       */
-        //explicit number(const number::ptr& lhs, unsigned op, const number::ptr& rhs);
 
         /**
        * @brief Deconstructor
@@ -121,15 +105,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] bool is_loop_variable() const;
 
-        /**
-       * @brief Returns whether the number is a conjunction of two numbers
-       *
-       * @return true, if the number is a conjunction
-       *
-
-
-       */
-        //[[maybe_unused]] [[nodiscard]] bool is_conjunction() const;
 
         /**
        * @brief Returns whether the number is a known constant number
@@ -155,19 +130,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::string& variable_name() const;
 
-        /**
-       * @brief Returns the binary expression in case it is a conjunction of two numbers
-       * 
-       * This method can only be called if is_conjunction() returns true, 
-       * otherwise this method throws an assertion and causes program 
-       * termination.
-       * 
-       * @return The represented binary expression
-       * 
-
-
-       */
-        // [[maybe_unused]] [[nodiscard]] binary_numeric_expr* conjunction_expr() const;
 
         /**
        * @brief Evaluates the number in the context of an execution
@@ -190,26 +152,12 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
 
-        /** @cond 0 */
-        //friend std::ostream& operator<<(std::ostream& os, const number& n);
-        /** @endcond */
 
     private:
         class priv;
         priv* const d = nullptr;
     };
 
-    /**
-     * @brief Prints the number to an output stream
-     *
-     * @param os Output stream
-     * @param n Number
-     *
-     * @return Output stream
-     *
-
-     */
-    std::ostream& operator<<(std::ostream& os, const number& n);
 
 } // namespace syrec::applications
 

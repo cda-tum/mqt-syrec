@@ -1,8 +1,6 @@
 module gray_binary( in op( 1 ), inout x0(16), inout x1(16))
-
   if op   //gary to binary
     then
-	
 	 x0.15 ^= x1.15
 	 x0.14 ^= (x0.15^ x1.14)
 	 x0.13 ^= (x0.14^ x1.13)
@@ -18,11 +16,8 @@ module gray_binary( in op( 1 ), inout x0(16), inout x1(16))
 	 x0.3 ^= (x0.4^ x1.3)
 	 x0.2 ^= (x0.3^ x1.2)
 	 x0.1 ^= (x0.2^ x1.1)
-	 x0.0 ^= (x0.1^ x1.0)	
-	
-    
+	 x0.0 ^= (x0.1^ x1.0)
   else
-       
 	 x0.15 ^=  x1.15
 	 x0.14 ^= (x1.15^ x1.14)
 	 x0.13 ^= (x1.14^ x1.13)

@@ -25,10 +25,6 @@ namespace syrec {
         insert_circuit(circ, circ.num_gates(), src, controls);
     }
 
-    /* [[maybe_unused]] void prepend_circuit(circuit& circ, const circuit& src, const gate::line_container& controls) {
-        insert_circuit(circ, 0, src, controls);
-    }*/
-
     void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls) {
         typedef std::pair<std::string, std::string> pair_t;
         if (controls.empty()) {

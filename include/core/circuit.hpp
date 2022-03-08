@@ -24,15 +24,17 @@
 #ifndef CIRCUIT_HPP
 #define CIRCUIT_HPP
 
+#include "core/gate.hpp"
+
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/signals2.hpp>
-#include <core/gate.hpp>
 #include <map>
 #include <memory>
 #include <optional>
 #include <utility>
 #include <variant>
+#include <string>
 
 namespace syrec {
     /**
@@ -90,81 +92,12 @@ namespace syrec {
    */
     typedef std::optional<bool> constant;
 
-    /**
-   * @brief Represents a circuit
-   *
-   * A circuit is represented by a list of gates (type gate::vector)
-   * and meta information like name, inputs, outputs, constants,
-   * and garbage.
-   *
-   * Via STL like iterators the gates can be accessed and also used
-   * in STL and STL like algorithms based on the iterator concept.
-   *
-   * @section example_circuit_class_1 Example: Creating a circuit with 5 lines
-   * @code
-   * #include <core/circuit.hpp>
-   *
-   * ...
-   *
-   * circuit circ( 5 );
-   * @endcode
-   *
-   * @section example_circuit_class_2 Example: Iterate through all gates in a circuit \p circ with iterators
-   * @code
-   * for ( circuit::const_iterator itGate = circ.begin(); itGate != circ.end(); ++itGate )
-   * {
-   *   gate& g = *itGate;
-   * }
-   * @endcode
-   *
-   * @section example_circuit_class_3 Example: Iterator through all gates in a circuit with foreach_
-   * @code
-   * #include <boost/foreach.hpp>
-   * #define foreach_ BOOST_FOREACH
-   *
-   * ...
-   *
-   * foreach_ ( gate& g, circ )
-   * {
-   *   // g can be modified
-   * } 
-   *
-   * foreach_ ( const gate& g, circ )
-   * {
-   *   // g cannot be modified
-   * } 
-   * @endcode
-   *
-
-   */
     class standard_circuit {
     public:
-        /**
-     * @brief Default Constructor
-     *
-     * Creates an empty circuit with zero lines.
-     *
 
-     */
         standard_circuit():
             lines(0) {}
 
-        /**
-     * @brief Default Constructor
-     *
-     * Creates an empty circuit with \p lines lines.
-     *
-     * @param lines Number of lines
-     *
-
-     */
-        //explicit standard_circuit(unsigned lines):
-        //    lines(lines) {
-        //    inputs.resize(lines, "i");
-        //    outputs.resize(lines, "o");
-        //    constants.resize(lines, constant());
-        //    garbage.resize(lines, false);
-        //}
 
         /** @cond 0 */
         std::vector<std::shared_ptr<gate>> gates;
@@ -175,210 +108,25 @@ namespace syrec {
         std::vector<constant>    constants;
         std::vector<bool>        garbage;
         std::string              name;
-        //    bus_collection                                            inputbuses;
-        //    bus_collection                                            outputbuses;
-        //    bus_collection                                            statesignals;
+
         std::map<const gate*, std::map<std::string, std::string>> annotations;
         /** @endcond */
     };
 
-    //class subcircuit;
 
-    /**
-   * @brief Generic circuit
-   *
-   * This circuit can be both standard_circuit or a subcircuit.
-   * In the default case it is considered as standard_circuit with
-   * no lines.
-   *
-   * In the following examples are given how to construct different
-   * types of circuits.
-   *
-   * <b>Empty circuit with no lines</b>
-   * @code circuit circ; @endcode
-   *
-   * <b>Empty circuit with 3 lines</b>
-   * @code circuit circ( 3 ); @endcode
-   *
-   * <b>Sub-circuit from \p circ including gates [2,4)</b>
-   * @code subcircuit subcirc( circ, 2, 4 ); @endcode
-   *
 
-   */
-    typedef std::variant<standard_circuit> circuit_variant;
+    typedef standard_circuit circuit_variant;
 
-    /**
-   * @brief Represents a sub-circuit
-   *
-   * A sub-circuit is a <i>window</i> which can be set
-   * on top of a standard_circuit. All methods are
-   * specialized for the sub-circuit. But the gates are
-   * references to the underlying circuit.
-   */
-    //class subcircuit {
-    //public:
-    /**
-     * @brief Default constructor
-     *
-     * This constructor creates a sub-circuit from a
-     * base which is a standard_circuit and a range of gates
-     * [\p from, \p to). Thus, the gate with index \p to is
-     * not included.
-     *
-     * @param base Underlying circuit
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
 
-     */
-    //   subcircuit(standard_circuit& base, unsigned from, unsigned to):
-    //       base(base), from(from), to(to) {}
-
-    /**
-     * @brief Default constructor
-     *
-     * Same as other constructor but takes a generic circuit,
-     * which will get casted to a standard_circuit.
-     *
-     * @param base Underlying circuit (has to be standard_circuit in the variant)
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
-
-     */
-    //   subcircuit(circuit_variant& base, unsigned from, unsigned to):
-    //       base(std::get<standard_circuit>(base)), from(from), to(to) {}
-
-    /**
-     * @brief Default constructor
-     *
-     * Same as other constructor but takes a generic circuit,
-     * which will get casted to a standard_circuit.
-     *
-     * @param base Underlying circuit (has to be standard_circuit in the variant)
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     *
-
-     */
-    //  subcircuit(const circuit_variant& base, unsigned from, unsigned to):
-    //      base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to) {}
-
-    /**
-     * @brief Constructor with line filter
-     *
-     * This constructor creates a sub-circuit from a
-     * base which is a standard_circuit and a range of gates
-     * [\p from, \p to). Thus, the gate with index \p to is
-     * not included.
-     *
-     * Further a line filter is specified. The vector contains all
-     * line indices (starting from 0) which should be accessible.
-     *
-     * @param base Underlying circuit
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     * @param filter Line filter
-     *
-
-     */
-    /*  subcircuit(standard_circuit& base, unsigned from, unsigned to, std::vector<unsigned> filter):
-            base(base), from(from), to(to), filter(std::move(filter)) {
-            std::sort(this->filter.begin(), this->filter.end());
-            this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
-        }*/
-
-    /**
-     * @brief Constructor with line filter
-     *
-     * Same as other constructor but takes a generic circuit,
-     * which will get casted to a standard_circuit.
-     *
-     * @param base Underlying circuit (has to be a standard_circuit in the variant)
-     * @param from First gate to be included (starting from 0)
-     * @param to First gate to be not included anymore
-     * @param filter Line filter
-     *
-
-     */
-    /*   subcircuit(const circuit_variant& base, unsigned from, unsigned to, std::vector<unsigned> filter):
-            base(std::get<standard_circuit>(const_cast<circuit_variant&>(base))), from(from), to(to), filter(std::move(filter)) {
-            std::sort(this->filter.begin(), this->filter.end());
-            this->filter.resize(std::unique(this->filter.begin(), this->filter.end()) - this->filter.begin());
-        }*/
-
-    /**
-     * @brief Deconstructor
-     *
-     * Deletes all filtered_gate objects in the filter cache
-     *
-
-     */
-    /*  ~subcircuit() {
-            std::map<gate*, filtered_gate*>::const_iterator it;
-            for (it = filter_cache.begin(); it != filter_cache.end(); ++it) {
-                delete it->second;
-            }
-        }*/
-
-    /** @cond */
-    //standard_circuit&     base;
-    //unsigned              from;
-    //unsigned              to;
-    //std::vector<unsigned> filter;
-
-    // for the transform_iterator implementation
-    //std::map<gate*, filtered_gate*> filter_cache;
-    /** @endcond */
-    //};
-
-    /** @cond */
-    /*struct filter_circuit {
-        typedef gate& result_type;
-
-       // filter_circuit() = default;
-       // explicit filter_circuit(subcircuit& circ):
-      //      circ(&circ) {}
-
-        gate& operator()(gate& g) const {
-            if (!circ) {
-                return g;
-            } else {
-                if (circ->filter_cache.find(&g) == circ->filter_cache.end()) {
-                    circ->filter_cache[&g] = new filtered_gate(g, circ->filter);
-                }
-                return *circ->filter_cache.find(&g)->second;
-            }
-        }
-
-    private:
-    //    subcircuit* circ = nullptr;
-    };*/
-    /** @endcond */
-
-    /** @cond */
     struct const_filter_circuit {
         typedef const gate& result_type;
 
-        /* const_filter_circuit() = default;
-        explicit const_filter_circuit(const subcircuit& circ):
-            circ(&circ) {}*/
-
         const gate& operator()(const gate& g) const {
-            /*if (!circ) {
-
-            } else {
-                // NOTE Works, but avoiding the const_cast would be better
-                if (circ->filter_cache.find(const_cast<gate*>(&g)) == circ->filter_cache.end()) {
-                    const_cast<subcircuit*>(circ)->filter_cache[const_cast<gate*>(&g)] = new filtered_gate(const_cast<gate&>(g), const_cast<subcircuit*>(circ)->filter);
-                }
-                return *circ->filter_cache.find(const_cast<gate*>(&g))->second;
-            }*/
             return g;
         }
 
     private:
-        // const subcircuit* circ = nullptr;
+
     };
     /** @endcond */
 
@@ -401,104 +149,11 @@ namespace syrec {
      */
         circuit() = default;
 
-        //explicit circuit(unsigned lines):
-        //    circ(standard_circuit(lines)) {}
-
-        /**
-     * @brief Cast Constructor for a standard_circuit
-     *
-     * With this constructor the standard_circuit constructor is automatically converted to 
-     * a circuit, e.g. by calling
-     *
-     * @code
-     * circuit circ( 3 );
-     * @endcode
-     *
-     * a circuit with 3 lines is created.
-     *
-     * @param std_circ standard_circuit implementation
-     *
-
-     */
-        //   explicit circuit(const standard_circuit& std_circ):
-        //       circ(std_circ) {}
-
-        /**
-     * @brief Cast Constructor for a standard_circuit
-     *
-     * With this constructor the standard_circuit constructor is automatically converted to 
-     * a circuit, e.g. by calling
-     *
-     * @code
-     * circuit circ( 3 );
-     * @endcode
-     *
-     * a circuit with 3 lines is created.
-     *
-     * @param std_circ standard_circuit implementation
-     *
-
-     */
-        //  explicit circuit(standard_circuit& std_circ):
-        //      circ(std_circ) {}
-
-        /**
-     * @brief Cast Constructor for a subcircuit
-     *
-     * This constructor is used, so that subcircuits are detected as circuits in
-     * algorithms and can passed as circuit parameter to other functions and
-     * algorithms.
-     *
-     * @param sub_circ subcircuit implementation
-     *
-
-     */
-        //   explicit circuit(const subcircuit& sub_circ):
-        //       circ(sub_circ) {}
-
-        /**
-     * @brief Cast Constructor for a subcircuit
-     *
-     * This constructor is used, so that subcircuits are detected as circuits in
-     * algorithms and can passed as circuit parameter to other functions and
-     * algorithms.
-     *
-     * @param sub_circ subcircuit implementation
-     *
-
-     */
-        //  explicit circuit(subcircuit& sub_circ):
-        //      circ(sub_circ) {}
-
-        /**
-     * @brief Copy Constructor
-     *
-     * This constructor is used by some algorithms, but should not be used directly.
-     *
-     * It copies the underlying circuit, but it does not
-     * copy the signals, so that this information gets lost.
-     *
-     * @param other Circuit to be copied
-     *
-
-     */
-        //   circuit(const circuit& other):
-        //       circ(other.circ) {}
-
-        /**
-     * @brief Mutable iterator for accessing the gates in a circuit
-     */
-        //typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::iterator>> iterator;
-
         /**
      * @brief Constant iterator for accessing the gates in a circuit
      */
         typedef boost::transform_iterator<const_filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_iterator>> const_iterator;
 
-        /**
-     * @brief Mutable reverse iterator for accessing the gates in a circuit
-     */
-        // typedef boost::transform_iterator<filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::reverse_iterator>> reverse_iterator;
         /**
      * @brief Constant reverse iterator for accessing the gates in a circuit
      */
@@ -563,79 +218,6 @@ namespace syrec {
      */
         [[nodiscard]] const_iterator end() const;
 
-        /**
-     * @brief Mutable begin iterator pointing to gates
-     *
-     * @return Mutable begin iterator
-     *
-
-     */
-        //  iterator begin();
-
-        /**
-     * @brief Mutable end iterator pointing to gates
-     *
-     * @return Mutable end iterator
-     *
-
-     */
-        //  iterator end();
-
-        /**
-     * @brief Constant begin reverse iterator pointing to gates
-     *
-     * @return Constant begin reverse iterator
-     *
-
-     */
-        //   [[nodiscard]] const_reverse_iterator rbegin() const;
-
-        /**
-     * @brief Constant end reverse iterator pointing to gates
-     *
-     * @return Constant end reverse iterator
-     *
-
-     */
-        //  [[nodiscard]] const_reverse_iterator rend() const;
-
-        /**
-     * @brief Mutable begin reverse iterator pointing to gates
-     *
-     * @return Mutable begin reverse iterator
-     *
-
-     */
-        // reverse_iterator rbegin();
-
-        /**
-     * @brief Mutable end reverse iterator pointing to gates
-     *
-     * @return Mutable end reverse iterator
-     *
-
-     */
-        // reverse_iterator rend();
-
-        /**
-     * @brief Random access operator for access to gates by index
-     *
-     * @param index Index of the gate, starting from 0
-     * @return constant access to the \p index gate in the circuit
-     *
-
-     */
-        //  const gate& operator[](unsigned index) const;
-
-        /**
-     * @brief Random access operator for access to gates by index
-     *
-     * @param index Index of the gate, starting from 0
-     * @return mutable access to the \p index gate in the circuit
-     *
-
-     */
-        //  gate& operator[](unsigned index);
 
         /**
      * @brief Inserts a gate at the end of the circuit
@@ -649,17 +231,6 @@ namespace syrec {
         gate& append_gate();
 
         /**
-     * @brief Inserts a gate at the beginning of the circuit
-     *
-     * This method inserts a gate at the beginning of the circuit.
-     *
-     * @return Reference to the newly created empty gate
-     *
-
-     */
-        //   gate& prepend_gate();
-
-        /**
      * @brief Inserts a gate into the circuit
      *
      * This method inserts a gate at an arbitrary position in the circuit
@@ -671,17 +242,6 @@ namespace syrec {
 
      */
         gate& insert_gate(unsigned pos);
-
-        /**
-     * @brief Removes a gate at a given index
-     *
-     * If the index is not valid, no gate is removed.
-     *
-     * @param pos  Index
-     *
-
-     */
-        //   [[maybe_unused]] void remove_gate_at(unsigned pos);
 
         /**
      * @brief Sets the input names of the lines in a circuit
@@ -791,209 +351,6 @@ namespace syrec {
         [[nodiscard]] const std::vector<bool>& garbage() const;
 
         /**
-     * @brief Sets a name of the circuit
-     *
-     * Sets a name for the circuit which is empty
-     * initially.
-     *
-     * @param name Name
-     *
-
-     */
-        //  [[maybe_unused]] void set_circuit_name(const std::string& name);
-
-        /**
-     * @brief Returns the name of the circuit
-     *
-     * Returns the name of the circuit which is empty
-     * initially.
-     *
-     * @return Name of the circuit
-     *
-
-     */
-        //  [[maybe_unused]] [[nodiscard]] const std::string& circuit_name() const;
-
-        /**
-     * @brief Constant access to the input buses
-     * 
-     * This method gives constant access to the input
-     * buses.
-     * 
-     * @return Input bus collection
-     *
-
-     */
-        //  [[maybe_unused]] [[nodiscard]] const bus_collection& inputbuses() const;
-
-        /**
-     * @brief Mutable access to the input buses
-     * 
-     * This method gives mutable access to the input
-     * buses.
-     * 
-     * @return Input bus collection
-     *
-
-     */
-        //   bus_collection& inputbuses();
-
-        /**
-     * @brief Constant access to the output buses
-     * 
-     * This method gives constant access to the output
-     * buses.
-     * 
-     * @return Output bus collection
-     *
-
-     */
-        //  [[maybe_unused]] [[nodiscard]] const bus_collection& outputbuses() const;
-
-        /**
-     * @brief Mutable access to the output buses
-     * 
-     * This method gives mutable access to the output
-     * buses.
-     * 
-     * @return Output bus collection
-     *
-
-     */
-        //    bus_collection& outputbuses();
-
-        /**
-     * @brief Constant access to the state signals
-     * 
-     * This method gives constant access to the state
-     * signals.
-     * 
-     * @return State signal collection
-     *
-
-     */
-        //  [[nodiscard]] const bus_collection& statesignals() const;
-
-        /**
-     * @brief Mutable access to the state signals
-     * 
-     * This method gives mutable access to the state
-     * signals.
-     * 
-     * @return State signal collection
-     *
-
-     */
-        //  bus_collection& statesignals();
-
-        /**
-     * @brief Returns whether the circuit is a sub-circuit or not
-     *
-     * Both standard_circuit and subcircuit are used in the context as a circuit
-     * in other algorithms. To determine what kind of circuit it is, this method
-     * returns \p true if the circuit is a sub-circuit, \p false otherwise.
-     *
-     * @return true, if circuit is a sub-circuit, \p false otherwise
-     *
-
-     */
-        //  [[maybe_unused]] [[nodiscard]] bool is_subcircuit() const;
-
-        /**
-     * @brief Returns the filter of a sub-circuit
-     *
-     * This method returns a pair <i>(l, f)</i>.
-     * In case the circuit is sub-circuit restricted on the lines,
-     * \em l is the original number of lines of the base circuit
-     * and \em f is the filter, i.e. a vector of lines which are
-     * used for the sub-circuit. In other cases \em s is always 0
-     * and \em f is empty.
-     *
-     * @return Pair of information about the sub-circuit's base or \em empty pair
-     *
-
-     */
-        //  [[nodiscard]] std::pair<unsigned, std::vector<unsigned>> filter() const;
-
-        /**
-     * @brief Returns the offset of the circuit (sub-circuit)
-     *
-     * For a standard_circuit, the offset is always 0, but for a
-     * sub-circuit, the offset is the index of the starting gate
-     * in respect to its base circuit.
-     *
-     * @return Offset of the circuit
-     *
-
-     */
-        //  [[nodiscard]] unsigned offset() const;
-
-        /**
-     * @brief Adds a module to the circuit
-     *
-     * This function adds a module to the circuit. It does
-     * not create a gate calling the module, but the module
-     * itself as a reference for further use, e.g. with append_module.
-     *
-     * This method uses smart pointer to a circuit wich already
-     * exists and is managed by another object. If it cannot
-     * be assured that the module is saved, the method
-     * add_module(const std::string&, const circuit&) should be used.
-     *
-     * @param name Name of the module
-     * @param module Reference to an existing module
-     *
-
-     */
-        // void add_module(const std::string& name, const std::shared_ptr<circuit>& module);
-
-        /**
-     * @brief Adds a module to the circuit
-     *
-     * This function adds a module to the circuit. It does
-     * not create a gate calling the module, but the module
-     * itself as a reference for further use, e.g. with append_module.
-     *
-     * In this method the module is copied first and thus assured
-     * that is managed by this circuit.
-     * 
-     * @param name Name of the module
-     * @param module Module to be copied
-     *
-
-     */
-        //  void add_module(const std::string& name, const circuit& module);
-
-        /**
-     * @brief Returns all modules in the circuit
-     * 
-     * This method returns a map of all modules, whereby the
-     * keys are the names of the modules.
-     * 
-     * @return Map of modules
-     *
-
-     */
-        //  [[nodiscard]] const std::map<std::string, std::shared_ptr<circuit>>& modules() const;
-
-        /**
-     * @brief Returns the annotation for one gate and one key
-     *
-     * This method returns the value for one particular annotation for
-     * a given gate. If no annotation with that key exists, the a default
-     * value is given. 
-     *
-     * @param g Gate
-     * @param key Key of the annotation
-     * @param default_value Default value, in case the key does not exist
-     * 
-     * @return Value of the annotation or the default value
-     *
-
-     */
-        //  [[nodiscard]] const std::string& annotation(const gate& g, const std::string& key, const std::string& default_value = std::string()) const;
-
-        /**
      * @brief Returns all annotations for a given gate
      *
      * This method returns all annotations for a given gate. For the
@@ -1061,9 +418,27 @@ namespace syrec {
     private:
         /** @cond */
         circuit_variant circ;
-        //std::map<std::string, std::shared_ptr<circuit>> _modules;
         /** @endcond */
     };
+
+    /**
+   * @brief Add a line to a circuit with specifying all meta-data
+   *
+   * This function helps adding a line to the circuit.
+   * Besides incrementing the line counter, all meta-data information
+   * is adjusted as well.
+   *
+   * @param circ Circuit
+   * @param input Name of the input of the line
+   * @param output Name of the output of the line
+   * @param c Constant value of that line (Default: Not constant)
+   * @param g If true, line is a garbage line
+   *
+   * @return The index of the newly added line
+   *
+   (Return value since 1.1)
+   */
+    unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false);
 
 } // namespace syrec
 

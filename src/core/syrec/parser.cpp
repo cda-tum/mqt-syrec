@@ -17,13 +17,6 @@
 
 #include "core/syrec/parser.hpp"
 
-#include "core/syrec/expression.hpp"
-#include "core/syrec/grammar.hpp"
-#include "core/syrec/module.hpp"
-#include "core/syrec/number.hpp"
-#include "core/syrec/program.hpp"
-#include "core/syrec/statement.hpp"
-#include "core/syrec/variable.hpp"
 
 #include <fstream>
 #include <memory>
@@ -465,53 +458,6 @@ namespace syrec {
             return new binary_expression(lhs, op, rhs);
         }
 
-        /* expression* operator()(const ast_unary_expression& ast_exp) const {
-            std::string    ast_op   = ast_exp.op;
-            ast_expression ast_expr = ast_exp.operand;
-
-            unsigned op = 0u;
-            if (ast_op == "!") {
-                op = unary_expression::logical_not;
-            } else if (ast_op == "~") {
-                op = unary_expression::bitwise_not;
-            }
-
-            expression::ptr expr = parse_expression(ast_expr, proc, bitwidth, context);
-            if (!expr) return nullptr;
-
-            // double negative elimination
-            if (auto* sub_expr = dynamic_cast<unary_expression*>(expr.get())) {
-                if (((op == unary_expression::bitwise_not) && (sub_expr->op() == unary_expression::bitwise_not)) || ((sub_expr->expr()->bitwidth() == 1u) && ((op == unary_expression::bitwise_not) || (op == unary_expression::logical_not)) && ((sub_expr->op() == unary_expression::bitwise_not) || (sub_expr->op() == unary_expression::logical_not)))) {
-                    if (numeric_expression* ep = dynamic_cast<numeric_expression*>(sub_expr->expr().get())) {
-                        return new numeric_expression(ep->value(), ep->bitwidth());
-                    }
-                    if (variable_expression* ep = dynamic_cast<variable_expression*>(sub_expr->expr().get())) {
-                        return new variable_expression(ep->var());
-                    }
-                    if (binary_expression* ep = dynamic_cast<binary_expression*>(sub_expr->expr().get())) {
-                        return new binary_expression(ep->lhs(), ep->op(), ep->rhs());
-                    }
-                    if (unary_expression* ep = dynamic_cast<unary_expression*>(sub_expr->expr().get())) {
-                        return new unary_expression(ep->op(), ep->expr());
-                    }
-                    if (shift_expression* ep = dynamic_cast<shift_expression*>(sub_expr->expr().get())) {
-                        return new shift_expression(ep->lhs(), ep->op(), ep->rhs());
-                    }
-                }
-            } else if (auto* sub_expr_1 = dynamic_cast<numeric_expression*>(expr.get())) {
-                if (op == unary_expression::logical_not) {
-                    if (sub_expr_1->value()->is_constant()) {
-                        unsigned value = (sub_expr_1->value()->evaluate(number::loop_variable_mapping()) == 0) ? 1 : 0;
-                        return new numeric_expression(std::make_shared<number>(value), 1);
-                    }
-                } else if (op == unary_expression::bitwise_not) {
-                    std::cerr << "Bitwise NOT is undefined for numbers w/o specified bit width: ~" << *expr << std::endl;
-                    assert(false);
-                    return nullptr;
-                }
-            }
-            return new unary_expression(op, expr);
-        }*/
 
         expression* operator()(const ast_shift_expression& ast_exp) const {
             ast_expression ast_exp1 = ast_exp.operand1;
@@ -822,26 +768,6 @@ namespace syrec {
                     bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
         }
 
-        /* for (const ast_variable_declarations& ast_decls: bf::at_c<2>(ast_proc)) {
-            unsigned type = parse_variable_type(bf::at_c<0>(ast_decls));
-
-            for (const ast_variable_declaration& ast_decl: bf::at_c<1>(ast_decls)) {
-                const std::string& variable_name = bf::at_c<0>(ast_decl);
-
-                if (variable_names.find(variable_name) != variable_names.end()) {
-                    context.error_message = "Redefinition of variable " + variable_name;
-                    return false;
-                } else {
-                    variable_names.emplace(variable_name);
-                }
-
-                proc.add_variable(std::make_shared<variable>(
-                        type,
-                        variable_name,
-                        bf::at_c<1>(ast_decl),
-                        bf::at_c<2>(ast_decl).get_value_or(context.settings.default_bitwidth)));
-            }
-        }*/
 
         for (const ast_statement& ast_stat: bf::at_c<3>(ast_proc)) {
             statement::ptr stat = parse_statement(ast_stat, prog, proc, context);

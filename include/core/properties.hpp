@@ -92,20 +92,9 @@ namespace syrec {
      *
 
      */
-        properties();
+        properties() = default;
 
-        /**
-     * @brief Direct access to the value type
-     *
-     * Since the \p value_type is of type \p boost::any, it is not recommended
-     * to use this operator, but rather get and set.
-     *
-     * @param k Key to access the property map. Must exist.
-     * @return The value associated with key \p k.
-     *
 
-     */
-        //const value_type& operator[](const key_type& k) const;
 
         /**
      * @brief Casted access to an existing element
@@ -170,41 +159,10 @@ namespace syrec {
      *
 
      */
-        void set(const key_type& k, const value_type& value);
+        void set(const properties::key_type& k, const properties::value_type& value) {
+            map[k] = value;
+        }
 
-        /**
-     * @brief Start iterator for the properties
-     *
-     * @return Iterator
-     *
-
-     */
-        //[[nodiscard]] storage_type::const_iterator begin() const;
-
-        /**
-     * @brief End iterator for the properties
-     *
-     * @return Iterator
-     *
-
-     */
-        // [[nodiscard]] storage_type::const_iterator end() const;
-
-        /**
-     * @brief Number of properties
-     *
-     * @return The number of properties
-     *
-
-     */
-        //[[nodiscard]] unsigned size() const;
-
-        /**
-     * @brief Clears all properties
-     *
-
-     */
-        //   void clear();
 
     private:
         storage_type map;
@@ -232,20 +190,6 @@ namespace syrec {
         return settings ? settings->get<T>(k, default_value) : default_value;
     }
 
-    /**
-   * @brief Sets an error message to a statistics smart pointer
-   *
-   * This function checks first if the smart pointer references something,
-   * and if that is the case, the value \p error, is written to the key
-   * \b error.
-   *
-   * @param statistics A smart pointer to a properties instance or an empty smart pointer
-   * @param error An error message, which should be written to the key \b error
-   *              if the smart pointer \p statistics can be de-referenced.
-   *
-
-   */
-    //[[maybe_unused]] void set_error_message(const properties::ptr& statistics, const std::string& error);
 
 } // namespace syrec
 

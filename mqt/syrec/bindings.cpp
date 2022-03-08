@@ -1,19 +1,18 @@
 
 #include "algorithms/simulation/simple_simulation.hpp"
 #include "algorithms/synthesis/syrec_synthesis.hpp"
-
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
-#include <core/circuit.hpp>
-#include <core/functions/control_lines.hpp>
-#include <core/functions/target_lines.hpp>
-#include <core/gate.hpp>
-#include <core/properties.hpp>
-#include <core/syrec/parser.hpp>
-#include <core/syrec/program.hpp>
-#include <core/target_tags.hpp>
-#include <core/utils/costs.hpp>
+#include "core/circuit.hpp"
+#include "core/gate.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/parser.hpp"
+#include "core/syrec/program.hpp"
+#include "core/target_tags.hpp"
+#include "core/utils/costs.hpp"
+
 #include <pybind11/stl.h>
+#include <functional>
 
 namespace py = pybind11;
 using namespace syrec;
@@ -69,10 +68,6 @@ py::list garbage_getter(const circuit& circ) {
     return list_getter<bool, circuit>(circ, &circuit::garbage);
 }
 
-int add_new(int i, int j) {
-    return i + j;
-}
-
 ///Properties
 
 template<typename T>
@@ -81,7 +76,7 @@ void properties_set(properties& prop, const std::string& key, const T& value) {
 }
 
 template<typename T>
-T properties_get1(properties& prop, const std::string& key) {
+T properties_get(properties& prop, const std::string& key) {
     return prop.get<T>(key);
 }
 
@@ -112,11 +107,7 @@ std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
 namespace gate_types {
     enum _types {
         toffoli,
-        //     peres,
         fredkin,
-        //     v,
-        //     vplus,
-        //     module
     };
 }
 
@@ -128,20 +119,7 @@ void gate_set_type(gate& g, unsigned value) {
         case gate_types::fredkin:
             g.set_type(fredkin_tag());
             break;
-        /*case gate_types::peres:
-            g.set_type(peres_tag());
-            break;
-        case gate_types::v:
-            g.set_type(v_tag());
-            break;
-        case gate_types::vplus:
-            g.set_type(vplus_tag());
-            break;
-        case gate_types::module:
-            g.set_type(module_tag());
-            break;*/
         default:
-            assert(false);
             break;
     }
 }
@@ -151,23 +129,13 @@ unsigned gate_get_type(const gate& g) {
         return gate_types::toffoli;
     } else if (is_fredkin(g)) {
         return gate_types::fredkin;
-    } /*else if (is_peres(g)) {
-        return gate_types::peres;
-    }else if (is_v(g)) {
-        return gate_types::v;
-    } else if (is_vplus(g)) {
-        return gate_types::vplus;
-    } else if (is_module(g)) {
-        return gate_types::module;
-    }*/
-
-    assert(false);
+    }
     return 0u;
 }
 
 /// control and target lines
 
-py::list control_lines1(const gate& g) {
+py::list control_lines_func(const gate& g) {
     gate::line_container c;
     py::list             l;
     control_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
@@ -177,7 +145,7 @@ py::list control_lines1(const gate& g) {
     return l;
 }
 
-py::list target_lines1(const gate& g) {
+py::list target_lines_func(const gate& g) {
     gate::line_container c;
     py::list             l;
     target_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
@@ -187,9 +155,15 @@ py::list target_lines1(const gate& g) {
     return l;
 }
 
+///simulation
+
+std::function <bool (boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation);
+
+
 PYBIND11_MODULE(pysyrec, m) {
-    m.def("py_syrec_synthesis", &syrec_synthesis);
-    m.def("py_simple_simulation", static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation));
+    m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
+    m.def("py_syrec_synthesis", &syrec_synthesis, py::arg("circ"), py::arg("program"), py::arg("settings"), py::arg("statistics"));
+    m.def("py_simple_simulation", sim_func, py::arg("output"), py::arg("circ"), py::arg("input"), py::arg("settings"), py::arg("statistics"));
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
@@ -203,8 +177,6 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_property_readonly("garbage", garbage_getter)
             .def("annotations", circuit_annotations);
 
-    m.def("add_new", &add_new, "A function that adds two numbers");
-
     py::class_<properties, std::shared_ptr<properties>>(m, "properties")
             .def(py::init<>())
             .def("set_string", &properties_set<std::string>)
@@ -212,9 +184,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("set_int", &properties_set<int>)
             .def("set_unsigned", &properties_set<unsigned>)
             .def("set_double", &properties_set<double>)
-            .def("set_char", &properties_set<char>)
-            .def("get_string", &properties_get1<std::string>)
-            .def("get_double", &properties_get1<double>);
+            .def("get_string", &properties_get<std::string>)
+            .def("get_double", &properties_get<double>);
 
     py::class_<program>(m, "syrec_program")
             .def(py::init<>())
@@ -237,19 +208,15 @@ PYBIND11_MODULE(pysyrec, m) {
 
     py::enum_<gate_types::_types>(m, "gate_type")
             .value("toffoli", gate_types::toffoli)
-            //.value("peres", gate_types::peres)
             .value("fredkin", gate_types::fredkin)
-            //.value("v", gate_types::v)
-            //.value("vplus", gate_types::vplus)
-            //.value("module", gate_types::module)
             .export_values();
 
     py::class_<gate>(m, "gate")
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type);
 
-    m.def("control_lines", control_lines1);
-    m.def("target_lines", target_lines1);
+    m.def("control_lines", control_lines_func);
+    m.def("target_lines", target_lines_func);
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

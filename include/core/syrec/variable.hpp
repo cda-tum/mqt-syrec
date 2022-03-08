@@ -96,30 +96,6 @@ namespace syrec::applications {
        */
         typedef std::vector<ptr> vec;
 
-        /**
-       * @brief Standard constructor
-       *
-       * Initializes default values
-       *
-
-
-       */
-        //variable();
-
-        /**
-       * @brief Constructor
-       *
-       * Initializes the type, the name, and the bit-width of the variable
-       *
-       * @param type Type
-       * @param name Name
-       * @param bitwidth Bitwidth of the variable (Default value: 32)
-       *
-
-
-       */
-        //variable(unsigned type, const std::string& name, unsigned bitwidth);
-
         variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth);
 
         /**
@@ -130,15 +106,6 @@ namespace syrec::applications {
        */
         ~variable();
 
-        /**
-       * @brief Sets the type of the variable
-       *
-       * @param type Type
-       *
-
-
-       */
-        //void set_type(unsigned type);
 
         /**
        * @brief Returns the type of the variable
@@ -150,15 +117,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned type() const;
 
-        /**
-       * @brief Sets the name of the variable
-       *
-       * @param name Name
-       *
-
-
-       */
-        //void set_name(const std::string& name);
 
         /**
        * @brief Returns the name of the variable
@@ -170,15 +128,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::string& name() const;
 
-        /**
-       * @brief Sets the bit-width of the variable
-       *
-       * @param bitwidth Bit-width
-       *
-
-
-       */
-        //[[maybe_unused]] void set_bitwidth(unsigned bitwidth);
 
         /**
        * @brief Returns the bit-width of the variable
@@ -229,15 +178,6 @@ namespace syrec::applications {
        */
         variable_access();
 
-        /**
-       * @brief Constructor with variable
-       *
-       * @param var Variable
-       *
-
-
-       */
-        //explicit variable_access(variable::ptr var);
 
         /**
        * @brief Deconstructor
@@ -315,29 +255,6 @@ namespace syrec::applications {
         priv* const d = nullptr;
     };
 
-    /**
-     * @brief Prints variable to output stream
-     *
-     * @param os Output Stream
-     * @param v Variable
-     *
-     * @return Output Stream
-     *
-
-     */
-    // std::ostream& operator<<(std::ostream& os, const variable& v);
-
-    /**
-     * @brief Prints variable access to output stream
-     *
-     * @param os Output Stream
-     * @param v Variable access
-     *
-     * @return Output Stream
-     *
-
-     */
-    //std::ostream& operator<<(std::ostream& os, const variable_access& v);
 
 } // namespace syrec::applications
 

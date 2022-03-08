@@ -58,92 +58,17 @@ namespace syrec {
             }
 
             return input;
-        } /*else if (is_peres(g)) {
-            if (input.test(*g.begin_controls())) // is single control set
-            {
-                // get both positions and value of t1
-                gate::const_iterator it = g.begin_targets();
-                unsigned             t1 = *it++;
-                unsigned             t2 = *it;
-
-                if (std::any_cast<peres_tag>(&g.type())->swap_targets) {
-                    unsigned tmp = t1;
-                    t1           = t2;
-                    t2           = tmp;
-                }
-
-                bool t1v = input.test(t1);
-
-                // flip t1 //
-                input.flip(t1);
-
-                // flip t2 if t1 was true //
-                if (t1v) {
-                    input.flip(t2);
-                }
-            }
-
-            return input;
-        } else if (is_module(g)) {
-            boost::dynamic_bitset<> c_mask(input.size());
-            for (gate::const_iterator itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
-                c_mask.set(*itControl);
-            }
-
-            // cancel if controls are not hit
-            if (!c_mask.is_subset_of(input)) {
-                return input;
-            }
-
-            const auto* tag = std::any_cast<module_tag>(&g.type());
-
-            // get the new input sub pattern
-            std::vector<unsigned>   targets(g.begin_targets(), g.end_targets());
-            boost::dynamic_bitset<> tpattern(targets.size());
-            for (unsigned i = 0u; i < targets.size(); ++i) {
-                tpattern.set(tag->target_sort_order.at(i), input.test(targets.at(i)));
-            }
-            boost::dynamic_bitset<> toutput;
-            assert(simple_simulation(toutput, *tag->reference, tpattern));
-
-            for (unsigned i = 0u; i < targets.size(); ++i) {
-                input.set(targets.at(i), toutput.test(tag->target_sort_order.at(i)));
-            }
-
-            return input;
-        } */
+        }
         else {
             assert(false);
         }
         return input;
     }
 
-    /*    bool simple_simulation(boost::dynamic_bitset<>& output, const gate& g, const boost::dynamic_bitset<>& input,
-                           const properties::ptr& settings,
-                           const properties::ptr& statistics) {
-        auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        auto step_result     = get<step_result_func>(settings, "step_result", step_result_func());
-
-        timer<properties_timer> t;
-
-        if (statistics) {
-            properties_timer rt(statistics);
-            t.start(rt);
-        }
-
-        output = input;
-        output = gate_simulation(g, output);
-        if (step_result) {
-            step_result(g, output);
-        }
-        return true;
-    }
-*/
     bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
                            const properties::ptr& settings,
                            const properties::ptr& statistics) {
         auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-        //auto step_result     = get<step_result_func>(settings, "step_result", step_result_func());
 
         timer<properties_timer> t;
 
@@ -155,9 +80,6 @@ namespace syrec {
         output = input;
         while (first != last) {
             output = gate_simulation(*first, output);
-            /*if (step_result) {
-                step_result(*first, output);
-            }*/
             ++first;
         }
         return true;
@@ -169,10 +91,5 @@ namespace syrec {
         return simple_simulation(output, circ.begin(), circ.end(), input, settings, statistics);
     }
 
-    /*[[maybe_unused]] simulation_func simple_simulation_func(properties::ptr settings, properties::ptr statistics) {
-        simulation_func f = [settings, statistics](auto&& PH1, auto&& PH2, auto&& PH3) { return simple_simulation(std::forward<decltype(PH1)>(PH1), std::forward<decltype(PH2)>(PH2), std::forward<decltype(PH3)>(PH3), settings, statistics); };
-        f.init(settings, statistics);
-        return f;
-    }*/
 
 } // namespace syrec

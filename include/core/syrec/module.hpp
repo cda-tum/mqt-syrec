@@ -61,15 +61,6 @@ namespace syrec::applications {
        */
         typedef std::vector<ptr> vec;
 
-        /**
-       * @brief Standard constructor
-       *
-       * Initializes default values
-       *
-
-
-       */
-        //module();
 
         /**
        * @brief Constructor
@@ -88,15 +79,6 @@ namespace syrec::applications {
        */
         ~module();
 
-        /**
-       * @brief Sets the name of the module
-       *
-       * @param name Name
-       *
-
-
-       */
-        //void set_name(const std::string& name);
 
         /**
        * @brief Returns the name of the module
@@ -128,15 +110,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const variable::vec& parameters() const;
 
-        /**
-       * @brief Adds a variable to the module
-       *
-       * @param variable Variable
-       *
-
-
-       */
-        //void add_variable(const variable::ptr& variable);
 
         /**
        * @brief Returns all variables of the module
@@ -187,17 +160,6 @@ namespace syrec::applications {
         priv* const d = nullptr;
     };
 
-    /**
-     * @brief Prints module to output stream
-     *
-     * @param os Output Stream
-     * @param m Module
-     *
-     * @return Output Stream
-     *
-
-     */
-    //std::ostream& operator<<(std::ostream& os, const module& m);
 
 } // namespace syrec::applications
 

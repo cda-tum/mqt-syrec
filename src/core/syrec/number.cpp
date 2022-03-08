@@ -23,29 +23,6 @@
 
 namespace syrec::applications {
 
-    /* class binary_numeric_expr {
-    public:
-        explicit binary_numeric_expr(number::ptr lhs, const unsigned op, number::ptr rhs):
-            op(op), lhs(std::move(lhs)), rhs(std::move(rhs)) {
-        }
-
-        [[nodiscard]] unsigned get_op() const {
-            return op;
-        }
-
-        [[nodiscard]] number::ptr get_lhs() const {
-            return lhs;
-        }
-
-        [[nodiscard]] number::ptr get_rhs() const {
-            return rhs;
-        }
-
-    private:
-        unsigned    op;
-        number::ptr lhs;
-        number::ptr rhs;
-    };*/
 
     struct evaluate_visitor {
         explicit evaluate_visitor(const number::loop_variable_mapping& map):
@@ -61,90 +38,6 @@ namespace syrec::applications {
             return it->second;
         }
 
-        /*unsigned operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
-            unsigned lhs_value = value->get_lhs()->evaluate(map);
-            unsigned rhs_value = value->get_rhs()->evaluate(map);
-
-            switch (value->get_op()) {
-                case numeric_expression::add: // +
-                {
-                    return lhs_value + rhs_value;
-                }
-
-                case numeric_expression::subtract: // -
-                {
-                    return lhs_value - rhs_value;
-                }
-
-                case numeric_expression::multiply: // *
-                {
-                    return lhs_value * rhs_value;
-                }
-
-                case numeric_expression::divide: // /
-                {
-                    return lhs_value / rhs_value;
-                }
-
-                case numeric_expression::modulo: // /
-                {
-                    return lhs_value % rhs_value;
-                }
-
-                case numeric_expression::logical_and: // /
-                {
-                    return lhs_value && rhs_value;
-                }
-
-                case numeric_expression::logical_or: // /
-                {
-                    return lhs_value || rhs_value;
-                }
-
-                case numeric_expression::bitwise_and: // /
-                {
-                    return lhs_value & rhs_value;
-                }
-
-                case numeric_expression::bitwise_or: // /
-                {
-                    return lhs_value | rhs_value;
-                }
-
-                case numeric_expression::less_than: // /
-                {
-                    return lhs_value < rhs_value;
-                }
-
-                case numeric_expression::greater_than: // /
-                {
-                    return lhs_value > rhs_value;
-                }
-
-                case numeric_expression::greater_equals: // /
-                {
-                    return lhs_value >= rhs_value;
-                }
-
-                case numeric_expression::less_equals: // /
-                {
-                    return lhs_value <= rhs_value;
-                }
-
-                case numeric_expression::equals: // /
-                {
-                    return lhs_value == rhs_value;
-                }
-
-                case numeric_expression::not_equals: // /
-                {
-                    return lhs_value != rhs_value;
-                }
-
-                default:
-                    return 0;
-            }
-        }*/
 
     private:
         const number::loop_variable_mapping& map;
@@ -166,10 +59,6 @@ namespace syrec::applications {
         d(new priv(value)) {
     }
 
-    /*number::number(const number::ptr& lhs, const unsigned op, const number::ptr& rhs):
-        d(new priv(std::make_unique<binary_numeric_expr>(binary_numeric_expr(lhs, op, rhs)))) {
-    }*/
-
     number::~number() {
         delete d;
     }
@@ -177,10 +66,6 @@ namespace syrec::applications {
     bool number::is_loop_variable() const {
         return std::holds_alternative<std::string>(d->number);
     }
-
-    /*[[maybe_unused]] bool number::is_conjunction() const {
-        return std::holds_alternative<std::unique_ptr<binary_numeric_expr>>(d->number);
-    }*/
 
     bool number::is_constant() const {
         return std::holds_alternative<unsigned>(d->number);
@@ -190,65 +75,10 @@ namespace syrec::applications {
         return std::get<std::string>(d->number);
     }
 
-    /* [[maybe_unused]] binary_numeric_expr* number::conjunction_expr() const {
-        return std::get<std::unique_ptr<binary_numeric_expr>>(d->number).get();
-    }*/
 
     unsigned number::evaluate(const loop_variable_mapping& map) const {
         return std::visit(evaluate_visitor(map), d->number);
     }
 
-    /*struct output_visitor {
-        explicit output_visitor(std::ostream& os):
-            os(os) {}
-
-        std::ostream& operator()(unsigned value) const {
-            return os << value;
-        }
-
-        std::ostream& operator()(const std::string& value) const {
-            return os << '$' << value;
-        }
-
-        std::ostream& operator()(const std::unique_ptr<binary_numeric_expr>& value) const {
-            os << "( " << *value->get_lhs();
-
-            switch (value->get_op()) {
-                case numeric_expression::add: // +
-                {
-                    os << " + ";
-                } break;
-
-                case numeric_expression::subtract: // -
-                {
-                    os << " - ";
-                } break;
-
-                case numeric_expression::multiply: // *
-                {
-                    os << " * ";
-                } break;
-
-                case numeric_expression::divide: // /
-                {
-                    os << " / ";
-                } break;
-
-                default:
-                    os << "Invalid Op";
-            }
-
-            os << *value->get_rhs() << " )";
-
-            return os;
-        }
-
-    private:
-        std::ostream& os;
-    };
-
-    std::ostream& operator<<(std::ostream& os, const number& n) {
-        return std::visit(output_visitor(os), n.d->number);
-    }*/
 
 } // namespace syrec::applications

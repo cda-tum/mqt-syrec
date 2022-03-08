@@ -41,32 +41,8 @@ endmacro()
 
 # TODO: add any source files containing tests here
 package_add_test(${PROJECT_NAME}_test
-		 unittests/test_simple_add.cpp
 		 unittests/test_alu.cpp
-		 unittests/test_call.cpp
-		unittests/test_negate.cpp
-		unittests/test_divide.cpp
-		unittests/test_for.cpp
-		unittests/test_gray_to_binary.cpp
-		unittests/test_input_repeated.cpp
-		unittests/test_modulo.cpp
-		unittests/test_multiple_statement.cpp
-		unittests/test_multiply.cpp
-		unittests/test_operators_repeated.cpp
-		unittests/test_parity.cpp
-		unittests/test_parity_check.cpp
-		unittests/test_single_longstatement.cpp
-		unittests/test_bitwise_and.cpp
-		unittests/test_bitwise_or.cpp
-		unittests/test_logical_and.cpp
-		unittests/test_logical_or.cpp
-		unittests/test_swap.cpp
-		unittests/test_shift.cpp
-		unittests/test_input_repeated_2.cpp
-		unittests/test_for_32.cpp
-		unittests/test_numeric.cpp
-		unittests/test_binary_numeric.cpp
-		unittests/test_bn.cpp)
+		 )
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD

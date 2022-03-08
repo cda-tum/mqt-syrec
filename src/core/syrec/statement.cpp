@@ -37,9 +37,6 @@ namespace syrec::applications {
         delete d;
     }
 
-    /*std::ostream& statement::print(std::ostream& os) const {
-        return os;
-    }*/
 
     void statement::set_line_number(unsigned line_number) {
         d->line_number = line_number;
@@ -57,9 +54,6 @@ namespace syrec::applications {
         variable_access::ptr rhs;
     };
 
-    /*  swap_statement::swap_statement():
-        d(new priv()) {
-    }*/
 
     swap_statement::swap_statement(variable_access::ptr lhs,
                                    variable_access::ptr rhs):
@@ -72,25 +66,15 @@ namespace syrec::applications {
         delete d;
     }
 
-    /*[[maybe_unused]] void swap_statement::set_lhs(variable_access::ptr lhs) {
-        d->lhs = std::move(lhs);
-    }*/
 
     variable_access::ptr swap_statement::lhs() const {
         return d->lhs;
     }
 
-    /*[[maybe_unused]] void swap_statement::set_rhs(variable_access::ptr rhs) {
-        d->rhs = std::move(rhs);
-    }*/
 
     variable_access::ptr swap_statement::rhs() const {
         return d->rhs;
     }
-
-    /* std::ostream& swap_statement::print(std::ostream& os) const {
-        return os << std::string(os.precision(), ' ') << *d->lhs << " <=> " << *d->rhs << ";" << std::endl;
-    }*/
 
     class unary_statement::priv {
     public:
@@ -100,9 +84,6 @@ namespace syrec::applications {
         variable_access::ptr var;
     };
 
-    /*unary_statement::unary_statement():
-        d(new priv()) {
-    }*/
 
     unary_statement::unary_statement(unsigned             op,
                                      variable_access::ptr var):
@@ -115,40 +96,13 @@ namespace syrec::applications {
         delete d;
     }
 
-    /*void unary_statement::set_op(unsigned op) {
-        d->op = op;
-    }*/
-
     unsigned unary_statement::op() const {
         return d->op;
     }
 
-    /* void unary_statement::set_var(variable_access::ptr var) {
-        d->var = std::move(var);
-    }*/
-
     variable_access::ptr unary_statement::var() const {
         return d->var;
     }
-
-    /*std::ostream& unary_statement::print(std::ostream& os) const {
-        os << std::string(os.precision(), ' ');
-        switch (d->op) {
-            case invert:
-                os << '~';
-                break;
-
-            case increment:
-                os << "++";
-                break;
-
-            case decrement:
-                os << "--";
-                break;
-        }
-        os << "= " << *d->var << ";" << std::endl;
-        return os;
-    }*/
 
     class assign_statement::priv {
     public:
@@ -159,9 +113,6 @@ namespace syrec::applications {
         unsigned             op{};
     };
 
-    /*assign_statement::assign_statement():
-        d(new priv()) {
-    }*/
 
     assign_statement::assign_statement(variable_access::ptr lhs,
                                        unsigned             op,
@@ -176,48 +127,21 @@ namespace syrec::applications {
         delete d;
     }
 
-    /* [[maybe_unused]] void assign_statement::set_lhs(variable_access::ptr lhs) {
-        d->lhs = std::move(lhs);
-    }*/
 
     variable_access::ptr assign_statement::lhs() const {
         return d->lhs;
     }
 
-    /*[[maybe_unused]] void assign_statement::set_rhs(expression::ptr rhs) {
-        d->rhs = std::move(rhs);
-    }*/
 
     expression::ptr assign_statement::rhs() const {
         return d->rhs;
     }
 
-    /*void assign_statement::set_op(unsigned op) {
-        d->op = op;
-    }*/
 
     unsigned assign_statement::op() const {
         return d->op;
     }
 
-    /*std::ostream& assign_statement::print(std::ostream& os) const {
-        os << std::string(os.precision(), ' ') << *d->lhs << " ";
-        switch (d->op) {
-            case add:
-                os << '+';
-                break;
-
-            case subtract:
-                os << '-';
-                break;
-
-            case exor:
-                os << '^';
-                break;
-        }
-        os << "= " << *d->rhs << ";" << std::endl;
-        return os;
-    }*/
 
     class if_statement::priv {
     public:
@@ -269,23 +193,6 @@ namespace syrec::applications {
         return d->fi_condition;
     }
 
-    /*std::ostream& if_statement::print(std::ostream& os) const {
-        unsigned indent = os.precision();
-        os.precision(indent + 2u);
-
-        os << std::string(indent, ' ') << "if " << *d->condition << " then" << std::endl;
-        for (const auto& statement: d->then_statements) {
-            os << *statement;
-        }
-        os << std::string(indent, ' ') << "else" << std::endl;
-        for (const auto& statement: d->else_statements) {
-            os << *statement;
-        }
-        os << std::string(indent, ' ') << "fi " << *d->fi_condition << ";" << std::endl;
-
-        os.precision(indent);
-        return os;
-    }*/
 
     class for_statement::priv {
     public:
@@ -346,41 +253,6 @@ namespace syrec::applications {
         return d->statements;
     }
 
-    /*std::ostream& for_statement::print(std::ostream& os) const {
-        unsigned indent = os.precision();
-        os.precision(indent + 2u);
-
-        os << std::string(indent, ' ') << "for ";
-
-        if (!d->loop_variable.empty()) {
-            os << "$" << d->loop_variable << " = ";
-        }
-
-        if (d->range.first) {
-            os << *d->range.first << " to ";
-        }
-
-        os << *d->range.second;
-
-        if (d->step) {
-            os << " step ";
-            if (d->negative_step) {
-                os << '-';
-            }
-            os << *d->step;
-        }
-
-        os << " do" << std::endl;
-        for (const auto& statement: d->statements) {
-            os << *statement;
-        }
-
-        os << std::string(indent, ' ') << "rof"
-           << ";" << std::endl;
-
-        os.precision(indent);
-        return os;
-    }*/
 
     class call_statement::priv {
     public:
@@ -390,14 +262,6 @@ namespace syrec::applications {
         std::vector<std::string> parameters;
     };
 
-    /* call_statement::call_statement():
-        d(new priv()) {
-    }*/
-
-    /*[[maybe_unused]] call_statement::call_statement(module::ptr target):
-        d(new priv()) {
-        d->target = std::move(target);
-    }*/
 
     call_statement::call_statement(module::ptr target, const std::vector<std::string>& parameters):
         d(new priv()) {
@@ -409,33 +273,15 @@ namespace syrec::applications {
         delete d;
     }
 
-    /*void call_statement::set_target(module::ptr target) {
-        d->target = std::move(target);
-    }*/
 
     module::ptr call_statement::target() const {
         return d->target;
     }
 
-    /*[[maybe_unused]] void call_statement::set_parameters(const std::vector<std::string>& parameters) {
-        d->parameters = parameters;
-    }*/
 
     const std::vector<std::string>& call_statement::parameters() const {
         return d->parameters;
     }
-
-    /*std::ostream& call_statement::print(std::ostream& os) const {
-        os << std::string(os.precision(), ' ') << "call " << d->target->name() << "(";
-        for (const auto& parameter: d->parameters) {
-            if (parameter != d->parameters.front()) {
-                os << ", ";
-            }
-            os << parameter;
-        }
-        os << ");" << std::endl;
-        return os;
-    }*/
 
     class uncall_statement::priv {
     public:
@@ -445,14 +291,6 @@ namespace syrec::applications {
         std::vector<std::string> parameters;
     };
 
-    /*uncall_statement::uncall_statement():
-        d(new priv()) {
-    }*/
-
-    /*[[maybe_unused]] uncall_statement::uncall_statement(module::ptr target):
-        d(new priv()) {
-        d->target = std::move(target);
-    }*/
 
     uncall_statement::uncall_statement(module::ptr target, const std::vector<std::string>& parameters):
         d(new priv()) {
@@ -464,42 +302,91 @@ namespace syrec::applications {
         delete d;
     }
 
-    /* void uncall_statement::set_target(module::ptr target) {
-        d->target = std::move(target);
-    }*/
 
     module::ptr uncall_statement::target() const {
         return d->target;
     }
 
-    /*[[maybe_unused]] void uncall_statement::set_parameters(const std::vector<std::string>& parameters) {
-        d->parameters = parameters;
-    }*/
-
     const std::vector<std::string>& uncall_statement::parameters() const {
         return d->parameters;
     }
 
-    /* std::ostream& uncall_statement::print(std::ostream& os) const {
-        os << std::string(os.precision(), ' ') << "uncall " << d->target->name() << "(";
-        for (const auto& parameter: d->parameters) {
-            if (parameter != d->parameters.front()) {
-                os << ", ";
-            }
-            os << parameter;
-        }
-        os << ");" << std::endl;
-        return os;
-    }*/
-
     skip_statement::~skip_statement() = default;
 
-    /*std::ostream& skip_statement::print(std::ostream& os) const {
-        return os << std::string(os.precision(), ' ') << "skip;" << std::endl;
-    }*/
 
-    /*std::ostream& operator<<(std::ostream& os, const statement& s) {
-        return s.print(os);
-    }*/
+    statement::ptr reverse_statements::operator()(statement::ptr _statement) const {
+        if (dynamic_cast<swap_statement*>(_statement.get())) {
+            return _statement;
+        } else if (auto* stat = dynamic_cast<unary_statement*>(_statement.get())) {
+            switch (stat->op()) {
+                case unary_statement::invert:
+                    return _statement;
+
+                case unary_statement::increment:
+                    return statement::ptr(new unary_statement(unary_statement::decrement, stat->var()));
+
+                case unary_statement::decrement:
+                    return statement::ptr(new unary_statement(unary_statement::increment, stat->var()));
+            }
+        } else if (auto* stat_1 = dynamic_cast<assign_statement*>(_statement.get())) {
+            switch (stat_1->op()) {
+                case assign_statement::add:
+                    std::cout << "add uncall" << std::endl;
+                    return statement::ptr(new assign_statement(stat_1->lhs(), assign_statement::subtract, stat_1->rhs()));
+
+                case assign_statement::subtract:
+                    std::cout << "sub uncall" << std::endl;
+                    return statement::ptr(new assign_statement(stat_1->lhs(), assign_statement::add, stat_1->rhs()));
+
+                case assign_statement::exor:
+                    std::cout << "exor uncall" << std::endl;
+                    return _statement;
+            }
+        } else if (auto* stat_2 = dynamic_cast<if_statement*>(_statement.get())) {
+            auto* if_stat = new if_statement();
+
+            if_stat->set_condition(stat_2->fi_condition());
+
+            if_stat->set_fi_condition(stat_2->condition());
+
+            for (auto it = stat_2->then_statements().rbegin(); it != stat_2->then_statements().rend(); ++it) {
+                if_stat->add_then_statement(*it);
+            }
+            for (auto it = stat_2->else_statements().rbegin(); it != stat_2->else_statements().rend(); ++it) {
+                if_stat->add_else_statement(*it);
+            }
+
+            return statement::ptr(if_stat);
+        } else if (auto* stat_3 = dynamic_cast<for_statement*>(_statement.get())) {
+            auto* for_stat = new for_statement();
+            std::cout << "for1" << std::endl;
+            for_stat->set_loop_variable(stat_3->loop_variable());
+            std::cout << "for2" << std::endl;
+            for_stat->set_range(std::make_pair(stat_3->range().second, stat_3->range().first));
+
+            /*for_stat->set_step(stat_3->step());
+            for_stat->set_negative_step(!stat_3->is_negative_step());*/
+
+            std::cout << "for3" << std::endl;
+            for (auto it = stat_3->statements().rbegin(); it != stat_3->statements().rend(); ++it) {
+                std::cout << "for5" << std::endl;
+                for_stat->add_statement(*it);
+            }
+            std::cout << "for4" << std::endl;
+            return statement::ptr(for_stat);
+        }
+        //else if (auto* stat_4 = dynamic_cast<call_statement*>(_statement.get())) {
+        //  return statement::ptr(new uncall_statement(stat_4->target(), stat_4->parameters()));
+        //} else if (auto* stat_5 = dynamic_cast<uncall_statement*>(_statement.get())) {
+        //    return statement::ptr(new call_statement(stat_5->target(), stat_5->parameters()));
+        //}
+        else if (dynamic_cast<skip_statement*>(_statement.get())) {
+            return _statement;
+        }
+
+        std::cout << "reverse_statement" << std::endl;
+
+        return _statement;
+    }
 
 } // namespace syrec::applications

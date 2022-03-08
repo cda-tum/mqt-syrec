@@ -36,7 +36,7 @@ namespace syrec {
 
     struct transform_line;
     struct filter_line;
-    //class filtered_gate;
+
 
     /**
    * @brief Represents a gate in a circuit
@@ -141,25 +141,6 @@ namespace syrec {
      */
         [[nodiscard]] virtual const_iterator end_controls() const;
 
-        /**
-     * @brief Start iterator for accessing control lines (non-const).
-     *
-     * Returns The start iterator of the line_container for accessing lines (non-const). 
-     *
-
-
-     */
-        //[[maybe_unused]] virtual iterator begin_controls();
-
-        /**
-     * @brief End iterator for accessing control lines (non-const).
-     *
-     * Returns the end iterator of the line_container for accessing control lines (non-const). 
-     *
-
-
-     */
-        //[[maybe_unused]] virtual iterator end_controls();
 
         /**
      * @brief Start iterator for accessing target lines (const).
@@ -181,37 +162,6 @@ namespace syrec {
      */
         [[nodiscard]] virtual const_iterator end_targets() const;
 
-        /**
-     * @brief Start iterator for accessing target lines (const).
-     *
-     * Returns The start iterator of the line_container for accessing target lines (const). 
-     *
-
-
-     */
-        //[[maybe_unused]] virtual iterator begin_targets();
-
-        /**
-     * @brief End iterator for accessing target lines (non-const).
-     *
-     * Returns The start iterator of the line_container for accessing target lines (non-const). 
-     *
-
-
-     */
-        //[[maybe_unused]] virtual iterator end_targets();
-
-        /**
-     * @brief Returns the number of control and target lines as sum
-     *
-     * This method returns the number of control and target
-     * lines as sum and can be used for e.g. calculating costs.
-     *
-
-     *
-     * @return Number of control and target lines.
-     */
-        //[[nodiscard]] virtual unsigned size() const;
 
         /**
      * @brief Adds a control line to the gate
@@ -223,15 +173,6 @@ namespace syrec {
      */
         virtual void add_control(line c);
 
-        /**
-     * @brief Remove control line to the gate
-     *
-     * @param c control line to remove
-     *
-
-
-     */
-        //  virtual void remove_control(line c);
 
         /**
      * @brief Adds a target to the desired line
@@ -242,16 +183,6 @@ namespace syrec {
 
      */
         virtual void add_target(line l);
-
-        /**
-     * @brief Removes a target from the desired line
-     *
-     * @param l target line 
-     *
-
-
-     */
-        //virtual void remove_target(line l);
 
         /**
      * @brief Sets the type of the target line(s)
@@ -271,91 +202,12 @@ namespace syrec {
      */
         [[nodiscard]] virtual const std::any& type() const;
 
-        // friend class filtered_gate;
 
     private:
         struct priv;
         priv* const d;
     };
 
-    /**
-   * @brief Wrapper for a gate to filter some lines
-   *
-   * This class wraps a underline \p base gate to just
-   * access some lines which are specified in filter.
-   *
-   * You will never have to create a filtered_gate object
-   * on your own, but you will get this as reference object
-   * to your iterators in a subcircuit.
-   *
-
-   */
-    //class filtered_gate: public gate {
-    //public:
-    /**
-     * @brief Standard constructor
-     *
-     * Creates a filtered_gate from a base gate and
-     * a list of indices which should be included in this
-     * gate.
-     * 
-     * @param base   The underlying referenced gate
-     * @param filter A vector with line indices which are included in this gate
-     *
-
-     */
-    //   filtered_gate(gate& base, std::vector<unsigned>& filter);
-
-    /**
-     * @brief Copy constructor
-     *
-     * @param other Object to be copied from
-     *
-
-     */
-    //   filtered_gate(const filtered_gate& other);
-
-    /**
-     * @brief Deconstructor
-     */
-    //   ~filtered_gate() override;
-
-    /**
-     * @brief Assignment operator
-     *
-     * @param other Gate to be assigned
-     *
-     * @return Pointer to instance
-     *
-
-     */
-    /*  filtered_gate& operator=(const filtered_gate& other);
-
-        [[nodiscard]] const_iterator begin_controls() const override;
-        [[nodiscard]] const_iterator end_controls() const override;
-        iterator                     begin_controls() override;
-        iterator                     end_controls() override;
-
-        [[nodiscard]] const_iterator begin_targets() const override;
-        [[nodiscard]] const_iterator end_targets() const override;
-        iterator                     begin_targets() override;
-        iterator                     end_targets() override;
-
-        [[nodiscard]] unsigned size() const override;
-        void                   add_control(line c) override;
-        void                   remove_control(line c) override;
-        void                   add_target(line l) override;
-        void                   remove_target(line l) override;
-
-        void                          set_type(const std::any& t) override;
-        [[nodiscard]] const std::any& type() const override;
-
-    private:
-        struct priv;
-        priv* const d;
-    };*/
-
-    /** @cond */
     struct transform_line {
         typedef gate::line result_type;
 
@@ -366,7 +218,6 @@ namespace syrec {
 
         gate::line operator()(gate::line l) const {
             return filter ? std::find(filter->begin(), filter->end(), l) - filter->begin() : l;
-            //return l;
         }
 
     private:
@@ -390,6 +241,59 @@ namespace syrec {
     };
     /** @endcond */
 
+    /**
+   * @brief Gets the control lines of a gate
+   *
+   * This function stores all control lines of a gate into a container.
+   *
+   * @section Example
+   * @code
+   * gate g = ...;
+   * std::vector<gate::line> controls;
+   * control_lines( g, std::back_inserter( controls ) );
+   * @endcode
+   *
+   * @param g      Gate
+   * @param result Iterator to store the lines as gate::line type
+   *
+   * @return The iterator after adding the lines (pointing after the end)
+   *
+
+    */
+            template<typename Iterator>
+            Iterator control_lines(const gate& g, Iterator result) {
+        for (gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c) {
+            *result++ = *c;
+        }
+        return result;
+    }
+
+    /**
+   * @brief Gets the target lines of a gate
+   *
+   * This function stores all target lines of a gate into a container.
+   *
+   * @section Example
+   * @code
+   * gate g = ...;
+   * std::vector<gate::line> targets;
+   * target_lines( g, std::back_inserter( targets ) );
+   * @endcode
+   *
+   * @param g      Gate
+   * @param result Iterator to store the lines as gate::line type
+   *
+   * @return The iterator after adding the lines (pointing after the end)
+   *
+
+    */
+            template<typename Iterator>
+            Iterator target_lines(const gate& g, Iterator result) {
+        for (gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c) {
+            *result++ = *c;
+        }
+        return result;
+    }
 } // namespace syrec
 
 #endif /* GATE_HPP */
