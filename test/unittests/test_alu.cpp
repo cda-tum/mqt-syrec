@@ -46,14 +46,14 @@ namespace syrec {
     };
 
     TEST_F(syrec_test_alu, GenericTest_alu1) {
-
+        circuit               circ;
         for (int i = 1; i < (int)content.size(); i++) {
 
-            circuit               circ;
+
             applications::program prog;
             std::string           error_string;
-            cost_t                qc = 0;
-            cost_t                tc = 0;
+            cost_t                qc;
+            cost_t                tc;
             properties::ptr       settings;
             properties::ptr       statistics;
 
