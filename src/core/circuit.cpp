@@ -16,6 +16,7 @@
  */
 
 #include "core/circuit.hpp"
+
 #include "core/gate.hpp"
 
 #include <memory>
@@ -27,7 +28,6 @@ namespace syrec {
         unsigned operator()(const standard_circuit& circ) const {
             return circ.gates.size();
         }
-
     };
 
     struct lines_setter {
@@ -42,8 +42,6 @@ namespace syrec {
             circ.garbage.resize(lines, false);
         }
 
-
-
     private:
         unsigned lines;
     };
@@ -52,27 +50,19 @@ namespace syrec {
         unsigned operator()(const standard_circuit& circ) const {
             return circ.lines;
         }
-
-
     };
 
     struct const_begin_visitor {
         circuit::const_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.begin()), const_filter_circuit());
-
         }
-
-
     };
 
     struct const_end_visitor {
         circuit::const_iterator operator()(const standard_circuit& circ) const {
             return boost::make_transform_iterator(boost::make_indirect_iterator(circ.gates.end()), const_filter_circuit());
         }
-
-
     };
-
 
     struct append_gate_visitor {
         explicit append_gate_visitor(circuit& c):
@@ -88,8 +78,6 @@ namespace syrec {
     private:
         circuit& c;
     };
-
-
 
     struct insert_gate_visitor {
         insert_gate_visitor(unsigned _pos, circuit& c):
@@ -117,7 +105,6 @@ namespace syrec {
             circ.inputs.resize(circ.lines, "i");
         }
 
-
     private:
         const std::vector<std::string>& inputs;
     };
@@ -126,8 +113,6 @@ namespace syrec {
         const std::vector<std::string>& operator()(const standard_circuit& circ) const {
             return circ.inputs;
         }
-
-
     };
 
     struct outputs_setter {
@@ -140,7 +125,6 @@ namespace syrec {
             circ.outputs.resize(circ.lines, "o");
         }
 
-
     private:
         const std::vector<std::string>& outputs;
     };
@@ -149,8 +133,6 @@ namespace syrec {
         const std::vector<std::string>& operator()(const standard_circuit& circ) const {
             return circ.outputs;
         }
-
-
     };
 
     struct constants_setter {
@@ -163,7 +145,6 @@ namespace syrec {
             circ.constants.resize(circ.lines, constant());
         }
 
-
     private:
         const std::vector<constant>& constants;
     };
@@ -172,8 +153,6 @@ namespace syrec {
         const std::vector<constant>& operator()(const standard_circuit& circ) const {
             return circ.constants;
         }
-
-
     };
 
     struct garbage_setter {
@@ -186,7 +165,6 @@ namespace syrec {
             circ.garbage.resize(circ.lines, false);
         }
 
-
     private:
         const std::vector<bool>& garbage;
     };
@@ -195,9 +173,7 @@ namespace syrec {
         const std::vector<bool>& operator()(const standard_circuit& circ) const {
             return circ.garbage;
         }
-
     };
-
 
     struct annotations_visitor {
         explicit annotations_visitor(const gate& g):
@@ -212,8 +188,6 @@ namespace syrec {
             }
         }
 
-
-
     private:
         const gate& g;
     };
@@ -226,7 +200,6 @@ namespace syrec {
         void operator()(standard_circuit& circ) const {
             circ.annotations[&g][key] = value;
         }
-
 
     private:
         const gate&        g;
@@ -259,12 +232,10 @@ namespace syrec {
         return constEndVisitor(circ);
     }
 
-
     gate& circuit::append_gate() {
         append_gate_visitor appendGateVisitor(*this);
         return appendGateVisitor(circ);
     }
-
 
     gate& circuit::insert_gate(unsigned pos) {
         insert_gate_visitor insertGateVisitor(pos, *this);

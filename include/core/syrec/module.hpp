@@ -61,7 +61,6 @@ namespace syrec::applications {
        */
         typedef std::vector<ptr> vec;
 
-
         /**
        * @brief Constructor
        *
@@ -78,7 +77,6 @@ namespace syrec::applications {
        * @brief Deconstructor
        */
         ~module();
-
 
         /**
        * @brief Returns the name of the module
@@ -109,7 +107,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const variable::vec& parameters() const;
-
 
         /**
        * @brief Returns all variables of the module
@@ -159,7 +156,6 @@ namespace syrec::applications {
         class priv;
         priv* const d = nullptr;
     };
-
 
 } // namespace syrec::applications
 

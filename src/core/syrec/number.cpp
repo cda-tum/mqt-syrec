@@ -23,7 +23,6 @@
 
 namespace syrec::applications {
 
-
     struct evaluate_visitor {
         explicit evaluate_visitor(const number::loop_variable_mapping& map):
             map(map) {}
@@ -37,7 +36,6 @@ namespace syrec::applications {
             assert(it != map.end());
             return it->second;
         }
-
 
     private:
         const number::loop_variable_mapping& map;
@@ -75,10 +73,8 @@ namespace syrec::applications {
         return std::get<std::string>(d->number);
     }
 
-
     unsigned number::evaluate(const loop_variable_mapping& map) const {
         return std::visit(evaluate_visitor(map), d->number);
     }
-
 
 } // namespace syrec::applications

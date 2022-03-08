@@ -86,7 +86,6 @@ namespace syrec::applications {
        */
         explicit number(const std::string& value);
 
-
         /**
        * @brief Deconstructor
        *
@@ -104,7 +103,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] bool is_loop_variable() const;
-
 
         /**
        * @brief Returns whether the number is a known constant number
@@ -130,7 +128,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::string& variable_name() const;
 
-
         /**
        * @brief Evaluates the number in the context of an execution
        * 
@@ -152,12 +149,10 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
 
-
     private:
         class priv;
         priv* const d = nullptr;
     };
-
 
 } // namespace syrec::applications
 

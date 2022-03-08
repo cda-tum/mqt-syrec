@@ -17,7 +17,6 @@
 
 #include "core/syrec/parser.hpp"
 
-
 #include <fstream>
 #include <memory>
 #include <optional>
@@ -458,7 +457,6 @@ namespace syrec {
             return new binary_expression(lhs, op, rhs);
         }
 
-
         expression* operator()(const ast_shift_expression& ast_exp) const {
             ast_expression ast_exp1 = ast_exp.operand1;
             std::string    ast_op   = ast_exp.op;
@@ -767,7 +765,6 @@ namespace syrec {
                     bf::at_c<1>(bf::at_c<1>(ast_param)),
                     bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
         }
-
 
         for (const ast_statement& ast_stat: bf::at_c<3>(ast_proc)) {
             statement::ptr stat = parse_statement(ast_stat, prog, proc, context);

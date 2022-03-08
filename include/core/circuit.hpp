@@ -32,9 +32,9 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <string>
 #include <utility>
 #include <variant>
-#include <string>
 
 namespace syrec {
     /**
@@ -94,10 +94,8 @@ namespace syrec {
 
     class standard_circuit {
     public:
-
         standard_circuit():
             lines(0) {}
-
 
         /** @cond 0 */
         std::vector<std::shared_ptr<gate>> gates;
@@ -113,10 +111,7 @@ namespace syrec {
         /** @endcond */
     };
 
-
-
     typedef standard_circuit circuit_variant;
-
 
     struct const_filter_circuit {
         typedef const gate& result_type;
@@ -126,7 +121,6 @@ namespace syrec {
         }
 
     private:
-
     };
     /** @endcond */
 
@@ -217,7 +211,6 @@ namespace syrec {
 
      */
         [[nodiscard]] const_iterator end() const;
-
 
         /**
      * @brief Inserts a gate at the end of the circuit

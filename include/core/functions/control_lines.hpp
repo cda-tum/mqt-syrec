@@ -29,7 +29,6 @@
 
 namespace syrec {
 
-
 } // namespace syrec
 
 #endif /* CONTROL_LINES_HPP */

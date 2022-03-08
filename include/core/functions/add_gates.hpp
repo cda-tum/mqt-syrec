@@ -116,8 +116,6 @@ namespace syrec {
      */
         target_line_adder operator()();
 
-
-
         /**
      * @brief Add two control lines
      *
@@ -131,7 +129,6 @@ namespace syrec {
 
      */
         target_line_adder operator()(const gate::line& l1, const gate::line& l2);
-
 
     private:
         gate* g = nullptr;
@@ -163,7 +160,6 @@ namespace syrec {
    */
     gate& append_cnot(circuit& circ, const gate::line& control, const gate::line& target);
 
-
     /**
    * @brief Helper function for appending a \b NOT gate
    *
@@ -175,7 +171,6 @@ namespace syrec {
 
    */
     gate& append_not(circuit& circ, const gate::line& target);
-
 
     /**
    * @brief Helper function for appending a generic gate using the control_line_adder

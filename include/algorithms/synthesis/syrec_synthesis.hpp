@@ -56,7 +56,6 @@ namespace syrec {
     } // namespace applications
     using namespace internal;
 
-
     class standard_syrec_synthesizer {
     public:
         typedef std::map<applications::variable::ptr, unsigned> var_lines_map;
@@ -65,16 +64,16 @@ namespace syrec {
 
         virtual ~standard_syrec_synthesizer() = default;
 
-        virtual bool on_module(const applications::module::ptr&);
-        virtual bool on_statement(const applications::statement::ptr& statement);
-        bool         on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        [[maybe_unused]] bool var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new//new
-        bool         op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
-        bool         full_statement(const applications::statement::ptr& statement);                                    //new
-        bool         flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);                  // new
-        virtual void set_settings(const properties::ptr& settings);
-        virtual void set_main_module(const applications::module::ptr& main_module);
-        bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
+        virtual bool          on_module(const applications::module::ptr&);
+        virtual bool          on_statement(const applications::statement::ptr& statement);
+        bool                  on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        [[maybe_unused]] bool var_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v);        //new//new
+        bool                  op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v); //new
+        bool                  full_statement(const applications::statement::ptr& statement);                                    //new
+        bool                  flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);                  // new
+        virtual void          set_settings(const properties::ptr& settings);
+        virtual void          set_main_module(const applications::module::ptr& main_module);
+        bool                  solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
         // Virtual Methods to override for custom synthesizers
     protected:
         // statements
@@ -106,7 +105,7 @@ namespace syrec {
                 bool
                      bitwise_negation(const std::vector<unsigned>& dest); // ~
         virtual bool decrement(const std::vector<unsigned>& dest);        // --
-        virtual bool increment(const std::vector<unsigned>& dest); // ++
+        virtual bool increment(const std::vector<unsigned>& dest);        // ++
 
         virtual // binary operations
                 bool
@@ -125,10 +124,9 @@ namespace syrec {
         virtual bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // <
         virtual bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
         virtual bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
-        virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // !=
-        virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                    // <=>
-        static bool check_repeats();
-
+        virtual bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                         // !=
+        virtual bool swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
+        static bool  check_repeats();
 
         bool decrease_new(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
@@ -136,8 +134,8 @@ namespace syrec {
         bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
         bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
         bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
-                // shift operations
-                bool
+        // shift operations
+        bool
                      left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // <<
         virtual bool right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2); // >>
 
@@ -147,22 +145,17 @@ namespace syrec {
 
         virtual bool assemble_circuit(const cct_node&);
 
-
         cct_manager cct_man;
 
     public:
         var_lines_map& var_lines();
 
-
     protected:
-
-
         virtual bool get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines);
         bool         unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
 
         unsigned get_constant_line(bool value);
         bool     get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
-
 
     private:
         circuit&                                    _circ;
@@ -171,7 +164,6 @@ namespace syrec {
         var_lines_map                               _var_lines;
         std::map<bool, std::vector<unsigned>>       free_const_lines_map; // TODO: set statt vector?
         applications::number::loop_variable_mapping loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
-
 
         typedef std::set<applications::variable_access::ptr, applications::set_comperator> var_set;
 

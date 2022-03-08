@@ -80,7 +80,6 @@ namespace syrec::applications {
        */
         virtual ~statement();
 
-
         /**
        * @brief Sets the line number of the SyReC code
        * 
@@ -116,7 +115,6 @@ namespace syrec::applications {
      */
     class swap_statement: public statement {
     public:
-
         /**
        * @brief Constructor
        * 
@@ -137,7 +135,6 @@ namespace syrec::applications {
        */
         ~swap_statement() override;
 
-
         /**
        * @brief Returns variable access on left hand side
        * 
@@ -148,7 +145,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] variable_access::ptr lhs() const;
 
-
         /**
        * @brief Returns variable access on right hand side
        * 
@@ -158,7 +154,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] variable_access::ptr rhs() const;
-
 
     private:
         class priv;
@@ -198,7 +193,6 @@ namespace syrec::applications {
             decrement
         };
 
-
         /**
        * @brief Constructor
        * 
@@ -219,7 +213,6 @@ namespace syrec::applications {
        */
         ~unary_statement() override;
 
-
         /**
        * @brief Returns the operation of the statement
        * 
@@ -230,7 +223,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned op() const;
 
-
         /**
        * @brief Returns the variable access of the statement
        * 
@@ -240,7 +232,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] variable_access::ptr var() const;
-
 
     private:
         class priv;
@@ -279,7 +270,6 @@ namespace syrec::applications {
          */
             exor
         };
-
 
         /**
        * @brief Constructor
@@ -323,7 +313,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr rhs() const;
 
-
         /**
        * @brief Returns the operation to be applied
        * 
@@ -334,7 +323,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] unsigned op() const;
-
 
     private:
         class priv;
@@ -535,7 +523,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const std::pair<number::ptr, number::ptr>& range() const;
 
-
         /**
        * @brief Returns the step of the loop
        * 
@@ -545,7 +532,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const number::ptr& step() const;
-
 
         /**
        * @brief Adds a statement to be executed in the loop
@@ -567,7 +553,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] const statement::vec& statements() const;
 
-
     private:
         class priv;
         priv* const d = nullptr;
@@ -582,7 +567,6 @@ namespace syrec::applications {
      */
     class call_statement: public statement {
     public:
-
         /**
        * @brief Constructor with module and parameters
        * 
@@ -612,7 +596,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] std::shared_ptr<module> target() const;
 
-
         /**
        * @brief Returns the parameters to assign with the module call
        * 
@@ -637,7 +620,6 @@ namespace syrec::applications {
      */
     class uncall_statement: public statement {
     public:
-
         /**
        * @brief Constructor with module and parameters
        * 
@@ -657,7 +639,6 @@ namespace syrec::applications {
        */
         ~uncall_statement() override;
 
-
         /**
        * @brief Returns the target module to uncall
        * 
@@ -668,7 +649,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] std::shared_ptr<module> target() const;
 
-
         /**
        * @brief Returns the parameters to assign with the module uncall
        * 
@@ -678,7 +658,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const std::vector<std::string>& parameters() const;
-
 
     private:
         class priv;
@@ -702,7 +681,6 @@ namespace syrec::applications {
 
        */
         ~skip_statement() override;
-
     };
 
     /**

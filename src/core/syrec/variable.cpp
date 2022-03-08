@@ -16,6 +16,7 @@
  */
 
 #include "core/syrec/variable.hpp"
+
 #include "core/syrec/expression.hpp"
 
 #include <cassert>
@@ -36,7 +37,6 @@ namespace syrec::applications {
         std::vector<unsigned> dimensions{};
     };
 
-
     variable::variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth):
         d(new priv()) {
         d->type       = type;
@@ -49,16 +49,13 @@ namespace syrec::applications {
         delete d;
     }
 
-
     unsigned variable::type() const {
         return d->type;
     }
 
-
     const std::string& variable::name() const {
         return d->name;
     }
-
 
     unsigned variable::bitwidth() const {
         return d->bitwidth;
@@ -71,7 +68,6 @@ namespace syrec::applications {
     variable::ptr variable::reference() const {
         return d->reference;
     }
-
 
     const std::vector<unsigned>& variable::dimensions() const {
         return d->dimensions;
@@ -89,7 +85,6 @@ namespace syrec::applications {
     variable_access::variable_access():
         d(new priv()) {
     }
-
 
     variable_access::~variable_access() {
         delete d;
@@ -144,6 +139,5 @@ namespace syrec::applications {
     const expression::vec& variable_access::indexes() const {
         return d->indexes;
     }
-
 
 } // namespace syrec::applications

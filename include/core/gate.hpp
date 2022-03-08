@@ -37,7 +37,6 @@ namespace syrec {
     struct transform_line;
     struct filter_line;
 
-
     /**
    * @brief Represents a gate in a circuit
    *
@@ -141,7 +140,6 @@ namespace syrec {
      */
         [[nodiscard]] virtual const_iterator end_controls() const;
 
-
         /**
      * @brief Start iterator for accessing target lines (const).
      *
@@ -162,7 +160,6 @@ namespace syrec {
      */
         [[nodiscard]] virtual const_iterator end_targets() const;
 
-
         /**
      * @brief Adds a control line to the gate
      *
@@ -172,7 +169,6 @@ namespace syrec {
 
      */
         virtual void add_control(line c);
-
 
         /**
      * @brief Adds a target to the desired line
@@ -201,7 +197,6 @@ namespace syrec {
 
      */
         [[nodiscard]] virtual const std::any& type() const;
-
 
     private:
         struct priv;
@@ -260,8 +255,8 @@ namespace syrec {
    *
 
     */
-            template<typename Iterator>
-            Iterator control_lines(const gate& g, Iterator result) {
+    template<typename Iterator>
+    Iterator control_lines(const gate& g, Iterator result) {
         for (gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c) {
             *result++ = *c;
         }
@@ -287,8 +282,8 @@ namespace syrec {
    *
 
     */
-            template<typename Iterator>
-            Iterator target_lines(const gate& g, Iterator result) {
+    template<typename Iterator>
+    Iterator target_lines(const gate& g, Iterator result) {
         for (gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c) {
             *result++ = *c;
         }

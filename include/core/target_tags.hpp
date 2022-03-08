@@ -52,7 +52,6 @@ namespace syrec {
    */
     struct fredkin_tag {};
 
-
     /**
    * @brief Returns whether a gate is a Toffoli gate
    *

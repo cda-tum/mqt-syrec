@@ -106,7 +106,6 @@ namespace syrec::applications {
        */
         ~variable();
 
-
         /**
        * @brief Returns the type of the variable
        *
@@ -117,7 +116,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned type() const;
 
-
         /**
        * @brief Returns the name of the variable
        *
@@ -127,7 +125,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const std::string& name() const;
-
 
         /**
        * @brief Returns the bit-width of the variable
@@ -177,7 +174,6 @@ namespace syrec::applications {
 
        */
         variable_access();
-
 
         /**
        * @brief Deconstructor
@@ -254,7 +250,6 @@ namespace syrec::applications {
         class priv;
         priv* const d = nullptr;
     };
-
 
 } // namespace syrec::applications
 

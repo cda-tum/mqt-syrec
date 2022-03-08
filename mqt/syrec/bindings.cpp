@@ -1,8 +1,6 @@
 
 #include "algorithms/simulation/simple_simulation.hpp"
 #include "algorithms/synthesis/syrec_synthesis.hpp"
-#include <boost/dynamic_bitset.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
 #include "core/properties.hpp"
@@ -11,8 +9,10 @@
 #include "core/target_tags.hpp"
 #include "core/utils/costs.hpp"
 
-#include <pybind11/stl.h>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 #include <functional>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 using namespace syrec;
@@ -157,8 +157,7 @@ py::list target_lines_func(const gate& g) {
 
 ///simulation
 
-std::function <bool (boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation);
-
+std::function<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation);
 
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";

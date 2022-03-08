@@ -79,7 +79,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] virtual unsigned bitwidth() const = 0;
 
-
     private:
         class priv;
         priv* const d = nullptr;
@@ -162,7 +161,6 @@ namespace syrec::applications {
        */
         ~numeric_expression() override;
 
-
         /**
        * @brief Returns the value of the expression
        *
@@ -183,8 +181,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-
-
     private:
         class priv;
         priv* const d = nullptr;
@@ -200,8 +196,6 @@ namespace syrec::applications {
      */
     class variable_expression: public expression {
     public:
-
-
         /**
        * @brief Constructor with variable
        * 
@@ -219,7 +213,6 @@ namespace syrec::applications {
 
        */
         ~variable_expression() override;
-
 
         /**
        * @brief Returns the variable of the expression
@@ -242,7 +235,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] unsigned bitwidth() const override;
-
 
     private:
         class priv;
@@ -358,7 +350,6 @@ namespace syrec::applications {
             greater_equals
         };
 
-
         /**
        * @brief Constructor which initializes a operation
        * 
@@ -381,7 +372,6 @@ namespace syrec::applications {
        */
         ~binary_expression() override;
 
-
         /**
        * @brief Returns the left hand side of the expression
        * 
@@ -392,8 +382,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr lhs() const;
 
-
-
         /**
        * @brief Returns the right hand side of the expression
        * 
@@ -403,8 +391,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] expression::ptr rhs() const;
-
-
 
         /**
        * @brief Returns the operation to be performed
@@ -431,7 +417,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] unsigned bitwidth() const override;
-
 
     private:
         class priv;
@@ -466,8 +451,6 @@ namespace syrec::applications {
             right
         };
 
-
-
         /**
        * @brief Constructor
        *
@@ -494,8 +477,6 @@ namespace syrec::applications {
        */
         ~shift_expression() override;
 
-
-
         /**
        * @brief Returns the left-hand side expression
        * 
@@ -506,7 +487,6 @@ namespace syrec::applications {
        */
         [[nodiscard]] expression::ptr lhs() const;
 
-
         /**
        * @brief Returns the number of bits to shift
        * 
@@ -516,7 +496,6 @@ namespace syrec::applications {
 
        */
         [[nodiscard]] const number::ptr& rhs() const;
-
 
         /**
        * @brief Returns the shift operation
@@ -541,14 +520,10 @@ namespace syrec::applications {
        */
         [[nodiscard]] unsigned bitwidth() const override;
 
-
-
     private:
         class priv;
         priv* const d = nullptr;
     };
-
-
 
 } // namespace syrec::applications
 

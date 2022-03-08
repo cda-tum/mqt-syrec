@@ -31,7 +31,6 @@ namespace syrec::applications {
         statement::vec statements;
     };
 
-
     module::module(const std::string& name):
         d(new priv()) {
         d->name = name;
@@ -74,6 +73,5 @@ namespace syrec::applications {
     const statement::vec& module::statements() const {
         return d->statements;
     }
-
 
 } // namespace syrec::applications

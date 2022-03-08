@@ -67,7 +67,6 @@ namespace syrec {
         return boost::make_transform_iterator(boost::make_filter_iterator<filter_line>(d->targets.end(), d->targets.end()), transform_line());
     }
 
-
     void gate::add_control(line c) {
         d->controls.insert(c);
     }
@@ -75,7 +74,6 @@ namespace syrec {
     void gate::add_target(line l) {
         d->targets.insert(l);
     }
-
 
     void gate::set_type(const std::any& t) {
         d->target_type = t;

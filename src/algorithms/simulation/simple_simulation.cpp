@@ -58,8 +58,7 @@ namespace syrec {
             }
 
             return input;
-        }
-        else {
+        } else {
             assert(false);
         }
         return input;
@@ -90,6 +89,5 @@ namespace syrec {
                            const properties::ptr& statistics) {
         return simple_simulation(output, circ.begin(), circ.end(), input, settings, statistics);
     }
-
 
 } // namespace syrec

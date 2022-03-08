@@ -94,8 +94,6 @@ namespace syrec {
      */
         properties() = default;
 
-
-
         /**
      * @brief Casted access to an existing element
      *
@@ -163,7 +161,6 @@ namespace syrec {
             map[k] = value;
         }
 
-
     private:
         storage_type map;
     };
@@ -189,7 +186,6 @@ namespace syrec {
     T get(const properties::ptr& settings, const properties::key_type& k, const T& default_value) {
         return settings ? settings->get<T>(k, default_value) : default_value;
     }
-
 
 } // namespace syrec
 

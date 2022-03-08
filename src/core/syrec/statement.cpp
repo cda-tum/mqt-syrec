@@ -37,7 +37,6 @@ namespace syrec::applications {
         delete d;
     }
 
-
     void statement::set_line_number(unsigned line_number) {
         d->line_number = line_number;
     }
@@ -54,7 +53,6 @@ namespace syrec::applications {
         variable_access::ptr rhs;
     };
 
-
     swap_statement::swap_statement(variable_access::ptr lhs,
                                    variable_access::ptr rhs):
         d(new priv()) {
@@ -66,11 +64,9 @@ namespace syrec::applications {
         delete d;
     }
 
-
     variable_access::ptr swap_statement::lhs() const {
         return d->lhs;
     }
-
 
     variable_access::ptr swap_statement::rhs() const {
         return d->rhs;
@@ -83,7 +79,6 @@ namespace syrec::applications {
         unsigned             op{};
         variable_access::ptr var;
     };
-
 
     unary_statement::unary_statement(unsigned             op,
                                      variable_access::ptr var):
@@ -113,7 +108,6 @@ namespace syrec::applications {
         unsigned             op{};
     };
 
-
     assign_statement::assign_statement(variable_access::ptr lhs,
                                        unsigned             op,
                                        expression::ptr      rhs):
@@ -127,21 +121,17 @@ namespace syrec::applications {
         delete d;
     }
 
-
     variable_access::ptr assign_statement::lhs() const {
         return d->lhs;
     }
-
 
     expression::ptr assign_statement::rhs() const {
         return d->rhs;
     }
 
-
     unsigned assign_statement::op() const {
         return d->op;
     }
-
 
     class if_statement::priv {
     public:
@@ -192,7 +182,6 @@ namespace syrec::applications {
     expression::ptr if_statement::fi_condition() const {
         return d->fi_condition;
     }
-
 
     class for_statement::priv {
     public:
@@ -253,7 +242,6 @@ namespace syrec::applications {
         return d->statements;
     }
 
-
     class call_statement::priv {
     public:
         priv() = default;
@@ -261,7 +249,6 @@ namespace syrec::applications {
         module::ptr              target;
         std::vector<std::string> parameters;
     };
-
 
     call_statement::call_statement(module::ptr target, const std::vector<std::string>& parameters):
         d(new priv()) {
@@ -273,11 +260,9 @@ namespace syrec::applications {
         delete d;
     }
 
-
     module::ptr call_statement::target() const {
         return d->target;
     }
-
 
     const std::vector<std::string>& call_statement::parameters() const {
         return d->parameters;
@@ -291,7 +276,6 @@ namespace syrec::applications {
         std::vector<std::string> parameters;
     };
 
-
     uncall_statement::uncall_statement(module::ptr target, const std::vector<std::string>& parameters):
         d(new priv()) {
         d->target     = std::move(target);
@@ -302,7 +286,6 @@ namespace syrec::applications {
         delete d;
     }
 
-
     module::ptr uncall_statement::target() const {
         return d->target;
     }
@@ -312,7 +295,6 @@ namespace syrec::applications {
     }
 
     skip_statement::~skip_statement() = default;
-
 
     statement::ptr reverse_statements::operator()(statement::ptr _statement) const {
         if (dynamic_cast<swap_statement*>(_statement.get())) {

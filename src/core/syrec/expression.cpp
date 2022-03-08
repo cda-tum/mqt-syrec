@@ -42,7 +42,6 @@ namespace syrec::applications {
         unsigned    bitwidth{};
     };
 
-
     numeric_expression::numeric_expression(const number::ptr& value, unsigned bitwidth):
         d(new priv()) {
         d->value    = value;
@@ -52,7 +51,6 @@ namespace syrec::applications {
     numeric_expression::~numeric_expression() {
         delete d;
     }
-
 
     const number::ptr& numeric_expression::value() const {
         return d->value;
@@ -69,8 +67,6 @@ namespace syrec::applications {
         variable_access::ptr var = nullptr;
     };
 
-
-
     variable_expression::variable_expression(variable_access::ptr var):
         d(new priv()) {
         d->var = std::move(var);
@@ -80,8 +76,6 @@ namespace syrec::applications {
         delete d;
     }
 
-
-
     variable_access::ptr variable_expression::var() const {
         return d->var;
     }
@@ -89,7 +83,6 @@ namespace syrec::applications {
     unsigned variable_expression::bitwidth() const {
         return d->var->bitwidth();
     }
-
 
     class binary_expression::priv {
     public:
@@ -99,7 +92,6 @@ namespace syrec::applications {
         expression::ptr rhs = nullptr;
         unsigned        op{};
     };
-
 
     binary_expression::binary_expression(expression::ptr lhs,
                                          unsigned        op,
@@ -118,12 +110,9 @@ namespace syrec::applications {
         return d->lhs;
     }
 
-
     expression::ptr binary_expression::rhs() const {
         return d->rhs;
     }
-
-
 
     unsigned binary_expression::op() const {
         return d->op;
@@ -147,7 +136,6 @@ namespace syrec::applications {
         }
     }
 
-
     class shift_expression::priv {
     public:
         priv() = default;
@@ -156,8 +144,6 @@ namespace syrec::applications {
         number::ptr     rhs = nullptr;
         unsigned        op{};
     };
-
-
 
     shift_expression::shift_expression(expression::ptr    lhs,
                                        unsigned           op,
@@ -172,16 +158,13 @@ namespace syrec::applications {
         delete d;
     }
 
-
     expression::ptr shift_expression::lhs() const {
         return d->lhs;
     }
 
-
     const number::ptr& shift_expression::rhs() const {
         return d->rhs;
     }
-
 
     unsigned shift_expression::op() const {
         return d->op;

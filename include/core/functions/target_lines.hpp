@@ -27,9 +27,6 @@
 
 namespace syrec {
 
-
-
-
 } // namespace syrec
 
 #endif /* TARGET_LINES_HPP */

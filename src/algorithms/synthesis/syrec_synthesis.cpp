@@ -78,11 +78,9 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_module(const applications::module::ptr& main) {
         for (const applications::statement::ptr& stat: main->statements()) {
             if (!full_statement(stat)) {
-
                 if (!on_statement(stat)) {
                     return false;
                 }
-
             }
         }
         return assemble_circuit(cct_man.root);
@@ -187,14 +185,12 @@ namespace syrec {
                         } else if (i == 1) {
                             i = 0;
                         } else {
-
                             continue;
                         }
                     }
                 }
 
                 for (unsigned i = 1; i <= exp_op_vector.size() - 1; i++) {
-
                     /// when both rhs and lhs exist
                     if ((exp_lhs_vector.at(i) != comp) && (exp_rhs_vector.at(i) != comp)) {
                         if (exp_lhs_vector.at(i) == exp_rhs_vector.at(i)) {
@@ -372,7 +368,6 @@ namespace syrec {
         return false;
     }
 
-
     /// generating LHS and RHS (not whole expressions, just the corresponding variables)
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
@@ -459,14 +454,12 @@ namespace syrec {
             } break;
 
             case applications::unary_statement::increment: {
-
                 // Default Version
                 increment(var);
 
             } break;
 
             case applications::unary_statement::decrement: {
-
                 // Default version
                 decrement(var);
 
@@ -498,7 +491,6 @@ namespace syrec {
 
         lhs_vec1.clear();
         rhs_vec1.clear();
-
 
         bool status = false;
 
@@ -608,7 +600,6 @@ namespace syrec {
                         exp_lhss.pop();
                         exp_rhss.pop();
                     }
-
                 }
             } break;
 
@@ -642,11 +633,9 @@ namespace syrec {
 
                 for (const applications::statement::ptr& stat: statement.then_statements()) {
                     if (!full_statement(stat)) {
-
                         if (!on_statement(stat)) {
                             return false;
                         }
-
                     }
                 }
 
@@ -657,11 +646,9 @@ namespace syrec {
 
                 for (const applications::statement::ptr& stat: statement.else_statements()) {
                     if (!full_statement(stat)) {
-
                         if (!on_statement(stat)) {
                             return false;
                         }
-
                     }
                 }
 
@@ -696,18 +683,14 @@ namespace syrec {
                 // adjust loop variable if necessary
 
                 if (!loop_variable.empty()) {
-
                     loop_map[loop_variable] = i;
                 }
 
                 for (const applications::statement::ptr& stat: statement.statements()) {
                     if (!full_statement(stat)) {
-
                         if (!on_statement(stat)) {
-
                             return false;
                         }
-
                     }
                 }
             }
@@ -718,26 +701,20 @@ namespace syrec {
                 // adjust loop variable if necessary
 
                 if (!loop_variable.empty()) {
-
                     loop_map[loop_variable] = i;
                 }
 
                 for (const applications::statement::ptr& stat: statement.statements()) {
                     if (!full_statement(stat)) {
-
-
                         if (!on_statement(stat)) {
-
                             return false;
                         }
-
                     }
                 }
             }
         }
         // clear loop variable if necessary
         if (!loop_variable.empty()) {
-
             assert(loop_map.erase(loop_variable) == 1u);
         }
 
@@ -745,7 +722,6 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_statement(const applications::call_statement& statement) {
-
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
             const std::string&                 parameter        = statement.parameters().at(i);
@@ -759,13 +735,10 @@ namespace syrec {
 
         modules.push(statement.target());
         for (const applications::statement::ptr& stat: statement.target()->statements()) {
-
             if (!full_statement(stat)) {
-
                 if (!on_statement(stat)) {
                     return false;
                 }
-
             }
         }
 
@@ -791,12 +764,10 @@ namespace syrec {
 
         modules.push(statement.target());
         for (applications::statement::ptr stat: statement.target()->statements() | reversed | transformed(syrec::applications::reverse_statements())) {
-
             if (!full_statement(stat)) {
                 if (!on_statement(stat)) {
                     return false;
                 }
-
             }
         }
 
@@ -875,16 +846,12 @@ namespace syrec {
 
             case applications::binary_expression::subtract: // -
             {
-
-
                 decrease_new_assign(rhs, lhs);
                 lines = rhs;
             } break;
 
             case applications::binary_expression::exor: // ^
             {
-
-
                 bitwise_cnot(rhs, lhs); // duplicate lhs
                 lines = rhs;
 
@@ -1004,7 +971,6 @@ namespace syrec {
 
             case applications::binary_expression::subtract: // -
             {
-
                 if (sub_flag) {
                     decrease_new_assign(rhs, lhs);
                     lines = rhs;
@@ -1017,8 +983,6 @@ namespace syrec {
 
             case applications::binary_expression::exor: // ^
             {
-
-
                 bitwise_cnot(rhs, lhs); // duplicate lhs
                 lines = rhs;
 
@@ -1208,9 +1172,7 @@ namespace syrec {
         }
 
         return true;
-
     }
-
 
     bool standard_syrec_synthesizer::increment(const std::vector<unsigned>& dest) {
         for (unsigned int i: dest) {
@@ -1223,7 +1185,6 @@ namespace syrec {
         }
 
         return true;
-
     }
 
     //**********************************************************************
@@ -1537,7 +1498,6 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-
         if ((src1.empty()) || (dest.empty())) return true;
 
         std::vector<unsigned> sum     = dest;
@@ -1649,7 +1609,6 @@ namespace syrec {
         return true;
     }
 
-
     template<typename T>
     struct is_type {
         template<typename Ptr>
@@ -1659,7 +1618,6 @@ namespace syrec {
     };
 
     bool standard_syrec_synthesizer::get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines) {
-
         unsigned offset = _var_lines[var->var()];
 
         if (!var->indexes().empty()) {

@@ -19,9 +19,7 @@
 
 #include "core/target_tags.hpp"
 
-
 namespace syrec {
-
 
     bool is_toffoli(const gate& g) {
         return g.type().type() == typeid(toffoli_tag);
@@ -56,7 +54,6 @@ namespace syrec {
         return target_line_adder(g);
     }
 
-
     target_line_adder control_line_adder::operator()(const gate::line& l1, const gate::line& l2) {
         g->add_control(l1);
         g->add_control(l2);
@@ -76,8 +73,6 @@ namespace syrec {
         return g;
     }
 
-
-
     gate& create_cnot(gate& g, const gate::line& control, const gate::line& target) {
         g.add_control(control);
         g.add_target(target);
@@ -86,14 +81,11 @@ namespace syrec {
         return g;
     }
 
-
     gate& create_not(gate& g, const gate::line& target) {
         g.add_target(target);
         g.set_type(toffoli_tag());
         return g;
     }
-
-
 
     ////////////////////////////// append_ functions
 
@@ -101,17 +93,13 @@ namespace syrec {
         return create_toffoli(circ.append_gate(), controls, target);
     }
 
-
-
     gate& append_cnot(circuit& circ, const gate::line& control, const gate::line& target) {
         return create_cnot(circ.append_gate(), control, target);
     }
 
-
     gate& append_not(circuit& circ, const gate::line& target) {
         return create_not(circ.append_gate(), target);
     }
-
 
     control_line_adder append_gate(circuit& circ, const std::any& tag) {
         gate& g = circ.append_gate();
@@ -126,6 +114,5 @@ namespace syrec {
     control_line_adder append_fredkin(circuit& circ) {
         return append_gate(circ, fredkin_tag());
     }
-
 
 } // namespace syrec
