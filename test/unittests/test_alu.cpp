@@ -23,10 +23,10 @@ namespace syrec {
         void SetUp() override {
             // setup all the individual objects before each test
 
-            std::vector<std::string>              row;
+            std::vector<std::string> row;
 
-            std::string                           line;
-            std::fstream                          file;
+            std::string  line;
+            std::fstream file;
 
             file.open("./circuits/circuits.csv", std::ios::in);
 
@@ -40,16 +40,13 @@ namespace syrec {
                 content.push_back(row);
             }
 
-
             file.close();
         }
     };
 
     TEST_F(syrec_test_alu, GenericTest_alu1) {
-        circuit               circ;
         for (int i = 1; i < (int)content.size(); i++) {
-
-
+            circuit               circ;
             applications::program prog;
             std::string           error_string;
             cost_t                qc;
@@ -64,23 +61,23 @@ namespace syrec {
             std::vector<std::vector<unsigned>> tl;
             std::vector<gate>                  gates_vec;
 
-            unsigned    expected_num_gates;
-            unsigned    expected_lines;
-            cost_t      expected_qc;
-            cost_t      expected_tc;
+            unsigned expected_num_gates;
+            unsigned expected_lines;
+            cost_t   expected_qc;
+            cost_t   expected_tc;
 
             std::string expected_sim_out;
 
-            std::vector<int>                      set_lines;
+            std::vector<int> set_lines;
 
-            std::string                           file_name;
+            std::string file_name;
             file_name.clear();
 
             file_name.append("./circuits/");
             file_name.append(content[i][0]);
             file_name.append(".src");
 
-            std::cout<<"src file: " <<file_name<<std::endl;
+            std::cout << "src file: " << file_name << std::endl;
 
             expected_num_gates = std::stoi(content[i][1]);
             expected_lines     = std::stoi(content[i][2]);
@@ -88,6 +85,7 @@ namespace syrec {
             expected_tc        = (cost_t)std::stoi(content[i][4]);
 
             std::stringstream str(content[i][5]);
+            std::string       word;
             while (getline(str, word, '-'))
                 set_lines.push_back(std::stoi(word));
 
@@ -95,9 +93,9 @@ namespace syrec {
 
             error_string = my_read_program(prog, file_name);
             EXPECT_TRUE(error_string.empty());
-            circ = syrec_synthesis(prog);
-            qc = syrec::final_quantum_cost(circ, circ.lines());
-            tc = syrec::final_transistor_cost(circ, circ.lines());
+            EXPECT_TRUE(syrec_synthesis(circ, prog));
+            qc        = syrec::final_quantum_cost(circ, circ.lines());
+            tc        = syrec::final_transistor_cost(circ, circ.lines());
             gates_vec = ct_gates(circ);
             for (const gate& g: gates_vec) {
                 cl.push_back(control_lines_check(g));

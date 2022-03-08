@@ -145,6 +145,7 @@ namespace syrec {
 
         /**
      * @brief Constant iterator for accessing the gates in a circuit
+         *
      */
         typedef boost::transform_iterator<const_filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_iterator>> const_iterator;
 

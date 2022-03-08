@@ -161,8 +161,7 @@ std::function<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynami
 
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
-   // m.def("py_syrec_synthesis", &syrec_synthesis, py::arg("circ"), py::arg("program"), py::arg("settings"), py::arg("statistics"));
-    m.def("py_syrec_synthesis", &syrec_synthesis,py::arg("program"), py::arg("settings"), py::arg("statistics"));
+    m.def("py_syrec_synthesis", &syrec_synthesis, py::arg("circ"), py::arg("program"), py::arg("settings"), py::arg("statistics"));
     m.def("py_simple_simulation", sim_func, py::arg("output"), py::arg("circ"), py::arg("input"), py::arg("settings"), py::arg("statistics"));
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
