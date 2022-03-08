@@ -93,9 +93,9 @@ namespace syrec {
             boost::to_string(output, output_string);
         }
 
-        EXPECT_EQ(expected_num_gates - 1, circ.num_gates());
+        EXPECT_EQ(expected_num_gates, circ.num_gates());
         EXPECT_EQ(expected_lines, circ.lines());
-        EXPECT_EQ(expected_qc - 1, qc);
+        EXPECT_EQ(expected_qc, qc);
         EXPECT_EQ(expected_tc, tc);
         EXPECT_EQ(expected_sim_out, output_string);
     }
