@@ -95,7 +95,7 @@ namespace syrec {
 
             error_string = my_read_program(prog, file_name);
             EXPECT_TRUE(error_string.empty());
-            EXPECT_TRUE(syrec::syrec_synthesis(circ, prog));
+            circ = syrec_synthesis(prog);
             qc = syrec::final_quantum_cost(circ, circ.lines());
             tc = syrec::final_transistor_cost(circ, circ.lines());
             gates_vec = ct_gates(circ);

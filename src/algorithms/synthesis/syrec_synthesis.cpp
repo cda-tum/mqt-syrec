@@ -1755,8 +1755,10 @@ namespace syrec {
         }
     }
 
-    bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    circuit syrec_synthesis(const applications::program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // Settings parsing
+        circuit circ;
+
         auto variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto main_module           = get<std::string>(settings, "main_module", std::string());
         auto statement_synthesizer = get<standard_syrec_synthesizer>(settings, "statement_synthesizer", standard_syrec_synthesizer(circ, program));
@@ -1779,7 +1781,7 @@ namespace syrec {
             main = program.find_module(main_module);
             if (!main) {
                 std::cerr << "Program has no module: " << main_module << std::endl;
-                return false;
+                //return false;
             }
         } else {
             main = program.find_module("main");
@@ -1796,7 +1798,8 @@ namespace syrec {
         add_variables(circ, statement_synthesizer, variable_name_format, main->variables());
 
         // synthesize the statements
-        return statement_synthesizer.on_module(main);
+        //return statement_synthesizer.on_module(main);
+        return circ;
     }
 
 } // namespace syrec

@@ -211,7 +211,7 @@ namespace syrec {
    *
 
    */
-    bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
+    circuit syrec_synthesis(const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
     /**
    * @brief Functor for the syrec_synthesis algorithm
