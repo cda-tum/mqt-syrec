@@ -17,36 +17,16 @@ namespace syrec {
     class syrec_test_alu: public ::testing::Test {
     protected:
         // any objects needed by all tests
-        circuit               circ;
-        applications::program prog;
-        std::string           error_string;
-        cost_t                qc = 0;
-        cost_t                tc = 0;
-        properties::ptr       settings;
-        properties::ptr       statistics;
-
-        boost::dynamic_bitset<> input;
-        boost::dynamic_bitset<> output;
-
-        std::vector<std::vector<unsigned>> cl;
-        std::vector<std::vector<unsigned>> tl;
-        std::vector<gate>                  gates_vec;
-
-        unsigned    expected_num_gates;
-        unsigned    expected_lines;
-        cost_t      expected_qc;
-        cost_t      expected_tc;
-        std::string expected_sim_out;
-
         std::vector<std::vector<std::string>> content;
-        std::vector<std::string>              row;
-        std::vector<int>                      set_lines;
-        std::string                           line, word;
-        std::fstream                          file;
-        std::string                           file_name;
+        std::string                           word;
 
         void SetUp() override {
             // setup all the individual objects before each test
+
+            std::vector<std::string>              row;
+
+            std::string                           line;
+            std::fstream                          file;
 
             file.open("./circuits/circuits.csv", std::ios::in);
 
@@ -68,7 +48,34 @@ namespace syrec {
     TEST_F(syrec_test_alu, GenericTest_alu1) {
 
         for (int i = 1; i < (int)content.size(); i++) {
+
+            circuit               circ;
+            applications::program prog;
+            std::string           error_string;
+            cost_t                qc = 0;
+            cost_t                tc = 0;
+            properties::ptr       settings;
+            properties::ptr       statistics;
+
+            boost::dynamic_bitset<> input;
+            boost::dynamic_bitset<> output;
+
+            std::vector<std::vector<unsigned>> cl;
+            std::vector<std::vector<unsigned>> tl;
+            std::vector<gate>                  gates_vec;
+
+            unsigned    expected_num_gates;
+            unsigned    expected_lines;
+            cost_t      expected_qc;
+            cost_t      expected_tc;
+
+            std::string expected_sim_out;
+
+            std::vector<int>                      set_lines;
+
+            std::string                           file_name;
             file_name.clear();
+
             file_name.append("./circuits/");
             file_name.append(content[i][0]);
             file_name.append(".src");
@@ -105,7 +112,7 @@ namespace syrec {
             output.resize(circ.lines());
             EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
 
-            EXPECT_EQ(expected_num_gates, circ.num_gates()) << content.size();
+            EXPECT_EQ(expected_num_gates, circ.num_gates());
             EXPECT_EQ(expected_lines, circ.lines());
             EXPECT_EQ(expected_qc, qc);
             EXPECT_EQ(expected_tc, tc);
