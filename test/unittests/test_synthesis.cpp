@@ -6,9 +6,7 @@
 #include "core/utils/costs.hpp"
 
 #include "gtest/gtest.h"
-#include <boost/dynamic_bitset.hpp>
 #include <fstream>
-#include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>

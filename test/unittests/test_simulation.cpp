@@ -1,5 +1,6 @@
 #include "algorithms/simulation/simple_simulation.hpp"
 #include "core/circuit.hpp"
+#include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
 #include "core/test_functions.hpp"
@@ -60,6 +61,8 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     error_string = my_read_program(prog, file_name);
     EXPECT_TRUE(error_string.empty());
+
+    EXPECT_TRUE(syrec_synthesis(circ, prog));
 
     input.resize(circ.lines());
 
