@@ -30,7 +30,7 @@ protected:
     cost_t   expected_tc;
 
     void SetUp() override {
-        std::string synthesis_param = GetParam();
+        std::string synthesis_param = "alu_2";
         file_name = test_circuits_dir + GetParam() + ".src";
         std::ifstream i("circuits_synthesis.json");
         json j = json::parse(i);
