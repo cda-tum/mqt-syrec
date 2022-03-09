@@ -33,8 +33,7 @@ protected:
         std::string synthesis_param = GetParam();
         file_name = test_circuits_dir + GetParam() + ".src";
         std::ifstream i("circuits_synthesis.json");
-        json j;
-        i >> j;
+        json j = json::parse(i);
         expected_num_gates = j[synthesis_param]["num_gates"];
         expected_lines = j[synthesis_param]["lines"];
         expected_qc = j[synthesis_param]["quantum_costs"];
