@@ -7,8 +7,7 @@ using namespace syrec;
 
 class SyrecParserTest: public testing::TestWithParam<std::string> {
 protected:
-
-    std::string test_circuits_dir  = "./circuits/";
+    std::string test_circuits_dir = "./circuits/";
     std::string file_name;
 
     void SetUp() override {

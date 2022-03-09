@@ -43,6 +43,7 @@ endmacro()
 package_add_test(${PROJECT_NAME}_test
 		 unittests/test_parser.cpp
 		 unittests/test_synthesis.cpp
+		 unittests/test_simulation.cpp
 		 )
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
