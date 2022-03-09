@@ -1,0 +1,22 @@
+{
+  "alu_2": {
+    "num_gates": 46,
+    "lines": 7,
+    "quantum_costs" : 222,
+    "transistor_costs" : 640
+  },
+  
+  "swap_2": {
+    "num_gates": 2,
+    "lines": 4,
+    "quantum_costs" : 1,
+    "transistor_costs" : 0
+  },
+
+  "shift_4": {
+    "num_gates": 11,
+    "lines": 20,
+    "quantum_costs" : 11,
+    "transistor_costs" : 88
+  }
+}

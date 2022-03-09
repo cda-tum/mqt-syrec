@@ -18,13 +18,13 @@ std::string my_read_program(syrec::applications::program& prog, const std::strin
     return error;
 }
 
-std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
+/*std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
     std::string res;
     for (unsigned i = 0; i < bitset.size(); i++) {
         res += bitset[i] ? "1" : "0";
     }
     return res;
-}
+}*/
 
 std::vector<unsigned> control_lines_check(const syrec::gate& g) {
     syrec::gate::line_container c;

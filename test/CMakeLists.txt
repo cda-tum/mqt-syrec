@@ -42,6 +42,7 @@ endmacro()
 # TODO: add any source files containing tests here
 package_add_test(${PROJECT_NAME}_test
 		 unittests/test_parser.cpp
+		 unittests/test_synthesis.cpp
 		 )
 
 add_custom_command(TARGET ${PROJECT_NAME}_test

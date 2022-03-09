@@ -94,13 +94,13 @@ std::string py_read_program(program& prog, const std::string& filename, const re
 
 ///dynamic bitset
 
-std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
+/*std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
     std::string res;
     for (unsigned i = 0; i < bitset.size(); i++) {
         res += bitset[i] ? "1" : "0";
     }
     return res;
-}
+}*/
 
 ///gates
 
@@ -202,8 +202,8 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
             .def(py::init<int>())
-            .def(py::init<int, unsigned long>())
-            .def("__str__", bitset_to_string);
+            .def(py::init<int, unsigned long>());
+            //.def("__str__", bitset_to_string);
 
     py::enum_<gate_types::_types>(m, "gate_type")
             .value("toffoli", gate_types::toffoli)
