@@ -18,7 +18,3 @@ if __name__ == "__main__":
     lines = circ.lines
     qc = syrec.quantum_costs(circ, circ.lines)
     tc = syrec.transistor_costs(circ, circ.lines)
-
-
-
-

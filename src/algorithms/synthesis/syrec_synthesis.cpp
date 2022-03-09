@@ -1,5 +1,4 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
-
 #include "core/functions/add_gates.hpp"
 #include "core/syrec/expression.hpp"
 #include "core/syrec/program.hpp"

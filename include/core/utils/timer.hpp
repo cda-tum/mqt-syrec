@@ -24,8 +24,9 @@
 #ifndef TIMER_HPP
 #define TIMER_HPP
 
+#include "core/properties.hpp"
+
 #include <chrono>
-#include <core/properties.hpp>
 #include <iostream>
 #include <utility>
 
