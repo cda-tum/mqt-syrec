@@ -16,7 +16,7 @@
 
   "multiply_2": {
     "set_lines": [3],
-    "sim_out": "010100"
+    "sim_out": "00010000"
   },
 
   "modulo_2": {
