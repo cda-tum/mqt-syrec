@@ -19,9 +19,8 @@ protected:
 INSTANTIATE_TEST_SUITE_P(SyrecParserTest, SyrecParserTest,
                          testing::Values(
                                  "alu_2",
-                                 "swap_2"
-                                 "shift_4"
-                                 ),
+                                 "swap_2",
+                                 "shift_4"),
                          [](const testing::TestParamInfo<SyrecParserTest::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
