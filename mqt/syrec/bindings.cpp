@@ -173,7 +173,6 @@ PYBIND11_MODULE(pysyrec, m) {
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
-            //.def(py::init<unsigned>())
             .def_property("lines", &circuit::lines, &circuit::set_lines)
             .def_property_readonly("num_gates", &circuit::num_gates)
             .def("gates", new_gates)
