@@ -21,7 +21,7 @@
 
   "modulo_2": {
     "set_lines": [3,4,5],
-    "sim_out": "01011101"
+    "sim_out": "0101110100"
   },
 
   "negate_8": {

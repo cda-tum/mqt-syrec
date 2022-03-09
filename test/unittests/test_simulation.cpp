@@ -42,7 +42,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                                  "alu_2",
                                  "swap_2",
                                  "simple_add_2",
-                                 "multily_2",
+                                 "multiply_2",
                                  "modulo_2",
                                  "negate_8"),
                          [](const testing::TestParamInfo<SyrecSimulationTest::ParamType>& info) {

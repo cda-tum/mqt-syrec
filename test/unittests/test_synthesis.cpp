@@ -48,23 +48,23 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                                  "call_8",
                                  "divide_2",
                                  "for_4",
-                                 "for_32"
-                                 "gray_binary_conversion"
-                                 "input_repeated_2"
-                                 "input_repeated_4"
-                                 "logical_and_1"
-                                 "logical_or_1"
-                                 "modulo_2"
-                                 "multiply_2"
-                                 "negate_8"
-                                 "numeric_2"
-                                 "operators_repeated_4"
-                                 "parity_4"
-                                 "parity_check_16"
-                                 "shift_4"
-                                 "simple_add_2"
-                                 "single_longstatement_4"
-                                 "skip"
+                                 "for_32",
+                                 "gray_binary_conversion",
+                                 "input_repeated_2",
+                                 "input_repeated_4",
+                                 "logical_and_1",
+                                 "logical_or_1",
+                                 "modulo_2",
+                                 "multiply_2",
+                                 "negate_8",
+                                 "numeric_2",
+                                 "operators_repeated_4",
+                                 "parity_4",
+                                 "parity_check_16",
+                                 "shift_4",
+                                 "simple_add_2",
+                                 "single_longstatement_4",
+                                 "skip",
                                  "swap_2"),
                          [](const testing::TestParamInfo<SyrecSynthesisTest::ParamType>& info) {
                              auto s = info.param;
