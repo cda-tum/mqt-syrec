@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/range/adaptors.hpp>
+//#include <boost/range/adaptors.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -25,7 +25,7 @@ protected:
     boost::dynamic_bitset<> output;
     std::vector<int>        set_lines;
     std::string             expected_sim_out;
-    std::string             output_string;
+    //[[maybe_unused]] std::string             output_string;
 
     void SetUp() override {
         std::string synthesis_param = GetParam();
@@ -67,7 +67,7 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
 
-    boost::to_string(output, output_string);
+    //boost::to_string(output, output_string);
 
-    EXPECT_EQ(expected_sim_out, boost::adaptors::reverse(output_string));
+    EXPECT_EQ(expected_sim_out, bitset_to_string(output));
 }
