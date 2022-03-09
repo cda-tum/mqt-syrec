@@ -48,6 +48,10 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                              return s; });
 
 TEST_P(SyrecSimulationTest, GenericSimulationTest) {
+
+    for (int line: set_lines)
+        std::cout<<line;
+
     circuit               circ;
     applications::program prog;
     properties::ptr       settings;
