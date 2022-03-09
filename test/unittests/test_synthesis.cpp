@@ -30,9 +30,9 @@ protected:
     cost_t   expected_tc;
 
     void SetUp() override {
-        std::string synthesis_param = "alu_2";
+        std::string synthesis_param = GetParam();
         file_name = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i("circuits_synthesis.json");
+        std::ifstream i(test_circuits_dir+ "circuits_synthesis.json");
         json j = json::parse(i);
         expected_num_gates = j[synthesis_param]["num_gates"];
         expected_lines = j[synthesis_param]["lines"];
