@@ -74,5 +74,5 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     boost::to_string(output, output_string);
 
-    EXPECT_EQ(expected_sim_out, boost::adaptors::reverse(output_string));
+    EXPECT_EQ(expected_sim_out, output_string);
 }
