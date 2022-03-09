@@ -7,8 +7,8 @@
 
 #include "gtest/gtest.h"
 #include <algorithm>
+#include <bits/stdc++.h>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/range/adaptors.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -73,6 +73,7 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
 
     boost::to_string(output, output_string);
+    std::reverse(output_string.begin(), output_string.end());
 
     EXPECT_EQ(expected_sim_out, output_string);
 }
