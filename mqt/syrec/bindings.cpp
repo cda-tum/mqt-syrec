@@ -8,7 +8,7 @@
 #include "core/target_tags.hpp"
 #include "core/utils/costs.hpp"
 
-#include <bits/stdc++.h>
+//#include <bits/stdc++.h>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <functional>
@@ -96,10 +96,18 @@ std::string py_read_program(program& prog, const std::string& filename, const re
 
 std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
     std::string res;
+    for (unsigned i = 0; i < bitset.size(); i++) {
+        res += bitset[i] ? "1" : "0";
+    }
+    return res;
+}
+
+/*std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
+    std::string res;
     boost::to_string(bitset, res);
     std::reverse(res.begin(), res.end());
     return res;
-}
+}*/
 
 ///gates
 

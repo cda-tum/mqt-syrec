@@ -19,12 +19,12 @@ class SyrecSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
     std::string test_circuits_dir = "./circuits/";
     std::string file_name;
-    cost_t      qc;
-    cost_t      tc;
-    unsigned    expected_num_gates;
-    unsigned    expected_lines;
-    cost_t      expected_qc;
-    cost_t      expected_tc;
+    cost_t      qc                 = 0;
+    cost_t      tc                 = 0;
+    unsigned    expected_num_gates = 0;
+    unsigned    expected_lines     = 0;
+    cost_t      expected_qc        = 0;
+    cost_t      expected_tc        = 0;
 
     void SetUp() override {
         std::string synthesis_param = GetParam();
@@ -41,8 +41,31 @@ protected:
 INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                          testing::Values(
                                  "alu_2",
-                                 "swap_2",
-                                 "shift_4"),
+                                 "binary_numeric",
+                                 "bitwise_and_2",
+                                 "bitwise_or_2",
+                                 "bn_2",
+                                 "call_8",
+                                 "divide_2",
+                                 "for_4",
+                                 "for_32"
+                                 "gray_binary_conversion"
+                                 "input_repeated_2"
+                                 "input_repeated_4"
+                                 "logical_and_1"
+                                 "logical_or_1"
+                                 "modulo_2"
+                                 "multiply_2"
+                                 "negate_8"
+                                 "numeric_2"
+                                 "operators_repeated_4"
+                                 "parity_4"
+                                 "parity_check_16"
+                                 "shift_4"
+                                 "simple_add_2"
+                                 "single_longstatement_4"
+                                 "skip"
+                                 "swap_2"),
                          [](const testing::TestParamInfo<SyrecSynthesisTest::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
