@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "cmake"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-manylinux-x86_64-image = "manylinux_2_24"
+manylinux-x86_64-image = "manylinux_2_28"
 build = "cp3*"
 skip = "*-win32 *-musllinux_* *-manylinux_i686 cp36-*"
 test-skip = "*_arm64 *_universal2:arm64"
