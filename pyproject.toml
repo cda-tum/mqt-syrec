@@ -17,7 +17,7 @@ before-all = [
     "tar -xzf boost_1_*",
     "cd boost_1_*/",
     "./bootstrap.sh",
-    "./b2 install --with-libraries=system"
+    "./b2 install --with-system"
 ]
 
 [tool.cibuildwheel.macos]
