@@ -1,25 +1,23 @@
 #!/usr/bin/python
 import re
 import sys
-import PyQt5
-from .pysyrec import *
-from PyQt5 import QtCore
 
+from mqt.syrec.pysyrec import *
+
+from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-#__all__ = ['error_msg', 'read_program', 'syrec_synthesis', 'init_gui', 'display_circuit']
-
 
 def error_msg(statistics):
-    "Returns the error message contained in statistics"
+    """Returns the error message contained in statistics"""
 
     return "Error: " + statistics.get_string("error", "")
 
 
 def read_program(prog, filename, default_bitwidth=32):
-    "Reads a SyReC program from a file"
+    """Reads a SyReC program from a file"""
 
     settings = read_program_settings()
     settings.default_bitwidth = default_bitwidth
@@ -29,7 +27,6 @@ def read_program(prog, filename, default_bitwidth=32):
     return error
 
 
-### ALGORITHMS
 def syrec_synthesis(circ, prog, variable_name_format="%1$s%3$s.%2$d", main_module="", if_realization=0, efficient_controls=True, modules_hierarchy=False):
     settings = properties()
 
@@ -47,29 +44,6 @@ def syrec_synthesis(circ, prog, variable_name_format="%1$s%3$s.%2$d", main_modul
         return error_msg(statistics)
 
 
-### GUI
-def init_gui():
-    return PyQt5.QtGui.QApplication([])
-
-
-def display_circuit(circ):
-    import revkitui
-    w = revkitui.CircuitView(circ)
-    w.setWindowTitle("Circuit View")
-    w.show()
-    return w
-
-
-#from .revkit import *
-#from .pysyrec import *
-
-
-
-
-
-#__all__ = ['CircuitLineItem', 'GateItem', 'CircuitView', 'SyReCEditor', 'SyReCHighligher', 'QtSyReCEditor', 'RevLibEditor', 'RevLibHighlighter', 'CodeEditor', 'LineNumberArea']
-
-
 class CircuitLineItem(QGraphicsItemGroup):
     def __init__(self, index, width, parent=None):
         QGraphicsItemGroup.__init__(self, parent)
@@ -83,6 +57,7 @@ class CircuitLineItem(QGraphicsItemGroup):
             e_width = 15 if i == 0 or i == width else 30
             self.addToGroup(QGraphicsLineItem(x, index * 30, x + e_width, index * 30))
             x += e_width
+
 
 class GateItem(QGraphicsItemGroup):
     def __init__(self, g, index, circ, parent=None):
@@ -105,11 +80,11 @@ class GateItem(QGraphicsItemGroup):
             if g.type == gate_type.toffoli:
                 print("toffoli")
                 target = QGraphicsEllipseItem(-10, t * 30 - 10, 20, 20, self)
-                targetLine = QGraphicsLineItem(0, t * 30 - 10, 0, t * 30 + 10, self)
-                targetLine2 = QGraphicsLineItem(-10, t * 30, 10, t * 30, self)
+                target_line = QGraphicsLineItem(0, t * 30 - 10, 0, t * 30 + 10, self)
+                target_line2 = QGraphicsLineItem(-10, t * 30, 10, t * 30, self)
                 self.addToGroup(target)
-                self.addToGroup(targetLine)
-                self.addToGroup(targetLine2)
+                self.addToGroup(target_line)
+                self.addToGroup(target_line2)
             if g.type == gate_type.fredkin:
                 print("fredkin")
                 crossTL_BR = QGraphicsLineItem(-5, t * 30 - 5, 5, t * 30 + 5, self)
@@ -117,11 +92,11 @@ class GateItem(QGraphicsItemGroup):
                 self.addToGroup(crossTL_BR)
                 self.addToGroup(crossTR_BL)
 
-
         for c in control_lines(g):
             control = QGraphicsEllipseItem(-5, c * 30 - 5, 10, 10, self)
             control.setBrush(Qt.black)
             self.addToGroup(control)
+
 
 class CircuitView(QGraphicsView):
 
@@ -134,6 +109,9 @@ class CircuitView(QGraphicsView):
 
         # Load circuit
         self.circ = None
+        self.lines = []
+        self.inputs = []
+        self.outputs = []
         if circ is not None:
             self.load(circ)
 
@@ -152,29 +130,29 @@ class CircuitView(QGraphicsView):
             line = CircuitLineItem(i, circ.num_gates)
             self.lines.append(line)
             self.scene().addItem(line)
-            self.inputs.append(self.addLineLabel(0, i * 30, circ.inputs[i], Qt.AlignRight, circ.constants[i] != None))
-            self.outputs.append(self.addLineLabel(width, i * 30, circ.outputs[i], Qt.AlignLeft, circ.garbage[i]))
+            self.inputs.append(self.add_line_label(0, i * 30, circ.inputs[i], Qt.AlignRight, circ.constants[i] is not None))
+            self.outputs.append(self.add_line_label(width, i * 30, circ.outputs[i], Qt.AlignLeft, circ.garbage[i]))
 
         index = 0
         for g in circ.gates():
-            gateItem = GateItem(g, index, self.circ)
-            gateItem.setPos(index * 30 + 15, 0)
-            self.scene().addItem(gateItem)
+            gate_item = GateItem(g, index, self.circ)
+            gate_item.setPos(index * 30 + 15, 0)
+            self.scene().addItem(gate_item)
             index += 1
 
-    def addLineLabel(self, x, y, text, align, color):
-        textItem = self.scene().addText(text)
-        textItem.setPlainText(text)
+    def add_line_label(self, x, y, text, align, color):
+        text_item = self.scene().addText(text)
+        text_item.setPlainText(text)
 
         if align == Qt.AlignRight:
-            x -= textItem.boundingRect().width()
+            x -= text_item.boundingRect().width()
 
-        textItem.setPos(x, y - 12)
+        text_item.setPos(x, y - 12)
 
         if color:
-            textItem.setDefaultTextColor(Qt.red)
+            text_item.setDefaultTextColor(Qt.red)
 
-        return textItem
+        return text_item
 
     def wheelEvent(self, event):
         factor = 1.2
@@ -196,7 +174,7 @@ class SyReCEditor(QWidget):
         super().__init__()
 
         self.parent = parent
-        self.setupActions()
+        self.setup_actions()
 
         self.filename = type("")
 
@@ -214,20 +192,18 @@ class SyReCEditor(QWidget):
         self.layout.addWidget(self.table)
         self.setLayout(self.layout)
 
-    def setupActions(self):
+    def setup_actions(self):
+        self.open_action = QAction(QIcon.fromTheme('document-open'), '&Open...', self.parent)
+        self.build_action = QAction(QIcon.fromTheme('media-playback-start'), '&Build...', self.parent)
+        self.sim_action = QAction(QIcon.fromTheme('x-office-spreadsheet'), '&Sim...', self.parent)  # system-run
+        self.stat_action = QAction(QIcon.fromTheme('applications-other'), '&Stats...', self.parent)
 
-        self.openAction = QAction(QIcon.fromTheme('document-open'), '&Open...', self.parent)
-        self.buildAction = QAction(QIcon.fromTheme('media-playback-start'), '&Build...', self.parent)
-        self.simAction = QAction(QIcon.fromTheme('x-office-spreadsheet'), '&Sim...', self.parent)  # system-run
-        self.statAction = QAction(QIcon.fromTheme('applications-other'), '&Stats...', self.parent)
-
-        self.openAction.triggered.connect(self.open)
-        self.buildAction.triggered.connect(self.build)
-        self.simAction.triggered.connect(self.sim)
-        self.statAction.triggered.connect(self.stat)
+        self.open_action.triggered.connect(self.open)
+        self.build_action.triggered.connect(self.build)
+        self.sim_action.triggered.connect(self.sim)
+        self.stat_action.triggered.connect(self.stat)
 
     def writeEditorContentsToFile(self):
-
         data = QFile("/tmp/out.src")
         if data.open(QFile.WriteOnly | QFile.Truncate):
             out = QTextStream(data)
@@ -239,7 +215,7 @@ class SyReCEditor(QWidget):
         return
 
     def open(self):
-        filename = QFileDialog.getOpenFileName(self.parent, 'Open Realization', '', 'SyReC specification (*.src)')
+        filename = QFileDialog.getOpenFileName(parent=self.parent, caption='Open Specification', filter='SyReC specification (*.src)')
         self.load(filename)
 
     def load(self, filename):
@@ -548,26 +524,25 @@ class CodeEditor(QPlainTextEdit):
         painter.fillRect(event.rect(), Qt.lightGray)
 
         block = self.firstVisibleBlock()
-        blockNumber = block.blockNumber()
+        block_number = block.blockNumber()
         top = self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
         bottom = top + self.blockBoundingGeometry(block).height()
 
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
-                # number = QString.number( blockNumber + 1 )
-                number = str(blockNumber + 1)
+                number = str(block_number + 1)
                 painter.setPen(Qt.black)
-                painter.drawText(0, top, self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
+                painter.drawText(0, round(top), self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
 
             block = block.next()
             top = bottom
             bottom = top + self.blockBoundingGeometry(block).height()
-            blockNumber += 1
+            block_number += 1
 
     def lineNumberAreaWidth(self):
         digits = 1
         max_ = max(1, self.blockCount())
-        while (max_ >= 10):
+        while max_ >= 10:
             max_ /= 10
             digits += 1
 
@@ -658,7 +633,6 @@ class RevLibEditor(CodeEditor):
         self.setFont(QFont("Monospace"))
 
 
-
 class LogWidget(QTreeWidget):
     def __init__(self, parent=None):
         QTreeWidget.__init__(self, parent)
@@ -682,14 +656,14 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("SyReC Editor")
 
-        self.setupWidgets()
-        self.setupDockWidgets()
-        self.setupActions()
-        self.setupToolBar()
+        self.setup_widgets()
+        self.setup_dock_widgets()
+        self.setup_actions()
+        self.setup_toolbar()
 
-    def setupWidgets(self):
+    def setup_widgets(self):
         self.editor = QtSyReCEditor(self)
-        self.viewer = CircuitView(None, self)
+        self.viewer = CircuitView(parent=self)
 
         splitter = QSplitter(Qt.Vertical, self)
         splitter.addWidget(self.editor.widget)
@@ -697,22 +671,19 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(splitter)
 
-    def setupDockWidgets(self):
+    def setup_dock_widgets(self):
         self.logWidget = LogWidget(self)
         self.logDockWidget = QDockWidget("Log Messages", self)
         self.logDockWidget.setWidget(self.logWidget)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
 
-    def setupActions(self):
+    def setup_actions(self):
         self.editor.before_build = self.logWidget.clear
         self.editor.build_successful = lambda circ: self.viewer.load(circ)
         self.editor.parser_failed = lambda error_message: self.logWidget.addMessage(error_message)
         self.editor.build_failed = lambda error_message: self.logWidget.addMessage(re.search('In line (.*): (.*)', error_message).group(2))
 
-        # self.editor.build_failed = lambda error_message: self.logWidget.addLineAndMessage( re.search ( 'In line (.*): (.*)', error_message ).group( 1 ), \
-        #                                                                                   re.search ( 'In line (.*): (.*)', error_message ).group( 2 ) )
-
-    def setupToolBar(self):
+    def setup_toolbar(self):
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(32, 32))
 
@@ -729,3 +700,7 @@ def main():
     w.show()
 
     sys.exit(a.exec_())
+
+
+if __name__ == "__main__":
+    main()

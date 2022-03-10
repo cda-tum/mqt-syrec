@@ -1,1 +1,1 @@
-from .pysyrec import *
+from mqt.syrec.pysyrec import *
