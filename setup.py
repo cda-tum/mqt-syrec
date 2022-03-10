@@ -107,7 +107,7 @@ setup(
         # 'Research': ''
     },
     install_requires=[
-        'PyQt5==5.15.6',
+        'PyQt6==6.2.3',
     ],
     entry_points={
         'console_scripts': ['syrec-editor=mqt.syrec.syrec_editor:main'],

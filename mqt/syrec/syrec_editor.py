@@ -4,10 +4,10 @@ import sys
 
 from mqt.syrec.pysyrec import *
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtCore
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 
 def error_msg(statistics):
@@ -62,7 +62,7 @@ class CircuitLineItem(QGraphicsItemGroup):
 class GateItem(QGraphicsItemGroup):
     def __init__(self, g, index, circ, parent=None):
         QGraphicsItemGroup.__init__(self, parent)
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
         l = control_lines(g)
         l.extend(target_lines(g))
@@ -94,7 +94,7 @@ class GateItem(QGraphicsItemGroup):
 
         for c in control_lines(g):
             control = QGraphicsEllipseItem(-5, c * 30 - 5, 10, 10, self)
-            control.setBrush(Qt.black)
+            control.setBrush(QColorConstants.Black)
             self.addToGroup(control)
 
 
@@ -105,7 +105,7 @@ class CircuitView(QGraphicsView):
 
         # Scene
         self.setScene(QGraphicsScene(self))
-        self.scene().setBackgroundBrush(Qt.white)
+        self.scene().setBackgroundBrush(QColorConstants.White)
 
         # Load circuit
         self.circ = None
@@ -130,8 +130,8 @@ class CircuitView(QGraphicsView):
             line = CircuitLineItem(i, circ.num_gates)
             self.lines.append(line)
             self.scene().addItem(line)
-            self.inputs.append(self.add_line_label(0, i * 30, circ.inputs[i], Qt.AlignRight, circ.constants[i] is not None))
-            self.outputs.append(self.add_line_label(width, i * 30, circ.outputs[i], Qt.AlignLeft, circ.garbage[i]))
+            self.inputs.append(self.add_line_label(0, i * 30, circ.inputs[i], Qt.AlignmentFlag.AlignRight, circ.constants[i] is not None))
+            self.outputs.append(self.add_line_label(width, i * 30, circ.outputs[i], Qt.AlignmentFlag.AlignLeft, circ.garbage[i]))
 
         index = 0
         for g in circ.gates():
@@ -144,13 +144,13 @@ class CircuitView(QGraphicsView):
         text_item = self.scene().addText(text)
         text_item.setPlainText(text)
 
-        if align == Qt.AlignRight:
+        if align == Qt.AlignmentFlag.AlignRight:
             x -= text_item.boundingRect().width()
 
         text_item.setPos(x, y - 12)
 
         if color:
-            text_item.setDefaultTextColor(Qt.red)
+            text_item.setDefaultTextColor(QColorConstants.Red)
 
         return text_item
 
@@ -205,7 +205,7 @@ class SyReCEditor(QWidget):
 
     def writeEditorContentsToFile(self):
         data = QFile("/tmp/out.src")
-        if data.open(QFile.WriteOnly | QFile.Truncate):
+        if data.open(QFile.OpenModeFlag.WriteOnly | QFile.OpenModeFlag.Truncate):
             out = QTextStream(data)
             out << self.getText()
         else:
@@ -223,7 +223,7 @@ class SyReCEditor(QWidget):
             self.filename = filename
 
             f = QFile(filename[0])
-            if f.open(QFile.ReadOnly | QFile.Text):
+            if f.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
                 ts = QTextStream(f)
                 self.setText(ts.readAll())
 
@@ -298,11 +298,11 @@ class SyReCEditor(QWidget):
         output = temp.format(gates, lines, qc, tc)
 
         msg = QMessageBox()
-        msg.setBaseSize(QSize(6, 120))
+        msg.setBaseSize(QSize(300, 200))
         msg.setInformativeText(output)
         msg.setWindowTitle("Statistics")
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg.exec()
 
         return
 
@@ -340,15 +340,15 @@ class SyReCEditor(QWidget):
             if i is None:
                 bit_mask = bit_mask + 2 ** bit_pos
 
-            bit_pos = bit_pos + 1
+            bit_pos += 1
 
         no_of_bits = len(circ.constants)
 
         input_list = [x & bit_mask for x in range(2 ** no_of_bits)]
 
         for i in range(len(circ.constants)):
-            if circ.constants[i] == True:
-                bit1_mask = bit1_mask + 2 ** (i)
+            if circ.constants[i]:
+                bit1_mask = bit1_mask + 2 ** i
 
         input_list = [i + bit1_mask for i in input_list]
 
@@ -403,12 +403,12 @@ class SyReCEditor(QWidget):
 
         self.table.setSpan(0, 0, 1, num_inputs)
         header1 = QTableWidgetItem("INPUTS")
-        header1.setTextAlignment(QtCore.Qt.AlignCenter)
+        header1.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(0, 0, header1)
 
         self.table.setSpan(0, num_inputs, 1, num_inputs)
         header2 = QTableWidgetItem("OUTPUTS")
-        header2.setTextAlignment(QtCore.Qt.AlignCenter)
+        header2.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(0, num_inputs, header2)
 
         self.table.horizontalHeader().setVisible(False)
@@ -417,25 +417,25 @@ class SyReCEditor(QWidget):
         # Fill Table
         for i in range(num_inputs):
             input_signal = QTableWidgetItem(circ.inputs[i])
-            input_signal.setTextAlignment(QtCore.Qt.AlignCenter)
+            input_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(1, i, QTableWidgetItem(input_signal))
 
             output_signal = QTableWidgetItem(circ.outputs[i])
-            output_signal.setTextAlignment(QtCore.Qt.AlignCenter)
+            output_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(1, i + num_inputs, QTableWidgetItem(output_signal))
 
         for i in range(input_list_len):
             for j in range(num_inputs):
                 input_cell = QTableWidgetItem(final_inp[i][j])
-                input_cell.setTextAlignment(QtCore.Qt.AlignCenter)
+                input_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(i + 2, j, QTableWidgetItem(input_cell))
 
                 output_cell = QTableWidgetItem(final_out[i][j])
-                output_cell.setTextAlignment(QtCore.Qt.AlignCenter)
+                output_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(i + 2, j + num_inputs, QTableWidgetItem(output_cell))
 
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
 
         # Add Table to QWidget
 
@@ -450,29 +450,30 @@ class SyReCHighligher(QSyntaxHighlighter):
         self.highlightingRules = []
 
         keywordFormat = QTextCharFormat()
-        keywordFormat.setForeground(Qt.darkBlue)
-        keywordFormat.setFontWeight(QFont.Bold)
+        keywordFormat.setForeground(QColorConstants.DarkBlue)
+        keywordFormat.setFontWeight(QFont.Weight.Bold)
         keywords = ["module", "in", "out", "inout", "wire", "state", "if", "else", "then", "fi", "for", "step", "to", "do", "rof", "skip", "call", "uncall"]
 
         for pattern in ["\\b%s\\b" % keyword for keyword in keywords]:
-            self.highlightingRules.append([QRegExp(pattern), keywordFormat])
+            self.highlightingRules.append([QtCore.QRegularExpression(pattern), keywordFormat])
 
         numberFormat = QTextCharFormat()
-        numberFormat.setForeground(Qt.darkCyan)
-        self.highlightingRules.append([QRegExp("\\b[0-9]+\\b"), numberFormat])
+        numberFormat.setForeground(QColorConstants.DarkCyan)
+        self.highlightingRules.append([QtCore.QRegularExpression("\\b[0-9]+\\b"), numberFormat])
 
         loopFormat = QTextCharFormat()
-        loopFormat.setForeground(Qt.darkRed)
-        self.highlightingRules.append([QRegExp("\\$[A-Za-z_0-9]+"), loopFormat])
+        loopFormat.setForeground(QColorConstants.DarkRed)
+        self.highlightingRules.append([QtCore.QRegularExpression("\\$[A-Za-z_0-9]+"), loopFormat])
 
     def highlightBlock(self, text):
         for rule in self.highlightingRules:
             expression = rule[0]
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
+            match = expression.match(text)
+            while match.hasMatch():
+                index = match.capturedStart()
+                length = match.capturedLength()
                 self.setFormat(index, length, rule[1])
-                index = expression.indexIn(text, index + length)
+                match = expression.match(text, offset=index + length)
 
 
 class QtSyReCEditor(SyReCEditor):
@@ -480,7 +481,7 @@ class QtSyReCEditor(SyReCEditor):
         SyReCEditor.__init__(self, parent)
 
         self.widget = CodeEditor(parent)
-        self.widget.setFont(QFont("Monospace", 8, QFont.Normal, False))
+        self.widget.setFont(QFont("Monospace", 10, QFont.Weight.Normal))
         self.widget.highlighter = SyReCHighligher(self.widget.document())
 
     def setText(self, text):
@@ -521,7 +522,7 @@ class CodeEditor(QPlainTextEdit):
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), Qt.lightGray)
+        painter.fillRect(event.rect(), QColorConstants.LightGray)
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
@@ -531,8 +532,8 @@ class CodeEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(block_number + 1)
-                painter.setPen(Qt.black)
-                painter.drawText(0, round(top), self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignRight, number)
+                painter.setPen(QColorConstants.Black)
+                painter.drawText(0, round(top), self.lineNumberArea.width(), self.fontMetrics().height(), Qt.AlignmentFlag.AlignRight, number)
 
             block = block.next()
             top = bottom
@@ -546,7 +547,7 @@ class CodeEditor(QPlainTextEdit):
             max_ /= 10
             digits += 1
 
-        space = 3 + self.fontMetrics().width('9') * digits
+        space = 3 + self.fontMetrics().horizontalAdvance('9') * digits
         return space
 
     def resizeEvent(self, event):
@@ -564,10 +565,10 @@ class CodeEditor(QPlainTextEdit):
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
 
-            lineColor = QColor(Qt.yellow).lighter(160)
+            lineColor = QColorConstants.Yellow.lighter(160)
 
             selection.format.setBackground(lineColor)
-            selection.format.setProperty(QTextFormat.FullWidthSelection, True)
+            selection.format.setProperty(QTextFormat.Property.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
             extraSelections.append(selection)
@@ -591,38 +592,39 @@ class RevLibHighlighter(QSyntaxHighlighter):
         self.highlightingRules = []
 
         keywordFormat = QTextCharFormat()
-        keywordFormat.setForeground(Qt.darkRed)
+        keywordFormat.setForeground(QColorConstants.DarkRed)
         keywords = ["version", "numvars", "variables", "inputs", "outputs", "inputbus", "outputbus", "state", "constants", "garbage", "module", "begin", "end"]
 
         for pattern in ["\\.%s" % keyword for keyword in keywords]:
-            self.highlightingRules.append([QRegExp(pattern), keywordFormat])
+            self.highlightingRules.append([QtCore.QRegularExpression(pattern), keywordFormat])
 
         gateFormat = QTextCharFormat()
-        gateFormat.setForeground(Qt.darkBlue)
-        gateFormat.setFontWeight(QFont.Bold)
+        gateFormat.setForeground(QColorConstants.DarkBlue)
+        gateFormat.setFontWeight(QFont.Weight.Bold)
         gates = ["t", "f", "p", "v"]
 
         for pattern in ["\\b%s\\d*\\b" % gate for gate in gates]:
-            self.highlightingRules.append([QRegExp(pattern), gateFormat])
-        self.highlightingRules.append([QRegExp("v\\+"), gateFormat])
+            self.highlightingRules.append([QtCore.QRegularExpression(pattern), gateFormat])
+        self.highlightingRules.append([QtCore.QRegularExpression("v\\+"), gateFormat])
 
         numberFormat = QTextCharFormat()
-        numberFormat.setForeground(Qt.darkCyan)
-        self.highlightingRules.append([QRegExp("\\b[0-9]+\\b"), numberFormat])
+        numberFormat.setForeground(QColorConstants.DarkCyan)
+        self.highlightingRules.append([QtCore.QRegularExpression("\\b[0-9]+\\b"), numberFormat])
 
         commentFormat = QTextCharFormat()
-        commentFormat.setForeground(Qt.darkGray)
+        commentFormat.setForeground(QColorConstants.DarkGray)
         commentFormat.setFontItalic(True)
-        self.highlightingRules.append([QRegExp("#.*$"), commentFormat])
+        self.highlightingRules.append([QtCore.QRegularExpression("#.*$"), commentFormat])
 
     def highlightBlock(self, text):
         for rule in self.highlightingRules:
             expression = rule[0]
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
+            match = expression.match(text)
+            while match.hasMatch():
+                index = match.capturedStart()
+                length = match.capturedLength()
                 self.setFormat(index, length, rule[1])
-                index = expression.indexIn(text, index + length)
+                match = expression.match(text, offset=index + length)
 
 
 class RevLibEditor(CodeEditor):
@@ -638,7 +640,6 @@ class LogWidget(QTreeWidget):
         QTreeWidget.__init__(self, parent)
 
         self.setRootIsDecorated(False)
-        # self.setHeaderLabels( [ "Line", "Message" ] )
         self.setHeaderLabels(["Message"])
 
     def addMessage(self, message):
@@ -665,7 +666,7 @@ class MainWindow(QMainWindow):
         self.editor = QtSyReCEditor(self)
         self.viewer = CircuitView(parent=self)
 
-        splitter = QSplitter(Qt.Vertical, self)
+        splitter = QSplitter(Qt.Orientation.Vertical, self)
         splitter.addWidget(self.editor.widget)
         splitter.addWidget(self.viewer)
 
@@ -675,7 +676,7 @@ class MainWindow(QMainWindow):
         self.logWidget = LogWidget(self)
         self.logDockWidget = QDockWidget("Log Messages", self)
         self.logDockWidget.setWidget(self.logWidget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, self.logDockWidget)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.logDockWidget)
 
     def setup_actions(self):
         self.editor.before_build = self.logWidget.clear
@@ -687,10 +688,10 @@ class MainWindow(QMainWindow):
         toolbar = self.addToolBar('Main')
         toolbar.setIconSize(QSize(32, 32))
 
-        toolbar.addAction(self.editor.openAction)
-        toolbar.addAction(self.editor.buildAction)
-        toolbar.addAction(self.editor.simAction)
-        toolbar.addAction(self.editor.statAction)
+        toolbar.addAction(self.editor.open_action)
+        toolbar.addAction(self.editor.build_action)
+        toolbar.addAction(self.editor.sim_action)
+        toolbar.addAction(self.editor.stat_action)
 
 
 def main():
@@ -699,7 +700,7 @@ def main():
     w = MainWindow()
     w.show()
 
-    sys.exit(a.exec_())
+    sys.exit(a.exec())
 
 
 if __name__ == "__main__":
