@@ -209,6 +209,7 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def(py::init<int>())
             .def(py::init<int, unsigned long>())
+            .def("set", py::overload_cast<boost::dynamic_bitset<>::size_type, bool>(&boost::dynamic_bitset<>::set))
             .def("__str__", bitset_to_string);
 
     py::enum_<gate_types::_types>(m, "gate_type")
