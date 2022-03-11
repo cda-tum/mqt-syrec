@@ -210,9 +210,15 @@ namespace syrec {
                                 /// cancel out the signals
                                 j = j + 1;
                             } else if (exp_op_vector.at(i) != 1 or exp_op_vector.at(i) != 2) {
-                                expression_single_op(stat_assign_op.at(j), exp_lhs_vector.at(i), stat_lhs);
-                                expression_single_op(exp_op_vector.at(i), exp_rhs_vector.at(i), stat_lhs);
-                                j = j + 1;
+                                if (stat_assign_op.at(j) == 1) {
+                                    expression_single_op(1, exp_lhs_vector.at(i), stat_lhs);
+                                    expression_single_op(1, exp_rhs_vector.at(i), stat_lhs);
+                                    j = j + 1;
+                                } else {
+                                    expression_single_op(stat_assign_op.at(j), exp_lhs_vector.at(i), stat_lhs);
+                                    expression_single_op(exp_op_vector.at(i), exp_rhs_vector.at(i), stat_lhs);
+                                    j = j + 1;
+                                }
                             }
                         } else {
                             solver(stat_lhs, stat_assign_op.at(j), exp_lhs_vector.at(i), exp_op_vector.at(i), exp_rhs_vector.at(i));

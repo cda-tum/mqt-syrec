@@ -146,10 +146,10 @@
 
   "operators_repeated_4":
   {
-    "num_gates"         :48,
-    "lines"             :16,
-    "quantum_costs"     :96,
-    "transistor_costs"  :480
+    "num_gates"         :260,
+    "lines"             :28,
+    "quantum_costs"     :500,
+    "transistor_costs"  :2240
   },
 
   "parity_4":
