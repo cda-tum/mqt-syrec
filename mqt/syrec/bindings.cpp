@@ -196,14 +196,14 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def("add_module", &program::add_module);
 
-    m.def("py_read_program", py_read_program);
+    m.def("py_read_program", py_read_program, py::arg("prog"), py::arg("filename"), py::arg("settings"));
 
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
 
-    m.def("quantum_costs", final_quantum_cost);
-    m.def("transistor_costs", final_transistor_cost);
+    m.def("quantum_costs", final_quantum_cost, py::arg("circ"), py::arg("lines"));
+    m.def("transistor_costs", final_transistor_cost, py::arg("circ"), py::arg("lines"));
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
@@ -220,8 +220,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def_property("type", gate_get_type, gate_set_type);
 
-    m.def("control_lines", control_lines_func);
-    m.def("target_lines", target_lines_func);
+    m.def("control_lines", control_lines_func, py::arg("g"));
+    m.def("target_lines", target_lines_func, py::arg("g"));
 
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;

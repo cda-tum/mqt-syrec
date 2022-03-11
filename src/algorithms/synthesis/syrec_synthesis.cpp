@@ -62,12 +62,9 @@ namespace syrec {
     }
 
     void standard_syrec_synthesizer::set_settings(const properties::ptr& settings) {
-        _settings = settings;
-
         variable_name_format     = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         crement_merge_line_count = get<unsigned>(settings, "crement_merge_line_count", 4u);
         if_realization           = get<unsigned>(settings, "if_realization", syrec_synthesis_if_realization_controlled);
-        efficient_controls       = get<bool>(settings, "efficient_controls", false);
     }
 
     void standard_syrec_synthesizer::set_main_module(const applications::module::ptr& main_module) {
@@ -135,18 +132,33 @@ namespace syrec {
                     lhs_vec1.clear();
                     rhs_vec1.clear();
                 } else {
-                    expression_single_op(statement.op(), exp_lhs_vector.at(0), stat_lhs);
-                    expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
-                    exp_op_vector.clear();
-                    assign_op_vector.clear();
-                    exp_lhs_vector.clear();
-                    exp_rhs_vector.clear();
-                    op_vec.clear();
-                    lhs_vec.clear();
-                    rhs_vec.clear();
-                    lhs_vec1.clear();
-                    rhs_vec1.clear();
+                    if (statement.op() == 1) {
+                        expression_single_op(1, exp_lhs_vector.at(0), stat_lhs);
+                        expression_single_op(1, exp_rhs_vector.at(0), stat_lhs);
+                        exp_op_vector.clear();
+                        assign_op_vector.clear();
+                        exp_lhs_vector.clear();
+                        exp_rhs_vector.clear();
+                        op_vec.clear();
+                        lhs_vec.clear();
+                        rhs_vec.clear();
+                        lhs_vec1.clear();
+                        rhs_vec1.clear();
+                    } else {
+                        expression_single_op(statement.op(), exp_lhs_vector.at(0), stat_lhs);
+                        expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
+                        exp_op_vector.clear();
+                        assign_op_vector.clear();
+                        exp_lhs_vector.clear();
+                        exp_rhs_vector.clear();
+                        op_vec.clear();
+                        lhs_vec.clear();
+                        rhs_vec.clear();
+                        lhs_vec1.clear();
+                        rhs_vec1.clear();
+                    }
                 }
+
             } else {
                 if (exp_lhs_vector.at(0) == exp_rhs_vector.at(0)) {
                     if (exp_op_vector.at(0) == 1 or exp_op_vector.at(0) == 2) {

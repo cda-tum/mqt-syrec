@@ -33,8 +33,8 @@ namespace syrec::internal {
                                   boost::property<boost::vertex_name_t, node_properties>>
             cct;
 
-    typedef boost::graph_traits<cct>::vertex_descriptor                cct_node;
-    [[maybe_unused]] typedef boost::graph_traits<cct>::edge_descriptor cct_edge;
+    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+    // [[maybe_unused]] typedef boost::graph_traits<cct>::edge_descriptor cct_edge;
 
     struct cct_manager {
         cct      tree;
@@ -159,11 +159,10 @@ namespace syrec {
 
     private:
         circuit&                                    _circ;
-        properties::ptr                             _settings; // Settings to use them recursively in module call
         std::stack<applications::statement::ptr>    _stmts;
         var_lines_map                               _var_lines;
-        std::map<bool, std::vector<unsigned>>       free_const_lines_map; // TODO: set statt vector?
-        applications::number::loop_variable_mapping loop_map;             // TODO: umbenennen: intern_variable_mapping oder aehnlich
+        std::map<bool, std::vector<unsigned>>       free_const_lines_map; //
+        applications::number::loop_variable_mapping loop_map;             //
 
         typedef std::set<applications::variable_access::ptr, applications::set_comperator> var_set;
 
@@ -183,8 +182,6 @@ namespace syrec {
         unsigned crement_merge_line_count{};
 
         unsigned if_realization{};
-
-        bool efficient_controls{};
     };
 
     /**
@@ -201,15 +198,13 @@ namespace syrec {
         /**
      * @brief Realization by using duplicated variables in else block
      */
-        syrec_synthesis_if_realization_duplication
     };
 
     /**
    * @brief SyReC Synthesis
    *
-   * TODO
    *
-
+   *
    */
     bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 
@@ -221,7 +216,6 @@ namespace syrec {
    *
    * @return A functor which complies with the hdl_synthesis_func interface
    *
-
    */
 
 } // namespace syrec
