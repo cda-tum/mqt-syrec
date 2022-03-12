@@ -53,6 +53,7 @@ namespace syrec {
 
         virtual ~standard_syrec_synthesizer() = default;
 
+        virtual void add_variables(circuit& circ, const applications::variable::vec& variables);
         virtual bool on_module(const applications::module::ptr&);
         virtual bool on_statement(const applications::statement::ptr& statement);
         bool         on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
@@ -72,7 +73,6 @@ namespace syrec {
         virtual bool on_statement(const applications::call_statement& statement);
         virtual bool on_statement(const applications::uncall_statement& statement);
         virtual bool on_statement(const applications::skip_statement& statement);
-        virtual bool var_expression(const applications::variable_expression& expression, std::vector<unsigned>& v);
         virtual bool op_rhs_lhs_expression(const applications::variable_expression& expression, std::vector<unsigned>& v);
         virtual bool op_rhs_lhs_expression(const applications::binary_expression& expression, std::vector<unsigned>& v);
         virtual bool full_statement(const applications::assign_statement& statement);
@@ -86,7 +86,6 @@ namespace syrec {
         virtual bool flow(const applications::variable_expression& expression, std::vector<unsigned>& v);
         virtual bool flow(const applications::binary_expression& expression, std::vector<unsigned>& v);
 
-    protected:
         // unary operations
         virtual bool bitwise_negation(const std::vector<unsigned>& dest); // ~
         virtual bool decrement(const std::vector<unsigned>& dest);        // --
@@ -130,11 +129,8 @@ namespace syrec {
 
         cct_manager cct_man;
 
-    public:
-        var_lines_map& var_lines();
-
-    protected:
-        virtual bool get_variables(applications::variable_access::ptr var, std::vector<unsigned>& lines);
+        void         add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const applications::variable::ptr& var, constant _constant, bool _garbage, const std::string& arraystr);
+        virtual bool get_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
         virtual bool unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
 
         unsigned get_constant_line(bool value);
