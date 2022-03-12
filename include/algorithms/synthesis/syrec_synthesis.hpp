@@ -47,6 +47,12 @@ namespace syrec {
 
     class standard_syrec_synthesizer {
     public:
+        inline static std::stack<unsigned>               exp_opp;
+        inline static std::stack<std::vector<unsigned>>  exp_lhss, exp_rhss;
+        bool                                             sub_flag = false;
+        inline static std::vector<unsigned>              op_vec, assign_op_vector, exp_op_vector;
+        inline static std::vector<std::vector<unsigned>> exp_lhs_vector, exp_rhs_vector;
+
         typedef std::map<applications::variable::ptr, unsigned> var_lines_map;
 
         standard_syrec_synthesizer(circuit& circ, const applications::program& prog);
@@ -60,7 +66,6 @@ namespace syrec {
         bool         op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v);
         bool         full_statement(const applications::statement::ptr& statement);
         bool         flow(const applications::expression::ptr& expression, std::vector<unsigned>& v);
-        virtual void set_settings(const properties::ptr& settings);
         virtual void set_main_module(const applications::module::ptr& main_module);
         bool         solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
 
@@ -78,8 +83,8 @@ namespace syrec {
         virtual bool full_statement(const applications::assign_statement& statement);
 
         // expressions
-        virtual bool on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        virtual bool on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
+        virtual bool on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines);
+        virtual bool on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines);
         virtual bool on_expression(const applications::binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
         virtual bool on_expression(const applications::shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
 
@@ -131,7 +136,6 @@ namespace syrec {
 
         void         add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const applications::variable::ptr& var, constant _constant, bool _garbage, const std::string& arraystr);
         virtual bool get_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
-        virtual bool unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines);
 
         unsigned get_constant_line(bool value);
         bool     get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
@@ -144,8 +148,6 @@ namespace syrec {
         applications::number::loop_variable_mapping loop_map;
 
         std::stack<applications::module::ptr> modules;
-
-        std::string variable_name_format;
     };
 
     /**

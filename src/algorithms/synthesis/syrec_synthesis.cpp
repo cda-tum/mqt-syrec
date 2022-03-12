@@ -7,7 +7,6 @@
 #include "core/utils/timer.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <cmath>
 #include <functional>
@@ -15,11 +14,6 @@
 #include <numeric>
 
 namespace syrec {
-    static std::stack<unsigned>               exp_opp;
-    static std::stack<std::vector<unsigned>>  exp_lhss, exp_rhss;
-    bool                                      sub_flag = false;
-    static std::vector<unsigned>              op_vec, assign_op_vector, exp_op_vector;
-    static std::vector<std::vector<unsigned>> exp_lhs_vector, exp_rhs_vector;
 
     struct annotater {
         explicit annotater(circuit& circ, const std::stack<applications::statement::ptr>& stmts):
@@ -52,10 +46,6 @@ namespace syrec {
         get(boost::vertex_name, cct_man.tree)[cct_man.current].circ = std::make_shared<circuit>();
         get(boost::vertex_name, cct_man.tree)[cct_man.current].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[cct_man.current].circ, _stmts));
         add_edge(cct_man.root, cct_man.current, cct_man.tree);
-    }
-
-    void standard_syrec_synthesizer::set_settings(const properties::ptr& settings) {
-        variable_name_format = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
     }
 
     void standard_syrec_synthesizer::set_main_module(const applications::module::ptr& main_module) {
@@ -367,22 +357,22 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_statement(const applications::statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
-        if (auto* stat = dynamic_cast<applications::swap_statement*>(statement.get())) {
-            okay = on_statement(*stat);
-        } else if (auto* stat_1 = dynamic_cast<applications::unary_statement*>(statement.get())) {
-            okay = on_statement(*stat_1);
-        } else if (auto* stat_2 = dynamic_cast<applications::assign_statement*>(statement.get())) {
-            okay = on_statement(*stat_2);
-        } else if (auto* stat_3 = dynamic_cast<applications::if_statement*>(statement.get())) {
-            okay = on_statement(*stat_3);
-        } else if (auto* stat_4 = dynamic_cast<applications::for_statement*>(statement.get())) {
-            okay = on_statement(*stat_4);
-        } else if (auto* stat_5 = dynamic_cast<applications::call_statement*>(statement.get())) {
-            okay = on_statement(*stat_5);
-        } else if (auto* stat_6 = dynamic_cast<applications::uncall_statement*>(statement.get())) {
-            okay = on_statement(*stat_6);
-        } else if (auto* stat_7 = dynamic_cast<applications::skip_statement*>(statement.get())) {
-            okay = on_statement(*stat_7);
+        if (auto* swap_stat = dynamic_cast<applications::swap_statement*>(statement.get())) {
+            okay = on_statement(*swap_stat);
+        } else if (auto* unary_stat = dynamic_cast<applications::unary_statement*>(statement.get())) {
+            okay = on_statement(*unary_stat);
+        } else if (auto* assign_stat = dynamic_cast<applications::assign_statement*>(statement.get())) {
+            okay = on_statement(*assign_stat);
+        } else if (auto* if_stat = dynamic_cast<applications::if_statement*>(statement.get())) {
+            okay = on_statement(*if_stat);
+        } else if (auto* for_stat = dynamic_cast<applications::for_statement*>(statement.get())) {
+            okay = on_statement(*for_stat);
+        } else if (auto* call_stat = dynamic_cast<applications::call_statement*>(statement.get())) {
+            okay = on_statement(*call_stat);
+        } else if (auto* uncall_stat = dynamic_cast<applications::uncall_statement*>(statement.get())) {
+            okay = on_statement(*uncall_stat);
+        } else if (auto* skip_stat = dynamic_cast<applications::skip_statement*>(statement.get())) {
+            okay = on_statement(*skip_stat);
         } else {
             return false;
         }
@@ -400,9 +390,6 @@ namespace syrec {
         assert(lhs.size() == rhs.size());
 
         swap(lhs, rhs);
-
-        unget_variables(statement.lhs(), lhs);
-        unget_variables(statement.rhs(), rhs);
 
         return true;
     }
@@ -425,8 +412,6 @@ namespace syrec {
             default:
                 return false;
         }
-        unget_variables(statement.var(), var);
-
         return true;
     }
 
@@ -504,8 +489,6 @@ namespace syrec {
                 return false;
         }
 
-        //empty the stack
-        unget_variables(statement.lhs(), lhs);
         return status;
     }
 
@@ -661,24 +644,24 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_expression(const applications::expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
-        if (auto* exp = dynamic_cast<applications::numeric_expression*>(expression.get())) {
-            return on_expression(*exp, lines, lhs_stat, op);
-        } else if (auto* exp_3 = dynamic_cast<applications::variable_expression*>(expression.get())) {
-            return on_expression(*exp_3, lines, lhs_stat, op);
-        } else if (auto* exp_4 = dynamic_cast<applications::binary_expression*>(expression.get())) {
-            return on_expression(*exp_4, lines, lhs_stat, op);
-        } else if (auto* exp_5 = dynamic_cast<applications::shift_expression*>(expression.get())) {
-            return on_expression(*exp_5, lines, lhs_stat, op);
+        if (auto* numeric = dynamic_cast<applications::numeric_expression*>(expression.get())) {
+            return on_expression(*numeric, lines);
+        } else if (auto* variable = dynamic_cast<applications::variable_expression*>(expression.get())) {
+            return on_expression(*variable, lines);
+        } else if (auto* binary = dynamic_cast<applications::binary_expression*>(expression.get())) {
+            return on_expression(*binary, lines, lhs_stat, op);
+        } else if (auto* shift = dynamic_cast<applications::shift_expression*>(expression.get())) {
+            return on_expression(*shift, lines, lhs_stat, op);
         } else {
             return false;
         }
     }
 
-    bool standard_syrec_synthesizer::on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines) {
         return get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
     }
 
-    bool standard_syrec_synthesizer::on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat [[maybe_unused]], unsigned op [[maybe_unused]]) {
+    bool standard_syrec_synthesizer::on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines) {
         return get_variables(expression.var(), lines);
     }
 
@@ -1283,8 +1266,6 @@ namespace syrec {
         unsigned offset = _var_lines[var->var()];
 
         if (!var->indexes().empty()) {
-            // change offset
-
             // check if it is all numeric_expressions
             unsigned n = var->var()->dimensions().size(); // dimensions
             if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), [&](const auto& p) { return dynamic_cast<applications::numeric_expression*>(p.get()); }) == n) {
@@ -1293,7 +1274,6 @@ namespace syrec {
                               std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
                               var->var()->bitwidth();
                 }
-            } else {
             }
         }
 
@@ -1317,19 +1297,6 @@ namespace syrec {
                 lines.emplace_back(offset + i);
             }
         }
-        return true;
-    }
-
-    bool standard_syrec_synthesizer::unget_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines [[maybe_unused]]) {
-        if (!var->indexes().empty()) {
-            // change offset
-
-            // check if it is not all numeric_expressions
-            unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), [&](const auto& p) { return dynamic_cast<applications::numeric_expression*>(p.get()); }) != n) {
-            }
-        }
-
         return true;
     }
 
@@ -1375,7 +1342,7 @@ namespace syrec {
                                                   constant _constant, bool _garbage, const std::string& arraystr) {
         if (dimensions.empty()) {
             for (unsigned i = 0u; i < var->bitwidth(); ++i) {
-                std::string name = boost::str(boost::format(variable_name_format) % var->name() % i % arraystr);
+                std::string name = var->name() + std::to_string(i) + arraystr;
                 add_line_to_circuit(circ, name, name, _constant, _garbage);
             }
         } else {
@@ -1407,16 +1374,6 @@ namespace syrec {
         auto main_module           = get<std::string>(settings, "main_module", std::string());
         auto statement_synthesizer = get<standard_syrec_synthesizer>(settings, "statement_synthesizer", standard_syrec_synthesizer(circ, program));
 
-        statement_synthesizer.set_settings(settings);
-
-        // Run-time measuring
-        timer<properties_timer> t;
-
-        if (statistics) {
-            properties_timer rt(statistics);
-            t.start(rt);
-        }
-
         // get the main module
         applications::module::ptr main;
 
@@ -1440,8 +1397,21 @@ namespace syrec {
         statement_synthesizer.add_variables(circ, main->parameters());
         statement_synthesizer.add_variables(circ, main->variables());
 
+        // Run-time measuring
+        timer<properties_timer> t;
+
+        if (statistics) {
+            properties_timer rt(statistics);
+            t.start(rt);
+        }
         // synthesize the statements
-        return statement_synthesizer.on_module(main);
+        bool synth_okay = statement_synthesizer.on_module(main);
+
+        if (statistics) {
+            t.stop();
+        }
+
+        return synth_okay;
     }
 
 } // namespace syrec

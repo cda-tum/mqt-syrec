@@ -63,11 +63,10 @@ namespace syrec {
      *
 
      */
-        double operator()(double r) const {
+        void operator()(double r) const {
             if (statistics) {
                 statistics->set("runtime", r);
             }
-            return r;
         }
 
     private:
@@ -77,59 +76,8 @@ namespace syrec {
     /**
    * @brief A generic timer class
    *
-   * This class measures the time between its constructor and
-   * its deconstructor is called. In the deconstructor a
-   * functor is called which can be assigned in the constructor.
-   *
-   * Because of this design the code for which the run-time has
-   * to be checked has to be enclosed as a block and the timer
-   * needs to be initialized as local variable in the beginning
-   * of the block, so that the deconstructor get called automatically
-   * at the end of the block.
-   *
-   * The Outputter has to implement <b>operator()(double runtime) const</b>.
-   *
-   * Two functors are already implemented in the library:
-   * - print_timer: Prints the run-time to a given output stream
-   * - reference_timer: Assigns the run-time to a variable
-   *
-   * @section sec_example_timer Example
-   *
-   * This example demonstrates how to create a timer functor which
-   * outputs the run-time to STDOUT and how to use the timer class
-   * with that functor.
-   *
-   * It is important to specify a result_type which is the result of the
-   * () operator.
-   *
-   * @sa timer::operator()()
-   *
-   * @code
-   * #include <core/utils/timer.hpp>
-   *
-   * struct output_timer {
-   *   typedef void result_type;
-   *
-   *   void operator()( double runtime ) const {
-   *     std::cout << runtime << std::endl;
-   *   }
-   * };
-   *
-   * ...
-   *
-   * // some other code for which no time should be measured
-   * {
-   *   output_timer ot;
-   *   syrec::timer<output_timer> t( ot );
-   *   // code for which time should be measured
-   * }
-   * // some other code for which no time should be measured
-   *
-   * 
-   * @endcode
-   *
-
    */
+
     template<typename Outputter>
     class timer {
     public:
@@ -146,32 +94,9 @@ namespace syrec {
         }
 
         /**
-     * @brief Constructor which starts measuring the time
-     *
-     * The \p outputter is copied and called in the
-     * deconstructor with the measured time.
-     *
-     * @param outputter Functor which does something with the measured run-time
-     *
-
+     * @brief function which starts measuring the time
      */
-        explicit timer(const Outputter& outputter):
-            p(outputter),
-            started(true) {
-            begin = std::chrono::steady_clock::now();
-        }
 
-        /**
-     * @brief Delayed start
-     *
-     * There might be reasons when the starting of the measurement
-     * should be delayed and not started with the constructor.
-     * For this cases this method can be used.
-     *
-     * @param outputter Functor which does something with the measured run-time
-     *
-
-     */
         void start(const Outputter& outputter) {
             p       = outputter;
             started = true;
@@ -179,49 +104,15 @@ namespace syrec {
         }
 
         /**
-     * @brief Intermediate Call of the timer functor
+     * @brief function which stops measuring the time
      *
-     * This operator also returns the return type of the functor.
-     * This is useful, when using the reference_timer which returns
-     * the value of the reference in the functor call.
-     *
-     * @section sec_example_timer_intermediate Example
-     * In this function the timer is used explicitly without a scope
-     * and the start method as well as the intermediate operator.
-     *
-     * @code
-     * double runtime;
-     * reference_timer rt( &runtime );
-     * timer<reference_timer> t;
-     * // before starting the measurement
-     * t.start( rt );
-     * // calculate a bit
-     * double intermediate_time = t();
-     * // calculate a bit more
-     * intermediate_time = t();
-     * @endcode
-     *
-     * @return The result value of the functor operator (if available)
-     *
-
      */
-        typename Outputter::result_type operator()() const {
-            assert(started);
-            double runtime = (std::chrono::steady_clock::now() - begin).count();
-            return p(runtime);
-        }
 
-        /**
-     * @brief Deconstructor which stops measuring the time
-     *
-     * In this function time is measured again and the functor
-     * is called with the runtime.
-     *
-
-     */
-        virtual ~timer() {
+        void stop() {
             if (started) {
-                operator()();
+                assert(started);
+                std::chrono::duration<double> runtime = (std::chrono::steady_clock::now() - begin);
+                p(runtime.count());
             }
         }
 

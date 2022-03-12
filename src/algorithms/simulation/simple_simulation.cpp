@@ -64,6 +64,11 @@ namespace syrec {
             output = gate_simulation(*first, output);
             ++first;
         }
+
+        if (statistics) {
+            t.stop();
+        }
+
         return true;
     }
 
