@@ -132,7 +132,7 @@ jobs:
         run: cd test/python && pytest .
 
   upload_pypi:
-    needs: [ build_ubuntu_wheels, build_macos_wheels, build_m1_wheels, build_windows_wheels, build_sdist ]
+    needs: [ build_ubuntu_wheels, build_macos_wheels, build_m1_wheels, build_windows_wheels, build_sdist, test_bindings ]
     runs-on: ubuntu-latest
     if:      github.event_name == 'release' && github.event.action == 'published'
     steps:
