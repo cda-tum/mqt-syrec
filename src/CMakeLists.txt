@@ -6,7 +6,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/circuit.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
+            #${CMAKE_CURRENT_SOURCE_DIR}/core/test_functions.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/gate.cpp
 		    ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_circuit.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/functions/add_gates.cpp
@@ -21,7 +21,7 @@ add_library(${PROJECT_NAME}
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
+            #${${PROJECT_NAME}_SOURCE_DIR}/include/core/test_functions.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/functions/add_gates.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/expression.hpp

@@ -1,15 +1,14 @@
 #include "algorithms/simulation/simple_simulation.hpp"
 
 #include "core/gate.hpp"
-#include "core/target_tags.hpp"
 #include "core/utils/timer.hpp"
 
 namespace syrec {
 
     boost::dynamic_bitset<>& core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input) {
-        if (is_toffoli(g)) {
+        if (gateType::Toffoli == g.type()) {
             boost::dynamic_bitset<> c_mask(input.size());
-            for (gate::const_iterator itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
+            for (auto itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
                 c_mask.set(*itControl);
             }
 
@@ -18,17 +17,17 @@ namespace syrec {
             }
 
             return input;
-        } else if (is_fredkin(g)) {
+        } else if (gateType::Fredkin == g.type()) {
             boost::dynamic_bitset<> c_mask(input.size());
-            for (gate::const_iterator itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
+            for (auto itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
                 c_mask.set(*itControl);
             }
 
             if (c_mask.none() || ((input & c_mask) == c_mask)) {
                 // get both positions and values
-                gate::const_iterator it = g.begin_targets();
-                unsigned             t1 = *it++;
-                unsigned             t2 = *it;
+                auto     it = g.begin_targets();
+                unsigned t1 = *it++;
+                unsigned t2 = *it;
 
                 bool t1v = input.test(t1);
                 bool t2v = input.test(t2);

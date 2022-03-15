@@ -5,7 +5,6 @@
 #include "core/properties.hpp"
 #include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/target_tags.hpp"
 #include "core/utils/costs.hpp"
 
 #include <boost/dynamic_bitset.hpp>
@@ -93,53 +92,40 @@ std::string py_read_program(program& prog, const std::string& filename, const re
 
 ///gates
 
-namespace gate_types {
-    enum _types {
-        toffoli,
-        fredkin,
-    };
+void gate_set_type(gate& g, gateType value) {
+    g.set_type(value);
 }
 
-void gate_set_type(gate& g, unsigned value) {
-    switch (value) {
-        case gate_types::toffoli:
-            g.set_type(toffoli_tag());
-            break;
-        case gate_types::fredkin:
-            g.set_type(fredkin_tag());
-            break;
-        default:
-            break;
-    }
-}
-
-unsigned gate_get_type(const gate& g) {
-    if (is_toffoli(g)) {
-        return gate_types::toffoli;
-    } else if (is_fredkin(g)) {
-        return gate_types::fredkin;
-    }
-    return 0u;
+gateType gate_get_type(const gate& g) {
+    return g.type();
 }
 
 /// control and target lines
 
 py::list control_lines_func(const gate& g) {
-    gate::line_container c;
-    py::list             l;
-    control_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
-    for (const auto& control: c) {
-        l.append(control);
+    //gate::line_container c;
+    py::list l;
+    //std::copy(g.begin_controls(), g.end_controls(), std::insert_iterator<gate::line_container>(c, c.begin()));
+    //control_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
+    for (auto c = g.begin_controls(); c != g.end_controls(); ++c) {
+        l.append(*c);
     }
+
+    /*for (const auto& control: c) {
+        l.append(control);
+    }*/
     return l;
 }
 
 py::list target_lines_func(const gate& g) {
-    gate::line_container c;
-    py::list             l;
-    target_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
+    //gate::line_container c;
+    py::list l;
+    /*target_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
     for (const auto& target: c) {
         l.append(target);
+    }*/
+    for (auto c = g.begin_targets(); c != g.end_targets(); ++c) {
+        l.append(*c);
     }
     return l;
 }
@@ -199,9 +185,9 @@ PYBIND11_MODULE(pysyrec, m) {
                 return str;
             });
 
-    py::enum_<gate_types::_types>(m, "gate_type")
-            .value("toffoli", gate_types::toffoli)
-            .value("fredkin", gate_types::fredkin)
+    py::enum_<gateType>(m, "gate_type")
+            .value("toffoli", gateType::Toffoli)
+            .value("fredkin", gateType::Fredkin)
             .export_values();
 
     py::class_<gate>(m, "gate")

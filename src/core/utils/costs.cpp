@@ -1,7 +1,5 @@
 #include "core/utils/costs.hpp"
 
-#include "core/target_tags.hpp"
-
 namespace syrec {
 
     cost_t single_gate_quantum_cost(const gate& g, unsigned lines) {
@@ -10,7 +8,7 @@ namespace syrec {
         unsigned n = lines;
         unsigned c = std::distance(g.begin_controls(), g.end_controls());
 
-        if (is_fredkin(g)) {
+        if (gateType::Fredkin == g.type()) {
             c += 1u;
         }
 

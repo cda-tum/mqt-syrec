@@ -16,9 +16,15 @@
 #include <vector>
 
 namespace syrec {
+    /**
+   * @brief Represents a gate tags
+   *
 
-    struct transform_line;
-    struct filter_line;
+    */
+
+    enum class gateType { None,
+                          Fredkin,
+                          Toffoli };
 
     /**
    * @brief Represents a gate in a circuit
@@ -53,14 +59,13 @@ namespace syrec {
      *
 
      */
-        typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::iterator>> iterator;
-
+        typedef line_container::iterator iterator;
         /**
      * @brief Constant Iterator for iterating through control or target lines
      *
 
      */
-        typedef boost::transform_iterator<transform_line, boost::filter_iterator<filter_line, line_container::const_iterator>> const_iterator;
+        typedef line_container::const_iterator const_iterator;
 
     public:
         /**
@@ -170,7 +175,7 @@ namespace syrec {
      *
 
      */
-        virtual void set_type(const std::any& t);
+        virtual void set_type(gateType t);
 
         /**
      * @brief Returns the type of the target line(s)
@@ -179,99 +184,14 @@ namespace syrec {
      *
 
      */
-        [[nodiscard]] virtual const std::any& type() const;
+        [[nodiscard]] virtual gateType type() const;
 
     private:
-        struct priv;
-        priv* const d;
+        line_container controls;
+        line_container targets;
+        gateType       target_type;
     };
 
-    struct transform_line {
-        typedef gate::line result_type;
-
-        transform_line() = default;
-
-        explicit transform_line(const std::vector<unsigned>& filter):
-            filter(&filter) {}
-
-        gate::line operator()(gate::line l) const {
-            return filter ? std::find(filter->begin(), filter->end(), l) - filter->begin() : l;
-        }
-
-    private:
-        const std::vector<unsigned>* filter = nullptr;
-    };
-    /** @endcond */
-
-    /** @cond */
-    struct filter_line {
-        filter_line() = default;
-
-        explicit filter_line(const std::vector<unsigned>& filter):
-            filter(&filter) {}
-
-        bool operator()(const gate::line& l) const {
-            return !filter || std::find(filter->begin(), filter->end(), l) != filter->end();
-        }
-
-    private:
-        const std::vector<unsigned>* filter = nullptr;
-    };
-    /** @endcond */
-
-    /**
-   * @brief Gets the control lines of a gate
-   *
-   * This function stores all control lines of a gate into a container.
-   *
-   * @section Example
-   * @code
-   * gate g = ...;
-   * std::vector<gate::line> controls;
-   * control_lines( g, std::back_inserter( controls ) );
-   * @endcode
-   *
-   * @param g      Gate
-   * @param result Iterator to store the lines as gate::line type
-   *
-   * @return The iterator after adding the lines (pointing after the end)
-   *
-
-    */
-    template<typename Iterator>
-    Iterator control_lines(const gate& g, Iterator result) {
-        for (gate::const_iterator c = g.begin_controls(); c != g.end_controls(); ++c) {
-            *result++ = *c;
-        }
-        return result;
-    }
-
-    /**
-   * @brief Gets the target lines of a gate
-   *
-   * This function stores all target lines of a gate into a container.
-   *
-   * @section Example
-   * @code
-   * gate g = ...;
-   * std::vector<gate::line> targets;
-   * target_lines( g, std::back_inserter( targets ) );
-   * @endcode
-   *
-   * @param g      Gate
-   * @param result Iterator to store the lines as gate::line type
-   *
-   * @return The iterator after adding the lines (pointing after the end)
-   *
-
-    */
-    template<typename Iterator>
-    Iterator target_lines(const gate& g, Iterator result) {
-        for (gate::const_iterator c = g.begin_targets(); c != g.end_targets(); ++c) {
-            *result++ = *c;
-        }
-        return result;
-    }
 } // namespace syrec
 
 #endif /* GATE_HPP */

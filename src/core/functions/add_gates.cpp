@@ -17,17 +17,7 @@
 
 #include "core/functions/add_gates.hpp"
 
-#include "core/target_tags.hpp"
-
 namespace syrec {
-
-    bool is_toffoli(const gate& g) {
-        return g.type().type() == typeid(toffoli_tag);
-    }
-
-    bool is_fredkin(const gate& g) {
-        return g.type().type() == typeid(fredkin_tag);
-    }
 
     ////////////////////////////// class target_line_adder
     target_line_adder::target_line_adder(gate* gate):
@@ -68,7 +58,7 @@ namespace syrec {
             g.add_control(control);
         }
         g.add_target(target);
-        g.set_type(toffoli_tag());
+        g.set_type(gateType::Toffoli);
 
         return g;
     }
@@ -76,14 +66,14 @@ namespace syrec {
     gate& create_cnot(gate& g, const gate::line& control, const gate::line& target) {
         g.add_control(control);
         g.add_target(target);
-        g.set_type(toffoli_tag());
+        g.set_type(gateType::Toffoli);
 
         return g;
     }
 
     gate& create_not(gate& g, const gate::line& target) {
         g.add_target(target);
-        g.set_type(toffoli_tag());
+        g.set_type(gateType::Toffoli);
         return g;
     }
 
@@ -101,18 +91,18 @@ namespace syrec {
         return create_not(circ.append_gate(), target);
     }
 
-    control_line_adder append_gate(circuit& circ, const std::any& tag) {
+    control_line_adder append_gate(circuit& circ, const gateType tag) {
         gate& g = circ.append_gate();
         g.set_type(tag);
         return control_line_adder(g);
     }
 
     control_line_adder append_toffoli(circuit& circ) {
-        return append_gate(circ, toffoli_tag());
+        return append_gate(circ, gateType::Toffoli);
     }
 
     control_line_adder append_fredkin(circuit& circ) {
-        return append_gate(circ, fredkin_tag());
+        return append_gate(circ, gateType::Fredkin);
     }
 
 } // namespace syrec

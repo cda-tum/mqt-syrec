@@ -3,7 +3,6 @@
 #include "core/properties.hpp"
 #include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/test_functions.hpp"
 #include "core/utils/costs.hpp"
 
 #include "gtest/gtest.h"
@@ -73,13 +72,10 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                              return s; });
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
-    circuit                            circ;
-    applications::program              prog;
-    read_program_settings              settings;
-    std::string                        error_string;
-    std::vector<std::vector<unsigned>> cl;
-    std::vector<std::vector<unsigned>> tl;
-    std::vector<gate>                  gates_vec;
+    circuit               circ;
+    applications::program prog;
+    read_program_settings settings;
+    std::string           error_string;
 
     error_string = read_program(prog, file_name, settings);
     EXPECT_TRUE(error_string.empty());
@@ -88,12 +84,6 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
 
     qc = syrec::quantum_cost(circ, circ.lines());
     tc = syrec::transistor_cost(circ);
-
-    gates_vec = ct_gates(circ);
-    for (const gate& g: gates_vec) {
-        cl.push_back(control_lines_check(g));
-        tl.push_back(target_lines_check(g));
-    }
 
     EXPECT_EQ(expected_num_gates, circ.num_gates());
     EXPECT_EQ(expected_lines, circ.lines());

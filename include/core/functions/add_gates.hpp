@@ -168,7 +168,7 @@ namespace syrec {
    *
 
    */
-    control_line_adder append_gate(circuit& circ, const std::any& tag);
+    control_line_adder append_gate(circuit& circ, gateType tag);
 
     /**
    * @brief Helper function for appending a \b Toffoli gate using the control_line_adder

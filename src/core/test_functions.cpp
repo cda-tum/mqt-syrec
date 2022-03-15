@@ -3,11 +3,14 @@
 class const_iterator;
 
 std::vector<unsigned> control_lines_check(const syrec::gate& g) {
-    syrec::gate::line_container c;
-    std::vector<unsigned>       l;
-    control_lines(g, std::insert_iterator<syrec::gate::line_container>(c, c.begin()));
-    for (const auto& control: c) {
-        l.push_back(control);
+    //syrec::gate::line_container c;
+    std::vector<unsigned> l;
+    //control_lines(g, std::insert_iterator<syrec::gate::line_container>(c, c.begin()));
+    //for (const auto& control: c) {
+    //    l.push_back(control);
+    //}
+    for (auto c = g.begin_controls(); c != g.end_controls(); ++c) {
+        l.push_back(*c);
     }
     return l;
 }
