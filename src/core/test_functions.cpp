@@ -1,22 +1,6 @@
 #include "core/test_functions.hpp"
 
 class const_iterator;
-std::string py_read_program(syrec::applications::program& prog, const std::string& filename, const syrec::read_program_settings& settings) {
-    std::string error_message;
-
-    if (!(syrec::read_program(prog, filename, settings, &error_message))) {
-        return error_message;
-    } else {
-        return {};
-    }
-}
-
-std::string my_read_program(syrec::applications::program& prog, const std::string& filename, unsigned default_bitwidth) {
-    syrec::read_program_settings settings;
-    settings.default_bitwidth = default_bitwidth;
-    std::string error         = py_read_program(prog, filename, settings);
-    return error;
-}
 
 std::vector<unsigned> control_lines_check(const syrec::gate& g) {
     syrec::gate::line_container c;

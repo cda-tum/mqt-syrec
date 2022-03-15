@@ -800,4 +800,13 @@ namespace syrec {
         return read_program_from_string(prog, content, settings, error);
     }
 
+    std::string read_program(syrec::applications::program& prog, const std::string& filename, read_program_settings& settings) {
+        std::string error_message;
+        settings.default_bitwidth = 32;
+        if (!(syrec::read_program(prog, filename, settings, &error_message))) {
+            return error_message;
+        } else {
+            return {};
+        }
+    }
 } // namespace syrec
