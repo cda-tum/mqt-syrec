@@ -6,7 +6,7 @@
 
 namespace syrec {
 
-    boost::dynamic_bitset<>& core_gate_simulation::operator()(const gate& g, boost::dynamic_bitset<>& input) const {
+    boost::dynamic_bitset<>& core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input) {
         if (is_toffoli(g)) {
             boost::dynamic_bitset<> c_mask(input.size());
             for (gate::const_iterator itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
@@ -42,16 +42,13 @@ namespace syrec {
 
             return input;
         } else {
-            assert(false);
+            std::cerr << "Unknown gate: Simulation error" << std::endl;
         }
         return input;
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
-                           const properties::ptr& settings,
                            const properties::ptr& statistics) {
-        auto gate_simulation = get<gate_simulation_func>(settings, "gate_simulation", core_gate_simulation());
-
         timer<properties_timer> t;
 
         if (statistics) {
@@ -61,7 +58,7 @@ namespace syrec {
 
         output = input;
         while (first != last) {
-            output = gate_simulation(*first, output);
+            output = core_gate_simulation(*first, output);
             ++first;
         }
 
@@ -73,9 +70,8 @@ namespace syrec {
     }
 
     bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                           const properties::ptr& settings,
                            const properties::ptr& statistics) {
-        return simple_simulation(output, circ.begin(), circ.end(), input, settings, statistics);
+        return simple_simulation(output, circ.begin(), circ.end(), input, statistics);
     }
 
 } // namespace syrec

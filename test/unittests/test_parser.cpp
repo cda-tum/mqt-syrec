@@ -1,5 +1,5 @@
+#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/test_functions.hpp"
 
 #include "gtest/gtest.h"
 
@@ -50,7 +50,8 @@ INSTANTIATE_TEST_SUITE_P(SyrecParserTest, SyrecParserTest,
 
 TEST_P(SyrecParserTest, GenericParserTest) {
     applications::program prog;
+    read_program_settings settings;
     std::string           error_string;
-    error_string = my_read_program(prog, file_name);
+    error_string = read_program(prog, file_name, settings);
     EXPECT_TRUE(error_string.empty());
 }

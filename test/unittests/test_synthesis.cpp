@@ -1,6 +1,7 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
+#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
 #include "core/test_functions.hpp"
 #include "core/utils/costs.hpp"
@@ -74,18 +75,19 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     circuit                            circ;
     applications::program              prog;
+    read_program_settings              settings;
     std::string                        error_string;
     std::vector<std::vector<unsigned>> cl;
     std::vector<std::vector<unsigned>> tl;
     std::vector<gate>                  gates_vec;
 
-    error_string = my_read_program(prog, file_name);
+    error_string = read_program(prog, file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));
 
-    qc = syrec::final_quantum_cost(circ, circ.lines());
-    tc = syrec::final_transistor_cost(circ, circ.lines());
+    qc = syrec::quantum_cost(circ, circ.lines());
+    tc = syrec::transistor_cost(circ);
 
     gates_vec = ct_gates(circ);
     for (const gate& g: gates_vec) {

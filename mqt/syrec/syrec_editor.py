@@ -291,7 +291,7 @@ class SyReCEditor(QWidget):
 
         qc = quantum_costs(circ, circ.lines)
 
-        tc = transistor_costs(circ, circ.lines)
+        tc = transistor_costs(circ)
 
         temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
 
@@ -363,14 +363,13 @@ class SyReCEditor(QWidget):
         final_inp = list()
         final_out = list()
 
-        p1 = properties()
-        p2 = properties()
+        settings = properties()
 
         for i in input_list:
             my_inp_bitset = bitset(circ.lines, i)
             my_out_bitset = bitset(circ.lines)
 
-            py_simple_simulation(my_out_bitset, circ, my_inp_bitset, p1, p2)
+            py_simple_simulation(my_out_bitset, circ, my_inp_bitset, settings)
             combination_inp.append(str(my_inp_bitset))
             combination_out.append(str(my_out_bitset))
 

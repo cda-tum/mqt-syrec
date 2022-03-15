@@ -4,7 +4,7 @@
 
 namespace syrec {
 
-    cost_t my_quantum_costs(const gate& g, unsigned lines) {
+    cost_t single_gate_quantum_cost(const gate& g, unsigned lines) {
         cost_t costs;
 
         unsigned n = lines;
@@ -91,31 +91,27 @@ namespace syrec {
         return costs;
     }
 
-    cost_t final_quantum_cost(const circuit& circ, unsigned lines) {
+    cost_t quantum_cost(const circuit& circ, unsigned lines) {
         circuit::const_iterator first = circ.begin();
         circuit::const_iterator last  = circ.end();
 
         cost_t final_q_costs = 0ull;
 
         while (first != last) {
-            final_q_costs = final_q_costs + my_quantum_costs(*first, lines);
+            final_q_costs = final_q_costs + single_gate_quantum_cost(*first, lines);
             ++first;
         }
         return final_q_costs;
     }
 
-    cost_t my_transistor_costs(const gate& g, unsigned lines [[maybe_unused]]) {
-        return 8ull * std::distance(g.begin_controls(), g.end_controls());
-    }
-
-    cost_t final_transistor_cost(const circuit& circ, unsigned lines) {
+    cost_t transistor_cost(const circuit& circ) {
         circuit::const_iterator first = circ.begin();
         circuit::const_iterator last  = circ.end();
 
         cost_t final_t_costs = 0ull;
 
         while (first != last) {
-            final_t_costs = final_t_costs + my_transistor_costs(*first, lines);
+            final_t_costs = final_t_costs + (8ull * std::distance((*first).begin_controls(), (*first).end_controls()));
             ++first;
         }
         return final_t_costs;

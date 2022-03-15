@@ -2,8 +2,8 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
+#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/test_functions.hpp"
 
 #include "gtest/gtest.h"
 #include <algorithm>
@@ -25,7 +25,7 @@ protected:
     boost::dynamic_bitset<> output;
     std::vector<int>        set_lines;
     std::string             expected_sim_out;
-    //std::string             output_string;
+    std::string             output_string;
 
     void SetUp() override {
         std::string synthesis_param = GetParam();
@@ -56,11 +56,11 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     circuit               circ;
     applications::program prog;
-    properties::ptr       settings;
+    read_program_settings settings;
     properties::ptr       statistics;
     std::string           error_string;
 
-    error_string = my_read_program(prog, file_name);
+    error_string = read_program(prog, file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));
@@ -72,10 +72,10 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     output.resize(circ.lines());
 
-    EXPECT_TRUE(simple_simulation(output, circ, input, settings, statistics));
+    EXPECT_TRUE(simple_simulation(output, circ, input, statistics));
 
-    //boost::to_string(output, output_string);
-    //std::reverse(output_string.begin(), output_string.end());
+    boost::to_string(output, output_string);
+    std::reverse(output_string.begin(), output_string.end());
 
-    EXPECT_EQ(expected_sim_out, bitset_to_string(output));
+    EXPECT_EQ(expected_sim_out, output_string);
 }

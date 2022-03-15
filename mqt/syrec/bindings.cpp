@@ -8,7 +8,6 @@
 #include "core/target_tags.hpp"
 #include "core/utils/costs.hpp"
 
-//#include <bits/stdc++.h>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <functional>
@@ -92,23 +91,6 @@ std::string py_read_program(program& prog, const std::string& filename, const re
     }
 }
 
-///dynamic bitset
-
-std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
-    std::string res;
-    for (unsigned i = 0; i < bitset.size(); i++) {
-        res += bitset[i] ? "1" : "0";
-    }
-    return res;
-}
-
-/*std::string bitset_to_string(boost::dynamic_bitset<> const& bitset) {
-    std::string res;
-    boost::to_string(bitset, res);
-    std::reverse(res.begin(), res.end());
-    return res;
-}*/
-
 ///gates
 
 namespace gate_types {
@@ -164,12 +146,12 @@ py::list target_lines_func(const gate& g) {
 
 ///simulation
 
-std::function<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&, const properties::ptr&)>(simple_simulation);
+std::function<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&)>(simple_simulation);
 
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
     m.def("py_syrec_synthesis", &syrec_synthesis, py::arg("circ"), py::arg("program"), py::arg("settings"), py::arg("statistics"));
-    m.def("py_simple_simulation", sim_func, py::arg("output"), py::arg("circ"), py::arg("input"), py::arg("settings"), py::arg("statistics"));
+    m.def("py_simple_simulation", sim_func, py::arg("output"), py::arg("circ"), py::arg("input"), py::arg("statistics"));
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
@@ -202,15 +184,20 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
 
-    m.def("quantum_costs", final_quantum_cost, py::arg("circ"), py::arg("lines"));
-    m.def("transistor_costs", final_transistor_cost, py::arg("circ"), py::arg("lines"));
+    m.def("quantum_costs", quantum_cost, py::arg("circ"), py::arg("lines"));
+    m.def("transistor_costs", transistor_cost, py::arg("circ"));
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
             .def(py::init<int>())
             .def(py::init<int, unsigned long>())
             .def("set", py::overload_cast<boost::dynamic_bitset<>::size_type, bool>(&boost::dynamic_bitset<>::set))
-            .def("__str__", bitset_to_string);
+            .def("__str__", [](const boost::dynamic_bitset<>& b) {
+                std::string str{};
+                boost::to_string(b, str);
+                std::reverse(str.begin(), str.end());
+                return str;
+            });
 
     py::enum_<gate_types::_types>(m, "gate_type")
             .value("toffoli", gate_types::toffoli)

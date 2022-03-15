@@ -227,17 +227,18 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::flow(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
-            return flow(*exp, v);
-        } else if (auto* exp_1 = dynamic_cast<applications::variable_expression*>(expression.get())) {
-            return flow(*exp_1, v);
+        if (auto* binary = dynamic_cast<applications::binary_expression*>(expression.get())) {
+            return flow(*binary, v);
+        } else if (auto* var = dynamic_cast<applications::variable_expression*>(expression.get())) {
+            return flow(*var, v);
         } else {
             return false;
         }
     }
 
     bool standard_syrec_synthesizer::flow(const applications::variable_expression& expression, std::vector<unsigned>& v) {
-        return get_variables(expression.var(), v);
+        get_variables(expression.var(), v);
+        return true;
     }
 
     /// generating LHS and RHS (can be whole expressions as well)
@@ -328,17 +329,18 @@ namespace syrec {
 
     /// generating LHS and RHS (not whole expressions, just the corresponding variables)
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto* exp = dynamic_cast<applications::binary_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*exp, v);
-        } else if (auto* exp_2 = dynamic_cast<applications::variable_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*exp_2, v);
+        if (auto* binary = dynamic_cast<applications::binary_expression*>(expression.get())) {
+            return op_rhs_lhs_expression(*binary, v);
+        } else if (auto* var = dynamic_cast<applications::variable_expression*>(expression.get())) {
+            return op_rhs_lhs_expression(*var, v);
         } else {
             return false;
         }
     }
 
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::variable_expression& expression, std::vector<unsigned>& v) {
-        return get_variables(expression.var(), v);
+        get_variables(expression.var(), v);
+        return true;
     }
 
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const applications::binary_expression& expression, std::vector<unsigned>& v) {
@@ -658,11 +660,13 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_expression(const applications::numeric_expression& expression, std::vector<unsigned>& lines) {
-        return get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
+        get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
+        return true;
     }
 
     bool standard_syrec_synthesizer::on_expression(const applications::variable_expression& expression, std::vector<unsigned>& lines) {
-        return get_variables(expression.var(), lines);
+        get_variables(expression.var(), lines);
+        return true;
     }
 
     /// Function when the assignment statements consist of binary expressions and does not include repeated input signals
@@ -1179,36 +1183,33 @@ namespace syrec {
         return true;
     }
 
-    bool standard_syrec_synthesizer::swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) {
+    void standard_syrec_synthesizer::swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) {
         for (unsigned i = 0u; i < dest1.size(); ++i) {
             append_fredkin (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ))()(dest1.at(i), dest2.at(i));
         }
-        return true;
     }
 
     //**********************************************************************
     //*****                      Shift Operations                      *****
     //**********************************************************************
 
-    bool standard_syrec_synthesizer::left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
+    void standard_syrec_synthesizer::left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
         for (unsigned i = 0u; (i + src2) < dest.size(); ++i) {
             append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), src1.at(i), dest.at(i + src2));
         }
-        return true;
     }
 
-    bool standard_syrec_synthesizer::right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
+    void standard_syrec_synthesizer::right_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
         for (unsigned i = src2; i < dest.size(); ++i) {
             append_cnot(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), src1.at(i), dest.at(i - src2));
         }
-        return true;
     }
 
     //**********************************************************************
     //*****                     Efficient Controls                     *****
     //**********************************************************************
 
-    bool standard_syrec_synthesizer::add_active_control(unsigned control) {
+    void standard_syrec_synthesizer::add_active_control(unsigned control) {
         // aktuelles Blatt vollendet, zurueck zum parent
         cct_man.current = source(*(in_edges(cct_man.current, cct_man.tree).first), cct_man.tree);
 
@@ -1228,11 +1229,9 @@ namespace syrec {
         get(boost::vertex_name, cct_man.tree)[leaf].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[leaf].circ, _stmts));
         add_edge(cct_man.current, leaf, cct_man.tree);
         cct_man.current = leaf;
-
-        return true;
     }
 
-    bool standard_syrec_synthesizer::remove_active_control(unsigned control [[maybe_unused]]) {
+    void standard_syrec_synthesizer::remove_active_control(unsigned control [[maybe_unused]]) {
         // aktuelles Blatt vollendet, zurueck zum parent
         cct_man.current = source(*(in_edges(cct_man.current, cct_man.tree).first), cct_man.tree);
 
@@ -1246,7 +1245,6 @@ namespace syrec {
         get(boost::vertex_name, cct_man.tree)[leaf].circ->gate_added.connect(annotater(*get(boost::vertex_name, cct_man.tree)[leaf].circ, _stmts));
         add_edge(cct_man.current, leaf, cct_man.tree);
         cct_man.current = leaf;
-        return true;
     }
 
     bool standard_syrec_synthesizer::assemble_circuit(const cct_node& current) {
@@ -1257,12 +1255,14 @@ namespace syrec {
         }
         // assemble optimized circuits of successors
         for (auto edge_it = out_edges(current, cct_man.tree).first; edge_it != out_edges(current, cct_man.tree).second; ++edge_it) {
-            if (!assemble_circuit(target(*edge_it, cct_man.tree))) return false;
+            if (!assemble_circuit(target(*edge_it, cct_man.tree))) {
+                return false;
+            }
         }
         return true;
     }
 
-    bool standard_syrec_synthesizer::get_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines) {
+    void standard_syrec_synthesizer::get_variables(const applications::variable_access::ptr& var, std::vector<unsigned>& lines) {
         unsigned offset = _var_lines[var->var()];
 
         if (!var->indexes().empty()) {
@@ -1297,7 +1297,6 @@ namespace syrec {
                 lines.emplace_back(offset + i);
             }
         }
-        return true;
     }
 
     /**
@@ -1328,21 +1327,19 @@ namespace syrec {
         return const_line;
     }
 
-    bool standard_syrec_synthesizer::get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines) {
+    void standard_syrec_synthesizer::get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines) {
         boost::dynamic_bitset<> number(bitwidth, value);
 
         for (unsigned i = 0u; i < bitwidth; ++i) {
             lines.emplace_back(get_constant_line(number.test(i)));
         }
-
-        return true;
     }
 
     void standard_syrec_synthesizer::add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const applications::variable::ptr& var,
                                                   constant _constant, bool _garbage, const std::string& arraystr) {
         if (dimensions.empty()) {
             for (unsigned i = 0u; i < var->bitwidth(); ++i) {
-                std::string name = var->name() + std::to_string(i) + arraystr;
+                std::string name = var->name() + arraystr + "." + std::to_string(i);
                 add_line_to_circuit(circ, name, name, _constant, _garbage);
             }
         } else {
