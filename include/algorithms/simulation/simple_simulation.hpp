@@ -16,11 +16,11 @@
 
 namespace syrec {
 
-   /**
+    /**
   * @brief Functor for gate-wise simulation, used as a setting for \ref syrec::simple_simulation "simple_simulation"
   */
 
-   /**
+    /**
     * @brief Simulation for a single gate \p g
     *
     * This operator performs simulation for a single gate and is called by
@@ -34,9 +34,9 @@ namespace syrec {
     *
     * @return Returns a output pattern, it will be the same reference as \p input
     */
-   boost::dynamic_bitset<>& core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input);
+    boost::dynamic_bitset<>& core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input);
 
-   /**
+    /**
   * @brief Simple Simulation function for a range of gates
   *
   * This method calls the \em gate_simulation setting's functor on
@@ -90,10 +90,10 @@ namespace syrec {
   * </table>
   * @return true on success
   */
-   bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
-                          const properties::ptr& statistics = properties::ptr());
+    bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
+                           const properties::ptr& statistics = properties::ptr());
 
-   /**
+    /**
   * @brief Simple Simulation function for a circuit
   *
   * This method calls the \em gate_simulation setting's functor on
@@ -146,8 +146,8 @@ namespace syrec {
   * </table>
   * @return true on success
   */
-   bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                          const properties::ptr& statistics = properties::ptr());
+    bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
+                           const properties::ptr& statistics = properties::ptr());
 
 } // namespace syrec
 

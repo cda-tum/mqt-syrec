@@ -15,7 +15,7 @@
 
 namespace syrec {
 
-   /**
+    /**
   * @brief Functor for the timer class which assigns the run-time to a property map
   *
   * This functor writes the \em runtime field of a property map
@@ -24,52 +24,52 @@ namespace syrec {
   *
 
   */
-   struct properties_timer {
-       /**
+    struct properties_timer {
+        /**
     * @brief Default constructor
     *
     * Available for delayed starting of the timer.
     *
 
     */
-       properties_timer() = default;
+        properties_timer() = default;
 
-       /**
+        /**
     * @brief Default constructor
     *
     * @param _statistics A smart pointer to a statistics properties object. Can be empty.
     *
 
     */
-       explicit properties_timer(properties::ptr _statistics):
-           statistics(std::move(_statistics)) {}
+        explicit properties_timer(properties::ptr _statistics):
+            statistics(std::move(_statistics)) {}
 
-       /**
+        /**
     * @brief Saves the run-time to the \b runtime field of the statistics variable
     *
     * @param r The run-time
     *
 
     */
-       void operator()(double r) const {
-           if (statistics) {
-               statistics->set("runtime", r);
-           }
-       }
+        void operator()(double r) const {
+            if (statistics) {
+                statistics->set("runtime", r);
+            }
+        }
 
-   private:
-       properties::ptr statistics;
-   };
+    private:
+        properties::ptr statistics;
+    };
 
-   /**
+    /**
   * @brief A generic timer class
   *
   */
 
-   template<typename Outputter>
-   class timer {
-   public:
-       /**
+    template<typename Outputter>
+    class timer {
+    public:
+        /**
     * @brief Constructor which does not start measuring the time
     *
     * When delayed starting should be done (using start(const Outputter&)) this
@@ -77,38 +77,38 @@ namespace syrec {
     *
 
     */
-       timer():
-           started(false) {
-       }
+        timer():
+            started(false) {
+        }
 
-       /**
+        /**
     * @brief function which starts measuring the time
     */
 
-       void start(const Outputter& outputter) {
-           p       = outputter;
-           started = true;
-           begin   = std::chrono::steady_clock::now();
-       }
+        void start(const Outputter& outputter) {
+            p       = outputter;
+            started = true;
+            begin   = std::chrono::steady_clock::now();
+        }
 
-       /**
+        /**
     * @brief function which stops measuring the time
     *
     */
 
-       void stop() {
-           if (started) {
-               assert(started);
-               std::chrono::duration<double> runtime = (std::chrono::steady_clock::now() - begin);
-               p(runtime.count());
-           }
-       }
+        void stop() {
+            if (started) {
+                assert(started);
+                std::chrono::duration<double> runtime = (std::chrono::steady_clock::now() - begin);
+                p(runtime.count());
+            }
+        }
 
-   private:
-       decltype(std::chrono::steady_clock::now()) begin;
-       Outputter                                  p; // NOTE: has to be copy
-       bool                                       started;
-   };
+    private:
+        decltype(std::chrono::steady_clock::now()) begin;
+        Outputter                                  p; // NOTE: has to be copy
+        bool                                       started;
+    };
 
 } // namespace syrec
 
