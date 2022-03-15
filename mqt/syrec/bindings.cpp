@@ -103,27 +103,15 @@ gateType gate_get_type(const gate& g) {
 /// control and target lines
 
 py::list control_lines_func(const gate& g) {
-    //gate::line_container c;
     py::list l;
-    //std::copy(g.begin_controls(), g.end_controls(), std::insert_iterator<gate::line_container>(c, c.begin()));
-    //control_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
     for (auto c = g.begin_controls(); c != g.end_controls(); ++c) {
         l.append(*c);
     }
-
-    /*for (const auto& control: c) {
-        l.append(control);
-    }*/
     return l;
 }
 
 py::list target_lines_func(const gate& g) {
-    //gate::line_container c;
     py::list l;
-    /*target_lines(g, std::insert_iterator<gate::line_container>(c, c.begin()));
-    for (const auto& target: c) {
-        l.append(target);
-    }*/
     for (auto c = g.begin_targets(); c != g.end_targets(); ++c) {
         l.append(*c);
     }

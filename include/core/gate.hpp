@@ -9,8 +9,6 @@
 
 #include <algorithm>
 #include <any>
-#include <boost/iterator/filter_iterator.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -76,17 +74,6 @@ namespace syrec {
 
      */
         gate();
-
-        /**
-     * @brief Copy Constructor
-     *
-     * Initializes private data and copies gate
-     *
-     * @param other Gate to be assigned
-     *
-
-     */
-        gate(const gate& other);
 
         /**
      * @brief Default deconstructor

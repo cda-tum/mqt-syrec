@@ -8,11 +8,6 @@ namespace syrec {
         target_type = gateType::None;
     }
 
-    gate::gate(const gate& other) {
-        target_type = gateType::None;
-        operator    =(other);
-    }
-
     gate::~gate() = default;
 
     gate& gate::operator=(const gate& other) {
