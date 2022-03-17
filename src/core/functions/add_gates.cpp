@@ -25,13 +25,13 @@ namespace syrec {
     }
 
     gate& target_line_adder::operator()(const gate::line& l1) {
-        g->add_target(l1);
+        g->targets.emplace(l1);
         return *g;
     }
 
     gate& target_line_adder::operator()(const gate::line& l1, const gate::line& l2) {
-        g->add_target(l1);
-        g->add_target(l2);
+        g->targets.emplace(l1);
+        g->targets.emplace(l2);
         return *g;
     }
 
@@ -45,35 +45,34 @@ namespace syrec {
     }
 
     target_line_adder control_line_adder::operator()(const gate::line& l1, const gate::line& l2) {
-        g->add_control(l1);
-        g->add_control(l2);
+        g->controls.emplace(l1);
+        g->controls.emplace(l2);
         return target_line_adder(g);
     }
 
     ////////////////////////////// create_ functions
 
     gate& create_toffoli(gate& g, const gate::line_container& controls, const gate::line& target) {
-        //std::for_each(controls.begin(), controls.end(), std::bind(&gate::add_control, &g, std::placeholders::_1));
         for (const auto& control: controls) {
-            g.add_control(control);
+            g.controls.emplace(control);
         }
-        g.add_target(target);
-        g.set_type(gateType::Toffoli);
+        g.targets.emplace(target);
+        g.type = gate::types::Toffoli;
 
         return g;
     }
 
     gate& create_cnot(gate& g, const gate::line& control, const gate::line& target) {
-        g.add_control(control);
-        g.add_target(target);
-        g.set_type(gateType::Toffoli);
+        g.controls.emplace(control);
+        g.targets.emplace(target);
+        g.type = gate::types::Toffoli;
 
         return g;
     }
 
     gate& create_not(gate& g, const gate::line& target) {
-        g.add_target(target);
-        g.set_type(gateType::Toffoli);
+        g.targets.emplace(target);
+        g.type = gate::types::Toffoli;
         return g;
     }
 
@@ -91,18 +90,18 @@ namespace syrec {
         return create_not(circ.append_gate(), target);
     }
 
-    control_line_adder append_gate(circuit& circ, const gateType tag) {
+    control_line_adder append_gate(circuit& circ, const gate::types type) {
         gate& g = circ.append_gate();
-        g.set_type(tag);
+        g.type  = type;
         return control_line_adder(g);
     }
 
     control_line_adder append_toffoli(circuit& circ) {
-        return append_gate(circ, gateType::Toffoli);
+        return append_gate(circ, gate::types::Toffoli);
     }
 
     control_line_adder append_fredkin(circuit& circ) {
-        return append_gate(circ, gateType::Fredkin);
+        return append_gate(circ, gate::types::Fredkin);
     }
 
 } // namespace syrec

@@ -28,10 +28,10 @@ namespace syrec {
     void insert_circuit(circuit& circ, unsigned pos, const circuit& src, const gate::line_container& controls) {
         typedef std::pair<std::string, std::string> pair_t;
         if (controls.empty()) {
-            for (const gate& g: src) {
+            for (const auto& g: src) {
                 gate& new_gate   = circ.insert_gate(pos++);
-                new_gate         = g;
-                auto annotations = src.annotations(g);
+                new_gate         = *g;
+                auto annotations = src.get_annotations(*g);
                 if (annotations) {
                     for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);
@@ -39,15 +39,19 @@ namespace syrec {
                 }
             }
         } else {
-            for (const gate& g: src) {
+            for (const auto& g: src) {
                 gate& new_gate = circ.insert_gate(pos++);
                 for (const auto& control: controls) {
-                    new_gate.add_control(control);
+                    new_gate.controls.emplace(control);
                 }
-                std::for_each(g.begin_controls(), g.end_controls(), [ObjectPtr = &new_gate](auto&& PH1) { ObjectPtr->add_control(std::forward<decltype(PH1)>(PH1)); });
-                std::for_each(g.begin_targets(), g.end_targets(), [ObjectPtr = &new_gate](auto&& PH1) { ObjectPtr->add_target(std::forward<decltype(PH1)>(PH1)); });
-                new_gate.set_type(g.type());
-                auto annotations = src.annotations(g);
+                for (const auto& c: g->controls) {
+                    new_gate.controls.emplace(c);
+                }
+                for (const auto& t: g->targets) {
+                    new_gate.targets.emplace(t);
+                }
+                new_gate.type    = g->type;
+                auto annotations = src.get_annotations(*g);
                 if (annotations) {
                     for (const pair_t p: *annotations) {
                         circ.annotate(new_gate, p.first, p.second);

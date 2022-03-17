@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import re
-import sys
 
 from mqt.syrec.pysyrec import *
 
@@ -64,8 +63,8 @@ class GateItem(QGraphicsItemGroup):
         QGraphicsItemGroup.__init__(self, parent)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
-        l = control_lines(g)
-        l.extend(target_lines(g))
+        l = list(g.controls)
+        l.extend(list(g.targets))
         l.sort()
 
         self.gate = g
@@ -76,9 +75,8 @@ class GateItem(QGraphicsItemGroup):
             circuitLine = QGraphicsLineItem(0, l[0] * 30, 0, l[-1] * 30, self)
             self.addToGroup(circuitLine)
 
-        for t in target_lines(g):
+        for t in g.targets:
             if g.type == gate_type.toffoli:
-                print("toffoli")
                 target = QGraphicsEllipseItem(-10, t * 30 - 10, 20, 20, self)
                 target_line = QGraphicsLineItem(0, t * 30 - 10, 0, t * 30 + 10, self)
                 target_line2 = QGraphicsLineItem(-10, t * 30, 10, t * 30, self)
@@ -86,13 +84,12 @@ class GateItem(QGraphicsItemGroup):
                 self.addToGroup(target_line)
                 self.addToGroup(target_line2)
             if g.type == gate_type.fredkin:
-                print("fredkin")
                 crossTL_BR = QGraphicsLineItem(-5, t * 30 - 5, 5, t * 30 + 5, self)
                 crossTR_BL = QGraphicsLineItem(5, t * 30 - 5, -5, t * 30 + 5, self)
                 self.addToGroup(crossTL_BR)
                 self.addToGroup(crossTR_BL)
 
-        for c in control_lines(g):
+        for c in g.controls:
             control = QGraphicsEllipseItem(-5, c * 30 - 5, 10, 10, self)
             control.setBrush(QColorConstants.Black)
             self.addToGroup(control)
@@ -134,7 +131,7 @@ class CircuitView(QGraphicsView):
             self.outputs.append(self.add_line_label(width, i * 30, circ.outputs[i], Qt.AlignmentFlag.AlignLeft, circ.garbage[i]))
 
         index = 0
-        for g in circ.gates():
+        for g in circ:
             gate_item = GateItem(g, index, self.circ)
             gate_item.setPos(index * 30 + 15, 0)
             self.scene().addItem(gate_item)
@@ -699,7 +696,7 @@ def main():
     w = MainWindow()
     w.show()
 
-    sys.exit(a.exec())
+    return a.exec()
 
 
 if __name__ == "__main__":

@@ -8,18 +8,18 @@
 #include "core/utils/costs.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include <functional>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
+using namespace pybind11::literals;
 using namespace syrec;
 using namespace syrec::applications;
 
 py::dict circuit_annotations(const circuit& c, const gate& g) {
     py::dict d{};
 
-    const auto annotations = c.annotations(g);
+    const auto annotations = c.get_annotations(g);
 
     if (annotations) {
         for (const auto& [first, second]: *annotations) {
@@ -28,42 +28,6 @@ py::dict circuit_annotations(const circuit& c, const gate& g) {
     }
 
     return d;
-}
-
-std::vector<gate> new_gates(const circuit& circ) {
-    std::vector<gate> my_gates{};
-    auto              first = circ.begin();
-    auto              last  = circ.end();
-    while (first != last) {
-        my_gates.push_back(*first);
-        ++first;
-    }
-    return my_gates;
-}
-
-template<typename T, typename C>
-py::list list_getter(const C& circ, std::function<const std::vector<T>&(const C*)> fgetter) {
-    py::list l;
-    for (auto&& elem: fgetter(&circ)) {
-        l.append(static_cast<T>(elem));
-    }
-    return l;
-}
-
-py::list inputs_getter(const circuit& circ) {
-    return list_getter<std::string, circuit>(circ, &circuit::inputs);
-}
-
-py::list outputs_getter(const circuit& circ) {
-    return list_getter<std::string, circuit>(circ, &circuit::outputs);
-}
-
-py::list constants_getter(const circuit& circ) {
-    return list_getter<constant, circuit>(circ, &circuit::constants);
-}
-
-py::list garbage_getter(const circuit& circ) {
-    return list_getter<bool, circuit>(circ, &circuit::garbage);
 }
 
 ///Properties
@@ -90,52 +54,19 @@ std::string py_read_program(program& prog, const std::string& filename, const re
     }
 }
 
-///gates
-
-void gate_set_type(gate& g, gateType value) {
-    g.set_type(value);
-}
-
-gateType gate_get_type(const gate& g) {
-    return g.type();
-}
-
-/// control and target lines
-
-py::list control_lines_func(const gate& g) {
-    py::list l;
-    for (auto c = g.begin_controls(); c != g.end_controls(); ++c) {
-        l.append(*c);
-    }
-    return l;
-}
-
-py::list target_lines_func(const gate& g) {
-    py::list l;
-    for (auto c = g.begin_targets(); c != g.end_targets(); ++c) {
-        l.append(*c);
-    }
-    return l;
-}
-
-///simulation
-
-std::function<bool(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&)> sim_func = static_cast<bool (*)(boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&)>(simple_simulation);
-
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
-    m.def("py_syrec_synthesis", &syrec_synthesis, py::arg("circ"), py::arg("program"), py::arg("settings"), py::arg("statistics"));
-    m.def("py_simple_simulation", sim_func, py::arg("output"), py::arg("circ"), py::arg("input"), py::arg("statistics"));
 
     py::class_<circuit, std::shared_ptr<circuit>>(m, "circuit")
             .def(py::init<>())
-            .def_property("lines", &circuit::lines, &circuit::set_lines)
+            .def_property("lines", &circuit::get_lines, &circuit::set_lines)
             .def_property_readonly("num_gates", &circuit::num_gates)
-            .def("gates", new_gates)
-            .def_property_readonly("inputs", inputs_getter)
-            .def_property_readonly("outputs", outputs_getter)
-            .def_property_readonly("constants", constants_getter)
-            .def_property_readonly("garbage", garbage_getter)
+            .def("__iter__",
+                 [](circuit& circ) { return py::make_iterator(circ.begin(), circ.end()); })
+            .def_property("inputs", &circuit::get_inputs, &circuit::set_inputs)
+            .def_property("outputs", &circuit::get_outputs, &circuit::set_outputs)
+            .def_property("constants", &circuit::get_constants, &circuit::set_constants)
+            .def_property("garbage", &circuit::get_garbage, &circuit::set_garbage)
             .def("annotations", circuit_annotations);
 
     py::class_<properties, std::shared_ptr<properties>>(m, "properties")
@@ -152,14 +83,14 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def("add_module", &program::add_module);
 
-    m.def("py_read_program", py_read_program, py::arg("prog"), py::arg("filename"), py::arg("settings"));
+    m.def("py_read_program", py_read_program, "prog"_a, "filename"_a, "settings"_a);
 
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
 
-    m.def("quantum_costs", quantum_cost, py::arg("circ"), py::arg("lines"));
-    m.def("transistor_costs", transistor_cost, py::arg("circ"));
+    m.def("quantum_costs", quantum_cost, "circ"_a, "lines"_a);
+    m.def("transistor_costs", transistor_cost, "circ"_a);
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
@@ -173,18 +104,19 @@ PYBIND11_MODULE(pysyrec, m) {
                 return str;
             });
 
-    py::enum_<gateType>(m, "gate_type")
-            .value("toffoli", gateType::Toffoli)
-            .value("fredkin", gateType::Fredkin)
+    py::enum_<gate::types>(m, "gate_type")
+            .value("toffoli", gate::types::Toffoli)
+            .value("fredkin", gate::types::Fredkin)
             .export_values();
 
-    py::class_<gate>(m, "gate")
+    py::class_<gate, std::shared_ptr<gate>>(m, "gate")
             .def(py::init<>())
-            .def_property("type", gate_get_type, gate_set_type);
+            .def_readwrite("controls", &gate::controls)
+            .def_readwrite("targets", &gate::targets)
+            .def_readwrite("type", &gate::type);
 
-    m.def("control_lines", control_lines_func, py::arg("g"));
-    m.def("target_lines", target_lines_func, py::arg("g"));
-
+    m.def("py_syrec_synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = std::make_shared<properties>(), "statistics"_a = std::make_shared<properties>());
+    m.def("py_simple_simulation", py::overload_cast<boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&>(&simple_simulation), "output"_a, "circ"_a, "input"_a, "statistics"_a = std::make_shared<properties>());
 #ifdef VERSION_INFO
     m.attr("__version__") = VERSION_INFO;
 #else

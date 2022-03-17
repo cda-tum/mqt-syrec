@@ -151,11 +151,8 @@ namespace syrec {
     };
 
     /**
-  * @brief SyReC Synthesis
-  *
-  *
-  *
-  */
+    * @brief SyReC Synthesis
+    */
     bool syrec_synthesis(circuit& circ, const applications::program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 } // namespace syrec
 

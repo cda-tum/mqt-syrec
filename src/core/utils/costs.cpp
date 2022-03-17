@@ -6,9 +6,9 @@ namespace syrec {
         cost_t costs;
 
         unsigned n = lines;
-        unsigned c = std::distance(g.begin_controls(), g.end_controls());
+        unsigned c = g.controls.size();
 
-        if (gateType::Fredkin == g.type()) {
+        if (g.type == gate::types::Fredkin) {
             c += 1u;
         }
 
@@ -90,29 +90,19 @@ namespace syrec {
     }
 
     cost_t quantum_cost(const circuit& circ, unsigned lines) {
-        circuit::const_iterator first = circ.begin();
-        circuit::const_iterator last  = circ.end();
-
-        cost_t final_q_costs = 0ull;
-
-        while (first != last) {
-            final_q_costs = final_q_costs + single_gate_quantum_cost(*first, lines);
-            ++first;
+        cost_t cost = 0ull;
+        for (const auto& g: circ) {
+            cost += single_gate_quantum_cost(*g, lines);
         }
-        return final_q_costs;
+        return cost;
     }
 
     cost_t transistor_cost(const circuit& circ) {
-        circuit::const_iterator first = circ.begin();
-        circuit::const_iterator last  = circ.end();
-
-        cost_t final_t_costs = 0ull;
-
-        while (first != last) {
-            final_t_costs = final_t_costs + (8ull * std::distance((*first).begin_controls(), (*first).end_controls()));
-            ++first;
+        cost_t cost = 0ull;
+        for (const auto& g: circ) {
+            cost += (8ull * g->controls.size());
         }
-        return final_t_costs;
+        return cost;
     }
 
 } // namespace syrec

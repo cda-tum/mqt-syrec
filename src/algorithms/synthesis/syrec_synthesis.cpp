@@ -1321,7 +1321,7 @@ namespace syrec {
             free_const_lines_map[!value].pop_back();
             append_not(*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ), const_line);
         } else {
-            const_line = add_line_to_circuit(_circ, (std::string("const_") + std::to_string(value)), "garbage", value, true);
+            const_line = _circ.add_line((std::string("const_") + std::to_string(value)), "garbage", value, true);
         }
 
         return const_line;
@@ -1340,7 +1340,7 @@ namespace syrec {
         if (dimensions.empty()) {
             for (unsigned i = 0u; i < var->bitwidth(); ++i) {
                 std::string name = var->name() + arraystr + "." + std::to_string(i);
-                add_line_to_circuit(circ, name, name, _constant, _garbage);
+                circ.add_line(name, name, _constant, _garbage);
             }
         } else {
             unsigned              len = dimensions.front();
@@ -1355,7 +1355,7 @@ namespace syrec {
     void standard_syrec_synthesizer::add_variables(circuit& circ, const applications::variable::vec& variables) {
         for (const auto& var: variables) {
             // entry in var lines map
-            _var_lines.insert(std::make_pair(var, circ.lines()));
+            _var_lines.insert(std::make_pair(var, circ.get_lines()));
 
             // types of constant and garbage
             constant _constant = (var->type() == applications::variable::out || var->type() == applications::variable::wire) ? constant(false) : constant();

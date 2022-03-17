@@ -65,14 +65,14 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));
 
-    input.resize(circ.lines());
+    input.resize(circ.get_lines());
 
     for (int line: set_lines)
         input.set(line);
 
-    output.resize(circ.lines());
+    output.resize(circ.get_lines());
 
-    EXPECT_TRUE(simple_simulation(output, circ, input, statistics));
+    simple_simulation(output, circ, input, statistics);
 
     boost::to_string(output, output_string);
     std::reverse(output_string.begin(), output_string.end());

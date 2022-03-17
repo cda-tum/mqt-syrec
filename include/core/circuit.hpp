@@ -9,8 +9,6 @@
 
 #include "core/gate.hpp"
 
-#include <boost/iterator/indirect_iterator.hpp>
-#include <boost/iterator/transform_iterator.hpp>
 #include <boost/signals2.hpp>
 #include <map>
 #include <memory>
@@ -70,131 +68,105 @@ namespace syrec {
    *   std::cout << "no constant value" << std::endl;
    * }
    * @endcode
-   *
-
    */
     typedef std::optional<bool> constant;
 
-    class standard_circuit {
-    public:
-        standard_circuit():
-            lines(0) {}
-
-        /** @cond 0 */
-        std::vector<std::shared_ptr<gate>> gates;
-        unsigned                           lines;
-
-        std::vector<std::string> inputs;
-        std::vector<std::string> outputs;
-        std::vector<constant>    constants;
-        std::vector<bool>        garbage;
-        std::string              name;
-
-        std::map<const gate*, std::map<std::string, std::string>> annotations;
-        /** @endcond */
-    };
-
-    typedef standard_circuit circuit_variant;
-
-    struct const_filter_circuit {
-        typedef const gate& result_type;
-
-        const gate& operator()(const gate& g) const {
-            return g;
-        }
-
-    private:
-    };
-    /** @endcond */
-
     /**
    * @brief Main circuit class
-   *
-   * This class represents a circuit and can be used generically for standard circuits and sub circuits.
-   *
-
    */
     class circuit {
     public:
         /**
-     * @brief Default constructor
-     *
-     * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
-     * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
-     *
-
-     */
-        circuit() = default;
-
-        /**
-     * @brief Constant iterator for accessing the gates in a circuit
+         * @brief Default constructor
          *
-     */
-        typedef boost::transform_iterator<const_filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_iterator>> const_iterator;
+         * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
+         * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
+         */
+        circuit()  = default;
+        ~circuit() = default;
 
         /**
-     * @brief Constant reverse iterator for accessing the gates in a circuit
-     */
-        typedef boost::transform_iterator<const_filter_circuit, boost::indirect_iterator<std::vector<std::shared_ptr<gate>>::const_reverse_iterator>> const_reverse_iterator;
+         * @brief Returns the number of gates
+         *
+         * This method returns the number of gates in the circuit.
+         *
+         * @return Number of gates
+         */
+        [[nodiscard]] unsigned num_gates() const {
+            return gates.size();
+        }
 
         /**
-     * @brief Returns the number of gates
-     *
-     * This method returns the number of gates in the circuit.
-     * 
-     * @return Number of gates
-     *
-
-     */
-        [[nodiscard]] unsigned num_gates() const;
-
-        /**
-     * @brief Sets the number of line
-     *
-     * This method sets the number of lines of the circuit.
-     *
-     * Changing this number will not affect the data in the gates.
-     * For example: If there is a gate with a control on line 3,
-     * and the number of lines is reduced to 2 in the circuit, then
-     * the control is still on line 3 but not visible in this circuit.
-     *
-     * So, changing the lines after already adding gates can lead
-     * to invalid gates.
-     *
-     * @param lines Number of lines
-     *
-
-     */
-        void set_lines(unsigned lines);
+         * @brief Sets the number of line
+         *
+         * This method sets the number of lines of the circuit.
+         *
+         * Changing this number will not affect the data in the gates.
+         * For example: If there is a gate with a control on line 3,
+         * and the number of lines is reduced to 2 in the circuit, then
+         * the control is still on line 3 but not visible in this circuit.
+         *
+         * So, changing the lines after already adding gates can lead
+         * to invalid gates.
+         *
+         * @param l Number of lines
+         */
+        void set_lines(unsigned l) {
+            lines = l;
+            inputs.resize(lines, "i");
+            outputs.resize(lines, "o");
+            constants.resize(lines, constant());
+            garbage.resize(lines, false);
+        }
 
         /**
-     * @brief Returns the number of lines
-     *
-     * This method returns the number of lines.
-     *
-     * @return Number of lines
-     *
-
-     */
-        [[nodiscard]] unsigned lines() const;
-
-        /**
-     * @brief Constant begin iterator pointing to gates
-     *
-     * @return Constant begin iterator
-     *
-
-     */
-        [[nodiscard]] const_iterator begin() const;
+         * @brief Returns the number of lines
+         *
+         * This method returns the number of lines.
+         *
+         * @return Number of lines
+         */
+        [[nodiscard]] unsigned get_lines() const {
+            return lines;
+        }
 
         /**
-     * @brief Constant end iterator pointing to gates
-     *
-     * @return Constant end iterator
-     *
+         * @brief Constant begin iterator pointing to gates
+         *
+         * @return Constant begin iterator
+         */
+        [[nodiscard]] auto cbegin() const {
+            return gates.cbegin();
+        }
 
-     */
-        [[nodiscard]] const_iterator end() const;
+        /**
+         * @brief Begin iterator pointing to gates
+         *
+         * @return Begin iterator
+         *
+         */
+        [[nodiscard]] auto begin() const {
+            return gates.begin();
+        }
+
+        /**
+         * @brief Constant end iterator pointing to gates
+         *
+         * @return Constant end iterator
+         */
+        [[nodiscard]] auto cend() const {
+            return gates.cend();
+        }
+
+        /**
+         * @brief End iterator pointing to gates
+         *
+         * @return End iterator
+         *
+         */
+        [[nodiscard]] auto end() const {
+            return gates.end();
+        }
 
         /**
      * @brief Inserts a gate at the end of the circuit
@@ -202,10 +174,12 @@ namespace syrec {
      * This method inserts a gate at the end of the circuit.
      *
      * @return Reference to the newly created empty gate
-     *
-
      */
-        gate& append_gate();
+        gate& append_gate() {
+            gates.emplace_back(std::make_shared<gate>());
+            gate_added(*gates.back());
+            return *gates.back();
+        }
 
         /**
      * @brief Inserts a gate into the circuit
@@ -215,10 +189,12 @@ namespace syrec {
      * @param pos  Position where to insert the gate
      *
      * @return Reference to the newly created empty gate
-     *
-
      */
-        gate& insert_gate(unsigned pos);
+        gate& insert_gate(unsigned pos) {
+            auto ins = gates.insert(gates.begin() + pos, std::make_shared<gate>());
+            gate_added(**ins);
+            return **ins;
+        }
 
         /**
      * @brief Sets the input names of the lines in a circuit
@@ -228,10 +204,11 @@ namespace syrec {
      * printing them, or creating images.
      *
      * @param inputs Input names
-     *
-
      */
-        void set_inputs(const std::vector<std::string>& inputs);
+        void set_inputs(const std::vector<std::string>& in) {
+            inputs = in;
+            inputs.resize(lines, "i");
+        }
 
         /**
      * @brief Returns the input names of the lines in a circuit
@@ -241,10 +218,10 @@ namespace syrec {
      * printing them, or creating images.
      *
      * @return Input names
-     *
-
      */
-        [[nodiscard]] const std::vector<std::string>& inputs() const;
+        [[nodiscard]] const std::vector<std::string>& get_inputs() const {
+            return inputs;
+        }
 
         /**
      * @brief Sets the output names of the lines in a circuit
@@ -254,10 +231,11 @@ namespace syrec {
      * printing them, or creating images.
      *
      * @param outputs Output names
-     *
-
      */
-        void set_outputs(const std::vector<std::string>& outputs);
+        void set_outputs(const std::vector<std::string>& out) {
+            outputs = out;
+            outputs.resize(lines, "o");
+        }
 
         /**
      * @brief Returns the output names of the lines in a circuit
@@ -267,10 +245,10 @@ namespace syrec {
      * printing them, or creating images.
      *
      * @return Output names
-     *
-
      */
-        [[nodiscard]] const std::vector<std::string>& outputs() const;
+        [[nodiscard]] const std::vector<std::string>& get_outputs() const {
+            return outputs;
+        }
 
         /**
      * @brief Sets the constant input line specifications
@@ -284,10 +262,11 @@ namespace syrec {
      * @sa constant
      *
      * @param constants Constant Lines
-     *
-
      */
-        void set_constants(const std::vector<constant>& constants);
+        void set_constants(const std::vector<constant>& con) {
+            constants = con;
+            constants.resize(lines, constant());
+        }
 
         /**
      * @brief Returns the constant input line specification
@@ -295,10 +274,10 @@ namespace syrec {
      * This method returns the constant input line specification.
      *
      * @return Constant input line specification
-     *
-
      */
-        [[nodiscard]] const std::vector<constant>& constants() const;
+        [[nodiscard]] const std::vector<constant>& get_constants() const {
+            return constants;
+        }
 
         /**
      * @brief Sets whether outputs are garbage or not
@@ -311,10 +290,11 @@ namespace syrec {
      * values are given than lines exist, they will be truncated.
      *
      * @param garbage Garbage line specification
-     *
-
      */
-        void set_garbage(const std::vector<bool>& garbage);
+        void set_garbage(const std::vector<bool>& gar) {
+            garbage = gar;
+            garbage.resize(lines, false);
+        }
 
         /**
      * @brief Returns whether outputs are garbage or not
@@ -322,10 +302,10 @@ namespace syrec {
      * This method returns the garbage line specification.
      *
      * @return Garbage output line specification
-     *
-
      */
-        [[nodiscard]] const std::vector<bool>& garbage() const;
+        [[nodiscard]] const std::vector<bool>& get_garbage() const {
+            return garbage;
+        }
 
         /**
      * @brief Returns all annotations for a given gate
@@ -353,10 +333,15 @@ namespace syrec {
      * @param g Gate
      * 
      * @return Map of annotations encapsulated in an optional
-     *
-
      */
-        [[nodiscard]] std::optional<const std::map<std::string, std::string>> annotations(const gate& g) const;
+        [[nodiscard]] std::optional<const std::map<std::string, std::string>> get_annotations(const gate& g) const {
+            auto it = annotations.find(&g);
+            if (it != annotations.end()) {
+                return {it->second};
+            } else {
+                return {};
+            }
+        }
 
         /**
      * @brief Annotates a gate
@@ -367,10 +352,34 @@ namespace syrec {
      * @param g Gate
      * @param key Key of the annotation
      * @param value Value of the annotation
-     *
-
      */
-        void annotate(const gate& g, const std::string& key, const std::string& value);
+        void annotate(const gate& g, const std::string& key, const std::string& value) {
+            annotations[&g][key] = value;
+        }
+
+        /**
+       * @brief Add a line to a circuit with specifying all meta-data
+       *
+       * This function helps adding a line to the circuit.
+       * Besides incrementing the line counter, all meta-data information
+       * is adjusted as well.
+       *
+       * @param input Name of the input of the line
+       * @param output Name of the output of the line
+       * @param c Constant value of that line (Default: Not constant)
+       * @param g If true, line is a garbage line
+       *
+       * @return The index of the newly added line
+       */
+        unsigned add_line(const std::string& input, const std::string& output, const constant& c = constant(), bool g = false) {
+            lines += 1;
+            inputs.emplace_back(input);
+            outputs.emplace_back(output);
+            constants.emplace_back(c);
+            garbage.emplace_back(g);
+
+            return lines - 1;
+        }
 
         // SIGNALS
         /**
@@ -382,39 +391,18 @@ namespace syrec {
      */
         boost::signals2::signal<void(gate&)> gate_added;
 
-        /** @cond */
-        explicit operator circuit_variant&() {
-            return circ;
-        }
-
-        explicit operator const circuit_variant&() const {
-            return circ;
-        }
-        /** @endcond */
     private:
-        /** @cond */
-        circuit_variant circ;
-        /** @endcond */
-    };
+        std::vector<std::shared_ptr<gate>> gates{};
+        unsigned                           lines{};
 
-    /**
-   * @brief Add a line to a circuit with specifying all meta-data
-   *
-   * This function helps adding a line to the circuit.
-   * Besides incrementing the line counter, all meta-data information
-   * is adjusted as well.
-   *
-   * @param circ Circuit
-   * @param input Name of the input of the line
-   * @param output Name of the output of the line
-   * @param c Constant value of that line (Default: Not constant)
-   * @param g If true, line is a garbage line
-   *
-   * @return The index of the newly added line
-   *
-   (Return value since 1.1)
-   */
-    unsigned add_line_to_circuit(circuit& circ, const std::string& input, const std::string& output, const constant& c = constant(), bool g = false);
+        std::vector<std::string> inputs{};
+        std::vector<std::string> outputs{};
+        std::vector<constant>    constants{};
+        std::vector<bool>        garbage{};
+        std::string              name{};
+
+        std::map<const gate*, std::map<std::string, std::string>> annotations;
+    };
 
 } // namespace syrec
 

@@ -82,11 +82,11 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));
 
-    qc = syrec::quantum_cost(circ, circ.lines());
+    qc = syrec::quantum_cost(circ, circ.get_lines());
     tc = syrec::transistor_cost(circ);
 
     EXPECT_EQ(expected_num_gates, circ.num_gates());
-    EXPECT_EQ(expected_lines, circ.lines());
+    EXPECT_EQ(expected_lines, circ.get_lines());
     EXPECT_EQ(expected_qc, qc);
     EXPECT_EQ(expected_tc, tc);
 }

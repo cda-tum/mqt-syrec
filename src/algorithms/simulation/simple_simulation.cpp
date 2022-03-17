@@ -5,27 +5,25 @@
 
 namespace syrec {
 
-    boost::dynamic_bitset<>& core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input) {
-        if (gateType::Toffoli == g.type()) {
+    void core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input) {
+        if (g.type == gate::types::Toffoli) {
             boost::dynamic_bitset<> c_mask(input.size());
-            for (auto itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
-                c_mask.set(*itControl);
+            for (const auto& c: g.controls) {
+                c_mask.set(c);
             }
 
             if (c_mask.none() || ((input & c_mask) == c_mask)) {
-                input.flip(*g.begin_targets());
+                input.flip(*g.targets.begin());
             }
-
-            return input;
-        } else if (gateType::Fredkin == g.type()) {
+        } else if (g.type == gate::types::Fredkin) {
             boost::dynamic_bitset<> c_mask(input.size());
-            for (auto itControl = g.begin_controls(); itControl != g.end_controls(); ++itControl) {
-                c_mask.set(*itControl);
+            for (const auto& c: g.controls) {
+                c_mask.set(c);
             }
 
             if (c_mask.none() || ((input & c_mask) == c_mask)) {
                 // get both positions and values
-                auto     it = g.begin_targets();
+                auto     it = g.targets.begin();
                 unsigned t1 = *it++;
                 unsigned t2 = *it;
 
@@ -38,15 +36,12 @@ namespace syrec {
                     input.set(t2, t1v);
                 }
             }
-
-            return input;
         } else {
             std::cerr << "Unknown gate: Simulation error" << std::endl;
         }
-        return input;
     }
 
-    bool simple_simulation(boost::dynamic_bitset<>& output, circuit::const_iterator first, circuit::const_iterator last, const boost::dynamic_bitset<>& input,
+    void simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
                            const properties::ptr& statistics) {
         timer<properties_timer> t;
 
@@ -56,21 +51,13 @@ namespace syrec {
         }
 
         output = input;
-        while (first != last) {
-            output = core_gate_simulation(*first, output);
-            ++first;
+        for (const auto& g: circ) {
+            core_gate_simulation(*g, output);
         }
 
         if (statistics) {
             t.stop();
         }
-
-        return true;
-    }
-
-    bool simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                           const properties::ptr& statistics) {
-        return simple_simulation(output, circ.begin(), circ.end(), input, statistics);
     }
 
 } // namespace syrec
