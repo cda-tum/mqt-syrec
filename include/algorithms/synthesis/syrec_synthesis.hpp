@@ -8,7 +8,6 @@
 #define SYREC_SYNTHESIS_HPP
 
 #include "core/circuit.hpp"
-#include "core/functions/add_circuit.hpp"
 #include "core/gate.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/expression.hpp"
@@ -20,27 +19,29 @@
 #include <memory>
 #include <stack>
 
-namespace syrec::internal {
-    struct node_properties {
-        node_properties() = default;
+namespace syrec {
+    namespace internal {
+        struct node_properties {
+            node_properties() = default;
 
-        unsigned                 control{};
-        gate::line_container     controls;
-        std::shared_ptr<circuit> circ;
-    };
+            unsigned                 control{};
+            gate::line_container     controls;
+            std::shared_ptr<circuit> circ;
+        };
 
-    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                                  boost::property<boost::vertex_name_t, node_properties>>
-            cct;
+        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                      boost::property<boost::vertex_name_t, node_properties>>
+                cct;
 
-    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+        typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
 
-    struct cct_manager {
-        cct      tree;
-        cct_node current;
-        cct_node root;
-    };
-} // namespace syrec::internal
+        struct cct_manager {
+            cct      tree;
+            cct_node current;
+            cct_node root;
+        };
+    } // namespace internal
+} // namespace syrec
 
 namespace syrec {
     using namespace internal;

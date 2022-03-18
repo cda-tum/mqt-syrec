@@ -91,7 +91,7 @@ namespace syrec {
 
      */
         template<typename T>
-        T get(const key_type& k) const {
+        T get(const std::string& k) const {
             return std::any_cast<T>(map.find(k)->second);
         }
 
@@ -137,9 +137,10 @@ namespace syrec {
      * @param k Key of the property
      * @param value The new value of \p k. If \p k already existed, the type of \p value must not change.
      *
-
      */
-        void set(const properties::key_type& k, const properties::value_type& value) {
+
+        template<typename T>
+        void set(const std::string& k, const T& value) {
             map[k] = value;
         }
 

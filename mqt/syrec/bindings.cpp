@@ -16,44 +16,6 @@ using namespace pybind11::literals;
 using namespace syrec;
 using namespace syrec::applications;
 
-py::dict circuit_annotations(const circuit& c, const gate& g) {
-    py::dict d{};
-
-    const auto annotations = c.get_annotations(g);
-
-    if (annotations) {
-        for (const auto& [first, second]: *annotations) {
-            d[py::cast(first)] = second;
-        }
-    }
-
-    return d;
-}
-
-///Properties
-
-template<typename T>
-void properties_set(properties& prop, const std::string& key, const T& value) {
-    prop.set(key, value);
-}
-
-template<typename T>
-T properties_get(properties& prop, const std::string& key) {
-    return prop.get<T>(key);
-}
-
-///Program
-
-std::string py_read_program(program& prog, const std::string& filename, const read_program_settings& settings) {
-    std::string error_message;
-
-    if (!read_program(prog, filename, settings, &error_message)) {
-        return error_message;
-    } else {
-        return {};
-    }
-}
-
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
 
@@ -67,23 +29,32 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_property("outputs", &circuit::get_outputs, &circuit::set_outputs)
             .def_property("constants", &circuit::get_constants, &circuit::set_constants)
             .def_property("garbage", &circuit::get_garbage, &circuit::set_garbage)
-            .def("annotations", circuit_annotations);
+            .def("annotations", [](const circuit& c, const gate& g) {
+                py::dict   d{};
+                const auto annotations = c.get_annotations(g);
+                if (annotations) {
+                    for (const auto& [first, second]: *annotations) {
+                        d[py::cast(first)] = second;
+                    }
+                }
+                return d;
+            });
 
     py::class_<properties, std::shared_ptr<properties>>(m, "properties")
             .def(py::init<>())
-            .def("set_string", &properties_set<std::string>)
-            .def("set_bool", &properties_set<bool>)
-            .def("set_int", &properties_set<int>)
-            .def("set_unsigned", &properties_set<unsigned>)
-            .def("set_double", &properties_set<double>)
-            .def("get_string", &properties_get<std::string>)
-            .def("get_double", &properties_get<double>);
+            .def("set_string", &properties::set<std::string>)
+            .def("set_bool", &properties::set<bool>)
+            .def("set_int", &properties::set<int>)
+            .def("set_unsigned", &properties::set<unsigned>)
+            .def("set_double", &properties::set<double>)
+            .def("get_string", py::overload_cast<const std::string&>(&properties::get<std::string>, py::const_))
+            .def("get_double", py::overload_cast<const std::string&>(&properties::get<double>, py::const_));
 
     py::class_<program>(m, "syrec_program")
             .def(py::init<>())
             .def("add_module", &program::add_module);
 
-    m.def("py_read_program", py_read_program, "prog"_a, "filename"_a, "settings"_a);
+    m.def("py_read_program", py::overload_cast<syrec::applications::program&, const std::string&, read_program_settings&>(&read_program), "prog"_a, "filename"_a, "settings"_a);
 
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())

@@ -381,6 +381,88 @@ namespace syrec {
             return lines - 1;
         }
 
+        ///add circuit
+
+        void insert_circuit(unsigned pos, const circuit& src, const gate::line_container& controls) {
+            typedef std::pair<std::string, std::string> pair_t;
+            if (controls.empty()) {
+                for (const auto& g: src) {
+                    gate& new_gate   = insert_gate(pos++);
+                    new_gate         = *g;
+                    auto annotations = src.get_annotations(*g);
+                    if (annotations) {
+                        for (const pair_t p: *annotations) {
+                            annotate(new_gate, p.first, p.second);
+                        }
+                    }
+                }
+            } else {
+                for (const auto& g: src) {
+                    gate& new_gate = insert_gate(pos++);
+                    for (const auto& control: controls) {
+                        new_gate.controls.emplace(control);
+                    }
+                    for (const auto& c: g->controls) {
+                        new_gate.controls.emplace(c);
+                    }
+                    for (const auto& t: g->targets) {
+                        new_gate.targets.emplace(t);
+                    }
+                    new_gate.type    = g->type;
+                    auto annotations = src.get_annotations(*g);
+                    if (annotations) {
+                        for (const pair_t p: *annotations) {
+                            annotate(new_gate, p.first, p.second);
+                        }
+                    }
+                }
+            }
+        }
+
+        ///add gates
+        gate& append_multi_control_toffoli(const gate::line_container& controls, const gate::line& target) {
+            gate& g = append_gate();
+            for (const auto& control: controls) {
+                g.controls.emplace(control);
+            }
+            g.targets.emplace(target);
+            g.type = gate::types::Toffoli;
+
+            return g;
+        }
+
+        gate& append_toffoli(const gate::line& control1, const gate::line& control2, const gate::line& target) {
+            gate& g = append_gate();
+            g.controls.emplace(control1);
+            g.controls.emplace(control2);
+            g.targets.emplace(target);
+            g.type = gate::types::Toffoli;
+            return g;
+        }
+
+        gate& append_cnot(const gate::line& control, const gate::line& target) {
+            gate& g = append_gate();
+            g.controls.emplace(control);
+            g.targets.emplace(target);
+            g.type = gate::types::Toffoli;
+            return g;
+        }
+
+        gate& append_not(const gate::line& target) {
+            gate& g = append_gate();
+            g.targets.emplace(target);
+            g.type = gate::types::Toffoli;
+            return g;
+        }
+
+        gate& append_fredkin(const gate::line& target1, const gate::line& target2) {
+            gate& g = append_gate();
+            g.targets.emplace(target1);
+            g.targets.emplace(target2);
+            g.type = gate::types::Fredkin;
+            return g;
+        }
+
         // SIGNALS
         /**
      * @brief Signal which is emitted after adding a gate
