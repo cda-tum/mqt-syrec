@@ -12,70 +12,32 @@
 
 namespace syrec::applications {
 
-    /**
-     * @brief SyReC program
-     *
-     * This class represents a SyReC program, which
-     * is a collection of modules.
-     *
-
-     */
     class program {
     public:
-        /**
-       * @brief Standard constructor
-       * 
-       * Initializes default values
-       *
+        program() = default;
 
+        ~program() = default;
 
-       */
-        program();
+        void add_module(const module::ptr& module) {
+            modules_vec.emplace_back(module);
+        }
 
-        /**
-       * @brief Deconstructor
-       *
+        [[nodiscard]] const module::vec& modules() const {
+            return modules_vec;
+        }
 
+        [[nodiscard]] module::ptr find_module(const std::string& name) const {
+            for (const module::ptr& p: modules_vec) {
+                if (p->name() == name) {
+                    return p;
+                }
+            }
 
-       */
-        ~program();
-
-        /**
-       * @brief Adds a module to the program
-       * 
-       * @param module Module
-       *
-
-
-       */
-        void add_module(const module::ptr& module);
-
-        /**
-       * @brief Returns all modules of the program
-       *
-       * @return List of modules 
-       *
-
-
-       */
-        [[nodiscard]] const module::vec& modules() const;
-
-        /**
-       * @brief Finds a module by its name
-       * 
-       * @param name Name of the module
-       * 
-       * @return Returns a smart pointer to the module if there is a module with the name \p name.
-       *         Otherwise, the empty smart pointer is returned.
-       *
-
-
-       */
-        [[nodiscard]] module::ptr find_module(const std::string& name) const;
+            return {};
+        }
 
     private:
-        class priv;
-        priv* const d = nullptr;
+        module::vec modules_vec;
     };
 
 } // namespace syrec::applications
