@@ -6,135 +6,62 @@
 #ifndef NUMBER_HPP
 #define NUMBER_HPP
 
+#include <cassert>
 #include <map>
 #include <memory>
 #include <string>
+#include <utility>
+#include <variant>
+
+template<class... Ts>
+struct overloaded: Ts... { using Ts::operator()...; };
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 namespace syrec::applications {
-    /**
-     * @brief SyReC number data type
-     *
-     * This class represents a number in the context of a SyReC
-     * program. A number can be an integer value, the current
-     * value of a loop variable or a binary conjunction (+,-,*,/)
-     * of two numbers. The current value of a loop variable
-     * can only be determined in an execution context of the program,
-     * i.e. in a synthesis procedure.
-     *
 
-     */
     class number {
     public:
-        /**
-       * @brief Smart pointer
-       *
-
-
-       */
         typedef std::shared_ptr<number> ptr;
 
-        /**
-       * @brief Loop Variable Mapping
-       *
-       * A loop variable mapping assigns a current value
-       * to a loop variable by name. A loop variable mapping
-       * is required in the evaluation of a variable.
-       *
-
-
-       */
         typedef std::map<std::string, unsigned> loop_variable_mapping;
 
-        /**
-       * @brief Construct by number
-       *
-       * This constructor generates a number based on the value \p value.
-       *
-       * @param value Value
-       *
+        explicit number(std::variant<unsigned, std::string> number):
+            number_var(std::move(number)) {}
 
+        explicit number(unsigned value):
+            number_var(value) {
+        }
 
-       */
-        explicit number(unsigned value);
+        explicit number(const std::string& value):
+            number_var(value) {
+        }
 
-        /**
-       * @brief Construct by loop variable
-       *
-       * This constructor generates a number based on a loop variable with the name \p value.
-       *
-       * @param value Name of the loop variable
-       *
+        ~number() = default;
 
+        [[nodiscard]] bool is_loop_variable() const {
+            return std::holds_alternative<std::string>(number_var);
+        }
 
-       */
-        explicit number(const std::string& value);
+        [[nodiscard]] bool is_constant() const {
+            return std::holds_alternative<unsigned>(number_var);
+        }
 
-        /**
-       * @brief Deconstructor
-       *
+        [[nodiscard]] const std::string& variable_name() const {
+            return std::get<std::string>(number_var);
+        }
 
-
-       */
-        ~number();
-
-        /**
-       * @brief Returns whether the number is a loop variable
-       *
-       * @return true, if the number is a loop variable
-       *
-
-
-       */
-        [[nodiscard]] bool is_loop_variable() const;
-
-        /**
-       * @brief Returns whether the number is a known constant number
-       *
-       * @return true, if the number is a known constant number
-       *
-
-
-       */
-        [[nodiscard]] bool is_constant() const;
-
-        /**
-       * @brief Returns the variable name in case it is a loop variable
-       *
-       * This method can only be called when is_loop_variable() returns true,
-       * otherwise this method throws an assertion and causes program
-       * termination.
-       *
-       * @return The name of the loop variable
-       * 
-
-
-       */
-        [[nodiscard]] const std::string& variable_name() const;
-
-        /**
-       * @brief Evaluates the number in the context of an execution
-       * 
-       * This method works as follows. If the number is represented
-       * by an integer, it is simply returned. If in contrast, the
-       * number is represented by a loop variable, its current value
-       * is looked up in \p map. In this case an entry for this loop
-       * variable must exist. Otherwise, an assertion is thrown.
-       * If the number is a conjunction (+,-,*,/) of two numbers, the 
-       * result is calculated and returned.
-       *
-       * @param map Loop variable map to obtain the current values
-       *            for loop variables
-       * 
-       * @return The evaluated number
-       *
-
-
-       */
-        [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const;
+        [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const {
+            return std::visit(overloaded{
+                                      [](unsigned arg) { return arg; },
+                                      [&](const std::string& value) {auto it = map.find(value);
+                        assert(it != map.end());
+                        return it->second; }},
+                              number_var);
+        }
 
     private:
-        class priv;
-        priv* const d = nullptr;
+        std::variant<unsigned, std::string> number_var;
     };
 
 } // namespace syrec::applications
