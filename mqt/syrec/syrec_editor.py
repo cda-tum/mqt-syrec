@@ -216,11 +216,14 @@ class SyReCEditor(QWidget):
 
         synthesis(circ, prog)
 
+        num_consts = sum(c is not None for c in circ.constants)
+        num_garbage = sum(circ.garbage)
         print("Number Of Gates         : ", circ.num_gates)
         print("Number Of Lines         : ", circ.lines)
-        print("Number Of Inputs        : ", circ.inputs)
-        print("Number Of Constants     : ", circ.constants)
-        print("Number of Garbage Lines : ", circ.garbage)
+        print("Number Of Inputs        : ", circ.lines - num_consts)
+        print("Number Of Constants     : ", num_consts)
+        print("Number of Outputs       : ", circ.lines - num_garbage)
+        print("Number of Garbage Lines : ", num_garbage)
 
         if self.build_successful is not None:
             self.build_successful(circ)
@@ -295,9 +298,6 @@ class SyReCEditor(QWidget):
         bit_pos = 0
         bit1_mask = 0
 
-        for i in range(len(circ.inputs)):
-            print(circ.inputs[i])
-
         for i in circ.constants:
 
             if i is None:
@@ -315,7 +315,6 @@ class SyReCEditor(QWidget):
 
         input_list = [i + bit1_mask for i in input_list]
 
-        print(input_list)
         input_list = list(set(input_list))
 
         input_list_len = len(input_list)
@@ -336,21 +335,13 @@ class SyReCEditor(QWidget):
             combination_inp.append(str(my_inp_bitset))
             combination_out.append(str(my_out_bitset))
 
-        print(combination_inp)
-        print(combination_out)
-
         # sorted_inp_str=sorted(combination_inp,key=lambda x: int(x,2))
 
         sorted_ind = sorted(range(len(combination_inp)), key=lambda k: int(combination_inp[k], 2))
 
-        print(sorted_ind)
-
         for i in sorted_ind:
             final_inp.append(combination_inp[i])
             final_out.append(combination_out[i])
-
-        print(final_inp)
-        print(final_out)
 
         num_inputs = len(circ.inputs)
 
