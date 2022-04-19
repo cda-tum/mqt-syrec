@@ -52,14 +52,14 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("get_string", py::overload_cast<const std::string&>(&properties::get<std::string>, py::const_))
             .def("get_double", py::overload_cast<const std::string&>(&properties::get<double>, py::const_));
 
-    py::class_<program>(m, "syrec_program")
-            .def(py::init<>())
-            .def("add_module", &program::add_module)
-            .def("read", &program::read, "filename"_a, "settings"_a);
-
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
+
+    py::class_<program>(m, "syrec_program")
+            .def(py::init<>())
+            .def("add_module", &program::add_module)
+            .def("read", &program::read, "filename"_a, "settings"_a = read_program_settings{});
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())
@@ -84,8 +84,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_readwrite("targets", &gate::targets)
             .def_readwrite("type", &gate::type);
 
-    m.def("py_syrec_synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = std::make_shared<properties>(), "statistics"_a = std::make_shared<properties>());
-    m.def("py_simple_simulation", py::overload_cast<boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&>(&simple_simulation), "output"_a, "circ"_a, "input"_a, "statistics"_a = std::make_shared<properties>());
+    m.def("syrec_synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
+    m.def("simple_simulation", &simple_simulation, "output"_a, "circ"_a, "input"_a, "statistics"_a = properties::ptr());
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

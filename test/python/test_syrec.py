@@ -17,8 +17,7 @@ string_src = ".src"
 def test_parser():
     for file_name in data_synthesis:
         prog = syrec.syrec_program()
-        read_settings = syrec.read_program_settings()
-        error = prog.read(test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
 
@@ -27,8 +26,7 @@ def test_synthesis():
     for file_name in data_synthesis:
         circ = syrec.circuit()
         prog = syrec.syrec_program()
-        read_settings = syrec.read_program_settings()
-        error = prog.read(test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
         assert syrec.py_syrec_synthesis(circ, prog)
@@ -42,8 +40,7 @@ def test_simulation():
     for file_name in data_simulation:
         circ = syrec.circuit()
         prog = syrec.syrec_program()
-        read_settings = syrec.read_program_settings()
-        error = prog.read(test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
         assert syrec.py_syrec_synthesis(circ, prog)

@@ -9,40 +9,6 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
 
-def error_msg(statistics):
-    """Returns the error message contained in statistics"""
-
-    return "Error: " + statistics.get_string("error", "")
-
-
-def read_program(prog, filename, default_bitwidth=32):
-    """Reads a SyReC program from a file"""
-
-    settings = read_program_settings()
-    settings.default_bitwidth = default_bitwidth
-
-    error = prog.read(filename, settings)
-
-    return error
-
-
-def syrec_synthesis(circ, prog, variable_name_format="%1$s%3$s.%2$d", main_module="", if_realization=0, efficient_controls=True, modules_hierarchy=False):
-    settings = properties()
-
-    settings.set_string("variable_name_format", variable_name_format)
-    settings.set_string("main_module", main_module)
-    settings.set_unsigned("if_realization", if_realization)
-    settings.set_bool("efficient_controls", efficient_controls)
-    settings.set_bool("modules_hierarchy", modules_hierarchy)
-
-    statistics = properties()
-
-    if py_syrec_synthesis(circ, prog, settings, statistics):
-        return dict(runtime=statistics.get_double("runtime"))
-    else:
-        return error_msg(statistics)
-
-
 class CircuitLineItem(QGraphicsItemGroup):
     def __init__(self, index, width, parent=None):
         QGraphicsItemGroup.__init__(self, parent)
@@ -234,7 +200,7 @@ class SyReCEditor(QWidget):
 
         prog = syrec_program()
 
-        error_string = read_program(prog, "/tmp/out.src")
+        error_string = prog.read("/tmp/out.src")
 
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None:
@@ -269,7 +235,7 @@ class SyReCEditor(QWidget):
 
         prog = syrec_program()
 
-        error_string = read_program(prog, "/tmp/out.src")
+        error_string = prog.read("/tmp/out.src")
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None:
                 self.parser_failed("Editor is Empty")
@@ -311,7 +277,7 @@ class SyReCEditor(QWidget):
 
         prog = syrec_program()
 
-        error_string = read_program(prog, "/tmp/out.src")
+        error_string = prog.read("/tmp/out.src")
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None:
                 self.parser_failed("Editor is Empty")
@@ -366,7 +332,7 @@ class SyReCEditor(QWidget):
             my_inp_bitset = bitset(circ.lines, i)
             my_out_bitset = bitset(circ.lines)
 
-            py_simple_simulation(my_out_bitset, circ, my_inp_bitset, settings)
+            simple_simulation(my_out_bitset, circ, my_inp_bitset, settings)
             combination_inp.append(str(my_inp_bitset))
             combination_out.append(str(my_out_bitset))
 

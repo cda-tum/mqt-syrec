@@ -1367,7 +1367,7 @@ namespace syrec {
         // Settings parsing
         auto variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto main_module           = get<std::string>(settings, "main_module", std::string());
-        auto statement_synthesizer = get<standard_syrec_synthesizer>(settings, "statement_synthesizer", standard_syrec_synthesizer(circ, program));
+        auto statement_synthesizer = standard_syrec_synthesizer(circ, program);
 
         // get the main module
         module::ptr main;
