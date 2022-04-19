@@ -547,56 +547,6 @@ class CodeEditor(QPlainTextEdit):
             self.updateLineNumberAreaWidth(0)
 
 
-class RevLibHighlighter(QSyntaxHighlighter):
-    def __init__(self, parent):
-        QSyntaxHighlighter.__init__(self, parent)
-
-        self.highlightingRules = []
-
-        keywordFormat = QTextCharFormat()
-        keywordFormat.setForeground(QColorConstants.DarkRed)
-        keywords = ["version", "numvars", "variables", "inputs", "outputs", "inputbus", "outputbus", "state", "constants", "garbage", "module", "begin", "end"]
-
-        for pattern in ["\\.%s" % keyword for keyword in keywords]:
-            self.highlightingRules.append([QtCore.QRegularExpression(pattern), keywordFormat])
-
-        gateFormat = QTextCharFormat()
-        gateFormat.setForeground(QColorConstants.DarkBlue)
-        gateFormat.setFontWeight(QFont.Weight.Bold)
-        gates = ["t", "f", "p", "v"]
-
-        for pattern in ["\\b%s\\d*\\b" % gate for gate in gates]:
-            self.highlightingRules.append([QtCore.QRegularExpression(pattern), gateFormat])
-        self.highlightingRules.append([QtCore.QRegularExpression("v\\+"), gateFormat])
-
-        numberFormat = QTextCharFormat()
-        numberFormat.setForeground(QColorConstants.DarkCyan)
-        self.highlightingRules.append([QtCore.QRegularExpression("\\b[0-9]+\\b"), numberFormat])
-
-        commentFormat = QTextCharFormat()
-        commentFormat.setForeground(QColorConstants.DarkGray)
-        commentFormat.setFontItalic(True)
-        self.highlightingRules.append([QtCore.QRegularExpression("#.*$"), commentFormat])
-
-    def highlightBlock(self, text):
-        for rule in self.highlightingRules:
-            expression = rule[0]
-            match = expression.match(text)
-            while match.hasMatch():
-                index = match.capturedStart()
-                length = match.capturedLength()
-                self.setFormat(index, length, rule[1])
-                match = expression.match(text, offset=index + length)
-
-
-class RevLibEditor(CodeEditor):
-    def __init__(self, parent=None):
-        CodeEditor.__init__(self, parent)
-
-        self.highlighter = RevLibHighlighter(self.document())
-        self.setFont(QFont("Monospace"))
-
-
 class LogWidget(QTreeWidget):
     def __init__(self, parent=None):
         QTreeWidget.__init__(self, parent)
