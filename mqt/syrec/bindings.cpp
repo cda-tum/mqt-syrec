@@ -3,9 +3,7 @@
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
 #include "core/properties.hpp"
-#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/utils/costs.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <functional>
@@ -40,7 +38,9 @@ PYBIND11_MODULE(pysyrec, m) {
                     }
                 }
                 return d;
-            });
+            })
+            .def("quantum_cost", &circuit::quantum_cost)
+            .def("transistor_cost", &circuit::transistor_cost);
 
     py::class_<properties, std::shared_ptr<properties>>(m, "properties")
             .def(py::init<>())
@@ -60,9 +60,6 @@ PYBIND11_MODULE(pysyrec, m) {
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
-
-    m.def("quantum_costs", quantum_cost, "circ"_a, "lines"_a);
-    m.def("transistor_costs", transistor_cost, "circ"_a);
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>())

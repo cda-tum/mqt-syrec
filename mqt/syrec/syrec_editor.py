@@ -286,9 +286,9 @@ class SyReCEditor(QWidget):
         gates = circ.num_gates
         lines = circ.lines
 
-        qc = quantum_costs(circ, circ.lines)
+        qc = circ.quantum_cost()
 
-        tc = transistor_costs(circ)
+        tc = circ.transistor_cost()
 
         temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
 

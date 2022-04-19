@@ -2,13 +2,11 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
-#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
 
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
-#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -51,9 +49,6 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                              return s; });
 
 TEST_P(SyrecSimulationTest, GenericSimulationTest) {
-    for (int line: set_lines)
-        std::cout << line;
-
     circuit               circ;
     program               prog;
     read_program_settings settings;

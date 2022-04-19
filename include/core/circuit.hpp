@@ -471,6 +471,22 @@ namespace syrec {
      */
         boost::signals2::signal<void(gate&)> gate_added;
 
+        [[nodiscard]] gate::cost_t quantum_cost() const {
+            gate::cost_t cost = 0U;
+            for (const auto& g: gates) {
+                cost += g->quantum_cost(lines);
+            }
+            return cost;
+        }
+
+        [[nodiscard]] gate::cost_t transistor_cost() const {
+            gate::cost_t cost = 0U;
+            for (const auto& g: gates) {
+                cost += (8ull * g->controls.size());
+            }
+            return cost;
+        }
+
     private:
         std::vector<std::shared_ptr<gate>> gates{};
         unsigned                           lines{};

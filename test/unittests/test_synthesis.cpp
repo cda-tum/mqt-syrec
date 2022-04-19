@@ -1,12 +1,9 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
-#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
-#include "core/utils/costs.hpp"
 
 #include "gtest/gtest.h"
-#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -17,14 +14,14 @@ using namespace syrec;
 
 class SyrecSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string test_circuits_dir = "./circuits/";
-    std::string file_name;
-    cost_t      qc                 = 0;
-    cost_t      tc                 = 0;
-    unsigned    expected_num_gates = 0;
-    unsigned    expected_lines     = 0;
-    cost_t      expected_qc        = 0;
-    cost_t      expected_tc        = 0;
+    std::string  test_circuits_dir = "./circuits/";
+    std::string  file_name;
+    gate::cost_t qc                 = 0;
+    gate::cost_t tc                 = 0;
+    unsigned     expected_num_gates = 0;
+    unsigned     expected_lines     = 0;
+    gate::cost_t expected_qc        = 0;
+    gate::cost_t expected_tc        = 0;
 
     void SetUp() override {
         std::string synthesis_param = GetParam();
@@ -82,8 +79,8 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));
 
-    qc = syrec::quantum_cost(circ, circ.get_lines());
-    tc = syrec::transistor_cost(circ);
+    qc = circ.quantum_cost();
+    tc = circ.transistor_cost();
 
     EXPECT_EQ(expected_num_gates, circ.num_gates());
     EXPECT_EQ(expected_lines, circ.get_lines());

@@ -34,8 +34,8 @@ def test_synthesis():
         assert syrec.py_syrec_synthesis(circ, prog)
         assert data_synthesis[file_name]["num_gates"] == circ.num_gates
         assert data_synthesis[file_name]["lines"] == circ.lines
-        assert data_synthesis[file_name]["quantum_costs"] == syrec.quantum_costs(circ, circ.lines)
-        assert data_synthesis[file_name]["transistor_costs"] == syrec.transistor_costs(circ)
+        assert data_synthesis[file_name]["quantum_costs"] == circ.quantum_cost()
+        assert data_synthesis[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
 def test_simulation():

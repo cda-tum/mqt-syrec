@@ -1,4 +1,3 @@
-#include "core/syrec/parser.hpp"
 #include "core/syrec/program.hpp"
 
 #include "gtest/gtest.h"

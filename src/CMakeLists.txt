@@ -8,7 +8,6 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/costs.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
@@ -20,7 +19,6 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/program.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/costs.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp)
 
 # set include directories
