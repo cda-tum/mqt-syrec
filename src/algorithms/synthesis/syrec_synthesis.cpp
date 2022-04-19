@@ -1262,22 +1262,22 @@ namespace syrec {
     }
 
     void standard_syrec_synthesizer::get_variables(const variable_access::ptr& var, std::vector<unsigned>& lines) {
-        unsigned offset = _var_lines[var->var()];
+        unsigned offset = _var_lines[var->get_var()];
 
-        if (!var->indexes().empty()) {
+        if (!var->indexes.empty()) {
             // check if it is all numeric_expressions
-            unsigned n = var->var()->dimensions().size(); // dimensions
-            if ((unsigned)std::count_if(var->indexes().cbegin(), var->indexes().cend(), [&](const auto& p) { return dynamic_cast<numeric_expression*>(p.get()); }) == n) {
+            unsigned n = var->get_var()->dimensions.size(); // dimensions
+            if ((unsigned)std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<numeric_expression*>(p.get()); }) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
-                    offset += dynamic_cast<numeric_expression*>(var->indexes().at(i).get())->value()->evaluate(loop_map) *
-                              std::accumulate(var->var()->dimensions().begin() + i + 1u, var->var()->dimensions().end(), 1u, std::multiplies<>()) *
-                              var->var()->bitwidth();
+                    offset += dynamic_cast<numeric_expression*>(var->indexes.at(i).get())->value()->evaluate(loop_map) *
+                              std::accumulate(var->get_var()->dimensions.begin() + i + 1u, var->get_var()->dimensions.end(), 1u, std::multiplies<>()) *
+                              var->get_var()->bitwidth;
                 }
             }
         }
 
-        if (var->range()) {
-            auto [nfirst, nsecond] = *var->range();
+        if (var->range) {
+            auto [nfirst, nsecond] = *var->range;
 
             unsigned first  = nfirst->evaluate(loop_map);
             unsigned second = nsecond->evaluate(loop_map);
@@ -1292,7 +1292,7 @@ namespace syrec {
                 }
             }
         } else {
-            for (unsigned i = 0u; i < var->var()->bitwidth(); ++i) {
+            for (unsigned i = 0u; i < var->get_var()->bitwidth; ++i) {
                 lines.emplace_back(offset + i);
             }
         }
@@ -1337,8 +1337,8 @@ namespace syrec {
     void standard_syrec_synthesizer::add_variable(circuit& circ, const std::vector<unsigned>& dimensions, const variable::ptr& var,
                                                   constant _constant, bool _garbage, const std::string& arraystr) {
         if (dimensions.empty()) {
-            for (unsigned i = 0u; i < var->bitwidth(); ++i) {
-                std::string name = var->name() + arraystr + "." + std::to_string(i);
+            for (unsigned i = 0u; i < var->bitwidth; ++i) {
+                std::string name = var->name + arraystr + "." + std::to_string(i);
                 circ.add_line(name, name, _constant, _garbage);
             }
         } else {
@@ -1357,10 +1357,10 @@ namespace syrec {
             _var_lines.insert(std::make_pair(var, circ.get_lines()));
 
             // types of constant and garbage
-            constant _constant = (var->type() == variable::out || var->type() == variable::wire) ? constant(false) : constant();
-            bool     _garbage  = (var->type() == variable::in || var->type() == variable::wire);
+            constant _constant = (var->type == variable::out || var->type == variable::wire) ? constant(false) : constant();
+            bool     _garbage  = (var->type == variable::in || var->type == variable::wire);
 
-            add_variable(circ, var->dimensions(), var, _constant, _garbage, std::string());
+            add_variable(circ, var->dimensions, var, _constant, _garbage, std::string());
         }
     }
 

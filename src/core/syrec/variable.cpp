@@ -9,94 +9,32 @@
 
 namespace syrec {
 
-    class variable::priv {
-    public:
-        priv() = default;
+    variable::variable(unsigned type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth):
+        type(type),
+        name(std::move(name)),
+        dimensions(std::move(dimensions)),
+        bitwidth(bitwidth) {}
 
-        unsigned              type{};
-        std::string           name{};
-        unsigned              bitwidth{};
-        variable::ptr         reference = nullptr;
-        std::vector<unsigned> dimensions{};
-    };
-
-    variable::variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth):
-        d(new priv()) {
-        d->type       = type;
-        d->name       = name;
-        d->dimensions = dimensions;
-        d->bitwidth   = bitwidth;
+    void variable::set_reference(variable::ptr ref) {
+        reference = std::move(ref);
     }
 
-    variable::~variable() {
-        delete d;
+    void variable_access::set_var(variable::ptr v) {
+        var = std::move(v);
     }
 
-    unsigned variable::type() const {
-        return d->type;
-    }
-
-    const std::string& variable::name() const {
-        return d->name;
-    }
-
-    unsigned variable::bitwidth() const {
-        return d->bitwidth;
-    }
-
-    void variable::set_reference(variable::ptr reference) {
-        d->reference = std::move(reference);
-    }
-
-    variable::ptr variable::reference() const {
-        return d->reference;
-    }
-
-    const std::vector<unsigned>& variable::dimensions() const {
-        return d->dimensions;
-    }
-
-    class variable_access::priv {
-    public:
-        priv() = default;
-
-        variable::ptr                                      var;
-        std::optional<std::pair<number::ptr, number::ptr>> range;
-        expression::vec                                    indexes;
-    };
-
-    variable_access::variable_access():
-        d(new priv()) {
-    }
-
-    variable_access::~variable_access() {
-        delete d;
-    }
-
-    void variable_access::set_var(variable::ptr var) {
-        d->var = std::move(var);
-    }
-
-    variable::ptr variable_access::var() const {
-        if (d->var->reference()) {
-            return d->var->reference();
+    variable::ptr variable_access::get_var() const {
+        if (var->reference) {
+            return var->reference;
         } else {
-            return d->var;
+            return var;
         }
     }
 
-    void variable_access::set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range) {
-        d->range = range;
-    }
-
-    const std::optional<std::pair<number::ptr, number::ptr>>& variable_access::range() const {
-        return d->range;
-    }
-
     unsigned variable_access::bitwidth() const {
-        if (d->range) {
+        if (range) {
             number::ptr first, second;
-            std::tie(first, second) = *d->range;
+            std::tie(first, second) = *range;
 
             /* if both variables are loop variables but have the same name,
            then the bit-width is 1, otherwise we cannot determine it now. */
@@ -111,16 +49,8 @@ namespace syrec {
             number::loop_variable_mapping map; // empty map
             return abs((int)(first->evaluate(map) - second->evaluate(map))) + 1;
         } else {
-            return d->var->bitwidth();
+            return var->bitwidth;
         }
-    }
-
-    void variable_access::set_indexes(const expression::vec& indexes) {
-        d->indexes = indexes;
-    }
-
-    const expression::vec& variable_access::indexes() const {
-        return d->indexes;
     }
 
 } // namespace syrec::applications

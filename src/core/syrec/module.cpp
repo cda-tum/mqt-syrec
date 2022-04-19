@@ -40,7 +40,7 @@ namespace syrec {
 
     variable::ptr module::find_parameter_or_variable(const std::string& name) const {
         for (variable::ptr var: d->parameters) {
-            if (var->name() == name) {
+            if (var->name == name) {
                 return var;
             }
         }

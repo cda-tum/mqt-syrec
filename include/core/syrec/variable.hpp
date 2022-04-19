@@ -28,8 +28,7 @@ namespace syrec {
      *
 
      */
-    class variable {
-    public:
+    struct variable {
         /**
        * @brief Type of variable
        *
@@ -79,55 +78,15 @@ namespace syrec {
        */
         typedef std::vector<ptr> vec;
 
-        variable(unsigned type, const std::string& name, const std::vector<unsigned>& dimensions, unsigned bitwidth);
+        variable(unsigned type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth);
 
-        /**
-       * @brief Deconstructor
-       *
+        void set_reference(variable::ptr reference);
 
-
-       */
-        ~variable();
-
-        /**
-       * @brief Returns the type of the variable
-       *
-       * @return Type
-       *
-
-
-       */
-        [[nodiscard]] unsigned type() const;
-
-        /**
-       * @brief Returns the name of the variable
-       *
-       * @return Name
-       *
-
-
-       */
-        [[nodiscard]] const std::string& name() const;
-
-        /**
-       * @brief Returns the bit-width of the variable
-       *
-       * @return Bit-width
-       *
-
-
-       */
-        [[nodiscard]] unsigned bitwidth() const;
-
-        void                        set_reference(variable::ptr reference);
-        [[nodiscard]] variable::ptr reference() const;
-
-        //[[maybe_unused]] void                      set_dimensions(const std::vector<unsigned>& dimensions);
-        [[nodiscard]] const std::vector<unsigned>& dimensions() const;
-
-    private:
-        class priv;
-        priv* const d = nullptr;
+        unsigned              type{};
+        std::string           name{};
+        std::vector<unsigned> dimensions{};
+        unsigned              bitwidth{};
+        variable::ptr         reference = nullptr;
     };
 
     /**
@@ -138,8 +97,7 @@ namespace syrec {
      *
 
      */
-    class variable_access {
-    public:
+    struct variable_access {
         /**
        * @brief Smart pointer
        *
@@ -148,23 +106,7 @@ namespace syrec {
        */
         typedef std::shared_ptr<variable_access> ptr;
 
-        /**
-       * @brief Standard constructor
-       *
-       * Initializes default values
-       *
-
-
-       */
-        variable_access();
-
-        /**
-       * @brief Deconstructor
-       *
-
-
-       */
-        ~variable_access();
+        variable_access() = default;
 
         /**
        * @brief Sets the variable of this access
@@ -184,32 +126,7 @@ namespace syrec {
 
 
        */
-        [[nodiscard]] variable::ptr var() const;
-
-        /**
-       * @brief Sets the range of this access
-       *
-       * If the parameter is empty, i.e. the default vaule @code boost::optional<std::pair<number::ptr, number::ptr> >() @endcode
-       * the full variable is considered. Otherwise, the values of the numbers are evaluated for determining the range.
-       *
-       * The first number can be larger than the second one. In this case, the range is also considered backwards.
-       *
-       * @param range Range
-       *
-
-
-       */
-        void set_range(const std::optional<std::pair<number::ptr, number::ptr>>& range);
-
-        /**
-       * @brief Returns the range of this access
-       *
-       * @return Range
-       *
-
-
-       */
-        [[nodiscard]] const std::optional<std::pair<number::ptr, number::ptr>>& range() const;
+        [[nodiscard]] variable::ptr get_var() const;
 
         /**
        * @brief Returns the bit-width of the variable access
@@ -226,12 +143,9 @@ namespace syrec {
        */
         [[nodiscard]] unsigned bitwidth() const;
 
-        void                                                          set_indexes(const std::vector<std::shared_ptr<expression>>& indexes);
-        [[nodiscard]] const std::vector<std::shared_ptr<expression>>& indexes() const;
-
-    private:
-        class priv;
-        priv* const d = nullptr;
+        variable::ptr                                      var{};
+        std::optional<std::pair<number::ptr, number::ptr>> range{};
+        std::vector<std::shared_ptr<expression>>           indexes{};
     };
 
 } // namespace syrec

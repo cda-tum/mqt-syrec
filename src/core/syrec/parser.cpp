@@ -24,7 +24,7 @@ namespace syrec {
                 return {};
             }
 
-            return std::make_shared<number>(var->bitwidth());
+            return std::make_shared<number>(var->bitwidth);
         }
 
         number::ptr operator()(const std::string& loop_variable) const {
@@ -204,8 +204,8 @@ namespace syrec {
             // is in range?
             if (!first->is_loop_variable()) {
                 unsigned bound = first->evaluate(number::loop_variable_mapping());
-                if (bound >= var->bitwidth()) {
-                    context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name() + "(" + std::to_string(var->bitwidth()) + ")";
+                if (bound >= var->bitwidth) {
+                    context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                     return {};
                 }
             }
@@ -219,8 +219,8 @@ namespace syrec {
                 // is in range?
                 if (!second->is_loop_variable()) {
                     unsigned bound = second->evaluate(number::loop_variable_mapping());
-                    if (bound >= var->bitwidth()) {
-                        context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name() + "(" + std::to_string(var->bitwidth()) + ")";
+                    if (bound >= var->bitwidth) {
+                        context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                         return {};
                     }
                 }
@@ -229,21 +229,21 @@ namespace syrec {
             var_range = std::make_pair(first, second);
         }
 
-        va->set_range(var_range);
+        va->range = var_range;
 
         // indexes
-        if (var->dimensions().size() != ast_var.indexes.size()) {
-            context.error_message = "Invalid number of array indexes in variable " + var->name() + ". Expected " + std::to_string(var->dimensions().size()) + ", got " + std::to_string(ast_var.indexes.size());
+        if (var->dimensions.size() != ast_var.indexes.size()) {
+            context.error_message = "Invalid number of array indexes in variable " + var->name + ". Expected " + std::to_string(var->dimensions.size()) + ", got " + std::to_string(ast_var.indexes.size());
             return {};
         }
 
         expression::vec indexes;
         for (const ast_expression& ast_exp: ast_var.indexes) {
-            expression::ptr index = parse_expression(ast_exp, proc, var->bitwidth(), context);
+            expression::ptr index = parse_expression(ast_exp, proc, var->bitwidth, context);
             if (!index) return {};
             indexes.emplace_back(index);
         }
-        va->set_indexes(indexes);
+        va->indexes = indexes;
 
         return va;
     }
@@ -499,7 +499,7 @@ namespace syrec {
             if (!va2) return nullptr;
 
             if (va1->bitwidth() != va2->bitwidth()) {
-                std::cerr << "Different bit-widths in <=> statement: " + va1->var()->name() + " (" + std::to_string(va1->bitwidth()) + "), " + va2->var()->name() + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
+                std::cerr << "Different bit-widths in <=> statement: " + va1->get_var()->name + " (" + std::to_string(va1->bitwidth()) + "), " + va2->get_var()->name + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
                 assert(false);
                 return nullptr;
             }
@@ -542,7 +542,7 @@ namespace syrec {
             if (!rhs) return nullptr;
 
             if (lhs->bitwidth() != rhs->bitwidth()) {
-                context.error_message = "Wrong bit-width in assignment to " + lhs->var()->name();
+                context.error_message = "Wrong bit-width in assignment to " + lhs->get_var()->name;
                 return nullptr;
             }
 
@@ -662,8 +662,8 @@ namespace syrec {
                 variable::ptr vOther    = other_proc->parameters().at(i);
                 variable::ptr parameter = proc.find_parameter_or_variable(parameters.at(i)); // must exist (see above)
 
-                if (vOther->bitwidth() != parameter->bitwidth()) {
-                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name() + " has bit-width of " + std::to_string(parameter->bitwidth()) + ", but " + std::to_string(vOther->bitwidth()) + " is required";
+                if (vOther->bitwidth != parameter->bitwidth) {
+                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name() + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
                     return nullptr;
                 }
             }
