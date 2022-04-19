@@ -24,8 +24,8 @@ jobs:
         with:
           submodules: recursive
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
-      - uses: actions/upload-artifact@v2
+        uses: pypa/cibuildwheel@v2.4.0
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -39,8 +39,8 @@ jobs:
       - name: Install boost
         run:  brew install boost
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
-      - uses: actions/upload-artifact@v2
+        uses: pypa/cibuildwheel@v2.4.0
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -53,16 +53,16 @@ jobs:
           submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
-        uses: MarkusJx/install-boost@v2.1.0
+        uses: MarkusJx/install-boost@v2.2.0
         id:   install-boost
         with:
           boost_version:    ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.4.0
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -78,10 +78,10 @@ jobs:
               curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
               brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.4.0
         env:
           CIBW_ARCHS_MACOS: arm64
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
 
@@ -107,7 +107,7 @@ jobs:
         env:
           CC:  "gcc-10"
           CXX: "g++-10"
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
           
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     if:      github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
