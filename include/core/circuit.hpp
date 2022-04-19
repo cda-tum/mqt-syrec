@@ -387,11 +387,11 @@ namespace syrec {
             typedef std::pair<std::string, std::string> pair_t;
             if (controls.empty()) {
                 for (const auto& g: src) {
-                    gate& new_gate   = insert_gate(pos++);
-                    new_gate         = *g;
-                    auto annotations = src.get_annotations(*g);
-                    if (annotations) {
-                        for (const pair_t p: *annotations) {
+                    gate& new_gate = insert_gate(pos++);
+                    new_gate       = *g;
+                    auto anno      = src.get_annotations(*g);
+                    if (anno) {
+                        for (const pair_t p: *anno) {
                             annotate(new_gate, p.first, p.second);
                         }
                     }
@@ -408,10 +408,10 @@ namespace syrec {
                     for (const auto& t: g->targets) {
                         new_gate.targets.emplace(t);
                     }
-                    new_gate.type    = g->type;
-                    auto annotations = src.get_annotations(*g);
-                    if (annotations) {
-                        for (const pair_t p: *annotations) {
+                    new_gate.type = g->type;
+                    auto anno     = src.get_annotations(*g);
+                    if (anno) {
+                        for (const pair_t p: *anno) {
                             annotate(new_gate, p.first, p.second);
                         }
                     }
