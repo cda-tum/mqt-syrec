@@ -11,6 +11,9 @@
 #include <functional>
 #include <pybind11/stl.h>
 
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace syrec;
@@ -86,8 +89,9 @@ PYBIND11_MODULE(pysyrec, m) {
 
     m.def("py_syrec_synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = std::make_shared<properties>(), "statistics"_a = std::make_shared<properties>());
     m.def("py_simple_simulation", py::overload_cast<boost::dynamic_bitset<>&, const circuit&, const boost::dynamic_bitset<>&, const properties::ptr&>(&simple_simulation), "output"_a, "circ"_a, "input"_a, "statistics"_a = std::make_shared<properties>());
+
 #ifdef VERSION_INFO
-    m.attr("__version__") = VERSION_INFO;
+    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else
     m.attr("__version__") = "dev";
 #endif

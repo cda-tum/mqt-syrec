@@ -1,14 +1,25 @@
 [build-system]
-requires = ["setuptools", "wheel", "cmake"]
+requires = [
+    "setuptools>=45",
+    "setuptools_scm>=6.4",
+    "wheel>=0.37",
+    "ninja>=1.10; sys_platform != 'win32'",
+    "cmake>=3.14",
+]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
 
 [tool.cibuildwheel]
 dependency-versions = "latest"
 build = "cp3*"
-skip = "*-win32 *-musllinux_* *-manylinux_i686 cp36-*"
-test-skip = "*_arm64 *_universal2:arm64"
-test-command = "python -c \"from mqt import syrec\ncirc = syrec.circuit()\n\""
+archs = "auto64"
+skip = "*-musllinux_*"
+test-skip = "*-macosx_arm64 *-musllinux* *aarch64"
+test-extras = ["tests"]
+test-command = "cd {project}/test/python && python -m pytest ."
 environment = { DEPLOY = "ON" }
+build-frontend = "build"
 build-verbosity = 3
 
 [tool.cibuildwheel.linux]
@@ -22,7 +33,6 @@ before-all = [
 ]
 
 [tool.cibuildwheel.macos]
-archs = "x86_64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", DEPLOY = "ON" }
 
 [tool.cibuildwheel.windows]

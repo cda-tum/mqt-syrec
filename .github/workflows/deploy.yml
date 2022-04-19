@@ -110,29 +110,9 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
-          
-  test_bindings:
-    name:    Test Python bindings
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions/setup-python@v2
-        name: Install Python
-        with:
-          python-version: '3.9'
-      - name: Install boost
-        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
-      - name: Install package
-        run:  pip install .
-      - name: Install test requirements
-        run:  pip install -r test/python/requirements-test.txt
-      - name: Test package
-        run: cd test/python && pytest .
 
   upload_pypi:
-    needs: [ build_ubuntu_wheels, build_macos_wheels, build_m1_wheels, build_windows_wheels, build_sdist, test_bindings ]
+    needs: [ build_ubuntu_wheels, build_macos_wheels, build_m1_wheels, build_windows_wheels, build_sdist ]
     runs-on: ubuntu-latest
     if:      github.event_name == 'release' && github.event.action == 'published'
     steps:
