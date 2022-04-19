@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-namespace syrec::applications {
+namespace syrec {
 
     class module;
 
@@ -676,6 +676,6 @@ namespace syrec::applications {
         statement::ptr operator()(statement::ptr _statement) const;
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* STATEMENT_HPP */

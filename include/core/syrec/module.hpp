@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace syrec::applications {
+namespace syrec {
 
     class statement;
 
@@ -140,6 +140,6 @@ namespace syrec::applications {
         priv* const d = nullptr;
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* MODULE_HPP */

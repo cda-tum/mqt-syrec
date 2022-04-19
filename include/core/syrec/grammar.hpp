@@ -10,19 +10,20 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <iostream>
+#include <optional>
 #include <variant>
 
 // Custom Parser iterator
-namespace syrec::applications::parser {
+namespace syrec::parser {
     BOOST_SPIRIT_TERMINAL(iter_pos)
-} // namespace syrec::applications::parser
+} // namespace syrec::parser
 
 namespace boost::spirit {
     template<>
-    struct use_terminal<qi::domain, syrec::applications::parser::tag::iter_pos>: mpl::true_ {};
+    struct use_terminal<qi::domain, syrec::parser::tag::iter_pos>: mpl::true_ {};
 } // namespace boost::spirit
 
-namespace syrec::applications::parser {
+namespace syrec::parser {
     struct iter_pos_parser: boost::spirit::qi::primitive_parser<iter_pos_parser> {
         template<typename Context, typename Iterator>
         struct attribute {
@@ -41,12 +42,12 @@ namespace syrec::applications::parser {
             return boost::spirit::info("iter_pos");
         }
     };
-} // namespace syrec::applications::parser
+} // namespace syrec::parser
 
 namespace boost::spirit::qi {
     template<typename Modifiers>
-    struct [[maybe_unused]] make_primitive<syrec::applications::parser::tag::iter_pos, Modifiers> {
-        typedef syrec::applications::parser::iter_pos_parser result_type;
+    struct [[maybe_unused]] make_primitive<syrec::parser::tag::iter_pos, Modifiers> {
+        typedef syrec::parser::iter_pos_parser result_type;
 
         result_type operator()(unused_type, unused_type) const {
             return {};
@@ -54,9 +55,10 @@ namespace boost::spirit::qi {
     };
 } // namespace boost::spirit::qi
 
-namespace syrec::applications {
+namespace syrec {
     namespace qi    = boost::spirit::qi;
     namespace ascii = boost::spirit::ascii;
+    namespace bf    = boost::fusion;
 
     struct ast_variable;
     struct ast_number_expression;
@@ -67,7 +69,7 @@ namespace syrec::applications {
 
     typedef std::string::const_iterator                                                                                                                                         ast_iterator;
     typedef std::variant<unsigned, boost::recursive_wrapper<ast_variable>, std::string, boost::recursive_wrapper<ast_number_expression>>                                        ast_number;
-    typedef boost::optional<boost::fusion::vector<syrec::applications::ast_number, std::optional<syrec::applications::ast_number>>>                                             ast_range;
+    typedef boost::optional<boost::fusion::vector<syrec::ast_number, std::optional<syrec::ast_number>>>                                                                         ast_range;
     typedef boost::variant<ast_number, boost::recursive_wrapper<ast_variable>, boost::recursive_wrapper<ast_binary_expression>, boost::recursive_wrapper<ast_shift_expression>> ast_expression;
     typedef boost::fusion::vector<ast_variable, ast_variable>                                                                                                                   ast_swap_statement;
     typedef boost::fusion::vector<std::string, ast_variable>                                                                                                                    ast_unary_statement;
@@ -127,193 +129,192 @@ namespace syrec::applications {
         step_t                     step;
         std::vector<ast_statement> do_statement;
     };
-} // namespace syrec::applications
+} // namespace syrec
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_variable,
-        (std::string, name)(std::vector<syrec::applications::ast_expression>, indexes)(syrec::applications::ast_range, range))
+        syrec::ast_variable,
+        (std::string, name)(std::vector<syrec::ast_expression>, indexes)(syrec::ast_range, range))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_number_expression,
-        (syrec::applications::ast_number, operand1)(std::string, op)(syrec::applications::ast_number, operand2))
+        syrec::ast_number_expression,
+        (syrec::ast_number, operand1)(std::string, op)(syrec::ast_number, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_binary_expression,
-        (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_expression, operand2))
+        syrec::ast_binary_expression,
+        (syrec::ast_expression, operand1)(std::string, op)(syrec::ast_expression, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_shift_expression,
-        (syrec::applications::ast_expression, operand1)(std::string, op)(syrec::applications::ast_number, operand2))
+        syrec::ast_shift_expression,
+        (syrec::ast_expression, operand1)(std::string, op)(syrec::ast_number, operand2))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_if_statement,
-        (syrec::applications::ast_expression, condition)(std::vector<syrec::applications::ast_statement>, if_statement)(std::vector<syrec::applications::ast_statement>, else_statement)(syrec::applications::ast_expression, fi_condition))
+        syrec::ast_if_statement,
+        (syrec::ast_expression, condition)(std::vector<syrec::ast_statement>, if_statement)(std::vector<syrec::ast_statement>, else_statement)(syrec::ast_expression, fi_condition))
 
 BOOST_FUSION_ADAPT_STRUCT(
-        syrec::applications::ast_for_statement,
-        (syrec::applications::ast_for_statement::from_t, from)(syrec::applications::ast_number, to)(syrec::applications::ast_for_statement::step_t, step)(std::vector<syrec::applications::ast_statement>, do_statement))
+        syrec::ast_for_statement,
+        (syrec::ast_for_statement::from_t, from)(syrec::ast_number, to)(syrec::ast_for_statement::step_t, step)(std::vector<syrec::ast_statement>, do_statement))
 
 namespace syrec {
-    namespace applications {
 
-        template<typename Iterator>
-        struct syrec_skip_parser: qi::grammar<Iterator> {
-            explicit syrec_skip_parser():
-                syrec_skip_parser::base_type(base_rule) {
-                using ascii::space;
-                using qi::char_;
-                using qi::eol;
-                using qi::lit;
+    template<typename Iterator>
+    struct syrec_skip_parser: qi::grammar<Iterator> {
+        explicit syrec_skip_parser():
+            syrec_skip_parser::base_type(base_rule) {
+            using ascii::space;
+            using qi::char_;
+            using qi::eol;
+            using qi::lit;
 
-                base_rule = lit(';') | space | single_line_comment_rule | multi_line_comment_rule;
+            base_rule = lit(';') | space | single_line_comment_rule | multi_line_comment_rule;
 
-                single_line_comment_rule = "//" >> *(char_ - eol) >> eol;
+            single_line_comment_rule = "//" >> *(char_ - eol) >> eol;
 
-                multi_line_comment_rule = "/*" >> *(char_ - "*/") >> "*/";
-            }
-
-            qi::rule<Iterator> base_rule;
-            qi::rule<Iterator> single_line_comment_rule;
-            qi::rule<Iterator> multi_line_comment_rule;
-        };
-
-        template<typename Iterator, typename SpaceT>
-        struct syrec_parser: qi::grammar<Iterator, ast_program(), qi::locals<std::string>, SpaceT> {
-            explicit syrec_parser():
-                syrec_parser::base_type(program_rule, "syrec") {
-                using ascii::alnum;
-                using parser::iter_pos;
-                using qi::_1;
-                using qi::_val;
-                using qi::char_;
-                using qi::eol;
-                using qi::lexeme;
-                using qi::lit;
-                using qi::string;
-                using qi::uint_;
-
-                // Helpers
-                identifier %= lexeme[+(alnum | '_')];
-
-                program_rule %= +module_rule;
-
-                variable_declaration_rule %= (identifier - lit("module")) >> *("[" >> uint_ >> "]") >> -("(" >> uint_ >> ")");
-
-                variable_declarations_rule %= (string("state") | string("wire")) >> (variable_declaration_rule % ',');
-
-                module_rule %= lit("module") > identifier >> '(' >> -(parameter_rule % ',') >> ')' >> *variable_declarations_rule >> +statement_rule;
-
-                parameter_rule %= (string("inout") | string("in") | string("out")) >> variable_declaration_rule;
-
-                swap_statement_rule %= variable_rule >> "<=>" >> variable_rule;
-
-                unary_statement_rule %= (string("~") | string("++") | string("--")) >> '=' >> variable_rule;
-
-                assign_statement_rule %= variable_rule >> char_("^+-") >> lit('=') >> expression_rule;
-
-                if_statement_rule %= "if" >> expression_rule >> "then" >> +statement_rule >> "else" >> +statement_rule >> "fi" >> expression_rule;
-
-                for_statement_rule %= "for" >> -(-("$" >> identifier >> "=") >> number_rule >> "to") >> number_rule >> -("step" >> -char_('-') >> number_rule) >> "do" >> +statement_rule >> "rof";
-
-                call_statement_rule %= (string("call") | string("uncall")) >> identifier >> -("(" >> -(identifier % ",") >> ")");
-
-                skip_rule %= string("skip");
-
-                statement_rule %= iter_pos >> (swap_statement_rule | unary_statement_rule | assign_statement_rule | if_statement_rule | for_statement_rule | call_statement_rule | skip_rule);
-
-                expression_rule %= number_rule | variable_rule | binary_expression_rule | shift_expression_rule;
-
-                binary_expression_rule %= '(' >> expression_rule >> (string("+") | string("-") | string("^") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string("<=") | string(">=") | string("=") | string("!=") | string("<") | string(">")) >> expression_rule >> ')';
-
-                shift_expression_rule %= '(' >> expression_rule >> (string("<<") | string(">>")) >> number_rule >> ')';
-
-                variable_rule %= (identifier - lit("module")) >> *("[" >> expression_rule >> "]") >> -('.' >> number_rule >> -(':' >> number_rule));
-
-                number_rule %= uint_ | ('#' >> variable_rule) | ('$' >> identifier) | number_expression_rule;
-
-                number_expression_rule %= '(' >> number_rule >> (string("+") | string("-") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string(">=") | string("<=") | string(">") | string("<") | string("==") | string("!=")) >> number_rule >> ')';
-
-                program_rule.name("program");
-                variable_declaration_rule.name("variable_declaration");
-                variable_declarations_rule.name("variable_declarations");
-                module_rule.name("module");
-                parameter_rule.name("parameter");
-                swap_statement_rule.name("swap_statement");
-                unary_statement_rule.name("unary_statement");
-                assign_statement_rule.name("assign_statement");
-                if_statement_rule.name("if_statement");
-                for_statement_rule.name("for_statement");
-                call_statement_rule.name("call_statement");
-                skip_rule.name("skip");
-                statement_rule.name("statement");
-                expression_rule.name("expression");
-                binary_expression_rule.name("binary_expression");
-                //unary_expression_rule.name("unary_expression");
-                shift_expression_rule.name("shift_expression");
-                variable_rule.name("variable");
-                number_rule.name("number");
-                number_expression_rule.name("number_expression");
-                identifier.name("identifier");
-
-                using qi::fail;
-                using qi::on_error;
-
-                using namespace qi::labels;
-                using boost::phoenix::construct;
-                using boost::phoenix::val;
-            }
-
-            qi::rule<Iterator, ast_program(), qi::locals<std::string>, SpaceT>               program_rule;
-            qi::rule<Iterator, ast_variable_declaration(), qi::locals<std::string>, SpaceT>  variable_declaration_rule;
-            qi::rule<Iterator, ast_variable_declarations(), qi::locals<std::string>, SpaceT> variable_declarations_rule;
-            qi::rule<Iterator, ast_module(), qi::locals<std::string>, SpaceT>                module_rule;
-            qi::rule<Iterator, ast_parameter(), qi::locals<std::string>, SpaceT>             parameter_rule;
-            qi::rule<Iterator, ast_swap_statement(), qi::locals<std::string>, SpaceT>        swap_statement_rule;
-            qi::rule<Iterator, ast_unary_statement(), qi::locals<std::string>, SpaceT>       unary_statement_rule;
-            qi::rule<Iterator, ast_assign_statement(), qi::locals<std::string>, SpaceT>      assign_statement_rule;
-            qi::rule<Iterator, ast_if_statement(), qi::locals<std::string>, SpaceT>          if_statement_rule;
-            qi::rule<Iterator, ast_for_statement(), qi::locals<std::string>, SpaceT>         for_statement_rule;
-            qi::rule<Iterator, ast_call_statement(), qi::locals<std::string>, SpaceT>        call_statement_rule;
-            qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT>               skip_rule;
-            qi::rule<Iterator, ast_statement(), qi::locals<std::string>, SpaceT>             statement_rule;
-            qi::rule<Iterator, ast_expression(), qi::locals<std::string>, SpaceT>            expression_rule;
-            qi::rule<Iterator, ast_binary_expression(), qi::locals<std::string>, SpaceT>     binary_expression_rule;
-            //qi::rule<Iterator, ast_unary_expression(), qi::locals<std::string>, SpaceT>      unary_expression_rule;
-            qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>  shift_expression_rule;
-            qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>          variable_rule;
-            qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>            number_rule;
-            qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT> number_expression_rule;
-
-            qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT> identifier;
-        };
-
-        template<typename Iterator>
-        bool parse(ast_program& prog, Iterator first, Iterator last) {
-            syrec_parser<Iterator, syrec_skip_parser<Iterator>> parser;
-            syrec_skip_parser<Iterator>                         skip_parser;
-
-            bool r = qi::phrase_parse(first, last,
-                                      parser,
-                                      skip_parser,
-                                      prog);
-
-            if (!r || first != last) {
-                std::cerr << "ERROR AT: " << std::string(first, last) << std::endl;
-                return false;
-            }
-
-            return true;
+            multi_line_comment_rule = "/*" >> *(char_ - "*/") >> "*/";
         }
-    } // namespace applications
 
-    inline bool parse_string(applications::ast_program& prog, const std::string& program) {
-        if (!applications::parse(prog, program.begin(), program.end())) {
+        qi::rule<Iterator> base_rule;
+        qi::rule<Iterator> single_line_comment_rule;
+        qi::rule<Iterator> multi_line_comment_rule;
+    };
+
+    template<typename Iterator, typename SpaceT>
+    struct syrec_parser: qi::grammar<Iterator, ast_program(), qi::locals<std::string>, SpaceT> {
+        explicit syrec_parser():
+            syrec_parser::base_type(program_rule, "syrec") {
+            using ascii::alnum;
+            using parser::iter_pos;
+            using qi::_1;
+            using qi::_val;
+            using qi::char_;
+            using qi::eol;
+            using qi::lexeme;
+            using qi::lit;
+            using qi::string;
+            using qi::uint_;
+
+            // Helpers
+            identifier %= lexeme[+(alnum | '_')];
+
+            program_rule %= +module_rule;
+
+            variable_declaration_rule %= (identifier - lit("module")) >> *("[" >> uint_ >> "]") >> -("(" >> uint_ >> ")");
+
+            variable_declarations_rule %= (string("state") | string("wire")) >> (variable_declaration_rule % ',');
+
+            module_rule %= lit("module") > identifier >> '(' >> -(parameter_rule % ',') >> ')' >> *variable_declarations_rule >> +statement_rule;
+
+            parameter_rule %= (string("inout") | string("in") | string("out")) >> variable_declaration_rule;
+
+            swap_statement_rule %= variable_rule >> "<=>" >> variable_rule;
+
+            unary_statement_rule %= (string("~") | string("++") | string("--")) >> '=' >> variable_rule;
+
+            assign_statement_rule %= variable_rule >> char_("^+-") >> lit('=') >> expression_rule;
+
+            if_statement_rule %= "if" >> expression_rule >> "then" >> +statement_rule >> "else" >> +statement_rule >> "fi" >> expression_rule;
+
+            for_statement_rule %= "for" >> -(-("$" >> identifier >> "=") >> number_rule >> "to") >> number_rule >> -("step" >> -char_('-') >> number_rule) >> "do" >> +statement_rule >> "rof";
+
+            call_statement_rule %= (string("call") | string("uncall")) >> identifier >> -("(" >> -(identifier % ",") >> ")");
+
+            skip_rule %= string("skip");
+
+            statement_rule %= iter_pos >> (swap_statement_rule | unary_statement_rule | assign_statement_rule | if_statement_rule | for_statement_rule | call_statement_rule | skip_rule);
+
+            expression_rule %= number_rule | variable_rule | binary_expression_rule | shift_expression_rule;
+
+            binary_expression_rule %= '(' >> expression_rule >> (string("+") | string("-") | string("^") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string("<=") | string(">=") | string("=") | string("!=") | string("<") | string(">")) >> expression_rule >> ')';
+
+            shift_expression_rule %= '(' >> expression_rule >> (string("<<") | string(">>")) >> number_rule >> ')';
+
+            variable_rule %= (identifier - lit("module")) >> *("[" >> expression_rule >> "]") >> -('.' >> number_rule >> -(':' >> number_rule));
+
+            number_rule %= uint_ | ('#' >> variable_rule) | ('$' >> identifier) | number_expression_rule;
+
+            number_expression_rule %= '(' >> number_rule >> (string("+") | string("-") | string("*") | string("/") | string("%") | string("&&") | string("||") | string("&") | string("|") | string(">=") | string("<=") | string(">") | string("<") | string("==") | string("!=")) >> number_rule >> ')';
+
+            program_rule.name("program");
+            variable_declaration_rule.name("variable_declaration");
+            variable_declarations_rule.name("variable_declarations");
+            module_rule.name("module");
+            parameter_rule.name("parameter");
+            swap_statement_rule.name("swap_statement");
+            unary_statement_rule.name("unary_statement");
+            assign_statement_rule.name("assign_statement");
+            if_statement_rule.name("if_statement");
+            for_statement_rule.name("for_statement");
+            call_statement_rule.name("call_statement");
+            skip_rule.name("skip");
+            statement_rule.name("statement");
+            expression_rule.name("expression");
+            binary_expression_rule.name("binary_expression");
+            //unary_expression_rule.name("unary_expression");
+            shift_expression_rule.name("shift_expression");
+            variable_rule.name("variable");
+            number_rule.name("number");
+            number_expression_rule.name("number_expression");
+            identifier.name("identifier");
+
+            using qi::fail;
+            using qi::on_error;
+
+            using namespace qi::labels;
+            using boost::phoenix::construct;
+            using boost::phoenix::val;
+        }
+
+        qi::rule<Iterator, ast_program(), qi::locals<std::string>, SpaceT>               program_rule;
+        qi::rule<Iterator, ast_variable_declaration(), qi::locals<std::string>, SpaceT>  variable_declaration_rule;
+        qi::rule<Iterator, ast_variable_declarations(), qi::locals<std::string>, SpaceT> variable_declarations_rule;
+        qi::rule<Iterator, ast_module(), qi::locals<std::string>, SpaceT>                module_rule;
+        qi::rule<Iterator, ast_parameter(), qi::locals<std::string>, SpaceT>             parameter_rule;
+        qi::rule<Iterator, ast_swap_statement(), qi::locals<std::string>, SpaceT>        swap_statement_rule;
+        qi::rule<Iterator, ast_unary_statement(), qi::locals<std::string>, SpaceT>       unary_statement_rule;
+        qi::rule<Iterator, ast_assign_statement(), qi::locals<std::string>, SpaceT>      assign_statement_rule;
+        qi::rule<Iterator, ast_if_statement(), qi::locals<std::string>, SpaceT>          if_statement_rule;
+        qi::rule<Iterator, ast_for_statement(), qi::locals<std::string>, SpaceT>         for_statement_rule;
+        qi::rule<Iterator, ast_call_statement(), qi::locals<std::string>, SpaceT>        call_statement_rule;
+        qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT>               skip_rule;
+        qi::rule<Iterator, ast_statement(), qi::locals<std::string>, SpaceT>             statement_rule;
+        qi::rule<Iterator, ast_expression(), qi::locals<std::string>, SpaceT>            expression_rule;
+        qi::rule<Iterator, ast_binary_expression(), qi::locals<std::string>, SpaceT>     binary_expression_rule;
+        //qi::rule<Iterator, ast_unary_expression(), qi::locals<std::string>, SpaceT>      unary_expression_rule;
+        qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>  shift_expression_rule;
+        qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>          variable_rule;
+        qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>            number_rule;
+        qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT> number_expression_rule;
+
+        qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT> identifier;
+    };
+
+    template<typename Iterator>
+    bool parse(ast_program& prog, Iterator first, Iterator last) {
+        syrec_parser<Iterator, syrec_skip_parser<Iterator>> parser;
+        syrec_skip_parser<Iterator>                         skip_parser;
+
+        bool r = qi::phrase_parse(first, last,
+                                  parser,
+                                  skip_parser,
+                                  prog);
+
+        if (!r || first != last) {
+            std::cerr << "ERROR AT: " << std::string(first, last) << std::endl;
             return false;
         }
 
         return true;
     }
 
+    inline bool parse_string(ast_program& prog, const std::string& program) {
+        if (!parse(prog, program.begin(), program.end())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    class program;
 } // namespace syrec
 
 #endif /* GRAMMAR_HPP */

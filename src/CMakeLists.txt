@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/expression.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/module.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/statement.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/costs.cpp

@@ -55,12 +55,12 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
         std::cout << line;
 
     circuit               circ;
-    applications::program prog;
+    program               prog;
     read_program_settings settings;
     properties::ptr       statistics;
     std::string           error_string;
 
-    error_string = read_program(prog, file_name, settings);
+    error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));

@@ -3,7 +3,7 @@
 #include <iterator>
 #include <utility>
 
-namespace syrec::applications {
+namespace syrec {
 
     class statement::priv {
     public:

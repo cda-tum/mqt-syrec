@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-namespace syrec::applications {
+namespace syrec {
 
     class module::priv {
     public:
@@ -14,8 +14,7 @@ namespace syrec::applications {
         statement::vec statements;
     };
 
-    module::module(const std::string& name):
-        d(new priv()) {
+    module::module(const std::string& name) :d(new priv()) {
         d->name = name;
     }
 
@@ -57,4 +56,4 @@ namespace syrec::applications {
         return d->statements;
     }
 
-} // namespace syrec::applications
+} // namespace syrec

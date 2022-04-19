@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace syrec::applications {
+namespace syrec {
 
     class expression;
 
@@ -234,6 +234,6 @@ namespace syrec::applications {
         priv* const d = nullptr;
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* VARIABLE_HPP */

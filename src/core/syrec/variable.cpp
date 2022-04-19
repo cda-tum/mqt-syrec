@@ -7,7 +7,7 @@
 #include <tuple>
 #include <utility>
 
-namespace syrec::applications {
+namespace syrec {
 
     class variable::priv {
     public:

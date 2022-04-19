@@ -73,11 +73,11 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     circuit               circ;
-    applications::program prog;
+    program               prog;
     read_program_settings settings;
     std::string           error_string;
 
-    error_string = read_program(prog, file_name, settings);
+    error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
     EXPECT_TRUE(syrec_synthesis(circ, prog));

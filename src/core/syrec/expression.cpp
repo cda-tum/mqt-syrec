@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace syrec::applications {
+namespace syrec {
 
     class expression::priv {
     public:

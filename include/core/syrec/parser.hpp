@@ -18,58 +18,21 @@
 
 namespace syrec {
 
-    /**
-  * @brief SyReC Namespace
-  */
-    namespace applications {
-        class program;
-    }
+    struct parser_context {
+        explicit parser_context(const read_program_settings& settings):
+            current_line_number(0u),
+            settings(settings) {
+        }
 
-    /**
-  * @brief Settings for read_program function
-  *
-
-  */
-    struct read_program_settings {
-        /**
-    * @brief Standard constructor
-    *
-    * Initializes default values
-    *
-
-    */
-        read_program_settings();
-
-        /**
-    * @brief Default Bit-width
-    *
-    * Variables can be defined without specifying the bit-width.
-    * In this case, this default bit-width is assigned.
-    * The default value is \b 32u.
-    */
-        unsigned default_bitwidth;
+        ast_iterator                 begin;
+        unsigned                     current_line_number;
+        const read_program_settings& settings;
+        std::string                  error_message;
+        std::vector<std::string>     loop_variables;
     };
 
-    /**
-  * @brief Parser for a SyReC program
-  *
-  * This function call performs both the lexical parsing
-  * as well as the semantic analysis of the program which
-  * creates the corresponding C++ constructs for the
-  * program.
-  *
-  * @param prog Empty SyReC program
-  * @param filename File-name to parse from
-  * @param settings Settings
-  * @param error Error Message, in case the function returns false
-  *
-  * @return true if parsing was successful, otherwise false
-  *
+    bool parse_module(module& proc, const ast_module& ast_proc, const program& prog, parser_context& context);
 
-  */
-    bool read_program(applications::program& prog, const std::string& filename, const read_program_settings& settings = read_program_settings(), std::string* error = nullptr);
-
-    std::string read_program(syrec::applications::program& prog, const std::string& filename, read_program_settings& settings);
 } // namespace syrec
 
 #endif /* PARSER_HPP */

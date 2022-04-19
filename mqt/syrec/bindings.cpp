@@ -14,7 +14,6 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace syrec;
-using namespace syrec::applications;
 
 PYBIND11_MODULE(pysyrec, m) {
     m.doc() = "Python interface for the SyReC programming language for the synthesis of reversible circuits";
@@ -52,9 +51,8 @@ PYBIND11_MODULE(pysyrec, m) {
 
     py::class_<program>(m, "syrec_program")
             .def(py::init<>())
-            .def("add_module", &program::add_module);
-
-    m.def("py_read_program", py::overload_cast<syrec::applications::program&, const std::string&, read_program_settings&>(&read_program), "prog"_a, "filename"_a, "settings"_a);
+            .def("add_module", &program::add_module)
+            .def("read", &program::read, "filename"_a, "settings"_a);
 
     py::class_<read_program_settings>(m, "read_program_settings")
             .def(py::init<>())

@@ -21,7 +21,7 @@ def read_program(prog, filename, default_bitwidth=32):
     settings = read_program_settings()
     settings.default_bitwidth = default_bitwidth
 
-    error = py_read_program(prog, filename, settings)
+    error = prog.read(filename, settings)
 
     return error
 

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <memory>
 
-namespace syrec::applications {
+namespace syrec {
 
     /**
      * @brief SyReC expression

@@ -6,22 +6,6 @@
 
 namespace syrec {
 
-    using namespace applications;
-    namespace bf = boost::fusion;
-
-    struct parser_context {
-        explicit parser_context(const read_program_settings& settings):
-            current_line_number(0u),
-            settings(settings) {
-        }
-
-        ast_iterator                 begin;
-        unsigned                     current_line_number;
-        const read_program_settings& settings;
-        std::string                  error_message;
-        std::vector<std::string>     loop_variables;
-    };
-
     number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context);
 
     struct parse_number_visitor {
@@ -713,22 +697,22 @@ namespace syrec {
 
     unsigned parse_variable_type(const std::string& name) {
         if (name == "in") {
-            return applications::variable::in;
+            return variable::in;
         } else if (name == "out") {
-            return applications::variable::out;
+            return variable::out;
         } else if (name == "inout") {
-            return applications::variable::inout;
+            return variable::inout;
         } else if (name == "state") {
-            return applications::variable::state;
+            return variable::state;
         } else if (name == "wire") {
-            return applications::variable::wire;
+            return variable::wire;
         }
 
         assert(false);
         return 0u;
     }
 
-    bool parse_module(applications::module& proc, const ast_module& ast_proc, const applications::program& prog, parser_context& context) {
+    bool parse_module(module& proc, const ast_module& ast_proc, const program& prog, parser_context& context) {
         std::set<std::string> variable_names;
 
         for (const ast_parameter& ast_param: bf::at_c<1>(ast_proc)) {
@@ -758,7 +742,7 @@ namespace syrec {
         return true;
     }
 
-    bool read_program_from_string(applications::program& prog, const std::string& content, const read_program_settings& settings, std::string* error) {
+    bool program::read_program_from_string(const std::string& content, const read_program_settings& settings, std::string* error) {
         ast_program ast_prog;
         if (!parse_string(ast_prog, content)) {
             *error = "PARSE_STRING_FAILED";
@@ -771,42 +755,15 @@ namespace syrec {
         // Modules
         for (const ast_module& ast_proc: ast_prog) {
             module::ptr proc(new module(bf::at_c<0>(ast_proc)));
-            if (!parse_module(*proc, ast_proc, prog, context)) {
+            if (!parse_module(*proc, ast_proc, *this, context)) {
                 if (error != nullptr) {
                     *error = "In line " + std::to_string(context.current_line_number) + ": " + context.error_message;
                 }
                 return false;
             }
-            prog.add_module(proc);
+            add_module(proc);
         }
 
         return true;
-    }
-
-    read_program_settings::read_program_settings():
-        default_bitwidth(32u) {
-    }
-
-    bool read_program(applications::program& prog, const std::string& filename, const read_program_settings& settings, std::string* error) {
-        std::string content, line;
-
-        std::ifstream is;
-        is.open(filename.c_str(), std::ios::in);
-
-        while (getline(is, line)) {
-            content += line + '\n';
-        }
-
-        return read_program_from_string(prog, content, settings, error);
-    }
-
-    std::string read_program(syrec::applications::program& prog, const std::string& filename, read_program_settings& settings) {
-        std::string error_message;
-        settings.default_bitwidth = 32;
-        if (!(syrec::read_program(prog, filename, settings, &error_message))) {
-            return error_message;
-        } else {
-            return {};
-        }
     }
 } // namespace syrec

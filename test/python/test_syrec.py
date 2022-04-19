@@ -18,8 +18,7 @@ def test_parser():
     for file_name in data_synthesis:
         prog = syrec.syrec_program()
         read_settings = syrec.read_program_settings()
-        read_settings.default_bitwidth = 32
-        error = syrec.py_read_program(prog, test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(test_circuit_dir + file_name + string_src, read_settings)
 
         assert error == ""
 
@@ -29,8 +28,7 @@ def test_synthesis():
         circ = syrec.circuit()
         prog = syrec.syrec_program()
         read_settings = syrec.read_program_settings()
-        read_settings.default_bitwidth = 32
-        error = syrec.py_read_program(prog, test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(test_circuit_dir + file_name + string_src, read_settings)
 
         assert error == ""
         assert syrec.py_syrec_synthesis(circ, prog)
@@ -45,8 +43,7 @@ def test_simulation():
         circ = syrec.circuit()
         prog = syrec.syrec_program()
         read_settings = syrec.read_program_settings()
-        read_settings.default_bitwidth = 32
-        error = syrec.py_read_program(prog, test_circuit_dir + file_name + string_src, read_settings)
+        error = prog.read(prog, test_circuit_dir + file_name + string_src, read_settings)
 
         assert error == ""
         assert syrec.py_syrec_synthesis(circ, prog)
