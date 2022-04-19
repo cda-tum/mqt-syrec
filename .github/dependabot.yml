@@ -17,15 +17,6 @@ updates:
       time:     "06:00"
     assignees:
       - "burgholzer"
-      
-  - package-ecosystem: "pip"
-    directory:         "/test/python"
-    schedule:
-      interval: "weekly"
-      day:      "friday"
-      time:     "21:30"
-    assignees:
-      - "burgholzer"
 
   - package-ecosystem: "pip"
     directory:         "/"
