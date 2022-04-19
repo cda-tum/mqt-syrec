@@ -17,7 +17,7 @@
 
 namespace syrec {
 
-    class expression;
+    struct expression;
 
     /**
      * @brief SyReC variable data type
@@ -25,15 +25,10 @@ namespace syrec {
      * This class represents variable data type. A variable
      * can either be a parameter passed to a module, or a
      * local variable.
-     *
-
      */
     struct variable {
         /**
        * @brief Type of variable
-       *
-
-
        */
         enum types {
             /**
@@ -64,17 +59,11 @@ namespace syrec {
 
         /**
        * @brief Smart pointer
-       *
-
-
        */
         typedef std::shared_ptr<variable> ptr;
 
         /**
        * @brief Vector of smart pointers
-       *
-
-
        */
         typedef std::vector<ptr> vec;
 
@@ -94,15 +83,10 @@ namespace syrec {
      *
      * This class represents the access of a variable inside
      * a statement or an expression.
-     *
-
      */
     struct variable_access {
         /**
        * @brief Smart pointer
-       *
-
-
        */
         typedef std::shared_ptr<variable_access> ptr;
 
@@ -112,9 +96,6 @@ namespace syrec {
        * @brief Sets the variable of this access
        *
        * @param var Variable
-       *
-
-
        */
         void set_var(variable::ptr var);
 
@@ -122,9 +103,6 @@ namespace syrec {
        * @brief Returns the variable of this access
        *
        * @return Variable
-       *
-
-
        */
         [[nodiscard]] variable::ptr get_var() const;
 
@@ -137,9 +115,6 @@ namespace syrec {
        * In other cases, this message throws an assertion.
        *
        * @return Bit-width of the range, if possible to calculate
-       *
-
-
        */
         [[nodiscard]] unsigned bitwidth() const;
 
