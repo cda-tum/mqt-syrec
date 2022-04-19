@@ -597,13 +597,13 @@ namespace syrec {
                         return nullptr;
                     }
 
-                    for_stat->set_loop_variable(loop_variable);
+                    for_stat->loop_variable = loop_variable;
 
                     context.loop_variables.emplace_back(loop_variable);
                 }
             }
 
-            for_stat->set_range(std::make_pair(from, to));
+            for_stat->range = std::make_pair(from, to);
 
             // step
             /*if (ast_for_stat.step) {
@@ -644,26 +644,26 @@ namespace syrec {
             const std::vector<std::string>& parameters = bf::at_c<2>(ast_call_stat);
 
             // wrong number of parameters
-            if (parameters.size() != other_proc->parameters().size()) {
-                context.error_message = "Wrong number of arguments in (un)call of " + other_proc->name() + ". Expected " + std::to_string(other_proc->parameters().size()) + ", got " + std::to_string(parameters.size());
+            if (parameters.size() != other_proc->parameters.size()) {
+                context.error_message = "Wrong number of arguments in (un)call of " + other_proc->name + ". Expected " + std::to_string(other_proc->parameters.size()) + ", got " + std::to_string(parameters.size());
                 return nullptr;
             }
 
             // unknown variable name in parameters
             for (const std::string& parameter: parameters) {
                 if (!proc.find_parameter_or_variable(parameter)) {
-                    context.error_message = "Unknown variable " + parameter + " in (un)call of " + other_proc->name();
+                    context.error_message = "Unknown variable " + parameter + " in (un)call of " + other_proc->name;
                     return nullptr;
                 }
             }
 
             // check whether bit-width fits
             for (unsigned i = 0; i < parameters.size(); ++i) {
-                variable::ptr vOther    = other_proc->parameters().at(i);
+                variable::ptr vOther    = other_proc->parameters.at(i);
                 variable::ptr parameter = proc.find_parameter_or_variable(parameters.at(i)); // must exist (see above)
 
                 if (vOther->bitwidth != parameter->bitwidth) {
-                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name() + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
+                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
                     return nullptr;
                 }
             }
@@ -688,7 +688,7 @@ namespace syrec {
     statement::ptr parse_statement(const ast_statement& ast_stat, const program& prog, const module& proc, parser_context& context) {
         if (statement* stat = boost::apply_visitor(statement_visitor(prog, proc, context), bf::at_c<1>(ast_stat))) {
             context.current_line_number = std::count(context.begin, bf::at_c<0>(ast_stat), '\n') + 1u;
-            stat->set_line_number(context.current_line_number);
+            stat->line_number           = context.current_line_number;
             return statement::ptr(stat);
         } else {
             return {};

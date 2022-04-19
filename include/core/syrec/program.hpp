@@ -28,8 +28,6 @@ namespace syrec {
     public:
         program() = default;
 
-        ~program() = default;
-
         void add_module(const module::ptr& module) {
             modules_vec.emplace_back(module);
         }
@@ -40,7 +38,7 @@ namespace syrec {
 
         [[nodiscard]] module::ptr find_module(const std::string& name) const {
             for (const module::ptr& p: modules_vec) {
-                if (p->name() == name) {
+                if (p->name == name) {
                     return p;
                 }
             }

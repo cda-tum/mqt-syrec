@@ -6,7 +6,6 @@
 #include "core/utils/timer.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/range/adaptors.hpp>
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -22,7 +21,7 @@ namespace syrec {
         // Operator needs this signature to work
         void operator()(gate& g) const {
             if (!_stmts.empty()) {
-                _circ.annotate(g, "lno", std::to_string(_stmts.top()->line_number()));
+                _circ.annotate(g, "lno", std::to_string(_stmts.top()->line_number));
             }
         }
 
@@ -53,7 +52,7 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_module(const module::ptr& main) {
-        for (const auto& stat: main->statements()) {
+        for (const auto& stat: main->statements) {
             if (!full_statement(stat)) {
                 if (!on_statement(stat)) {
                     return false;
@@ -77,19 +76,19 @@ namespace syrec {
     bool standard_syrec_synthesizer::full_statement(const assign_statement& statement) {
         std::vector<unsigned> d, dd, stat_lhs, comp, ddd;
         std::vector<unsigned> lines;
-        get_variables(statement.lhs(), stat_lhs);
+        get_variables(statement.lhs, stat_lhs);
 
-        op_rhs_lhs_expression(statement.rhs(), d);
+        op_rhs_lhs_expression(statement.rhs, d);
 
         if (op_vec.empty()) {
             return false;
         }
-        flow(statement.rhs(), ddd);
+        flow(statement.rhs, ddd);
 
         /// Only when the rhs input signals are repeated (since the results are stored in the rhs)
 
         if (check_repeats()) {
-            flow(statement.rhs(), dd);
+            flow(statement.rhs, dd);
 
             if (exp_op_vector.size() == 1) {
                 if (exp_op_vector.at(0) == 1 or exp_op_vector.at(0) == 2) {
@@ -101,7 +100,7 @@ namespace syrec {
                     exp_rhs_vector.clear();
                     op_vec.clear();
                 } else {
-                    if (statement.op() == 1) {
+                    if (statement.op == 1) {
                         expression_single_op(1, exp_lhs_vector.at(0), stat_lhs);
                         expression_single_op(1, exp_rhs_vector.at(0), stat_lhs);
                         exp_op_vector.clear();
@@ -110,7 +109,7 @@ namespace syrec {
                         exp_rhs_vector.clear();
                         op_vec.clear();
                     } else {
-                        expression_single_op(statement.op(), exp_lhs_vector.at(0), stat_lhs);
+                        expression_single_op(statement.op, exp_lhs_vector.at(0), stat_lhs);
                         expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
                         exp_op_vector.clear();
                         assign_op_vector.clear();
@@ -125,11 +124,11 @@ namespace syrec {
                     if (exp_op_vector.at(0) == 1 or exp_op_vector.at(0) == 2) {
                         /// cancel out the signals
                     } else if (exp_op_vector.at(0) != 1 or exp_op_vector.at(0) != 2) {
-                        expression_single_op(statement.op(), exp_lhs_vector.at(0), stat_lhs);
+                        expression_single_op(statement.op, exp_lhs_vector.at(0), stat_lhs);
                         expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
                     }
                 } else {
-                    solver(stat_lhs, statement.op(), exp_lhs_vector.at(0), exp_op_vector.at(0), exp_rhs_vector.at(0));
+                    solver(stat_lhs, statement.op, exp_lhs_vector.at(0), exp_op_vector.at(0), exp_rhs_vector.at(0));
                 }
 
                 unsigned              j = 0;
@@ -151,7 +150,7 @@ namespace syrec {
 
                 /// If reversible assignment is "-", the assignment operations must negated appropriately
 
-                if (statement.op() == 1) {
+                if (statement.op == 1) {
                     for (unsigned int& i: stat_assign_op) {
                         if (i == 0) {
                             i = 1;
@@ -385,8 +384,8 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_statement(const swap_statement& statement) {
         std::vector<unsigned> lhs, rhs;
 
-        get_variables(statement.lhs(), lhs);
-        get_variables(statement.rhs(), rhs);
+        get_variables(statement.lhs, lhs);
+        get_variables(statement.rhs, rhs);
 
         assert(lhs.size() == rhs.size());
 
@@ -398,9 +397,9 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_statement(const unary_statement& statement) {
         // load variable
         std::vector<unsigned> var;
-        get_variables(statement.var(), var);
+        get_variables(statement.var, var);
 
-        switch (statement.op()) {
+        switch (statement.op) {
             case unary_statement::invert:
                 bitwise_negation(var);
                 break;
@@ -420,17 +419,17 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_statement(const assign_statement& statement) {
         std::vector<unsigned> lhs, rhs, d;
 
-        get_variables(statement.lhs(), lhs);
+        get_variables(statement.lhs, lhs);
 
-        op_rhs_lhs_expression(statement.rhs(), d);
-        on_expression(statement.rhs(), rhs, lhs, statement.op());
+        op_rhs_lhs_expression(statement.rhs, d);
+        on_expression(statement.rhs, rhs, lhs, statement.op);
         op_vec.clear();
 
         bool status = false;
 
-        switch (statement.op()) {
+        switch (statement.op) {
             case assign_statement::add: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op()) {
+                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
                     status = increase_new(lhs, exp_lhss.top());
                     status = increase_new(lhs, exp_rhss.top());
                     exp_opp.pop();
@@ -449,7 +448,7 @@ namespace syrec {
             } break;
 
             case assign_statement::subtract: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op()) {
+                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
                     status = decrease_new(lhs, exp_lhss.top());
                     status = increase_new(lhs, exp_rhss.top());
                     exp_opp.pop();
@@ -468,7 +467,7 @@ namespace syrec {
             } break;
 
             case assign_statement::exor: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op()) {
+                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
                     status = bitwise_cnot(lhs, exp_lhss.top());
                     status = bitwise_cnot(lhs, exp_rhss.top());
                     exp_opp.pop();
@@ -497,7 +496,7 @@ namespace syrec {
         // calculate expression
         std::vector<unsigned> expression_result, lhs_stat;
         unsigned              op = 0u;
-        on_expression(statement.condition(), expression_result, lhs_stat, op);
+        on_expression(statement.condition, expression_result, lhs_stat, op);
         assert(expression_result.size() == 1u);
 
         // add new helper line
@@ -506,7 +505,7 @@ namespace syrec {
         // activate this line
         add_active_control(helper_line);
 
-        for (const auto& stat: statement.then_statements()) {
+        for (const auto& stat: statement.then_statements) {
             if (!full_statement(stat)) {
                 if (!on_statement(stat)) {
                     return false;
@@ -519,7 +518,7 @@ namespace syrec {
         (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(helper_line);
         add_active_control(helper_line);
 
-        for (const auto& stat: statement.else_statements()) {
+        for (const auto& stat: statement.else_statements) {
             if (!full_statement(stat)) {
                 if (!on_statement(stat)) {
                     return false;
@@ -535,12 +534,12 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_statement(const for_statement& statement) {
-        const auto [nfrom, nto] = statement.range();
+        const auto [nfrom, nto] = statement.range;
 
         const unsigned     from          = nfrom ? nfrom->evaluate(loop_map) : 1u; // default value is 1u
         const unsigned     to            = nto->evaluate(loop_map);
-        const unsigned     step          = statement.step() ? statement.step()->evaluate(loop_map) : 1u; // default step is +1
-        const std::string& loop_variable = statement.loop_variable();
+        const unsigned     step          = statement.step ? statement.step->evaluate(loop_map) : 1u; // default step is +1
+        const std::string& loop_variable = statement.loop_variable;
 
         if (from <= to) {
             for (unsigned i = from; i <= to; i += step) {
@@ -550,7 +549,7 @@ namespace syrec {
                     loop_map[loop_variable] = i;
                 }
 
-                for (const auto& stat: statement.statements()) {
+                for (const auto& stat: statement.statements) {
                     if (!full_statement(stat)) {
                         if (!on_statement(stat)) {
                             return false;
@@ -568,7 +567,7 @@ namespace syrec {
                     loop_map[loop_variable] = i;
                 }
 
-                for (const auto& stat: statement.statements()) {
+                for (const auto& stat: statement.statements) {
                     if (!full_statement(stat)) {
                         if (!on_statement(stat)) {
                             return false;
@@ -587,18 +586,18 @@ namespace syrec {
 
     bool standard_syrec_synthesizer::on_statement(const call_statement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
-        for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
-            const std::string& parameter        = statement.parameters().at(i);
-            const auto&        module_parameter = statement.target()->parameters().at(i);
+        for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
+            const std::string& parameter        = statement.parameters.at(i);
+            const auto&        module_parameter = statement.target->parameters.at(i);
 
             module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
         }
 
         // 2. Create new lines for the module's variables
-        add_variables(_circ, statement.target()->variables());
+        add_variables(_circ, statement.target->variables);
 
-        modules.push(statement.target());
-        for (const auto& stat: statement.target()->statements()) {
+        modules.push(statement.target);
+        for (const auto& stat: statement.target->statements) {
             if (!full_statement(stat)) {
                 if (!on_statement(stat)) {
                     return false;
@@ -612,24 +611,24 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_statement(const uncall_statement& statement) {
-        using boost::adaptors::reversed;
-        using boost::adaptors::transformed;
-
         // 1. Adjust the references module's parameters to the call arguments
-        for (unsigned i = 0u; i < statement.parameters().size(); ++i) {
-            const std::string& parameter        = statement.parameters().at(i);
-            const auto&        module_parameter = statement.target()->parameters().at(i);
+        for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
+            const std::string& parameter        = statement.parameters.at(i);
+            const auto&        module_parameter = statement.target->parameters.at(i);
 
             module_parameter->set_reference(modules.top()->find_parameter_or_variable(parameter));
         }
 
         // 2. Create new lines for the module's variables
-        add_variables(_circ, statement.target()->variables());
+        add_variables(_circ, statement.target->variables);
 
-        modules.push(statement.target());
-        for (const auto& stat: statement.target()->statements() | reversed | transformed(syrec::reverse_statements())) {
-            if (!full_statement(stat)) {
-                if (!on_statement(stat)) {
+        modules.push(statement.target);
+
+        const auto statements = statement.target->statements;
+        for (auto it = statements.rbegin(); it != statements.rend(); ++it) {
+            const auto reverse_statement = (*it)->reverse();
+            if (!full_statement(reverse_statement)) {
+                if (!on_statement(reverse_statement)) {
                     return false;
                 }
             }
@@ -1390,8 +1389,8 @@ namespace syrec {
         statement_synthesizer.set_main_module(main);
 
         // create lines for global variables
-        statement_synthesizer.add_variables(circ, main->parameters());
-        statement_synthesizer.add_variables(circ, main->variables());
+        statement_synthesizer.add_variables(circ, main->parameters);
+        statement_synthesizer.add_variables(circ, main->variables);
 
         // Run-time measuring
         timer<properties_timer> t;
