@@ -2,9 +2,6 @@
  * @file properties.hpp
  *
  * @brief Property Map Implementation for Algorithms
- *
-
-
  */
 
 #ifndef PROPERTIES_HPP
@@ -25,21 +22,15 @@ namespace syrec {
    * The key to access data is always of type \p std::string and the value
    * can be of any type. To be type-safe, the getter corresponding get
    * functions have to be provided with a type.
-   *
-
    */
     struct properties {
         /**
      * @brief Internal storage type used with the internal property map
-     *
-
      */
         typedef std::map<std::string, std::any> storage_type;
 
         /**
      * @brief Value type of the property map, i.e. \p std::string
-     *
-
      */
         typedef storage_type::mapped_type value_type;
 
@@ -47,8 +38,6 @@ namespace syrec {
      *
      * There are pre-defined getter methods, which can be called with a
      * type identifier for explicit casting.
-     *
-
      */
         typedef storage_type::key_type key_type;
 
@@ -62,8 +51,6 @@ namespace syrec {
      *
      * @sa get
      * @sa set_error_message
-     *
-
      */
         typedef std::shared_ptr<properties> ptr;
 
@@ -71,8 +58,6 @@ namespace syrec {
      * @brief Standard constructor
      *
      * Creates the property map on base of the storage map
-     *
-
      */
         properties() = default;
 
@@ -87,8 +72,6 @@ namespace syrec {
      *
      * @param k Key to access the property map. Must exist.
      * @return The value associated with key \p k casted to its original type \p T.
-     *
-
      */
         template<typename T>
         T get(const std::string& k) const {
@@ -105,8 +88,6 @@ namespace syrec {
      * @param default_value If \p k does not exist, this value is returned.
      * @return The value associated with key \p k casted to its original type \p T. If the key \p k does not exist,
      *         \p default_value is returned.
-     *
-
      */
         template<typename T>
         T get(const key_type& k, const T& default_value) const {
@@ -136,7 +117,6 @@ namespace syrec {
      *
      * @param k Key of the property
      * @param value The new value of \p k. If \p k already existed, the type of \p value must not change.
-     *
      */
 
         template<typename T>
@@ -162,8 +142,6 @@ namespace syrec {
    *                      is empty or the key does not exist.
    *
    * @return The value addressed by \p k or the \p default_value.
-   *
-
    */
     template<typename T>
     T get(const properties::ptr& settings, const properties::key_type& k, const T& default_value) {

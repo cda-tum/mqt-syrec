@@ -17,8 +17,6 @@ namespace syrec {
   * Costs is an unsigned long long, that is usually
   * at least a 64-bit integer, but depending on the
   * platform.
-  *
-
   */
     typedef unsigned long long cost_t;
 

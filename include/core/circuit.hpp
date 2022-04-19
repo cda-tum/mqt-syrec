@@ -143,7 +143,6 @@ namespace syrec {
          * @brief Begin iterator pointing to gates
          *
          * @return Begin iterator
-         *
          */
         [[nodiscard]] auto begin() const {
             return gates.begin();
@@ -162,7 +161,6 @@ namespace syrec {
          * @brief End iterator pointing to gates
          *
          * @return End iterator
-         *
          */
         [[nodiscard]] auto end() const {
             return gates.end();

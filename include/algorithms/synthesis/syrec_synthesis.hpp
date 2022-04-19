@@ -19,29 +19,27 @@
 #include <memory>
 #include <stack>
 
-namespace syrec {
-    namespace internal {
-        struct node_properties {
-            node_properties() = default;
+namespace syrec::internal {
+    struct node_properties {
+        node_properties() = default;
 
-            unsigned                 control{};
-            gate::line_container     controls;
-            std::shared_ptr<circuit> circ;
-        };
+        unsigned                 control{};
+        gate::line_container     controls;
+        std::shared_ptr<circuit> circ;
+    };
 
-        typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
-                                      boost::property<boost::vertex_name_t, node_properties>>
-                cct;
+    typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS,
+                                  boost::property<boost::vertex_name_t, node_properties>>
+            cct;
 
-        typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
+    typedef boost::graph_traits<cct>::vertex_descriptor cct_node;
 
-        struct cct_manager {
-            cct      tree;
-            cct_node current;
-            cct_node root;
-        };
-    } // namespace internal
-} // namespace syrec
+    struct cct_manager {
+        cct      tree;
+        cct_node current;
+        cct_node root;
+    };
+} // namespace syrec::internal
 
 namespace syrec {
     using namespace internal;

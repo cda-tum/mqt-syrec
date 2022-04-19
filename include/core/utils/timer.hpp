@@ -21,16 +21,12 @@ namespace syrec {
   * This functor writes the \em runtime field of a property map
   * after the time was measured and is thus similar to the
   * reference_timer.
-  *
-
   */
     struct properties_timer {
         /**
     * @brief Default constructor
     *
     * Available for delayed starting of the timer.
-    *
-
     */
         properties_timer() = default;
 
@@ -38,8 +34,6 @@ namespace syrec {
     * @brief Default constructor
     *
     * @param _statistics A smart pointer to a statistics properties object. Can be empty.
-    *
-
     */
         explicit properties_timer(properties::ptr _statistics):
             statistics(std::move(_statistics)) {}
@@ -48,8 +42,6 @@ namespace syrec {
     * @brief Saves the run-time to the \b runtime field of the statistics variable
     *
     * @param r The run-time
-    *
-
     */
         void operator()(double r) const {
             if (statistics) {
@@ -63,7 +55,6 @@ namespace syrec {
 
     /**
   * @brief A generic timer class
-  *
   */
 
     template<typename Outputter>
@@ -74,8 +65,6 @@ namespace syrec {
     *
     * When delayed starting should be done (using start(const Outputter&)) this
     * constructor has to be used.
-    *
-
     */
         timer():
             started(false) {
@@ -93,7 +82,6 @@ namespace syrec {
 
         /**
     * @brief function which stops measuring the time
-    *
     */
 
         void stop() {

@@ -16,8 +16,6 @@
 namespace syrec {
     /**
    * @brief Represents a gate in a circuit
-   *
-
    */
     struct gate {
         /**
