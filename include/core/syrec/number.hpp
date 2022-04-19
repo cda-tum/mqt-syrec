@@ -54,9 +54,7 @@ namespace syrec {
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const {
             return std::visit(overloaded{
                                       [](unsigned arg) { return arg; },
-                                      [&](const std::string& value) {auto it = map.find(value);
-                        assert(it != map.end());
-                        return it->second; }},
+                                      [&](const std::string& value) { return map.find(value)->second; }},
                               number_var);
         }
 

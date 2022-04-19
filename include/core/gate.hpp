@@ -99,27 +99,9 @@ namespace syrec {
                         costs = 253ull;
                     }
                     break;
-                case 8u:
-                    if (e >= 6u) {
-                        costs = 74ull;
-                    } else if (e >= 1u) {
-                        costs = 128ull;
-                    } else {
-                        costs = 509ull;
-                    }
-                    break;
-                case 9u:
-                    if (e >= 7u) {
-                        costs = 86ull;
-                    } else if (e >= 1u) {
-                        costs = 152ull;
-                    } else {
-                        costs = 1021ull;
-                    }
-                    break;
                 default:
                     if (e >= c - 2u) {
-                        costs = 12ull * c - 33ull;
+                        costs = 12ull * c - 22ull;
                     } else if (e >= 1u) {
                         costs = 24ull * c - 87ull;
                     } else {

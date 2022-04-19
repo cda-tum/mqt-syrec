@@ -118,7 +118,6 @@ namespace syrec {
      * @param k Key of the property
      * @param value The new value of \p k. If \p k already existed, the type of \p value must not change.
      */
-
         template<typename T>
         void set(const std::string& k, const T& value) {
             map[k] = value;
