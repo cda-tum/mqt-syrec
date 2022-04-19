@@ -443,8 +443,8 @@ namespace syrec {
             if (!rhs) return nullptr;
 
             if (auto* lhs_no = dynamic_cast<numeric_expression*>(lhs.get())) {
-                if (lhs_no->value()->is_constant() && rhs->is_constant()) {
-                    unsigned value    = lhs_no->value()->evaluate(number::loop_variable_mapping());
+                if (lhs_no->value->is_constant() && rhs->is_constant()) {
+                    unsigned value    = lhs_no->value->evaluate(number::loop_variable_mapping());
                     unsigned shft_amt = rhs->evaluate(number::loop_variable_mapping());
                     unsigned result   = 0;
 

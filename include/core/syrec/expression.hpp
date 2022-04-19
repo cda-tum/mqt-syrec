@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <memory>
+#include <utility>
 
 namespace syrec {
 
@@ -19,16 +20,10 @@ namespace syrec {
      * This abstract class represents the base of an SyReC expression.
      * Eeach expression is derived from this class and has to
      * implement the bitwidth() and the print() methods.
-     *
-
      */
-    class expression {
-    public:
+    struct expression {
         /**
        * @brief Shared Pointer interface to the class
-       *
-
-
        */
         typedef std::shared_ptr<expression> ptr;
 
@@ -36,19 +31,13 @@ namespace syrec {
 
         /**
        * @brief Standard constructor
-       *
-
-
        */
-        expression();
+        expression() = default;
 
         /**
-       * @brief Standard deconstructor
-       *
-
-
+       * @brief Standard destructor
        */
-        virtual ~expression();
+        virtual ~expression() = default;
 
         /**
        * @brief Bit-width of the expression
@@ -56,29 +45,16 @@ namespace syrec {
        * This method returns the bit-width of an expression.
        *
        * @return Bit-width of the expression
-       *
-
-
        */
         [[nodiscard]] virtual unsigned bitwidth() const = 0;
-
-    private:
-        class priv;
-        priv* const d = nullptr;
     };
 
     /**
      * @brief Numeric Expression
-     *
-
      */
-    class numeric_expression: public expression {
-    public:
+    struct numeric_expression: public expression {
         /**
        * @brief Operation to perform in case of binary numeric expression
-       *
-
-
        */
         enum {
             /**
@@ -130,43 +106,16 @@ namespace syrec {
        *
        * @param value Value
        * @param bitwidth Bit-width of the value
-       *
-
-
        */
-        numeric_expression(const number::ptr& value, unsigned bitwidth);
+        numeric_expression(number::ptr value, unsigned bitwidth):
+            value(std::move(value)), bwidth(bitwidth) {}
 
-        /**
-       * @brief Standard Deconstructor
-       *
+        [[nodiscard]] unsigned bitwidth() const override {
+            return bwidth;
+        }
 
-
-       */
-        ~numeric_expression() override;
-
-        /**
-       * @brief Returns the value of the expression
-       *
-       * @return Value of the expression
-       *
-
-
-       */
-        [[nodiscard]] const number::ptr& value() const;
-
-        /**
-       * @brief Returns the bit-width of the expression
-       *
-       * @return Bit-width
-       *
-
-
-       */
-        [[nodiscard]] unsigned bitwidth() const override;
-
-    private:
-        class priv;
-        priv* const d = nullptr;
+        number::ptr value = nullptr;
+        unsigned    bwidth{};
     };
 
     /**
@@ -174,54 +123,21 @@ namespace syrec {
      *
      * This class represents a variable expression and
      * capsulates a variable access pointer var().
-     *
-
      */
-    class variable_expression: public expression {
-    public:
+    struct variable_expression: public expression {
         /**
        * @brief Constructor with variable
        * 
        * @param var Variable access
-       * 
-
-
        */
-        explicit variable_expression(variable_access::ptr var);
+        explicit variable_expression(variable_access::ptr var):
+            var(std::move(var)) {}
 
-        /**
-       * @brief Deconstructor
-       *
+        [[nodiscard]] unsigned bitwidth() const override {
+            return var->bitwidth();
+        }
 
-
-       */
-        ~variable_expression() override;
-
-        /**
-       * @brief Returns the variable of the expression
-       * 
-       * @return Variable access
-       *
-
-
-       */
-        [[nodiscard]] variable_access::ptr var() const;
-
-        /**
-       * @brief Returns the bit-width of the variable access
-       * 
-       * This method calls variable_access::bitwidth() internally.
-       *
-       * @return Bit-width of the variable access
-       *
-
-
-       */
-        [[nodiscard]] unsigned bitwidth() const override;
-
-    private:
-        class priv;
-        priv* const d = nullptr;
+        variable_access::ptr var = nullptr;
     };
 
     /**
@@ -229,16 +145,10 @@ namespace syrec {
      *
      * This class represents a binary expression between two sub
      * expressions lhs() and rhs() by an operation op(). 
-     *
-
      */
-    class binary_expression: public expression {
-    public:
+    struct binary_expression: public expression {
         /**
        * @brief Operation to perform
-       *
-
-
        */
         enum {
             /**
@@ -339,51 +249,12 @@ namespace syrec {
        * @param lhs Expression on left hand side
        * @param op Operation to be performed
        * @param rhs Expression on right hand side
-       * 
-
-
        */
         binary_expression(expression::ptr lhs,
                           unsigned        op,
-                          expression::ptr rhs);
-
-        /**
-       * @brief Deconstructor
-       *
-
-
-       */
-        ~binary_expression() override;
-
-        /**
-       * @brief Returns the left hand side of the expression
-       * 
-       * @return Expression
-       *
-
-
-       */
-        [[nodiscard]] expression::ptr lhs() const;
-
-        /**
-       * @brief Returns the right hand side of the expression
-       * 
-       * @return Expression
-       *
-
-
-       */
-        [[nodiscard]] expression::ptr rhs() const;
-
-        /**
-       * @brief Returns the operation to be performed
-       *
-       * @return Operation
-       * 
-
-
-       */
-        [[nodiscard]] unsigned op() const;
+                          expression::ptr rhs):
+            lhs(std::move(lhs)),
+            op(op), rhs(std::move(rhs)) {}
 
         /**
        * @brief Bit-width of the expression
@@ -395,15 +266,28 @@ namespace syrec {
        * however, the returned bit-width is always 1.
        * 
        * @return Bit-width of the expression
-       *
-
-
        */
-        [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override {
+            switch (op) {
+                case logical_and:
+                case logical_or:
+                case less_than:
+                case greater_than:
+                case equals:
+                case not_equals:
+                case less_equals:
+                case greater_equals:
+                    return 1;
 
-    private:
-        class priv;
-        priv* const d = nullptr;
+                default:
+                    // lhs and rhs are assumed to have the same bit-width
+                    return lhs->bitwidth();
+            }
+        }
+
+        expression::ptr lhs = nullptr;
+        unsigned        op{};
+        expression::ptr rhs = nullptr;
     };
 
     /**
@@ -411,16 +295,10 @@ namespace syrec {
      *
      * This class represents a binary expression with a
      * sub-expression lhs() and a number rhs() by a shift operation op(). 
-     *
-
      */
-    class shift_expression: public expression {
-    public:
+    struct shift_expression: public expression {
         /**
        * @brief Shft Operation
-       * 
-
-
        */
         enum {
             /**
@@ -444,51 +322,12 @@ namespace syrec {
        * @param lhs Expression to be shifted 
        * @param op Shift operation
        * @param rhs Number of bits to shift
-       * 
-
-
        */
-        shift_expression(expression::ptr    lhs,
-                         unsigned           op,
-                         const number::ptr& rhs);
-
-        /**
-       * @brief Deconstructor
-       * 
-
-
-       */
-        ~shift_expression() override;
-
-        /**
-       * @brief Returns the left-hand side expression
-       * 
-       * @return Expression
-       *
-
-
-       */
-        [[nodiscard]] expression::ptr lhs() const;
-
-        /**
-       * @brief Returns the number of bits to shift
-       * 
-       * @return Number
-       *
-
-
-       */
-        [[nodiscard]] const number::ptr& rhs() const;
-
-        /**
-       * @brief Returns the shift operation
-       * 
-       * @return Shift operation
-       *
-
-
-       */
-        [[nodiscard]] unsigned op() const;
+        shift_expression(expression::ptr lhs,
+                         unsigned        op,
+                         number::ptr     rhs):
+            lhs(std::move(lhs)),
+            op(op), rhs(std::move(rhs)) {}
 
         /**
        * @brief Returns the bit-width of the expression
@@ -497,17 +336,16 @@ namespace syrec {
        * of the lhs sub-expression.
        * 
        * @return Bit-width of the expression
-       *
-
-
        */
-        [[nodiscard]] unsigned bitwidth() const override;
+        [[nodiscard]] unsigned bitwidth() const override {
+            return lhs->bitwidth();
+        }
 
-    private:
-        class priv;
-        priv* const d = nullptr;
+        expression::ptr lhs = nullptr;
+        unsigned        op{};
+        number::ptr     rhs = nullptr;
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* EXPRESSION_HPP */

@@ -236,22 +236,22 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::flow(const variable_expression& expression, std::vector<unsigned>& v) {
-        get_variables(expression.var(), v);
+        get_variables(expression.var, v);
         return true;
     }
 
     /// generating LHS and RHS (can be whole expressions as well)
     bool standard_syrec_synthesizer::flow(const binary_expression& expression, std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs, rhs, comp;
-        assign_op_vector.push_back(expression.op());
+        assign_op_vector.push_back(expression.op);
 
-        if (!flow(expression.lhs(), lhs) || !flow(expression.rhs(), rhs)) {
+        if (!flow(expression.lhs, lhs) || !flow(expression.rhs, rhs)) {
             return false;
         }
 
         exp_lhs_vector.push_back(lhs);
         exp_rhs_vector.push_back(rhs);
-        exp_op_vector.push_back(expression.op());
+        exp_op_vector.push_back(expression.op);
         return true;
     }
 
@@ -338,19 +338,19 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v) {
-        get_variables(expression.var(), v);
+        get_variables(expression.var, v);
         return true;
     }
 
     bool standard_syrec_synthesizer::op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v) {
         std::vector<unsigned> lhs, rhs;
 
-        if (!op_rhs_lhs_expression(expression.lhs(), lhs) || !op_rhs_lhs_expression(expression.rhs(), rhs)) {
+        if (!op_rhs_lhs_expression(expression.lhs, lhs) || !op_rhs_lhs_expression(expression.rhs, rhs)) {
             return false;
         }
 
         v = rhs;
-        op_vec.push_back(expression.op());
+        op_vec.push_back(expression.op);
         return true;
     }
 
@@ -659,12 +659,12 @@ namespace syrec {
     }
 
     bool standard_syrec_synthesizer::on_expression(const numeric_expression& expression, std::vector<unsigned>& lines) {
-        get_constant_lines(expression.bitwidth(), expression.value()->evaluate(loop_map), lines);
+        get_constant_lines(expression.bitwidth(), expression.value->evaluate(loop_map), lines);
         return true;
     }
 
     bool standard_syrec_synthesizer::on_expression(const variable_expression& expression, std::vector<unsigned>& lines) {
-        get_variables(expression.var(), lines);
+        get_variables(expression.var, lines);
         return true;
     }
 
@@ -673,13 +673,13 @@ namespace syrec {
     bool standard_syrec_synthesizer::on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
         std::vector<unsigned> lhs, rhs;
 
-        if (!on_expression(expression.lhs(), lhs, lhs_stat, op) || !on_expression(expression.rhs(), rhs, lhs_stat, op)) {
+        if (!on_expression(expression.lhs, lhs, lhs_stat, op) || !on_expression(expression.rhs, rhs, lhs_stat, op)) {
             return false;
         }
 
         exp_lhss.push(lhs);
         exp_rhss.push(rhs);
-        exp_opp.push(expression.op());
+        exp_opp.push(expression.op);
 
         if (exp_opp.size() == op_vec.size()) {
             if (exp_opp.top() == op) {
@@ -687,7 +687,7 @@ namespace syrec {
             }
         }
 
-        switch (expression.op()) {
+        switch (expression.op) {
             case binary_expression::add: // +
                 increase_new(rhs, lhs);
                 lines = rhs;
@@ -792,13 +792,13 @@ namespace syrec {
 
     bool standard_syrec_synthesizer::on_expression(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
         std::vector<unsigned> lhs;
-        if (!on_expression(expression.lhs(), lhs, lhs_stat, op)) {
+        if (!on_expression(expression.lhs, lhs, lhs_stat, op)) {
             return false;
         }
 
-        unsigned rhs = expression.rhs()->evaluate(loop_map);
+        unsigned rhs = expression.rhs->evaluate(loop_map);
 
-        switch (expression.op()) {
+        switch (expression.op) {
             case shift_expression::left: // <<
                 get_constant_lines(expression.bitwidth(), 0u, lines);
                 left_shift(lines, lhs, rhs);
@@ -1269,7 +1269,7 @@ namespace syrec {
             unsigned n = var->get_var()->dimensions.size(); // dimensions
             if ((unsigned)std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<numeric_expression*>(p.get()); }) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
-                    offset += dynamic_cast<numeric_expression*>(var->indexes.at(i).get())->value()->evaluate(loop_map) *
+                    offset += dynamic_cast<numeric_expression*>(var->indexes.at(i).get())->value->evaluate(loop_map) *
                               std::accumulate(var->get_var()->dimensions.begin() + i + 1u, var->get_var()->dimensions.end(), 1u, std::multiplies<>()) *
                               var->get_var()->bitwidth;
                 }
