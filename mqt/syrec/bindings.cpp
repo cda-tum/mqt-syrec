@@ -56,7 +56,7 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>())
             .def_readwrite("default_bitwidth", &read_program_settings::default_bitwidth);
 
-    py::class_<program>(m, "syrec_program")
+    py::class_<program>(m, "program")
             .def(py::init<>())
             .def("add_module", &program::add_module)
             .def("read", &program::read, "filename"_a, "settings"_a = read_program_settings{});
@@ -84,7 +84,7 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_readwrite("targets", &gate::targets)
             .def_readwrite("type", &gate::type);
 
-    m.def("syrec_synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
+    m.def("synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
     m.def("simple_simulation", &simple_simulation, "output"_a, "circ"_a, "input"_a, "statistics"_a = properties::ptr());
 
 #ifdef VERSION_INFO

@@ -16,7 +16,7 @@ string_src = ".src"
 
 def test_parser():
     for file_name in data_synthesis:
-        prog = syrec.syrec_program()
+        prog = syrec.program()
         error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
@@ -25,11 +25,11 @@ def test_parser():
 def test_synthesis():
     for file_name in data_synthesis:
         circ = syrec.circuit()
-        prog = syrec.syrec_program()
+        prog = syrec.program()
         error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
-        assert syrec.py_syrec_synthesis(circ, prog)
+        assert syrec.synthesis(circ, prog)
         assert data_synthesis[file_name]["num_gates"] == circ.num_gates
         assert data_synthesis[file_name]["lines"] == circ.lines
         assert data_synthesis[file_name]["quantum_costs"] == circ.quantum_cost()
@@ -39,11 +39,11 @@ def test_synthesis():
 def test_simulation():
     for file_name in data_simulation:
         circ = syrec.circuit()
-        prog = syrec.syrec_program()
+        prog = syrec.program()
         error = prog.read(test_circuit_dir + file_name + string_src)
 
         assert error == ""
-        assert syrec.py_syrec_synthesis(circ, prog)
+        assert syrec.synthesis(circ, prog)
 
         my_inp_bitset = syrec.bitset(circ.lines)
         my_out_bitset = syrec.bitset(circ.lines)
@@ -52,5 +52,5 @@ def test_simulation():
         for set_index in set_list:
             my_inp_bitset.set(set_index, True)
 
-        syrec.py_simple_simulation(my_out_bitset, circ, my_inp_bitset)
+        syrec.simple_simulation(my_out_bitset, circ, my_inp_bitset)
         assert data_simulation[file_name]["sim_out"] == str(my_out_bitset)

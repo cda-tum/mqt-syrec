@@ -198,7 +198,7 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        prog = syrec_program()
+        prog = program()
 
         error_string = prog.read("/tmp/out.src")
 
@@ -214,7 +214,7 @@ class SyReCEditor(QWidget):
 
         circ = circuit()
 
-        syrec_synthesis(circ, prog)
+        synthesis(circ, prog)
 
         print("Number Of Gates         : ", circ.num_gates)
         print("Number Of Lines         : ", circ.lines)
@@ -233,7 +233,7 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        prog = syrec_program()
+        prog = program()
 
         error_string = prog.read("/tmp/out.src")
         if error_string == "PARSE_STRING_FAILED":
@@ -247,7 +247,7 @@ class SyReCEditor(QWidget):
             return
 
         circ = circuit()
-        syrec_synthesis(circ, prog)
+        synthesis(circ, prog)
 
         gates = circ.num_gates
         lines = circ.lines
@@ -275,7 +275,7 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        prog = syrec_program()
+        prog = program()
 
         error_string = prog.read("/tmp/out.src")
         if error_string == "PARSE_STRING_FAILED":
@@ -289,7 +289,7 @@ class SyReCEditor(QWidget):
 
         circ = circuit()
 
-        syrec_synthesis(circ, prog)
+        synthesis(circ, prog)
 
         bit_mask = 0
         bit_pos = 0
