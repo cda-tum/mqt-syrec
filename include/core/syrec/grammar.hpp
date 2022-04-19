@@ -46,7 +46,7 @@ namespace syrec::parser {
 
 namespace boost::spirit::qi {
     template<typename Modifiers>
-    struct [[maybe_unused]] make_primitive<syrec::parser::tag::iter_pos, Modifiers> {
+    struct make_primitive<syrec::parser::tag::iter_pos, Modifiers> {
         typedef syrec::parser::iter_pos_parser result_type;
 
         result_type operator()(unused_type, unused_type) const {
@@ -279,7 +279,6 @@ namespace syrec {
         qi::rule<Iterator, ast_statement(), qi::locals<std::string>, SpaceT>             statement_rule;
         qi::rule<Iterator, ast_expression(), qi::locals<std::string>, SpaceT>            expression_rule;
         qi::rule<Iterator, ast_binary_expression(), qi::locals<std::string>, SpaceT>     binary_expression_rule;
-        //qi::rule<Iterator, ast_unary_expression(), qi::locals<std::string>, SpaceT>      unary_expression_rule;
         qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>  shift_expression_rule;
         qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>          variable_rule;
         qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>            number_rule;

@@ -6,7 +6,6 @@
 
 namespace syrec {
 
-    number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context);
 
     struct parse_number_visitor {
         explicit parse_number_visitor(const module& proc, parser_context& context):
@@ -180,8 +179,6 @@ namespace syrec {
     number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context) {
         return std::visit(parse_number_visitor(proc, context), ast_num);
     }
-
-    expression::ptr parse_expression(const ast_expression& ast_exp, const module& proc, unsigned bitwidth, parser_context& context);
 
     variable_access::ptr parse_variable_access(const ast_variable& ast_var, const module& proc, parser_context& context) {
         variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
@@ -476,12 +473,9 @@ namespace syrec {
         parser_context& context;
     };
 
-    // explain: bitwidth is the bitwidth to set in case ast_exp is a numeric expression
     expression::ptr parse_expression(const ast_expression& ast_exp, const module& proc, unsigned bitwidth, parser_context& context) {
         return expression::ptr(boost::apply_visitor(expression_visitor(proc, bitwidth, context), ast_exp));
     }
-
-    statement::ptr parse_statement(const ast_statement& ast_stat, const program& prog, const module& proc, parser_context& context);
 
     struct statement_visitor {
         statement_visitor(const program& prog, const module& proc, parser_context& context):
