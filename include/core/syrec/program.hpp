@@ -69,6 +69,6 @@ namespace syrec {
         bool read_program_from_string(const std::string& content, const read_program_settings& settings, std::string* error);
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* PROGRAM_HPP */

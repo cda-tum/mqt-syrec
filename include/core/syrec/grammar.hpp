@@ -279,10 +279,10 @@ namespace syrec {
         qi::rule<Iterator, ast_statement(), qi::locals<std::string>, SpaceT>             statement_rule;
         qi::rule<Iterator, ast_expression(), qi::locals<std::string>, SpaceT>            expression_rule;
         qi::rule<Iterator, ast_binary_expression(), qi::locals<std::string>, SpaceT>     binary_expression_rule;
-        qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>  shift_expression_rule;
-        qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>          variable_rule;
-        qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>            number_rule;
-        qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT> number_expression_rule;
+        qi::rule<Iterator, ast_shift_expression(), qi::locals<std::string>, SpaceT>      shift_expression_rule;
+        qi::rule<Iterator, ast_variable(), qi::locals<std::string>, SpaceT>              variable_rule;
+        qi::rule<Iterator, ast_number(), qi::locals<std::string>, SpaceT>                number_rule;
+        qi::rule<Iterator, ast_number_expression(), qi::locals<std::string>, SpaceT>     number_expression_rule;
 
         qi::rule<Iterator, std::string(), qi::locals<std::string>, SpaceT> identifier;
     };

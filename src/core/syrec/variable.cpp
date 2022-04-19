@@ -53,4 +53,4 @@ namespace syrec {
         }
     }
 
-} // namespace syrec::applications
+} // namespace syrec

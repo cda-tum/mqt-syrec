@@ -64,6 +64,6 @@ namespace syrec {
         std::variant<unsigned, std::string> number_var;
     };
 
-} // namespace syrec::applications
+} // namespace syrec
 
 #endif /* NUMBER_HPP */

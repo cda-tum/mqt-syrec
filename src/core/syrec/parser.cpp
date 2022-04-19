@@ -6,7 +6,6 @@
 
 namespace syrec {
 
-
     struct parse_number_visitor {
         explicit parse_number_visitor(const module& proc, parser_context& context):
             proc(proc),
