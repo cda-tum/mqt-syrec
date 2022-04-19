@@ -11,7 +11,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 
 [tool.cibuildwheel]
-dependency-versions = "latest"
 build = "cp3*"
 archs = "auto64"
 skip = "*-musllinux_*"
