@@ -35,4 +35,4 @@ before-all = [
 environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", DEPLOY = "ON" }
 
 [tool.cibuildwheel.windows]
-test-command = "cd {project}\\test\\python && python -m pytest ."
+test-command = "from mqt import syrec"
