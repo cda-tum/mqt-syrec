@@ -7,8 +7,7 @@
 
 # MQT SyReC - A Programming Language for the Synthesis of Reversible Circuits
 
-A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) and
-the [Institute for Integrated Circuits](https://iic.jku.at/eda/) at the [Johannes Kepler University Linz](https://jku.at).
+A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
 SyReC is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
 
 If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/syrec/issues).
@@ -19,7 +18,7 @@ SyReC is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, ma
 
 - In order to make the library as easy to use as possible (without compilation), we provide pre-built wheels for most common platforms (64-bit Linux, MacOS, Windows). These can be installed using
     ```bash
-    (venv) $ pip install syrec
+    (venv) $ pip install mqt.syrec
     ```
 - Once installed, start the SyReC editor GUI by running:
     ```bash
