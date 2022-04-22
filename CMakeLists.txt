@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 
 project(syrec
         LANGUAGES CXX
-        VERSION 0.1.0
-        DESCRIPTION "SyReC - A Programming Language for Synthesis of Reversible Circuits"
+        DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits"
         )
 
 # enable organization of targets into folders

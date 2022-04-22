@@ -22,12 +22,15 @@ macro(package_add_test TESTNAME)
 	target_link_libraries(${TESTNAME} PUBLIC MQT::${PROJECT_NAME} gmock gtest_main)
 	# discover tests
 	gtest_discover_tests(${TESTNAME} WORKING_DIRECTORY ${PROJECT_DIR} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}")
-	set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
+	set_target_properties(${TESTNAME} PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+	enable_lto(${TESTNAME})
 endmacro()
 
-# TODO: add any source files containing tests here
 package_add_test(${PROJECT_NAME}_test
-                 test_dummy.cpp)
+		 unittests/test_parser.cpp
+		 unittests/test_synthesis.cpp
+		 unittests/test_simulation.cpp
+		 )
 
 add_custom_command(TARGET ${PROJECT_NAME}_test
                    POST_BUILD

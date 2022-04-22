@@ -1,34 +1,54 @@
-[![CI](https://github.com/cda-tum/syrec/actions/workflows/ci.yml/badge.svg)](https://github.com/cda-tum/syrec/actions/workflows/ci.yml)
-[![Codecov branch](https://img.shields.io/codecov/c/github/cda-tum/syrec/master?label=codecov&logo=codecov&style=plastic)](https://codecov.io/gh/cda-tum/syrec)
+[![PyPI](https://img.shields.io/pypi/v/mqt.syrec?logo=pypi&style=flat-square)](https://pypi.org/project/mqt.syrec/)
+![OS](https://img.shields.io/badge/os-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![CI](https://img.shields.io/github/workflow/status/cda-tum/syrec/CI?style=flat-square&logo=github&label=c%2B%2B)](https://github.com/cda-tum/syrec/actions/workflows/ci.yml)
+[![Bindings](https://img.shields.io/github/workflow/status/cda-tum/syrec/Deploy%20to%20PyPI?style=flat-square&logo=github&label=python)](https://github.com/cda-tum/syrec/actions/workflows/deploy.yml)
+[![codecov](https://img.shields.io/codecov/c/github/cda-tum/syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/syrec)
 
-# SyReC - A Programming Language for the Synthesis of Reversible Circuits
+# MQT SyReC - A Programming Language for the Synthesis of Reversible Circuits
 
-The tool is based on methods proposed in [[1]](https://iic.jku.at/files/eda/2019_iccad_hdl_based_reversible_circuit_synthesis_without_additional_lines.pdf).
+A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) and
+the [Institute for Integrated Circuits](https://iic.jku.at/eda/) at the [Johannes Kepler University Linz](https://jku.at).
+SyReC is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
 
-[[1]](https://iic.jku.at/files/eda/2019_iccad_hdl_based_reversible_circuit_synthesis_without_additional_lines.pdf) Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. **"Towards HDL-based Synthesis of Reversible Circuits with No
-Additional Lines"**. In International Conference on Computer Aided Design (ICCAD), 2019
+If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/syrec/issues).
 
-TODO: Description of what the tool is capable of and references to further relevant publications.
+## Getting Started
 
-## Usage
-
-SyReC is mainly developed as a C++ library with an easy-to-use Python interface.
+SyReC is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
 
 - In order to make the library as easy to use as possible (without compilation), we provide pre-built wheels for most common platforms (64-bit Linux, MacOS, Windows). These can be installed using
     ```bash
-    pip install syrec
+    (venv) $ pip install syrec
     ```
-  However, in order to get the best performance out of SyReC, it is recommended to build it locally from the source distribution (see [system requirements](#system-requirements)) via
+- Once installed, start the SyReC editor GUI by running:
     ```bash
-    pip install syrec --no-binary syrec
+    (venv) $ syrec-editor
     ```
-  This enables platform specific compiler optimizations that cannot be enabled on portable wheels.
-- Once installed, start using it in Python:
-    ```python
-    from mqt.syrec import * 
-    
-    <...>
-    ```
+
+## Reference
+
+SyReC has been developed based on methods proposed in the following papers:
+
+<details open>
+<summary>[1] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
+
+```bibtex
+@inproceedings{wille2019towardsHDLsynthesis,
+    author = {Wille, Robert and Haghparast, Majid and Adarsh, Smaran and M, Tanmay},
+    title = {Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines},
+    booktitle = {International Conference on Computer Aided Design},
+    year = {2019}
+}
+```
+
+</details>
+
+If you use our tool for your research, we would appreciate if you cited the appropriate publication.
+
+---
+
+## Documentation for Developers
 
 ### System requirements
 
@@ -84,21 +104,3 @@ a [virtual environment](https://docs.python.org/3/library/venv.html) set up and 
 If you change parts of the C++ code, you have to run this command again to make the changes visible in Python.
 
 In order for your IDE to pick up the bindings code, you might have to set the `-DBINDINGS=ON` CMake configuration option.
-
-## Reference
-
-If you use our tool for your research, we will be thankful if you refer to it by citing the appropriate publication:
-
-<details open>
-<summary>[1] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
-
-```bibtex
-@inproceedings{wille2019towardsHDLsynthesis,
-    author = {Wille, Robert and Haghparast, Majid and Adarsh, Smaran and M, Tanmay},
-    title = {Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines},
-    booktitle = {International Conference on Computer Aided Design},
-    year = {2019}
-}
-```
-
-</details>

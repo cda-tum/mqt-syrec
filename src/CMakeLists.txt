@@ -1,8 +1,26 @@
-# TODO: add any header and source files here
 add_library(${PROJECT_NAME}
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/Dummy.hpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/Dummy.cpp
-            )
+            ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
+
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
+
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
+
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/expression.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/grammar.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/module.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/number.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/parser.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/program.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/statement.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/variable.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp)
+
 # set include directories
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)
 
