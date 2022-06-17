@@ -419,7 +419,6 @@ int main() {
     QMDD_array.push_back(zero_node);
     QMDD_array.push_back(one_node);
 
-
     //int root_index = buildQMDD(string_vector, zero); //QMDD for CNOT TT.
 
     // int root_index = buildQMDD(dd_combination, zero);   //QMDD for the input/output combination specified above.
