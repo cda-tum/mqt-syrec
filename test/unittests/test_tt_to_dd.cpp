@@ -1,120 +1,58 @@
-#include "core/truthTable/truth_table.hpp"
-#include "dd/FunctionalityConstruction.hpp"
+#include "core/truthTable/tt_to_dd.hpp"
 
 #include "gtest/gtest.h"
+#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
 
-using namespace dd::literals;
-using namespace syrec;
+using json = nlohmann::json;
 
-class TruthTableDD: public testing::TestWithParam<std::string> {
+class truthTable_to_dd_test: public testing::TestWithParam<std::string> {
 protected:
-    dd::QubitCount                 nqubits = 3U;
-    TruthTable                     tt{};
-    std::unique_ptr<dd::Package<>> dd;
+    std::string test_circuits_dir = "./circuits/";
 
-    TruthTable::Cube c00{};
-    TruthTable::Cube c01{};
-    TruthTable::Cube c10{};
-    TruthTable::Cube c11{};
-
-    TruthTable::Cube c000{};
-    TruthTable::Cube c001{};
-    TruthTable::Cube c010{};
-    TruthTable::Cube c011{};
-    TruthTable::Cube c100{};
-    TruthTable::Cube c101{};
-    TruthTable::Cube c110{};
-    TruthTable::Cube c111{};
+    int                           expected_node_size  = 0;
+    int                           expected_qubit_size = 0;
+    double                        expected_hit_ratio  = 0;
+    syrec::truth_table::io_vector io_comb;
 
     void SetUp() override {
-        dd = std::make_unique<dd::Package<>>(nqubits);
+        std::string   tt_param = GetParam();
+        std::ifstream i(test_circuits_dir + "truth_table.json");
+        json          j = json::parse(i);
 
-        c00 = TruthTable::Cube::fromInteger(0b00U, 2U);
-        c01 = TruthTable::Cube::fromInteger(0b01U, 2U);
-        c10 = TruthTable::Cube::fromInteger(0b10U, 2U);
-        c11 = TruthTable::Cube::fromInteger(0b11U, 2U);
-
-        c000 = TruthTable::Cube::fromInteger(0b000U, 3U);
-        c001 = TruthTable::Cube::fromInteger(0b001U, 3U);
-        c010 = TruthTable::Cube::fromInteger(0b010U, 3U);
-        c011 = TruthTable::Cube::fromInteger(0b011U, 3U);
-        c100 = TruthTable::Cube::fromInteger(0b100U, 3U);
-        c101 = TruthTable::Cube::fromInteger(0b101U, 3U);
-        c110 = TruthTable::Cube::fromInteger(0b110U, 3U);
-        c111 = TruthTable::Cube::fromInteger(0b111U, 3U);
+        io_comb             = j[tt_param]["io"];
+        expected_node_size  = j[tt_param]["node_size"];
+        expected_qubit_size = j[tt_param]["qubit_size"];
+        expected_hit_ratio  = j[tt_param]["hit_ratio"];
     }
 };
 
-TEST_F(TruthTableDD, Ident2Bit) {
-    // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c01);
-    tt.insert(c10, c10);
-    tt.insert(c11, c11);
+INSTANTIATE_TEST_SUITE_P(truthTable_to_dd_test, truthTable_to_dd_test,
+                         testing::Values(
+                                 "Id_2_bit",
+                                 "Id_3_bit",
+                                 "CNOT_2_bit",
+                                 "Custom_tt"),
+                         [](const testing::TestParamInfo<truthTable_to_dd_test::ParamType>& info) {
+                             auto s = info.param;
+                             std::replace( s.begin(), s.end(), '-', '_');
+                             return s; });
 
-    EXPECT_EQ(tt.nInputs(), 2U);
-    EXPECT_EQ(tt.nOutputs(), 2U);
+TEST_P(truthTable_to_dd_test, Generic_tt_to_dd) {
+    syrec::truth_table test_tt;
 
-    const auto ttDD = tt.buildDD(dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
+    test_tt.set_iocombination(io_comb);
 
-    EXPECT_EQ(ttDD, dd->makeIdent(2U));
-}
+    int input_size = io_comb[0].size() / 2;
 
-TEST_F(TruthTableDD, CNOT) {
-    // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c01);
-    tt.insert(c10, c11);
-    tt.insert(c11, c10);
+    std::unique_ptr<dd::Package<>> dd1 = std::make_unique<dd::Package<>>(input_size);
 
-    EXPECT_EQ(tt.nInputs(), 2U);
-    EXPECT_EQ(tt.nOutputs(), 2U);
+    auto check = syrec::buildDD(test_tt, dd1);
 
-    const auto ttDD = tt.buildDD(dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
+    EXPECT_TRUE(check.p != nullptr);
 
-    auto qc = qc::QuantumComputation(2U);
-    qc.x(0, 1_pc); // CNOT with target q0 and control q1
-    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
-}
-
-TEST_F(TruthTableDD, SWAP) {
-    // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c10);
-    tt.insert(c10, c01);
-    tt.insert(c11, c11);
-
-    EXPECT_EQ(tt.nInputs(), 2U);
-    EXPECT_EQ(tt.nOutputs(), 2U);
-
-    const auto ttDD = tt.buildDD(dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    auto qc = qc::QuantumComputation(2U);
-    qc.swap(0, 1);
-    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
-}
-
-TEST_F(TruthTableDD, Toffoli) {
-    // create identity truth table
-    tt.insert(c000, c000);
-    tt.insert(c001, c001);
-    tt.insert(c010, c010);
-    tt.insert(c011, c011);
-    tt.insert(c100, c100);
-    tt.insert(c101, c101);
-    tt.insert(c110, c111);
-    tt.insert(c111, c110);
-
-    EXPECT_EQ(tt.nInputs(), 3U);
-    EXPECT_EQ(tt.nOutputs(), 3U);
-
-    const auto ttDD = tt.buildDD(dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    auto qc = qc::QuantumComputation(3U);
-    qc.x(0, {1_pc, 2_pc}); // Toffoli with target q0 and controls q1 and q2
-    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
+    EXPECT_EQ(expected_node_size, static_cast<int>(dd1->qubits()));
+    EXPECT_EQ(expected_qubit_size, static_cast<int>(dd1->mUniqueTable.getNodeCount()));
+    EXPECT_EQ(expected_qubit_size, static_cast<int>(dd1->mUniqueTable.hitRatio()));
 }
