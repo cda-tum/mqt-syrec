@@ -13,7 +13,8 @@ protected:
 
     int                           expected_node_size  = 0;
     int                           expected_qubit_size = 0;
-    double                        expected_hit_ratio  = 0;
+    int                           expected_hits       = 0;
+    int                           expected_looks      = 0;
     syrec::truth_table::io_vector io_comb;
 
     void SetUp() override {
@@ -24,7 +25,8 @@ protected:
         io_comb             = j[tt_param]["io"];
         expected_node_size  = j[tt_param]["node_size"];
         expected_qubit_size = j[tt_param]["qubit_size"];
-        expected_hit_ratio  = j[tt_param]["hit_ratio"];
+        expected_hits       = j[tt_param]["hits"];
+        expected_looks      = j[tt_param]["looks"];
     }
 };
 
@@ -54,5 +56,5 @@ TEST_P(truthTable_to_dd_test, Generic_tt_to_dd) {
 
     EXPECT_EQ(expected_qubit_size, static_cast<int>(dd1->qubits()));
     EXPECT_EQ(expected_node_size, static_cast<int>(dd1->mUniqueTable.getNodeCount()));
-    //EXPECT_EQ(expected_hit_ratio, static_cast<double>(dd1->mUniqueTable.hitRatio()));
+    EXPECT_EQ(expected_hits, static_cast<int>((static_cast<double>(dd1->mUniqueTable.hitRatio())) * static_cast<double>(expected_looks)));
 }
