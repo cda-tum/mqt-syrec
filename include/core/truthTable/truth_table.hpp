@@ -14,7 +14,7 @@
 
 namespace syrec {
 
-    struct MinHeapNode {
+    /*struct MinHeapNode {
         std::string data;
 
         int freq;
@@ -37,14 +37,23 @@ namespace syrec {
             return (l->freq > r->freq);
         }
     };
-
+*/
     class truth_table {
     public:
         typedef std::string io_type;
 
         typedef std::vector<io_type> io_vector;
 
-        unsigned num_inputs() const {
+        void set_iocombination(io_vector& s) {
+            _iocombination.clear();
+            _iocombination = s;
+        }
+
+        io_vector get_iocombination() {
+            return _iocombination;
+        }
+
+        /* unsigned num_inputs() const {
             if (_input.size()) {
                 return _input[0].size();
             } else {
@@ -65,10 +74,7 @@ namespace syrec {
             _output.push_back(output);
         }
 
-        void set_iocombination(io_vector& s) {
-            _iocombination.clear();
-            _iocombination = s;
-        }
+
 
         void hufCodes(struct MinHeapNode* root, std::string str, std::map<std::string, std::string>& check_map) {
             if (!root)
@@ -147,18 +153,18 @@ namespace syrec {
 
                 _iocombination.push_back(io);
             }
+
         }
 
-        io_vector get_iocombination() {
-            return _iocombination;
-        }
+        */
 
     private:
-        io_vector _input;
+        /*io_vector _input;
 
         io_vector _output;
 
         std::map<io_type, io_type> _enc;
+        */
 
         io_vector _iocombination;
     };
