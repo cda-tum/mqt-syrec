@@ -2,207 +2,251 @@
 
 namespace syrec {
 
-    auto TruthTable::Cube::completeCubes() const -> Vector {
-        Vector result{};
+    std::vector<truthTable::cube_type> in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result) {
+        auto first = c.begin();
 
-        // iterate over the values of the cube
-        for (std::size_t pos = 0U; pos < size(); ++pos) {
-            // skip any value that is not a don't care
-            if (cube[pos].has_value()) {
-                continue;
+        auto last = c.end();
+
+        truthTable::cube_type cube(first, last);
+
+        std::vector<unsigned> dcPositions;
+
+        unsigned pos = 0;
+
+        while (first != last) {
+            if (!((*first).has_value())) // if DC
+            {
+                std::cout << "dontcare" << std::endl;
+                dcPositions.emplace_back(pos);
             }
-            // recursively compute all the complete cubes for the zero case
-            Cube zero(cube);
-            zero.at(pos) = false;
 
-            auto completeZero = zero.completeCubes();
-            // move the computed cubes to the result vector
-            result.insert(result.end(),
-                          std::make_move_iterator(completeZero.begin()),
-                          std::make_move_iterator(completeZero.end()));
+            ++pos;
 
-            // recursively compute all the complete cubes for the one case
-
-            Cube one(cube);
-            one.at(pos) = true;
-
-            auto completeOne = one.completeCubes();
-            // move the computed cubes to the result vector
-            result.insert(result.end(),
-                          std::make_move_iterator(completeOne.begin()),
-                          std::make_move_iterator(completeOne.end()));
+            ++first;
         }
-        // handle the case where the cube was already complete
-        if (result.empty()) {
+
+        for (unsigned i = 0; i < (1u << dcPositions.size()); ++i) {
+            for (unsigned j = 0; j < dcPositions.size(); ++j) {
+                unsigned localBit = i & (1u << (dcPositions.size() - j - 1)) ? 1 : 0;
+
+                cube.at(dcPositions.at(j)) = localBit;
+            }
+
             result.emplace_back(cube);
         }
+
         return result;
     }
 
-    auto TruthTable::extend() -> void {
-        // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
-        assert(cubeMap.empty() || (nInputs() <= std::log2(cubeMap.max_size()) && nInputs() <= 63U));
+    truthTable::cube_type number_to_cube(unsigned number, unsigned bw) {
+        truthTable::cube_type c;
 
-        CubeMap newCubeMap{};
+        for (unsigned i = 0; i < bw; ++i) {
+            c.push_back((number & (1u << (bw - 1 - i))) ? true : false);
+        }
 
-        for (auto const& [input, output]: cubeMap) {
-            // ensure that all outputs are complete
-            assert(std::none_of(output.cbegin(), output.cend(), [](auto const& v) { return !v.has_value(); }));
+        return c;
+    }
 
-            // compute the complete cubes for the input
-            auto completeInputs = input.completeCubes();
-            // move all the complete cubes to the new cube map
-            for (auto& completeInput: completeInputs) {
-                newCubeMap.try_emplace(std::move(completeInput), output);
+    void extend_truth_table(truthTable& tt) {
+        std::map<std::vector<truthTable::cube_type>, truthTable::cube_type> newCubes;
+
+        for (auto& it: tt.io_cube()) {
+            std::vector<truthTable::cube_type> inCube;
+
+            in_cube_to_full_cubes(it.first, inCube);
+
+            truthTable::cube_type output(it.second.begin(), it.second.end());
+
+            newCubes.insert(std::make_pair(inCube, output));
+        }
+
+        tt.clear();
+
+        for (auto& it: newCubes) {
+            for (auto& itCube: it.first) {
+                truthTable::cube_type newInEntry = itCube;
+
+                tt.add_entry(newInEntry, it.second);
             }
         }
-        // swap the new cube map with the old one
-        cubeMap = std::move(newCubeMap);
 
-        // construct output cube
-        const auto output = Cube(nOutputs(), false);
+        truthTable::cube_type outCube(tt.num_outputs(), false);
 
-        std::uint64_t pos = 0U;
-        for (const auto& [input, _]: cubeMap) {
-            // fill in all the missing inputs
-            const auto number = input.toInteger();
-            for (std::uint64_t i = pos; i < number; ++i) {
-                cubeMap[Cube::fromInteger(i, nInputs())] = output;
+        unsigned currentPos = 0;
+
+        truthTable::cube_vector ioVec = tt.io_cube();
+
+        for (auto it = ioVec.begin();; ++it) {
+            unsigned pos = 0;
+
+            unsigned i = tt.num_inputs();
+
+            if (it == ioVec.end()) {
+                pos = 1u << tt.num_inputs();
+            } else {
+                for (auto& inBit: it->first) {
+                    pos |= (*inBit) << --i;
+                }
             }
-            pos = number + 1U;
-        }
-        // fill in the remaining missing inputs (if any)
-        const std::uint64_t max = 1ULL << nInputs();
-        for (std::uint64_t i = pos; i < max; ++i) {
-            cubeMap[Cube::fromInteger(i, nInputs())] = output;
+
+            for (i = currentPos; i < pos; ++i) {
+                truthTable::cube_type inputCube = number_to_cube(i, tt.num_inputs());
+
+                tt.add_entry(inputCube, outCube);
+            }
+
+            currentPos = pos;
+
+            if (it == ioVec.end()) {
+                break;
+            }
         }
     }
 
-    auto TruthTable::encodeHuffman() -> void {
-        std::map<Cube, std::size_t> outputFreq;
-        for (const auto& [input, output]: cubeMap) {
-            outputFreq[output]++;
-        }
+    truthTable::cube_type append_zero(truthTable::cube_type enc) {
+        enc.push_back(false);
 
-        // if the truth table function is already reversible, no encoding is necessary
-        if (outputFreq.size() == cubeMap.size()) {
+        return enc;
+    }
+
+    truthTable::cube_type insert_zero(truthTable::cube_type& inNew) {
+        inNew.insert(inNew.begin(), false);
+
+        return inNew;
+    }
+
+    truthTable::cube_type append_one(truthTable::cube_type enc) {
+        enc.push_back(true);
+
+        return enc;
+    }
+
+    void hufCodes(struct syrec::MinHeapNode* root, truthTable::cube_type enc, truthTable::cube_vector& encInOut) {
+        if (!root)
             return;
+
+        if (root->data.size() != 0) {
+            encInOut.insert({root->data, enc});
         }
 
-        // create a priority queue for building the Huffman tree
-        auto comp = [](const std::shared_ptr<MinHeapNode>& a, const std::shared_ptr<MinHeapNode>& b) {
-            return *a > *b;
-        };
-        std::priority_queue<std::shared_ptr<MinHeapNode>,
-                            std::vector<std::shared_ptr<MinHeapNode>>,
-                            decltype(comp)>
-                minHeap(comp);
+        hufCodes(root->left, append_zero(enc), encInOut);
 
-        // initialize the leaves of the Huffman tree from the output frequencies
-        for (const auto& [output, freq]: outputFreq) {
-            const auto requiredGarbage = static_cast<std::size_t>(std::ceil(std::log2(freq)));
-            minHeap.emplace(std::make_shared<MinHeapNode>(output, requiredGarbage));
+        hufCodes(root->right, append_one(enc), encInOut);
+    }
+
+    void HuffmanCodes(truthTable& tt) {
+        std::map<truthTable::cube_type, int> outputFreq;
+
+        truthTable::cube_vector encInOut;
+
+        truthTable::cube_vector inOutCube = tt.io_cube();
+
+        std::vector<truthTable::cube_type> outCube;
+
+        for (auto& i: tt.io_cube()) {
+            outCube.push_back(i.second);
         }
 
-        // combine the nodes with the smallest weights until there is only one node left
-        while (minHeap.size() > 1U) {
-            // pop the two nodes with the smallest weights
-            const auto left = minHeap.top();
-            minHeap.pop();
-            const auto right = minHeap.top();
-            minHeap.pop();
-            // compute appropriate frequency to cover both nodes
-            const auto freq = std::max(left->freq, right->freq) + 1U;
-            // create new parent node
-            auto top   = std::make_shared<MinHeapNode>(Cube{}, freq);
-            top->left  = left;
-            top->right = right;
-            // add node to queue
-            minHeap.emplace(std::move(top));
+        for (auto& elem: outCube) {
+            auto result = outputFreq.insert(std::pair<truthTable::cube_type, int>(elem, 1));
+            if (result.second == false)
+                result.first->second++;
         }
 
-        const auto requiredGarbage = minHeap.top()->freq;
-        // determine encoding from Huffman tree
-        CubeMap encoding{};
-        minHeap.top()->traverse({}, encoding);
-
-        // resize all outputs to the correct size (by adding don't care values)
-        for (auto& [input, output]: encoding) {
-            output.resize(requiredGarbage);
+        for (auto& elem: outputFreq) {
+            outputFreq[elem.first] = ceil(log2(elem.second));
         }
 
-        // encode all the outputs
-        for (auto& [input, output]: cubeMap) {
-            output = encoding[output];
+        // if the given truth table is not reversible
+
+        if (outputFreq.size() != inOutCube.size()) {
+            std::vector<unsigned> maxEncSize;
+
+            unsigned encSize;
+
+            truthTable::value_type emptyVal;
+
+            truthTable::cube_type emptyVec;
+
+            truthTable::cube_type codedVec;
+
+            struct syrec::MinHeapNode *left, *right, *top;
+
+            std::priority_queue<syrec::MinHeapNode*, std::vector<syrec::MinHeapNode*>, syrec::compare> minHeap;
+
+            for (auto& elem: outputFreq)
+                minHeap.push(new syrec::MinHeapNode(elem.first, elem.second));
+
+            while (minHeap.size() != 1) {
+                left = minHeap.top();
+                minHeap.pop();
+
+                right = minHeap.top();
+                minHeap.pop();
+
+                top = new syrec::MinHeapNode(emptyVec, (std::max(left->freq, right->freq) + 1));
+
+                top->left  = left;
+                top->right = right;
+
+                minHeap.push(top);
+            }
+
+            //encode the output if necessary
+
+            hufCodes(minHeap.top(), codedVec, encInOut);
+
+            //increase the lengths of the encoded outputs with dont cares if required
+
+            for (auto& i: encInOut) {
+                maxEncSize.push_back(i.second.size());
+            }
+
+            encSize = *(std::max_element(maxEncSize.begin(), maxEncSize.end()));
+
+            for (auto& i: encInOut) {
+                if (encSize > i.second.size()) {
+                    for (unsigned j = 0; j <= (encSize - i.second.size()); j++) {
+                        i.second.push_back(emptyVal);
+                    }
+                }
+            }
+
+            //replace the outputs with the corrsponding encoded outputs
+
+            for (auto& i: inOutCube) {
+                inOutCube[i.first] = encInOut[i.second];
+            }
+        }
+
+        //Append zeros to the input if the output length (either encoded or not) is higher compared to the input
+
+        for (auto& i: inOutCube) {
+            if (i.second.size() > i.first.size()) {
+                for (unsigned j = 0; j <= (i.second.size() > i.first.size()); j++) {
+                    truthTable::cube_type dummy = i.first;
+
+                    auto node = inOutCube.extract(i.first);
+
+                    node.key() = insert_zero(dummy);
+
+                    inOutCube.insert(std::move(node));
+                }
+            }
+        }
+
+        tt.clear();
+
+        //update the truth table
+
+        for (auto& i: inOutCube) {
+            truthTable::cube_type firstVal = i.first;
+
+            truthTable::cube_type secondVal = i.second;
+
+            tt.add_entry(firstVal, secondVal);
         }
     }
 
-    auto TruthTable::augmentWithConstants() -> void {
-        for (auto const& [input, output]: cubeMap) {
-            const auto inputSize  = input.size();
-            const auto outputSize = output.size();
-            if (inputSize >= outputSize) {
-                continue;
-            }
-
-            const auto requiredConstants = outputSize - inputSize;
-            auto       newCube           = input;
-            newCube.reserve(outputSize);
-            for (std::size_t i = 0; i < requiredConstants; i++) {
-                newCube.insertZero();
-            }
-            auto nh  = cubeMap.extract(input);
-            nh.key() = newCube;
-            cubeMap.insert(std::move(nh));
-        }
-    }
-
-    auto TruthTable::buildDD(std::unique_ptr<dd::Package<>>& dd) const -> dd::mEdge {
-        // truth tables has to have the same number of inputs and outputs
-        assert(nInputs() == nOutputs());
-
-        if (nInputs() == 0U) {
-            return dd::mEdge::zero;
-        }
-
-        auto edges = std::array<dd::mEdge, 4U>{dd::mEdge::zero, dd::mEdge::zero, dd::mEdge::zero, dd::mEdge::zero};
-
-        // base case
-        if (nInputs() == 1U) {
-            for (const auto& [input, output]: cubeMap) {
-                // truth table has to be completely specified
-                assert(input[0].has_value());
-                assert(output[0].has_value());
-                const auto in    = *input[0];
-                const auto out   = *output[0];
-                const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-                edges[index]     = dd::mEdge::one;
-            }
-            return dd->makeDDNode(0, edges);
-        }
-
-        // generate sub-tables
-        std::array<TruthTable, 4U> subTables{};
-        for (const auto& [input, output]: cubeMap) {
-            // truth table has to be completely specified
-            assert(input[0].has_value());
-            assert(output[0].has_value());
-            const auto in    = *input[0];
-            const auto out   = *output[0];
-            const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-            Cube       reducedInput(input.begin() + 1, input.end());
-            Cube       reducedOutput(output.begin() + 1, output.end());
-            subTables[index].insert(std::move(reducedInput), std::move(reducedOutput));
-        }
-
-        // recursively build the DD for each sub-table
-        for (std::size_t i = 0U; i < 4U; i++) {
-            edges[i] = subTables[i].buildDD(dd);
-            // free up the memory used by the sub-table as fast as possible.
-            subTables[i].clear();
-        }
-
-        const auto label = static_cast<dd::Qubit>(nInputs() - 1U);
-        return dd->makeDDNode(label, edges);
-    }
 } // namespace syrec
