@@ -9,9 +9,11 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
-		    ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/tt_to_dd.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/tt_to_dd.cpp
 
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
+
+		${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/expression.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/syrec/grammar.hpp

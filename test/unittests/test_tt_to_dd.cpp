@@ -1,4 +1,5 @@
 #include "core/truthTable/tt_to_dd.hpp"
+#include "dd/FunctionalityConstruction.hpp"
 
 #include "gtest/gtest.h"
 #include <nlohmann/json.hpp>
@@ -7,54 +8,92 @@
 
 using json = nlohmann::json;
 
-class truthTable_to_dd_test: public testing::TestWithParam<std::string> {
-protected:
-    std::string test_circuits_dir = "./circuits/";
+using namespace dd::literals;
 
-    int                           expected_node_size  = 0;
-    int                           expected_qubit_size = 0;
-    int                           expected_hits       = 0;
-    int                           expected_looks      = 0;
-    syrec::truth_table::io_vector io_comb;
+using namespace syrec;
+
+class truthTableDD: public testing::TestWithParam<std::string> {
+protected:
+    std::string testCircuitsDir = "./circuits/";
+
+    dd::QubitCount                     nqubits = 2U;
+    std::vector<std::vector<bool>>     inDummy;
+    std::vector<std::vector<bool>>     outDummy;
+    truthTable::cube_type              dummyVec;
+    std::vector<truthTable::cube_type> inCube;
+    std::vector<truthTable::cube_type> outCube;
+    truthTable                         tt;
+    std::unique_ptr<dd::Package<>>     dd;
+    qc::MatrixDD                       ident{};
 
     void SetUp() override {
         std::string   tt_param = GetParam();
-        std::ifstream i(test_circuits_dir + "truth_table.json");
+        std::ifstream i(testCircuitsDir + "truth_table.json");
         json          j = json::parse(i);
 
-        io_comb             = j[tt_param]["io"];
-        expected_node_size  = j[tt_param]["node_size"];
-        expected_qubit_size = j[tt_param]["qubit_size"];
-        expected_hits       = j[tt_param]["hits"];
-        expected_looks      = j[tt_param]["looks"];
+        dd = std::make_unique<dd::Package<>>(nqubits);
+
+        inDummy = j[tt_param]["in"];
+
+        outDummy = j[tt_param]["out"];
+
+        ident = dd->makeIdent(nqubits);
+
+        for (auto i: inDummy) {
+            for (auto j: i) {
+                std::optional<bool> dummy = j;
+                dummyVec.push_back(dummy);
+            }
+            inCube.push_back(dummyVec);
+        }
+
+        dummyVec.clear();
+
+        for (auto i: outDummy) {
+            for (auto j: i) {
+                std::optional<bool> dummy = j;
+                dummyVec.push_back(dummy);
+            }
+            outCube.push_back(dummyVec);
+        }
+
+        for (int i = 0; i < (int)inCube.size(); i++) {
+            tt.add_entry(inCube[i], outCube[i]);
+        }
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(truthTable_to_dd_test, truthTable_to_dd_test,
+INSTANTIATE_TEST_SUITE_P(truthTableDD, truthTableDD,
                          testing::Values(
                                  "Id_2_bit",
-                                 "Id_3_bit",
-                                 "CNOT_2_bit",
-                                 "Custom_tt"),
-                         [](const testing::TestParamInfo<truthTable_to_dd_test::ParamType>& info) {
+                                 "CNOT"),
+                         [](const testing::TestParamInfo<truthTableDD::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
                              return s; });
 
-TEST_P(truthTable_to_dd_test, Generic_tt_to_dd) {
-    syrec::truth_table test_tt;
+TEST_P(truthTableDD, GenericttDD) {
+    std::string circuit = (std::string)GetParam();
 
-    test_tt.set_iocombination(io_comb);
+    extend_truth_table(tt);
 
-    int input_size = io_comb[0].size() / 2;
+    HuffmanCodes(tt);
 
-    std::unique_ptr<dd::Package<>> dd1 = std::make_unique<dd::Package<>>(input_size);
+    auto root = buildDD(tt, dd);
 
-    auto check = syrec::buildDD(test_tt, dd1);
+    qc::MatrixDD ddTest;
 
-    EXPECT_TRUE(check.p != nullptr);
+    if (circuit == "Id_2_bit") {
+        ddTest = ident;
+    }
 
-    EXPECT_EQ(expected_qubit_size, static_cast<int>(dd1->qubits()));
-    EXPECT_EQ(expected_node_size, static_cast<int>(dd1->mUniqueTable.getNodeCount()));
-    EXPECT_EQ(expected_hits, static_cast<int>((static_cast<double>(dd1->mUniqueTable.hitRatio())) * static_cast<double>(expected_looks)));
+    else if (circuit == "CNOT") {
+        auto q = qc::QuantumComputation(2);
+        q.x(0, 1_pc); // creates CNOT with target q0 and control q1
+        ddTest = dd::buildFunctionality(&q, dd);
+    }
+
+    EXPECT_EQ(tt.num_inputs(), static_cast<int>(dd->qubits()));
+    EXPECT_TRUE(root.p != nullptr);
+    EXPECT_EQ(root, ddTest);
 }
