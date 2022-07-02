@@ -45,6 +45,7 @@ protected:
                 dummyVec.push_back(dummy);
             }
             inCube.push_back(dummyVec);
+            dummyVec.clear();
         }
 
         dummyVec.clear();
@@ -55,6 +56,7 @@ protected:
                 dummyVec.push_back(dummy);
             }
             outCube.push_back(dummyVec);
+            dummyVec.clear();
         }
 
         for (int i = 0; i < (int)inCube.size(); i++) {
