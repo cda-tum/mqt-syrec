@@ -10,6 +10,8 @@ namespace syrec {
 
         truthTable::value_type falseVal = false;
 
+        //truthTable::value_type emptyVal;
+
         truthTable::value_type trueVal = true;
 
         auto p1 = zero_node;
@@ -49,11 +51,11 @@ namespace syrec {
                     f4 = one_node;
                 }
 
-                /*else if (dd_combination[i][0] == '0' && dd_combination[i][1] == '_')  {
+                /*else if (i.first[0] == falseVal && i.second[0] == emptyVal)  {
 
 			}
 
-			else if (dd_combination[i][0] == '1' && dd_combination[i][1] == '_')  {
+			else if (i.first[0] == trueVal && i.second[0] == emptyVal)  {
 
 			}*/
             }
@@ -115,14 +117,13 @@ namespace syrec {
                     tt4.add_entry(firstVal, secondVal);
                 }
 
-                /*else if (dd_combination[i][0] == '0' && dd_combination[i][1] == '_'){
-			
-			}
+                /*else if (i.first[0] == falseVal && i.second[0] == emptyVal)  {
 
-		else if (dd_combination[i][0] == '1' && dd_combination[i][1] == '_'){
-			
-			}
-		*/
+            }
+
+            else if (i.first[0] == trueVal && i.second[0] == emptyVal)  {
+
+            }*/
             }
 
             p1 = buildDD(tt1, ddk);
