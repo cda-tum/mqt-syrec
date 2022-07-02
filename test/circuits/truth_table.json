@@ -16,8 +16,8 @@
   },
 
   "NEGCXX": {
-    "in": [[false, false], [true, false], [true, true]],
-    "out": [[false, false, true], [false, true, false], [false, true, true]]
+    "in": [[false, false, false], [false, true, false], [false, true, true], [true, false, false], [true, false, true], [true, true, false], [true, true, true]],
+    "out": [[false, false, true], [false, true, false], [false, true, true], [true, false, false], [true, false, true], [true, true, false], [true, true, true]]
   }
 
 
