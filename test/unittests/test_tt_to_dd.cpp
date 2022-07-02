@@ -24,7 +24,6 @@ protected:
     std::vector<truthTable::cube_type> outCube;
     truthTable                         tt;
     std::unique_ptr<dd::Package<>>     dd;
-    qc::MatrixDD                       ident{};
 
     void SetUp() override {
         std::string   tt_param = GetParam();
@@ -36,8 +35,6 @@ protected:
         inDummy = j[tt_param]["in"];
 
         outDummy = j[tt_param]["out"];
-
-        ident = dd->makeIdent(nqubits);
 
         for (auto i: inDummy) {
             for (auto j: i) {
@@ -92,7 +89,7 @@ TEST_P(truthTableDD, GenericttDD) {
     qc::MatrixDD ddTest;
 
     if (circuit == "Id2bit") {
-        ddTest = ident;
+        ddTest = dd->makeIdent(2);
     }
 
     else if (circuit == "CNOT") {
@@ -117,7 +114,6 @@ TEST_P(truthTableDD, GenericttDD) {
         ddTest = dd::buildFunctionality(&q, dd);
     }
 
-    //EXPECT_EQ(tt.num_inputs(), static_cast<int>(dd->qubits()));
     EXPECT_TRUE(root.p != nullptr);
     EXPECT_EQ(root, ddTest);
 }
