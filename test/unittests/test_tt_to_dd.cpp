@@ -16,7 +16,7 @@ class truthTableDD: public testing::TestWithParam<std::string> {
 protected:
     std::string testCircuitsDir = "./circuits/";
 
-    dd::QubitCount                     nqubits = 2U;
+    dd::QubitCount                     nqubits = 3U;
     std::vector<std::vector<bool>>     inDummy;
     std::vector<std::vector<bool>>     outDummy;
     truthTable::cube_type              dummyVec;
@@ -67,31 +67,53 @@ protected:
 
 INSTANTIATE_TEST_SUITE_P(truthTableDD, truthTableDD,
                          testing::Values(
-                                 "Id_2_bit",
-                                 "CNOT"),
+                                 "Id2bit",
+                                 "CNOT",
+                                 "SWAP",
+                                 "NEGCXX"),
                          [](const testing::TestParamInfo<truthTableDD::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
                              return s; });
 
 TEST_P(truthTableDD, GenericttDD) {
+    EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() != 0);
+
     std::string circuit = (std::string)GetParam();
 
     extend_truth_table(tt);
 
     HuffmanCodes(tt);
 
+    EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() == tt.num_outputs());
+
     auto root = buildDD(tt, dd);
 
     qc::MatrixDD ddTest;
 
-    if (circuit == "Id_2_bit") {
+    if (circuit == "Id2bit") {
         ddTest = ident;
     }
 
     else if (circuit == "CNOT") {
         auto q = qc::QuantumComputation(2);
         q.x(0, 1_pc); // creates CNOT with target q0 and control q1
+        ddTest = dd::buildFunctionality(&q, dd);
+    }
+
+    else if (circuit == "SWAP") {
+        auto q = qc::QuantumComputation(2);
+        q.swap(0, 1); // creates CNOT with target q0 and control q1
+        ddTest = dd::buildFunctionality(&q, dd);
+    }
+
+    else if (circuit == "NEGCXX") {
+        auto q = qc::QuantumComputation(3);
+        q.x(1);
+        q.x(2);
+        q.x(0, dd::Controls{1_pc, 2_pc}); // creates negative CXX with target q0 and control q1 and q2
+        q.x(1);
+        q.x(2);
         ddTest = dd::buildFunctionality(&q, dd);
     }
 
