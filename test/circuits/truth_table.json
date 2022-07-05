@@ -1,24 +1,18 @@
 {
-
   "Id2bit": {
     "in": [[false, true], [true, false], [true, true]],
     "out": [[false, true], [true, false], [true, true]]
   },
-
   "CNOT": {
     "in": [[false, true], [true, false], [true, true]],
     "out": [[false, true], [true, true], [true, false]]
   },
-
   "SWAP": {
     "in": [[false, true], [true, false], [true, true]],
     "out": [[true, false], [false, true], [true, true]]
   },
-
   "NEGCXX": {
     "in": [[false, false, false], [false, true, false], [false, true, true], [true, false, false], [true, false, true], [true, true, false], [true, true, true]],
     "out": [[false, false, true], [false, true, false], [false, true, true], [true, false, false], [true, false, true], [true, true, false], [true, true, true]]
   }
-
-
 }
