@@ -38,11 +38,11 @@ namespace syrec {
         return result;
     }
 
-    truthTable::cube_type number_to_cube(unsigned number, unsigned bw) {
+    truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw) {
         truthTable::cube_type c;
 
-        for (unsigned i = 0; i < bw; ++i) {
-            c.push_back((number & (1u << (bw - 1 - i))) ? true : false);
+        for (std::size_t i = 0; i < bw; ++i) {
+            c.push_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
         return c;
@@ -51,23 +51,21 @@ namespace syrec {
     void extend_truth_table(truthTable& tt) {
         std::map<std::vector<truthTable::cube_type>, truthTable::cube_type> newCubes;
 
-        for (auto& it: tt.io_cube()) {
+        for (auto& [key, value]: tt.io_cube()) {
             std::vector<truthTable::cube_type> inCube;
 
-            in_cube_to_full_cubes(it.first, inCube);
+            in_cube_to_full_cubes(key, inCube);
 
-            truthTable::cube_type output(it.second.begin(), it.second.end());
-
-            newCubes.insert(std::make_pair(inCube, output));
+            newCubes.try_emplace(inCube, value);
         }
 
         tt.clear();
 
-        for (auto& it: newCubes) {
-            for (auto& itCube: it.first) {
-                truthTable::cube_type newInEntry = itCube;
+        for (auto& [key, value]: newCubes) {
+            for (auto& itCube: key) {
+                const truthTable::cube_type& newInEntry = itCube;
 
-                tt.add_entry(newInEntry, it.second);
+                tt.add_entry(newInEntry, value);
             }
         }
 
@@ -80,7 +78,7 @@ namespace syrec {
         for (auto it = ioVec.begin();; ++it) {
             unsigned pos = 0;
 
-            unsigned i = tt.num_inputs();
+            std::size_t i = tt.num_inputs();
 
             if (it == ioVec.end()) {
                 pos = 1u << tt.num_inputs();
@@ -126,8 +124,8 @@ namespace syrec {
         if (!root)
             return;
 
-        if (root->data.size() != 0) {
-            encInOut.insert({root->data, enc});
+        if (!root->data.empty()) {
+            encInOut.try_emplace(root->data, enc);
         }
 
         hufCodes(root->left, append_zero(enc), encInOut);
@@ -136,34 +134,24 @@ namespace syrec {
     }
 
     void HuffmanCodes(truthTable& tt) {
-        std::map<truthTable::cube_type, int> outputFreq;
+        std::map<truthTable::cube_type, std::size_t> outputFreq;
 
         truthTable::cube_vector encInOut;
 
         truthTable::cube_vector inOutCube = tt.io_cube();
 
-        std::vector<truthTable::cube_type> outCube;
-
-        for (auto& i: tt.io_cube()) {
-            outCube.push_back(i.second);
-        }
-
-        for (auto& elem: outCube) {
-            auto result = outputFreq.insert(std::pair<truthTable::cube_type, int>(elem, 1));
-            if (result.second == false)
-                result.first->second++;
-        }
-
-        for (auto& elem: outputFreq) {
-            outputFreq[elem.first] = ceil(log2(elem.second));
+        for (auto const& [in, out]: tt.io_cube()) {
+            auto [key, value] = outputFreq.try_emplace(out, 1);
+            if (!value)
+                key->second++;
         }
 
         // if the given truth table is not reversible
 
         if (outputFreq.size() != inOutCube.size()) {
-            std::vector<unsigned> maxEncSize;
+            std::vector<std::size_t> maxEncSize;
 
-            unsigned encSize;
+            std::size_t encSize;
 
             truthTable::value_type emptyVal;
 
@@ -171,12 +159,14 @@ namespace syrec {
 
             truthTable::cube_type codedVec;
 
-            struct syrec::MinHeapNode *left, *right, *top;
+            struct syrec::MinHeapNode* left;
+            struct syrec::MinHeapNode* right;
+            struct syrec::MinHeapNode* top;
 
             std::priority_queue<syrec::MinHeapNode*, std::vector<syrec::MinHeapNode*>, syrec::compare> minHeap;
 
-            for (auto& elem: outputFreq)
-                minHeap.push(new syrec::MinHeapNode(elem.first, elem.second));
+            for (auto const& [key, value]: outputFreq)
+                minHeap.push(new syrec::MinHeapNode(key, (std::size_t)ceil(log2((double)value))));
 
             while (minHeap.size() != 1) {
                 left = minHeap.top();
@@ -199,35 +189,33 @@ namespace syrec {
 
             //increase the lengths of the encoded outputs with dont cares if required
 
-            for (auto& i: encInOut) {
-                maxEncSize.push_back(i.second.size());
+            for (auto const& [key, value]: encInOut) {
+                maxEncSize.push_back(value.size());
             }
 
             encSize = *(std::max_element(maxEncSize.begin(), maxEncSize.end()));
 
-            for (auto& i: encInOut) {
-                if (encSize > i.second.size()) {
-                    for (unsigned j = 0; j <= (encSize - i.second.size()); j++) {
-                        i.second.push_back(emptyVal);
-                    }
+            for (auto& [key, value]: encInOut) {
+                if (encSize > value.size()) {
+                    std::fill_n(std::back_inserter(value), ((encSize - value.size()) + 1), emptyVal);
                 }
             }
 
             //replace the outputs with the corrsponding encoded outputs
 
-            for (auto& i: inOutCube) {
-                inOutCube[i.first] = encInOut[i.second];
+            for (auto const& [key, value]: inOutCube) {
+                inOutCube[key] = encInOut[value];
             }
         }
 
         //Append zeros to the input if the output length (either encoded or not) is higher compared to the input
 
-        for (auto& i: inOutCube) {
-            if (i.second.size() > i.first.size()) {
-                for (unsigned j = 0; j <= (i.second.size() > i.first.size()); j++) {
-                    truthTable::cube_type dummy = i.first;
+        for (auto const& [key, value]: inOutCube) {
+            if (value.size() > key.size()) {
+                for (std::size_t j = 0; j <= (value.size() - key.size()); j++) {
+                    truthTable::cube_type dummy = key;
 
-                    auto node = inOutCube.extract(i.first);
+                    auto node = inOutCube.extract(key);
 
                     node.key() = insert_zero(dummy);
 
@@ -240,12 +228,10 @@ namespace syrec {
 
         //update the truth table
 
-        for (auto& i: inOutCube) {
-            truthTable::cube_type firstVal = i.first;
+        for (auto const& [key, value]: inOutCube) {
+            truthTable::cube_type secondVal = value;
 
-            truthTable::cube_type secondVal = i.second;
-
-            tt.add_entry(firstVal, secondVal);
+            tt.add_entry(key, secondVal);
         }
     }
 

@@ -36,9 +36,9 @@ protected:
 
         outDummy = j[tt_param]["out"];
 
-        for (auto i: inDummy) {
-            for (auto j: i) {
-                std::optional<bool> dummy = j;
+        for (const auto& in: inDummy) {
+            for (auto inVal: in) {
+                std::optional<bool> dummy = inVal;
                 dummyVec.push_back(dummy);
             }
             inCube.push_back(dummyVec);
@@ -47,17 +47,17 @@ protected:
 
         dummyVec.clear();
 
-        for (auto i: outDummy) {
-            for (auto j: i) {
-                std::optional<bool> dummy = j;
+        for (const auto& out: outDummy) {
+            for (auto outVal: out) {
+                std::optional<bool> dummy = outVal;
                 dummyVec.push_back(dummy);
             }
             outCube.push_back(dummyVec);
             dummyVec.clear();
         }
 
-        for (int i = 0; i < (int)inCube.size(); i++) {
-            tt.add_entry(inCube[i], outCube[i]);
+        for (std::size_t index = 0; index < inCube.size(); index++) {
+            tt.add_entry(inCube[index], outCube[index]);
         }
     }
 };
@@ -76,7 +76,7 @@ INSTANTIATE_TEST_SUITE_P(truthTableDD, truthTableDD,
 TEST_P(truthTableDD, GenericttDD) {
     EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() != 0);
 
-    std::string circuit = (std::string)GetParam();
+    auto circuit = (std::string)GetParam();
 
     extend_truth_table(tt);
 
