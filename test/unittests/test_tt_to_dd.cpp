@@ -19,9 +19,9 @@ protected:
     dd::QubitCount                     nqubits = 3U;
     std::vector<std::vector<bool>>     inDummy;
     std::vector<std::vector<bool>>     outDummy;
-    TruthTable::cube_type              dummyVec;
-    std::vector<TruthTable::cube_type> inCube;
-    std::vector<TruthTable::cube_type> outCube;
+    TruthTable::CubeType              dummyVec;
+    std::vector<TruthTable::CubeType> inCube;
+    std::vector<TruthTable::CubeType> outCube;
     TruthTable                         tt;
     std::unique_ptr<dd::Package<>>     dd;
 

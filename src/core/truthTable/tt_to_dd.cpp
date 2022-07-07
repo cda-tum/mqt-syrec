@@ -3,11 +3,11 @@
 namespace syrec {
 
     dd::mEdge buildDD(const TruthTable& tt, std::unique_ptr<dd::Package<>>& ddk) {
-        TruthTable::cube_vector dd_combination = tt.io_cube();
+        TruthTable::CubeVector dd_combination = tt.io_cube();
 
-        TruthTable::value_type falseVal = false;
+        TruthTable::ValueType falseVal = false;
 
-        TruthTable::value_type trueVal = true;
+        TruthTable::ValueType trueVal = true;
 
         auto f1 = dd::mEdge::zero;
         auto f2 = dd::mEdge::zero;
@@ -53,9 +53,9 @@ namespace syrec {
         else {
             for (auto& [key, value]: dd_combination) {
                 if (key.c[0] == falseVal && value.c[0] == falseVal) {
-                    TruthTable::cube_type firstVal = key;
+                    TruthTable::CubeType firstVal = key;
 
-                    TruthTable::cube_type secondVal = value;
+                    TruthTable::CubeType secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -66,9 +66,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == trueVal && value.c[0] == falseVal) {
-                    TruthTable::cube_type firstVal = key;
+                    TruthTable::CubeType firstVal = key;
 
-                    TruthTable::cube_type secondVal = value;
+                    TruthTable::CubeType secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -79,9 +79,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == falseVal && value.c[0] == trueVal) {
-                    TruthTable::cube_type firstVal = key;
+                    TruthTable::CubeType firstVal = key;
 
-                    TruthTable::cube_type secondVal = value;
+                    TruthTable::CubeType secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -92,9 +92,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == trueVal && value.c[0] == trueVal) {
-                    TruthTable::cube_type firstVal = key;
+                    TruthTable::CubeType firstVal = key;
 
-                    TruthTable::cube_type secondVal = value;
+                    TruthTable::CubeType secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 

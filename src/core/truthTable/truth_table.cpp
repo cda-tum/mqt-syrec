@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    TruthTable::CubeTypeVec TruthTable::cube_type::in_cube_to_full_cubes() const {
+    TruthTable::CubeTypeVec TruthTable::CubeType::in_cube_to_full_cubes() const {
 
         TruthTable::CubeTypeVec result;
 
@@ -27,7 +27,7 @@ namespace syrec {
 
 
             }
-            TruthTable::cube_type cubeObj;
+            TruthTable::CubeType cubeObj;
             cubeObj.c = cube;
             result.emplace_back(cubeObj);
         }
@@ -35,8 +35,8 @@ namespace syrec {
         return result;
     }
 
-    TruthTable::cube_type TruthTable::number_to_cube(std::size_t number, std::size_t bw) {
-        TruthTable::cube_type ct;
+    TruthTable::CubeType TruthTable::number_to_cube(const std::size_t number, const std::size_t bw) {
+        TruthTable::CubeType ct;
 
         for (std::size_t i = 0; i < bw; ++i) {
             ct.c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
@@ -46,7 +46,7 @@ namespace syrec {
     }
 
     void TruthTable::extend_truth_table() {
-        std::map<TruthTable::CubeTypeVec, TruthTable::cube_type> newCubes;
+        std::map<TruthTable::CubeTypeVec, TruthTable::CubeType> newCubes;
 
         for (auto const& [key, value]: io_cube()) {
             newCubes.try_emplace(key.in_cube_to_full_cubes(), value);
@@ -60,7 +60,7 @@ namespace syrec {
             }
         }
 
-        TruthTable::cube_type outCube;
+        TruthTable::CubeType outCube;
 
         for (std::size_t outSize = 0; outSize < num_outputs(); outSize++){
             outCube.c.emplace_back(false);
@@ -83,7 +83,7 @@ namespace syrec {
             }
 
             for (i = currentPos; i < pos; ++i) {
-                const TruthTable::cube_type inputCube = number_to_cube(i, num_inputs());
+                const TruthTable::CubeType inputCube = number_to_cube(i, num_inputs());
 
                 add_entry(inputCube, outCube);
             }
@@ -97,23 +97,23 @@ namespace syrec {
     }
 
 
-    TruthTable::cube_type append_zero(TruthTable::cube_type enc) {
+    TruthTable::CubeType append_zero(TruthTable::CubeType enc) {
         enc.c.emplace_back(false);
 
         return enc;
     }
 
-    void TruthTable::cube_type::insert_zero() {
+    void TruthTable::CubeType::insert_zero() {
         c.insert(c.begin(), false);
     }
 
-    TruthTable::cube_type append_one(TruthTable::cube_type enc) {
+    TruthTable::CubeType append_one(TruthTable::CubeType enc) {
         enc.c.emplace_back(true);
 
         return enc;
     }
 
-    void hufCodes(struct syrec::MinHeapNode* root, TruthTable::cube_type enc, TruthTable::cube_vector& encInOut) {
+    void hufCodes(struct syrec::MinHeapNode* root, TruthTable::CubeType enc, TruthTable::CubeVector& encInOut) {
         if (!root)
             return;
 
@@ -127,11 +127,11 @@ namespace syrec {
     }
 
     void TruthTable::HuffmanCodes() {
-        std::map<TruthTable::cube_type, std::size_t> outputFreq;
+        std::map<TruthTable::CubeType, std::size_t> outputFreq;
 
-        TruthTable::cube_vector encInOut;
+        TruthTable::CubeVector encInOut;
 
-        TruthTable::cube_vector inOutCube = io_cube();
+        TruthTable::CubeVector inOutCube = io_cube();
 
         for (auto const& [in, out]: io_cube()) {
             auto [key, value] = outputFreq.try_emplace(out, 1);
@@ -146,11 +146,11 @@ namespace syrec {
 
             std::size_t encSize;
 
-            TruthTable::value_type emptyVal;
+            TruthTable::ValueType emptyVal;
 
-            TruthTable::cube_type emptyVec;
+            TruthTable::CubeType emptyVec;
 
-            TruthTable::cube_type codedVec;
+            TruthTable::CubeType codedVec;
 
             struct syrec::MinHeapNode* left;
             struct syrec::MinHeapNode* right;
@@ -203,7 +203,7 @@ namespace syrec {
 
             if(outSize > inSize) {  //not needed, just a safe condition
                 for (std::size_t j = 0; j < (outSize - inSize); j++) {
-                    TruthTable::cube_type dummy = key;
+                    TruthTable::CubeType dummy = key;
 
                     dummy.insert_zero();
                     auto node = inOutCube.extract(key);
