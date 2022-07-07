@@ -57,6 +57,8 @@ namespace syrec {
 
         void extend_truth_table();
 
+        void HuffmanCodes();
+
     private:
         cube_vector cubes;
     };
@@ -94,7 +96,5 @@ namespace syrec {
     truthTable::cube_type append_one(truthTable::cube_type enc);
 
     void hufCodes(struct MinHeapNode* root, truthTable::cube_type enc, truthTable::cube_vector& encInOut);
-
-    void HuffmanCodes(truthTable& tt);
 
 } // namespace syrec
