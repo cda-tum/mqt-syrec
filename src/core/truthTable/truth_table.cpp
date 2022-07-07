@@ -22,7 +22,7 @@ namespace syrec {
 
         for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
             for (std::size_t j = 0; j < dcPositions.size(); ++j) {
-                cube.at(dcPositions.at(j))  = (i & (1u << (dcPositions.size() - j - 1))) != 0;
+                cube.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
             }
 
             result.emplace_back(cube);
@@ -35,7 +35,7 @@ namespace syrec {
         truthTable::cube_type c(bw);
 
         for (std::size_t i = 0; i < bw; ++i) {
-            c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
+            c.push_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
         return c;
