@@ -49,10 +49,6 @@ namespace syrec {
         std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
 
         for (auto const& [key, value]: io_cube()) {
-            //truthTable::CubeTypeVec inCube;
-
-            //in_cube_to_full_cubes(key, inCube);
-
             newCubes.try_emplace(key.in_cube_to_full_cubes(), value);
         }
 
@@ -108,10 +104,8 @@ namespace syrec {
         return enc;
     }
 
-    truthTable::cube_type insert_zero(truthTable::cube_type& inNew) {
-        inNew.c.insert(inNew.c.begin(), false);
-
-        return inNew;
+    void truthTable::cube_type::insert_zero() {
+        c.insert(c.begin(), false);
     }
 
     truthTable::cube_type append_one(truthTable::cube_type enc) {
@@ -218,9 +212,9 @@ namespace syrec {
                 for (std::size_t j = 0; j < (outSize - inSize); j++) {
                     truthTable::cube_type dummy = key;
 
+                    dummy.insert_zero();
                     auto node = inOutCube.extract(key);
-
-                    node.key() = insert_zero(dummy);
+                    node.key() = dummy;
 
                     inOutCube.insert(std::move(node));
                 }
