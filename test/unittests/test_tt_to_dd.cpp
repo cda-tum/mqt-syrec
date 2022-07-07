@@ -39,21 +39,21 @@ protected:
         for (const auto& in: inDummy) {
             for (auto inVal: in) {
                 std::optional<bool> dummy = inVal;
-                dummyVec.push_back(dummy);
+                dummyVec.c.push_back(dummy);
             }
             inCube.push_back(dummyVec);
-            dummyVec.clear();
+            dummyVec.c.clear();
         }
 
-        dummyVec.clear();
+        dummyVec.c.clear();
 
         for (const auto& out: outDummy) {
             for (auto outVal: out) {
                 std::optional<bool> dummy = outVal;
-                dummyVec.push_back(dummy);
+                dummyVec.c.push_back(dummy);
             }
             outCube.push_back(dummyVec);
-            dummyVec.clear();
+            dummyVec.c.clear();
         }
 
         for (std::size_t index = 0; index < inCube.size(); index++) {

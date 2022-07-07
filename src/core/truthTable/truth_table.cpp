@@ -10,7 +10,7 @@ namespace syrec {
 
         std::size_t pos = 0;
 
-        for(auto const& it : cube) {
+        for(auto const& it : cube.c) {
             if (!(it.has_value())) // if DC
             {
                 dcPositions.emplace_back(pos);
@@ -21,7 +21,7 @@ namespace syrec {
 
         for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
             for (std::size_t j = 0; j < dcPositions.size(); ++j) {
-                cube.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
+                cube.c.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
 
 
             }
@@ -33,13 +33,13 @@ namespace syrec {
     }
 
     truthTable::cube_type truthTable::number_to_cube(std::size_t number, std::size_t bw) {
-        truthTable::cube_type c;
+        truthTable::cube_type ct;
 
         for (std::size_t i = 0; i < bw; ++i) {
-            c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
+            ct.c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
-        return c;
+        return ct;
     }
 
     void truthTable::extend_truth_table() {
@@ -61,7 +61,11 @@ namespace syrec {
             }
         }
 
-        const truthTable::cube_type outCube(num_outputs(), false);
+        truthTable::cube_type outCube;
+
+        for (std::size_t outSize = 0; outSize < num_outputs(); outSize++){
+            outCube.c.emplace_back(false);
+        }
 
         unsigned currentPos = 0;
 
@@ -75,7 +79,7 @@ namespace syrec {
             if (it == ioVec.end()) {
                 pos = 1u << num_inputs();
             } else {
-                for (auto& inBit: it->first) {
+                for (auto& inBit: it->first.c) {
                     pos |= (*inBit) << --i;
                 }
             }
@@ -96,19 +100,19 @@ namespace syrec {
 
 
     truthTable::cube_type append_zero(truthTable::cube_type enc) {
-        enc.push_back(false);
+        enc.c.emplace_back(false);
 
         return enc;
     }
 
     truthTable::cube_type insert_zero(truthTable::cube_type& inNew) {
-        inNew.insert(inNew.begin(), false);
+        inNew.c.insert(inNew.c.begin(), false);
 
         return inNew;
     }
 
     truthTable::cube_type append_one(truthTable::cube_type enc) {
-        enc.push_back(true);
+        enc.c.emplace_back(true);
 
         return enc;
     }
@@ -117,7 +121,7 @@ namespace syrec {
         if (!root)
             return;
 
-        if (!root->data.empty()) {
+        if (!root->data.c.empty()) {
             encInOut.try_emplace(root->data, enc);
         }
 
@@ -183,14 +187,14 @@ namespace syrec {
             //increase the lengths of the encoded outputs with dont cares if required
 
             for (auto const& [key, value]: encInOut) {
-                maxEncSize.push_back(value.size());
+                maxEncSize.push_back(value.c.size());
             }
 
             encSize = *(std::max_element(maxEncSize.begin(), maxEncSize.end()));
 
             for (auto& [key, value]: encInOut) {
-                if (encSize > value.size()) {
-                    std::fill_n(std::back_inserter(value), (encSize - value.size()), emptyVal);
+                if (encSize > value.c.size()) {
+                    std::fill_n(std::back_inserter(value.c), (encSize - value.c.size()), emptyVal);
                 }
             }
 
@@ -203,9 +207,9 @@ namespace syrec {
 
         //Append zeros to the input if the output length (either encoded or not) is higher compared to the input
         for (auto const& [key, value]: inOutCube) {
-            const std::size_t outSize = value.size();
+            const std::size_t outSize = value.c.size();
 
-            const std::size_t inSize = key.size();
+            const std::size_t inSize = key.c.size();
 
             if(outSize > inSize) {  //not needed, just a safe condition
                 for (std::size_t j = 0; j < (outSize - inSize); j++) {
