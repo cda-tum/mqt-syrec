@@ -54,7 +54,8 @@ namespace syrec {
 
         for (auto& [key, value]: newCubes) {
             for (auto& itCube: key) {
-                tt.add_entry(itCube, value);
+                const truthTable::cube_type& newInEntry = itCube;
+                tt.add_entry( newInEntry, value);
             }
         }
 
