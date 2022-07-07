@@ -23,6 +23,8 @@ namespace syrec {
             bool operator<(const cube_type& cv) const{
                 return (this->c < cv.c);
             }
+
+            [[nodiscard]] std::vector<cube_type> in_cube_to_full_cubes() const;
         };
 
 
@@ -30,6 +32,7 @@ namespace syrec {
         using cube_vector = std::map<cube_type, cube_type>;
 
         using CubeTypeVec = std::vector<cube_type>;
+
 
         [[nodiscard]] std::size_t num_inputs() const {
             if (!cubes.empty()) {
@@ -59,7 +62,7 @@ namespace syrec {
             return cubes;
         }
 
-        static void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result);
+        //static void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result);
 
         static cube_type number_to_cube(std::size_t number, std::size_t bw);
 
