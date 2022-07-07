@@ -80,7 +80,7 @@ TEST_P(truthTableDD, GenericttDD) {
 
     tt.extend_truth_table();
 
-    HuffmanCodes(tt);
+    tt.HuffmanCodes();
 
     EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() == tt.num_outputs());
 

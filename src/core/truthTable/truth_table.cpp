@@ -126,14 +126,14 @@ namespace syrec {
         hufCodes(root->right, append_one(enc), encInOut);
     }
 
-    void HuffmanCodes(truthTable& tt) {
+    void truthTable::HuffmanCodes() {
         std::map<truthTable::cube_type, std::size_t> outputFreq;
 
         truthTable::cube_vector encInOut;
 
-        truthTable::cube_vector inOutCube = tt.io_cube();
+        truthTable::cube_vector inOutCube = io_cube();
 
-        for (auto const& [in, out]: tt.io_cube()) {
+        for (auto const& [in, out]: io_cube()) {
             auto [key, value] = outputFreq.try_emplace(out, 1);
             if (!value)
                 key->second++;
@@ -221,13 +221,13 @@ namespace syrec {
 
         }
 
-        tt.clear();
+        clear();
 
         //update the truth table
 
         for (auto const& [key, value]: inOutCube) {
 
-            tt.add_entry(key, value);
+            add_entry(key, value);
         }
     }
 
