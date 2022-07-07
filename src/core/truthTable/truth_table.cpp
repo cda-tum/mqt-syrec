@@ -2,7 +2,9 @@
 
 namespace syrec {
 
-    void truthTable::in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result) {
+    truthTable::CubeTypeVec truthTable::cube_type::in_cube_to_full_cubes() const {
+
+        truthTable::CubeTypeVec result;
 
         auto cube = c ;
 
@@ -10,7 +12,7 @@ namespace syrec {
 
         std::size_t pos = 0;
 
-        for(auto const& it : cube.c) {
+        for(auto const& it : cube) {
             if (!(it.has_value())) // if DC
             {
                 dcPositions.emplace_back(pos);
@@ -21,15 +23,16 @@ namespace syrec {
 
         for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
             for (std::size_t j = 0; j < dcPositions.size(); ++j) {
-                cube.c.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
+                cube.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
 
 
             }
-
-            result.emplace_back(cube);
+            truthTable::cube_type cubeObj;
+            cubeObj.c = cube;
+            result.emplace_back(cubeObj);
         }
 
-        return;
+        return result;
     }
 
     truthTable::cube_type truthTable::number_to_cube(std::size_t number, std::size_t bw) {
@@ -46,11 +49,11 @@ namespace syrec {
         std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
 
         for (auto const& [key, value]: io_cube()) {
-            truthTable::CubeTypeVec inCube;
+            //truthTable::CubeTypeVec inCube;
 
-            in_cube_to_full_cubes(key, inCube);
+            //in_cube_to_full_cubes(key, inCube);
 
-            newCubes.try_emplace(inCube, value);
+            newCubes.try_emplace(key.in_cube_to_full_cubes(), value);
         }
 
         clear();
