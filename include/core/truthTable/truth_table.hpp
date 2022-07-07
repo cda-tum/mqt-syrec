@@ -47,9 +47,9 @@ namespace syrec {
             cubes.clear();
         }
 
-        [[nodiscard]] cube_vector& io_cube() {
+       /* [[nodiscard]] cube_vector& io_cube() {
             return cubes;
-        }
+        }*/
 
         [[nodiscard]] const cube_vector& io_cube() const {
             return cubes;
