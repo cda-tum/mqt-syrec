@@ -118,7 +118,7 @@ namespace syrec {
         if (!root)
             return;
 
-        if (!root->data.c.empty()) {
+        if (!(root->data.c.empty())) {
             encInOut.try_emplace(root->data, enc);
         }
 
@@ -178,16 +178,10 @@ namespace syrec {
             }
 
             //encode the output if necessary
-
+            encSize = minHeap.top()->freq;
             hufCodes(minHeap.top(), codedVec, encInOut);
 
             //increase the lengths of the encoded outputs with dont cares if required
-
-            for (auto const& [key, value]: encInOut) {
-                maxEncSize.push_back(value.c.size());
-            }
-
-            encSize = *(std::max_element(maxEncSize.begin(), maxEncSize.end()));
 
             for (auto& [key, value]: encInOut) {
                 if (encSize > value.c.size()) {

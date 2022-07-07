@@ -94,7 +94,7 @@ namespace syrec {
         bool operator()(MinHeapNode const* l, MinHeapNode const* r) const
 
         {
-            return (l->freq < r->freq);
+            return (l->freq > r->freq);
         }
     };
 
