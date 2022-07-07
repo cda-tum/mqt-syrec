@@ -189,7 +189,7 @@ namespace syrec {
 
             for (auto& [key, value]: encInOut) {
                 if (encSize > value.size()) {
-                    std::fill_n(std::back_inserter(value), ((encSize - value.size()) + 1), emptyVal);
+                    std::fill_n(std::back_inserter(value), (encSize - value.size()), emptyVal);
                 }
             }
 
@@ -201,10 +201,13 @@ namespace syrec {
         }
 
         //Append zeros to the input if the output length (either encoded or not) is higher compared to the input
-
         for (auto const& [key, value]: inOutCube) {
-            if (value.size() > key.size()) {
-                for (std::size_t j = 0; j <= (value.size() - key.size()); j++) {
+            const std::size_t outSize = value.size();
+
+            const std::size_t inSize = key.size();
+
+            if(outSize > inSize) {  //not needed, just a safe condition
+                for (std::size_t j = 0; j < (outSize - inSize); j++) {
                     truthTable::cube_type dummy = key;
 
                     auto node = inOutCube.extract(key);
@@ -214,6 +217,7 @@ namespace syrec {
                     inOutCube.insert(std::move(node));
                 }
             }
+
         }
 
         tt.clear();
