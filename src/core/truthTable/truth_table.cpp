@@ -221,9 +221,8 @@ namespace syrec {
         //update the truth table
 
         for (auto const& [key, value]: inOutCube) {
-            truthTable::cube_type secondVal = value;
 
-            tt.add_entry(key, secondVal);
+            tt.add_entry(key, value);
         }
     }
 
