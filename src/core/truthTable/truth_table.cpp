@@ -42,6 +42,58 @@ namespace syrec {
         return c;
     }
 
+    void truthTable::extend_truth_table() {
+        std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
+
+        for (auto const& [key, value]: io_cube()) {
+            truthTable::CubeTypeVec inCube;
+
+            in_cube_to_full_cubes(key, inCube);
+
+            newCubes.try_emplace(inCube, value);
+        }
+
+        clear();
+
+        for (auto const& [key, value]: newCubes) {
+            for (auto const& itCube: key) {
+                add_entry(itCube, value);
+            }
+        }
+
+        const truthTable::cube_type outCube(num_outputs(), false);
+
+        unsigned currentPos = 0;
+
+        const truthTable::cube_vector ioVec = io_cube();
+
+        for (auto it = ioVec.begin();; ++it) {
+            unsigned pos = 0;
+
+            std::size_t i = num_inputs();
+
+            if (it == ioVec.end()) {
+                pos = 1u << num_inputs();
+            } else {
+                for (auto& inBit: it->first) {
+                    pos |= (*inBit) << --i;
+                }
+            }
+
+            for (i = currentPos; i < pos; ++i) {
+                const truthTable::cube_type inputCube = number_to_cube(i, num_inputs());
+
+                add_entry(inputCube, outCube);
+            }
+
+            currentPos = pos;
+
+            if (it == ioVec.end()) {
+                break;
+            }
+        }
+    }
+
 
     truthTable::cube_type append_zero(truthTable::cube_type enc) {
         enc.push_back(false);
