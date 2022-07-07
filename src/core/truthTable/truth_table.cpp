@@ -2,57 +2,48 @@
 
 namespace syrec {
 
-    std::vector<truthTable::cube_type> in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result) {
-        auto first = c.begin();
+    void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result) {
 
-        auto last = c.end();
+        auto cube = c;
 
-        truthTable::cube_type cube(first, last);
+        std::vector<std::size_t> dcPositions;
 
-        std::vector<unsigned> dcPositions;
+        std::size_t pos = 0;
 
-        unsigned pos = 0;
-
-        while (first != last) {
-            if (!((*first).has_value())) // if DC
+        for(auto it : cube){
+            if (!(it.has_value())) // if DC
             {
-                std::cout << "dontcare" << std::endl;
                 dcPositions.emplace_back(pos);
             }
 
             ++pos;
 
-            ++first;
         }
 
         for (unsigned i = 0; i < (1u << dcPositions.size()); ++i) {
             for (unsigned j = 0; j < dcPositions.size(); ++j) {
-                unsigned localBit = i & (1u << (dcPositions.size() - j - 1)) ? 1 : 0;
-
-                cube.at(dcPositions.at(j)) = localBit;
+                cube.at(dcPositions.at(j)) = (i & (1u << (dcPositions.size() - j - 1))) != 0;
             }
 
             result.emplace_back(cube);
         }
-
-        return result;
     }
 
-    truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw) {
-        truthTable::cube_type c;
+    truthTable::cube_type number_to_cube(std::size_t const number, std::size_t const bw) {
+        truthTable::cube_type c(bw);
 
         for (std::size_t i = 0; i < bw; ++i) {
-            c.push_back((number & (1u << (bw - 1 - i))) != 0);
+            c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
         return c;
     }
 
     void extend_truth_table(truthTable& tt) {
-        std::map<std::vector<truthTable::cube_type>, truthTable::cube_type> newCubes;
+        std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
 
-        for (auto& [key, value]: tt.io_cube()) {
-            std::vector<truthTable::cube_type> inCube;
+        for (auto const& [key, value]: tt.io_cube()) {
+            truthTable::CubeTypeVec inCube;
 
             in_cube_to_full_cubes(key, inCube);
 
@@ -63,9 +54,7 @@ namespace syrec {
 
         for (auto& [key, value]: newCubes) {
             for (auto& itCube: key) {
-                const truthTable::cube_type& newInEntry = itCube;
-
-                tt.add_entry(newInEntry, value);
+                tt.add_entry(itCube, value);
             }
         }
 

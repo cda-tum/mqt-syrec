@@ -21,6 +21,8 @@ namespace syrec {
 
         using cube_vector = std::map<cube_type, cube_type>;
 
+        using CubeTypeVec = std::vector<cube_type>;
+
         [[nodiscard]] std::size_t num_inputs() const {
             if (!cubes.empty()) {
                 return cubes.begin()->first.size();
@@ -57,7 +59,7 @@ namespace syrec {
         cube_vector cubes;
     };
 
-    std::vector<truthTable::cube_type> in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result);
+    void in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result);
 
     truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw);
 
