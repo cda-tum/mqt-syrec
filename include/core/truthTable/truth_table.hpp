@@ -13,10 +13,6 @@
 
 namespace syrec {
 
-    //void in_cube_to_full_cubes(const std::vector<std::optional<bool>>& c, std::vector<std::vector<std::optional<bool>>>& result);
-
-    //truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw);
-
     class truthTable {
     public:
         using value_type = std::optional<bool>;
@@ -55,68 +51,15 @@ namespace syrec {
             return cubes;
         }
 
-        void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result);
+        static void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result);
 
-        cube_type number_to_cube(std::size_t number, std::size_t bw);
+        static cube_type number_to_cube(std::size_t number, std::size_t bw);
 
-        void extend_truth_table() {
-            std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
-
-            for (auto const& [key, value]: io_cube()) {
-                truthTable::CubeTypeVec inCube;
-
-                in_cube_to_full_cubes(key, inCube);
-
-                newCubes.try_emplace(inCube, value);
-            }
-
-            clear();
-
-            for (auto const& [key, value]: newCubes) {
-                for (auto const& itCube: key) {
-                    add_entry(itCube, value);
-                }
-            }
-
-            const truthTable::cube_type outCube(num_outputs(), false);
-
-            unsigned currentPos = 0;
-
-            const truthTable::cube_vector ioVec = io_cube();
-
-            for (auto it = ioVec.begin();; ++it) {
-                unsigned pos = 0;
-
-                std::size_t i = num_inputs();
-
-                if (it == ioVec.end()) {
-                    pos = 1u << num_inputs();
-                } else {
-                    for (auto& inBit: it->first) {
-                        pos |= (*inBit) << --i;
-                    }
-                }
-
-                for (i = currentPos; i < pos; ++i) {
-                    const truthTable::cube_type inputCube = number_to_cube(i, num_inputs());
-
-                    add_entry(inputCube, outCube);
-                }
-
-                currentPos = pos;
-
-                if (it == ioVec.end()) {
-                    break;
-                }
-            }
-        }
+        void extend_truth_table();
 
     private:
         cube_vector cubes;
     };
-
-
-    //void extend_truth_table(truthTable& tt);
 
     struct MinHeapNode {
         truthTable::cube_type data;
