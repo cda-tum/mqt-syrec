@@ -25,6 +25,8 @@ namespace syrec {
             }
 
             [[nodiscard]] std::vector<cube_type> in_cube_to_full_cubes() const;
+
+            void insert_zero();
         };
 
 
@@ -61,8 +63,6 @@ namespace syrec {
         [[nodiscard]] const cube_vector& io_cube() const {
             return cubes;
         }
-
-        //static void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result);
 
         static cube_type number_to_cube(std::size_t number, std::size_t bw);
 
@@ -101,8 +101,6 @@ namespace syrec {
 
 
     truthTable::cube_type append_zero(truthTable::cube_type enc);
-
-    truthTable::cube_type insert_zero(truthTable::cube_type& inNew);
 
     truthTable::cube_type append_one(truthTable::cube_type enc);
 
