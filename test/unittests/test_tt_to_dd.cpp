@@ -78,7 +78,7 @@ TEST_P(truthTableDD, GenericttDD) {
 
     auto circuit = (std::string)GetParam();
 
-    extend_truth_table(tt);
+    tt.extend_truth_table();
 
     HuffmanCodes(tt);
 
