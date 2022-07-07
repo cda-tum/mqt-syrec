@@ -6,9 +6,9 @@ namespace syrec {
 
         auto cube = c ;
 
-        std::vector<unsigned> dcPositions;
+        std::vector<std::size_t> dcPositions;
 
-        unsigned pos = 0;
+        std::size_t pos = 0;
 
         for(auto const& it : cube) {
             if (!(it.has_value())) // if DC
@@ -20,8 +20,8 @@ namespace syrec {
             ++pos;
         }
 
-        for (unsigned i = 0; i < (1u << dcPositions.size()); ++i) {
-            for (unsigned j = 0; j < dcPositions.size(); ++j) {
+        for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
+            for (std::size_t j = 0; j < dcPositions.size(); ++j) {
                 cube.at(dcPositions.at(j))  = i & (1u << (dcPositions.size() - j - 1)) ? 1 : 0;
 
 
