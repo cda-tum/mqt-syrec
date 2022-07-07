@@ -37,7 +37,7 @@ namespace syrec {
         truthTable::cube_type c;
 
         for (std::size_t i = 0; i < bw; ++i) {
-            c.push_back((number & (1u << (bw - 1 - i))) != 0);
+            c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
         return c;
