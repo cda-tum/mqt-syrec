@@ -2,22 +2,22 @@
 
 namespace syrec {
 
-    dd::mEdge buildDD(const truthTable& tt, std::unique_ptr<dd::Package<>>& ddk) {
-        truthTable::cube_vector dd_combination = tt.io_cube();
+    dd::mEdge buildDD(const TruthTable& tt, std::unique_ptr<dd::Package<>>& ddk) {
+        TruthTable::cube_vector dd_combination = tt.io_cube();
 
-        truthTable::value_type falseVal = false;
+        TruthTable::value_type falseVal = false;
 
-        truthTable::value_type trueVal = true;
+        TruthTable::value_type trueVal = true;
 
         auto f1 = dd::mEdge::zero;
         auto f2 = dd::mEdge::zero;
         auto f3 = dd::mEdge::zero;
         auto f4 = dd::mEdge::zero;
 
-        syrec::truthTable tt1;
-        syrec::truthTable tt2;
-        syrec::truthTable tt3;
-        syrec::truthTable tt4;
+        syrec::TruthTable tt1;
+        syrec::TruthTable tt2;
+        syrec::TruthTable tt3;
+        syrec::TruthTable tt4;
 
         if (tt.num_inputs() == 0) {
             return dd::mEdge::zero;
@@ -53,9 +53,9 @@ namespace syrec {
         else {
             for (auto& [key, value]: dd_combination) {
                 if (key.c[0] == falseVal && value.c[0] == falseVal) {
-                    truthTable::cube_type firstVal = key;
+                    TruthTable::cube_type firstVal = key;
 
-                    truthTable::cube_type secondVal = value;
+                    TruthTable::cube_type secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -66,9 +66,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == trueVal && value.c[0] == falseVal) {
-                    truthTable::cube_type firstVal = key;
+                    TruthTable::cube_type firstVal = key;
 
-                    truthTable::cube_type secondVal = value;
+                    TruthTable::cube_type secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -79,9 +79,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == falseVal && value.c[0] == trueVal) {
-                    truthTable::cube_type firstVal = key;
+                    TruthTable::cube_type firstVal = key;
 
-                    truthTable::cube_type secondVal = value;
+                    TruthTable::cube_type secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 
@@ -92,9 +92,9 @@ namespace syrec {
                 }
 
                 else if (key.c[0] == trueVal && value.c[0] == trueVal) {
-                    truthTable::cube_type firstVal = key;
+                    TruthTable::cube_type firstVal = key;
 
-                    truthTable::cube_type secondVal = value;
+                    TruthTable::cube_type secondVal = value;
 
                     firstVal.c.erase(firstVal.c.begin());
 

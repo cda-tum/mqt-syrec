@@ -12,17 +12,17 @@ using namespace dd::literals;
 
 using namespace syrec;
 
-class truthTableDD: public testing::TestWithParam<std::string> {
+class TruthTableDD: public testing::TestWithParam<std::string> {
 protected:
     std::string testCircuitsDir = "./circuits/";
 
     dd::QubitCount                     nqubits = 3U;
     std::vector<std::vector<bool>>     inDummy;
     std::vector<std::vector<bool>>     outDummy;
-    truthTable::cube_type              dummyVec;
-    std::vector<truthTable::cube_type> inCube;
-    std::vector<truthTable::cube_type> outCube;
-    truthTable                         tt;
+    TruthTable::cube_type              dummyVec;
+    std::vector<TruthTable::cube_type> inCube;
+    std::vector<TruthTable::cube_type> outCube;
+    TruthTable                         tt;
     std::unique_ptr<dd::Package<>>     dd;
 
     void SetUp() override {
@@ -62,18 +62,18 @@ protected:
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(truthTableDD, truthTableDD,
+INSTANTIATE_TEST_SUITE_P(TruthTableDD, TruthTableDD,
                          testing::Values(
                                  "Id2bit",
                                  "CNOT",
                                  "SWAP",
                                  "NEGCXX"),
-                         [](const testing::TestParamInfo<truthTableDD::ParamType>& info) {
+                         [](const testing::TestParamInfo<TruthTableDD::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
                              return s; });
 
-TEST_P(truthTableDD, GenericttDD) {
+TEST_P(TruthTableDD, GenericttDD) {
     EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() != 0);
 
     auto circuit = (std::string)GetParam();
