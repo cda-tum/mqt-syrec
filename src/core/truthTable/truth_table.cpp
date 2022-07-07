@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    void in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result) {
+    std::vector<truthTable::cube_type> in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result) {
         auto first = c.begin();
 
         auto last = c.end();
@@ -34,13 +34,15 @@ namespace syrec {
 
             result.emplace_back(cube);
         }
+
+        return result;
     }
 
-    truthTable::cube_type number_to_cube(std::size_t const number, std::size_t const bw) {
-        truthTable::cube_type c(bw);
+    truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw) {
+        truthTable::cube_type c;
 
         for (std::size_t i = 0; i < bw; ++i) {
-            c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
+            c.push_back((number & (1u << (bw - 1 - i))) != 0);
         }
 
         return c;
