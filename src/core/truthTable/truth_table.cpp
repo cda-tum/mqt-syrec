@@ -57,13 +57,11 @@ namespace syrec {
 
         for (auto const& [key, value]: newCubes) {
             for (auto const& itCube: key) {
-                //const truthTable::cube_type& newInEntry = itCube;
-
                 tt.add_entry(itCube, value);
             }
         }
 
-        truthTable::cube_type outCube(tt.num_outputs(), false);
+        const truthTable::cube_type outCube(tt.num_outputs(), false);
 
         unsigned currentPos = 0;
 
@@ -83,7 +81,7 @@ namespace syrec {
             }
 
             for (i = currentPos; i < pos; ++i) {
-                truthTable::cube_type inputCube = number_to_cube(i, tt.num_inputs());
+                const truthTable::cube_type inputCube = number_to_cube(i, tt.num_inputs());
 
                 tt.add_entry(inputCube, outCube);
             }
