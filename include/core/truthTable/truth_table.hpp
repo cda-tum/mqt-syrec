@@ -17,7 +17,15 @@ namespace syrec {
     public:
         using value_type = std::optional<bool>;
 
-        using cube_type = std::vector<value_type>;
+        struct cube_type {
+            std::vector<value_type> c;
+
+            bool operator<(const cube_type& cv) const{
+                return (this->c < cv.c);
+            }
+        };
+
+
 
         using cube_vector = std::map<cube_type, cube_type>;
 
@@ -25,7 +33,7 @@ namespace syrec {
 
         [[nodiscard]] std::size_t num_inputs() const {
             if (!cubes.empty()) {
-                return cubes.begin()->first.size();
+                return cubes.begin()->first.c.size();
             } else {
                 return 0;
             }
@@ -33,7 +41,7 @@ namespace syrec {
 
         [[nodiscard]] std::size_t num_outputs() const {
             if (!cubes.empty()) {
-                return cubes.begin()->second.size();
+                return cubes.begin()->second.c.size();
             } else {
                 return 0;
             }

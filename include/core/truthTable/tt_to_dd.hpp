@@ -6,7 +6,7 @@
 
 namespace syrec {
 
-    dd::mEdge buildDD(truthTable& tt, std::unique_ptr<dd::Package<>>& ddk);
+    dd::mEdge buildDD(const truthTable& tt, std::unique_ptr<dd::Package<>>& ddk);
 
 }
 

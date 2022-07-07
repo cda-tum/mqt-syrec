@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    dd::mEdge buildDD(truthTable& tt, std::unique_ptr<dd::Package<>>& ddk) {
+    dd::mEdge buildDD(const truthTable& tt, std::unique_ptr<dd::Package<>>& ddk) {
         truthTable::cube_vector dd_combination = tt.io_cube();
 
         truthTable::value_type falseVal = false;
@@ -27,20 +27,20 @@ namespace syrec {
 
         if (tt.num_inputs() == 1) {
             for (auto& [key, value]: dd_combination) {
-                if (key[0] == falseVal && value[0] == falseVal) {
+                if (key.c[0] == falseVal && value.c[0] == falseVal) {
                     f1 = dd::mEdge::one;
 
                 }
 
-                else if (key[0] == trueVal && value[0] == falseVal) {
+                else if (key.c[0] == trueVal && value.c[0] == falseVal) {
                     f2 = dd::mEdge::one;
                 }
 
-                else if (key[0] == falseVal && value[0] == trueVal) {
+                else if (key.c[0] == falseVal && value.c[0] == trueVal) {
                     f3 = dd::mEdge::one;
                 }
 
-                else if (key[0] == trueVal && value[0] == trueVal) {
+                else if (key.c[0] == trueVal && value.c[0] == trueVal) {
                     f4 = dd::mEdge::one;
                 }
 
@@ -52,53 +52,53 @@ namespace syrec {
 
         else {
             for (auto& [key, value]: dd_combination) {
-                if (key[0] == falseVal && value[0] == falseVal) {
+                if (key.c[0] == falseVal && value.c[0] == falseVal) {
                     truthTable::cube_type firstVal = key;
 
                     truthTable::cube_type secondVal = value;
 
-                    firstVal.erase(firstVal.begin());
+                    firstVal.c.erase(firstVal.c.begin());
 
-                    secondVal.erase(secondVal.begin());
+                    secondVal.c.erase(secondVal.c.begin());
 
                     tt1.add_entry(firstVal, secondVal);
 
                 }
 
-                else if (key[0] == trueVal && value[0] == falseVal) {
+                else if (key.c[0] == trueVal && value.c[0] == falseVal) {
                     truthTable::cube_type firstVal = key;
 
                     truthTable::cube_type secondVal = value;
 
-                    firstVal.erase(firstVal.begin());
+                    firstVal.c.erase(firstVal.c.begin());
 
-                    secondVal.erase(secondVal.begin());
+                    secondVal.c.erase(secondVal.c.begin());
 
                     tt2.add_entry(firstVal, secondVal);
 
                 }
 
-                else if (key[0] == falseVal && value[0] == trueVal) {
+                else if (key.c[0] == falseVal && value.c[0] == trueVal) {
                     truthTable::cube_type firstVal = key;
 
                     truthTable::cube_type secondVal = value;
 
-                    firstVal.erase(firstVal.begin());
+                    firstVal.c.erase(firstVal.c.begin());
 
-                    secondVal.erase(secondVal.begin());
+                    secondVal.c.erase(secondVal.c.begin());
 
                     tt3.add_entry(firstVal, secondVal);
 
                 }
 
-                else if (key[0] == trueVal && value[0] == trueVal) {
+                else if (key.c[0] == trueVal && value.c[0] == trueVal) {
                     truthTable::cube_type firstVal = key;
 
                     truthTable::cube_type secondVal = value;
 
-                    firstVal.erase(firstVal.begin());
+                    firstVal.c.erase(firstVal.c.begin());
 
-                    secondVal.erase(secondVal.begin());
+                    secondVal.c.erase(secondVal.c.begin());
 
                     tt4.add_entry(firstVal, secondVal);
                 }
