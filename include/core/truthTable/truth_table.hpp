@@ -15,25 +15,25 @@ namespace syrec {
 
     class TruthTable {
     public:
-        using value_type = std::optional<bool>;
+        using ValueType = std::optional<bool>;
 
-        struct cube_type {
-            std::vector<value_type> c;
+        struct CubeType {
+            std::vector<ValueType> c;
 
-            bool operator<(const cube_type& cv) const{
+            bool operator<(const CubeType& cv) const{
                 return (this->c < cv.c);
             }
 
-            [[nodiscard]] std::vector<cube_type> in_cube_to_full_cubes() const;
+            [[nodiscard]] std::vector<CubeType> in_cube_to_full_cubes() const;
 
             void insert_zero();
         };
 
 
 
-        using cube_vector = std::map<cube_type, cube_type>;
+        using CubeVector = std::map<CubeType, CubeType>;
 
-        using CubeTypeVec = std::vector<cube_type>;
+        using CubeTypeVec = std::vector<CubeType>;
 
 
         [[nodiscard]] std::size_t num_inputs() const {
@@ -52,7 +52,7 @@ namespace syrec {
             }
         }
 
-        void add_entry(cube_type const& input, cube_type const& output) {
+        void add_entry(CubeType const& input, CubeType const& output) {
             cubes.try_emplace(input, output);
         }
 
@@ -60,29 +60,29 @@ namespace syrec {
             cubes.clear();
         }
 
-        [[nodiscard]] const cube_vector& io_cube() const {
+        [[nodiscard]] const CubeVector& io_cube() const {
             return cubes;
         }
 
-        static cube_type number_to_cube(std::size_t number, std::size_t bw);
+        static CubeType number_to_cube(std::size_t number, std::size_t bw);
 
         void extend_truth_table();
 
         void HuffmanCodes();
 
     private:
-        cube_vector cubes;
+        CubeVector cubes;
     };
 
     struct MinHeapNode {
-        TruthTable::cube_type data;
+        TruthTable::CubeType data;
 
         std::size_t freq;
 
         MinHeapNode* left;
         MinHeapNode* right;
 
-        MinHeapNode(TruthTable::cube_type data, std::size_t const freq):
+        MinHeapNode(TruthTable::CubeType data, std::size_t const freq):
             data(std::move(data)), freq(freq)
 
         {
@@ -100,10 +100,10 @@ namespace syrec {
 
 
 
-    TruthTable::cube_type append_zero(TruthTable::cube_type enc);
+    TruthTable::CubeType append_zero(TruthTable::CubeType enc);
 
-    TruthTable::cube_type append_one(TruthTable::cube_type enc);
+    TruthTable::CubeType append_one(TruthTable::CubeType enc);
 
-    void hufCodes(struct MinHeapNode* root, TruthTable::cube_type enc, TruthTable::cube_vector& encInOut);
+    void hufCodes(struct MinHeapNode* root, TruthTable::CubeType enc, TruthTable::CubeVector& encInOut);
 
 } // namespace syrec
