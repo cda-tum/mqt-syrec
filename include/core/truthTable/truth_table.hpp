@@ -20,7 +20,7 @@ namespace syrec {
         struct CubeType {
             std::vector<ValueType> c;
 
-            bool operator<(const CubeType& cv) const{
+            bool operator<(const CubeType& cv) const {
                 return (this->c < cv.c);
             }
 
@@ -29,14 +29,11 @@ namespace syrec {
             void insert_zero();
         };
 
-
-
         using CubeVector = std::map<CubeType, CubeType>;
 
         using CubeTypeVec = std::vector<CubeType>;
 
-
-        [[nodiscard]] std::size_t num_inputs() const {
+        [[nodiscard]] std::size_t nInputs() const {
             if (!cubes.empty()) {
                 return cubes.begin()->first.c.size();
             } else {
@@ -44,7 +41,7 @@ namespace syrec {
             }
         }
 
-        [[nodiscard]] std::size_t num_outputs() const {
+        [[nodiscard]] std::size_t nOutputs() const {
             if (!cubes.empty()) {
                 return cubes.begin()->second.c.size();
             } else {
@@ -97,8 +94,6 @@ namespace syrec {
             return (l->freq > r->freq);
         }
     };
-
-
 
     TruthTable::CubeType append_zero(TruthTable::CubeType enc);
 

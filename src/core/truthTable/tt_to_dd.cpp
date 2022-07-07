@@ -19,13 +19,13 @@ namespace syrec {
         syrec::TruthTable tt3;
         syrec::TruthTable tt4;
 
-        if (tt.num_inputs() == 0) {
+        if (tt.nInputs() == 0) {
             return dd::mEdge::zero;
         }
 
-        std::size_t label = (tt.num_inputs()) - 1;
+        std::size_t label = (tt.nInputs()) - 1;
 
-        if (tt.num_inputs() == 1) {
+        if (tt.nInputs() == 1) {
             for (auto& [key, value]: dd_combination) {
                 if (key.c[0] == falseVal && value.c[0] == falseVal) {
                     f1 = dd::mEdge::one;
@@ -43,7 +43,6 @@ namespace syrec {
                 else if (key.c[0] == trueVal && value.c[0] == trueVal) {
                     f4 = dd::mEdge::one;
                 }
-
             }
 
             return ddk->makeDDNode(static_cast<dd::Qubit>(label), std::array{f1, f2, f3, f4});
@@ -102,7 +101,6 @@ namespace syrec {
 
                     tt4.add_entry(firstVal, secondVal);
                 }
-
             }
 
             auto p1 = buildDD(tt1, ddk);
