@@ -16,14 +16,14 @@ class TruthTableDD: public testing::TestWithParam<std::string> {
 protected:
     std::string testCircuitsDir = "./circuits/";
 
-    dd::QubitCount                     nqubits = 3U;
-    std::vector<std::vector<bool>>     inDummy;
-    std::vector<std::vector<bool>>     outDummy;
+    dd::QubitCount                    nqubits = 3U;
+    std::vector<std::vector<bool>>    inDummy;
+    std::vector<std::vector<bool>>    outDummy;
     TruthTable::CubeType              dummyVec;
     std::vector<TruthTable::CubeType> inCube;
     std::vector<TruthTable::CubeType> outCube;
-    TruthTable                         tt;
-    std::unique_ptr<dd::Package<>>     dd;
+    TruthTable                        tt;
+    std::unique_ptr<dd::Package<>>    dd;
 
     void SetUp() override {
         std::string   tt_param = GetParam();
@@ -74,7 +74,7 @@ INSTANTIATE_TEST_SUITE_P(TruthTableDD, TruthTableDD,
                              return s; });
 
 TEST_P(TruthTableDD, GenericttDD) {
-    EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() != 0);
+    EXPECT_TRUE(tt.nInputs() != 0 && tt.nInputs() != 0);
 
     auto circuit = (std::string)GetParam();
 
@@ -82,7 +82,7 @@ TEST_P(TruthTableDD, GenericttDD) {
 
     tt.HuffmanCodes();
 
-    EXPECT_TRUE(tt.num_inputs() != 0 && tt.num_inputs() == tt.num_outputs());
+    EXPECT_TRUE(tt.nInputs() != 0 && tt.nInputs() == tt.nOutputs());
 
     auto root = buildDD(tt, dd);
 
