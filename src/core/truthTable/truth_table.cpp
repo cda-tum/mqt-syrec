@@ -31,7 +31,7 @@ namespace syrec {
         return;
     }
 
-    truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw) {
+    truthTable::cube_type number_to_cube(std::size_t number, std::size_t bw ) {
         truthTable::cube_type c(bw);
 
         for (std::size_t i = 0; i < bw; ++i) {
