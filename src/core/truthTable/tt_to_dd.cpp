@@ -44,11 +44,6 @@ namespace syrec {
                     f4 = dd::mEdge::one;
                 }
 
-                /*
-			}
-
-
-			}*/
             }
 
             return ddk->makeDDNode(static_cast<dd::Qubit>(label), std::array{f1, f2, f3, f4});
@@ -108,11 +103,6 @@ namespace syrec {
                     tt4.add_entry(firstVal, secondVal);
                 }
 
-                /*
-            }
-
-
-            }*/
             }
 
             auto p1 = buildDD(tt1, ddk);
