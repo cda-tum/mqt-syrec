@@ -22,7 +22,7 @@ namespace syrec {
 
         for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
             for (std::size_t j = 0; j < dcPositions.size(); ++j) {
-                cube.at(dcPositions.at(j))  = i & (1u << (dcPositions.size() - j - 1)) ? 1 : 0;
+                cube.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
 
 
             }
