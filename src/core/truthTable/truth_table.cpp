@@ -2,27 +2,34 @@
 
 namespace syrec {
 
-    void in_cube_to_full_cubes(const truthTable::cube_type& c, truthTable::CubeTypeVec& result) {
+    void in_cube_to_full_cubes(const truthTable::cube_type& c, std::vector<truthTable::cube_type>& result) {
+        auto first = c.begin();
 
-        auto cube = c;
+        auto last = c.end();
 
-        std::vector<std::size_t> dcPositions;
+        truthTable::cube_type cube(first, last);
 
-        std::size_t pos = 0;
+        std::vector<unsigned> dcPositions;
 
-        for(auto it : cube){
-            if (!(it.has_value())) // if DC
+        unsigned pos = 0;
+
+        while (first != last) {
+            if (!((*first).has_value())) // if DC
             {
+                std::cout << "dontcare" << std::endl;
                 dcPositions.emplace_back(pos);
             }
 
             ++pos;
 
+            ++first;
         }
 
         for (unsigned i = 0; i < (1u << dcPositions.size()); ++i) {
             for (unsigned j = 0; j < dcPositions.size(); ++j) {
-                cube.at(dcPositions.at(j)) = (i & (1u << (dcPositions.size() - j - 1))) != 0;
+                unsigned localBit = i & (1u << (dcPositions.size() - j - 1)) ? 1 : 0;
+
+                cube.at(dcPositions.at(j)) = localBit;
             }
 
             result.emplace_back(cube);
@@ -40,10 +47,10 @@ namespace syrec {
     }
 
     void extend_truth_table(truthTable& tt) {
-        std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
+        std::map<std::vector<truthTable::cube_type>, truthTable::cube_type> newCubes;
 
-        for (auto const& [key, value]: tt.io_cube()) {
-            truthTable::CubeTypeVec inCube;
+        for (auto& [key, value]: tt.io_cube()) {
+            std::vector<truthTable::cube_type> inCube;
 
             in_cube_to_full_cubes(key, inCube);
 
@@ -55,7 +62,8 @@ namespace syrec {
         for (auto& [key, value]: newCubes) {
             for (auto& itCube: key) {
                 const truthTable::cube_type& newInEntry = itCube;
-                tt.add_entry( newInEntry, value);
+
+                tt.add_entry(newInEntry, value);
             }
         }
 

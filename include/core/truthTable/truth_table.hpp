@@ -21,7 +21,6 @@ namespace syrec {
 
         using cube_vector = std::map<cube_type, cube_type>;
 
-        using CubeTypeVec = std::vector<cube_type>;
 
         [[nodiscard]] std::size_t num_inputs() const {
             if (!cubes.empty()) {
