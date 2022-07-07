@@ -65,7 +65,7 @@ namespace syrec {
 
         unsigned currentPos = 0;
 
-        truthTable::cube_vector ioVec = tt.io_cube();
+        const truthTable::cube_vector ioVec = tt.io_cube();
 
         for (auto it = ioVec.begin();; ++it) {
             unsigned pos = 0;
