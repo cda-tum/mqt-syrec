@@ -2,9 +2,9 @@
 
 namespace syrec {
 
-    truthTable::CubeTypeVec truthTable::cube_type::in_cube_to_full_cubes() const {
+    TruthTable::CubeTypeVec TruthTable::cube_type::in_cube_to_full_cubes() const {
 
-        truthTable::CubeTypeVec result;
+        TruthTable::CubeTypeVec result;
 
         auto cube = c ;
 
@@ -27,7 +27,7 @@ namespace syrec {
 
 
             }
-            truthTable::cube_type cubeObj;
+            TruthTable::cube_type cubeObj;
             cubeObj.c = cube;
             result.emplace_back(cubeObj);
         }
@@ -35,8 +35,8 @@ namespace syrec {
         return result;
     }
 
-    truthTable::cube_type truthTable::number_to_cube(std::size_t number, std::size_t bw) {
-        truthTable::cube_type ct;
+    TruthTable::cube_type TruthTable::number_to_cube(std::size_t number, std::size_t bw) {
+        TruthTable::cube_type ct;
 
         for (std::size_t i = 0; i < bw; ++i) {
             ct.c.emplace_back((number & (1u << (bw - 1 - i))) != 0);
@@ -45,8 +45,8 @@ namespace syrec {
         return ct;
     }
 
-    void truthTable::extend_truth_table() {
-        std::map<truthTable::CubeTypeVec, truthTable::cube_type> newCubes;
+    void TruthTable::extend_truth_table() {
+        std::map<TruthTable::CubeTypeVec, TruthTable::cube_type> newCubes;
 
         for (auto const& [key, value]: io_cube()) {
             newCubes.try_emplace(key.in_cube_to_full_cubes(), value);
@@ -60,7 +60,7 @@ namespace syrec {
             }
         }
 
-        truthTable::cube_type outCube;
+        TruthTable::cube_type outCube;
 
         for (std::size_t outSize = 0; outSize < num_outputs(); outSize++){
             outCube.c.emplace_back(false);
@@ -68,23 +68,22 @@ namespace syrec {
 
         unsigned currentPos = 0;
 
-        //const truthTable::cube_vector ioVec = io_cube();
 
         for (auto it = io_cube().begin();; ++it) {
             unsigned pos = 0;
 
             std::size_t i = num_inputs();
 
-            /*if (it == io_cube().end()) {
+            if (it == io_cube().end()) {
                 pos = 1u << num_inputs();
-            }*/
+            } else {
                 for (auto& inBit: it->first.c) {
                     pos |= (*inBit) << --i;
                 }
-
+            }
 
             for (i = currentPos; i < pos; ++i) {
-                const truthTable::cube_type inputCube = number_to_cube(i, num_inputs());
+                const TruthTable::cube_type inputCube = number_to_cube(i, num_inputs());
 
                 add_entry(inputCube, outCube);
             }
@@ -98,23 +97,23 @@ namespace syrec {
     }
 
 
-    truthTable::cube_type append_zero(truthTable::cube_type enc) {
+    TruthTable::cube_type append_zero(TruthTable::cube_type enc) {
         enc.c.emplace_back(false);
 
         return enc;
     }
 
-    void truthTable::cube_type::insert_zero() {
+    void TruthTable::cube_type::insert_zero() {
         c.insert(c.begin(), false);
     }
 
-    truthTable::cube_type append_one(truthTable::cube_type enc) {
+    TruthTable::cube_type append_one(TruthTable::cube_type enc) {
         enc.c.emplace_back(true);
 
         return enc;
     }
 
-    void hufCodes(struct syrec::MinHeapNode* root, truthTable::cube_type enc, truthTable::cube_vector& encInOut) {
+    void hufCodes(struct syrec::MinHeapNode* root, TruthTable::cube_type enc, TruthTable::cube_vector& encInOut) {
         if (!root)
             return;
 
@@ -127,12 +126,12 @@ namespace syrec {
         hufCodes(root->right, append_one(enc), encInOut);
     }
 
-    void truthTable::HuffmanCodes() {
-        std::map<truthTable::cube_type, std::size_t> outputFreq;
+    void TruthTable::HuffmanCodes() {
+        std::map<TruthTable::cube_type, std::size_t> outputFreq;
 
-        truthTable::cube_vector encInOut;
+        TruthTable::cube_vector encInOut;
 
-        truthTable::cube_vector inOutCube = io_cube();
+        TruthTable::cube_vector inOutCube = io_cube();
 
         for (auto const& [in, out]: io_cube()) {
             auto [key, value] = outputFreq.try_emplace(out, 1);
@@ -147,11 +146,11 @@ namespace syrec {
 
             std::size_t encSize;
 
-            truthTable::value_type emptyVal;
+            TruthTable::value_type emptyVal;
 
-            truthTable::cube_type emptyVec;
+            TruthTable::cube_type emptyVec;
 
-            truthTable::cube_type codedVec;
+            TruthTable::cube_type codedVec;
 
             struct syrec::MinHeapNode* left;
             struct syrec::MinHeapNode* right;
@@ -204,7 +203,7 @@ namespace syrec {
 
             if(outSize > inSize) {  //not needed, just a safe condition
                 for (std::size_t j = 0; j < (outSize - inSize); j++) {
-                    truthTable::cube_type dummy = key;
+                    TruthTable::cube_type dummy = key;
 
                     dummy.insert_zero();
                     auto node = inOutCube.extract(key);

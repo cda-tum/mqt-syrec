@@ -13,7 +13,7 @@
 
 namespace syrec {
 
-    class truthTable {
+    class TruthTable {
     public:
         using value_type = std::optional<bool>;
 
@@ -75,14 +75,14 @@ namespace syrec {
     };
 
     struct MinHeapNode {
-        truthTable::cube_type data;
+        TruthTable::cube_type data;
 
         std::size_t freq;
 
         MinHeapNode* left;
         MinHeapNode* right;
 
-        MinHeapNode(truthTable::cube_type data, std::size_t const freq):
+        MinHeapNode(TruthTable::cube_type data, std::size_t const freq):
             data(std::move(data)), freq(freq)
 
         {
@@ -100,10 +100,10 @@ namespace syrec {
 
 
 
-    truthTable::cube_type append_zero(truthTable::cube_type enc);
+    TruthTable::cube_type append_zero(TruthTable::cube_type enc);
 
-    truthTable::cube_type append_one(truthTable::cube_type enc);
+    TruthTable::cube_type append_one(TruthTable::cube_type enc);
 
-    void hufCodes(struct MinHeapNode* root, truthTable::cube_type enc, truthTable::cube_vector& encInOut);
+    void hufCodes(struct MinHeapNode* root, TruthTable::cube_type enc, TruthTable::cube_vector& encInOut);
 
 } // namespace syrec
