@@ -21,7 +21,7 @@ namespace syrec {
             ++pos;
         }
 
-        for (std::size_t i = 0; i < (1u << dcPositions.size()); ++i) {
+        for (std::size_t i = 0; i < (1 << dcPositions.size()); ++i) {
             for (std::size_t j = 0; j < dcPositions.size(); ++j) {
                 cube.at(dcPositions.at(j))  = ((i & (1u << (dcPositions.size() - j - 1))) != 0);
 
@@ -70,12 +70,12 @@ namespace syrec {
 
         const truthTable::cube_vector ioVec = io_cube();
 
-        for (auto it = ioVec.begin();; ++it) {
+        for (auto it = io_cube().begin();; ++it) {
             unsigned pos = 0;
 
             std::size_t i = num_inputs();
 
-            if (it == ioVec.end()) {
+            if (it == io_cube().end()) {
                 pos = 1u << num_inputs();
             } else {
                 for (auto& inBit: it->first.c) {
@@ -91,7 +91,7 @@ namespace syrec {
 
             currentPos = pos;
 
-            if (it == ioVec.end()) {
+            if (it == io_cube().end()) {
                 break;
             }
         }
