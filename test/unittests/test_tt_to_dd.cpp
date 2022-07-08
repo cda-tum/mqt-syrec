@@ -106,11 +106,11 @@ TEST_P(TruthTableDD, GenericttDD) {
 
     else if (circuit == "NEGCXX") {
         auto q = qc::QuantumComputation(3);
-        q.x(1);
-        q.x(2);
+        //q.x(1);
+        //q.x(2);
         q.x(0, dd::Controls{1_pc, 2_pc}); // creates negative CXX with target q0 and control q1 and q2
-        q.x(1);
-        q.x(2);
+        //q.x(1);
+        //q.x(2);
         ddTest = dd::buildFunctionality(&q, dd);
     }
 
