@@ -1,6 +1,9 @@
 #pragma once
 
+#include "dd/Package.hpp"
+
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <iterator>
@@ -15,90 +18,174 @@ namespace syrec {
 
     class TruthTable {
     public:
-        using ValueType = std::optional<bool>;
+        class Cube {
+        public:
+            using Value  = std::optional<bool>;
+            using Vector = std::vector<Cube>;
 
-        struct CubeType {
-            std::vector<ValueType> c;
+        private:
+            std::vector<Value> cube{};
 
-            bool operator<(const CubeType& cv) const {
-                return (this->c < cv.c);
+        public:
+            Cube() = default;
+            explicit Cube(std::vector<Value> cube):
+                cube(std::move(cube)) {}
+
+            Cube(const std::size_t bw, const Value& initializer) {
+                cube.resize(bw, initializer);
             }
 
-            [[nodiscard]] std::vector<CubeType> in_cube_to_full_cubes() const;
+            template<class InputIt>
+            Cube(InputIt first, InputIt last) {
+                std::copy(first, last, std::back_inserter(cube));
+            }
 
-            void insert_zero();
+            // construct a cube from a (64bit) number with a given bitwidth
+            static auto fromInteger(const std::uint64_t number, const std::size_t bw) -> Cube {
+                assert(bw <= 64U);
+                Cube cube{};
+                cube.reserve(bw);
+                for (std::size_t i = 0U; i < bw; ++i) {
+                    cube.emplace_back((number & (1ULL << (bw - 1U - i))) != 0U);
+                }
+                return cube;
+            }
+            // return integer representation of the cube
+            [[nodiscard]] auto toInteger() const -> std::uint64_t {
+                assert(cube.size() <= 64U);
+                assert(std::none_of(cube.cbegin(), cube.cend(), [](auto const& v) { return !v.has_value(); }));
+                std::uint64_t result = 0U;
+                for (std::size_t i = 0U; i < cube.size(); ++i) {
+                    if (*cube[i]) {
+                        result |= (1ULL << (cube.size() - 1U - i));
+                    }
+                }
+                return result;
+            }
+
+            [[nodiscard]] auto completeCubes() const -> Vector;
+
+            auto insertZero() -> void {
+                cube.insert(cube.begin(), false);
+            }
+            [[nodiscard]] auto append(const Value& v) const -> Cube {
+                auto c = cube;
+                c.emplace_back(v);
+                return Cube(c);
+            }
+            [[nodiscard]] auto appendZero() const -> Cube {
+                return append(false);
+            }
+            [[nodiscard]] auto appendOne() const -> Cube {
+                return append(true);
+            }
+
+            // pass-through functions for underlying vector
+            auto operator[](std::size_t pos) const -> Value {
+                return cube[pos];
+            }
+            auto operator<(const Cube& cv) const -> bool {
+                return (cube < cv.cube);
+            }
+            auto reserve(const std::size_t n) -> void {
+                cube.reserve(n);
+            }
+            auto resize(const std::size_t n, const Value& val = Value()) -> void {
+                cube.resize(n, val);
+            }
+            auto emplace_back(const Value& v) -> void {
+                cube.emplace_back(v);
+            }
+            [[nodiscard]] auto size() const -> std::size_t {
+                return cube.size();
+            }
+            [[nodiscard]] auto empty() const -> bool {
+                return cube.empty();
+            }
+            [[nodiscard]] auto begin() const -> decltype(cube.begin()) {
+                return cube.begin();
+            }
+            [[nodiscard]] auto cbegin() const -> decltype(cube.cbegin()) {
+                return cube.cbegin();
+            }
+            [[nodiscard]] auto end() const -> decltype(cube.end()) {
+                return cube.end();
+            }
+            [[nodiscard]] auto cend() const -> decltype(cube.cend()) {
+                return cube.cend();
+            }
         };
 
-        using CubeVector = std::map<CubeType, CubeType>;
+        using CubeMap = std::map<Cube, Cube>;
 
-        using CubeTypeVec = std::vector<CubeType>;
-
-        [[nodiscard]] std::size_t nInputs() const {
-            if (!cubes.empty()) {
-                return cubes.begin()->first.c.size();
-            } else {
-                return 0;
+        [[nodiscard]] auto nInputs() const -> std::size_t {
+            if (cubeMap.empty()) {
+                return 0U;
             }
+            return cubeMap.begin()->first.size();
         }
 
-        [[nodiscard]] std::size_t nOutputs() const {
-            if (!cubes.empty()) {
-                return cubes.begin()->second.c.size();
-            } else {
-                return 0;
+        [[nodiscard]] auto nOutputs() const -> std::size_t {
+            if (cubeMap.empty()) {
+                return 0U;
             }
+            return cubeMap.begin()->second.size();
         }
 
-        void add_entry(CubeType const& input, CubeType const& output) {
-            cubes.try_emplace(input, output);
+        auto insert(const Cube& input, const Cube& output) -> void {
+            assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
+            cubeMap.try_emplace(input, output);
+        }
+        auto insert(Cube&& input, Cube&& output) -> void {
+            assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
+            cubeMap.try_emplace(std::move(input), std::move(output));
         }
 
-        void clear() {
-            cubes.clear();
+        auto clear() -> void {
+            cubeMap.clear();
         }
 
-        [[nodiscard]] const CubeVector& io_cube() const {
-            return cubes;
-        }
+        auto extend() -> void;
 
-        static CubeType number_to_cube(std::size_t number, std::size_t bw);
+        auto encodeHuffman() -> void;
 
-        void extend_truth_table();
+        auto augmentWithConstants() -> void;
 
-        void HuffmanCodes();
+        auto buildDD(std::unique_ptr<dd::Package<>>& dd) const -> dd::mEdge;
 
     private:
-        CubeVector cubes;
+        CubeMap cubeMap{};
+
+        struct MinHeapNode {
+            Cube data;
+
+            std::size_t freq{};
+
+            std::shared_ptr<MinHeapNode> left{};
+            std::shared_ptr<MinHeapNode> right{};
+
+            MinHeapNode(Cube data, const std::size_t freq):
+                data(std::move(data)), freq(freq) {}
+
+            auto operator>(const MinHeapNode& other) const -> bool {
+                return freq > other.freq;
+            }
+
+            auto traverse(Cube&& encodedCube, CubeMap& encoding) const -> void {
+                // leaf node -> add encoding
+                if (!data.empty()) {
+                    encoding.try_emplace(data, std::move(encodedCube));
+                    return;
+                }
+
+                // non-leaf node -> traverse left and right subtree
+                if (left) {
+                    left->traverse(encodedCube.appendZero(), encoding);
+                }
+                if (right) {
+                    right->traverse(encodedCube.appendOne(), encoding);
+                }
+            }
+        };
     };
-
-    struct MinHeapNode {
-        TruthTable::CubeType data;
-
-        std::size_t freq;
-
-        MinHeapNode* left;
-        MinHeapNode* right;
-
-        MinHeapNode(TruthTable::CubeType data, std::size_t const freq):
-            data(std::move(data)), freq(freq)
-
-        {
-            left = right = nullptr;
-        }
-    };
-
-    struct compare {
-        bool operator()(MinHeapNode const* l, MinHeapNode const* r) const
-
-        {
-            return (l->freq > r->freq);
-        }
-    };
-
-    TruthTable::CubeType append_zero(TruthTable::CubeType enc);
-
-    TruthTable::CubeType append_one(TruthTable::CubeType enc);
-
-    void hufCodes(struct MinHeapNode* root, TruthTable::CubeType enc, TruthTable::CubeVector& encInOut);
-
 } // namespace syrec
