@@ -1,119 +1,120 @@
-#include "core/truthTable/tt_to_dd.hpp"
+#include "core/truthTable/truth_table.hpp"
 #include "dd/FunctionalityConstruction.hpp"
 
 #include "gtest/gtest.h"
-#include <nlohmann/json.hpp>
-#include <string>
-#include <vector>
-
-using json = nlohmann::json;
 
 using namespace dd::literals;
-
 using namespace syrec;
 
 class TruthTableDD: public testing::TestWithParam<std::string> {
 protected:
-    std::string testCircuitsDir = "./circuits/";
+    dd::QubitCount                 nqubits = 3U;
+    TruthTable                     tt{};
+    std::unique_ptr<dd::Package<>> dd;
 
-    dd::QubitCount                    nqubits = 3U;
-    std::vector<std::vector<bool>>    inDummy;
-    std::vector<std::vector<bool>>    outDummy;
-    TruthTable::CubeType              dummyVec;
-    std::vector<TruthTable::CubeType> inCube;
-    std::vector<TruthTable::CubeType> outCube;
-    TruthTable                        tt;
-    std::unique_ptr<dd::Package<>>    dd;
+    TruthTable::Cube c00{};
+    TruthTable::Cube c01{};
+    TruthTable::Cube c10{};
+    TruthTable::Cube c11{};
+
+    TruthTable::Cube c000{};
+    TruthTable::Cube c001{};
+    TruthTable::Cube c010{};
+    TruthTable::Cube c011{};
+    TruthTable::Cube c100{};
+    TruthTable::Cube c101{};
+    TruthTable::Cube c110{};
+    TruthTable::Cube c111{};
 
     void SetUp() override {
-        std::string   tt_param = GetParam();
-        std::ifstream i(testCircuitsDir + "truth_table.json");
-        json          j = json::parse(i);
-
         dd = std::make_unique<dd::Package<>>(nqubits);
 
-        inDummy = j[tt_param]["in"];
+        c00 = TruthTable::Cube::fromInteger(0b00U, 2U);
+        c01 = TruthTable::Cube::fromInteger(0b01U, 2U);
+        c10 = TruthTable::Cube::fromInteger(0b10U, 2U);
+        c11 = TruthTable::Cube::fromInteger(0b11U, 2U);
 
-        outDummy = j[tt_param]["out"];
-
-        for (const auto& in: inDummy) {
-            for (auto inVal: in) {
-                std::optional<bool> dummy = inVal;
-                dummyVec.c.push_back(dummy);
-            }
-            inCube.push_back(dummyVec);
-            dummyVec.c.clear();
-        }
-
-        dummyVec.c.clear();
-
-        for (const auto& out: outDummy) {
-            for (auto outVal: out) {
-                std::optional<bool> dummy = outVal;
-                dummyVec.c.push_back(dummy);
-            }
-            outCube.push_back(dummyVec);
-            dummyVec.c.clear();
-        }
-
-        for (std::size_t index = 0; index < inCube.size(); index++) {
-            tt.add_entry(inCube[index], outCube[index]);
-        }
+        c000 = TruthTable::Cube::fromInteger(0b000U, 3U);
+        c001 = TruthTable::Cube::fromInteger(0b001U, 3U);
+        c010 = TruthTable::Cube::fromInteger(0b010U, 3U);
+        c011 = TruthTable::Cube::fromInteger(0b011U, 3U);
+        c100 = TruthTable::Cube::fromInteger(0b100U, 3U);
+        c101 = TruthTable::Cube::fromInteger(0b101U, 3U);
+        c110 = TruthTable::Cube::fromInteger(0b110U, 3U);
+        c111 = TruthTable::Cube::fromInteger(0b111U, 3U);
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(TruthTableDD, TruthTableDD,
-                         testing::Values(
-                                 "Id2bit",
-                                 "CNOT",
-                                 "SWAP",
-                                 "NEGCXX"),
-                         [](const testing::TestParamInfo<TruthTableDD::ParamType>& info) {
-                             auto s = info.param;
-                             std::replace( s.begin(), s.end(), '-', '_');
-                             return s; });
+TEST_F(TruthTableDD, Ident2Bit) {
+    // create identity truth table
+    tt.insert(c00, c00);
+    tt.insert(c01, c01);
+    tt.insert(c10, c10);
+    tt.insert(c11, c11);
 
-TEST_P(TruthTableDD, GenericttDD) {
-    EXPECT_TRUE(tt.nInputs() != 0 && tt.nInputs() != 0);
+    EXPECT_EQ(tt.nInputs(), 2U);
+    EXPECT_EQ(tt.nOutputs(), 2U);
 
-    auto circuit = (std::string)GetParam();
+    const auto ttDD = tt.buildDD(dd);
+    EXPECT_TRUE(ttDD.p != nullptr);
 
-    tt.extend_truth_table();
+    EXPECT_EQ(ttDD, dd->makeIdent(2U));
+}
 
-    tt.HuffmanCodes();
+TEST_F(TruthTableDD, CNOT) {
+    // create identity truth table
+    tt.insert(c00, c00);
+    tt.insert(c01, c01);
+    tt.insert(c10, c11);
+    tt.insert(c11, c10);
 
-    EXPECT_TRUE(tt.nInputs() != 0 && tt.nInputs() == tt.nOutputs());
+    EXPECT_EQ(tt.nInputs(), 2U);
+    EXPECT_EQ(tt.nOutputs(), 2U);
 
-    auto root = buildDD(tt, dd);
+    const auto ttDD = tt.buildDD(dd);
+    EXPECT_TRUE(ttDD.p != nullptr);
 
-    qc::MatrixDD ddTest;
+    auto qc = qc::QuantumComputation(2U);
+    qc.x(0, 1_pc); // CNOT with target q0 and control q1
+    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
+}
 
-    if (circuit == "Id2bit") {
-        ddTest = dd->makeIdent(2);
-    }
+TEST_F(TruthTableDD, SWAP) {
+    // create identity truth table
+    tt.insert(c00, c00);
+    tt.insert(c01, c10);
+    tt.insert(c10, c01);
+    tt.insert(c11, c11);
 
-    else if (circuit == "CNOT") {
-        auto q = qc::QuantumComputation(2);
-        q.x(0, 1_pc); // creates CNOT with target q0 and control q1
-        ddTest = dd::buildFunctionality(&q, dd);
-    }
+    EXPECT_EQ(tt.nInputs(), 2U);
+    EXPECT_EQ(tt.nOutputs(), 2U);
 
-    else if (circuit == "SWAP") {
-        auto q = qc::QuantumComputation(2);
-        q.swap(0, 1); // creates CNOT with target q0 and control q1
-        ddTest = dd::buildFunctionality(&q, dd);
-    }
+    const auto ttDD = tt.buildDD(dd);
+    EXPECT_TRUE(ttDD.p != nullptr);
 
-    else if (circuit == "NEGCXX") {
-        auto q = qc::QuantumComputation(3);
-        //q.x(1);
-        //q.x(2);
-        q.x(0, dd::Controls{1_pc, 2_pc}); // creates negative CXX with target q0 and control q1 and q2
-        //q.x(1);
-        //q.x(2);
-        ddTest = dd::buildFunctionality(&q, dd);
-    }
+    auto qc = qc::QuantumComputation(2U);
+    qc.swap(0, 1);
+    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
+}
 
-    EXPECT_TRUE(root.p != nullptr);
-    EXPECT_EQ(root, ddTest);
+TEST_F(TruthTableDD, Toffoli) {
+    // create identity truth table
+    tt.insert(c000, c000);
+    tt.insert(c001, c001);
+    tt.insert(c010, c010);
+    tt.insert(c011, c011);
+    tt.insert(c100, c100);
+    tt.insert(c101, c101);
+    tt.insert(c110, c111);
+    tt.insert(c111, c110);
+
+    EXPECT_EQ(tt.nInputs(), 3U);
+    EXPECT_EQ(tt.nOutputs(), 3U);
+
+    const auto ttDD = tt.buildDD(dd);
+    EXPECT_TRUE(ttDD.p != nullptr);
+
+    auto qc = qc::QuantumComputation(3U);
+    qc.x(0, {1_pc, 2_pc}); // Toffoli with target q0 and controls q1 and q2
+    EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
 }
