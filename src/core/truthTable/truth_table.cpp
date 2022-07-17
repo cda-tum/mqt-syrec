@@ -112,8 +112,8 @@ namespace syrec {
             // compute appropriate frequency to cover both nodes
             const auto freq = std::max(left->freq, right->freq) + 1U;
             // create new parent node
-            auto top = std::make_shared<MinHeapNode>(Cube{}, freq);
-            top->left = left;
+            auto top   = std::make_shared<MinHeapNode>(Cube{}, freq);
+            top->left  = left;
             top->right = right;
             // add node to queue
             minHeap.emplace(std::move(top));
@@ -137,19 +137,19 @@ namespace syrec {
 
     auto TruthTable::augmentWithConstants() -> void {
         for (auto const& [input, output]: cubeMap) {
-            const auto inputSize = input.size();
+            const auto inputSize  = input.size();
             const auto outputSize = output.size();
             if (inputSize >= outputSize) {
                 continue;
             }
 
             const auto requiredConstants = outputSize - inputSize;
-            auto newCube = input;
+            auto       newCube           = input;
             newCube.reserve(outputSize);
             for (std::size_t i = 0; i < requiredConstants; i++) {
                 newCube.insertZero();
             }
-            auto nh = cubeMap.extract(input);
+            auto nh  = cubeMap.extract(input);
             nh.key() = newCube;
             cubeMap.insert(std::move(nh));
         }
@@ -171,10 +171,10 @@ namespace syrec {
                 // truth table has to be completely specified
                 assert(input[0].has_value());
                 assert(output[0].has_value());
-                const auto in = *input[0];
-                const auto out = *output[0];
+                const auto in    = *input[0];
+                const auto out   = *output[0];
                 const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-                edges[index] = dd::mEdge::one;
+                edges[index]     = dd::mEdge::one;
             }
             return dd->makeDDNode(0, edges);
         }
@@ -185,16 +185,16 @@ namespace syrec {
             // truth table has to be completely specified
             assert(input[0].has_value());
             assert(output[0].has_value());
-            const auto in = *input[0];
-            const auto out = *output[0];
+            const auto in    = *input[0];
+            const auto out   = *output[0];
             const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-            Cube reducedInput(input.begin() +1, input.end());
-            Cube reducedOutput(output.begin() +1, output.end());
+            Cube       reducedInput(input.begin() + 1, input.end());
+            Cube       reducedOutput(output.begin() + 1, output.end());
             subTables[index].insert(std::move(reducedInput), std::move(reducedOutput));
         }
 
         // recursively build the DD for each sub-table
-        for(std::size_t i = 0U; i < 4U; i++) {
+        for (std::size_t i = 0U; i < 4U; i++) {
             edges[i] = subTables[i].buildDD(dd);
             // free up the memory used by the sub-table as fast as possible.
             subTables[i].clear();
