@@ -81,12 +81,23 @@ namespace syrec {
             }
 
             // pass-through functions for underlying vector
+
+            auto at(std::size_t pos) -> Value& {
+                return cube[pos];
+            }
+
             auto operator[](std::size_t pos) const -> Value {
                 return cube[pos];
             }
+
             auto operator<(const Cube& cv) const -> bool {
                 return (cube < cv.cube);
             }
+
+            auto operator==(const Cube& cv) const -> bool {
+                return (cube == cv.cube);
+            }
+
             auto reserve(const std::size_t n) -> void {
                 cube.reserve(n);
             }
@@ -96,6 +107,11 @@ namespace syrec {
             auto emplace_back(const Value& v) -> void {
                 cube.emplace_back(v);
             }
+
+            auto pop_back() -> void {
+                cube.pop_back();
+            }
+
             [[nodiscard]] auto size() const -> std::size_t {
                 return cube.size();
             }
@@ -143,6 +159,10 @@ namespace syrec {
 
         auto clear() -> void {
             cubeMap.clear();
+        }
+
+        [[nodiscard]] const CubeMap& ioCube() const {
+            return cubeMap;
         }
 
         auto extend() -> void;
