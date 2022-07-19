@@ -11,10 +11,10 @@ namespace syrec {
             if (cube[pos].has_value()) {
                 continue;
             }
-
             // recursively compute all the complete cubes for the zero case
-            auto zero         = Cube(cube);
-            zero[pos]         = false;
+            Cube zero(cube);
+            zero.at(pos) = false;
+
             auto completeZero = zero.completeCubes();
             // move the computed cubes to the result vector
             result.insert(result.end(),
@@ -22,8 +22,10 @@ namespace syrec {
                           std::make_move_iterator(completeZero.end()));
 
             // recursively compute all the complete cubes for the one case
-            auto one         = Cube(cube);
-            one[pos]         = true;
+
+            Cube one(cube);
+            one.at(pos) = true;
+
             auto completeOne = one.completeCubes();
             // move the computed cubes to the result vector
             result.insert(result.end(),
