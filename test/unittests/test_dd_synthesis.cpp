@@ -46,13 +46,45 @@ protected:
     }
 };
 
-TEST_F(DDSynth, CUSTOMTT) {
+TEST_F(DDSynth, CUSTOMTT1) {
     tt.insert(c001, c001);
     tt.insert(c010, c100);
     tt.insert(c011, c101);
     tt.insert(c100, c111);
     tt.insert(c101, c010);
     tt.insert(c110, c011);
+    tt.insert(c111, c110);
+
+    EXPECT_EQ(tt.ioCube().size(), 7U);
+
+    tt.extend();
+
+    EXPECT_EQ(tt.ioCube().size(), 8U);
+
+    EXPECT_EQ(tt.nInputs(), 3U);
+    EXPECT_EQ(tt.nOutputs(), 3U);
+
+    const auto ttDD = tt.buildDD(dd3Bit);
+    EXPECT_TRUE(ttDD.p != nullptr);
+
+    EXPECT_NE(ttDD, dd3Bit->makeIdent(3U));
+
+    auto src = ttDD;
+
+    EXPECT_NE(src, dd3Bit->makeIdent(3U));
+
+    algoQ(src, dd3Bit);
+
+    EXPECT_EQ(src, dd3Bit->makeIdent(3U));
+}
+
+TEST_F(DDSynth, CUSTOMTT2) {
+    tt.insert(c001, c011);
+    tt.insert(c010, c001);
+    tt.insert(c011, c010);
+    tt.insert(c100, c100);
+    tt.insert(c101, c111);
+    tt.insert(c110, c101);
     tt.insert(c111, c110);
 
     EXPECT_EQ(tt.ioCube().size(), 7U);
