@@ -400,5 +400,5 @@ namespace syrec {
         std::cout << "src is identity" << std::endl;
     }
 
-}
-// namespace syrec
+} // namespace syrec
+  // namespace syrec
