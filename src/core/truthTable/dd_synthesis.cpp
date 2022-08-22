@@ -120,6 +120,8 @@ namespace syrec {
         currentNode.qubit = current->v;
         currentNode.type  = dd::Control::Type::pos;
 
+        std::cout << "indices size" << indices.size() << std::endl;
+
         for (auto ind: indices) {
             for (std::size_t p2Obj = 0; p2Obj < p2SigVecCpy[ind].size(); p2Obj++) {
                 dd::Controls Ctrl;
@@ -131,8 +133,10 @@ namespace syrec {
                     p2SigVecCpy[ind].at(p2Obj) = true;
                 }
 
-                auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVecCpy[ind]);
-                if (it != p1SigVec.end()) {
+                auto it1 = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVecCpy[ind]);
+                auto it2 = std::find(p2SigVec.begin(), p2SigVec.end(), p2SigVecCpy[ind]);
+
+                if (it1 != p1SigVec.end() && it2 != p2SigVec.end()) {
                     std::cout << "not changed to unique signature" << std::endl;
                     p2SigVecCpy = p2SigVec;
                     continue;
@@ -186,9 +190,8 @@ namespace syrec {
                     break;
                 }
             }
-
-            algoQ(src, dd);
         }
+        algoQ(src, dd);
     }
 
     bool algoP3(dd::mNode* current) {
@@ -224,20 +227,23 @@ namespace syrec {
                 dd::Controls Ctrl;
 
                 for (auto const& i: rootSigVec) {
+                    std::cout << "inside root p1" << std::endl;
                     for (std::size_t j = 0; j < i.size(); j++) {
                         if (*(i[j])) {
                             std::cout << "root" << std::endl;
                             std::cout << "pos" << std::endl;
                             dd::Control obj;
                             obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::pos;
+                            std::cout << (i.size() + current->v) - j << std::endl;
+                            obj.type = dd::Control::Type::pos;
                             Ctrl.insert(obj);
                         } else {
                             std::cout << "root" << std::endl;
                             std::cout << "neg" << std::endl;
                             dd::Control obj;
                             obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::neg;
+                            std::cout << (i.size() + current->v) - j << std::endl;
+                            obj.type = dd::Control::Type::neg;
                             Ctrl.insert(obj);
                         }
                     }
@@ -248,6 +254,8 @@ namespace syrec {
                     auto ddTest = dd::buildFunctionality(&q, dd);
                     src         = dd->multiply(src, ddTest);
                 }
+
+                algoQ(src, dd);
             }
         }
     }
@@ -291,14 +299,16 @@ namespace syrec {
                             std::cout << "pos" << std::endl;
                             dd::Control obj;
                             obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::pos;
+                            std::cout << (i.size() + current->v) - j << std::endl;
+                            obj.type = dd::Control::Type::pos;
                             Ctrl.insert(obj);
                         } else {
                             std::cout << "root" << std::endl;
                             std::cout << "neg" << std::endl;
                             dd::Control obj;
                             obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::neg;
+                            std::cout << (i.size() + current->v) - j << std::endl;
+                            obj.type = dd::Control::Type::neg;
                             Ctrl.insert(obj);
                         }
                     }
@@ -310,14 +320,16 @@ namespace syrec {
                                 std::cout << "pos" << std::endl;
                                 dd::Control obj;
                                 obj.qubit = static_cast<dd::Qubit>(current->v - (pj + 1));
-                                obj.type  = dd::Control::Type::pos;
+                                std::cout << current->v - (pj + 1) << std::endl;
+                                obj.type = dd::Control::Type::pos;
                                 Ctrl.insert(obj);
                             } else {
                                 std::cout << "not root" << std::endl;
                                 std::cout << "neg" << std::endl;
                                 dd::Control obj;
                                 obj.qubit = static_cast<dd::Qubit>(current->v - (pj + 1));
-                                obj.type  = dd::Control::Type::neg;
+                                std::cout << current->v - (pj + 1) << std::endl;
+                                obj.type = dd::Control::Type::neg;
                                 Ctrl.insert(obj);
                             }
                         }
@@ -329,6 +341,8 @@ namespace syrec {
                         src         = dd->multiply(src, ddTest);
                     }
                 }
+
+                algoQ(src, dd);
 
             }
 
@@ -363,12 +377,13 @@ namespace syrec {
         auto currNode = src.p;
 
         while (src != dd->makeIdent(static_cast<dd::Qubit>(dd->qubits()))) {
-            std::cout << "while" << std::endl;
+            std::cout << "while main" << std::endl;
             for (const auto& edge: currNode->e) {
                 if (!edge.isTerminal()) {
                     auto it = std::find(visited.begin(), visited.end(), edge.p);
 
                     if (it == visited.end()) {
+                        std::cout << "node not present" << std::endl;
                         algoP(src, edge.p, dd);
                         q.emplace_back(edge.p);
                         visited.emplace_back(edge.p);
@@ -378,7 +393,12 @@ namespace syrec {
 
             currNode = q.front();
             q.erase(q.begin());
+
+            std::cout << "end while" << std::endl;
         }
+
+        std::cout << "src is identity" << std::endl;
     }
 
-} // namespace syrec
+}
+// namespace syrec

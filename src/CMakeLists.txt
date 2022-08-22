@@ -10,6 +10,7 @@ add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/dd_synthesis.cpp
+			#${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/pla_parser.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/gate.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/circuit.hpp
@@ -24,6 +25,7 @@ add_library(${PROJECT_NAME}
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/utils/timer.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
 			${${PROJECT_NAME}_SOURCE_DIR}/include/core/truthTable/dd_synthesis.hpp)
+			#${${PROJECT_NAME}_SOURCE_DIR}/include/core/truthTable/pla_parser.hpp)
 
 # set include directories
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)
