@@ -1363,7 +1363,7 @@ namespace syrec {
         }
     }
 
-    bool syrec_synthesis(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    bool synthesisNoLines(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // Settings parsing
         auto variable_name_format  = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto main_module           = get<std::string>(settings, "main_module", std::string());

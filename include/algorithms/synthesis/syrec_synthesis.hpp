@@ -152,7 +152,7 @@ namespace syrec {
     /**
     * @brief SyReC Synthesis
     */
-    bool syrec_synthesis(circuit& circ, const program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
+    bool synthesisNoLines(circuit& circ, const program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
 } // namespace syrec
 
 #endif /* SYREC_SYNTHESIS_HPP */

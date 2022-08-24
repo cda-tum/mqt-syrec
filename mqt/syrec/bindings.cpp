@@ -1,4 +1,5 @@
 #include "algorithms/simulation/simple_simulation.hpp"
+#include "algorithms/synthesis/original_syrec.hpp"
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
@@ -84,7 +85,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_readwrite("targets", &gate::targets)
             .def_readwrite("type", &gate::type);
 
-    m.def("synthesis", &syrec_synthesis, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
+    m.def("synthesisAdditionalLines", &synthesisAdditionalLines, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
+    m.def("synthesisNoLines", &synthesisNoLines, "circ"_a, "program"_a, "settings"_a = properties::ptr(), "statistics"_a = properties::ptr());
     m.def("simple_simulation", &simple_simulation, "output"_a, "circ"_a, "input"_a, "statistics"_a = properties::ptr());
 
 #ifdef VERSION_INFO

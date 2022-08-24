@@ -1,9 +1,11 @@
 add_library(${PROJECT_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/original_syrec.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
+			${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/original_syrec.hpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp

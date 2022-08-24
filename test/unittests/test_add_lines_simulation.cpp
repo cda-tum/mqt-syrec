@@ -1,5 +1,5 @@
 #include "algorithms/simulation/simple_simulation.hpp"
-#include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "algorithms/synthesis/original_syrec.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
@@ -15,7 +15,7 @@ using json = nlohmann::json;
 
 using namespace syrec;
 
-class SyrecSimulationTest: public testing::TestWithParam<std::string> {
+class SyrecAddLinesSimulationTest: public testing::TestWithParam<std::string> {
 protected:
     std::string             test_circuits_dir = "./circuits/";
     std::string             file_name;
@@ -28,14 +28,14 @@ protected:
     void SetUp() override {
         std::string synthesis_param = GetParam();
         file_name                   = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i(test_circuits_dir + "circuits_simulation.json");
+        std::ifstream i(test_circuits_dir + "circuits_simulation_add_lines.json");
         json          j  = json::parse(i);
         expected_sim_out = j[synthesis_param]["sim_out"];
         set_lines        = j[synthesis_param]["set_lines"].get<std::vector<int>>();
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
+INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecAddLinesSimulationTest,
                          testing::Values(
                                  "alu_2",
                                  "swap_2",
@@ -43,12 +43,12 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                                  "multiply_2",
                                  "modulo_2",
                                  "negate_8"),
-                         [](const testing::TestParamInfo<SyrecSimulationTest::ParamType>& info) {
+                         [](const testing::TestParamInfo<SyrecAddLinesSimulationTest::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
                              return s; });
 
-TEST_P(SyrecSimulationTest, GenericSimulationTest) {
+TEST_P(SyrecAddLinesSimulationTest, GenericSimulationTest) {
     circuit               circ;
     program               prog;
     read_program_settings settings;
@@ -58,7 +58,7 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
-    EXPECT_TRUE(synthesisNoLines(circ, prog));
+    EXPECT_TRUE(synthesisAdditionalLines(circ, prog));
 
     input.resize(circ.get_lines());
 
