@@ -2,6 +2,8 @@
 
 #include "core/truthTable/truth_table.hpp"
 
+#include <stdexcept>
+
 namespace syrec {
 
     inline TruthTable::Cube::Value transformPlaChar(const char& c) {
@@ -14,7 +16,7 @@ namespace syrec {
             case '1':
                 return true;
             default:
-                std::cerr << "Unknown Character" << std::endl;
+                throw std::invalid_argument("Unknown Character");
                 return {};
         }
     }
@@ -24,8 +26,8 @@ namespace syrec {
         str.erase(0, str.find_first_not_of(' ')); //prefixing spaces
     }
 
-    void parse_pla(TruthTable& reader, std::istream& in);
+    void parse_pla(TruthTable& tt, std::istream& in);
 
-    bool read_pla(TruthTable& reader, const std::string& filename);
+    bool read_pla(TruthTable& tt, const std::string& filename);
 
 } // namespace syrec

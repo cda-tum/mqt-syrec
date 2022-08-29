@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    [[maybe_unused]] void parse_pla(TruthTable& reader, std::istream& in) {
+    void parse_pla(TruthTable& tt, std::istream& in) {
         std::string line;
         std::regex  whitespace("\\s+");
 
@@ -18,7 +18,7 @@ namespace syrec {
             }
 
             else {
-                assert(!line.empty() && (line[0] == '0' || line[0] == '1' || line[0] == '-' || line[0] == '~'));
+                assert((line[0] == '0' || line[0] == '1' || line[0] == '-' || line[0] == '~'));
 
                 std::vector<std::string> inout;
 
@@ -29,7 +29,7 @@ namespace syrec {
                 }
 
                 if (inout.size() != 2)
-                    std::cerr << "I/O not available" << std::endl;
+                    throw std::invalid_argument("Invalid I/O");
 
                 TruthTable::Cube cubeIn;
                 cubeIn.reserve(inout[0].size());
@@ -45,12 +45,12 @@ namespace syrec {
                     cubeOut.emplace_back(transformPlaChar(s));
                 }
 
-                reader.insert(cubeIn, cubeOut);
+                tt.insert(cubeIn, cubeOut);
             }
         }
     }
 
-    bool read_pla(TruthTable& reader, const std::string& filename) {
+    bool read_pla(TruthTable& tt, const std::string& filename) {
         std::ifstream is;
         is.open(filename.c_str(), std::ifstream::in);
 
@@ -60,7 +60,7 @@ namespace syrec {
             return false;
         }
 
-        parse_pla(reader, is);
+        parse_pla(tt, is);
 
         return true;
     }
