@@ -15,11 +15,6 @@ if (NOT TARGET gtest OR NOT TARGET gmock)
 	endif ()
 endif ()
 
-#add_executable(${PROJECT_NAME}_example ${CMAKE_CURRENT_SOURCE_DIR}/test.cpp)
-#target_link_libraries(${PROJECT_NAME}_example PRIVATE ${PROJECT_NAME})
-#set_target_properties(${PROJECT_NAME}_example PROPERTIES FOLDER tests CMAKE_CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
-#enable_lto(${PROJECT_NAME}_example)
-
 macro(package_add_test TESTNAME)
 	# create an exectuable in which the tests will be stored
 	add_executable(${TESTNAME} ${ARGN})
