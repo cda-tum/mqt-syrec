@@ -1,5 +1,5 @@
 #include "algorithms/simulation/simple_simulation.hpp"
-#include "algorithms/synthesis/original_syrec.hpp"
+#include "algorithms/synthesis/syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
@@ -58,7 +58,7 @@ TEST_P(SyrecAddLinesSimulationTest, GenericSimulationTest) {
     error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
-    EXPECT_TRUE(synthesisAdditionalLines(circ, prog));
+    EXPECT_TRUE(syrec_synthesis_additional_lines(circ, prog));
 
     input.resize(circ.get_lines());
 

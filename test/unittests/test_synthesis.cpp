@@ -77,7 +77,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
-    EXPECT_TRUE(synthesisNoLines(circ, prog));
+    EXPECT_TRUE(syrec_synthesis_no_additional_lines(circ, prog));
 
     qc = circ.quantum_cost();
     tc = circ.transistor_cost();

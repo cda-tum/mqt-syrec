@@ -58,7 +58,7 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
-    EXPECT_TRUE(synthesisNoLines(circ, prog));
+    EXPECT_TRUE(syrec_synthesis_no_additional_lines(circ, prog));
 
     input.resize(circ.get_lines());
 

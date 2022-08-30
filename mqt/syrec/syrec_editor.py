@@ -132,7 +132,10 @@ class SyReCEditor(QWidget):
     build_failed = None
     before_build = None
     parser_failed = None
-    buildType   = [0,0];
+
+    synthesize_with_additional_lines = 0
+    synthesize_without_additional_lines = 0
+
 
     def __init__(self, parent=None):
         super().__init__()
@@ -162,53 +165,58 @@ class SyReCEditor(QWidget):
         self.sim_action = QAction(QIcon.fromTheme('x-office-spreadsheet'), '&Sim...', self.parent)  # system-run
         self.stat_action = QAction(QIcon.fromTheme('applications-other'), '&Stats...', self.parent)
 
-        self.check1 = QCheckBox("Sythesizer with Add. Lines")
-        self.check1.setFont(QFont("Sanserif", 13))
-        self.check1.stateChanged.connect(self.item_selected)
+        self.buttonAddLines = QRadioButton("SyReC with Add. Lines", self)
+        self.buttonAddLines.toggled.connect(self.item_selected)
 
-        self.check2 = QCheckBox("Sythesizer with no lines")
-        self.check2.setFont(QFont("Sanserif", 13))
-        self.check2.stateChanged.connect(self.item_selected)
 
+        self.buttonNoLines = QRadioButton("SyReC with no lines", self)
+        self.buttonNoLines.setChecked(True)
+        self.synthesize_without_additional_lines = 1
+        self.buttonNoLines.toggled.connect(self.item_selected)
+
+        self.sim_action.setDisabled(True)
+        self.stat_action.setDisabled(True)
 
         self.open_action.triggered.connect(self.open)
+
         self.build_action.triggered.connect(self.build)
+
         self.sim_action.triggered.connect(self.sim)
+
         self.stat_action.triggered.connect(self.stat)
 
+    def item_selected(self):
 
-    def item_selected(self, state):
+        # Disable sim and stat function
+        self.sim_action.setDisabled(True)
+        self.stat_action.setDisabled(True)
 
-        if state == QtCore.Qt.CheckState.Checked.value:
-
-            if self.sender() == self.check1:
-                self.buildType[0] = 1
-                self.buildType[1] = 0
+        # if first button is selected
+        if self.sender() == self.buttonAddLines:
+            if(self.buttonAddLines.isChecked()):
+                self.synthesize_with_additional_lines = 1
+                self.synthesize_without_additional_lines = 0
                 # making other check box to uncheck
-                self.check2.setChecked(False)
-
-
-            # if second check box is selected
-            elif self.sender() == self.check2:
-                self.buildType[1] = 1
-                self.buildType[0] = 0
+                self.buttonNoLines.setChecked(False)
+            else:
+                self.synthesize_with_additional_lines = 0
+                self.synthesize_without_additional_lines = 1
                 # making other check box to uncheck
-                self.check1.setChecked(False)
+                self.buttonNoLines.setChecked(True)
 
 
-        else:
-
-            if self.sender() == self.check1:
-                self.buildType[0] = 0
-
-
-            elif self.sender() == self.check2:
-                self.buildType[1] = 0
-
-
-
-
-
+        # if second button is selected
+        elif self.sender() == self.buttonNoLines:
+            if(self.buttonNoLines.isChecked()):
+                self.synthesize_with_additional_lines = 0
+                self.synthesize_without_additional_lines = 1
+                # making other check box to uncheck
+                self.buttonAddLines.setChecked(False)
+            else:
+                self.synthesize_with_additional_lines = 1
+                self.synthesize_without_additional_lines = 0
+                # making other check box to uncheck
+                self.buttonAddLines.setChecked(True)
 
     def writeEditorContentsToFile(self):
         data = QFile("/tmp/out.src")
@@ -219,6 +227,7 @@ class SyReCEditor(QWidget):
             return
 
         data.close()
+
         return
 
     def open(self):
@@ -243,236 +252,163 @@ class SyReCEditor(QWidget):
 
         self.writeEditorContentsToFile()
 
-        if self.buildType== [0,0]:
+        self.prog = program()
 
+        error_string = self.prog.read("/tmp/out.src")
+
+        if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None:
-                self.parser_failed("Sythesizer not selected")
+                self.parser_failed("Editor is Empty")
             return
 
-        else:
-            prog = program()
+        elif error_string != "":
+            if self.build_failed is not None:
+                self.build_failed(error_string)
+            return
 
-            error_string = prog.read("/tmp/out.src")
+        self.circ = circuit()
 
-            if error_string == "PARSE_STRING_FAILED":
-                if self.parser_failed is not None:
-                    self.parser_failed("Editor is Empty")
-                return
+        if ((self.synthesize_with_additional_lines) and not(self.synthesize_without_additional_lines)):
+            syrec_synthesis_additional_lines(self.circ, self.prog)
+        if (not(self.synthesize_with_additional_lines) and (self.synthesize_without_additional_lines)):
+            syrec_synthesis_no_additional_lines(self.circ, self.prog)
 
-            elif error_string != "":
-                if self.build_failed is not None:
-                    self.build_failed(error_string)
-                return
+        self.sim_action.setDisabled(False)
+        self.stat_action.setDisabled(False)
 
-            circ = circuit()
+        num_consts = sum(c is not None for c in self.circ.constants)
+        num_garbage = sum(self.circ.garbage)
+        print("Number Of Gates         : ", self.circ.num_gates)
+        print("Number Of Lines         : ", self.circ.lines)
+        print("Number Of Inputs        : ", self.circ.lines - num_consts)
+        print("Number Of Constants     : ", num_consts)
+        print("Number of Outputs       : ", self.circ.lines - num_garbage)
+        print("Number of Garbage Lines : ", num_garbage)
 
-            if self.buildType == [1,0]:
-                synthesisAdditionalLines(circ, prog)
-            elif self.buildType == [0,1]:
-                synthesisNoLines(circ, prog)
-
-            num_consts = sum(c is not None for c in circ.constants)
-            num_garbage = sum(circ.garbage)
-            print("Number Of Gates         : ", circ.num_gates)
-            print("Number Of Lines         : ", circ.lines)
-            print("Number Of Inputs        : ", circ.lines - num_consts)
-            print("Number Of Constants     : ", num_consts)
-            print("Number of Outputs       : ", circ.lines - num_garbage)
-            print("Number of Garbage Lines : ", num_garbage)
-
-            if self.build_successful is not None:
-                self.build_successful(circ)
+        if self.build_successful is not None:
+            self.build_successful(self.circ)
 
         return
 
     def stat(self):
-        if self.before_build is not None:
-            self.before_build()
 
-        self.writeEditorContentsToFile()
+        gates = self.circ.num_gates
+        lines = self.circ.lines
 
-        if self.buildType== [0,0]:
+        qc = self.circ.quantum_cost()
 
-            if self.parser_failed is not None:
-                self.parser_failed("Sythesizer not selected")
-            return
+        tc = self.circ.transistor_cost()
 
-        else:
+        temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
 
-            prog = program()
+        output = temp.format(gates, lines, qc, tc)
 
-            error_string = prog.read("/tmp/out.src")
-            if error_string == "PARSE_STRING_FAILED":
-                if self.parser_failed is not None:
-                    self.parser_failed("Editor is Empty")
-                return
-
-            elif error_string != "":
-                if self.build_failed is not None:
-                    self.build_failed(error_string)
-                return
-
-            circ = circuit()
-
-            if self.buildType == [1,0]:
-                synthesisAdditionalLines(circ, prog)
-            elif self.buildType == [0,1]:
-                synthesisNoLines(circ, prog)
-
-            gates = circ.num_gates
-            lines = circ.lines
-
-            qc = circ.quantum_cost()
-
-            tc = circ.transistor_cost()
-
-            temp = "Gates:\t\t{}\nLines:\t\t{}\nQuantum Costs:\t{}\nTransistor Costs:\t{}\n"
-
-            output = temp.format(gates, lines, qc, tc)
-
-            msg = QMessageBox()
-            msg.setBaseSize(QSize(300, 200))
-            msg.setInformativeText(output)
-            msg.setWindowTitle("Statistics")
-            msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-            msg.exec()
+        msg = QMessageBox()
+        msg.setBaseSize(QSize(300, 200))
+        msg.setInformativeText(output)
+        msg.setWindowTitle("Statistics")
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg.exec()
 
         return
 
+
     def sim(self):
-        if self.before_build is not None:
-            self.before_build()
 
-        self.writeEditorContentsToFile()
+        bit_mask = 0
+        bit_pos = 0
+        bit1_mask = 0
 
-        if self.buildType== [0,0]:
+        for i in self.circ.constants:
 
-            if self.parser_failed is not None:
-                self.parser_failed("Sythesizer not selected")
-            return
+            if i is None:
+                bit_mask = bit_mask + 2 ** bit_pos
 
-        else:
+            bit_pos += 1
 
-            prog = program()
+        no_of_bits = len(self.circ.constants)
 
-            error_string = prog.read("/tmp/out.src")
-            if error_string == "PARSE_STRING_FAILED":
-                if self.parser_failed is not None:
-                    self.parser_failed("Editor is Empty")
-                return
-            elif error_string != "":
-                if self.build_failed is not None:
-                    self.build_failed(error_string)
-                return
+        input_list = [x & bit_mask for x in range(2 ** no_of_bits)]
 
-            circ = circuit()
+        for i in range(len(self.circ.constants)):
+            if self.circ.constants[i]:
+                bit1_mask = bit1_mask + 2 ** i
 
-            if self.buildType == [1,0]:
-                synthesisAdditionalLines(circ, prog)
-            elif self.buildType == [0,1]:
-                synthesisNoLines(circ, prog)
+        input_list = [i + bit1_mask for i in input_list]
 
-            bit_mask = 0
-            bit_pos = 0
-            bit1_mask = 0
+        input_list = list(set(input_list))
 
-            for i in circ.constants:
+        input_list_len = len(input_list)
 
-                if i is None:
-                    bit_mask = bit_mask + 2 ** bit_pos
+        combination_inp = list()
+        combination_out = list()
 
-                bit_pos += 1
+        final_inp = list()
+        final_out = list()
 
-            no_of_bits = len(circ.constants)
+        settings = properties()
 
-            input_list = [x & bit_mask for x in range(2 ** no_of_bits)]
+        for i in input_list:
+            my_inp_bitset = bitset(self.circ.lines, i)
+            my_out_bitset = bitset(self.circ.lines)
 
-            for i in range(len(circ.constants)):
-                if circ.constants[i]:
-                    bit1_mask = bit1_mask + 2 ** i
+            simple_simulation(my_out_bitset, self.circ, my_inp_bitset, settings)
+            combination_inp.append(str(my_inp_bitset))
+            combination_out.append(str(my_out_bitset))
 
-            input_list = [i + bit1_mask for i in input_list]
+        sorted_ind = sorted(range(len(combination_inp)), key=lambda k: int(combination_inp[k], 2))
 
-            input_list = list(set(input_list))
+        for i in sorted_ind:
+            final_inp.append(combination_inp[i])
+            final_out.append(combination_out[i])
 
-            input_list_len = len(input_list)
+        num_inputs = len(self.circ.inputs)
 
-            combination_inp = list()
-            combination_out = list()
+        # Initiate table
 
-            final_inp = list()
-            final_out = list()
+        self.table.clear()
+        self.table.setRowCount(0)
+        self.table.setColumnCount(0)
 
-            settings = properties()
+        self.table.setRowCount(input_list_len + 2)
+        self.table.setColumnCount(2 * num_inputs)
 
-            for i in input_list:
-                my_inp_bitset = bitset(circ.lines, i)
-                my_out_bitset = bitset(circ.lines)
+        self.table.setSpan(0, 0, 1, num_inputs)
+        header1 = QTableWidgetItem("INPUTS")
+        header1.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.table.setItem(0, 0, header1)
 
-                simple_simulation(my_out_bitset, circ, my_inp_bitset, settings)
-                combination_inp.append(str(my_inp_bitset))
-                combination_out.append(str(my_out_bitset))
+        self.table.setSpan(0, num_inputs, 1, num_inputs)
+        header2 = QTableWidgetItem("OUTPUTS")
+        header2.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.table.setItem(0, num_inputs, header2)
 
-            # sorted_inp_str=sorted(combination_inp,key=lambda x: int(x,2))
+        self.table.horizontalHeader().setVisible(False)
+        self.table.verticalHeader().setVisible(False)
 
-            sorted_ind = sorted(range(len(combination_inp)), key=lambda k: int(combination_inp[k], 2))
+        # Fill Table
+        for i in range(num_inputs):
+            input_signal = QTableWidgetItem(self.circ.inputs[i])
+            input_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(1, i, QTableWidgetItem(input_signal))
 
-            for i in sorted_ind:
-                final_inp.append(combination_inp[i])
-                final_out.append(combination_out[i])
+            output_signal = QTableWidgetItem(self.circ.outputs[i])
+            output_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(1, i + num_inputs, QTableWidgetItem(output_signal))
 
-            num_inputs = len(circ.inputs)
+        for i in range(input_list_len):
+            for j in range(num_inputs):
+                input_cell = QTableWidgetItem(final_inp[i][j])
+                input_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.table.setItem(i + 2, j, QTableWidgetItem(input_cell))
 
-            # Initiate table
+                output_cell = QTableWidgetItem(final_out[i][j])
+                output_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.table.setItem(i + 2, j + num_inputs, QTableWidgetItem(output_cell))
 
-            self.table.clear()
-            self.table.setRowCount(0)
-            self.table.setColumnCount(0)
-
-            self.table.setRowCount(input_list_len + 2)
-            self.table.setColumnCount(2 * num_inputs)
-
-            self.table.setSpan(0, 0, 1, num_inputs)
-            header1 = QTableWidgetItem("INPUTS")
-            header1.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.table.setItem(0, 0, header1)
-
-            self.table.setSpan(0, num_inputs, 1, num_inputs)
-            header2 = QTableWidgetItem("OUTPUTS")
-            header2.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.table.setItem(0, num_inputs, header2)
-
-            self.table.horizontalHeader().setVisible(False)
-            self.table.verticalHeader().setVisible(False)
-
-            # Fill Table
-            for i in range(num_inputs):
-                input_signal = QTableWidgetItem(circ.inputs[i])
-                input_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.table.setItem(1, i, QTableWidgetItem(input_signal))
-
-                output_signal = QTableWidgetItem(circ.outputs[i])
-                output_signal.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.table.setItem(1, i + num_inputs, QTableWidgetItem(output_signal))
-
-            for i in range(input_list_len):
-                for j in range(num_inputs):
-                    input_cell = QTableWidgetItem(final_inp[i][j])
-                    input_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                    self.table.setItem(i + 2, j, QTableWidgetItem(input_cell))
-
-                    output_cell = QTableWidgetItem(final_out[i][j])
-                    output_cell.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                    self.table.setItem(i + 2, j + num_inputs, QTableWidgetItem(output_cell))
-
-            self.table.horizontalHeader().setStretchLastSection(True)
-            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-
-            # Add Table to QWidget
-
-            # show table
-            self.show()
-
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.show()
 
 class SyReCHighligher(QSyntaxHighlighter):
     def __init__(self, parent):
@@ -506,7 +442,6 @@ class SyReCHighligher(QSyntaxHighlighter):
                 self.setFormat(index, length, rule[1])
                 match = expression.match(text, offset=index + length)
 
-
 class QtSyReCEditor(SyReCEditor):
     def __init__(self, parent=None):
         SyReCEditor.__init__(self, parent)
@@ -520,8 +455,6 @@ class QtSyReCEditor(SyReCEditor):
 
     def getText(self):
         return self.widget.toPlainText()
-
-
 class LineNumberArea(QWidget):
     def __init__(self, editor):
         QWidget.__init__(self, editor)
@@ -532,7 +465,6 @@ class LineNumberArea(QWidget):
 
     def paintEvent(self, event):
         self.codeEditor.lineNumberAreaPaintEvent(event)
-
 
 class CodeEditor(QPlainTextEdit):
     def __init__(self, parent=None):
@@ -627,11 +559,6 @@ class LogWidget(QTreeWidget):
         item = QTreeWidgetItem([message])
         self.addTopLevelItem(item)
 
-    # def addLineAndMessage( self, line, message ):
-    #    item = QTreeWidgetItem( [ str( int(line) + 1 ), message ] )
-    #    self.addTopLevelItem( item )
-
-
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
@@ -673,13 +600,8 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.editor.build_action)
         toolbar.addAction(self.editor.sim_action)
         toolbar.addAction(self.editor.stat_action)
-
-
-        toolbar.addWidget(self.editor.check1)
-
-
-        toolbar.addWidget(self.editor.check2)
-
+        toolbar.addWidget(self.editor.buttonAddLines)
+        toolbar.addWidget(self.editor.buttonNoLines)
 
 def main():
     a = QApplication([])

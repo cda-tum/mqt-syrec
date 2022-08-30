@@ -37,7 +37,7 @@ def test_synthesis_no_lines():
         error = prog.read(test_circuit_dir+ file_name + string_src)
 
         assert error == ""
-        assert syrec.synthesisNoLines(circ, prog)
+        assert syrec.syrec_synthesis_no_additional_lines(circ, prog)
         assert data_synthesis_no_lines[file_name]["num_gates"] == circ.num_gates
         assert data_synthesis_no_lines[file_name]["lines"] == circ.lines
         assert data_synthesis_no_lines[file_name]["quantum_costs"] == circ.quantum_cost()
@@ -50,7 +50,7 @@ def test_synthesis_add_lines():
         error = prog.read(test_circuit_dir+ file_name + string_src)
 
         assert error == ""
-        assert syrec.synthesisAdditionalLines(circ, prog)
+        assert syrec.syrec_synthesis_additional_lines(circ, prog)
         assert data_synthesis_add_lines[file_name]["num_gates"] == circ.num_gates
         assert data_synthesis_add_lines[file_name]["lines"] == circ.lines
         assert data_synthesis_add_lines[file_name]["quantum_costs"] == circ.quantum_cost()
@@ -64,7 +64,7 @@ def test_simulation_no_lines():
         error = prog.read(test_circuit_dir+ file_name + string_src)
 
         assert error == ""
-        assert syrec.synthesisNoLines(circ, prog)
+        assert syrec.syrec_synthesis_no_additional_lines(circ, prog)
 
         my_inp_bitset = syrec.bitset(circ.lines)
         my_out_bitset = syrec.bitset(circ.lines)
@@ -85,7 +85,7 @@ def test_simulation_add_lines():
         error = prog.read(test_circuit_dir+ file_name + string_src)
 
         assert error == ""
-        assert syrec.synthesisAdditionalLines(circ, prog)
+        assert syrec.syrec_synthesis_additional_lines(circ, prog)
 
         my_inp_bitset = syrec.bitset(circ.lines)
         my_out_bitset = syrec.bitset(circ.lines)
