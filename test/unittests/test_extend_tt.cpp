@@ -1,21 +1,17 @@
-#include "core/truthTable/truth_table.hpp"
+#include "algorithms/synthesis/encoding.hpp"
+#include "core/io/pla_parser.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace dd::literals;
 using namespace syrec;
 
-class TruthTableExtend: public testing::TestWithParam<std::string> {
+class TruthTableExtend: public testing::Test {
 protected:
-    dd::QubitCount                 nqubits = 3U;
-    TruthTable                     tt{};
-    std::unique_ptr<dd::Package<>> dd;
-
-    TruthTable::Cube::Value emptyVal;
+    TruthTable  tt{};
+    std::string test_circuits_dir = "./circuits/";
 
     TruthTable::Cube c00{};
-    TruthTable::Cube c01{};
-    TruthTable::Cube c10{};
     TruthTable::Cube c11{};
 
     TruthTable::Cube c000{};
@@ -27,15 +23,8 @@ protected:
     TruthTable::Cube c110{};
     TruthTable::Cube c111{};
 
-    TruthTable::Cube c_11{};
-    TruthTable::Cube c1_0{};
-
     void SetUp() override {
-        dd = std::make_unique<dd::Package<>>(nqubits);
-
         c00 = TruthTable::Cube::fromInteger(0b00U, 2U);
-        c01 = TruthTable::Cube::fromInteger(0b01U, 2U);
-        c10 = TruthTable::Cube::fromInteger(0b10U, 2U);
         c11 = TruthTable::Cube::fromInteger(0b11U, 2U);
 
         c000 = TruthTable::Cube::fromInteger(0b000U, 3U);
@@ -46,27 +35,19 @@ protected:
         c101 = TruthTable::Cube::fromInteger(0b101U, 3U);
         c110 = TruthTable::Cube::fromInteger(0b110U, 3U);
         c111 = TruthTable::Cube::fromInteger(0b111U, 3U);
-
-        c_11.emplace_back(emptyVal);
-        c_11.emplace_back(true);
-        c_11.emplace_back(true);
-
-        c1_0.emplace_back(true);
-        c1_0.emplace_back(emptyVal);
-        c1_0.emplace_back(false);
     }
 };
 
 TEST_F(TruthTableExtend, Ident2Bit) {
     // create identity truth table
 
-    tt.insert(c01, c01);
-    tt.insert(c10, c10);
-    tt.insert(c11, c11);
+    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+
+    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
 
     EXPECT_EQ(tt.ioCube().size(), 3U);
 
-    tt.extend();
+    extend(tt);
 
     EXPECT_EQ(tt.ioCube().size(), 4U);
 
@@ -78,15 +59,15 @@ TEST_F(TruthTableExtend, Ident2Bit) {
 }
 
 TEST_F(TruthTableExtend, X2Bit) {
-    // create identity X truth table (X gate applied on both the bits)
+    // create X truth table (X gate applied on both the bits)
 
-    tt.insert(c00, c11);
-    tt.insert(c01, c10);
-    tt.insert(c10, c01);
+    std::string circX2Bit = test_circuits_dir + "X2Bit.pla";
+
+    EXPECT_TRUE(read_pla(tt, circX2Bit));
 
     EXPECT_EQ(tt.ioCube().size(), 3U);
 
-    tt.extend();
+    extend(tt);
 
     EXPECT_EQ(tt.ioCube().size(), 4U);
 
@@ -97,14 +78,14 @@ TEST_F(TruthTableExtend, X2Bit) {
     EXPECT_EQ(search->second, c00);
 }
 
-TEST_F(TruthTableExtend, CUSTOMTT) {
-    tt.insert(c_11, c111);
+TEST_F(TruthTableExtend, EXTENDTT) {
+    std::string circEXTENDTT = test_circuits_dir + "EXTENDTT.pla";
 
-    tt.insert(c1_0, c101);
+    EXPECT_TRUE(read_pla(tt, circEXTENDTT));
 
     EXPECT_EQ(tt.ioCube().size(), 2U);
 
-    tt.extend();
+    extend(tt);
 
     EXPECT_EQ(tt.ioCube().size(), 8U);
 

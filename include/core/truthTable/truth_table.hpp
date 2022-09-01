@@ -1,5 +1,6 @@
 #pragma once
 
+#include "QuantumComputation.hpp"
 #include "dd/Package.hpp"
 
 #include <algorithm>
@@ -16,8 +17,7 @@
 
 namespace syrec {
 
-    class TruthTable {
-    public:
+    struct TruthTable {
         class Cube {
         public:
             using Value  = std::optional<bool>;
@@ -134,6 +134,8 @@ namespace syrec {
 
         using CubeMap = std::map<Cube, Cube>;
 
+        CubeMap cubeMap{};
+
         [[nodiscard]] auto nInputs() const -> std::size_t {
             if (cubeMap.empty()) {
                 return 0U;
@@ -164,48 +166,5 @@ namespace syrec {
         [[nodiscard]] const CubeMap& ioCube() const {
             return cubeMap;
         }
-
-        auto extend() -> void;
-
-        auto encodeHuffman() -> void;
-
-        auto augmentWithConstants() -> void;
-
-        auto buildDD(std::unique_ptr<dd::Package<>>& dd) const -> dd::mEdge;
-
-    private:
-        CubeMap cubeMap{};
-
-        struct MinHeapNode {
-            Cube data;
-
-            std::size_t freq{};
-
-            std::shared_ptr<MinHeapNode> left{};
-            std::shared_ptr<MinHeapNode> right{};
-
-            MinHeapNode(Cube data, const std::size_t freq):
-                data(std::move(data)), freq(freq) {}
-
-            auto operator>(const MinHeapNode& other) const -> bool {
-                return freq > other.freq;
-            }
-
-            auto traverse(Cube&& encodedCube, CubeMap& encoding) const -> void {
-                // leaf node -> add encoding
-                if (!data.empty()) {
-                    encoding.try_emplace(data, std::move(encodedCube));
-                    return;
-                }
-
-                // non-leaf node -> traverse left and right subtree
-                if (left) {
-                    left->traverse(encodedCube.appendZero(), encoding);
-                }
-                if (right) {
-                    right->traverse(encodedCube.appendOne(), encoding);
-                }
-            }
-        };
     };
 } // namespace syrec

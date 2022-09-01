@@ -33,7 +33,6 @@ package_add_test(${PROJECT_NAME}_test
 		 unittests/test_tt_to_dd.cpp
 		 unittests/test_extend_tt.cpp
 		 unittests/test_huffman.cpp
-		unittests/test_dd_synthesis.cpp
 		unittests/test_pla_parser.cpp
 		 )
 

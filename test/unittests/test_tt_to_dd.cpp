@@ -1,4 +1,6 @@
-#include "core/truthTable/truth_table.hpp"
+#include "algorithms/synthesis/dd_synthesis.hpp"
+#include "algorithms/synthesis/encoding.hpp"
+#include "core/io/pla_parser.hpp"
 #include "dd/FunctionalityConstruction.hpp"
 
 #include "gtest/gtest.h"
@@ -6,56 +8,25 @@
 using namespace dd::literals;
 using namespace syrec;
 
-class TruthTableDD: public testing::TestWithParam<std::string> {
+class TruthTableDD: public testing::Test {
 protected:
-    dd::QubitCount                 nqubits = 3U;
+    std::string                    test_circuits_dir = "./circuits/";
     TruthTable                     tt{};
-    std::unique_ptr<dd::Package<>> dd;
-
-    TruthTable::Cube c00{};
-    TruthTable::Cube c01{};
-    TruthTable::Cube c10{};
-    TruthTable::Cube c11{};
-
-    TruthTable::Cube c000{};
-    TruthTable::Cube c001{};
-    TruthTable::Cube c010{};
-    TruthTable::Cube c011{};
-    TruthTable::Cube c100{};
-    TruthTable::Cube c101{};
-    TruthTable::Cube c110{};
-    TruthTable::Cube c111{};
-
-    void SetUp() override {
-        dd = std::make_unique<dd::Package<>>(nqubits);
-
-        c00 = TruthTable::Cube::fromInteger(0b00U, 2U);
-        c01 = TruthTable::Cube::fromInteger(0b01U, 2U);
-        c10 = TruthTable::Cube::fromInteger(0b10U, 2U);
-        c11 = TruthTable::Cube::fromInteger(0b11U, 2U);
-
-        c000 = TruthTable::Cube::fromInteger(0b000U, 3U);
-        c001 = TruthTable::Cube::fromInteger(0b001U, 3U);
-        c010 = TruthTable::Cube::fromInteger(0b010U, 3U);
-        c011 = TruthTable::Cube::fromInteger(0b011U, 3U);
-        c100 = TruthTable::Cube::fromInteger(0b100U, 3U);
-        c101 = TruthTable::Cube::fromInteger(0b101U, 3U);
-        c110 = TruthTable::Cube::fromInteger(0b110U, 3U);
-        c111 = TruthTable::Cube::fromInteger(0b111U, 3U);
-    }
+    std::unique_ptr<dd::Package<>> dd = std::make_unique<dd::Package<>>(3U);
 };
 
 TEST_F(TruthTableDD, Ident2Bit) {
     // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c01);
-    tt.insert(c10, c10);
-    tt.insert(c11, c11);
+    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+
+    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    const auto ttDD = tt.buildDD(dd);
+    extend(tt);
+
+    auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
     EXPECT_EQ(ttDD, dd->makeIdent(2U));
@@ -63,15 +34,16 @@ TEST_F(TruthTableDD, Ident2Bit) {
 
 TEST_F(TruthTableDD, CNOT) {
     // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c01);
-    tt.insert(c10, c11);
-    tt.insert(c11, c10);
+    std::string circCNOT = test_circuits_dir + "CNOT.pla";
+
+    EXPECT_TRUE(read_pla(tt, circCNOT));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    const auto ttDD = tt.buildDD(dd);
+    extend(tt);
+
+    auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
     auto qc = qc::QuantumComputation(2U);
@@ -81,15 +53,17 @@ TEST_F(TruthTableDD, CNOT) {
 
 TEST_F(TruthTableDD, SWAP) {
     // create identity truth table
-    tt.insert(c00, c00);
-    tt.insert(c01, c10);
-    tt.insert(c10, c01);
-    tt.insert(c11, c11);
+
+    std::string circSWAP = test_circuits_dir + "SWAP.pla";
+
+    EXPECT_TRUE(read_pla(tt, circSWAP));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    const auto ttDD = tt.buildDD(dd);
+    extend(tt);
+
+    auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
     auto qc = qc::QuantumComputation(2U);
@@ -99,19 +73,17 @@ TEST_F(TruthTableDD, SWAP) {
 
 TEST_F(TruthTableDD, Toffoli) {
     // create identity truth table
-    tt.insert(c000, c000);
-    tt.insert(c001, c001);
-    tt.insert(c010, c010);
-    tt.insert(c011, c011);
-    tt.insert(c100, c100);
-    tt.insert(c101, c101);
-    tt.insert(c110, c111);
-    tt.insert(c111, c110);
+
+    std::string circToffoli = test_circuits_dir + "Toffoli.pla";
+
+    EXPECT_TRUE(read_pla(tt, circToffoli));
 
     EXPECT_EQ(tt.nInputs(), 3U);
     EXPECT_EQ(tt.nOutputs(), 3U);
 
-    const auto ttDD = tt.buildDD(dd);
+    extend(tt);
+
+    auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
     auto qc = qc::QuantumComputation(3U);
