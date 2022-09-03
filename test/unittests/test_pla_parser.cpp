@@ -38,11 +38,11 @@ TEST_F(PlaParserTest, andTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.ioCube().size(), 1U);
+    EXPECT_EQ(testPla.cubeMap.size(), 1U);
 
-    auto it11 = testPla.ioCube().find(c11);
+    auto it11 = testPla.cubeMap.find(c11);
 
-    EXPECT_TRUE(it11 != testPla.ioCube().end());
+    EXPECT_TRUE(it11 != testPla.cubeMap.end());
     EXPECT_EQ(it11->second, c1);
 }
 
@@ -53,15 +53,15 @@ TEST_F(PlaParserTest, orTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.ioCube().size(), 2U);
+    EXPECT_EQ(testPla.cubeMap.size(), 2U);
 
-    auto it_1 = testPla.ioCube().find(c_1);
+    auto it_1 = testPla.cubeMap.find(c_1);
 
-    EXPECT_TRUE(it_1 != testPla.ioCube().end());
+    EXPECT_TRUE(it_1 != testPla.cubeMap.end());
     EXPECT_EQ(it_1->second, c1);
 
-    auto it1_ = testPla.ioCube().find(c1_);
+    auto it1_ = testPla.cubeMap.find(c1_);
 
-    EXPECT_TRUE(it1_ != testPla.ioCube().end());
+    EXPECT_TRUE(it1_ != testPla.cubeMap.end());
     EXPECT_EQ(it1_->second, c1);
 }

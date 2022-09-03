@@ -1,9 +1,9 @@
 #pragma once
 
-#include "QuantumComputation.hpp"
 #include "dd/Package.hpp"
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -16,6 +16,8 @@
 #include <vector>
 
 namespace syrec {
+
+    auto transformCharToCubeValue(const char& c) -> std::optional<bool>;
 
     struct TruthTable {
         class Cube {
@@ -50,6 +52,18 @@ namespace syrec {
                 }
                 return cube;
             }
+
+            // construct a cube from a string
+            static auto fromString(const std::string& str) -> Cube {
+                assert(str.size() <= 64U);
+                Cube cube{};
+                cube.reserve(str.size());
+                for (const auto& s: str) {
+                    cube.emplace_back(transformCharToCubeValue(s));
+                }
+                return cube;
+            }
+
             // return integer representation of the cube
             [[nodiscard]] auto toInteger() const -> std::uint64_t {
                 assert(cube.size() <= 64U);
@@ -82,12 +96,13 @@ namespace syrec {
 
             // pass-through functions for underlying vector
 
-            auto at(std::size_t pos) -> Value& {
+            auto operator[](std::size_t pos) -> Value& {
                 return cube[pos];
             }
 
             auto operator[](std::size_t pos) const -> Value {
-                return cube[pos];
+                const std::vector<Value>& x = cube;
+                return x[pos];
             }
 
             auto operator<(const Cube& cv) const -> bool {
@@ -101,15 +116,31 @@ namespace syrec {
             auto reserve(const std::size_t n) -> void {
                 cube.reserve(n);
             }
-            auto resize(const std::size_t n, const Value& val = Value()) -> void {
+
+            auto resize(const std::size_t n, Value val = Value()) -> void {
                 cube.resize(n, val);
             }
+
+            auto resize(const std::size_t n, const Value& val) -> void {
+                cube.resize(n, val);
+            }
+
             auto emplace_back(const Value& v) -> void {
                 cube.emplace_back(v);
             }
 
             auto pop_back() -> void {
                 cube.pop_back();
+            }
+
+            [[nodiscard]] auto equals(const std::uint64_t num) const -> bool {
+                Cube cubeEq(cube);
+                return cubeEq.toInteger() == num;
+            }
+
+            [[nodiscard]] auto equals(const std::string& str) const -> bool {
+                Cube cubeEq(cube);
+                return Cube::fromString(str) == cubeEq;
             }
 
             [[nodiscard]] auto size() const -> std::size_t {
@@ -150,6 +181,10 @@ namespace syrec {
             return cubeMap.begin()->second.size();
         }
 
+        auto findCubeInteger(const std::uint64_t number, const std::size_t bw) -> decltype(cubeMap.cbegin()) {
+            return cubeMap.find(Cube::fromInteger(number, bw));
+        }
+
         auto insert(const Cube& input, const Cube& output) -> void {
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
@@ -161,10 +196,6 @@ namespace syrec {
 
         auto clear() -> void {
             cubeMap.clear();
-        }
-
-        [[nodiscard]] const CubeMap& ioCube() const {
-            return cubeMap;
         }
     };
 } // namespace syrec

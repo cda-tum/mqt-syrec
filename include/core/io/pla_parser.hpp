@@ -6,21 +6,6 @@
 
 namespace syrec {
 
-    inline TruthTable::Cube::Value transformPlaChar(const char& c) {
-        switch (c) {
-            case '-':
-            case '~':
-                return {};
-            case '0':
-                return false;
-            case '1':
-                return true;
-            default:
-                throw std::invalid_argument("Unknown Character");
-                return {};
-        }
-    }
-
     inline void trim(std::string& str) {
         str.erase(str.find_last_not_of(' ') + 1); //suffixing spaces
         str.erase(0, str.find_first_not_of(' ')); //prefixing spaces

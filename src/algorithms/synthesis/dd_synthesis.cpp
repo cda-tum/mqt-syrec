@@ -1,6 +1,5 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 
-#include "dd/FunctionalityConstruction.hpp"
 using namespace dd::literals;
 
 namespace syrec {
@@ -54,4 +53,3 @@ namespace syrec {
         return dd->makeDDNode(label, edges);
     }
 } // namespace syrec
-  // namespace syrec

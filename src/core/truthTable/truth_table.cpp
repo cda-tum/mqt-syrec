@@ -2,6 +2,20 @@
 
 namespace syrec {
 
+    auto transformCharToCubeValue(const char& c) -> std::optional<bool> {
+        switch (c) {
+            case '-':
+            case '~':
+                return {};
+            case '0':
+                return false;
+            case '1':
+                return true;
+            default:
+                throw std::invalid_argument("Unknown Character");
+        }
+    }
+
     auto TruthTable::Cube::completeCubes() const -> Vector {
         Vector result{};
 
@@ -13,7 +27,7 @@ namespace syrec {
             }
             // recursively compute all the complete cubes for the zero case
             Cube zero(cube);
-            zero.at(pos) = false;
+            zero[pos] = false;
 
             auto completeZero = zero.completeCubes();
             // move the computed cubes to the result vector
@@ -24,7 +38,7 @@ namespace syrec {
             // recursively compute all the complete cubes for the one case
 
             Cube one(cube);
-            one.at(pos) = true;
+            one[pos] = true;
 
             auto completeOne = one.completeCubes();
             // move the computed cubes to the result vector
