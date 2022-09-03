@@ -6,10 +6,7 @@ namespace syrec {
         // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
         assert(tt.cubeMap.empty() || (tt.nInputs() <= std::log2(tt.cubeMap.max_size()) && tt.nInputs() <= 63U));
 
-        if (tt.cubeMap.empty())
-            throw std::invalid_argument("TruthTable is empty");
-
-        if (tt.nInputs() <= static_cast<std::size_t>(std::log2(tt.cubeMap.max_size())) && tt.nInputs() <= 63U)
+        if (!tt.cubeMap.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.cubeMap.max_size())) || tt.nInputs() > 63U))
             throw std::invalid_argument("Overflow!, Number of inputs more than 64");
 
         TruthTable::CubeMap newCubeMap{};
