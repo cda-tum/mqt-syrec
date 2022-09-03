@@ -1,11 +1,4 @@
-/**
- * @file gate.hpp
- *
- * @brief Gate class
- */
-
-#ifndef GATE_HPP
-#define GATE_HPP
+#pragma once
 
 #include <algorithm>
 #include <any>
@@ -118,5 +111,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* GATE_HPP */

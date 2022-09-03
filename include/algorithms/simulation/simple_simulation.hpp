@@ -1,11 +1,4 @@
-/**
-* @file simple_simulation.hpp
-*
-* @brief Very simple simulation, only efficient for small circuits
-*/
-
-#ifndef SIMPLE_SIMULATION_HPP
-#define SIMPLE_SIMULATION_HPP
+#pragma once
 
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
@@ -60,5 +53,3 @@ namespace syrec {
                            const properties::ptr& statistics = properties::ptr());
 
 } // namespace syrec
-
-#endif /* SIMPLE_SIMULATION_HPP */

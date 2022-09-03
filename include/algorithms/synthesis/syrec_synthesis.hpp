@@ -1,5 +1,4 @@
-#ifndef SYREC_SYNTHESIS_HPP
-#define SYREC_SYNTHESIS_HPP
+#pragma once
 
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
@@ -49,8 +48,8 @@ namespace syrec {
 
         using var_lines_map = std::map<variable::ptr, unsigned int>;
 
-        SyrecSynthesis(circuit& circ, const program& prog);
-        ~SyrecSynthesis() = default;
+        explicit SyrecSynthesis(circuit& circ);
+        virtual ~SyrecSynthesis() = default;
 
         void add_variables(circuit& circ, const variable::vec& variables);
         void set_main_module(const module::ptr& main_module);
@@ -117,67 +116,4 @@ namespace syrec {
         std::map<bool, std::vector<unsigned>> free_const_lines_map;
     };
 
-    class SyrecSynthesisNoAdditionalLines: public SyrecSynthesis {
-    public:
-        using SyrecSynthesis::SyrecSynthesis;
-        ~SyrecSynthesisNoAdditionalLines() = default;
-
-        bool on_module(const module::ptr&);
-
-        bool full_statement(const statement::ptr& statement);
-        bool full_statement(const assign_statement& statement);
-
-        bool on_statement(const statement::ptr& statement);
-        bool on_statement(const assign_statement& statement);
-        bool on_statement(const if_statement& statement);
-        bool on_statement(const for_statement& statement);
-        bool on_statement(const call_statement& statement);
-        bool on_statement(const uncall_statement& statement);
-
-        bool solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
-
-        bool op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v);
-        bool op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v);
-        bool op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v);
-
-        bool flow(const expression::ptr& expression, std::vector<unsigned>& v);
-        bool flow(const variable_expression& expression, std::vector<unsigned>& v);
-        bool flow(const binary_expression& expression, const std::vector<unsigned>& v);
-
-        bool on_expression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-        bool on_expression(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op);
-
-        bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
-
-        bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-        bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
-    };
-
-    class SyrecSynthesisAdditionalLines: public SyrecSynthesis {
-    public:
-        using SyrecSynthesis::SyrecSynthesis;
-        ~SyrecSynthesisAdditionalLines() = default;
-
-        bool on_module(const module::ptr&);
-
-        bool on_statement(const statement::ptr& statement);
-
-        bool on_statement(const assign_statement& statement);
-        bool on_statement(const if_statement& statement);
-        bool on_statement(const for_statement& statement);
-        bool on_statement(const call_statement& statement);
-        bool on_statement(const uncall_statement& statement);
-
-        bool on_expression(const expression::ptr& expression, std::vector<unsigned>& lines);
-        bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines);
-        bool on_expression(const shift_expression& expression, std::vector<unsigned>& lines);
-    };
-
-    bool syrec_synthesis_additional_lines(circuit& circ, const program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
-    bool syrec_synthesis_no_additional_lines(circuit& circ, const program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
-
 } // namespace syrec
-
-#endif /* SYREC_SYNTHESIS_HPP */

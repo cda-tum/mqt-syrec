@@ -1,4 +1,4 @@
-#include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "algorithms/synthesis/derived_syrec_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
@@ -77,7 +77,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     error_string = prog.read(file_name, settings);
     EXPECT_TRUE(error_string.empty());
 
-    EXPECT_TRUE(syrec_synthesis_no_additional_lines(circ, prog));
+    EXPECT_TRUE(SyrecSynthesisNoAdditionalLines::synthesize(circ, prog));
 
     qc = circ.quantum_cost();
     tc = circ.transistor_cost();

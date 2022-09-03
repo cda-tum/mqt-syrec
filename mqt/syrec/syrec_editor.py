@@ -268,9 +268,9 @@ class SyReCEditor(QWidget):
 
         self.circ = circuit()
 
-        if ((self.synthesize_with_additional_lines) and not(self.synthesize_without_additional_lines)):
+        if (self.synthesize_with_additional_lines):
             syrec_synthesis_additional_lines(self.circ, self.prog)
-        if (not(self.synthesize_with_additional_lines) and (self.synthesize_without_additional_lines)):
+        else:
             syrec_synthesis_no_additional_lines(self.circ, self.prog)
 
         self.sim_action.setDisabled(False)

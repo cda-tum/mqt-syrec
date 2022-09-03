@@ -1,10 +1,4 @@
-/**
- * @file number.hpp
- *
- * @brief SyReC number data type
- */
-#ifndef NUMBER_HPP
-#define NUMBER_HPP
+#pragma once
 
 #include <cassert>
 #include <map>
@@ -63,5 +57,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* NUMBER_HPP */

@@ -1,5 +1,4 @@
-#include "algorithms/synthesis/syrec_synthesis.hpp"
-
+#include "algorithms/synthesis/derived_syrec_synthesis.hpp"
 #include "core/syrec/expression.hpp"
 #include "core/syrec/program.hpp"
 #include "core/syrec/variable.hpp"
@@ -31,7 +30,7 @@ namespace syrec {
     };
 
     // Helper Functions for the synthesis methods
-    SyrecSynthesis::SyrecSynthesis(circuit& circ, const program& prog [[maybe_unused]]):
+    SyrecSynthesis::SyrecSynthesis(circuit& circ):
         _circ(circ) {
         free_const_lines_map.try_emplace(false /* emplacing a default constructed object */);
         free_const_lines_map.try_emplace(true /* emplacing a default constructed object */);
@@ -53,7 +52,7 @@ namespace syrec {
 
     bool SyrecSynthesisNoAdditionalLines::on_module(const module::ptr& main) {
         for (const auto& stat: main->statements) {
-            if (!full_statement(stat) && !on_statement(stat))
+            if (!full_statement(stat) && !onStatementNoAdditionalLines(stat))
                 return false;
         }
         return assemble_circuit(cct_man.root);
@@ -61,7 +60,7 @@ namespace syrec {
 
     bool SyrecSynthesisAdditionalLines::on_module(const module::ptr& main) {
         for (const statement::ptr& stat: main->statements) {
-            if (!on_statement(stat)) return false;
+            if (!onStatementAdditionalLines(stat)) return false;
         }
         return assemble_circuit(cct_man.root);
     }
@@ -144,9 +143,9 @@ namespace syrec {
                 unsigned              z;
                 std::vector<unsigned> stat_assign_op;
                 if ((exp_op_vector.size() % 2) == 0) {
-                    z = ((int)(exp_op_vector.size()) / 2);
+                    z = (static_cast<int>(exp_op_vector.size()) / 2);
                 } else {
-                    z = ((int)((exp_op_vector.size()) - 1) / 2);
+                    z = (static_cast<int>((exp_op_vector.size()) - 1) / 2);
                 }
 
                 for (unsigned k = 0; k <= z - 1; k++) {
@@ -355,7 +354,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const statement::ptr& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
         if (auto const* swapStat = dynamic_cast<swap_statement*>(statement.get())) {
@@ -363,15 +362,15 @@ namespace syrec {
         } else if (auto const* unaryStat = dynamic_cast<unary_statement*>(statement.get())) {
             okay = SyrecSynthesis::on_statement(*unaryStat);
         } else if (auto const* assignStat = dynamic_cast<assign_statement*>(statement.get())) {
-            okay = on_statement(*assignStat);
+            okay = onStatementAdditionalLines(*assignStat);
         } else if (auto const* ifStat = dynamic_cast<if_statement*>(statement.get())) {
-            okay = on_statement(*ifStat);
+            okay = onStatementAdditionalLines(*ifStat);
         } else if (auto const* forStat = dynamic_cast<for_statement*>(statement.get())) {
-            okay = on_statement(*forStat);
+            okay = onStatementAdditionalLines(*forStat);
         } else if (auto const* callStat = dynamic_cast<call_statement*>(statement.get())) {
-            okay = on_statement(*callStat);
+            okay = onStatementAdditionalLines(*callStat);
         } else if (auto const* uncallStat = dynamic_cast<uncall_statement*>(statement.get())) {
-            okay = on_statement(*uncallStat);
+            okay = onStatementAdditionalLines(*uncallStat);
         } else if (auto const* skipStat = statement.get()) {
             okay = SyrecSynthesis::on_statement(*skipStat);
         } else {
@@ -382,7 +381,7 @@ namespace syrec {
         return okay;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const statement::ptr& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
         if (auto const* swap_stat = dynamic_cast<swap_statement*>(statement.get())) {
@@ -390,15 +389,15 @@ namespace syrec {
         } else if (auto const* unary_stat = dynamic_cast<unary_statement*>(statement.get())) {
             okay = SyrecSynthesis::on_statement(*unary_stat);
         } else if (auto const* assign_stat = dynamic_cast<assign_statement*>(statement.get())) {
-            okay = on_statement(*assign_stat);
+            okay = onStatementNoAdditionalLines(*assign_stat);
         } else if (auto const* if_stat = dynamic_cast<if_statement*>(statement.get())) {
-            okay = on_statement(*if_stat);
+            okay = onStatementNoAdditionalLines(*if_stat);
         } else if (auto const* for_stat = dynamic_cast<for_statement*>(statement.get())) {
-            okay = on_statement(*for_stat);
+            okay = onStatementNoAdditionalLines(*for_stat);
         } else if (auto const* call_stat = dynamic_cast<call_statement*>(statement.get())) {
-            okay = on_statement(*call_stat);
+            okay = onStatementNoAdditionalLines(*call_stat);
         } else if (auto const* uncall_stat = dynamic_cast<uncall_statement*>(statement.get())) {
-            okay = on_statement(*uncall_stat);
+            okay = onStatementNoAdditionalLines(*uncall_stat);
         } else if (auto const* skip_stat = statement.get()) {
             okay = SyrecSynthesis::on_statement(*skip_stat);
         } else {
@@ -444,11 +443,11 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const assign_statement& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const assign_statement& statement) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
         get_variables(statement.lhs, lhs);
-        on_expression(statement.rhs, rhs);
+        onExpressionAdditionalLines(statement.rhs, rhs);
 
         assert(lhs.size() == rhs.size());
 
@@ -473,7 +472,7 @@ namespace syrec {
         return status;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const assign_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const assign_statement& statement) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
         std::vector<unsigned> d;
@@ -481,7 +480,7 @@ namespace syrec {
         get_variables(statement.lhs, lhs);
 
         op_rhs_lhs_expression(statement.rhs, d);
-        on_expression(statement.rhs, rhs, lhs, statement.op);
+        onExpressionNoAdditionalLines(statement.rhs, rhs, lhs, statement.op);
         op_vec.clear();
 
         bool status = false;
@@ -551,10 +550,10 @@ namespace syrec {
         return status;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const if_statement& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const if_statement& statement) {
         // calculate expression
         std::vector<unsigned> expression_result;
-        on_expression(statement.condition, expression_result);
+        onExpressionAdditionalLines(statement.condition, expression_result);
         assert(expression_result.size() == 1u);
 
         // add new helper line
@@ -564,7 +563,7 @@ namespace syrec {
         add_active_control(helper_line);
 
         for (const statement::ptr& stat: statement.then_statements) {
-            if (!on_statement(stat)) return false;
+            if (!onStatementAdditionalLines(stat)) return false;
         }
 
         // toggle helper line
@@ -573,7 +572,7 @@ namespace syrec {
         add_active_control(helper_line);
 
         for (const statement::ptr& stat: statement.else_statements) {
-            if (!on_statement(stat)) return false;
+            if (!onStatementAdditionalLines(stat)) return false;
         }
 
         // de-active helper line
@@ -583,12 +582,12 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const if_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const if_statement& statement) {
         // calculate expression
         std::vector<unsigned> expression_result;
         std::vector<unsigned> lhs_stat;
         unsigned              op = 0u;
-        on_expression(statement.condition, expression_result, lhs_stat, op);
+        onExpressionNoAdditionalLines(statement.condition, expression_result, lhs_stat, op);
         assert(expression_result.size() == 1u);
 
         // add new helper line
@@ -598,7 +597,7 @@ namespace syrec {
         add_active_control(helper_line);
 
         for (const auto& stat: statement.then_statements) {
-            if ((!full_statement(stat)) && (!on_statement(stat)))
+            if ((!full_statement(stat)) && (!onStatementNoAdditionalLines(stat)))
                 return false;
         }
 
@@ -608,7 +607,7 @@ namespace syrec {
         add_active_control(helper_line);
 
         for (const auto& stat: statement.else_statements) {
-            if ((!full_statement(stat)) && (!on_statement(stat)))
+            if ((!full_statement(stat)) && (!onStatementNoAdditionalLines(stat)))
                 return false;
         }
 
@@ -619,7 +618,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const for_statement& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const for_statement& statement) {
         const auto& [nfrom, nto] = statement.range;
 
         const unsigned     from          = nfrom ? nfrom->evaluate(loop_map) : 1u; // default value is 1u
@@ -636,7 +635,7 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if (!on_statement(stat)) {
+                    if (!onStatementAdditionalLines(stat)) {
                         return false;
                     }
                 }
@@ -644,7 +643,7 @@ namespace syrec {
         }
 
         else if (from > to) {
-            for (auto i = (int)from; i >= (int)to; i -= (int)step) {
+            for (auto i = static_cast<int>(from); i >= static_cast<int>(to); i -= static_cast<int>(step)) {
                 // adjust loop variable if necessary
 
                 if (!loop_variable.empty()) {
@@ -652,7 +651,7 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if (!on_statement(stat)) {
+                    if (!onStatementAdditionalLines(stat)) {
                         return false;
                     }
                 }
@@ -666,7 +665,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const for_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const for_statement& statement) {
         const auto& [nfrom, nto] = statement.range;
 
         const unsigned     from          = nfrom ? nfrom->evaluate(SyrecSynthesis::loop_map) : 1u; // default value is 1u
@@ -683,14 +682,14 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if ((!full_statement(stat)) && (!on_statement(stat)))
+                    if ((!full_statement(stat)) && (!onStatementNoAdditionalLines(stat)))
                         return false;
                 }
             }
         }
 
         else if (from > to) {
-            for (auto i = (int)from; i >= (int)to; i -= (int)step) {
+            for (auto i = static_cast<int>(from); i >= static_cast<int>(to); i -= static_cast<int>(step)) {
                 // adjust loop variable if necessary
 
                 if (!loop_variable.empty()) {
@@ -698,7 +697,7 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if ((!full_statement(stat)) && (!on_statement(stat)))
+                    if ((!full_statement(stat)) && (!onStatementNoAdditionalLines(stat)))
                         return false;
                 }
             }
@@ -711,7 +710,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const call_statement& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const call_statement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
             const std::string&   parameter        = statement.parameters.at(i);
@@ -725,14 +724,14 @@ namespace syrec {
 
         modules.push(statement.target);
         for (const statement::ptr& stat: statement.target->statements) {
-            if (!on_statement(stat)) return false;
+            if (!onStatementAdditionalLines(stat)) return false;
         }
         modules.pop();
 
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const call_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const call_statement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
             const std::string& parameter        = statement.parameters.at(i);
@@ -746,7 +745,7 @@ namespace syrec {
 
         modules.push(statement.target);
         for (const auto& stat: statement.target->statements) {
-            if ((!full_statement(stat)) && (!on_statement(stat)))
+            if ((!full_statement(stat)) && (!onStatementNoAdditionalLines(stat)))
                 return false;
         }
 
@@ -755,7 +754,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_statement(const uncall_statement& statement) {
+    bool SyrecSynthesisAdditionalLines::onStatementAdditionalLines(const uncall_statement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
             const std::string& parameter        = statement.parameters.at(i);
@@ -772,7 +771,7 @@ namespace syrec {
         const auto statements = statement.target->statements;
         for (auto it = statements.rbegin(); it != statements.rend(); ++it) {
             const auto reverse_statement = (*it)->reverse();
-            if (!on_statement(reverse_statement)) {
+            if (!onStatementAdditionalLines(reverse_statement)) {
                 return false;
             }
         }
@@ -782,7 +781,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const uncall_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::onStatementNoAdditionalLines(const uncall_statement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0u; i < statement.parameters.size(); ++i) {
             const std::string& parameter        = statement.parameters.at(i);
@@ -799,7 +798,7 @@ namespace syrec {
         const auto statements = statement.target->statements;
         for (auto it = statements.rbegin(); it != statements.rend(); ++it) {
             const auto reverse_statement = (*it)->reverse();
-            if ((!full_statement(reverse_statement)) && (!on_statement(reverse_statement)))
+            if ((!full_statement(reverse_statement)) && (!onStatementNoAdditionalLines(reverse_statement)))
                 return false;
         }
 
@@ -812,25 +811,25 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_expression(const expression::ptr& expression, std::vector<unsigned>& lines) {
+    bool SyrecSynthesisAdditionalLines::onExpressionAdditionalLines(const expression::ptr& expression, std::vector<unsigned>& lines) {
         if (const auto* numExp = dynamic_cast<numeric_expression*>(expression.get())) {
             return SyrecSynthesis::on_expression(*numExp, lines);
         } else if (const auto* varExp = dynamic_cast<variable_expression*>(expression.get())) {
             return SyrecSynthesis::on_expression(*varExp, lines);
         } else if (const auto* binExp = dynamic_cast<binary_expression*>(expression.get())) {
-            return on_expression(*binExp, lines);
+            return onExpressionAdditionalLines(*binExp, lines);
         } else if (const auto* shiftExp = dynamic_cast<shift_expression*>(expression.get())) {
-            return on_expression(*shiftExp, lines);
+            return onExpressionAdditionalLines(*shiftExp, lines);
         } else {
             return false;
         }
     }
 
-    bool SyrecSynthesisAdditionalLines::on_expression(const binary_expression& expression, std::vector<unsigned>& lines) {
+    bool SyrecSynthesisAdditionalLines::onExpressionAdditionalLines(const binary_expression& expression, std::vector<unsigned>& lines) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
-        if (!on_expression(expression.lhs, lhs) || !on_expression(expression.rhs, rhs)) {
+        if (!onExpressionAdditionalLines(expression.lhs, lhs) || !onExpressionAdditionalLines(expression.rhs, rhs)) {
             return false;
         }
 
@@ -963,15 +962,15 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_expression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+    bool SyrecSynthesisNoAdditionalLines::onExpressionNoAdditionalLines(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) {
         if (auto const* numeric = dynamic_cast<numeric_expression*>(expression.get())) {
             return SyrecSynthesis::on_expression(*numeric, lines);
         } else if (auto const* variable = dynamic_cast<variable_expression*>(expression.get())) {
             return SyrecSynthesis::on_expression(*variable, lines);
         } else if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
-            return on_expression(*binary, lines, lhs_stat, op);
+            return onExpressionNoAdditionalLines(*binary, lines, lhs_stat, op);
         } else if (auto const* shift = dynamic_cast<shift_expression*>(expression.get())) {
-            return on_expression(*shift, lines, lhs_stat, op);
+            return onExpressionNoAdditionalLines(*shift, lines, lhs_stat, op);
         } else {
             return false;
         }
@@ -989,11 +988,11 @@ namespace syrec {
 
     /// Function when the assignment statements consist of binary expressions and does not include repeated input signals
 
-    bool SyrecSynthesisNoAdditionalLines::on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+    bool SyrecSynthesisNoAdditionalLines::onExpressionNoAdditionalLines(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
-        if (!on_expression(expression.lhs, lhs, lhs_stat, op) || !on_expression(expression.rhs, rhs, lhs_stat, op)) {
+        if (!onExpressionNoAdditionalLines(expression.lhs, lhs, lhs_stat, op) || !onExpressionNoAdditionalLines(expression.rhs, rhs, lhs_stat, op)) {
             return false;
         }
 
@@ -1108,10 +1107,10 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisAdditionalLines::on_expression(const shift_expression& expression, std::vector<unsigned>& lines) {
+    bool SyrecSynthesisAdditionalLines::onExpressionAdditionalLines(const shift_expression& expression, std::vector<unsigned>& lines) {
         std::vector<unsigned> lhs;
 
-        if (!on_expression(expression.lhs, lhs)) {
+        if (!onExpressionAdditionalLines(expression.lhs, lhs)) {
             return false;
         }
 
@@ -1139,9 +1138,9 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_expression(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned>& lhs_stat, unsigned op) {
+    bool SyrecSynthesisNoAdditionalLines::onExpressionNoAdditionalLines(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) {
         std::vector<unsigned> lhs;
-        if (!on_expression(expression.lhs, lhs, lhs_stat, op)) {
+        if (!onExpressionNoAdditionalLines(expression.lhs, lhs, lhs_stat, op)) {
             return false;
         }
 
@@ -1276,11 +1275,11 @@ namespace syrec {
             increase(sum, partial);
             remove_active_control(dest.at(i));
             if (i > 0) {
-                for (unsigned j = ((int)src1.size() - i); j < src1.size(); ++j) {
+                for (unsigned j = (static_cast<int>(src1.size()) - i); j < src1.size(); ++j) {
                     remove_active_control(src2.at(j));
                 }
                 (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(src2.at(src1.size() - i));
-                for (unsigned j = ((int)src1.size() + 1u - i); j < src1.size(); ++j) {
+                for (unsigned j = (static_cast<int>(src1.size()) + 1u - i); j < src1.size(); ++j) {
                     add_active_control(src2.at(j));
                 }
             }
@@ -1318,7 +1317,7 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
-        if (auto bitwidth = (int)rhs.size(); bitwidth == 1) {
+        if (auto bitwidth = static_cast<int>(rhs.size()); bitwidth == 1) {
             (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_cnot(lhs.at(0), rhs.at(0));
         } else {
             for (int i = 1; i <= bitwidth - 1; ++i) {
@@ -1420,7 +1419,7 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry) {
-        auto bitwidth = (int)src.size();
+        auto bitwidth = static_cast<int>(src.size());
 
         if (bitwidth == 0) return true;
 
@@ -1488,11 +1487,11 @@ namespace syrec {
             remove_active_control(dest.at(i));
             (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(dest.at(i));
             if (i > 0) {
-                for (unsigned j = ((int)src1.size() - i); j < src1.size(); ++j) {
+                for (unsigned j = (static_cast<int>(src1.size()) - i); j < src1.size(); ++j) {
                     remove_active_control(src2.at(j));
                 }
                 (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(src2.at(src1.size() - i));
-                for (unsigned j = ((int)src1.size() + 1u - i); j < src1.size(); ++j) {
+                for (unsigned j = (static_cast<int>(src1.size()) + 1u - i); j < src1.size(); ++j) {
                     add_active_control(src2.at(j));
                 }
             }
@@ -1612,7 +1611,7 @@ namespace syrec {
 
         if (!var->indexes.empty()) {
             // check if it is all numeric_expressions
-            unsigned n = (int)var->get_var()->dimensions.size(); // dimensions
+            unsigned n = static_cast<int>(var->get_var()->dimensions.size()); // dimensions
             if ((unsigned)std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<numeric_expression*>(p.get()); }) == n) {
                 for (unsigned i = 0u; i < n; ++i) {
                     offset += dynamic_cast<numeric_expression*>(var->indexes.at(i).get())->value->evaluate(loop_map) *
@@ -1633,7 +1632,7 @@ namespace syrec {
                     lines.emplace_back(offset + i);
                 }
             } else {
-                for (auto i = (int)first; i >= (int)second; --i) {
+                for (auto i = static_cast<int>(first); i >= static_cast<int>(second); --i) {
                     lines.emplace_back(offset + i);
                 }
             }
@@ -1710,11 +1709,11 @@ namespace syrec {
         }
     }
 
-    bool syrec_synthesis_additional_lines(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    bool SyrecSynthesisAdditionalLines::synthesize(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // Settings parsing
         auto                          variable_name_format = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto                          main_module          = get<std::string>(settings, "main_module", std::string());
-        SyrecSynthesisAdditionalLines statement_synthesizer(circ, program);
+        SyrecSynthesisAdditionalLines statement_synthesizer(circ);
         // Run-time measuring
         timer<properties_timer> t;
 
@@ -1750,11 +1749,11 @@ namespace syrec {
         return statement_synthesizer.on_module(main);
     }
 
-    bool syrec_synthesis_no_additional_lines(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    bool SyrecSynthesisNoAdditionalLines::synthesize(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
         // Settings parsing
         auto                            variable_name_format = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto                            main_module          = get<std::string>(settings, "main_module", std::string());
-        SyrecSynthesisNoAdditionalLines statement_synthesizer(circ, program);
+        SyrecSynthesisNoAdditionalLines statement_synthesizer(circ);
         // get the main module
         module::ptr main;
 
