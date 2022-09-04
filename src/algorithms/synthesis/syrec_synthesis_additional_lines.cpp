@@ -1,7 +1,5 @@
 #include "algorithms/synthesis/syrec_synthesis_additional_lines.hpp"
 
-#include "core/utils/timer.hpp"
-
 namespace syrec {
     bool SyrecSynthesisAdditionalLines::on_statement(const assign_statement& statement) {
         std::vector<unsigned> lhs;

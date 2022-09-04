@@ -1,7 +1,5 @@
 #include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
 
-#include "core/utils/timer.hpp"
-
 namespace syrec {
     /// checking the entire statement
     bool SyrecSynthesisNoAdditionalLines::full_statement(const statement::ptr& statement) {
