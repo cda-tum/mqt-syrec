@@ -1,4 +1,4 @@
-#include "algorithms/synthesis/derived_syrec_synthesis.hpp"
+#include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"

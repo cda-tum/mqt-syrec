@@ -55,12 +55,26 @@ namespace syrec {
         void set_main_module(const module::ptr& main_module);
 
     protected:
-        bool               on_statement(const swap_statement& statement);
-        bool               on_statement(const unary_statement& statement);
-        [[nodiscard]] bool on_statement(const skip_statement& statement) const;
+        // TODO: please find a proper name for this function, this is just a placeholder for now
+        virtual bool process_statement(const statement::ptr& statement) = 0;
 
-        bool on_expression(const numeric_expression& expression, std::vector<unsigned>& lines);
-        bool on_expression(const variable_expression& expression, std::vector<unsigned>& lines);
+        virtual bool on_module(const module::ptr&);
+
+        virtual bool              on_statement(const statement::ptr& statement);
+        virtual bool              on_statement(const assign_statement& statement) = 0;
+        virtual bool              on_statement(const if_statement& statement);
+        virtual bool              on_statement(const for_statement& statement);
+        virtual bool              on_statement(const call_statement& statement);
+        virtual bool              on_statement(const uncall_statement& statement);
+        bool                      on_statement(const swap_statement& statement);
+        bool                      on_statement(const unary_statement& statement);
+        [[nodiscard]] static bool on_statement(const skip_statement& statement);
+
+        virtual bool on_expression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
+        virtual bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) = 0;
+        virtual bool on_expression(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
+        virtual bool on_expression(const numeric_expression& expression, std::vector<unsigned>& lines);
+        virtual bool on_expression(const variable_expression& expression, std::vector<unsigned>& lines);
 
         // unary operations
         bool bitwise_negation(const std::vector<unsigned>& dest); // ~
@@ -105,6 +119,8 @@ namespace syrec {
 
         unsigned get_constant_line(bool value);
         void     get_constant_lines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
+
+        static bool synthesize(SyrecSynthesis* synthesizer, circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics);
 
         std::stack<statement::ptr>    _stmts;
         circuit&                      _circ;

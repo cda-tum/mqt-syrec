@@ -1,5 +1,5 @@
 #include "algorithms/simulation/simple_simulation.hpp"
-#include "algorithms/synthesis/derived_syrec_synthesis.hpp"
+#include "algorithms/synthesis/syrec_synthesis_additional_lines.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
