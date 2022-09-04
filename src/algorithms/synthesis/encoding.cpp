@@ -4,8 +4,6 @@ namespace syrec {
 
     auto extend(TruthTable& tt) -> void {
         // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
-        assert(tt.empty() || (tt.nInputs() <= std::log2(tt.max_size()) && tt.nInputs() <= 63U));
-
         if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U))
             throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
 
