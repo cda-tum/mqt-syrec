@@ -6,8 +6,8 @@ add_library(${PROJECT_NAME}
 
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
             ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_with_additional_lines.hpp
-            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_without_additional_lines.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_additional_lines.hpp
+            ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp
 
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
