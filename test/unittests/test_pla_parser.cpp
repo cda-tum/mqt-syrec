@@ -38,12 +38,12 @@ TEST_F(PlaParserTest, andTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.cubeMap.size(), 1U);
+    EXPECT_EQ(testPla.size(), 1U);
 
-    auto it11 = testPla.cubeMap.find(c11);
+    auto it11 = testPla.find(0b11U, 2U);
 
-    EXPECT_TRUE(it11 != testPla.cubeMap.end());
-    EXPECT_EQ(it11->second, c1);
+    EXPECT_TRUE(it11 != testPla.end());
+    EXPECT_TRUE(it11->second.equals(0b1U, 1U));
 }
 
 TEST_F(PlaParserTest, orTest) {
@@ -53,15 +53,15 @@ TEST_F(PlaParserTest, orTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.cubeMap.size(), 2U);
+    EXPECT_EQ(testPla.size(), 2U);
 
-    auto it_1 = testPla.cubeMap.find(c_1);
+    auto it_1 = testPla.find(std::string("-1"));
 
-    EXPECT_TRUE(it_1 != testPla.cubeMap.end());
-    EXPECT_EQ(it_1->second, c1);
+    EXPECT_TRUE(it_1 != testPla.end());
+    EXPECT_TRUE(it_1->second.equals(0b1U, 1U));
 
-    auto it1_ = testPla.cubeMap.find(c1_);
+    auto it1_ = testPla.find(std::string("1-"));
 
-    EXPECT_TRUE(it1_ != testPla.cubeMap.end());
-    EXPECT_EQ(it1_->second, c1);
+    EXPECT_TRUE(it1_ != testPla.end());
+    EXPECT_TRUE(it1_->second.equals(0b1U, 1U));
 }

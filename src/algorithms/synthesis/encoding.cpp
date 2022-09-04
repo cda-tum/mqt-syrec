@@ -4,54 +4,54 @@ namespace syrec {
 
     auto extend(TruthTable& tt) -> void {
         // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
-        assert(tt.cubeMap.empty() || (tt.nInputs() <= std::log2(tt.cubeMap.max_size()) && tt.nInputs() <= 63U));
+        assert(tt.empty() || (tt.nInputs() <= std::log2(tt.max_size()) && tt.nInputs() <= 63U));
 
-        if (!tt.cubeMap.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.cubeMap.max_size())) || tt.nInputs() > 63U))
-            throw std::invalid_argument("Overflow!, Number of inputs more than 64");
+        if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U))
+            throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
 
-        TruthTable::CubeMap newCubeMap{};
+        TruthTable newCubeMap{};
 
-        for (auto const& [input, output]: tt.cubeMap) {
+        for (auto const& [input, output]: tt) {
             // ensure that all outputs are complete
             assert(std::none_of(output.cbegin(), output.cend(), [](auto const& v) { return !v.has_value(); }));
 
             // compute the complete cubes for the input
             auto completeInputs = input.completeCubes();
             // move all the complete cubes to the new cube map
-            for (auto& completeInput: completeInputs) {
-                newCubeMap.try_emplace(std::move(completeInput), output);
+            for (auto const& completeInput: completeInputs) {
+                newCubeMap.insert(completeInput, output);
             }
         }
         // swap the new cube map with the old one
-        tt.cubeMap = std::move(newCubeMap);
+        tt.swap(newCubeMap);
 
         // construct output cube
         const auto output = TruthTable::Cube(tt.nOutputs(), false);
 
         std::uint64_t pos = 0U;
-        for (const auto& [input, _]: tt.cubeMap) {
+        for (const auto& [input, _]: tt) {
             // fill in all the missing inputs
             const auto number = input.toInteger();
             for (std::uint64_t i = pos; i < number; ++i) {
-                tt.cubeMap[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
+                tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
             }
             pos = number + 1U;
         }
         // fill in the remaining missing inputs (if any)
         const std::uint64_t max = 1ULL << tt.nInputs();
         for (std::uint64_t i = pos; i < max; ++i) {
-            tt.cubeMap[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
+            tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
         }
     }
 
     auto encodeHuffman(TruthTable& tt) -> void {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
-        for (const auto& [input, output]: tt.cubeMap) {
+        for (const auto& [input, output]: tt) {
             outputFreq[output]++;
         }
 
         // if the truth table function is already reversible, no encoding is necessary
-        if (outputFreq.size() == tt.cubeMap.size()) {
+        if (outputFreq.size() == tt.size()) {
             return;
         }
 
@@ -98,13 +98,13 @@ namespace syrec {
         }
 
         // encode all the outputs
-        for (auto& [input, output]: tt.cubeMap) {
-            output = encoding[output];
+        for (auto& [input, output]: tt) {
+            tt[input] = encoding[output];
         }
     }
 
     auto augmentWithConstants(TruthTable& tt) -> void {
-        for (auto const& [input, output]: tt.cubeMap) {
+        for (auto const& [input, output]: tt) {
             const auto inputSize  = input.size();
             const auto outputSize = output.size();
             if (inputSize >= outputSize) {
@@ -117,9 +117,9 @@ namespace syrec {
             for (std::size_t i = 0; i < requiredConstants; i++) {
                 newCube.insertZero();
             }
-            auto nh  = tt.cubeMap.extract(input);
+            auto nh  = tt.extract(input);
             nh.key() = newCube;
-            tt.cubeMap.insert(std::move(nh));
+            tt.insertNode(std::move(nh));
         }
     }
 

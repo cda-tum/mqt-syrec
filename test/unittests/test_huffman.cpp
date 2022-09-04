@@ -12,22 +12,46 @@ protected:
     std::string test_circuits_dir = "./circuits/";
 };
 
+TEST_F(TestHuff, Ident2Bit) {
+    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+
+    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
+
+    EXPECT_EQ(tt.size(), 3U);
+
+    extend(tt);
+
+    EXPECT_EQ(tt.size(), 4U);
+
+    auto search = tt.find(0b00U, 2U);
+
+    EXPECT_TRUE(search != tt.end());
+
+    EXPECT_TRUE(search->second.equals(0b00U, 2U));
+
+    TruthTable ttExtend(tt);
+
+    encodeHuffman(tt);
+
+    ASSERT_TRUE(tt == ttExtend);
+}
+
 TEST_F(TestHuff, HUFF1) {
     std::string circHUFF1 = test_circuits_dir + "HUFF1.pla";
 
     EXPECT_TRUE(read_pla(tt, circHUFF1));
 
-    EXPECT_EQ(tt.cubeMap.size(), 3U);
+    EXPECT_EQ(tt.size(), 3U);
 
     extend(tt);
 
-    EXPECT_EQ(tt.cubeMap.size(), 4U);
+    EXPECT_EQ(tt.size(), 4U);
 
-    auto search1 = tt.findCubeInteger(0b00U, 2U);
+    auto search1 = tt.find(0b00U, 2U);
 
-    EXPECT_TRUE(search1 != tt.cubeMap.end());
+    EXPECT_TRUE(search1 != tt.end());
 
-    EXPECT_TRUE(search1->second.equals(0b00U));
+    EXPECT_TRUE(search1->second.equals(0b00U, 2U));
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
@@ -38,22 +62,22 @@ TEST_F(TestHuff, HUFF1) {
     std::vector<std::uint64_t> encInput{0b01U, 0b10U};
 
     for (const auto& in1: encInput) {
-        auto search = tt.findCubeInteger(in1, 2U);
-        EXPECT_TRUE(search != tt.cubeMap.end());
+        auto search = tt.find(in1, 2U);
+        EXPECT_TRUE(search != tt.end());
         EXPECT_TRUE(search->second.equals(std::string("0-")));
     }
 
-    auto search2 = tt.findCubeInteger(0b00U, 2U);
+    auto search2 = tt.find(0b00U, 2U);
 
-    EXPECT_TRUE(search2 != tt.cubeMap.end());
+    EXPECT_TRUE(search2 != tt.end());
 
-    EXPECT_TRUE(search2->second.equals(0b10U));
+    EXPECT_TRUE(search2->second.equals(0b10U, 2U));
 
-    auto search3 = tt.findCubeInteger(0b11U, 2U);
+    auto search3 = tt.find(0b11U, 2U);
 
-    EXPECT_TRUE(search3 != tt.cubeMap.end());
+    EXPECT_TRUE(search3 != tt.end());
 
-    EXPECT_TRUE(search3->second.equals(0b11U));
+    EXPECT_TRUE(search3->second.equals(0b11U, 2U));
 }
 
 TEST_F(TestHuff, HUFF2) {
@@ -61,17 +85,17 @@ TEST_F(TestHuff, HUFF2) {
 
     EXPECT_TRUE(read_pla(tt, circHUFF2));
 
-    EXPECT_EQ(tt.cubeMap.size(), 2U);
+    EXPECT_EQ(tt.size(), 2U);
 
     extend(tt);
 
-    EXPECT_EQ(tt.cubeMap.size(), 4U);
+    EXPECT_EQ(tt.size(), 4U);
 
-    auto search1 = tt.findCubeInteger(0b00U, 2U);
+    auto search1 = tt.find(0b00U, 2U);
 
-    EXPECT_TRUE(search1 != tt.cubeMap.end());
+    EXPECT_TRUE(search1 != tt.end());
 
-    EXPECT_TRUE(search1->second.equals(0b00U));
+    EXPECT_TRUE(search1->second.equals(0b00U, 2U));
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
@@ -82,15 +106,15 @@ TEST_F(TestHuff, HUFF2) {
     std::vector<std::uint64_t> encInput{0b01U, 0b10U, 0b11U};
 
     for (const auto& in1: encInput) {
-        auto search2 = tt.findCubeInteger(in1, 2U);
-        EXPECT_TRUE(search2 != tt.cubeMap.end());
+        auto search2 = tt.find(in1, 2U);
+        EXPECT_TRUE(search2 != tt.end());
 
         EXPECT_TRUE(search2->second.equals(std::string("1--")));
     }
 
-    auto search3 = tt.findCubeInteger(0b00U, 2U);
+    auto search3 = tt.find(0b00U, 2U);
 
-    EXPECT_TRUE(search3 != tt.cubeMap.end());
+    EXPECT_TRUE(search3 != tt.end());
 
     EXPECT_TRUE(search3->second.equals(std::string("0--")));
 
@@ -103,8 +127,8 @@ TEST_F(TestHuff, HUFF2) {
     std::vector<std::uint64_t> augInput{0b000U, 0b001U, 0b010U, 0b011U};
 
     for (const auto& in2: augInput) {
-        auto search4 = tt.findCubeInteger(in2, 3U);
+        auto search4 = tt.find(in2, 3U);
 
-        EXPECT_TRUE(search4 != tt.cubeMap.end());
+        EXPECT_TRUE(search4 != tt.end());
     }
 }

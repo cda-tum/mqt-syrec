@@ -17,8 +17,6 @@
 
 namespace syrec {
 
-    auto transformCharToCubeValue(const char& c) -> std::optional<bool>;
-
     struct TruthTable {
         class Cube {
         public:
@@ -42,6 +40,20 @@ namespace syrec {
                 std::copy(first, last, std::back_inserter(cube));
             }
 
+            static auto getValue(const char& c) -> std::optional<bool> {
+                switch (c) {
+                    case '-':
+                    case '~':
+                        return {};
+                    case '0':
+                        return false;
+                    case '1':
+                        return true;
+                    default:
+                        throw std::invalid_argument("Unknown Character");
+                }
+            }
+
             // construct a cube from a (64bit) number with a given bitwidth
             static auto fromInteger(const std::uint64_t number, const std::size_t bw) -> Cube {
                 assert(bw <= 64U);
@@ -55,11 +67,10 @@ namespace syrec {
 
             // construct a cube from a string
             static auto fromString(const std::string& str) -> Cube {
-                assert(str.size() <= 64U);
                 Cube cube{};
                 cube.reserve(str.size());
                 for (const auto& s: str) {
-                    cube.emplace_back(transformCharToCubeValue(s));
+                    cube.emplace_back(getValue(s));
                 }
                 return cube;
             }
@@ -100,9 +111,8 @@ namespace syrec {
                 return cube[pos];
             }
 
-            auto operator[](std::size_t pos) const -> Value {
-                const std::vector<Value>& x = cube;
-                return x[pos];
+            auto operator[](std::size_t pos) const -> const Value& {
+                return cube[pos];
             }
 
             auto operator<(const Cube& cv) const -> bool {
@@ -133,14 +143,12 @@ namespace syrec {
                 cube.pop_back();
             }
 
-            [[nodiscard]] auto equals(const std::uint64_t num) const -> bool {
-                Cube cubeEq(cube);
-                return cubeEq.toInteger() == num;
+            [[nodiscard]] auto equals(const std::uint64_t num, const std::uint64_t bw) const -> bool {
+                return cube == (Cube::fromInteger(num, bw)).cube;
             }
 
             [[nodiscard]] auto equals(const std::string& str) const -> bool {
-                Cube cubeEq(cube);
-                return Cube::fromString(str) == cubeEq;
+                return cube == (Cube::fromString(str)).cube;
             }
 
             [[nodiscard]] auto size() const -> std::size_t {
@@ -165,7 +173,44 @@ namespace syrec {
 
         using CubeMap = std::map<Cube, Cube>;
 
+    private:
         CubeMap cubeMap{};
+
+    public:
+        TruthTable()               = default;
+        TruthTable(TruthTable& tt) = default;
+
+        auto operator==(const TruthTable& tt) const -> bool {
+            return (cubeMap == tt.cubeMap);
+        }
+
+        auto operator[](const Cube& key) -> Cube& {
+            return cubeMap[key];
+        }
+
+        auto operator[](Cube&& key) -> Cube& {
+            return cubeMap[std::move(key)];
+        }
+
+        [[nodiscard]] auto begin() const -> decltype(cubeMap.begin()) {
+            return cubeMap.begin();
+        }
+
+        [[nodiscard]] auto end() const -> decltype(cubeMap.end()) {
+            return cubeMap.end();
+        }
+
+        [[nodiscard]] auto empty() const -> bool {
+            return cubeMap.empty();
+        }
+
+        [[nodiscard]] auto size() const -> std::size_t {
+            return cubeMap.size();
+        }
+
+        [[nodiscard]] auto max_size() const -> std::size_t {
+            return cubeMap.max_size();
+        }
 
         [[nodiscard]] auto nInputs() const -> std::size_t {
             if (cubeMap.empty()) {
@@ -181,8 +226,20 @@ namespace syrec {
             return cubeMap.begin()->second.size();
         }
 
-        auto findCubeInteger(const std::uint64_t number, const std::size_t bw) -> decltype(cubeMap.cbegin()) {
+        auto extract(Cube const& key) -> CubeMap::node_type {
+            return cubeMap.extract(key);
+        }
+
+        auto swap(TruthTable& other) noexcept -> void {
+            cubeMap.swap(other.cubeMap);
+        }
+
+        auto find(const std::uint64_t number, const std::size_t bw) -> decltype(cubeMap.cbegin()) {
             return cubeMap.find(Cube::fromInteger(number, bw));
+        }
+
+        auto find(const std::string& str) -> decltype(cubeMap.cbegin()) {
+            return cubeMap.find(Cube::fromString(str));
         }
 
         auto insert(const Cube& input, const Cube& output) -> void {
@@ -192,6 +249,10 @@ namespace syrec {
         auto insert(Cube&& input, Cube&& output) -> void {
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(std::move(input), std::move(output));
+        }
+
+        auto insertNode(CubeMap::node_type nh) -> void {
+            cubeMap.insert(std::move(nh));
         }
 
         auto clear() -> void {

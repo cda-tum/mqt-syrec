@@ -16,7 +16,7 @@ namespace syrec {
 
         // base case
         if (tt.nInputs() == 1U) {
-            for (const auto& [input, output]: tt.cubeMap) {
+            for (const auto& [input, output]: tt) {
                 // truth table has to be completely specified
                 assert(input[0].has_value());
                 assert(output[0].has_value());
@@ -30,7 +30,7 @@ namespace syrec {
 
         // generate sub-tables
         std::array<TruthTable, 4U> subTables{};
-        for (const auto& [input, output]: tt.cubeMap) {
+        for (const auto& [input, output]: tt) {
             // truth table has to be completely specified
             assert(input[0].has_value());
             assert(output[0].has_value());

@@ -2,20 +2,6 @@
 
 namespace syrec {
 
-    auto transformCharToCubeValue(const char& c) -> std::optional<bool> {
-        switch (c) {
-            case '-':
-            case '~':
-                return {};
-            case '0':
-                return false;
-            case '1':
-                return true;
-            default:
-                throw std::invalid_argument("Unknown Character");
-        }
-    }
-
     auto TruthTable::Cube::completeCubes() const -> Vector {
         Vector result{};
 

@@ -39,7 +39,7 @@ namespace syrec {
                 }
 
                 if (inout.size() != 2)
-                    throw std::invalid_argument("Expected exactly 2, received " + std::to_string(inout.size()));
+                    throw std::invalid_argument("Expected exactly 2 columns (input and output), received " + std::to_string(inout.size()) + std::string(" columns"));
 
                 if (inout[0].size() != nInputs)
                     throw std::invalid_argument(".i " + std::string("(") + std::to_string(nInputs) + std::string(")") + std::string(" not equal to received number of inputs ") + std::string("(") + std::to_string(inout[0].size()) + std::string(")"));
@@ -51,14 +51,14 @@ namespace syrec {
                 cubeIn.reserve(nInputs);
 
                 for (auto s: inout[0]) {
-                    cubeIn.emplace_back(transformCharToCubeValue(s));
+                    cubeIn.emplace_back(TruthTable::Cube::getValue(s));
                 }
 
                 TruthTable::Cube cubeOut;
                 cubeOut.reserve(nOutputs);
 
                 for (auto s: inout[1]) {
-                    cubeOut.emplace_back(transformCharToCubeValue(s));
+                    cubeOut.emplace_back(TruthTable::Cube::getValue(s));
                 }
 
                 tt.insert(cubeIn, cubeOut);
