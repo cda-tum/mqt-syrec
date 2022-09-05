@@ -108,7 +108,9 @@ setup(
     zip_safe=False,
     packages=find_namespace_packages(include=['mqt.*']),
     extras_require={
-        "tests": ["pytest~=7.1.1"],
+        "test": ["pytest>=7"],
+        "coverage": ["coverage[toml]~=6.4.2", "pytest-cov~=3.0.0"],
+        "dev": ["mqt.syrec[test, coverage"]
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
