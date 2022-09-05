@@ -8,10 +8,9 @@ from setuptools.command.build_ext import build_ext
 
 
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir='', namespace=''):
+    def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
-        self.namespace = namespace
 
 
 class CMakeBuild(build_ext):
@@ -19,7 +18,7 @@ class CMakeBuild(build_ext):
         from setuptools_scm import get_version
         version = get_version(root='.', relative_to=__file__)
 
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.namespace + ext.name)))
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
         # required for auto-detection of auxiliary "native" libs
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
@@ -78,9 +77,15 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         else:
-            os.remove(self.build_temp + "/CMakeCache.txt")
+            try:
+                os.remove(os.path.join(self.build_temp, "CMakeCache.txt"))
+            except OSError:
+                pass
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp)
-        subprocess.check_call(['cmake', '--build', '.', '--target', ext.name] + build_args, cwd=self.build_temp)
+        subprocess.check_call(
+            ["cmake", "--build", ".", "--target", ext.name.split(".")[-1]] + build_args,
+            cwd=self.build_temp,
+        )
 
 
 README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
@@ -98,7 +103,7 @@ setup(
     python_requires='>=3.7',
     license="MIT",
     # url="",
-    ext_modules=[CMakeExtension('pysyrec', namespace='mqt.syrec.')],
+    ext_modules=[CMakeExtension('mqt.syrec.pysyrec')],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     packages=find_namespace_packages(include=['mqt.*']),
