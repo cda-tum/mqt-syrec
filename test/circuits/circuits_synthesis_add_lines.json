@@ -1,0 +1,207 @@
+{
+  "alu_2": {
+    "num_gates": 26,
+    "lines": 11,
+    "quantum_costs" : 138,
+    "transistor_costs" : 384
+  },
+
+  "binary_numeric": {
+    "num_gates": 30,
+    "lines": 60,
+    "quantum_costs" : 30,
+    "transistor_costs" : 240
+  },
+
+  "bitwise_and_2": {
+    "num_gates": 8,
+    "lines": 8,
+    "quantum_costs" : 24,
+    "transistor_costs" : 96
+  },
+
+  "bitwise_or_2": {
+    "num_gates": 12,
+    "lines": 8,
+    "quantum_costs" : 28,
+    "transistor_costs" : 128
+  },
+
+  "bn_2": {
+    "num_gates": 188,
+    "lines": 74,
+    "quantum_costs" : 520,
+    "transistor_costs" : 1920
+  },
+
+  "call_8": {
+    "num_gates": 212,
+    "lines": 41,
+    "quantum_costs" : 1492,
+    "transistor_costs" : 3776
+  },
+
+  "divide_2": {
+    "num_gates": 252,
+    "lines": 22,
+    "quantum_costs" : 1076,
+    "transistor_costs" : 2832
+  },
+
+  "for_4":
+  {
+    "num_gates"         : 112,
+    "lines"             : 41,
+    "quantum_costs"     : 208,
+    "transistor_costs"  : 1088
+  },
+
+  "for_32":
+  {
+    "num_gates"         : 2498,
+    "lines"             : 641,
+    "quantum_costs"     : 15426,
+    "transistor_costs"  : 41856
+  },
+
+  "gray_binary_conversion_16":
+  {
+    "num_gates"         :94,
+    "lines"             :63,
+    "quantum_costs"     :462,
+    "transistor_costs"  :1472
+  },
+
+  "input_repeated_2":
+  {
+    "num_gates"         :88,
+    "lines"             :38,
+    "quantum_costs"     :168,
+    "transistor_costs"  :800
+  },
+
+  "input_repeated_4":
+  {
+    "num_gates"         :168,
+    "lines"             :48,
+    "quantum_costs"     :312,
+    "transistor_costs"  :1504
+  },
+
+  "logical_and_1":
+  {
+    "num_gates"         :52,
+    "lines"             :12,
+    "quantum_costs"     :100,
+    "transistor_costs"  :400
+  },
+
+  "logical_or_1":
+  {
+    "num_gates"         :53,
+    "lines"             :12,
+    "quantum_costs"     :101,
+    "transistor_costs"  :416
+  },
+
+  "modulo_2":
+  {
+    "num_gates"         :31,
+    "lines"             :10,
+    "quantum_costs"     :111,
+    "transistor_costs"  :320
+  },
+
+  "multiple_statement_4":
+  {
+    "num_gates"         :116,
+    "lines"             :28,
+    "quantum_costs"     :212,
+    "transistor_costs"  :992
+  },
+
+  "multiply_2":
+  {
+    "num_gates"         :5,
+    "lines"             :8,
+    "quantum_costs"     :17,
+    "transistor_costs"  :64
+  },
+
+
+  "negate_8":
+  {
+    "num_gates"         :48,
+    "lines"             :8,
+    "quantum_costs"     :1740,
+    "transistor_costs"  :896
+  },
+
+  "numeric_2":
+  {
+    "num_gates"         :34,
+    "lines"             :68,
+    "quantum_costs"     :34,
+    "transistor_costs"  :272
+  },
+
+  "operators_repeated_4":
+  {
+    "num_gates"         :276,
+    "lines"             :64,
+    "quantum_costs"     :516,
+    "transistor_costs"  :2496
+  },
+
+  "parity_4":
+  {
+    "num_gates"         :17,
+    "lines"             :12,
+    "quantum_costs"     :73,
+    "transistor_costs"  :232
+  },
+
+  "parity_check_16":
+  {
+    "num_gates"         :69,
+    "lines"             :51,
+    "quantum_costs"     :333,
+    "transistor_costs"  :1064
+  },
+
+  "shift_4": {
+    "num_gates": 11,
+    "lines": 20,
+    "quantum_costs" : 11,
+    "transistor_costs" : 88
+  },
+
+  "simple_add_2": {
+    "num_gates": 18,
+    "lines": 8,
+    "quantum_costs" : 34,
+    "transistor_costs" : 144
+  },
+
+  "single_longstatement_4": {
+    "num_gates": 108,
+    "lines": 48,
+    "quantum_costs" : 180,
+    "transistor_costs" : 880
+  },
+
+  "skip": {
+    "num_gates": 0,
+    "lines": 4,
+    "quantum_costs" : 0,
+    "transistor_costs" : 0
+  },
+
+  "swap_2": {
+    "num_gates": 2,
+    "lines": 4,
+    "quantum_costs" : 2,
+    "transistor_costs" : 0
+  }
+
+}

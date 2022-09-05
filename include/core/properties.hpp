@@ -1,11 +1,4 @@
-/**
- * @file properties.hpp
- *
- * @brief Property Map Implementation for Algorithms
- */
-
-#ifndef PROPERTIES_HPP
-#define PROPERTIES_HPP
+#pragma once
 
 #include <any>
 #include <iostream>
@@ -148,5 +141,3 @@ namespace syrec {
     }
 
 } // namespace syrec
-
-#endif /* PROPERTIES_HPP */

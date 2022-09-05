@@ -1,10 +1,4 @@
-/**
- * @file module.hpp
- *
- * @brief SyReC module data type
- */
-#ifndef MODULE_HPP
-#define MODULE_HPP
+#pragma once
 
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
@@ -89,5 +83,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* MODULE_HPP */

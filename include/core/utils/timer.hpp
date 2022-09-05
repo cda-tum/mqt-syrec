@@ -1,11 +1,4 @@
-/**
-* @file timer.hpp
-*
-* @brief A generic way for measuring time
-*/
-
-#ifndef TIMER_HPP
-#define TIMER_HPP
+#pragma once
 
 #include "core/properties.hpp"
 
@@ -99,5 +92,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif

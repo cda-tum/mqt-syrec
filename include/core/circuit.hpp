@@ -1,11 +1,4 @@
-/**
- * @file circuit.hpp
- *
- * @brief Circuit class
- */
-
-#ifndef CIRCUIT_HPP
-#define CIRCUIT_HPP
+#pragma once
 
 #include "core/gate.hpp"
 
@@ -501,5 +494,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* CIRCUIT_HPP */

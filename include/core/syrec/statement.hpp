@@ -1,10 +1,4 @@
-/**
- * @file statement.hpp
- *
- * @brief SyReC statement data types
- */
-#ifndef STATEMENT_HPP
-#define STATEMENT_HPP
+#pragma once
 
 #include "core/syrec/expression.hpp"
 #include "core/syrec/module.hpp"
@@ -358,5 +352,3 @@ namespace syrec {
     }
 
 } // namespace syrec
-
-#endif /* STATEMENT_HPP */

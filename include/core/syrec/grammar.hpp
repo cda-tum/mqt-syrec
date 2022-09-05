@@ -1,5 +1,4 @@
-#ifndef GRAMMAR_HPP
-#define GRAMMAR_HPP
+#pragma once
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
@@ -315,5 +314,3 @@ namespace syrec {
 
     class program;
 } // namespace syrec
-
-#endif /* GRAMMAR_HPP */
