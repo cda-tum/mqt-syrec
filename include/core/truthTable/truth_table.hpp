@@ -1,5 +1,6 @@
 #pragma once
 
+#include "QuantumComputation.hpp"
 #include "dd/Package.hpp"
 
 #include <algorithm>
