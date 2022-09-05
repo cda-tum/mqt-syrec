@@ -320,9 +320,9 @@ namespace syrec {
      *   }
      * }
      * @endcode
-     * 
+     *
      * @param g Gate
-     * 
+     *
      * @return Map of annotations encapsulated in an optional
      */
         [[nodiscard]] std::optional<const std::map<std::string, std::string>> get_annotations(const gate& g) const {
@@ -336,7 +336,7 @@ namespace syrec {
 
         /**
      * @brief Annotates a gate
-     * 
+     *
      * With this method a gate can be annotated using a key and a value.
      * If there is an annotation with the same key, it will be overwritten.
      *

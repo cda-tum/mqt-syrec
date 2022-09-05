@@ -17,13 +17,13 @@ If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de]
 SyReC is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
 
 - In order to make the library as easy to use as possible (without compilation), we provide pre-built wheels for most common platforms (64-bit Linux, MacOS, Windows). These can be installed using
-    ```bash
-    (venv) $ pip install mqt.syrec
-    ```
+  ```bash
+  (venv) $ pip install mqt.syrec
+  ```
 - Once installed, start the SyReC editor GUI by running:
-    ```bash
-    (venv) $ syrec-editor
-    ```
+  ```bash
+  (venv) $ syrec-editor
+  ```
 
 ## Reference
 
@@ -54,7 +54,7 @@ If you use our tool for your research, we would appreciate if you cited the appr
 Building (and running) is continuously tested under Linux, MacOS, and Windows using the [latest available system versions for GitHub Actions](https://github.com/actions/virtual-environments). However, the implementation should be compatible
 with any current C++ compiler supporting C++17 and a minimum CMake version of 3.14.
 
-*Disclaimer*: We noticed some issues when compiling with Microsoft's `MSCV` compiler toolchain. If you are developing under Windows, consider using the `clang` compiler toolchain. A detailed description of how to set this up can be
+_Disclaimer_: We noticed some issues when compiling with Microsoft's `MSCV` compiler toolchain. If you are developing under Windows, consider using the `clang` compiler toolchain. A detailed description of how to set this up can be
 found [here](https://docs.microsoft.com/en-us/cpp/build/clang-support-msbuild?view=msvc-160).
 
 ### Setup, Configure, and Build
@@ -62,20 +62,20 @@ found [here](https://docs.microsoft.com/en-us/cpp/build/clang-support-msbuild?vi
 To start off, clone this repository using
 
 ```shell
-git clone --recurse-submodules -j8 https://github.com/cda-tum/syrec 
+git clone --recurse-submodules -j8 https://github.com/cda-tum/syrec
 ```
 
 Note the `--recurse-submodules` flag. It is required to also clone all the required submodules. If you happen to forget passing the flag on your initial clone, you can initialize all the submodules by
 executing `git submodule update --init --recursive` in the main project directory.
 
-Our projects use CMake as the main build configuration tool. Building a project using CMake is a two-stage process. First, CMake needs to be *configured* by calling
+Our projects use CMake as the main build configuration tool. Building a project using CMake is a two-stage process. First, CMake needs to be _configured_ by calling
 
-```shell 
+```shell
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 ```
 
-This tells CMake to search the current directory `.` (passed via `-S`) for a *CMakeLists.txt* file and process it into a directory `build` (passed via `-B`). The flag `-DCMAKE_BUILD_TYPE=Release` tells CMake to configure a *Release* build (
-as opposed to, e.g., a *Debug* build).
+This tells CMake to search the current directory `.` (passed via `-S`) for a _CMakeLists.txt_ file and process it into a directory `build` (passed via `-B`). The flag `-DCMAKE_BUILD_TYPE=Release` tells CMake to configure a _Release_ build (
+as opposed to, e.g., a _Debug_ build).
 
 After configuring with CMake, the project can be built by calling
 

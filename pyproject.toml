@@ -2,7 +2,6 @@
 requires = [
     "setuptools>=45",
     "setuptools_scm>=6.4",
-    "wheel>=0.37",
     "ninja>=1.10; sys_platform != 'win32'",
     "cmake>=3.14",
 ]
@@ -15,7 +14,7 @@ build = "cp3*"
 archs = "auto64"
 skip = "*-musllinux_*"
 test-skip = "*-macosx_arm64 *-musllinux* *aarch64"
-test-extras = ["tests"]
+test-extras = ["test"]
 test-command = "cd {project}/test/python && python -m pytest ."
 environment = { DEPLOY = "ON" }
 build-frontend = "build"
@@ -36,3 +35,50 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", DEPLOY = "ON" }
 
 [tool.cibuildwheel.windows]
 test-command = "python -c \"from mqt import syrec\""
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["test/python"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+log_cli_level = "INFO"
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["mqt.syrec"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+precision = 1
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+src_paths = ["mqt/syrec", "test/python"]
+
+[tool.pylint]
+master.py-version = "3.7"
+master.jobs = "0"
+reports.output-format = "colorized"
+similarities.ignore-imports = "yes"
+messages_control.enable = [
+    "useless-suppression",
+]
+messages_control.disable = [
+    "invalid-name",
+    "line-too-long",
+    "missing-module-docstring",
+    "no-member",
+    "protected-access",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-locals",
+    "too-many-statements",
+    "ungrouped-imports",
+    "wrong-import-order",
+    "wrong-import-position",
+]

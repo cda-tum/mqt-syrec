@@ -2,25 +2,25 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   schedule:
-    - cron: '15 21 * * 6'
+    - cron: "15 21 * * 6"
 
 jobs:
   analyze:
-    name:    Analyze
+    name: Analyze
     runs-on: ubuntu-latest
     permissions:
-      actions:         read
-      contents:        read
+      actions: read
+      contents: read
       security-events: write
 
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp', 'python' ]
+        language: ["cpp", "python"]
 
     steps:
       - name: Checkout repository
@@ -29,7 +29,7 @@ jobs:
           submodules: recursive
 
       - name: Install boost
-        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
+        run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL

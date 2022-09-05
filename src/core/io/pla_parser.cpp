@@ -30,34 +30,34 @@ namespace syrec {
             else {
                 assert((line[0] == '0' || line[0] == '1' || line[0] == '-' || line[0] == '~'));
 
-                std::vector<std::string> inout;
+                std::vector<std::string> inputOutputMapping;
 
                 auto        lineString = std::stringstream(line);
                 std::string tokenString;
                 while (std::getline(lineString, tokenString, ' ')) {
-                    inout.emplace_back(tokenString);
+                    inputOutputMapping.emplace_back(tokenString);
                 }
 
-                if (inout.size() != 2)
-                    throw std::invalid_argument("Expected exactly 2 columns (input and output), received " + std::to_string(inout.size()) + std::string(" columns"));
+                if (inputOutputMapping.size() != 2)
+                    throw std::invalid_argument("Expected exactly 2 columns (input and output), received " + std::to_string(inputOutputMapping.size()) + std::string(" columns"));
 
-                if (inout[0].size() != nInputs)
-                    throw std::invalid_argument(".i " + std::string("(") + std::to_string(nInputs) + std::string(")") + std::string(" not equal to received number of inputs ") + std::string("(") + std::to_string(inout[0].size()) + std::string(")"));
+                if (inputOutputMapping[0].size() != nInputs)
+                    throw std::invalid_argument(".i " + std::string("(") + std::to_string(nInputs) + std::string(")") + std::string(" not equal to received number of inputs ") + std::string("(") + std::to_string(inputOutputMapping[0].size()) + std::string(")"));
 
-                if (inout[1].size() != nOutputs)
-                    throw std::invalid_argument(".o " + std::string("(") + std::to_string(nOutputs) + std::string(")") + std::string(" not equal to received number of outputs ") + std::string("(") + std::to_string(inout[1].size()) + std::string(")"));
+                if (inputOutputMapping[1].size() != nOutputs)
+                    throw std::invalid_argument(".o " + std::string("(") + std::to_string(nOutputs) + std::string(")") + std::string(" not equal to received number of outputs ") + std::string("(") + std::to_string(inputOutputMapping[1].size()) + std::string(")"));
 
                 TruthTable::Cube cubeIn;
                 cubeIn.reserve(nInputs);
 
-                for (auto s: inout[0]) {
+                for (auto s: inputOutputMapping[0]) {
                     cubeIn.emplace_back(TruthTable::Cube::getValue(s));
                 }
 
                 TruthTable::Cube cubeOut;
                 cubeOut.reserve(nOutputs);
 
-                for (auto s: inout[1]) {
+                for (auto s: inputOutputMapping[1]) {
                     cubeOut.emplace_back(TruthTable::Cube::getValue(s));
                 }
 

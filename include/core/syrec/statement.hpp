@@ -60,7 +60,7 @@ namespace syrec {
     struct swap_statement: public statement {
         /**
        * @brief Constructor
-       * 
+       *
        * @param lhs Variable access on left hand side
        * @param rhs Variable access on right hand side
        */
@@ -102,7 +102,7 @@ namespace syrec {
 
         /**
        * @brief Constructor
-       * 
+       *
        * @param op Operation
        * @param var Variable access to be transformed
        */
@@ -146,7 +146,7 @@ namespace syrec {
             add,
 
             /**
-         * @brief Substraction from itself
+         * @brief Subtraction from itself
          */
             subtract,
 
@@ -158,7 +158,7 @@ namespace syrec {
 
         /**
        * @brief Constructor
-       * 
+       *
        * @param lhs Variable access to which the operation is applied
        * @param op Operation to be applied
        * @param rhs Expression to be evaluated
@@ -196,7 +196,7 @@ namespace syrec {
     struct if_statement: public statement {
         /**
        * @brief Standard constructor
-       * 
+       *
        * Initializes default values
        */
         if_statement() = default;
@@ -205,7 +205,7 @@ namespace syrec {
        * @brief Sets the condition for the execution of the then_statements()
        *
        * The expression \p condition is assumed to have a bit-width of 1 bit.
-       * 
+       *
        * @param condition Expression
        */
         void set_condition(expression::ptr cond) {
@@ -214,7 +214,7 @@ namespace syrec {
 
         /**
        * @brief Adds a statement to the then branch
-       * 
+       *
        * @param then_statement Statement to be executed in the if branch
        */
         void add_then_statement(const statement::ptr& then_statement) {
@@ -223,7 +223,7 @@ namespace syrec {
 
         /**
        * @brief Adds a statement to the else branch
-       * 
+       *
        * @param else_statement Statement to be executed in the else branch
        */
         void add_else_statement(const statement::ptr& else_statement) {
@@ -234,10 +234,10 @@ namespace syrec {
        * @brief Sets the reverse condition for the execution of the if_statements()
        *
        * The expression \p fi_condition is assumed to have a bit-width of 1 bit.
-       * The reverse condition is checked in order the if statement is uncalled, 
+       * The reverse condition is checked in order the if statement is uncalled,
        * i.e. executed reversed. Usually it is the same has the condition(), unless
-       * the evalation of the condition does not change in one of the branches.
-       * 
+       * the evaluation of the condition does not change in one of the branches.
+       *
        * @param fi_condition Expression
        */
         void set_fi_condition(expression::ptr fi_cond) {
@@ -272,13 +272,13 @@ namespace syrec {
         /**
        * @brief Standard constructor
        *
-       * Initilizes default values
+       * Initializes default values
        */
         for_statement() = default;
 
         /**
        * @brief Adds a statement to be executed in the loop
-       * 
+       *
        * @param statement Statement
        */
         void add_statement(const statement::ptr& statement) {
@@ -311,7 +311,7 @@ namespace syrec {
     struct call_statement: public statement {
         /**
        * @brief Constructor with module and parameters
-       * 
+       *
        * @param target Module to call
        * @param parameters Parameters to assign
        */
@@ -332,7 +332,7 @@ namespace syrec {
     struct uncall_statement: public statement {
         /**
        * @brief Constructor with module and parameters
-       * 
+       *
        * @param target Module to uncall
        * @param parameters Parameters to assign
        */
