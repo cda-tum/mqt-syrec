@@ -60,9 +60,9 @@ namespace syrec {
 
         virtual bool on_module(const module::ptr&);
 
-        virtual bool op_rhs_lhs_expression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v)     = 0;
-        virtual bool op_rhs_lhs_expression([[maybe_unused]] const variable_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) = 0;
-        virtual bool op_rhs_lhs_expression([[maybe_unused]] const binary_expression& expression, [[maybe_unused]] std::vector<unsigned>& v)   = 0;
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v);
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const variable_expression& expression, [[maybe_unused]] std::vector<unsigned>& v);
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const binary_expression& expression, [[maybe_unused]] std::vector<unsigned>& v);
 
         virtual bool              on_statement(const statement::ptr& statement);
         virtual bool              on_statement(const assign_statement& statement);
@@ -116,7 +116,7 @@ namespace syrec {
         void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
         bool         decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool         increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        virtual bool expression_op_inverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& exp_lhs, [[maybe_unused]] const std::vector<unsigned>& exp_rhs) = 0;
+        virtual bool expression_op_inverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& exp_lhs, [[maybe_unused]] const std::vector<unsigned>& exp_rhs);
         bool         check_repeats();
 
         // shift operations

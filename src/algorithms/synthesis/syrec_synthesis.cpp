@@ -105,31 +105,13 @@ namespace syrec {
         return false;
     }
 
-    bool SyrecSynthesis::op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*binary, v);
-        } else if (auto const* var = dynamic_cast<variable_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*var, v);
-        } else {
-            return false;
-        }
-    }
-
-    bool SyrecSynthesis::op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v) {
-        get_variables(expression.var, v);
+    bool SyrecSynthesis::op_rhs_lhs_expression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v) {
         return true;
     }
-
-    bool SyrecSynthesis::op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v) {
-        std::vector<unsigned> lhs;
-        std::vector<unsigned> rhs;
-
-        if (!op_rhs_lhs_expression(expression.lhs, lhs) || !op_rhs_lhs_expression(expression.rhs, rhs)) {
-            return false;
-        }
-
-        v = rhs;
-        op_vec.push_back(expression.op);
+    bool SyrecSynthesis::op_rhs_lhs_expression([[maybe_unused]] const variable_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) {
+        return true;
+    }
+    bool SyrecSynthesis::op_rhs_lhs_expression([[maybe_unused]] const binary_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) {
         return true;
     }
 
@@ -837,6 +819,9 @@ namespace syrec {
         }
     }
 
+    bool SyrecSynthesis::expression_op_inverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& exp_lhs, [[maybe_unused]] const std::vector<unsigned>& exp_rhs) {
+        return true;
+    }
     //**********************************************************************
     //*****                     Efficient Controls                     *****
     //**********************************************************************
