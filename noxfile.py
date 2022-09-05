@@ -26,4 +26,4 @@ def pylint(session: Session) -> None:
 
     session.install("pylint")
     session.install("-e", ".")
-    session.run("pylint", "mqt.syrec", "--extension-pkg-allow-list=mqt.syrec.pysyrec", *session.posargs)
+    session.run("pylint", "mqt.syrec", "--extension-pkg-allow-list=mqt.syrec.pysyrec,PyQt6", *session.posargs)
