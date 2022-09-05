@@ -82,7 +82,7 @@ class CMakeBuild(build_ext):
                 os.remove(os.path.join(self.build_temp, "CMakeCache.txt"))
             except OSError:
                 pass
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp)
+        subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp)
         subprocess.check_call(
             ["cmake", "--build", ".", "--target", ext.name.split(".")[-1]] + build_args,
             cwd=self.build_temp,

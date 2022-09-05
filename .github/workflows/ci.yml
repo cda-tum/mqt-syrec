@@ -2,14 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 env:
-  BUILD_TYPE:          Release
-  MAKEFLAGS:           "-j2"
+  BUILD_TYPE: Release
+  MAKEFLAGS: "-j2"
   BOOST_VERSION_MAJOR: 1
   BOOST_VERSION_MINOR: 76
   BOOST_VERSION_PATCH: 0
@@ -27,27 +27,27 @@ jobs:
         with:
           submodules: recursive
       - name: Install boost
-        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
+        run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
       - name: Configure CMake
-        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
       - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-      - name:              Test
+        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+      - name: Test
         working-directory: ${{github.workspace}}/build/test
-        run:               ctest -C $BUILD_TYPE --output-on-failure
+        run: ctest -C $BUILD_TYPE --output-on-failure
       - name: Coverage
-        run:  |
-              cmake -S "${{github.workspace}}" -B "${{github.workspace}}/buildCov" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DCOVERAGE=ON -DBINDINGS=ON
-              cmake --build "${{github.workspace}}/buildCov" --config Debug
-              cd buildCov/test
-              ctest -C Debug --output-on-failure
+        run: |
+          cmake -S "${{github.workspace}}" -B "${{github.workspace}}/buildCov" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DCOVERAGE=ON -DBINDINGS=ON
+          cmake --build "${{github.workspace}}/buildCov" --config Debug
+          cd buildCov/test
+          ctest -C Debug --output-on-failure
       - name: Run gcov
-        run:  find . -type f -name '*.gcno' -exec gcov -p  {} +
+        run: find . -type f -name '*.gcno' -exec gcov -p  {} +
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true
-          token:            ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-macos:
     name: macOS (Build and Test)
@@ -57,14 +57,14 @@ jobs:
         with:
           submodules: recursive
       - name: Install boost
-        run:  brew install boost
+        run: brew install boost
       - name: Configure CMake
-        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
       - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-      - name:              Test
+        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+      - name: Test
         working-directory: ${{github.workspace}}/build/test
-        run:               ctest -C $BUILD_TYPE --output-on-failure
+        run: ctest -C $BUILD_TYPE --output-on-failure
 
   build-windows:
     name: Windows (Build and Test)
@@ -75,19 +75,19 @@ jobs:
           submodules: recursive
       - name: Install boost
         uses: MarkusJx/install-boost@v2.3.1
-        id:   install-boost
+        id: install-boost
         with:
-          boost_version:    ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
+          boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
       - name: Configure CMake
-        run:  cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl" -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_RUNTIME=OFF
+        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl" -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_RUNTIME=OFF
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Build
-        run:  cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-      - name:              Test
+        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+      - name: Test
         working-directory: ${{github.workspace}}/build/test
-        run:               cd $BUILD_TYPE && ./syrec_test
+        run: cd $BUILD_TYPE && ./syrec_test
 
   codestyle:
     runs-on: ubuntu-latest
@@ -97,6 +97,6 @@ jobs:
           submodules: recursive
       - uses: DoozyX/clang-format-lint-action@v0.14
         with:
-          source:             "include src test mqt/syrec"
-          extensions:         "h,hpp,c,cpp"
+          source: "include src test mqt/syrec"
+          extensions: "h,hpp,c,cpp"
           clangFormatVersion: 12

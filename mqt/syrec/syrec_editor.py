@@ -137,7 +137,6 @@ class SyReCEditor(QtWidgets.QWidget):
     synthesize_with_additional_lines = 0
     synthesize_without_additional_lines = 0
 
-
     def __init__(self, parent=None):
         super().__init__()
 
@@ -168,11 +167,10 @@ class SyReCEditor(QtWidgets.QWidget):
         )  # system-run
         self.stat_action = QtGui.QAction(QtGui.QIcon.fromTheme("applications-other"), "&Stats...", self.parent)
 
-        self.buttonAddLines = QRadioButton("SyReC with Add. Lines", self)
+        self.buttonAddLines = QtWidgets.QRadioButton("SyReC with Add. Lines", self)
         self.buttonAddLines.toggled.connect(self.item_selected)
 
-
-        self.buttonNoLines = QRadioButton("SyReC with no lines", self)
+        self.buttonNoLines = QtWidgets.QRadioButton("SyReC with no lines", self)
         self.buttonNoLines.setChecked(True)
         self.synthesize_without_additional_lines = 1
         self.buttonNoLines.toggled.connect(self.item_selected)
@@ -196,7 +194,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         # if first button is selected
         if self.sender() == self.buttonAddLines:
-            if(self.buttonAddLines.isChecked()):
+            if self.buttonAddLines.isChecked():
                 self.synthesize_with_additional_lines = 1
                 self.synthesize_without_additional_lines = 0
                 # making other check box to uncheck
@@ -207,10 +205,9 @@ class SyReCEditor(QtWidgets.QWidget):
                 # making other check box to uncheck
                 self.buttonNoLines.setChecked(True)
 
-
         # if second button is selected
         elif self.sender() == self.buttonNoLines:
-            if(self.buttonNoLines.isChecked()):
+            if self.buttonNoLines.isChecked():
                 self.synthesize_with_additional_lines = 0
                 self.synthesize_without_additional_lines = 1
                 # making other check box to uncheck
@@ -257,7 +254,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         self.writeEditorContentsToFile()
 
-        prog = syrec.program()
+        self.prog = syrec.program()
 
         error_string = self.prog.read("/tmp/out.src")
 
@@ -271,9 +268,9 @@ class SyReCEditor(QtWidgets.QWidget):
                 self.build_failed(error_string)
             return
 
-        circ = syrec.circuit()
+        self.circ = syrec.circuit()
 
-        if (self.synthesize_with_additional_lines):
+        if self.synthesize_with_additional_lines:
             syrec.syrec_synthesis_additional_lines(self.circ, self.prog)
         else:
             syrec.syrec_synthesis_no_additional_lines(self.circ, self.prog)
@@ -317,7 +314,6 @@ class SyReCEditor(QtWidgets.QWidget):
 
         return
 
-
     def sim(self):
 
         bit_mask = 0
@@ -327,17 +323,17 @@ class SyReCEditor(QtWidgets.QWidget):
         for i in self.circ.constants:
 
             if i is None:
-                bit_mask = bit_mask + 2 ** bit_pos
+                bit_mask = bit_mask + 2**bit_pos
 
             bit_pos += 1
 
         no_of_bits = len(self.circ.constants)
 
-        input_list = [x & bit_mask for x in range(2 ** no_of_bits)]
+        input_list = [x & bit_mask for x in range(2**no_of_bits)]
 
         for i in range(len(self.circ.constants)):
             if self.circ.constants[i]:
-                bit1_mask = bit1_mask + 2 ** i
+                bit1_mask = bit1_mask + 2**i
 
         input_list = [i + bit1_mask for i in input_list]
 
@@ -467,6 +463,7 @@ class SyReCHighligher(QtGui.QSyntaxHighlighter):
                 self.setFormat(index, length, rule[1])
                 match = expression.match(text, offset=index + length)
 
+
 class QtSyReCEditor(SyReCEditor):
     def __init__(self, parent=None):
         SyReCEditor.__init__(self, parent)
@@ -594,6 +591,7 @@ class LogWidget(QtWidgets.QTreeWidget):
         item = QtWidgets.QTreeWidgetItem([message])
         self.addTopLevelItem(item)
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
@@ -639,6 +637,7 @@ class MainWindow(QtWidgets.QMainWindow):
         toolbar.addAction(self.editor.stat_action)
         toolbar.addWidget(self.editor.buttonAddLines)
         toolbar.addWidget(self.editor.buttonNoLines)
+
 
 def main():
     a = QtWidgets.QApplication([])

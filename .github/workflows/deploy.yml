@@ -2,11 +2,11 @@ name: Deploy to PyPI
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 env:
@@ -75,8 +75,8 @@ jobs:
           submodules: recursive
       - name: Install Boost
         run: |
-             curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
-             brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
+          curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
+          brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
         env:
@@ -121,7 +121,7 @@ jobs:
         build_sdist,
       ]
     runs-on: ubuntu-latest
-    if:      github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -129,7 +129,7 @@ jobs:
           path: dist
       - uses: pypa/gh-action-pypi-publish@master
         with:
-          user:          __token__
-          password:      ${{ secrets.pypi_password }}
+          user: __token__
+          password: ${{ secrets.pypi_password }}
           skip_existing: true
-          verbose:       true
+          verbose: true
