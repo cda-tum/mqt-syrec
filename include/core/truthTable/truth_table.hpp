@@ -17,7 +17,7 @@
 
 namespace syrec {
 
-    struct TruthTable {
+    class TruthTable {
         class Cube {
         public:
             using Value  = std::optional<bool>;
