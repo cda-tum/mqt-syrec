@@ -1,6 +1,6 @@
-from mqt import syrec
-import pytest
 import json
+
+from mqt import syrec
 
 f_synthesis_no_lines = open('../circuits/circuits_synthesis.json')
 data_synthesis_no_lines = json.load(f_synthesis_no_lines)

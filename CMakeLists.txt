@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.14...3.22)
 
-project(syrec
-        LANGUAGES CXX
-        DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits"
-        )
+project(
+		syrec
+		LANGUAGES CXX
+		DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits")
 
 # enable organization of targets into folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -16,27 +16,39 @@ option(GENERATE_POSITION_INDEPENDENT_CODE "Generate position independent code")
 option(BUILD_SYREC_TESTS "Also build tests for SyReC project")
 
 if (DEFINED ENV{DEPLOY})
-	set(DEPLOY $ENV{DEPLOY} CACHE BOOL "Use deployment configuration from environment" FORCE)
+	set(DEPLOY
+	    $ENV{DEPLOY}
+	    CACHE BOOL "Use deployment configuration from environment" FORCE)
 	message(STATUS "Setting deployment configuration to '${DEPLOY}' from environment")
 endif ()
 
 # set deployment specific options
 if (DEPLOY)
 	# set the macOS deployment target appropriately
-	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "" FORCE)
+	set(CMAKE_OSX_DEPLOYMENT_TARGET
+	    "10.15"
+	    CACHE STRING "" FORCE)
 endif ()
 
 # build type settings
-set(default_build_type "Release")
+set(DEFAULT_BUILD_TYPE "Release")
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-	message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
-	set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
-	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+	message(STATUS "Setting build type to '${DEFAULT_BUILD_TYPE}' as none was specified.")
+	set(CMAKE_BUILD_TYPE
+	    "${default_build_type}"
+	    CACHE STRING "Choose the type of build." FORCE)
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel"
+	             "RelWithDebInfo")
 endif ()
 
-macro(check_submodule_present MODULENAME)
-	if (NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/${MODULENAME}/CMakeLists.txt")
-		message(FATAL_ERROR "${MODULENAME} submodule not cloned properly. Please run `git submodule update --init --recursive` from the main project directory")
+# check whether the submodule ``modulename`` is correctly cloned in the ``/extern`` directory.
+macro(CHECK_SUBMODULE_PRESENT modulename)
+	if (NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/${modulename}/CMakeLists.txt")
+		message(
+				FATAL_ERROR
+				"${modulename} submodule not cloned properly. \
+        Please run `git submodule update --init --recursive` \
+        from the main project directory")
 	endif ()
 endmacro()
 

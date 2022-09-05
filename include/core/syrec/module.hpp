@@ -15,7 +15,7 @@ namespace syrec {
     /**
      * @brief SyReC module data type
      *
-     * This class represents a SyReC module. It containes of a name(), parameters(),
+     * This class represents a SyReC module. It consists of a name(), parameters(),
      * local variables(), and a list of statements().
      */
     struct module {

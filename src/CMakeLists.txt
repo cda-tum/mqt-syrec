@@ -35,7 +35,8 @@ add_library(${PROJECT_NAME}
 			${${PROJECT_NAME}_SOURCE_DIR}/include/core/io/pla_parser.hpp)
 
 # set include directories
-target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)
+target_include_directories(${PROJECT_NAME}
+                           PUBLIC $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>)
 
 # set required C++ standard and disable compiler specific extensions
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
@@ -46,8 +47,8 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/extern/qfr" "extern/qfr")
 target_link_libraries(${PROJECT_NAME} PUBLIC MQT::qfr)
 
 # add header-only part of the Boost library
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
+set(BOOST_USE_MULTITHREADED ON)
+set(BOOST_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.71 REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 
@@ -84,7 +85,8 @@ if (GENERATE_POSITION_INDEPENDENT_CODE OR BINDINGS)
 	set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif ()
 
-# add coverage compiler and linker flag to the library and all targets that link against it, if COVERAGE is set
+# add coverage compiler and linker flag to the library and all targets that link against it, if
+# COVERAGE is set
 if (COVERAGE)
 	target_compile_options(${PROJECT_NAME} PUBLIC --coverage)
 	target_link_libraries(${PROJECT_NAME} PUBLIC --coverage)

@@ -10,14 +10,14 @@ on:
   workflow_dispatch:
 
 env:
-  BOOST_HASH:          3a336c8b1a917f7d9c55abba2905be99dade914bf9b829aab9d5fb6069b6ffcc
+  BOOST_HASH: 3a336c8b1a917f7d9c55abba2905be99dade914bf9b829aab9d5fb6069b6ffcc
   BOOST_VERSION_MAJOR: 1
   BOOST_VERSION_MINOR: 76
   BOOST_VERSION_PATCH: 0
 
 jobs:
   build_ubuntu_wheels:
-    name:    Build wheels on Ubuntu
+    name: Build wheels on Ubuntu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -30,14 +30,14 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_macos_wheels:
-    name:    Build wheels on macOS
+    name: Build wheels on macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
       - name: Install boost
-        run:  brew install boost
+        run: brew install boost
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
       - uses: actions/upload-artifact@v3
@@ -45,7 +45,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_windows_wheels:
-    name:    Build wheels on Windows
+    name: Build wheels on Windows
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -54,9 +54,9 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
         uses: MarkusJx/install-boost@v2.3.1
-        id:   install-boost
+        id: install-boost
         with:
-          boost_version:    ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
+          boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
@@ -67,7 +67,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_m1_wheels:
-    name:    Build wheels for Apple Silicon
+    name: Build wheels for Apple Silicon
     runs-on: macos-11
     steps:
       - uses: actions/checkout@v3
@@ -75,8 +75,8 @@ jobs:
           submodules: recursive
       - name: Install Boost
         run: |
-              curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
-              brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
+             curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
+             brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
         env:
@@ -86,7 +86,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_sdist:
-    name:    Build source distribution
+    name: Build source distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -95,24 +95,31 @@ jobs:
       - uses: actions/setup-python@v4
         name: Install Python
         with:
-          python-version: '3.9'
+          python-version: "3.9"
       - name: Install boost
-        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
+        run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
       - name: Install dependencies
-        run:  pip install -q build
+        run: pip install -q build
       - name: Build sdist
-        run:  python -m build --sdist
+        run: python -m build --sdist
       - name: Test sdist
-        run:  pip install --verbose dist/*.tar.gz
+        run: pip install --verbose dist/*.tar.gz
         env:
-          CC:  "gcc-10"
+          CC: "gcc-10"
           CXX: "g++-10"
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
 
   upload_pypi:
-    needs: [ build_ubuntu_wheels, build_macos_wheels, build_m1_wheels, build_windows_wheels, build_sdist ]
+    needs:
+      [
+        build_ubuntu_wheels,
+        build_macos_wheels,
+        build_m1_wheels,
+        build_windows_wheels,
+        build_sdist,
+      ]
     runs-on: ubuntu-latest
     if:      github.event_name == 'release' && github.event.action == 'published'
     steps:

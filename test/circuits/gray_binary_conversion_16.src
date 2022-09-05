@@ -33,5 +33,5 @@ module gray_binary( in op( 1 ), inout x0(16), inout x1(16))
 	 x0.3 ^= (x1.4^ x1.3)
 	 x0.2 ^= (x1.3^ x1.2)
 	 x0.1 ^= (x1.2^ x1.1)
-	 x0.0 ^= (x1.1^ x1.0)	
+	 x0.0 ^= (x1.1^ x1.0)
 fi op
