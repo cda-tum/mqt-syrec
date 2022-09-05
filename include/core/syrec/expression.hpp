@@ -121,7 +121,7 @@ namespace syrec {
     struct variable_expression: public expression {
         /**
        * @brief Constructor with variable
-       * 
+       *
        * @param var Variable access
        */
         explicit variable_expression(variable_access::ptr var):
@@ -138,7 +138,7 @@ namespace syrec {
      * @brief Binary expression
      *
      * This class represents a binary expression between two sub
-     * expressions lhs() and rhs() by an operation op(). 
+     * expressions lhs() and rhs() by an operation op().
      */
     struct binary_expression: public expression {
         /**
@@ -239,7 +239,7 @@ namespace syrec {
 
         /**
        * @brief Constructor which initializes a operation
-       * 
+       *
        * @param lhs Expression on left hand side
        * @param op Operation to be performed
        * @param rhs Expression on right hand side
@@ -252,13 +252,13 @@ namespace syrec {
 
         /**
        * @brief Bit-width of the expression
-       * 
+       *
        * It is assumed that the bit-width of the left
        * hand side and the right hand side are the same.
        * Thus, the bit-width of the lhs() expression is
-       * returned. If a logical operation is performed, 
+       * returned. If a logical operation is performed,
        * however, the returned bit-width is always 1.
-       * 
+       *
        * @return Bit-width of the expression
        */
         [[nodiscard]] unsigned bitwidth() const override {
@@ -288,7 +288,7 @@ namespace syrec {
      * @brief Shift expression
      *
      * This class represents a binary expression with a
-     * sub-expression lhs() and a number rhs() by a shift operation op(). 
+     * sub-expression lhs() and a number rhs() by a shift operation op().
      */
     struct shift_expression: public expression {
         /**
@@ -312,8 +312,8 @@ namespace syrec {
        * This constructs a shift expression with a sub-expression
        * as the \p lhs, a shift operation \p os, and a number
        * \p rhs.
-       * 
-       * @param lhs Expression to be shifted 
+       *
+       * @param lhs Expression to be shifted
        * @param op Shift operation
        * @param rhs Number of bits to shift
        */
@@ -328,7 +328,7 @@ namespace syrec {
        *
        * The bit-width of a shift expression is the bit-width
        * of the lhs sub-expression.
-       * 
+       *
        * @return Bit-width of the expression
        */
         [[nodiscard]] unsigned bitwidth() const override {

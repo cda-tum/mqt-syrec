@@ -29,7 +29,7 @@ namespace syrec {
             if (std::find(context.loop_variables.begin(), context.loop_variables.end(), loop_variable) != context.loop_variables.end()) {
                 return std::make_shared<number>(loop_variable);
             } else {
-                context.error_message = "Unkown loop variable $" + loop_variable;
+                context.error_message = "Unknown loop variable $" + loop_variable;
                 return {};
             }
         }
