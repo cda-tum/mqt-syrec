@@ -1,5 +1,8 @@
 #!/usr/bin/python
+from __future__ import annotations
+
 import re
+from typing import Callable
 
 from mqt import syrec
 from PyQt6 import QtCore, QtGui, QtWidgets
@@ -10,12 +13,12 @@ class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
         QtWidgets.QGraphicsItemGroup.__init__(self, parent)
 
         # Tool Tip
-        self.setToolTip('<b><font color="#606060">Line:</font></b> %d' % index)
+        self.setToolTip(f'<b><font color="#606060">Line:</font></b> {index:d}')
 
         # Create sub-lines
         x = 0
         for i in range(0, width + 1):
-            e_width = 15 if i == 0 or i == width else 30
+            e_width = 15 if i in {0, width} else 30
             self.addToGroup(QtWidgets.QGraphicsLineItem(x, index * 30, x + e_width, index * 30))
             x += e_width
 
@@ -129,10 +132,10 @@ class CircuitView(QtWidgets.QGraphicsView):
 
 class SyReCEditor(QtWidgets.QWidget):
     widget = None
-    build_successful = None
-    build_failed = None
-    before_build = None
-    parser_failed = None
+    build_successful: Callable[[syrec.circuit], None] = None
+    build_failed: Callable[[str], None] = None
+    before_build: Callable[[], None] = None
+    parser_failed: Callable[[str], None] = None
 
     synthesize_with_additional_lines = 0
     synthesize_without_additional_lines = 0
@@ -245,8 +248,6 @@ class SyReCEditor(QtWidgets.QWidget):
                 ts = QtCore.QTextStream(f)
                 self.setText(ts.readAll())
 
-        return
-
     def build(self):
 
         if self.before_build is not None:
@@ -263,7 +264,7 @@ class SyReCEditor(QtWidgets.QWidget):
                 self.parser_failed("Editor is Empty")
             return
 
-        elif error_string != "":
+        if error_string != "":
             if self.build_failed is not None:
                 self.build_failed(error_string)
             return
@@ -290,8 +291,6 @@ class SyReCEditor(QtWidgets.QWidget):
         if self.build_successful is not None:
             self.build_successful(self.circ)
 
-        return
-
     def stat(self):
 
         gates = self.circ.num_gates
@@ -312,8 +311,6 @@ class SyReCEditor(QtWidgets.QWidget):
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         msg.exec()
 
-        return
-
     def sim(self):
 
         bit_mask = 0
@@ -331,8 +328,8 @@ class SyReCEditor(QtWidgets.QWidget):
 
         input_list = [x & bit_mask for x in range(2**no_of_bits)]
 
-        for i in range(len(self.circ.constants)):
-            if self.circ.constants[i]:
+        for i, constant in enumerate(self.circ.constants):
+            if constant:
                 bit1_mask = bit1_mask + 2**i
 
         input_list = [i + bit1_mask for i in input_list]
@@ -341,11 +338,11 @@ class SyReCEditor(QtWidgets.QWidget):
 
         input_list_len = len(input_list)
 
-        combination_inp = list()
-        combination_out = list()
+        combination_inp = []
+        combination_out = []
 
-        final_inp = list()
-        final_out = list()
+        final_inp = []
+        final_out = []
 
         settings = syrec.properties()
 
@@ -442,7 +439,7 @@ class SyReCHighligher(QtGui.QSyntaxHighlighter):
             "uncall",
         ]
 
-        for pattern in ["\\b%s\\b" % keyword for keyword in keywords]:
+        for pattern in [f"\\b{keyword}\\b" for keyword in keywords]:
             self.highlightingRules.append([QtCore.QRegularExpression(pattern), keywordFormat])
 
         numberFormat = QtGui.QTextCharFormat()
@@ -501,12 +498,13 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.highlightCurrentLine)
 
-        self.updateLineNumberAreaWidth(0)
+        self.updateLineNumberAreaWidth()
         self.highlightCurrentLine()
 
     def load(self, filename):
         if len(filename) > 0:
-            self.setPlainText(open(filename).read())
+            with open(filename, encoding="utf-8") as f:
+                self.setPlainText(f.read())
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QtGui.QPainter(self.lineNumberArea)
@@ -551,7 +549,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         cr = self.contentsRect()
         self.lineNumberArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
 
-    def updateLineNumberAreaWidth(self, newBlockCount):
+    def updateLineNumberAreaWidth(self):
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
 
     def highlightCurrentLine(self):
@@ -577,7 +575,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.lineNumberArea.update(0, rect.y(), self.lineNumberArea.width(), rect.height())
 
         if rect.contains(self.viewport().rect()):
-            self.updateLineNumberAreaWidth(0)
+            self.updateLineNumberAreaWidth()
 
 
 class LogWidget(QtWidgets.QTreeWidget):
@@ -621,8 +619,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def setup_actions(self):
         self.editor.before_build = self.logWidget.clear
-        self.editor.build_successful = lambda circ: self.viewer.load(circ)
-        self.editor.parser_failed = lambda error_message: self.logWidget.addMessage(error_message)
+        self.editor.build_successful = self.viewer.load
+        self.editor.parser_failed = self.logWidget.addMessage
         self.editor.build_failed = lambda error_message: self.logWidget.addMessage(
             re.search("In line (.*): (.*)", error_message).group(2)
         )
