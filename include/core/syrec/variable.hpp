@@ -1,10 +1,4 @@
-/**
- * @file variable.hpp
- *
- * @brief SyReC variable data type
- */
-#ifndef VARIABLE_HPP
-#define VARIABLE_HPP
+#pragma once
 
 #include "core/syrec/number.hpp"
 
@@ -124,5 +118,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* VARIABLE_HPP */

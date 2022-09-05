@@ -1,10 +1,4 @@
-/**
-* @file parser.hpp
-*
-* @brief SyReC parser routines
-*/
-#ifndef PARSER_HPP
-#define PARSER_HPP
+#pragma once
 
 #include "core/syrec/expression.hpp"
 #include "core/syrec/grammar.hpp"
@@ -43,5 +37,3 @@ namespace syrec {
 
     variable_access::ptr parse_variable_access(const ast_variable& ast_var, const module& proc, parser_context& context);
 } // namespace syrec
-
-#endif /* PARSER_HPP */

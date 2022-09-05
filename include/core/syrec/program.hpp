@@ -1,10 +1,4 @@
-/**
- * @file program.hpp
- *
- * @brief SyReC program
- */
-#ifndef PROGRAM_HPP
-#define PROGRAM_HPP
+#pragma once
 
 #include "core/syrec/expression.hpp"
 #include "core/syrec/grammar.hpp"
@@ -70,5 +64,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* PROGRAM_HPP */

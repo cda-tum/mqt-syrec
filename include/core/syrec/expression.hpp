@@ -1,10 +1,4 @@
-/**
- * @file expression.hpp
- *
- * @brief SyReC expression data types
- */
-#ifndef EXPRESSION_HPP
-#define EXPRESSION_HPP
+#pragma once
 
 #include "core/syrec/variable.hpp"
 
@@ -347,5 +341,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-
-#endif /* EXPRESSION_HPP */
