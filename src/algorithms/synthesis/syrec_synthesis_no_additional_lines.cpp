@@ -3,7 +3,7 @@
 namespace syrec {
     /// checking the entire statement
     bool SyrecSynthesisNoAdditionalLines::full_statement(const statement::ptr& statement) {
-        bool okay = false;
+        bool okay;
         if (auto const* stat = dynamic_cast<assign_statement*>(statement.get())) {
             okay = full_statement(*stat);
         } else {
@@ -216,7 +216,6 @@ namespace syrec {
         return true;
     }
 
-    /// generating LHS and RHS (not whole expressions, just the corresponding variables)
     bool SyrecSynthesisNoAdditionalLines::op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
             return op_rhs_lhs_expression(*binary, v);
@@ -245,84 +244,56 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_statement(const assign_statement& statement) {
-        std::vector<unsigned> lhs;
-        std::vector<unsigned> rhs;
-        std::vector<unsigned> d;
-
-        get_variables(statement.lhs, lhs);
-
-        op_rhs_lhs_expression(statement.rhs, d);
-        SyrecSynthesis::on_expression(statement.rhs, rhs, lhs, statement.op);
-        op_vec.clear();
-
-        bool status = false;
-
-        switch (statement.op) {
-            case assign_statement::add: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
-                    increase(lhs, exp_lhss.top()); //status = increase(lhs, exp_lhss.top())
-                    status = increase(lhs, exp_rhss.top());
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                } else {
-                    status = increase(lhs, rhs);
-                }
-                while (!exp_opp.empty()) {
-                    expression_op_inverse(exp_opp.top(), exp_lhss.top(), exp_rhss.top());
-                    sub_flag = false;
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                }
-            } break;
-
-            case assign_statement::subtract: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
-                    decrease(lhs, exp_lhss.top()); //status=decrease(lhs, exp_lhss.top())
-                    status = increase(lhs, exp_rhss.top());
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                } else {
-                    status = decrease(lhs, rhs);
-                }
-                while (!exp_opp.empty()) {
-                    expression_op_inverse(exp_opp.top(), exp_lhss.top(), exp_rhss.top());
-                    sub_flag = false;
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                }
-            } break;
-
-            case assign_statement::exor: {
-                if (!exp_opp.empty() && exp_opp.top() == statement.op) {
-                    bitwise_cnot(lhs, exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
-                    status = bitwise_cnot(lhs, exp_rhss.top());
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                } else {
-                    status = bitwise_cnot(lhs, rhs);
-                }
-                while (!exp_opp.empty()) {
-                    expression_op_inverse(exp_opp.top(), exp_lhss.top(), exp_rhss.top());
-                    sub_flag = false;
-                    exp_opp.pop();
-                    exp_lhss.pop();
-                    exp_rhss.pop();
-                }
-            } break;
-
-            default:
-                return false;
-        }
-
-        return status;
+    void SyrecSynthesisNoAdditionalLines::pop_exp() {
+        SyrecSynthesis::exp_opp.pop();
+        SyrecSynthesis::exp_lhss.pop();
+        SyrecSynthesis::exp_rhss.pop();
     }
 
+    void SyrecSynthesisNoAdditionalLines::inverse() {
+        expression_op_inverse(SyrecSynthesis::exp_opp.top(), SyrecSynthesis::exp_lhss.top(), SyrecSynthesis::exp_rhss.top());
+        SyrecSynthesis::sub_flag = false;
+        pop_exp();
+    }
+
+    void SyrecSynthesisNoAdditionalLines::assign_add(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
+            SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
+            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_rhss.top());
+            pop_exp();
+        } else {
+            status = SyrecSynthesis::increase(lhs, rhs);
+        }
+        while (!SyrecSynthesis::exp_opp.empty()) {
+            inverse();
+        }
+    }
+
+    void SyrecSynthesisNoAdditionalLines::assign_subtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
+            SyrecSynthesis::decrease(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
+            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_rhss.top());
+            pop_exp();
+        } else {
+            status = SyrecSynthesis::decrease(lhs, rhs);
+        }
+        while (!SyrecSynthesis::exp_opp.empty()) {
+            inverse();
+        }
+    }
+
+    void SyrecSynthesisNoAdditionalLines::assign_exor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
+            SyrecSynthesis::bitwise_cnot(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
+            status = SyrecSynthesis::bitwise_cnot(lhs, SyrecSynthesis::exp_rhss.top());
+            pop_exp();
+        } else {
+            status = SyrecSynthesis::bitwise_cnot(lhs, rhs);
+        }
+        while (!SyrecSynthesis::exp_opp.empty()) {
+            inverse();
+        }
+    }
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
     bool SyrecSynthesisNoAdditionalLines::exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
         switch (op) {
@@ -367,23 +338,6 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
-        switch (op) {
-            case binary_expression::add: // +
-                decrease(exp_rhs, exp_lhs);
-                break;
-            case binary_expression::subtract: // -
-                decrease_new_assign(exp_rhs, exp_lhs);
-                break;
-            case binary_expression::exor: // ^
-                bitwise_cnot(exp_rhs, exp_lhs);
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
-
     bool SyrecSynthesisNoAdditionalLines::expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
         switch (op) {
             case binary_expression::add: // +
@@ -405,95 +359,20 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) {
-        std::vector<unsigned> lhs;
-        std::vector<unsigned> rhs;
-
-        if (!SyrecSynthesis::on_expression(expression.lhs, lhs, lhs_stat, op) || !SyrecSynthesis::on_expression(expression.rhs, rhs, lhs_stat, op)) {
-            return false;
-        }
-
-        exp_lhss.push(lhs);
-        exp_rhss.push(rhs);
-        exp_opp.push(expression.op);
-
-        if ((exp_opp.size() == op_vec.size()) && (exp_opp.top() == op)) {
-            return true;
-        }
-
-        switch (expression.op) {
+    bool SyrecSynthesisNoAdditionalLines::expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
+        switch (op) {
             case binary_expression::add: // +
-                increase(rhs, lhs);
-                lines = rhs;
+                decrease(exp_rhs, exp_lhs);
                 break;
             case binary_expression::subtract: // -
-                decrease_new_assign(rhs, lhs);
-                lines = rhs;
+                decrease_new_assign(exp_rhs, exp_lhs);
                 break;
             case binary_expression::exor: // ^
-                bitwise_cnot(rhs, lhs);   // duplicate lhs
-                lines = rhs;
-                break;
-            case binary_expression::multiply: // *
-                get_constant_lines(expression.bitwidth(), 0u, lines);
-                multiplication(lines, lhs, rhs);
-                break;
-            case binary_expression::divide: // /
-                get_constant_lines(expression.bitwidth(), 0u, lines);
-                division(lines, lhs, rhs);
-                break;
-            case binary_expression::modulo: {
-                get_constant_lines(expression.bitwidth(), 0u, lines);
-                std::vector<unsigned> quot;
-                get_constant_lines(expression.bitwidth(), 0u, quot);
-
-                bitwise_cnot(lines, lhs); // duplicate lhs
-                modulo(quot, lines, rhs);
-            } break;
-            case binary_expression::logical_and: // &&
-                lines.emplace_back(get_constant_line(false));
-                conjunction(lines.at(0), lhs.at(0), rhs.at(0));
-                break;
-            case binary_expression::logical_or: // ||
-                lines.emplace_back(get_constant_line(false));
-                disjunction(lines.at(0), lhs.at(0), rhs.at(0));
-                break;
-            case binary_expression::bitwise_and: // &
-                get_constant_lines(expression.bitwidth(), 0u, lines);
-                bitwise_and(lines, lhs, rhs);
-                break;
-            case binary_expression::bitwise_or: // |
-                get_constant_lines(expression.bitwidth(), 0u, lines);
-                bitwise_or(lines, lhs, rhs);
-                break;
-            case binary_expression::less_than: // <
-                lines.emplace_back(get_constant_line(false));
-                less_than(lines.at(0), lhs, rhs);
-                break;
-            case binary_expression::greater_than: // >
-                lines.emplace_back(get_constant_line(false));
-                greater_than(lines.at(0), lhs, rhs);
-                break;
-            case binary_expression::equals: // =
-                lines.emplace_back(get_constant_line(false));
-                equals(lines.at(0), lhs, rhs);
-                break;
-            case binary_expression::not_equals: // !=
-                lines.emplace_back(get_constant_line(false));
-                not_equals(lines.at(0), lhs, rhs);
-                break;
-            case binary_expression::less_equals: // <=
-                lines.emplace_back(get_constant_line(false));
-                less_equals(lines.at(0), lhs, rhs);
-                break;
-            case binary_expression::greater_equals: // >=
-                lines.emplace_back(get_constant_line(false));
-                greater_equals(lines.at(0), lhs, rhs);
+                bitwise_cnot(exp_rhs, exp_lhs);
                 break;
             default:
                 return false;
         }
-
         return true;
     }
 

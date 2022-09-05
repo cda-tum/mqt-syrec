@@ -14,8 +14,35 @@ namespace syrec {
             return !SyrecSynthesis::on_statement(statement);
         }
 
-        bool on_statement(const assign_statement& statement) override;
+        bool op_rhs_lhs_expression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v) override {
+            return true;
+        }
+        bool op_rhs_lhs_expression([[maybe_unused]] const variable_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) override {
+            return true;
+        }
+        bool op_rhs_lhs_expression([[maybe_unused]] const binary_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) override {
+            return true;
+        }
 
-        bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
+        void assign_add(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+            status = SyrecSynthesis::increase(lhs, rhs);
+        }
+
+        void assign_subtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+            status = SyrecSynthesis::decrease(lhs, rhs);
+        }
+
+        void assign_exor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+            status = SyrecSynthesis::bitwise_cnot(lhs, rhs);
+        }
+
+        void exp_add(const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override;
+        void exp_subtract(const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override;
+
+        void exp_exor(const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override;
+
+        bool expression_op_inverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& exp_lhs, [[maybe_unused]] const std::vector<unsigned>& exp_rhs) override {
+            return true;
+        }
     };
 } // namespace syrec

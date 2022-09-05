@@ -105,6 +105,34 @@ namespace syrec {
         return false;
     }
 
+    bool SyrecSynthesis::op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v) {
+        if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
+            return op_rhs_lhs_expression(*binary, v);
+        } else if (auto const* var = dynamic_cast<variable_expression*>(expression.get())) {
+            return op_rhs_lhs_expression(*var, v);
+        } else {
+            return false;
+        }
+    }
+
+    bool SyrecSynthesis::op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v) {
+        get_variables(expression.var, v);
+        return true;
+    }
+
+    bool SyrecSynthesis::op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v) {
+        std::vector<unsigned> lhs;
+        std::vector<unsigned> rhs;
+
+        if (!op_rhs_lhs_expression(expression.lhs, lhs) || !op_rhs_lhs_expression(expression.rhs, rhs)) {
+            return false;
+        }
+
+        v = rhs;
+        op_vec.push_back(expression.op);
+        return true;
+    }
+
     bool SyrecSynthesis::on_statement(const statement::ptr& statement) {
         _stmts.push(statement);
         bool okay = false;
@@ -165,6 +193,39 @@ namespace syrec {
                 return false;
         }
         return true;
+    }
+
+    bool SyrecSynthesis::on_statement(const assign_statement& statement) {
+        std::vector<unsigned> lhs;
+        std::vector<unsigned> rhs;
+        std::vector<unsigned> d;
+
+        get_variables(statement.lhs, lhs);
+
+        op_rhs_lhs_expression(statement.rhs, d);
+        SyrecSynthesis::on_expression(statement.rhs, rhs, lhs, statement.op);
+        op_vec.clear();
+
+        bool status = false;
+
+        switch (statement.op) {
+            case assign_statement::add: {
+                assign_add(status, lhs, rhs, statement.op);
+            } break;
+
+            case assign_statement::subtract: {
+                assign_subtract(status, lhs, rhs, statement.op);
+            } break;
+
+            case assign_statement::exor: {
+                assign_exor(status, lhs, rhs, statement.op);
+            } break;
+
+            default:
+                return false;
+        }
+
+        return status;
     }
 
     bool SyrecSynthesis::on_statement(const if_statement& statement) {
@@ -349,6 +410,95 @@ namespace syrec {
 
     bool SyrecSynthesis::on_expression(const variable_expression& expression, std::vector<unsigned>& lines) {
         get_variables(expression.var, lines);
+        return true;
+    }
+
+    bool SyrecSynthesis::on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) {
+        std::vector<unsigned> lhs;
+        std::vector<unsigned> rhs;
+
+        if (!on_expression(expression.lhs, lhs, lhs_stat, op) || !on_expression(expression.rhs, rhs, lhs_stat, op)) {
+            return false;
+        }
+
+        exp_lhss.push(lhs);
+        exp_rhss.push(rhs);
+        exp_opp.push(expression.op);
+
+        if ((exp_opp.size() == op_vec.size()) && (exp_opp.top() == op)) {
+            return true;
+        }
+
+        switch (expression.op) {
+            case binary_expression::add: // +
+                exp_add(expression.bitwidth(), lines, lhs, rhs);
+                break;
+            case binary_expression::subtract: // -
+                exp_subtract(expression.bitwidth(), lines, lhs, rhs);
+                break;
+            case binary_expression::exor: // ^
+                exp_exor(expression.bitwidth(), lines, lhs, rhs);
+                break;
+            case binary_expression::multiply: // *
+                get_constant_lines(expression.bitwidth(), 0u, lines);
+                multiplication(lines, lhs, rhs);
+                break;
+            case binary_expression::divide: // /
+                get_constant_lines(expression.bitwidth(), 0u, lines);
+                division(lines, lhs, rhs);
+                break;
+            case binary_expression::modulo: { // %
+                get_constant_lines(expression.bitwidth(), 0u, lines);
+                std::vector<unsigned> quot;
+                get_constant_lines(expression.bitwidth(), 0u, quot);
+
+                bitwise_cnot(lines, lhs); // duplicate lhs
+                modulo(quot, lines, rhs);
+            } break;
+            case binary_expression::logical_and: // &&
+                lines.emplace_back(get_constant_line(false));
+                conjunction(lines.at(0), lhs.at(0), rhs.at(0));
+                break;
+            case binary_expression::logical_or: // ||
+                lines.emplace_back(get_constant_line(false));
+                disjunction(lines.at(0), lhs.at(0), rhs.at(0));
+                break;
+            case binary_expression::bitwise_and: // &
+                get_constant_lines(expression.bitwidth(), 0u, lines);
+                bitwise_and(lines, lhs, rhs);
+                break;
+            case binary_expression::bitwise_or: // |
+                get_constant_lines(expression.bitwidth(), 0u, lines);
+                bitwise_or(lines, lhs, rhs);
+                break;
+            case binary_expression::less_than: // <
+                lines.emplace_back(get_constant_line(false));
+                less_than(lines.at(0), lhs, rhs);
+                break;
+            case binary_expression::greater_than: // >
+                lines.emplace_back(get_constant_line(false));
+                greater_than(lines.at(0), lhs, rhs);
+                break;
+            case binary_expression::equals: // =
+                lines.emplace_back(get_constant_line(false));
+                equals(lines.at(0), lhs, rhs);
+                break;
+            case binary_expression::not_equals: // !=
+                lines.emplace_back(get_constant_line(false));
+                not_equals(lines.at(0), lhs, rhs);
+                break;
+            case binary_expression::less_equals: // <=
+                lines.emplace_back(get_constant_line(false));
+                less_equals(lines.at(0), lhs, rhs);
+                break;
+            case binary_expression::greater_equals: // >=
+                lines.emplace_back(get_constant_line(false));
+                greater_equals(lines.at(0), lhs, rhs);
+                break;
+            default:
+                return false;
+        }
+
         return true;
     }
 

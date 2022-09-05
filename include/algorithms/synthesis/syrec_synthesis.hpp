@@ -60,8 +60,12 @@ namespace syrec {
 
         virtual bool on_module(const module::ptr&);
 
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v)     = 0;
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const variable_expression& expression, [[maybe_unused]] std::vector<unsigned>& v) = 0;
+        virtual bool op_rhs_lhs_expression([[maybe_unused]] const binary_expression& expression, [[maybe_unused]] std::vector<unsigned>& v)   = 0;
+
         virtual bool              on_statement(const statement::ptr& statement);
-        virtual bool              on_statement(const assign_statement& statement) = 0;
+        virtual bool              on_statement(const assign_statement& statement);
         virtual bool              on_statement(const if_statement& statement);
         virtual bool              on_statement(const for_statement& statement);
         virtual bool              on_statement(const call_statement& statement);
@@ -70,11 +74,22 @@ namespace syrec {
         bool                      on_statement(const unary_statement& statement);
         [[nodiscard]] static bool on_statement(const skip_statement& statement);
 
+        virtual void assign_add(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
+
+        virtual void assign_subtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
+        virtual void assign_exor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op)     = 0;
+
         virtual bool on_expression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
-        virtual bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op) = 0;
+        virtual bool on_expression(const binary_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
         virtual bool on_expression(const shift_expression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhs_stat, unsigned op);
         virtual bool on_expression(const numeric_expression& expression, std::vector<unsigned>& lines);
         virtual bool on_expression(const variable_expression& expression, std::vector<unsigned>& lines);
+
+        virtual void exp_add([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) = 0;
+
+        virtual void exp_subtract([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) = 0;
+
+        virtual void exp_exor([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) = 0;
 
         // unary operations
         bool bitwise_negation(const std::vector<unsigned>& dest); // ~
@@ -82,26 +97,27 @@ namespace syrec {
         bool increment(const std::vector<unsigned>& dest);        // ++
 
         // binary operations
-        bool bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
-        bool bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        bool bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // &
-        bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // &&// -=
-        bool decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
-        bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
-        bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        bool greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // >
-        bool greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // >// +=
-        bool increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                        // <=
-        bool less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // <
-        bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
-        bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
-        bool not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                         // !=
-        void swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
-        bool decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        bool check_repeats();
+        bool         bitwise_and(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
+        bool         bitwise_cnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
+        bool         bitwise_or(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // &
+        bool         conjunction(unsigned dest, unsigned src1, unsigned src2);                                                             // &&// -=
+        bool         decrease_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        bool         disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
+        bool         division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
+        bool         equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
+        bool         greater_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);               // >
+        bool         greater_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                 // >// +=
+        bool         increase_with_carry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        bool         less_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                        // <=
+        bool         less_than(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // <
+        bool         modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
+        bool         multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
+        bool         not_equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                         // !=
+        void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
+        bool         decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool         increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        virtual bool expression_op_inverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& exp_lhs, [[maybe_unused]] const std::vector<unsigned>& exp_rhs) = 0;
+        bool         check_repeats();
 
         // shift operations
         void left_shift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2);  // <<
