@@ -39,7 +39,7 @@ namespace syrec {
             const auto       index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
             TruthTable::Cube reducedInput(input.begin() + 1, input.end());
             TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
-            subTables[index].insert(std::move(reducedInput), std::move(reducedOutput));
+            subTables[index].try_emplace(std::move(reducedInput), std::move(reducedOutput));
         }
 
         // recursively build the DD for each sub-table

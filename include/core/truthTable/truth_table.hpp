@@ -41,7 +41,7 @@ namespace syrec {
                 std::copy(first, last, std::back_inserter(cube));
             }
 
-            static auto getValue(const char& c) -> std::optional<bool> {
+            static auto getValue(const char& c) -> Value {
                 switch (c) {
                     case '-':
                     case '~':
@@ -144,12 +144,12 @@ namespace syrec {
                 cube.pop_back();
             }
 
-            [[nodiscard]] auto equals(const std::uint64_t num, const std::uint64_t bw) const -> bool {
-                return cube == (Cube::fromInteger(num, bw)).cube;
+            [[nodiscard]] auto equals(const std::uint64_t num, const std::size_t bw) const -> bool {
+                return *this == (Cube::fromInteger(num, bw));
             }
 
             [[nodiscard]] auto equals(const std::string& str) const -> bool {
-                return cube == (Cube::fromString(str)).cube;
+                return *this == (Cube::fromString(str));
             }
 
             [[nodiscard]] auto size() const -> std::size_t {
@@ -243,16 +243,16 @@ namespace syrec {
             return cubeMap.find(Cube::fromString(str));
         }
 
-        auto insert(const Cube& input, const Cube& output) -> void {
+        auto try_emplace(const Cube& input, const Cube& output) -> void {
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
         }
-        auto insert(Cube&& input, Cube&& output) -> void {
+        auto try_emplace(Cube&& input, Cube&& output) -> void {
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(std::move(input), std::move(output));
         }
 
-        auto insertNode(CubeMap::node_type nh) -> void {
+        auto insert(CubeMap::node_type nh) -> void {
             cubeMap.insert(std::move(nh));
         }
 

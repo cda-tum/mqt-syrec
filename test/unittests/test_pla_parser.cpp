@@ -55,12 +55,12 @@ TEST_F(PlaParserTest, orTest) {
     EXPECT_EQ(testPla.nOutputs(), 1U);
     EXPECT_EQ(testPla.size(), 2U);
 
-    auto it_1 = testPla.find(std::string("-1"));
+    auto it_1 = testPla.find("-1");
 
     EXPECT_TRUE(it_1 != testPla.end());
     EXPECT_TRUE(it_1->second.equals(0b1U, 1U));
 
-    auto it1_ = testPla.find(std::string("1-"));
+    auto it1_ = testPla.find("1-");
 
     EXPECT_TRUE(it1_ != testPla.end());
     EXPECT_TRUE(it1_->second.equals(0b1U, 1U));

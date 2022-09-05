@@ -61,7 +61,7 @@ namespace syrec {
                     cubeOut.emplace_back(TruthTable::Cube::getValue(s));
                 }
 
-                tt.insert(cubeIn, cubeOut);
+                tt.try_emplace(cubeIn, cubeOut);
             }
         }
     }

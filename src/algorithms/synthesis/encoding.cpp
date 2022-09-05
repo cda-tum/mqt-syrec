@@ -7,7 +7,7 @@ namespace syrec {
         if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U))
             throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
 
-        TruthTable newCubeMap{};
+        TruthTable newTT{};
 
         for (auto const& [input, output]: tt) {
             // ensure that all outputs are complete
@@ -17,11 +17,11 @@ namespace syrec {
             auto completeInputs = input.completeCubes();
             // move all the complete cubes to the new cube map
             for (auto const& completeInput: completeInputs) {
-                newCubeMap.insert(completeInput, output);
+                newTT.try_emplace(completeInput, output);
             }
         }
         // swap the new cube map with the old one
-        tt.swap(newCubeMap);
+        tt.swap(newTT);
 
         // construct output cube
         const auto output = TruthTable::Cube(tt.nOutputs(), false);
@@ -117,7 +117,7 @@ namespace syrec {
             }
             auto nh  = tt.extract(input);
             nh.key() = newCube;
-            tt.insertNode(std::move(nh));
+            tt.insert(std::move(nh));
         }
     }
 

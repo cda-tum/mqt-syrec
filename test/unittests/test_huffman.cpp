@@ -64,7 +64,7 @@ TEST_F(TestHuff, HUFF1) {
     for (const auto& in1: encInput) {
         auto search = tt.find(in1, 2U);
         EXPECT_TRUE(search != tt.end());
-        EXPECT_TRUE(search->second.equals(std::string("0-")));
+        EXPECT_TRUE(search->second.equals("0-"));
     }
 
     auto search2 = tt.find(0b00U, 2U);
@@ -109,14 +109,14 @@ TEST_F(TestHuff, HUFF2) {
         auto search2 = tt.find(in1, 2U);
         EXPECT_TRUE(search2 != tt.end());
 
-        EXPECT_TRUE(search2->second.equals(std::string("1--")));
+        EXPECT_TRUE(search2->second.equals("1--"));
     }
 
     auto search3 = tt.find(0b00U, 2U);
 
     EXPECT_TRUE(search3 != tt.end());
 
-    EXPECT_TRUE(search3->second.equals(std::string("0--")));
+    EXPECT_TRUE(search3->second.equals("0--"));
 
     EXPECT_EQ(tt.nInputs(), 2U);
 
