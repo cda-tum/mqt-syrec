@@ -97,7 +97,7 @@ namespace syrec {
 
         // encode all the outputs
         for (auto& [input, output]: tt) {
-            tt[input] = encoding[output];
+            output = encoding[output];
         }
     }
 

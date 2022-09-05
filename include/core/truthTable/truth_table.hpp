@@ -193,6 +193,14 @@ namespace syrec {
             return cubeMap[std::move(key)];
         }
 
+        [[nodiscard]] auto begin() -> decltype(cubeMap.begin()) {
+            return cubeMap.begin();
+        }
+
+        [[nodiscard]] auto end() -> decltype(cubeMap.end()) {
+            return cubeMap.end();
+        }
+
         [[nodiscard]] auto begin() const -> decltype(cubeMap.begin()) {
             return cubeMap.begin();
         }
