@@ -23,6 +23,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.9.0
       - uses: actions/upload-artifact@v3
@@ -36,6 +37,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Install boost
         run: brew install boost
       - name: Build wheels
@@ -51,6 +53,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
         uses: MarkusJx/install-boost@v2.4.0
@@ -73,6 +76,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Install Boost
         run: |
           curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
@@ -92,6 +96,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
       - uses: actions/setup-python@v4
         name: Install Python
         with:
