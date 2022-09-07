@@ -28,6 +28,7 @@ def pylint(session: Session) -> None:
     session.install("-e", ".")
     session.run("pylint", "mqt.syrec", "--extension-pkg-allow-list=mqt.syrec.pysyrec,PyQt6", *session.posargs)
 
+
 @nox.session
 def docs(session: Session) -> None:
     """Build the documentation. Simply execute `nox -rs docs -- serve` to locally build and serve the docs."""
