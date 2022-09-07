@@ -51,18 +51,18 @@ package_add_test(
   unittests/test_pla_parser.cpp)
 
 add_custom_command(
-		TARGET ${PROJECT_NAME}_test
-		POST_BUILD
-		COMMAND
-		${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/${PROJECT_NAME}_test
-		${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits
-		$<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
-		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
-		${CMAKE_BINARY_DIR}/circuits
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/configs
-		$<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
-		COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
-		${CMAKE_BINARY_DIR}/configs
-		COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
-		VERBATIM)
+  TARGET ${PROJECT_NAME}_test
+  POST_BUILD
+  COMMAND
+    ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/${PROJECT_NAME}_test
+    ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits
+          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
+          ${CMAKE_BINARY_DIR}/circuits
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/configs
+          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
+          ${CMAKE_BINARY_DIR}/configs
+  COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
+  VERBATIM)
