@@ -43,7 +43,7 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Configure CMake
-        run: cmake -S . -B build -DBINDINGS=ON
+        run: cmake -S . -B build -DBINDINGS=ON -DBUILD_SYREC_TESTS=ON
 
       - if: matrix.language == 'cpp'
         name: Build
