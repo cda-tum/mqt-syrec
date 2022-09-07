@@ -5,12 +5,19 @@ import os
 import nox
 from nox.sessions import Session
 
-nox.options.sessions = ["lint"]
+nox.options.sessions = ["lint", "tests"]
 
 PYTHON_ALL_VERSIONS = ["3.7", "3.8", "3.9", "3.10"]
 
 if os.environ.get("CI", None):
     nox.options.error_on_missing_interpreters = True
+
+
+@nox.session(python=PYTHON_ALL_VERSIONS)
+def tests(session: Session) -> None:
+    """Run the test suite."""
+    session.install("-e", ".[test]")
+    session.run("pytest", *session.posargs)
 
 
 @nox.session
