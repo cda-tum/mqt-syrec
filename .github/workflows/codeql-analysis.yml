@@ -32,22 +32,22 @@ jobs:
           fetch-depth: 0
 
       - name: Install boost
-        run:  sudo apt-get update && sudo apt-get -y install libboost-all-dev
+        run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages:   ${{ matrix.language }}
+          languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
-      - if:   matrix.language == 'cpp'
+      - if: matrix.language == 'cpp'
         name: Configure CMake
-        run:  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
 
-      - if:   matrix.language == 'cpp'
+      - if: matrix.language == 'cpp'
         name: Build
-        run:  cmake --build build --parallel 4
+        run: cmake --build build --parallel 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
