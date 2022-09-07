@@ -248,7 +248,6 @@ namespace syrec {
             statement_rule.name("statement");
             expression_rule.name("expression");
             binary_expression_rule.name("binary_expression");
-            //unary_expression_rule.name("unary_expression");
             shift_expression_rule.name("shift_expression");
             variable_rule.name("variable");
             number_rule.name("number");
