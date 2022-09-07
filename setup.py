@@ -110,7 +110,16 @@ setup(
     extras_require={
         "test": ["pytest>=7"],
         "coverage": ["coverage[toml]~=6.4.2", "pytest-cov~=3.0.0"],
-        "dev": ["mqt.syrec[test, coverage]"],
+        "docs": [
+            "sphinx>=5.1.1",
+            "sphinx-rtd-theme",
+            "sphinxcontrib-bibtex~=2.5",
+            "sphinx-copybutton",
+            "sphinx-hoverxref~=1.1.3",
+            "pybtex>=0.24",
+            "importlib_metadata>=3.6; python_version < '3.10'",
+        ],
+        "dev": ["mqt.syrec[test, coverage, docs]"],
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
