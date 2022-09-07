@@ -1,40 +1,51 @@
 import json
+from pathlib import Path
 
+import pytest
 from mqt import syrec
 
-f_synthesis_no_lines = open("../circuits/circuits_synthesis.json")
-data_synthesis_no_lines = json.load(f_synthesis_no_lines)
-f_synthesis_no_lines.close()
-
-f_synthesis_add_lines = open("../circuits/circuits_synthesis_add_lines.json")
-data_synthesis_add_lines = json.load(f_synthesis_add_lines)
-f_synthesis_add_lines.close()
-
-f_simulation_no_lines = open("../circuits/circuits_simulation.json")
-data_simulation_no_lines = json.load(f_simulation_no_lines)
-f_simulation_no_lines.close()
-
-f_simulation_add_lines = open("../circuits/circuits_simulation_add_lines.json")
-data_simulation_add_lines = json.load(f_simulation_add_lines)
-f_simulation_add_lines.close()
-
-test_circuit_dir = "../circuits/"
-string_src = ".src"
+test_dir = Path(__file__).resolve().parent.parent
+configs_dir = test_dir / "configs"
+circuit_dir = test_dir / "circuits"
 
 
-def test_parser():
+@pytest.fixture
+def data_synthesis_no_lines():
+    with open(configs_dir / "circuits_synthesis.json") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def data_synthesis_add_lines():
+    with open(configs_dir / "circuits_synthesis_add_lines.json") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def data_simulation_no_lines():
+    with open(configs_dir / "circuits_simulation.json") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def data_simulation_add_lines():
+    with open(configs_dir / "circuits_simulation_add_lines.json") as f:
+        return json.load(f)
+
+
+def test_parser(data_synthesis_no_lines):
     for file_name in data_synthesis_no_lines:
         prog = syrec.program()
-        error = prog.read(test_circuit_dir + file_name + string_src)
+        error = prog.read(str(circuit_dir / (file_name + ".src")))
 
         assert error == ""
 
 
-def test_synthesis_no_lines():
+def test_synthesis_no_lines(data_synthesis_no_lines):
     for file_name in data_synthesis_no_lines:
         circ = syrec.circuit()
         prog = syrec.program()
-        error = prog.read(test_circuit_dir + file_name + string_src)
+        error = prog.read(str(circuit_dir / (file_name + ".src")))
 
         assert error == ""
         assert syrec.syrec_synthesis_no_additional_lines(circ, prog)
@@ -44,11 +55,11 @@ def test_synthesis_no_lines():
         assert data_synthesis_no_lines[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_synthesis_add_lines():
+def test_synthesis_add_lines(data_synthesis_add_lines):
     for file_name in data_synthesis_add_lines:
         circ = syrec.circuit()
         prog = syrec.program()
-        error = prog.read(test_circuit_dir + file_name + string_src)
+        error = prog.read(str(circuit_dir / (file_name + ".src")))
 
         assert error == ""
         assert syrec.syrec_synthesis_additional_lines(circ, prog)
@@ -58,11 +69,11 @@ def test_synthesis_add_lines():
         assert data_synthesis_add_lines[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_simulation_no_lines():
+def test_simulation_no_lines(data_simulation_no_lines):
     for file_name in data_simulation_no_lines:
         circ = syrec.circuit()
         prog = syrec.program()
-        error = prog.read(test_circuit_dir + file_name + string_src)
+        error = prog.read(str(circuit_dir / (file_name + ".src")))
 
         assert error == ""
         assert syrec.syrec_synthesis_no_additional_lines(circ, prog)
@@ -78,11 +89,11 @@ def test_simulation_no_lines():
         assert data_simulation_no_lines[file_name]["sim_out"] == str(my_out_bitset)
 
 
-def test_simulation_add_lines():
+def test_simulation_add_lines(data_simulation_add_lines):
     for file_name in data_simulation_add_lines:
         circ = syrec.circuit()
         prog = syrec.program()
-        error = prog.read(test_circuit_dir + file_name + string_src)
+        error = prog.read(str(circuit_dir / (file_name + ".src")))
 
         assert error == ""
         assert syrec.syrec_synthesis_additional_lines(circ, prog)
