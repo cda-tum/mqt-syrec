@@ -47,7 +47,7 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Build
-        run: cmake --build build --parallel 4
+        run: cmake --build build --parallel 3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
