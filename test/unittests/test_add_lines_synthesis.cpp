@@ -14,6 +14,7 @@ using namespace syrec;
 
 class SyrecAddLinesSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
+    std::string  test_configs_dir  = "./configs/";
     std::string  test_circuits_dir = "./circuits/";
     std::string  file_name;
     gate::cost_t qc                 = 0;
