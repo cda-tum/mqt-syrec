@@ -141,7 +141,7 @@ setup(
     project_urls={
         "Source": "https://github.com/cda-tum/syrec/",
         "Tracker": "https://github.com/cda-tum/syrec/issues",
-        # 'Research': ''
+        "Documentation": "https://syrec.readthedocs.io",
     },
     install_requires=[
         "PyQt6>=6.2.3,<6.4.0",
