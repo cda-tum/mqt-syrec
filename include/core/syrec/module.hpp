@@ -10,7 +10,7 @@
 
 namespace syrec {
 
-    class statement;
+    struct statement;
 
     /**
      * @brief SyReC module data type
