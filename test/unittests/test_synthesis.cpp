@@ -14,6 +14,7 @@ using namespace syrec;
 
 class SyrecSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
+    std::string  test_configs_dir  = "./configs/";
     std::string  test_circuits_dir = "./circuits/";
     std::string  file_name;
     gate::cost_t qc                 = 0;
@@ -26,7 +27,7 @@ protected:
     void SetUp() override {
         std::string synthesis_param = GetParam();
         file_name                   = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i(test_circuits_dir + "circuits_synthesis.json");
+        std::ifstream i(test_configs_dir + "circuits_synthesis.json");
         json          j    = json::parse(i);
         expected_num_gates = j[synthesis_param]["num_gates"];
         expected_lines     = j[synthesis_param]["lines"];

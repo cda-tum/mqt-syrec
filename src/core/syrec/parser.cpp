@@ -167,7 +167,7 @@ namespace syrec {
 
                 return std::make_shared<number>(num_value);
             }
-            return std::make_shared<number>(num); //return std::make_shared<number>(lhs, op, rhs);
+            return std::make_shared<number>(num);
         }
 
     private:
@@ -310,113 +310,6 @@ namespace syrec {
             expression::ptr rhs = parse_expression(ast_exp2, proc, lhs->bitwidth(), context);
             if (!rhs) return nullptr;
 
-            /*if (auto* lhs_exp = dynamic_cast<numeric_expression*>(lhs.get())) {
-                if (auto* rhs_exp = dynamic_cast<numeric_expression*>(rhs.get())) {
-                    if (lhs_exp->value()->is_constant() && rhs_exp->value()->is_constant()) {
-                        unsigned lhs_value = lhs_exp->value()->evaluate(number::loop_variable_mapping());
-                        unsigned rhs_value = rhs_exp->value()->evaluate(number::loop_variable_mapping());
-                        unsigned num_value = 0;
-
-                        switch (op) {
-                            case binary_expression::add: // +
-                            {
-                                num_value = lhs_value + rhs_value;
-                            } break;
-
-                            case binary_expression::subtract: // -
-                            {
-                                num_value = lhs_value - rhs_value;
-                            } break;
-
-                            case binary_expression::exor: // ^
-                            {
-                                num_value = lhs_value ^ rhs_value;
-                            } break;
-
-                            case binary_expression::multiply: // *
-                            {
-                                num_value = lhs_value * rhs_value;
-                            } break;
-
-                            case binary_expression::divide: // /
-                            {
-                                num_value = lhs_value / rhs_value;
-                            } break;
-
-                            case binary_expression::modulo: // %
-                            {
-                                num_value = lhs_value % rhs_value;
-                            } break;
-
-                                case binary_expression::frac_divide: // *>
-                            {
-                                std::cerr << "Operator *> is undefined for numbers w/o specified bit width: ( " + std::to_string(lhs_value) + " *> " + std::to_string(rhs_value) + " )" << std::endl;
-                                assert(false);
-                                return nullptr;
-                            } break;
-
-                            case binary_expression::logical_and: // &&
-                            {
-                                num_value = lhs_value && rhs_value;
-                            } break;
-
-                            case binary_expression::logical_or: // ||
-                            {
-                                num_value = lhs_value || rhs_value;
-                            } break;
-
-                            case binary_expression::bitwise_and: // &
-                            {
-                                num_value = lhs_value & rhs_value;
-                            } break;
-
-                            case binary_expression::bitwise_or: // |
-                            {
-                                num_value = lhs_value | rhs_value;
-                            } break;
-
-                            case binary_expression::less_than: // <
-                            {
-                                num_value = lhs_value < rhs_value;
-                            } break;
-
-                            case binary_expression::greater_than: // >
-                            {
-                                num_value = lhs_value > rhs_value;
-                            } break;
-
-                            case binary_expression::equals: // =
-                            {
-                                num_value = lhs_value == rhs_value;
-                            } break;
-
-                            case binary_expression::not_equals: // !=
-                            {
-                                num_value = lhs_value != rhs_value;
-                            } break;
-
-                            case binary_expression::less_equals: // <=
-                            {
-                                num_value = lhs_value <= rhs_value;
-                            } break;
-
-                            case binary_expression::greater_equals: // >=
-                            {
-                                num_value = lhs_value >= rhs_value;
-                            } break;
-
-                            default:
-                                std::cerr << "Invalid operator in binary expression" << std::endl;
-                                assert(false);
-                        }
-
-                        return new numeric_expression(std::make_shared<number>(num_value), lhs->bitwidth());
-                    }
-                } else {
-                    lhs_exp = new numeric_expression(lhs_exp->value(), rhs->bitwidth());
-                    lhs     = expression::ptr(lhs_exp);
-                }
-            }*/
             return new binary_expression(lhs, op, rhs);
         }
 
@@ -599,17 +492,6 @@ namespace syrec {
             for_stat->range = std::make_pair(from, to);
 
             // step
-            /*if (ast_for_stat.step) {
-                number::ptr step = parse_number(bf::at_c<1>(*ast_for_stat.step), proc, context);
-                if (!step) return nullptr;
-
-                for_stat->set_step(step);
-
-                if (bf::at_c<0>(*ast_for_stat.step)) {
-                    for_stat->set_negative_step(true);
-                }
-            }*/
-
             for (const ast_statement& ast_stat: ast_for_stat.do_statement) {
                 statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
                 if (!stat) return nullptr;

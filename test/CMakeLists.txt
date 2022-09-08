@@ -61,5 +61,9 @@ add_custom_command(
           $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
           ${CMAKE_BINARY_DIR}/circuits
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/configs
+          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
+          ${CMAKE_BINARY_DIR}/configs
   COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
   VERBATIM)
