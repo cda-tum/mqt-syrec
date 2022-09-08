@@ -7,9 +7,13 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   BUILD_TYPE: Release
-  MAKEFLAGS: "-j2"
+  MAKEFLAGS: "-j3"
   BOOST_VERSION_MAJOR: 1
   BOOST_VERSION_MINOR: 76
   BOOST_VERSION_PATCH: 0

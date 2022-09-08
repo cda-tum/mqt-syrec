@@ -11,7 +11,7 @@
 
 namespace syrec {
 
-    class module;
+    struct module;
 
     /**
      * @brief Abstract base class for all SyReC statements

@@ -17,6 +17,7 @@ using namespace syrec;
 
 class SyrecSimulationTest: public testing::TestWithParam<std::string> {
 protected:
+    std::string             test_configs_dir  = "./configs/";
     std::string             test_circuits_dir = "./circuits/";
     std::string             file_name;
     boost::dynamic_bitset<> input;
@@ -28,7 +29,7 @@ protected:
     void SetUp() override {
         std::string synthesis_param = GetParam();
         file_name                   = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i(test_circuits_dir + "circuits_simulation.json");
+        std::ifstream i(test_configs_dir + "circuits_simulation.json");
         json          j  = json::parse(i);
         expected_sim_out = j[synthesis_param]["sim_out"];
         set_lines        = j[synthesis_param]["set_lines"].get<std::vector<int>>();
