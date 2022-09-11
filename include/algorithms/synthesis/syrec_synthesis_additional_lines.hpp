@@ -14,12 +14,12 @@ namespace syrec {
             return !SyrecSynthesis::onStatement(statement);
         }
 
-        void assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
-            status = SyrecSynthesis::increase(lhs, rhs);
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+            status = SyrecSynthesis::increase(rhs, lhs);
         }
 
-        void assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
-            status = SyrecSynthesis::decrease(lhs, rhs);
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+            status = SyrecSynthesis::decrease(rhs, lhs);
         }
 
         void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {

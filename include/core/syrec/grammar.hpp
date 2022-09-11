@@ -30,14 +30,14 @@ namespace syrec::parser {
         };
 
         template<typename Iterator, typename Context, typename Skipper, typename Attribute>
-        bool parse(Iterator& first, Iterator const& last, Context& /*unused*/, Skipper const& skipper, Attribute& attr) const {
+        bool parse(Iterator& first, Iterator const& last, [[maybe_unused]] Context&, Skipper const& skipper, Attribute& attr) const {
             boost::spirit::qi::skip_over(first, last, skipper);
             boost::spirit::traits::assign_to(first, attr);
             return true;
         }
 
         template<typename Context>
-        boost::spirit::info what(Context& /*unused*/) const {
+        boost::spirit::info what([[maybe_unused]] Context&) const {
             return boost::spirit::info("iter_pos");
         }
     };
@@ -48,7 +48,7 @@ namespace boost::spirit::qi {
     struct make_primitive<syrec::parser::tag::iter_pos, Modifiers> {
         using result_type = syrec::parser::IterPosParser;
 
-        result_type operator()(unused_type /*unused*/, unused_type /*unused*/) const {
+        result_type operator()([[maybe_unused]] unused_type, [[maybe_unused]] unused_type) const {
             return {};
         }
     };
@@ -171,7 +171,7 @@ namespace syrec {
 
     template<typename Iterator, typename SpaceT>
     struct SyrecParser: qi::grammar<Iterator, ast_program(), qi::locals<std::string>, SpaceT> {
-        [[maybe_unused]] explicit SyrecParser():
+        explicit SyrecParser():
             SyrecParser::base_type(programRule, "syrec") {
             using ascii::alnum;
             using parser::iter_pos;
@@ -295,7 +295,7 @@ namespace syrec {
         return true;
     }
 
-    inline bool parseString(ast_program& prog, const std::string& program) {
+    inline bool parseString(ast_program& prog, std::string_view program) {
         return parse(prog, program.begin(), program.end());
     }
 

@@ -52,12 +52,12 @@ namespace syrec {
         virtual ~SyrecSynthesis() = default;
 
         void addVariables(Circuit& circ, const Variable::vec& variables);
-        void setMainModule(const module::ptr& mainModule);
+        void setMainModule(const Module::ptr& mainModule);
 
     protected:
         virtual bool processStatement(const Statement::ptr& statement) = 0;
 
-        virtual bool onModule(const module::ptr&);
+        virtual bool onModule(const Module::ptr&);
 
         virtual bool opRhsLhsExpression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v);
         virtual bool opRhsLhsExpression([[maybe_unused]] const VariableExpression& expression, [[maybe_unused]] std::vector<unsigned>& v);
@@ -140,7 +140,7 @@ namespace syrec {
         std::stack<Statement::ptr>    stmts;
         Circuit&                      circ;
         Number::loop_variable_mapping loopMap;
-        std::stack<module::ptr>       modules;
+        std::stack<Module::ptr>       modules;
 
     private:
         var_lines_map                         varLines;

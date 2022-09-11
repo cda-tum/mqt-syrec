@@ -11,7 +11,7 @@
 
 namespace syrec {
 
-    struct statement;
+    struct Statement;
 
     /**
      * @brief SyReC module data type
@@ -19,11 +19,11 @@ namespace syrec {
      * This class represents a SyReC module. It consists of a name(), parameters(),
      * local variables(), and a list of statements().
      */
-    struct module {
+    struct Module {
         /**
        * @brief Smart pointer
        */
-        using ptr = std::shared_ptr<module>;
+        using ptr = std::shared_ptr<Module>;
 
         /**
        * @brief Vector of smart pointers
@@ -37,7 +37,7 @@ namespace syrec {
        *
        * @param name Name of the module
        */
-        explicit module(std::string name):
+        explicit Module(std::string name):
             name(std::move(name)) {}
 
         /**
@@ -58,7 +58,7 @@ namespace syrec {
        * Otherwise, using the \ref variable::type() "type" it can
        * be determined, whether it is a parameter of a variable.
        */
-        [[nodiscard]] Variable::ptr findParameterOrVariable(const std::string& n) const {
+        [[nodiscard]] Variable::ptr findParameterOrVariable(std::string_view n) const {
             for (Variable::ptr var: parameters) {
                 if (var->name == n) {
                     return var;

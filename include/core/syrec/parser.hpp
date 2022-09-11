@@ -24,15 +24,15 @@ namespace syrec {
         std::vector<std::string>   loopVariables;
     };
 
-    bool parseModule(module& proc, const ast_module& astProc, const program& prog, ParserContext& context);
+    bool parseModule(Module& proc, const ast_module& astProc, const program& prog, ParserContext& context);
 
-    Number::ptr parseNumber(const ast_number& astNum, const module& proc, ParserContext& context);
+    Number::ptr parseNumber(const ast_number& astNum, const Module& proc, ParserContext& context);
 
-    expression::ptr parseExpression(const ast_expression& astExp, const module& proc, unsigned bitwidth, ParserContext& context);
+    expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context);
 
-    Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const module& proc, ParserContext& context);
+    Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const Module& proc, ParserContext& context);
 
     unsigned parseVariableType(const std::string& name);
 
-    VariableAccess::ptr parseVariableAccess(const ast_variable& astVar, const module& proc, ParserContext& context);
+    VariableAccess::ptr parseVariableAccess(const ast_variable& astVar, const Module& proc, ParserContext& context);
 } // namespace syrec

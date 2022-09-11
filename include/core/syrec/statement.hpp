@@ -11,7 +11,7 @@
 
 namespace syrec {
 
-    struct module;
+    struct Module;
 
     /**
      * @brief Abstract base class for all SyReC statements
@@ -315,12 +315,12 @@ namespace syrec {
        * @param target Module to call
        * @param parameters Parameters to assign
        */
-        CallStatement(std::shared_ptr<module> target, std::vector<std::string> parameters):
+        CallStatement(std::shared_ptr<Module> target, std::vector<std::string> parameters):
             target(std::move(target)), parameters(std::move(parameters)) {}
 
         Statement::ptr reverse() override;
 
-        std::shared_ptr<module>  target{};
+        std::shared_ptr<Module>  target{};
         std::vector<std::string> parameters{};
     };
 
@@ -336,14 +336,14 @@ namespace syrec {
        * @param target Module to uncall
        * @param parameters Parameters to assign
        */
-        uncall_statement(std::shared_ptr<module> target, std::vector<std::string> parameters):
+        uncall_statement(std::shared_ptr<Module> target, std::vector<std::string> parameters):
             target(std::move(target)), parameters(std::move(parameters)) {}
 
         Statement::ptr reverse() override {
             return std::make_shared<CallStatement>(target, parameters);
         }
 
-        std::shared_ptr<module>  target{};
+        std::shared_ptr<Module>  target{};
         std::vector<std::string> parameters{};
     };
 

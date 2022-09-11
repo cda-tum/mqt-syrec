@@ -192,21 +192,21 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::solver(const std::vector<unsigned>& statLhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& expRhs) {
+    bool SyrecSynthesisNoAdditionalLines::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
         std::vector<unsigned> lines;
         if (statOp == expOp) {
             if (expOp == 1) {
-                expressionSingleOp(1, expLhs, statLhs);
-                expressionSingleOp(0, expRhs, statLhs);
+                expressionSingleOp(1, expLhs, expRhs);
+                expressionSingleOp(0, statLhs, expRhs);
             } else {
-                expressionSingleOp(statOp, expLhs, statLhs);
-                expressionSingleOp(statOp, expRhs, statLhs);
+                expressionSingleOp(statOp, expLhs, expRhs);
+                expressionSingleOp(statOp, statLhs, expRhs);
             }
         } else {
             subFlag = true;
             expEvaluate(lines, expOp, expLhs, expRhs);
             subFlag = false;
-            expEvaluate(lines, statOp, lines, statLhs);
+            expEvaluate(lines, statOp, lines, expRhs);
             subFlag = true;
             if (expOp < 3) {
                 expressionOpInverse(expOp, expLhs, expRhs);
@@ -256,26 +256,26 @@ namespace syrec {
         popExp();
     }
 
-    void SyrecSynthesisNoAdditionalLines::assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+    void SyrecSynthesisNoAdditionalLines::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
         if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
-            SyrecSynthesis::increase(lhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
-            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::expRhss.top());
+            SyrecSynthesis::increase(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
+            status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
             popExp();
         } else {
-            status = SyrecSynthesis::increase(lhs, rhs);
+            status = SyrecSynthesis::increase(rhs, lhs);
         }
         while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
     }
 
-    void SyrecSynthesisNoAdditionalLines::assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+    void SyrecSynthesisNoAdditionalLines::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
         if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
-            SyrecSynthesis::decrease(lhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
-            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::expRhss.top());
+            SyrecSynthesis::decrease(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
+            status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
             popExp();
         } else {
-            status = SyrecSynthesis::decrease(lhs, rhs);
+            status = SyrecSynthesis::decrease(rhs, lhs);
         }
         while (!SyrecSynthesis::expOpp.empty()) {
             inverse();

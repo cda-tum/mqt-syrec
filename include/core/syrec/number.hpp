@@ -48,7 +48,7 @@ namespace syrec {
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const {
             return std::visit(Overloaded{
                                       [](unsigned arg) { return arg; },
-                                      [&](const std::string& value) { return map.find(value)->second; }},
+                                      [&map](const std::string& value) { return map.find(value)->second; }},
                               numberVar);
         }
 

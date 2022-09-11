@@ -22,16 +22,16 @@ namespace syrec {
     public:
         program() = default;
 
-        void addModule(const module::ptr& module) {
+        void addModule(const Module::ptr& module) {
             modulesVec.emplace_back(module);
         }
 
-        [[nodiscard]] const module::vec& modules() const {
+        [[nodiscard]] const Module::vec& modules() const {
             return modulesVec;
         }
 
-        [[nodiscard]] module::ptr findModule(const std::string& name) const {
-            for (const module::ptr& p: modulesVec) {
+        [[nodiscard]] Module::ptr findModule(const std::string& name) const {
+            for (const Module::ptr& p: modulesVec) {
                 if (p->name == name) {
                     return p;
                 }
@@ -43,7 +43,7 @@ namespace syrec {
         std::string read(const std::string& filename, ReadProgramSettings settings = ReadProgramSettings{});
 
     private:
-        module::vec modulesVec;
+        Module::vec modulesVec;
 
         /**
         * @brief Parser for a SyReC program

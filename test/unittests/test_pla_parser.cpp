@@ -15,19 +15,19 @@ protected:
 
     TruthTable::Cube c1{};
 
-    TruthTable::Cube c1_{};
-    TruthTable::Cube c_1{};
+    TruthTable::Cube cOneDc{};
+    TruthTable::Cube cDcOne{};
 
     void SetUp() override {
         c11 = TruthTable::Cube::fromInteger(0b11U, 2U);
 
         c1 = TruthTable::Cube::fromInteger(0b1U, 1U);
 
-        c1_.emplace_back(true);
-        c1_.emplace_back(emptyVal);
+        cOneDc.emplace_back(true);
+        cOneDc.emplace_back(emptyVal);
 
-        c_1.emplace_back(emptyVal);
-        c_1.emplace_back(true);
+        cDcOne.emplace_back(emptyVal);
+        cDcOne.emplace_back(true);
     }
 };
 
@@ -55,10 +55,10 @@ TEST_F(PlaParserTest, orTest) {
     EXPECT_EQ(testPla.nOutputs(), 1U);
     EXPECT_EQ(testPla.size(), 2U);
 
-    auto it_1 = testPla.find("-1");
+    auto itDcOne = testPla.find("-1");
 
-    EXPECT_TRUE(it_1 != testPla.end());
-    EXPECT_TRUE(it_1->second.equals(0b1U, 1U));
+    EXPECT_TRUE(itDcOne != testPla.end());
+    EXPECT_TRUE(itDcOne->second.equals(0b1U, 1U));
 
     auto it1 = testPla.find("1-");
 

@@ -46,12 +46,12 @@ namespace syrec {
         add_edge(cctMan.root, cctMan.current, cctMan.tree);
     }
 
-    void SyrecSynthesis::setMainModule(const module::ptr& mainModule) {
+    void SyrecSynthesis::setMainModule(const Module::ptr& mainModule) {
         assert(modules.empty());
         modules.push(mainModule);
     }
 
-    bool SyrecSynthesis::onModule(const module::ptr& main) {
+    bool SyrecSynthesis::onModule(const Module::ptr& main) {
         for (const auto& stat: main->statements) {
             if (processStatement(stat)) {
                 return false;
@@ -633,8 +633,8 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::greaterEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!greaterThan(dest, src2, src1)) {
+    bool SyrecSynthesis::greaterEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1) {
+        if (!greaterThan(dest, src1, src2)) {
             return false;
         }
         (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(dest);
@@ -642,8 +642,8 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::greaterThan(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        return lessThan(dest, src2, src1);
+    bool SyrecSynthesis::greaterThan(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1) {
+        return lessThan(dest, src1, src2);
     }
 
     bool SyrecSynthesis::increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
@@ -732,8 +732,8 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::lessEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!lessThan(dest, src2, src1)) {
+    bool SyrecSynthesis::lessEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1) {
+        if (!lessThan(dest, src1, src2)) {
             return false;
         }
         (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(dest);
@@ -1008,7 +1008,7 @@ namespace syrec {
         }
 
         // get the main module
-        module::ptr main;
+        Module::ptr main;
 
         if (!mainModule.empty()) {
             main = program.findModule(mainModule);

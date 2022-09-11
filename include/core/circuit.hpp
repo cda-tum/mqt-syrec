@@ -461,7 +461,7 @@ namespace syrec {
      * circuit an empty gate is returned as reference and then
      * further processed by functions such as append_toffoli.
      */
-        boost::signals2::signal<void(Gate&)> gateAdded;
+        boost::signals2::signal<void(Gate&)> gateAdded; //NOLINT(cppcoreguidelines-pro-type-member-init)
 
         [[nodiscard]] Gate::cost_t quantumCost() const {
             Gate::cost_t cost = 0U;
