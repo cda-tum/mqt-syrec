@@ -62,12 +62,12 @@ namespace syrec {
    * }
    * @endcode
    */
-    typedef std::optional<bool> constant;
+    using constant = std::optional<bool>;
 
     /**
    * @brief Main circuit class
    */
-    class circuit {
+    class Circuit {
     public:
         /**
          * @brief Default constructor
@@ -75,8 +75,8 @@ namespace syrec {
          * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
          * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
          */
-        circuit()  = default;
-        ~circuit() = default;
+        Circuit()  = default;
+        ~Circuit() = default;
 
         /**
          * @brief Returns the number of gates
@@ -85,7 +85,7 @@ namespace syrec {
          *
          * @return Number of gates
          */
-        [[nodiscard]] unsigned num_gates() const {
+        [[nodiscard]] unsigned numGates() const {
             return gates.size();
         }
 
@@ -104,7 +104,7 @@ namespace syrec {
          *
          * @param l Number of lines
          */
-        void set_lines(unsigned l) {
+        void setLines(unsigned l) {
             lines = l;
             inputs.resize(lines, "i");
             outputs.resize(lines, "o");
@@ -119,7 +119,7 @@ namespace syrec {
          *
          * @return Number of lines
          */
-        [[nodiscard]] unsigned get_lines() const {
+        [[nodiscard]] unsigned getLines() const {
             return lines;
         }
 
@@ -166,9 +166,9 @@ namespace syrec {
      *
      * @return Reference to the newly created empty gate
      */
-        gate& append_gate() {
-            gates.emplace_back(std::make_shared<gate>());
-            gate_added(*gates.back());
+        Gate& appendGate() {
+            gates.emplace_back(std::make_shared<Gate>());
+            gateAdded(*gates.back());
             return *gates.back();
         }
 
@@ -181,9 +181,9 @@ namespace syrec {
      *
      * @return Reference to the newly created empty gate
      */
-        gate& insert_gate(unsigned pos) {
-            auto ins = gates.insert(gates.begin() + pos, std::make_shared<gate>());
-            gate_added(**ins);
+        Gate& insertGate(unsigned pos) {
+            auto ins = gates.insert(gates.begin() + pos, std::make_shared<Gate>());
+            gateAdded(**ins);
             return **ins;
         }
 
@@ -196,7 +196,7 @@ namespace syrec {
      *
      * @param inputs Input names
      */
-        void set_inputs(const std::vector<std::string>& in) {
+        void setInputs(const std::vector<std::string>& in) {
             inputs = in;
             inputs.resize(lines, "i");
         }
@@ -210,7 +210,7 @@ namespace syrec {
      *
      * @return Input names
      */
-        [[nodiscard]] const std::vector<std::string>& get_inputs() const {
+        [[nodiscard]] const std::vector<std::string>& getInputs() const {
             return inputs;
         }
 
@@ -223,7 +223,7 @@ namespace syrec {
      *
      * @param outputs Output names
      */
-        void set_outputs(const std::vector<std::string>& out) {
+        void setOutputs(const std::vector<std::string>& out) {
             outputs = out;
             outputs.resize(lines, "o");
         }
@@ -237,7 +237,7 @@ namespace syrec {
      *
      * @return Output names
      */
-        [[nodiscard]] const std::vector<std::string>& get_outputs() const {
+        [[nodiscard]] const std::vector<std::string>& getOutputs() const {
             return outputs;
         }
 
@@ -254,7 +254,7 @@ namespace syrec {
      *
      * @param constants Constant Lines
      */
-        void set_constants(const std::vector<constant>& con) {
+        void setConstants(const std::vector<constant>& con) {
             constants = con;
             constants.resize(lines, constant());
         }
@@ -266,7 +266,7 @@ namespace syrec {
      *
      * @return Constant input line specification
      */
-        [[nodiscard]] const std::vector<constant>& get_constants() const {
+        [[nodiscard]] const std::vector<constant>& getConstants() const {
             return constants;
         }
 
@@ -282,7 +282,7 @@ namespace syrec {
      *
      * @param garbage Garbage line specification
      */
-        void set_garbage(const std::vector<bool>& gar) {
+        void setGarbage(const std::vector<bool>& gar) {
             garbage = gar;
             garbage.resize(lines, false);
         }
@@ -294,7 +294,7 @@ namespace syrec {
      *
      * @return Garbage output line specification
      */
-        [[nodiscard]] const std::vector<bool>& get_garbage() const {
+        [[nodiscard]] const std::vector<bool>& getGarbage() const {
             return garbage;
         }
 
@@ -325,13 +325,12 @@ namespace syrec {
      *
      * @return Map of annotations encapsulated in an optional
      */
-        [[nodiscard]] std::optional<const std::map<std::string, std::string>> get_annotations(const gate& g) const {
+        [[nodiscard]] std::optional<const std::map<std::string, std::string>> getAnnotations(const Gate& g) const {
             auto it = annotations.find(&g);
             if (it != annotations.end()) {
                 return {it->second};
-            } else {
-                return {};
             }
+            return {};
         }
 
         /**
@@ -344,7 +343,7 @@ namespace syrec {
      * @param key Key of the annotation
      * @param value Value of the annotation
      */
-        void annotate(const gate& g, const std::string& key, const std::string& value) {
+        void annotate(const Gate& g, const std::string& key, const std::string& value) {
             annotations[&g][key] = value;
         }
 
@@ -362,7 +361,7 @@ namespace syrec {
        *
        * @return The index of the newly added line
        */
-        unsigned add_line(const std::string& input, const std::string& output, const constant& c = constant(), bool g = false) {
+        unsigned addLine(const std::string& input, const std::string& output, const constant& c = constant(), bool g = false) {
             lines += 1;
             inputs.emplace_back(input);
             outputs.emplace_back(output);
@@ -374,36 +373,36 @@ namespace syrec {
 
         ///add circuit
 
-        void insert_circuit(unsigned pos, const circuit& src, const gate::line_container& controls) {
-            typedef std::pair<std::string, std::string> pair_t;
+        void insertCircuit(unsigned pos, const Circuit& src, const Gate::line_container& controls) {
+            using pair_t = std::pair<std::string, std::string>;
             if (controls.empty()) {
                 for (const auto& g: src) {
-                    gate& new_gate = insert_gate(pos++);
-                    new_gate       = *g;
-                    auto anno      = src.get_annotations(*g);
+                    Gate& newGate = insertGate(pos++);
+                    newGate       = *g;
+                    auto anno     = src.getAnnotations(*g);
                     if (anno) {
                         for (const pair_t p: *anno) {
-                            annotate(new_gate, p.first, p.second);
+                            annotate(newGate, p.first, p.second);
                         }
                     }
                 }
             } else {
                 for (const auto& g: src) {
-                    gate& new_gate = insert_gate(pos++);
+                    Gate& newGate = insertGate(pos++);
                     for (const auto& control: controls) {
-                        new_gate.controls.emplace(control);
+                        newGate.controls.emplace(control);
                     }
                     for (const auto& c: g->controls) {
-                        new_gate.controls.emplace(c);
+                        newGate.controls.emplace(c);
                     }
                     for (const auto& t: g->targets) {
-                        new_gate.targets.emplace(t);
+                        newGate.targets.emplace(t);
                     }
-                    new_gate.type = g->type;
-                    auto anno     = src.get_annotations(*g);
+                    newGate.type = g->type;
+                    auto anno    = src.getAnnotations(*g);
                     if (anno) {
                         for (const pair_t p: *anno) {
-                            annotate(new_gate, p.first, p.second);
+                            annotate(newGate, p.first, p.second);
                         }
                     }
                 }
@@ -411,46 +410,46 @@ namespace syrec {
         }
 
         ///add gates
-        gate& append_multi_control_toffoli(const gate::line_container& controls, const gate::line& target) {
-            gate& g = append_gate();
+        Gate& appendMultiControlToffoli(const Gate::line_container& controls, const Gate::line& target) {
+            Gate& g = appendGate();
             for (const auto& control: controls) {
                 g.controls.emplace(control);
             }
             g.targets.emplace(target);
-            g.type = gate::types::Toffoli;
+            g.type = Gate::Types::Toffoli;
 
             return g;
         }
 
-        gate& append_toffoli(const gate::line& control1, const gate::line& control2, const gate::line& target) {
-            gate& g = append_gate();
+        Gate& appendToffoli(const Gate::line& control1, const Gate::line& control2, const Gate::line& target) {
+            Gate& g = appendGate();
             g.controls.emplace(control1);
             g.controls.emplace(control2);
             g.targets.emplace(target);
-            g.type = gate::types::Toffoli;
+            g.type = Gate::Types::Toffoli;
             return g;
         }
 
-        gate& append_cnot(const gate::line& control, const gate::line& target) {
-            gate& g = append_gate();
+        Gate& appendCnot(const Gate::line& control, const Gate::line& target) {
+            Gate& g = appendGate();
             g.controls.emplace(control);
             g.targets.emplace(target);
-            g.type = gate::types::Toffoli;
+            g.type = Gate::Types::Toffoli;
             return g;
         }
 
-        gate& append_not(const gate::line& target) {
-            gate& g = append_gate();
+        Gate& appendNot(const Gate::line& target) {
+            Gate& g = appendGate();
             g.targets.emplace(target);
-            g.type = gate::types::Toffoli;
+            g.type = Gate::Types::Toffoli;
             return g;
         }
 
-        gate& append_fredkin(const gate::line& target1, const gate::line& target2) {
-            gate& g = append_gate();
+        Gate& appendFredkin(const Gate::line& target1, const Gate::line& target2) {
+            Gate& g = appendGate();
             g.targets.emplace(target1);
             g.targets.emplace(target2);
-            g.type = gate::types::Fredkin;
+            g.type = Gate::Types::Fredkin;
             return g;
         }
 
@@ -462,26 +461,26 @@ namespace syrec {
      * circuit an empty gate is returned as reference and then
      * further processed by functions such as append_toffoli.
      */
-        boost::signals2::signal<void(gate&)> gate_added;
+        boost::signals2::signal<void(Gate&)> gateAdded;
 
-        [[nodiscard]] gate::cost_t quantum_cost() const {
-            gate::cost_t cost = 0U;
+        [[nodiscard]] Gate::cost_t quantumCost() const {
+            Gate::cost_t cost = 0U;
             for (const auto& g: gates) {
-                cost += g->quantum_cost(lines);
+                cost += g->quantumCost(lines);
             }
             return cost;
         }
 
-        [[nodiscard]] gate::cost_t transistor_cost() const {
-            gate::cost_t cost = 0U;
+        [[nodiscard]] Gate::cost_t transistorCost() const {
+            Gate::cost_t cost = 0U;
             for (const auto& g: gates) {
-                cost += (8ull * g->controls.size());
+                cost += (8ULL * g->controls.size());
             }
             return cost;
         }
 
     private:
-        std::vector<std::shared_ptr<gate>> gates{};
+        std::vector<std::shared_ptr<Gate>> gates{};
         unsigned                           lines{};
 
         std::vector<std::string> inputs{};
@@ -490,7 +489,7 @@ namespace syrec {
         std::vector<bool>        garbage{};
         std::string              name{};
 
-        std::map<const gate*, std::map<std::string, std::string>> annotations;
+        std::map<const Gate*, std::map<std::string, std::string>> annotations;
     };
 
 } // namespace syrec

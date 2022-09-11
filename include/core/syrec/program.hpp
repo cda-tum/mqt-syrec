@@ -12,26 +12,26 @@
 
 namespace syrec {
 
-    struct read_program_settings {
-        explicit read_program_settings(unsigned bitwidth = 32U):
-            default_bitwidth(bitwidth){};
-        unsigned default_bitwidth;
+    struct ReadProgramSettings {
+        explicit ReadProgramSettings(unsigned bitwidth = 32U):
+            defaultBitwidth(bitwidth){};
+        unsigned defaultBitwidth;
     };
 
     class program {
     public:
         program() = default;
 
-        void add_module(const module::ptr& module) {
-            modules_vec.emplace_back(module);
+        void addModule(const module::ptr& module) {
+            modulesVec.emplace_back(module);
         }
 
         [[nodiscard]] const module::vec& modules() const {
-            return modules_vec;
+            return modulesVec;
         }
 
-        [[nodiscard]] module::ptr find_module(const std::string& name) const {
-            for (const module::ptr& p: modules_vec) {
+        [[nodiscard]] module::ptr findModule(const std::string& name) const {
+            for (const module::ptr& p: modulesVec) {
                 if (p->name == name) {
                     return p;
                 }
@@ -40,10 +40,10 @@ namespace syrec {
             return {};
         }
 
-        std::string read(const std::string& filename, read_program_settings settings = read_program_settings{});
+        std::string read(const std::string& filename, ReadProgramSettings settings = ReadProgramSettings{});
 
     private:
-        module::vec modules_vec;
+        module::vec modulesVec;
 
         /**
         * @brief Parser for a SyReC program
@@ -59,8 +59,8 @@ namespace syrec {
         *
         * @return true if parsing was successful, otherwise false
         */
-        bool read_file(const std::string& filename, read_program_settings settings, std::string* error = nullptr);
-        bool read_program_from_string(const std::string& content, const read_program_settings& settings, std::string* error);
+        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
+        bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error);
     };
 
 } // namespace syrec

@@ -20,7 +20,7 @@ namespace syrec {
     * @param g     The gate to be simulated
     * @param input An input pattern
     */
-    void core_gate_simulation(const gate& g, boost::dynamic_bitset<>& input);
+    void coreGateSimulation(const Gate& g, boost::dynamic_bitset<>& input);
 
     /**
     * @brief Simple Simulation function for a circuit
@@ -49,7 +49,7 @@ namespace syrec {
     *   </tr>
     * </table>
     */
-    void simple_simulation(boost::dynamic_bitset<>& output, const circuit& circ, const boost::dynamic_bitset<>& input,
-                           const properties::ptr& statistics = properties::ptr());
+    void simpleSimulation(boost::dynamic_bitset<>& output, const Circuit& circ, const boost::dynamic_bitset<>& input,
+                          const Properties::ptr& statistics = Properties::ptr());
 
 } // namespace syrec

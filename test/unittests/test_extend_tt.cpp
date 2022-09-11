@@ -9,14 +9,14 @@ using namespace syrec;
 class TruthTableExtend: public testing::Test {
 protected:
     TruthTable  tt{};
-    std::string test_circuits_dir = "./circuits/";
+    std::string testCircuitsDir = "./circuits/";
 };
 
 TEST_F(TruthTableExtend, Max) {
     // create identity truth table
-    std::string circMax = test_circuits_dir + "Max.pla";
+    std::string circMax = testCircuitsDir + "Max.pla";
 
-    EXPECT_TRUE(read_pla(tt, circMax));
+    EXPECT_TRUE(readPla(tt, circMax));
 
     EXPECT_EQ(tt.size(), 1U);
 
@@ -25,9 +25,9 @@ TEST_F(TruthTableExtend, Max) {
 
 TEST_F(TruthTableExtend, Ident2Bit) {
     // create identity truth table
-    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
+    EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -45,9 +45,9 @@ TEST_F(TruthTableExtend, Ident2Bit) {
 TEST_F(TruthTableExtend, X2Bit) {
     // create X truth table (X gate applied on both the bits)
 
-    std::string circX2Bit = test_circuits_dir + "X2Bit.pla";
+    std::string circX2Bit = testCircuitsDir + "X2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circX2Bit));
+    EXPECT_TRUE(readPla(tt, circX2Bit));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -63,9 +63,9 @@ TEST_F(TruthTableExtend, X2Bit) {
 }
 
 TEST_F(TruthTableExtend, EXTENDTT) {
-    std::string circEXTENDTT = test_circuits_dir + "EXTENDTT.pla";
+    std::string circEXTENDTT = testCircuitsDir + "EXTENDTT.pla";
 
-    EXPECT_TRUE(read_pla(tt, circEXTENDTT));
+    EXPECT_TRUE(readPla(tt, circEXTENDTT));
 
     EXPECT_EQ(tt.size(), 2U);
 

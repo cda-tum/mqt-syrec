@@ -6,237 +6,246 @@
 
 namespace syrec {
 
-    struct parse_number_visitor {
-        explicit parse_number_visitor(const module& proc, parser_context& context):
+    struct ParseNumberVisitor {
+        explicit ParseNumberVisitor(const module& proc, ParserContext& context):
             proc(proc),
             context(context) {}
 
-        number::ptr operator()(unsigned value) const {
-            return std::make_shared<number>(value);
+        Number::ptr operator()(unsigned value) const {
+            return std::make_shared<Number>(value);
         }
 
-        number::ptr operator()(const boost::recursive_wrapper<ast_variable>& ast_var) const {
-            variable::ptr var = proc.find_parameter_or_variable(ast_var.get().name);
+        Number::ptr operator()(const boost::recursive_wrapper<ast_variable>& astVar) const {
+            Variable::ptr var = proc.findParameterOrVariable(astVar.get().name);
             if (!var) {
-                context.error_message = "Unknown variable " + ast_var.get().name;
+                context.errorMessage = "Unknown variable " + astVar.get().name;
                 return {};
             }
 
-            return std::make_shared<number>(var->bitwidth);
+            return std::make_shared<Number>(var->bitwidth);
         }
 
-        number::ptr operator()(const std::string& loop_variable) const {
-            if (std::find(context.loop_variables.begin(), context.loop_variables.end(), loop_variable) != context.loop_variables.end()) {
-                return std::make_shared<number>(loop_variable);
-            } else {
-                context.error_message = "Unknown loop variable $" + loop_variable;
+        Number::ptr operator()(const std::string& loopVariable) const {
+            if (std::find(context.loopVariables.begin(), context.loopVariables.end(), loopVariable) != context.loopVariables.end()) {
+                return std::make_shared<Number>(loopVariable);
+            }
+            context.errorMessage = "Unknown loop variable $" + loopVariable;
+            return {};
+        }
+
+        Number::ptr operator()(const boost::recursive_wrapper<ast_number_expression>& astNe) const {
+            ast_number  astNo1 = astNe.get().operand1;
+            std::string astOp  = astNe.get().op;
+            ast_number  astNo2 = astNe.get().operand2;
+
+            unsigned op = 0U;
+            if (astOp == "+") {
+                op = NumericExpression::Add;
+            } else if (astOp == "-") {
+                op = NumericExpression::Subtract;
+            } else if (astOp == "*") {
+                op = NumericExpression::Multiply;
+            } else if (astOp == "/") {
+                op = NumericExpression::Divide;
+            } else if (astOp == "%") {
+                op = NumericExpression::Modulo;
+            } else if (astOp == "&&") {
+                op = NumericExpression::LogicalAnd;
+            }
+
+            else if (astOp == "||") {
+                op = NumericExpression::LogicalOr;
+            } else if (astOp == "&") {
+                op = NumericExpression::BitwiseAnd;
+            } else if (astOp == "|") {
+                op = NumericExpression::BitwiseOr;
+            } else if (astOp == ">") {
+                op = NumericExpression::GreaterThan;
+            } else if (astOp == "<") {
+                op = NumericExpression::LessThan;
+            } else if (astOp == ">=") {
+                op = NumericExpression::GreaterEquals;
+            } else if (astOp == "<=") {
+                op = NumericExpression::LessEquals;
+            } else if (astOp == "==") {
+                op = NumericExpression::Equals;
+            } else if (astOp == "!=") {
+                op = NumericExpression::NotEquals;
+            }
+
+            Number::ptr lhs = parseNumber(astNo1, proc, context);
+            if (!lhs) {
                 return {};
             }
-        }
 
-        number::ptr operator()(const boost::recursive_wrapper<ast_number_expression>& ast_ne) const {
-            ast_number  ast_no1 = ast_ne.get().operand1;
-            std::string ast_op  = ast_ne.get().op;
-            ast_number  ast_no2 = ast_ne.get().operand2;
-
-            unsigned op = 0u;
-            if (ast_op == "+") {
-                op = numeric_expression::add;
-            } else if (ast_op == "-") {
-                op = numeric_expression::subtract;
-            } else if (ast_op == "*") {
-                op = numeric_expression::multiply;
-            } else if (ast_op == "/") {
-                op = numeric_expression::divide;
-            } else if (ast_op == "%") {
-                op = numeric_expression::modulo;
-            } else if (ast_op == "&&") {
-                op = numeric_expression::logical_and;
+            Number::ptr rhs = parseNumber(astNo2, proc, context);
+            if (!rhs) {
+                return {};
             }
-
-            else if (ast_op == "||") {
-                op = numeric_expression::logical_or;
-            } else if (ast_op == "&") {
-                op = numeric_expression::bitwise_and;
-            } else if (ast_op == "|") {
-                op = numeric_expression::bitwise_or;
-            } else if (ast_op == ">") {
-                op = numeric_expression::greater_than;
-            } else if (ast_op == "<") {
-                op = numeric_expression::less_than;
-            } else if (ast_op == ">=") {
-                op = numeric_expression::greater_equals;
-            } else if (ast_op == "<=") {
-                op = numeric_expression::less_equals;
-            } else if (ast_op == "==") {
-                op = numeric_expression::equals;
-            } else if (ast_op == "!=") {
-                op = numeric_expression::not_equals;
-            }
-
-            number::ptr lhs = parse_number(ast_no1, proc, context);
-            if (!lhs) return {};
-
-            number::ptr rhs = parse_number(ast_no2, proc, context);
-            if (!rhs) return {};
             unsigned num = 0;
-            if (lhs->is_constant() && rhs->is_constant()) {
-                unsigned lhs_value = lhs->evaluate(number::loop_variable_mapping());
-                unsigned rhs_value = rhs->evaluate(number::loop_variable_mapping());
-                unsigned num_value = 0;
+            if (lhs->isConstant() && rhs->isConstant()) {
+                unsigned lhsValue = lhs->evaluate(Number::loop_variable_mapping());
+                unsigned rhsValue = rhs->evaluate(Number::loop_variable_mapping());
+                unsigned numValue = 0;
 
                 switch (op) {
-                    case numeric_expression::add: // +
+                    case NumericExpression::Add: // +
                     {
-                        num_value = lhs_value + rhs_value;
+                        numValue = lhsValue + rhsValue;
                     } break;
 
-                    case numeric_expression::subtract: // -
+                    case NumericExpression::Subtract: // -
                     {
-                        num_value = lhs_value - rhs_value;
+                        numValue = lhsValue - rhsValue;
                     } break;
 
-                    case numeric_expression::multiply: // *
+                    case NumericExpression::Multiply: // *
                     {
-                        num_value = lhs_value * rhs_value;
+                        numValue = lhsValue * rhsValue;
                     } break;
 
-                    case numeric_expression::divide: // /
+                    case NumericExpression::Divide: // /
                     {
-                        num_value = lhs_value / rhs_value;
+                        numValue = lhsValue / rhsValue;
                     } break;
 
-                    case numeric_expression::modulo: // /
+                    case NumericExpression::Modulo: // /
                     {
-                        num_value = lhs_value % rhs_value;
+                        numValue = lhsValue % rhsValue;
                     } break;
 
-                    case numeric_expression::logical_and: // /
+                    case NumericExpression::LogicalAnd: // /
                     {
-                        num_value = lhs_value && rhs_value;
+                        numValue = static_cast<unsigned>((lhsValue != 0U) && (rhsValue != 0U));
                     } break;
 
-                    case numeric_expression::logical_or: // /
+                    case NumericExpression::LogicalOr: // /
                     {
-                        num_value = lhs_value || rhs_value;
+                        numValue = static_cast<unsigned>((lhsValue != 0U) || (rhsValue != 0U));
                     } break;
 
-                    case numeric_expression::bitwise_and: // /
+                    case NumericExpression::BitwiseAnd: // /
                     {
-                        num_value = lhs_value & rhs_value;
+                        numValue = lhsValue & rhsValue;
                     } break;
 
-                    case numeric_expression::bitwise_or: // /
+                    case NumericExpression::BitwiseOr: // /
                     {
-                        num_value = lhs_value | rhs_value;
+                        numValue = lhsValue | rhsValue;
                     } break;
 
-                    case numeric_expression::less_than: // /
+                    case NumericExpression::LessThan: // /
                     {
-                        num_value = lhs_value < rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue < rhsValue);
                     } break;
 
-                    case numeric_expression::greater_than: // /
+                    case NumericExpression::GreaterThan: // /
                     {
-                        num_value = lhs_value > rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue > rhsValue);
                     } break;
 
-                    case numeric_expression::greater_equals: // /
+                    case NumericExpression::GreaterEquals: // /
                     {
-                        num_value = lhs_value >= rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue >= rhsValue);
                     } break;
 
-                    case numeric_expression::less_equals: // /
+                    case NumericExpression::LessEquals: // /
                     {
-                        num_value = lhs_value <= rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue <= rhsValue);
                     } break;
 
-                    case numeric_expression::equals: // /
+                    case NumericExpression::Equals: // /
                     {
-                        num_value = lhs_value == rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue == rhsValue);
                     } break;
 
-                    case numeric_expression::not_equals: // /
+                    case NumericExpression::NotEquals: // /
                     {
-                        num_value = lhs_value != rhs_value;
+                        numValue = static_cast<unsigned int>(lhsValue != rhsValue);
                     } break;
 
                     default:
                         return {};
                 }
 
-                return std::make_shared<number>(num_value);
+                return std::make_shared<Number>(numValue);
             }
-            return std::make_shared<number>(num);
+            return std::make_shared<Number>(num);
         }
 
     private:
-        const module&   proc;
-        parser_context& context;
+        const module&  proc;
+        ParserContext& context;
     };
 
-    number::ptr parse_number(const ast_number& ast_num, const module& proc, parser_context& context) {
-        return std::visit(parse_number_visitor(proc, context), ast_num);
+    Number::ptr parseNumber(const ast_number& astNum, const module& proc, ParserContext& context) {
+        return std::visit(ParseNumberVisitor(proc, context), astNum);
     }
 
-    variable_access::ptr parse_variable_access(const ast_variable& ast_var, const module& proc, parser_context& context) {
-        variable::ptr var = proc.find_parameter_or_variable(ast_var.name);
+    VariableAccess::ptr parseVariableAccess(const ast_variable& astVar, const module& proc, ParserContext& context) {
+        Variable::ptr var = proc.findParameterOrVariable(astVar.name);
 
         if (!var) {
-            context.error_message = "Unknown variable %s" + ast_var.name;
+            context.errorMessage = "Unknown variable %s" + astVar.name;
             return {};
         }
 
-        variable_access::ptr va(new variable_access());
-        va->set_var(var);
+        VariableAccess::ptr va(new VariableAccess());
+        va->setVar(var);
 
-        std::optional<std::pair<number::ptr, number::ptr>> var_range;
+        std::optional<std::pair<Number::ptr, Number::ptr>> varRange;
 
-        ast_range range = ast_var.range;
+        ast_range range = astVar.range;
         if (range) {
-            number::ptr first = parse_number(bf::at_c<0>(*range), proc, context);
-            if (!first) return {};
+            Number::ptr first = parseNumber(boost::fusion::at_c<0>(*range), proc, context);
+            if (!first) {
+                return {};
+            }
 
             // is in range?
-            if (!first->is_loop_variable()) {
-                unsigned bound = first->evaluate(number::loop_variable_mapping());
+            if (!first->isLoopVariable()) {
+                unsigned bound = first->evaluate(Number::loop_variable_mapping());
                 if (bound >= var->bitwidth) {
-                    context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
+                    context.errorMessage = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                     return {};
                 }
             }
 
-            number::ptr second = first;
+            Number::ptr second = first;
 
-            if (bf::at_c<1>(*range)) {
-                second = parse_number(*bf::at_c<1>(*range), proc, context);
-                if (!second) return {};
+            if (boost::fusion::at_c<1>(*range)) {
+                second = parseNumber(*boost::fusion::at_c<1>(*range), proc, context);
+                if (!second) {
+                    return {};
+                }
 
                 // is in range?
-                if (!second->is_loop_variable()) {
-                    unsigned bound = second->evaluate(number::loop_variable_mapping());
+                if (!second->isLoopVariable()) {
+                    unsigned bound = second->evaluate(Number::loop_variable_mapping());
                     if (bound >= var->bitwidth) {
-                        context.error_message = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
+                        context.errorMessage = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                         return {};
                     }
                 }
             }
 
-            var_range = std::make_pair(first, second);
+            varRange = std::make_pair(first, second);
         }
 
-        va->range = var_range;
+        va->range = varRange;
 
         // indexes
-        if (var->dimensions.size() != ast_var.indexes.size()) {
-            context.error_message = "Invalid number of array indexes in variable " + var->name + ". Expected " + std::to_string(var->dimensions.size()) + ", got " + std::to_string(ast_var.indexes.size());
+        if (var->dimensions.size() != astVar.indexes.size()) {
+            context.errorMessage = "Invalid number of array indexes in variable " + var->name + ". Expected " + std::to_string(var->dimensions.size()) + ", got " + std::to_string(astVar.indexes.size());
             return {};
         }
 
         expression::vec indexes;
-        for (const ast_expression& ast_exp: ast_var.indexes) {
-            expression::ptr index = parse_expression(ast_exp, proc, var->bitwidth, context);
-            if (!index) return {};
+        for (const ast_expression& astExp: astVar.indexes) {
+            expression::ptr index = parseExpression(astExp, proc, var->bitwidth, context);
+            if (!index) {
+                return {};
+            }
             indexes.emplace_back(index);
         }
         va->indexes = indexes;
@@ -244,399 +253,438 @@ namespace syrec {
         return va;
     }
 
-    struct expression_visitor {
-        expression_visitor(const module& proc, unsigned bitwidth, parser_context& context):
+    struct ExpressionVisitor {
+        ExpressionVisitor(const module& proc, unsigned bitwidth, ParserContext& context):
             proc(proc),
             bitwidth(bitwidth),
             context(context) {}
 
-        expression* operator()(const ast_number& ast_num) const {
-            number::ptr num = parse_number(ast_num, proc, context);
-            if (!num) return nullptr;
-            return new numeric_expression(num, bitwidth);
+        expression* operator()(const ast_number& astNum) const {
+            Number::ptr num = parseNumber(astNum, proc, context);
+            if (!num) {
+                return nullptr;
+            }
+            return new NumericExpression(num, bitwidth);
         }
 
-        expression* operator()(const ast_variable& ast_var) const {
-            variable_access::ptr access = parse_variable_access(ast_var, proc, context);
-            if (!access) return nullptr;
-            return new variable_expression(access);
+        expression* operator()(const ast_variable& astVar) const {
+            VariableAccess::ptr access = parseVariableAccess(astVar, proc, context);
+            if (!access) {
+                return nullptr;
+            }
+            return new VariableExpression(access);
         }
 
-        expression* operator()(const ast_binary_expression& ast_exp) const {
-            ast_expression ast_exp1 = ast_exp.operand1;
-            std::string    ast_op   = ast_exp.op;
-            ast_expression ast_exp2 = ast_exp.operand2;
+        expression* operator()(const ast_binary_expression& astExp) const {
+            ast_expression astExp1 = astExp.operand1;
+            std::string    astOp   = astExp.op;
+            ast_expression astExp2 = astExp.operand2;
 
-            unsigned op = 0u;
-            if (ast_op == "+") {
-                op = binary_expression::add;
-            } else if (ast_op == "-") {
-                op = binary_expression::subtract;
-            } else if (ast_op == "^") {
-                op = binary_expression::exor;
-            } else if (ast_op == "*") {
-                op = binary_expression::multiply;
-            } else if (ast_op == "/") {
-                op = binary_expression::divide;
-            } else if (ast_op == "%") {
-                op = binary_expression::modulo;
-            } else if (ast_op == "*>") {
-                op = binary_expression::frac_divide;
-            } else if (ast_op == "&") {
-                op = binary_expression::bitwise_and;
-            } else if (ast_op == "|") {
-                op = binary_expression::bitwise_or;
-            } else if (ast_op == "&&") {
-                op = binary_expression::logical_and;
-            } else if (ast_op == "||") {
-                op = binary_expression::logical_or;
-            } else if (ast_op == "<") {
-                op = binary_expression::less_than;
-            } else if (ast_op == ">") {
-                op = binary_expression::greater_than;
-            } else if (ast_op == "=") {
-                op = binary_expression::equals;
-            } else if (ast_op == "!=") {
-                op = binary_expression::not_equals;
-            } else if (ast_op == "<=") {
-                op = binary_expression::less_equals;
-            } else if (ast_op == ">=") {
-                op = binary_expression::greater_equals;
+            unsigned op = 0U;
+            if (astOp == "+") {
+                op = BinaryExpression::Add;
+            } else if (astOp == "-") {
+                op = BinaryExpression::Subtract;
+            } else if (astOp == "^") {
+                op = BinaryExpression::Exor;
+            } else if (astOp == "*") {
+                op = BinaryExpression::Multiply;
+            } else if (astOp == "/") {
+                op = BinaryExpression::Divide;
+            } else if (astOp == "%") {
+                op = BinaryExpression::Modulo;
+            } else if (astOp == "*>") {
+                op = BinaryExpression::FracDivide;
+            } else if (astOp == "&") {
+                op = BinaryExpression::BitwiseAnd;
+            } else if (astOp == "|") {
+                op = BinaryExpression::BitwiseOr;
+            } else if (astOp == "&&") {
+                op = BinaryExpression::LogicalAnd;
+            } else if (astOp == "||") {
+                op = BinaryExpression::LogicalOr;
+            } else if (astOp == "<") {
+                op = BinaryExpression::LessThan;
+            } else if (astOp == ">") {
+                op = BinaryExpression::GreaterThan;
+            } else if (astOp == "=") {
+                op = BinaryExpression::Equals;
+            } else if (astOp == "!=") {
+                op = BinaryExpression::NotEquals;
+            } else if (astOp == "<=") {
+                op = BinaryExpression::LessEquals;
+            } else if (astOp == ">=") {
+                op = BinaryExpression::GreaterEquals;
             }
 
-            expression::ptr lhs = parse_expression(ast_exp1, proc, 0u, context);
-            if (!lhs) return nullptr;
-
-            expression::ptr rhs = parse_expression(ast_exp2, proc, lhs->bitwidth(), context);
-            if (!rhs) return nullptr;
-
-            return new binary_expression(lhs, op, rhs);
-        }
-
-        expression* operator()(const ast_shift_expression& ast_exp) const {
-            ast_expression ast_exp1 = ast_exp.operand1;
-            std::string    ast_op   = ast_exp.op;
-            ast_number     ast_num  = ast_exp.operand2;
-
-            unsigned op = 0u;
-            if (ast_op == "<<") {
-                op = shift_expression::left;
-            } else if (ast_op == ">>") {
-                op = shift_expression::right;
+            expression::ptr lhs = parseExpression(astExp1, proc, 0U, context);
+            if (!lhs) {
+                return nullptr;
             }
 
-            expression::ptr lhs = parse_expression(ast_exp1, proc, bitwidth, context);
-            if (!lhs) return nullptr;
+            expression::ptr rhs = parseExpression(astExp2, proc, lhs->bitwidth(), context);
+            if (!rhs) {
+                return nullptr;
+            }
 
-            number::ptr rhs = parse_number(ast_num, proc, context);
-            if (!rhs) return nullptr;
+            return new BinaryExpression(lhs, op, rhs);
+        }
 
-            if (auto* lhs_no = dynamic_cast<numeric_expression*>(lhs.get())) {
-                if (lhs_no->value->is_constant() && rhs->is_constant()) {
-                    unsigned value    = lhs_no->value->evaluate(number::loop_variable_mapping());
-                    unsigned shft_amt = rhs->evaluate(number::loop_variable_mapping());
-                    unsigned result   = 0;
+        expression* operator()(const ast_shift_expression& astExp) const {
+            ast_expression astExp1 = astExp.operand1;
+            std::string    astOp   = astExp.op;
+            ast_number     astNum  = astExp.operand2;
+
+            unsigned op = 0U;
+            if (astOp == "<<") {
+                op = ShiftExpression::Left;
+            } else if (astOp == ">>") {
+                op = ShiftExpression::Right;
+            }
+
+            expression::ptr lhs = parseExpression(astExp1, proc, bitwidth, context);
+            if (!lhs) {
+                return nullptr;
+            }
+
+            Number::ptr rhs = parseNumber(astNum, proc, context);
+            if (!rhs) {
+                return nullptr;
+            }
+
+            if (auto const* lhsNo = dynamic_cast<NumericExpression*>(lhs.get())) {
+                if (lhsNo->value->isConstant() && rhs->isConstant()) {
+                    unsigned value   = lhsNo->value->evaluate(Number::loop_variable_mapping());
+                    unsigned shftAmt = rhs->evaluate(Number::loop_variable_mapping());
+                    unsigned result  = 0;
 
                     switch (op) {
-                        case shift_expression::left: // <<
+                        case ShiftExpression::Left: // <<
                         {
-                            result = value << shft_amt;
+                            result = value << shftAmt;
                         } break;
 
-                        case shift_expression::right: // >>
+                        case ShiftExpression::Right: // >>
                         {
-                            result = value >> shft_amt;
+                            result = value >> shftAmt;
                         } break;
 
                         default:
                             std::cerr << "Invalid operator in shift expression" << std::endl;
                             assert(false);
                     }
-                    return new numeric_expression(std::make_shared<number>(result), lhs->bitwidth());
+                    return new NumericExpression(std::make_shared<Number>(result), lhs->bitwidth());
                 }
             }
 
-            return new shift_expression(lhs, op, rhs);
+            return new ShiftExpression(lhs, op, rhs);
         }
 
     private:
-        const module&   proc;
-        unsigned        bitwidth;
-        parser_context& context;
+        const module&  proc;
+        unsigned       bitwidth;
+        ParserContext& context;
     };
 
-    expression::ptr parse_expression(const ast_expression& ast_exp, const module& proc, unsigned bitwidth, parser_context& context) {
-        return expression::ptr(boost::apply_visitor(expression_visitor(proc, bitwidth, context), ast_exp));
+    expression::ptr parseExpression(const ast_expression& astExp, const module& proc, unsigned bitwidth, ParserContext& context) {
+        return expression::ptr(boost::apply_visitor(ExpressionVisitor(proc, bitwidth, context), astExp));
     }
 
-    struct statement_visitor {
-        statement_visitor(const program& prog, const module& proc, parser_context& context):
+    struct StatementVisitor {
+        StatementVisitor(const program& prog, const module& proc, ParserContext& context):
             prog(prog),
             proc(proc),
             context(context) {}
 
-        statement* operator()(const ast_swap_statement& ast_swap_stat) const {
-            const ast_variable& ast_var1 = bf::at_c<0>(ast_swap_stat);
-            const ast_variable& ast_var2 = bf::at_c<1>(ast_swap_stat);
+        statement* operator()(const ast_swap_statement& astSwapStat) const {
+            const ast_variable& astVar1 = boost::fusion::at_c<0>(astSwapStat);
+            const ast_variable& astVar2 = boost::fusion::at_c<1>(astSwapStat);
 
-            variable_access::ptr va1 = parse_variable_access(ast_var1, proc, context);
-            if (!va1) return nullptr;
-            variable_access::ptr va2 = parse_variable_access(ast_var2, proc, context);
-            if (!va2) return nullptr;
+            VariableAccess::ptr va1 = parseVariableAccess(astVar1, proc, context);
+            if (!va1) {
+                return nullptr;
+            }
+            VariableAccess::ptr va2 = parseVariableAccess(astVar2, proc, context);
+            if (!va2) {
+                return nullptr;
+            }
 
             if (va1->bitwidth() != va2->bitwidth()) {
-                std::cerr << "Different bit-widths in <=> statement: " + va1->get_var()->name + " (" + std::to_string(va1->bitwidth()) + "), " + va2->get_var()->name + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
+                std::cerr << "Different bit-widths in <=> statement: " + va1->getVar()->name + " (" + std::to_string(va1->bitwidth()) + "), " + va2->getVar()->name + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
                 assert(false);
                 return nullptr;
             }
 
-            return new swap_statement(va1, va2);
+            return reinterpret_cast<statement*>(new SwapStatement(va1, va2));
         }
 
-        statement* operator()(const ast_unary_statement& ast_unary_stat) const {
-            const std::string&  ast_op  = bf::at_c<0>(ast_unary_stat);
-            const ast_variable& ast_var = bf::at_c<1>(ast_unary_stat);
+        statement* operator()(const ast_unary_statement& astUnaryStat) const {
+            const std::string&  astOp  = boost::fusion::at_c<0>(astUnaryStat);
+            const ast_variable& astVar = boost::fusion::at_c<1>(astUnaryStat);
 
-            variable_access::ptr var = parse_variable_access(ast_var, proc, context);
-            if (!var) return nullptr;
-
-            unsigned op = 0u;
-
-            if (ast_op == "~") {
-                op = unary_statement::invert;
-            } else if (ast_op == "++") {
-                op = unary_statement::increment;
-            } else if (ast_op == "--") {
-                op = unary_statement::decrement;
-            }
-
-            return new unary_statement(op, var);
-        }
-
-        statement* operator()(const ast_assign_statement& ast_assign_stat) const {
-            const ast_variable&   ast_var = bf::at_c<0>(ast_assign_stat);
-            char                  ast_op  = bf::at_c<1>(ast_assign_stat);
-            const ast_expression& ast_exp = bf::at_c<2>(ast_assign_stat);
-
-            variable_access::ptr lhs = parse_variable_access(ast_var, proc, context);
-            if (!lhs) return nullptr;
-
-            unsigned op = ast_op == '+' ? assign_statement::add :
-                                          (ast_op == '-' ? assign_statement::subtract : assign_statement::exor);
-
-            expression::ptr rhs = parse_expression(ast_exp, proc, lhs->bitwidth(), context);
-            if (!rhs) return nullptr;
-
-            if (lhs->bitwidth() != rhs->bitwidth()) {
-                context.error_message = "Wrong bit-width in assignment to " + lhs->get_var()->name;
+            VariableAccess::ptr var = parseVariableAccess(astVar, proc, context);
+            if (!var) {
                 return nullptr;
             }
 
-            return new assign_statement(lhs, op, rhs);
-        }
+            unsigned op = 0U;
 
-        statement* operator()(const ast_if_statement& ast_if_stat) const {
-            auto* if_stat = new if_statement();
-
-            expression::ptr condition = parse_expression(ast_if_stat.condition, proc, 1u, context);
-            if (!condition) return nullptr;
-            if_stat->set_condition(condition);
-
-            expression::ptr fi_condition = parse_expression(ast_if_stat.fi_condition, proc, 1u, context);
-            if (!fi_condition) return nullptr;
-            if_stat->set_fi_condition(fi_condition);
-
-            for (const ast_statement& ast_stat: ast_if_stat.if_statement) {
-                statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return nullptr;
-                if_stat->add_then_statement(stat);
+            if (astOp == "~") {
+                op = UnaryStatement::Invert;
+            } else if (astOp == "++") {
+                op = UnaryStatement::Increment;
+            } else if (astOp == "--") {
+                op = UnaryStatement::Decrement;
             }
 
-            for (const ast_statement& ast_stat: ast_if_stat.else_statement) {
-                statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return nullptr;
-                if_stat->add_else_statement(stat);
-            }
-
-            return if_stat;
+            return reinterpret_cast<statement*>(new UnaryStatement(op, var));
         }
 
-        statement* operator()(const ast_for_statement& ast_for_stat) const {
-            auto* for_stat = new for_statement();
+        statement* operator()(const ast_assign_statement& astAssignStat) const {
+            const ast_variable&   astVar = boost::fusion::at_c<0>(astAssignStat);
+            char                  astOp  = boost::fusion::at_c<1>(astAssignStat);
+            const ast_expression& astExp = boost::fusion::at_c<2>(astAssignStat);
 
-            number::ptr from;
-            number::ptr to = parse_number(ast_for_stat.to, proc, context);
-            if (!to) return nullptr;
+            VariableAccess::ptr lhs = parseVariableAccess(astVar, proc, context);
+            if (!lhs) {
+                return nullptr;
+            }
 
-            std::string loop_variable;
-            if (ast_for_stat.from) {
-                from = parse_number(bf::at_c<1>(*ast_for_stat.from), proc, context);
-                if (!from) return nullptr;
+            unsigned op = astOp == '+' ? AssignStatement::Add :
+                                         (astOp == '-' ? AssignStatement::Subtract : AssignStatement::Exor);
+
+            expression::ptr rhs = parseExpression(astExp, proc, lhs->bitwidth(), context);
+            if (!rhs) {
+                return nullptr;
+            }
+
+            if (lhs->bitwidth() != rhs->bitwidth()) {
+                context.errorMessage = "Wrong bit-width in assignment to " + lhs->getVar()->name;
+                return nullptr;
+            }
+
+            return reinterpret_cast<statement*>(new AssignStatement(lhs, op, rhs));
+        }
+
+        statement* operator()(const ast_if_statement& astIfStat) const {
+            auto* ifStat = new IfStatement();
+
+            expression::ptr condition = parseExpression(astIfStat.condition, proc, 1U, context);
+            if (!condition) {
+                return nullptr;
+            }
+            ifStat->setCondition(condition);
+
+            expression::ptr fiCondition = parseExpression(astIfStat.fiCondition, proc, 1U, context);
+            if (!fiCondition) {
+                return nullptr;
+            }
+            ifStat->setFiCondition(fiCondition);
+
+            for (const ast_statement& astStat: astIfStat.ifStatement) {
+                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                if (!stat) {
+                    return nullptr;
+                }
+                ifStat->addThenStatement(stat);
+            }
+
+            for (const ast_statement& astStat: astIfStat.elseStatement) {
+                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                if (!stat) {
+                    return nullptr;
+                }
+                ifStat->addElseStatement(stat);
+            }
+
+            return reinterpret_cast<statement*>(ifStat);
+        }
+
+        statement* operator()(const ast_for_statement& astForStat) const {
+            auto* forStat = new ForStatement();
+
+            Number::ptr from;
+            Number::ptr to = parseNumber(astForStat.to, proc, context);
+            if (!to) {
+                return nullptr;
+            }
+
+            std::string loopVariable;
+            if (astForStat.from) {
+                from = parseNumber(boost::fusion::at_c<1>(*astForStat.from), proc, context);
+                if (!from) {
+                    return nullptr;
+                }
 
                 // is there a loop variable?
-                if (bf::at_c<0>(*ast_for_stat.from)) {
-                    loop_variable = *bf::at_c<0>(*ast_for_stat.from);
+                if (boost::fusion::at_c<0>(*astForStat.from)) {
+                    loopVariable = *boost::fusion::at_c<0>(*astForStat.from);
 
                     // does the loop variable exist already?
-                    if (std::find(context.loop_variables.begin(), context.loop_variables.end(), loop_variable) != context.loop_variables.end()) {
-                        context.error_message = "Redefinition of loop variable $" + loop_variable;
+                    if (std::find(context.loopVariables.begin(), context.loopVariables.end(), loopVariable) != context.loopVariables.end()) {
+                        context.errorMessage = "Redefinition of loop variable $" + loopVariable;
                         return nullptr;
                     }
 
-                    for_stat->loop_variable = loop_variable;
+                    forStat->loopVariable = loopVariable;
 
-                    context.loop_variables.emplace_back(loop_variable);
+                    context.loopVariables.emplace_back(loopVariable);
                 }
             }
 
-            for_stat->range = std::make_pair(from, to);
+            forStat->range = std::make_pair(from, to);
 
             // step
-            for (const ast_statement& ast_stat: ast_for_stat.do_statement) {
-                statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-                if (!stat) return nullptr;
-                for_stat->add_statement(stat);
+            for (const ast_statement& astStat: astForStat.doStatement) {
+                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                if (!stat) {
+                    return nullptr;
+                }
+                forStat->addStatement(stat);
             }
 
-            if (!loop_variable.empty()) {
+            if (!loopVariable.empty()) {
                 // release loop variable
-                context.loop_variables.erase(std::remove_if(context.loop_variables.begin(), context.loop_variables.end(), [&](const auto& s) { return s == loop_variable; }), context.loop_variables.end());
+                context.loopVariables.erase(std::remove_if(context.loopVariables.begin(), context.loopVariables.end(), [&loopVariable](const auto& s) { return s == loopVariable; }), context.loopVariables.end());
             }
 
-            return for_stat;
+            return reinterpret_cast<statement*>(forStat);
         }
 
-        statement* operator()(const ast_call_statement& ast_call_stat) const {
-            std::string proc_name  = bf::at_c<1>(ast_call_stat);
-            module::ptr other_proc = prog.find_module(proc_name);
+        statement* operator()(const ast_call_statement& astCallStat) const {
+            std::string procName  = boost::fusion::at_c<1>(astCallStat);
+            module::ptr otherProc = prog.findModule(procName);
 
             // found no module
-            if (!other_proc.get()) {
-                context.error_message = "Unknown module " + proc_name;
+            if (!static_cast<bool>(otherProc.get())) {
+                context.errorMessage = "Unknown module " + procName;
                 return nullptr;
             }
 
-            const std::vector<std::string>& parameters = bf::at_c<2>(ast_call_stat);
+            const std::vector<std::string>& parameters = boost::fusion::at_c<2>(astCallStat);
 
             // wrong number of parameters
-            if (parameters.size() != other_proc->parameters.size()) {
-                context.error_message = "Wrong number of arguments in (un)call of " + other_proc->name + ". Expected " + std::to_string(other_proc->parameters.size()) + ", got " + std::to_string(parameters.size());
+            if (parameters.size() != otherProc->parameters.size()) {
+                context.errorMessage = "Wrong number of arguments in (un)call of " + otherProc->name + ". Expected " + std::to_string(otherProc->parameters.size()) + ", got " + std::to_string(parameters.size());
                 return nullptr;
             }
 
             // unknown variable name in parameters
             for (const std::string& parameter: parameters) {
-                if (!proc.find_parameter_or_variable(parameter)) {
-                    context.error_message = "Unknown variable " + parameter + " in (un)call of " + other_proc->name;
+                if (!proc.findParameterOrVariable(parameter)) {
+                    context.errorMessage = "Unknown variable " + parameter + " in (un)call of " + otherProc->name;
                     return nullptr;
                 }
             }
 
             // check whether bit-width fits
             for (unsigned i = 0; i < parameters.size(); ++i) {
-                variable::ptr vOther    = other_proc->parameters.at(i);
-                variable::ptr parameter = proc.find_parameter_or_variable(parameters.at(i)); // must exist (see above)
+                Variable::ptr vOther    = otherProc->parameters.at(i);
+                Variable::ptr parameter = proc.findParameterOrVariable(parameters.at(i)); // must exist (see above)
 
                 if (vOther->bitwidth != parameter->bitwidth) {
-                    context.error_message = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + other_proc->name + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
+                    context.errorMessage = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + otherProc->name + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
                     return nullptr;
                 }
             }
 
-            if (bf::at_c<0>(ast_call_stat) == "call") {
-                return new call_statement(other_proc, parameters);
-            } else {
-                return new uncall_statement(other_proc, parameters);
+            if (boost::fusion::at_c<0>(astCallStat) == "call") {
+                return reinterpret_cast<statement*>(new CallStatement(otherProc, parameters));
             }
+            return reinterpret_cast<statement*>(new uncall_statement(otherProc, parameters));
         }
 
-        statement* operator()(const std::string& ast_skip_stat [[maybe_unused]]) const {
-            return new skip_statement();
+        statement* operator()(const std::string& astSkipStat [[maybe_unused]]) const {
+            return reinterpret_cast<statement*>(new skip_statement());
         }
 
     private:
-        const program&  prog;
-        const module&   proc;
-        parser_context& context;
+        const program& prog;
+        const module&  proc;
+        ParserContext& context;
     };
 
-    statement::ptr parse_statement(const ast_statement& ast_stat, const program& prog, const module& proc, parser_context& context) {
-        if (statement* stat = boost::apply_visitor(statement_visitor(prog, proc, context), bf::at_c<1>(ast_stat))) {
-            context.current_line_number = std::count(context.begin, bf::at_c<0>(ast_stat), '\n') + 1u;
-            stat->line_number           = context.current_line_number;
-            return statement::ptr(stat);
-        } else {
-            return {};
+    Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const module& proc, ParserContext& context) {
+        if (auto* stat = reinterpret_cast<Statement*>(boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat)))) {
+            context.currentLineNumber = static_cast<unsigned>(std::count(context.begin, boost::fusion::at_c<0>(astStat), '\n')) + 1U;
+            stat->lineNumber          = context.currentLineNumber;
+            return Statement::ptr(stat);
         }
+        return {};
     }
 
-    unsigned parse_variable_type(const std::string& name) {
+    unsigned parseVariableType(const std::string& name) {
         if (name == "in") {
-            return variable::in;
-        } else if (name == "out") {
-            return variable::out;
-        } else if (name == "inout") {
-            return variable::inout;
-        } else if (name == "state") {
-            return variable::state;
-        } else if (name == "wire") {
-            return variable::wire;
+            return Variable::In;
+        }
+        if (name == "out") {
+            return Variable::Out;
+        }
+        if (name == "inout") {
+            return Variable::Inout;
+        }
+        if (name == "state") {
+            return Variable::State;
+        }
+        if (name == "wire") {
+            return Variable::Wire;
         }
 
         assert(false);
-        return 0u;
+        return 0U;
     }
 
-    bool parse_module(module& proc, const ast_module& ast_proc, const program& prog, parser_context& context) {
-        std::set<std::string> variable_names;
+    bool parseModule(module& proc, const ast_module& astProc, const program& prog, ParserContext& context) {
+        std::set<std::string> variableNames;
 
-        for (const ast_parameter& ast_param: bf::at_c<1>(ast_proc)) {
-            const std::string& variable_name = bf::at_c<0>(bf::at_c<1>(ast_param));
+        for (const ast_parameter& astParam: boost::fusion::at_c<1>(astProc)) {
+            const std::string& variableName = boost::fusion::at_c<0>(boost::fusion::at_c<1>(astParam));
 
-            if (variable_names.find(variable_name) != variable_names.end()) {
-                context.error_message = "Redefinition of variable " + variable_name;
+            if (variableNames.find(variableName) != variableNames.end()) {
+                context.errorMessage = "Redefinition of variable " + variableName;
                 return false;
-            } else {
-                variable_names.emplace(variable_name);
             }
+            variableNames.emplace(variableName);
 
-            unsigned type = parse_variable_type(bf::at_c<0>(ast_param));
-            proc.add_parameter(std::make_shared<variable>(
+            unsigned type = parseVariableType(boost::fusion::at_c<0>(astParam));
+            proc.addParameter(std::make_shared<Variable>(
                     type,
-                    variable_name,
-                    bf::at_c<1>(bf::at_c<1>(ast_param)),
-                    bf::at_c<2>(bf::at_c<1>(ast_param)).get_value_or(context.settings.default_bitwidth)));
+                    variableName,
+                    boost::fusion::at_c<1>(boost::fusion::at_c<1>(astParam)),
+                    boost::fusion::at_c<2>(boost::fusion::at_c<1>(astParam)).get_value_or(context.settings.defaultBitwidth)));
         }
 
-        for (const ast_statement& ast_stat: bf::at_c<3>(ast_proc)) {
-            statement::ptr stat = parse_statement(ast_stat, prog, proc, context);
-            if (!stat) return false;
-            proc.add_statement(stat);
+        for (const ast_statement& astStat: boost::fusion::at_c<3>(astProc)) {
+            Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+            if (!stat) {
+                return false;
+            }
+            proc.addStatement(stat);
         }
 
         return true;
     }
 
-    bool program::read_program_from_string(const std::string& content, const read_program_settings& settings, std::string* error) {
-        ast_program ast_prog;
-        if (!parse_string(ast_prog, content)) {
+    bool program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
+        ast_program astProg;
+        if (!parseString(astProg, content)) {
             *error = "PARSE_STRING_FAILED";
             return false;
         }
 
-        parser_context context(settings);
+        ParserContext context(settings);
         context.begin = content.begin();
 
         // Modules
-        for (const ast_module& ast_proc: ast_prog) {
-            module::ptr proc(new module(bf::at_c<0>(ast_proc)));
-            if (!parse_module(*proc, ast_proc, *this, context)) {
+        for (const ast_module& astProc: astProg) {
+            module::ptr proc(new module(boost::fusion::at_c<0>(astProc)));
+            if (!parseModule(*proc, astProc, *this, context)) {
                 if (error != nullptr) {
-                    *error = "In line " + std::to_string(context.current_line_number) + ": " + context.error_message;
+                    *error = "In line " + std::to_string(context.currentLineNumber) + ": " + context.errorMessage;
                 }
                 return false;
             }
-            add_module(proc);
+            addModule(proc);
         }
 
         return true;

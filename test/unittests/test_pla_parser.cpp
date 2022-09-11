@@ -6,7 +6,7 @@ using namespace syrec;
 
 class PlaParserTest: public testing::Test {
 protected:
-    std::string test_circuits_dir = "./circuits/";
+    std::string testCircuitsDir = "./circuits/";
     TruthTable  testPla;
 
     TruthTable::Cube::Value emptyVal;
@@ -32,9 +32,9 @@ protected:
 };
 
 TEST_F(PlaParserTest, andTest) {
-    std::string circAnd = test_circuits_dir + "and.pla";
+    std::string circAnd = testCircuitsDir + "and.pla";
 
-    EXPECT_TRUE(read_pla(testPla, circAnd));
+    EXPECT_TRUE(readPla(testPla, circAnd));
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
@@ -47,9 +47,9 @@ TEST_F(PlaParserTest, andTest) {
 }
 
 TEST_F(PlaParserTest, orTest) {
-    std::string circOr = test_circuits_dir + "or.pla";
+    std::string circOr = testCircuitsDir + "or.pla";
 
-    EXPECT_TRUE(read_pla(testPla, circOr));
+    EXPECT_TRUE(readPla(testPla, circOr));
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
@@ -60,8 +60,8 @@ TEST_F(PlaParserTest, orTest) {
     EXPECT_TRUE(it_1 != testPla.end());
     EXPECT_TRUE(it_1->second.equals(0b1U, 1U));
 
-    auto it1_ = testPla.find("1-");
+    auto it1 = testPla.find("1-");
 
-    EXPECT_TRUE(it1_ != testPla.end());
-    EXPECT_TRUE(it1_->second.equals(0b1U, 1U));
+    EXPECT_TRUE(it1 != testPla.end());
+    EXPECT_TRUE(it1->second.equals(0b1U, 1U));
 }

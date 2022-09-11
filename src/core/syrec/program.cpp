@@ -2,8 +2,9 @@
 
 namespace syrec {
 
-    bool program::read_file(const std::string& filename, const read_program_settings settings, std::string* error) {
-        std::string content, line;
+    bool program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string* error) {
+        std::string content;
+        std::string line;
 
         std::ifstream is;
         is.open(filename.c_str(), std::ios::in);
@@ -12,16 +13,15 @@ namespace syrec {
             content += line + '\n';
         }
 
-        return read_program_from_string(content, settings, error);
+        return readProgramFromString(content, settings, error);
     }
 
-    std::string program::read(const std::string& filename, const read_program_settings settings) {
-        std::string error_message;
-        if (!(read_file(filename, settings, &error_message))) {
-            return error_message;
-        } else {
-            return {};
+    std::string program::read(const std::string& filename, const ReadProgramSettings settings) {
+        std::string errorMessage;
+        if (!(readFile(filename, settings, &errorMessage))) {
+            return errorMessage;
         }
+        return {};
     }
 
 } // namespace syrec

@@ -19,9 +19,9 @@ namespace syrec {
         /**
        * @brief Shared Pointer interface to the class
        */
-        typedef std::shared_ptr<expression> ptr;
+        using ptr = std::shared_ptr<expression>;
 
-        typedef std::vector<ptr> vec;
+        using vec = std::vector<ptr>;
 
         /**
        * @brief Standard constructor
@@ -46,7 +46,7 @@ namespace syrec {
     /**
      * @brief Numeric Expression
      */
-    struct numeric_expression: public expression {
+    struct NumericExpression: public expression {
         /**
        * @brief Operation to perform in case of binary numeric expression
        */
@@ -54,44 +54,44 @@ namespace syrec {
             /**
          * @brief Addition
          */
-            add,
+            Add,
 
             /**
          * @brief Subtraction
          */
-            subtract,
+            Subtract,
 
             /**
          * @brief Multiplication
          */
-            multiply,
+            Multiply,
 
             /**
          * @brief Division
          */
-            divide,
+            Divide,
 
-            modulo,
+            Modulo,
 
-            logical_and,
+            LogicalAnd,
 
-            logical_or,
+            LogicalOr,
 
-            bitwise_and,
+            BitwiseAnd,
 
-            bitwise_or,
+            BitwiseOr,
 
-            less_than,
+            LessThan,
 
-            greater_than,
+            GreaterThan,
 
-            less_equals,
+            LessEquals,
 
-            greater_equals,
+            GreaterEquals,
 
-            equals,
+            Equals,
 
-            not_equals
+            NotEquals
 
         };
 
@@ -101,14 +101,14 @@ namespace syrec {
        * @param value Value
        * @param bitwidth Bit-width of the value
        */
-        numeric_expression(number::ptr value, unsigned bitwidth):
+        NumericExpression(Number::ptr value, unsigned bitwidth):
             value(std::move(value)), bwidth(bitwidth) {}
 
         [[nodiscard]] unsigned bitwidth() const override {
             return bwidth;
         }
 
-        number::ptr value = nullptr;
+        Number::ptr value = nullptr;
         unsigned    bwidth{};
     };
 
@@ -118,20 +118,20 @@ namespace syrec {
      * This class represents a variable expression and
      * capsulates a variable access pointer var().
      */
-    struct variable_expression: public expression {
+    struct VariableExpression: public expression {
         /**
        * @brief Constructor with variable
        *
        * @param var Variable access
        */
-        explicit variable_expression(variable_access::ptr var):
+        explicit VariableExpression(VariableAccess::ptr var):
             var(std::move(var)) {}
 
         [[nodiscard]] unsigned bitwidth() const override {
             return var->bitwidth();
         }
 
-        variable_access::ptr var = nullptr;
+        VariableAccess::ptr var = nullptr;
     };
 
     /**
@@ -140,7 +140,7 @@ namespace syrec {
      * This class represents a binary expression between two sub
      * expressions lhs() and rhs() by an operation op().
      */
-    struct binary_expression: public expression {
+    struct BinaryExpression: public expression {
         /**
        * @brief Operation to perform
        */
@@ -148,93 +148,93 @@ namespace syrec {
             /**
          * @brief Addition
          */
-            add,
+            Add,
 
             /**
          * @brief Subtraction
          */
-            subtract,
+            Subtract,
 
             /**
          * @brief Bit-wise EXOR
          */
-            exor,
+            Exor,
 
             /**
          * @brief Multiplication
          *
          * Returns n least significant bits, where n is the bit-width of lhs() and rhs()
          */
-            multiply,
+            Multiply,
 
             /**
          * @brief Division
          *
          * Returns n least significant bits, where n is the bit-width of lhs() and rhs()
          */
-            divide,
+            Divide,
 
             /**
          * @brief Modulo Operation
          */
-            modulo,
+            Modulo,
 
             /**
          * @brief Multiplication (most significant bits)
          *
          * Performs multiplication and returns the n most significant bits, where n is the bit-width of lhs() and rhs()
          */
-            frac_divide,
+            FracDivide,
 
             /**
          * @brief Logical AND
          */
-            logical_and,
+            LogicalAnd,
 
             /**
          * @brief Logical OR
          */
-            logical_or,
+            LogicalOr,
 
             /**
          * @brief Bitwise AND
          */
-            bitwise_and,
+            BitwiseAnd,
 
             /**
          * @brief Bitwise OR
          */
-            bitwise_or,
+            BitwiseOr,
 
             /**
          * @brief Less than
          */
-            less_than,
+            LessThan,
 
             /**
          * @brief Greater than
          */
-            greater_than,
+            GreaterThan,
 
             /**
          * @brief Equals
          */
-            equals,
+            Equals,
 
             /**
          * @brief Not equals
          */
-            not_equals,
+            NotEquals,
 
             /**
          * @brief Less equals
          */
-            less_equals,
+            LessEquals,
 
             /**
          * @brief Greater equals
          */
-            greater_equals
+            GreaterEquals
         };
 
         /**
@@ -244,9 +244,9 @@ namespace syrec {
        * @param op Operation to be performed
        * @param rhs Expression on right hand side
        */
-        binary_expression(expression::ptr lhs,
-                          unsigned        op,
-                          expression::ptr rhs):
+        BinaryExpression(expression::ptr lhs,
+                         unsigned        op,
+                         expression::ptr rhs):
             lhs(std::move(lhs)),
             op(op), rhs(std::move(rhs)) {}
 
@@ -263,14 +263,14 @@ namespace syrec {
        */
         [[nodiscard]] unsigned bitwidth() const override {
             switch (op) {
-                case logical_and:
-                case logical_or:
-                case less_than:
-                case greater_than:
-                case equals:
-                case not_equals:
-                case less_equals:
-                case greater_equals:
+                case LogicalAnd:
+                case LogicalOr:
+                case LessThan:
+                case GreaterThan:
+                case Equals:
+                case NotEquals:
+                case LessEquals:
+                case GreaterEquals:
                     return 1;
 
                 default:
@@ -290,7 +290,7 @@ namespace syrec {
      * This class represents a binary expression with a
      * sub-expression lhs() and a number rhs() by a shift operation op().
      */
-    struct shift_expression: public expression {
+    struct ShiftExpression: public expression {
         /**
        * @brief Shft Operation
        */
@@ -298,12 +298,12 @@ namespace syrec {
             /**
          * @brief Left-Shift
          */
-            left,
+            Left,
 
             /**
          * @brief Right-Shift
          */
-            right
+            Right
         };
 
         /**
@@ -317,9 +317,9 @@ namespace syrec {
        * @param op Shift operation
        * @param rhs Number of bits to shift
        */
-        shift_expression(expression::ptr lhs,
-                         unsigned        op,
-                         number::ptr     rhs):
+        ShiftExpression(expression::ptr lhs,
+                        unsigned        op,
+                        Number::ptr     rhs):
             lhs(std::move(lhs)),
             op(op), rhs(std::move(rhs)) {}
 
@@ -337,7 +337,7 @@ namespace syrec {
 
         expression::ptr lhs = nullptr;
         unsigned        op{};
-        number::ptr     rhs = nullptr;
+        Number::ptr     rhs = nullptr;
     };
 
 } // namespace syrec
