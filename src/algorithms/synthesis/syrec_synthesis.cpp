@@ -287,7 +287,7 @@ namespace syrec {
         }
         // clear loop variable if necessary
         if (!loopVariable.empty()) {
-            assert(loopMap.erase(loop_variable) == 1U);
+            assert(loopMap.erase(loopVariable) == 1U);
         }
 
         return true;
