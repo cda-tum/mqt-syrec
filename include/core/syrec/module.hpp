@@ -58,7 +58,7 @@ namespace syrec {
        * Otherwise, using the \ref variable::type() "type" it can
        * be determined, whether it is a parameter of a variable.
        */
-        [[nodiscard]] Variable::ptr findParameterOrVariable(std::string_view n) const {
+        [[nodiscard]] Variable::ptr findParameterOrVariable(const std::string& n) const {
             for (Variable::ptr var: parameters) {
                 if (var->name == n) {
                     return var;
