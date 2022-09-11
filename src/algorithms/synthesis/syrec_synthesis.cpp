@@ -214,7 +214,7 @@ namespace syrec {
         // calculate expression
         std::vector<unsigned> expressionResult;
         onExpression(statement.condition, expressionResult, {}, 0U);
-        assert(expression_result.size() == 1u);
+        assert(expressionResult.size() == 1U);
 
         // add new helper line
         unsigned helperLine = expressionResult.front();
@@ -287,7 +287,7 @@ namespace syrec {
         }
         // clear loop variable if necessary
         if (!loopVariable.empty()) {
-            assert(loop_map.erase(loop_variable) == 1u);
+            assert(loopMap.erase(loop_variable) == 1U);
         }
 
         return true;
