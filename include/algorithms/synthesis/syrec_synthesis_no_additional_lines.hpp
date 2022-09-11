@@ -27,13 +27,13 @@ namespace syrec {
 
         void inverse();
 
-        void assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
 
-        void assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
 
         void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
 
-        bool solver(const std::vector<unsigned>& statLhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& expRhs);
+        bool solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs);
 
         bool flow(const expression::ptr& expression, std::vector<unsigned>& v);
         bool flow(const VariableExpression& expression, std::vector<unsigned>& v);

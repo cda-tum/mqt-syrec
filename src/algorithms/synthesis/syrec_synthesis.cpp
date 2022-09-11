@@ -633,8 +633,8 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::greaterEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1) {
-        if (!greaterThan(dest, src1, src2)) {
+    bool SyrecSynthesis::greaterEquals(unsigned dest, const std::vector<unsigned>& srcTwo, const std::vector<unsigned>& srcOne) {
+        if (!greaterThan(dest, srcOne, srcTwo)) {
             return false;
         }
         (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(dest);

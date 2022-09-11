@@ -204,12 +204,12 @@ namespace syrec {
             }
         } else {
             subFlag = true;
-            expEvaluate(lines, expOp, expLhs, expRhs);
+            expEvaluate(lines, expOp, expLhs, statLhs);
             subFlag = false;
             expEvaluate(lines, statOp, lines, expRhs);
             subFlag = true;
             if (expOp < 3) {
-                expressionOpInverse(expOp, expLhs, expRhs);
+                expressionOpInverse(expOp, expLhs, statLhs);
             }
         }
         subFlag = false;

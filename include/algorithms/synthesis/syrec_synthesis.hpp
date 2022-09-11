@@ -104,10 +104,10 @@ namespace syrec {
         bool         disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
         bool         division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
         bool         equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        bool         greaterEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                // >
-        bool         greaterThan(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                  // >// +=
+        bool         greaterEquals(unsigned dest, const std::vector<unsigned>& srcTwo, const std::vector<unsigned>& srcOne);            // >
+        bool         greaterThan(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                  // >// +=
         bool         increaseWithCarry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool         lessEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                         // <=
+        bool         lessEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                         // <=
         bool         lessThan(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                           // <
         bool         modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
         bool         multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
