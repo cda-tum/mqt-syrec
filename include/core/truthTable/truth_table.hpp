@@ -137,11 +137,11 @@ namespace syrec {
                 cube.resize(n, val);
             }
 
-            auto emplace_back(const Value& v) -> void {
+            auto emplace_back(const Value& v) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
                 cube.emplace_back(v);
             }
 
-            auto pop_back() -> void {
+            auto pop_back() -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
                 cube.pop_back();
             }
 
@@ -218,7 +218,7 @@ namespace syrec {
             return cubeMap.size();
         }
 
-        [[nodiscard]] auto max_size() const -> std::size_t {
+        [[nodiscard]] auto max_size() const -> std::size_t { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             return cubeMap.max_size();
         }
 
@@ -252,11 +252,11 @@ namespace syrec {
             return cubeMap.find(Cube::fromString(str));
         }
 
-        auto try_emplace(const Cube& input, const Cube& output) -> void {
+        auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
         }
-        auto try_emplace(Cube&& input, Cube&& output) -> void {
+        auto try_emplace(Cube&& input, Cube&& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(std::move(input), std::move(output));
         }

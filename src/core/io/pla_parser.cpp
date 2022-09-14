@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    void parse_pla(TruthTable& tt, std::istream& in) {
+    void parsePla(TruthTable& tt, std::istream& in) {
         std::string line;
         std::size_t nInputs  = 0;
         std::size_t nOutputs = 0;
@@ -15,7 +15,7 @@ namespace syrec {
                 continue;
             }
 
-            else if (line.rfind(".i", 0) == 0) {
+            if (line.rfind(".i", 0) == 0) {
                 nInputs = std::stoi(line.substr(3));
             }
 
@@ -38,14 +38,17 @@ namespace syrec {
                     inputOutputMapping.emplace_back(tokenString);
                 }
 
-                if (inputOutputMapping.size() != 2)
+                if (inputOutputMapping.size() != 2) {
                     throw std::invalid_argument("Expected exactly 2 columns (input and output), received " + std::to_string(inputOutputMapping.size()) + std::string(" columns"));
+                }
 
-                if (inputOutputMapping[0].size() != nInputs)
+                if (inputOutputMapping[0].size() != nInputs) {
                     throw std::invalid_argument(".i " + std::string("(") + std::to_string(nInputs) + std::string(")") + std::string(" not equal to received number of inputs ") + std::string("(") + std::to_string(inputOutputMapping[0].size()) + std::string(")"));
+                }
 
-                if (inputOutputMapping[1].size() != nOutputs)
+                if (inputOutputMapping[1].size() != nOutputs) {
                     throw std::invalid_argument(".o " + std::string("(") + std::to_string(nOutputs) + std::string(")") + std::string(" not equal to received number of outputs ") + std::string("(") + std::to_string(inputOutputMapping[1].size()) + std::string(")"));
+                }
 
                 TruthTable::Cube cubeIn;
                 cubeIn.reserve(nInputs);
@@ -66,7 +69,7 @@ namespace syrec {
         }
     }
 
-    bool read_pla(TruthTable& tt, const std::string& filename) {
+    bool readPla(TruthTable& tt, const std::string& filename) {
         std::ifstream is;
         is.open(filename.c_str(), std::ifstream::in);
 
@@ -76,7 +79,7 @@ namespace syrec {
             return false;
         }
 
-        parse_pla(tt, is);
+        parsePla(tt, is);
 
         return true;
     }

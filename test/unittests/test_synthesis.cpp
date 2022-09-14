@@ -14,25 +14,25 @@ using namespace syrec;
 
 class SyrecSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string  test_configs_dir  = "./configs/";
-    std::string  test_circuits_dir = "./circuits/";
-    std::string  file_name;
-    gate::cost_t qc                 = 0;
-    gate::cost_t tc                 = 0;
-    unsigned     expected_num_gates = 0;
-    unsigned     expected_lines     = 0;
-    gate::cost_t expected_qc        = 0;
-    gate::cost_t expected_tc        = 0;
+    std::string  testConfigsDir  = "./configs/";
+    std::string  testCircuitsDir = "./circuits/";
+    std::string  fileName;
+    Gate::cost_t qc               = 0;
+    Gate::cost_t tc               = 0;
+    unsigned     expectedNumGates = 0;
+    unsigned     expectedLines    = 0;
+    Gate::cost_t expectedQc       = 0;
+    Gate::cost_t expectedTc       = 0;
 
     void SetUp() override {
-        std::string synthesis_param = GetParam();
-        file_name                   = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i(test_configs_dir + "circuits_synthesis.json");
-        json          j    = json::parse(i);
-        expected_num_gates = j[synthesis_param]["num_gates"];
-        expected_lines     = j[synthesis_param]["lines"];
-        expected_qc        = j[synthesis_param]["quantum_costs"];
-        expected_tc        = j[synthesis_param]["transistor_costs"];
+        std::string synthesisParam = GetParam();
+        fileName                   = testCircuitsDir + GetParam() + ".src";
+        std::ifstream i(testConfigsDir + "circuits_synthesis.json");
+        json          j  = json::parse(i);
+        expectedNumGates = j[synthesisParam]["num_gates"];
+        expectedLines    = j[synthesisParam]["lines"];
+        expectedQc       = j[synthesisParam]["quantum_costs"];
+        expectedTc       = j[synthesisParam]["transistor_costs"];
     }
 };
 
@@ -70,21 +70,21 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                              return s; });
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
-    circuit               circ;
-    program               prog;
-    read_program_settings settings;
-    std::string           error_string;
+    Circuit             circ;
+    program             prog;
+    ReadProgramSettings settings;
+    std::string         errorString;
 
-    error_string = prog.read(file_name, settings);
-    EXPECT_TRUE(error_string.empty());
+    errorString = prog.read(fileName, settings);
+    EXPECT_TRUE(errorString.empty());
 
     EXPECT_TRUE(SyrecSynthesisNoAdditionalLines::synthesize(circ, prog));
 
-    qc = circ.quantum_cost();
-    tc = circ.transistor_cost();
+    qc = circ.quantumCost();
+    tc = circ.transistorCost();
 
-    EXPECT_EQ(expected_num_gates, circ.num_gates());
-    EXPECT_EQ(expected_lines, circ.get_lines());
-    EXPECT_EQ(expected_qc, qc);
-    EXPECT_EQ(expected_tc, tc);
+    EXPECT_EQ(expectedNumGates, circ.numGates());
+    EXPECT_EQ(expectedLines, circ.getLines());
+    EXPECT_EQ(expectedQc, qc);
+    EXPECT_EQ(expectedTc, tc);
 }

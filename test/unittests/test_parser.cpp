@@ -6,11 +6,11 @@ using namespace syrec;
 
 class SyrecParserTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string test_circuits_dir = "./circuits/";
-    std::string file_name;
+    std::string testCircuitsDir = "./circuits/";
+    std::string fileName;
 
     void SetUp() override {
-        file_name = test_circuits_dir + GetParam() + ".src";
+        fileName = testCircuitsDir + GetParam() + ".src";
     }
 };
 
@@ -48,9 +48,9 @@ INSTANTIATE_TEST_SUITE_P(SyrecParserTest, SyrecParserTest,
                              return s; });
 
 TEST_P(SyrecParserTest, GenericParserTest) {
-    program               prog;
-    read_program_settings settings;
-    std::string           error_string;
-    error_string = prog.read(file_name, settings);
-    EXPECT_TRUE(error_string.empty());
+    program             prog;
+    ReadProgramSettings settings;
+    std::string         errorString;
+    errorString = prog.read(fileName, settings);
+    EXPECT_TRUE(errorString.empty());
 }
