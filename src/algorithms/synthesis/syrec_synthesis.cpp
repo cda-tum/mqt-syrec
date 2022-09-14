@@ -220,6 +220,7 @@ namespace syrec {
         unsigned helperLine = expressionResult.front();
 
         // activate this line
+        // NOLINTNEXTLINE warning stems from Boost itself
         addActiveControl(helperLine);
 
         for (const Statement::ptr& stat: statement.thenStatements) {
@@ -856,7 +857,6 @@ namespace syrec {
         cct_node leaf                                       = add_vertex(cctMan.tree);
         get(boost::vertex_name, cctMan.tree)[leaf].controls = get(boost::vertex_name, cctMan.tree)[cctMan.current].controls;
         get(boost::vertex_name, cctMan.tree)[leaf].circ     = std::make_shared<Circuit>();
-        // NOLINTNEXTLINE (clang-analyzer-cplusplus.NewDelete) warning stems from Boost itself
         get(boost::vertex_name, cctMan.tree)[leaf].circ->gateAdded.connect(Annotater(*get(boost::vertex_name, cctMan.tree)[leaf].circ, stmts));
         add_edge(cctMan.current, leaf, cctMan.tree);
         cctMan.current = leaf;
