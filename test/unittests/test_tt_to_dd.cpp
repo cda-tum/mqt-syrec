@@ -10,16 +10,16 @@ using namespace syrec;
 
 class TruthTableDD: public testing::Test {
 protected:
-    std::string                    test_circuits_dir = "./circuits/";
+    std::string                    testCircuitsDir = "./circuits/";
     TruthTable                     tt{};
     std::unique_ptr<dd::Package<>> dd = std::make_unique<dd::Package<>>(3U);
 };
 
 TEST_F(TruthTableDD, Ident2Bit) {
     // create identity truth table
-    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
+    EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
@@ -34,9 +34,9 @@ TEST_F(TruthTableDD, Ident2Bit) {
 
 TEST_F(TruthTableDD, CNOT) {
     // create identity truth table
-    std::string circCNOT = test_circuits_dir + "CNOT.pla";
+    std::string circCNOT = testCircuitsDir + "CNOT.pla";
 
-    EXPECT_TRUE(read_pla(tt, circCNOT));
+    EXPECT_TRUE(readPla(tt, circCNOT));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
@@ -54,9 +54,9 @@ TEST_F(TruthTableDD, CNOT) {
 TEST_F(TruthTableDD, SWAP) {
     // create identity truth table
 
-    std::string circSWAP = test_circuits_dir + "SWAP.pla";
+    std::string circSWAP = testCircuitsDir + "SWAP.pla";
 
-    EXPECT_TRUE(read_pla(tt, circSWAP));
+    EXPECT_TRUE(readPla(tt, circSWAP));
 
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
@@ -74,9 +74,9 @@ TEST_F(TruthTableDD, SWAP) {
 TEST_F(TruthTableDD, Toffoli) {
     // create identity truth table
 
-    std::string circToffoli = test_circuits_dir + "Toffoli.pla";
+    std::string circToffoli = testCircuitsDir + "Toffoli.pla";
 
-    EXPECT_TRUE(read_pla(tt, circToffoli));
+    EXPECT_TRUE(readPla(tt, circToffoli));
 
     EXPECT_EQ(tt.nInputs(), 3U);
     EXPECT_EQ(tt.nOutputs(), 3U);

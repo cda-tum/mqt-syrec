@@ -11,8 +11,8 @@ namespace syrec {
         str.erase(0, str.find_first_not_of(' ')); //prefixing spaces
     }
 
-    void parse_pla(TruthTable& tt, std::istream& in);
+    void parsePla(TruthTable& tt, std::istream& in);
 
-    bool read_pla(TruthTable& tt, const std::string& filename);
+    bool readPla(TruthTable& tt, const std::string& filename);
 
 } // namespace syrec

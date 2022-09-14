@@ -8,52 +8,52 @@
 #include <variant>
 
 template<class... Ts>
-struct overloaded: Ts... { using Ts::operator()...; };
+struct Overloaded: Ts... { using Ts::operator()...; };
 template<class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 namespace syrec {
 
-    class number {
+    class Number {
     public:
-        typedef std::shared_ptr<number> ptr;
+        using ptr = std::shared_ptr<Number>;
 
-        typedef std::map<std::string, unsigned> loop_variable_mapping;
+        using loop_variable_mapping = std::map<std::string, unsigned int>;
 
-        explicit number(std::variant<unsigned, std::string> number):
-            number_var(std::move(number)) {}
+        explicit Number(std::variant<unsigned, std::string> number):
+            numberVar(std::move(number)) {}
 
-        explicit number(unsigned value):
-            number_var(value) {
+        explicit Number(unsigned value):
+            numberVar(value) {
         }
 
-        explicit number(const std::string& value):
-            number_var(value) {
+        explicit Number(const std::string& value):
+            numberVar(value) {
         }
 
-        ~number() = default;
+        ~Number() = default;
 
-        [[nodiscard]] bool is_loop_variable() const {
-            return std::holds_alternative<std::string>(number_var);
+        [[nodiscard]] bool isLoopVariable() const {
+            return std::holds_alternative<std::string>(numberVar);
         }
 
-        [[nodiscard]] bool is_constant() const {
-            return std::holds_alternative<unsigned>(number_var);
+        [[nodiscard]] bool isConstant() const {
+            return std::holds_alternative<unsigned>(numberVar);
         }
 
-        [[nodiscard]] const std::string& variable_name() const {
-            return std::get<std::string>(number_var);
+        [[nodiscard]] const std::string& variableName() const {
+            return std::get<std::string>(numberVar);
         }
 
         [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const {
-            return std::visit(overloaded{
+            return std::visit(Overloaded{
                                       [](unsigned arg) { return arg; },
-                                      [&](const std::string& value) { return map.find(value)->second; }},
-                              number_var);
+                                      [&map](const std::string& value) { return map.find(value)->second; }},
+                              numberVar);
         }
 
     private:
-        std::variant<unsigned, std::string> number_var;
+        std::variant<unsigned, std::string> numberVar;
     };
 
 } // namespace syrec

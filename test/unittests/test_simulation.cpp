@@ -17,22 +17,22 @@ using namespace syrec;
 
 class SyrecSimulationTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string             test_configs_dir  = "./configs/";
-    std::string             test_circuits_dir = "./circuits/";
-    std::string             file_name;
+    std::string             testConfigsDir  = "./configs/";
+    std::string             testCircuitsDir = "./circuits/";
+    std::string             fileName;
     boost::dynamic_bitset<> input;
     boost::dynamic_bitset<> output;
-    std::vector<int>        set_lines;
-    std::string             expected_sim_out;
-    std::string             output_string;
+    std::vector<int>        setLines;
+    std::string             expectedSimOut;
+    std::string             outputString;
 
     void SetUp() override {
-        std::string synthesis_param = GetParam();
-        file_name                   = test_circuits_dir + GetParam() + ".src";
-        std::ifstream i(test_configs_dir + "circuits_simulation.json");
-        json          j  = json::parse(i);
-        expected_sim_out = j[synthesis_param]["sim_out"];
-        set_lines        = j[synthesis_param]["set_lines"].get<std::vector<int>>();
+        std::string synthesisParam = GetParam();
+        fileName                   = testCircuitsDir + GetParam() + ".src";
+        std::ifstream i(testConfigsDir + "circuits_simulation.json");
+        json          j = json::parse(i);
+        expectedSimOut  = j[synthesisParam]["sim_out"];
+        setLines        = j[synthesisParam]["set_lines"].get<std::vector<int>>();
     }
 };
 
@@ -50,28 +50,29 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                              return s; });
 
 TEST_P(SyrecSimulationTest, GenericSimulationTest) {
-    circuit               circ;
-    program               prog;
-    read_program_settings settings;
-    properties::ptr       statistics;
-    std::string           error_string;
+    Circuit             circ;
+    program             prog;
+    ReadProgramSettings settings;
+    Properties::ptr     statistics;
+    std::string         errorString;
 
-    error_string = prog.read(file_name, settings);
-    EXPECT_TRUE(error_string.empty());
+    errorString = prog.read(fileName, settings);
+    EXPECT_TRUE(errorString.empty());
 
     EXPECT_TRUE(SyrecSynthesisNoAdditionalLines::synthesize(circ, prog));
 
-    input.resize(circ.get_lines());
+    input.resize(circ.getLines());
 
-    for (int line: set_lines)
+    for (int line: setLines) {
         input.set(line);
+    }
 
-    output.resize(circ.get_lines());
+    output.resize(circ.getLines());
 
-    simple_simulation(output, circ, input, statistics);
+    simpleSimulation(output, circ, input, statistics);
 
-    boost::to_string(output, output_string);
-    std::reverse(output_string.begin(), output_string.end());
+    boost::to_string(output, outputString);
+    std::reverse(outputString.begin(), outputString.end());
 
-    EXPECT_EQ(expected_sim_out, output_string);
+    EXPECT_EQ(expectedSimOut, outputString);
 }

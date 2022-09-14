@@ -20,56 +20,56 @@ namespace syrec {
      * can either be a parameter passed to a module, or a
      * local variable.
      */
-    struct variable {
+    struct Variable {
         /**
        * @brief Type of variable
        */
-        enum types {
+        enum Types {
             /**
          * @brief Module Input Parameter (garbage output)
          */
-            in,
+            In,
 
             /**
          * @brief Module Output Parameter (constant inputs with value 0)
          */
-            out,
+            Out,
 
             /**
          * @brief Module Input/Output Parameter
          */
-            inout,
+            Inout,
 
             /**
          * @brief State Variable (local in top module)
          */
-            state,
+            State,
 
             /**
          * @brief Local variable (constant inputs with value 0 and garbage output)
          */
-            wire
+            Wire
         };
 
         /**
        * @brief Smart pointer
        */
-        typedef std::shared_ptr<variable> ptr;
+        using ptr = std::shared_ptr<Variable>;
 
         /**
        * @brief Vector of smart pointers
        */
-        typedef std::vector<ptr> vec;
+        using vec = std::vector<ptr>;
 
-        variable(unsigned type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth);
+        Variable(unsigned type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth);
 
-        void set_reference(variable::ptr reference);
+        void setReference(Variable::ptr reference);
 
         unsigned              type{};
         std::string           name{};
         std::vector<unsigned> dimensions{};
         unsigned              bitwidth{};
-        variable::ptr         reference = nullptr;
+        Variable::ptr         reference = nullptr;
     };
 
     /**
@@ -78,27 +78,27 @@ namespace syrec {
      * This class represents the access of a variable inside
      * a statement or an expression.
      */
-    struct variable_access {
+    struct VariableAccess {
         /**
        * @brief Smart pointer
        */
-        typedef std::shared_ptr<variable_access> ptr;
+        using ptr = std::shared_ptr<VariableAccess>;
 
-        variable_access() = default;
+        VariableAccess() = default;
 
         /**
        * @brief Sets the variable of this access
        *
        * @param var Variable
        */
-        void set_var(variable::ptr var);
+        void setVar(Variable::ptr var);
 
         /**
        * @brief Returns the variable of this access
        *
        * @return Variable
        */
-        [[nodiscard]] variable::ptr get_var() const;
+        [[nodiscard]] Variable::ptr getVar() const;
 
         /**
        * @brief Returns the bit-width of the variable access
@@ -112,8 +112,8 @@ namespace syrec {
        */
         [[nodiscard]] unsigned bitwidth() const;
 
-        variable::ptr                                      var{};
-        std::optional<std::pair<number::ptr, number::ptr>> range{};
+        Variable::ptr                                      var{};
+        std::optional<std::pair<Number::ptr, Number::ptr>> range{};
         std::vector<std::shared_ptr<expression>>           indexes{};
     };
 

@@ -9,13 +9,13 @@ using namespace syrec;
 class TestHuff: public testing::Test {
 protected:
     TruthTable  tt{};
-    std::string test_circuits_dir = "./circuits/";
+    std::string testCircuitsDir = "./circuits/";
 };
 
 TEST_F(TestHuff, Ident2Bit) {
-    std::string circIdent2Bit = test_circuits_dir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circIdent2Bit));
+    EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -37,9 +37,9 @@ TEST_F(TestHuff, Ident2Bit) {
 }
 
 TEST_F(TestHuff, HUFF1) {
-    std::string circHUFF1 = test_circuits_dir + "HUFF1.pla";
+    std::string circHUFF1 = testCircuitsDir + "HUFF1.pla";
 
-    EXPECT_TRUE(read_pla(tt, circHUFF1));
+    EXPECT_TRUE(readPla(tt, circHUFF1));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -81,9 +81,9 @@ TEST_F(TestHuff, HUFF1) {
 }
 
 TEST_F(TestHuff, HUFF2) {
-    std::string circHUFF2 = test_circuits_dir + "HUFF2.pla";
+    std::string circHUFF2 = testCircuitsDir + "HUFF2.pla";
 
-    EXPECT_TRUE(read_pla(tt, circHUFF2));
+    EXPECT_TRUE(readPla(tt, circHUFF2));
 
     EXPECT_EQ(tt.size(), 2U);
 

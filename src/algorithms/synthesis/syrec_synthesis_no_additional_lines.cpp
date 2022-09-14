@@ -2,10 +2,10 @@
 
 namespace syrec {
     /// checking the entire statement
-    bool SyrecSynthesisNoAdditionalLines::full_statement(const statement::ptr& statement) {
-        bool okay;
-        if (auto const* stat = dynamic_cast<assign_statement*>(statement.get())) {
-            okay = full_statement(*stat);
+    bool SyrecSynthesisNoAdditionalLines::fullStatement(const Statement::ptr& statement) {
+        bool okay = false;
+        if (auto const* stat = dynamic_cast<AssignStatement*>(statement.get())) {
+            okay = fullStatement(*stat);
         } else {
             return false;
         }
@@ -13,89 +13,89 @@ namespace syrec {
         return okay;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::full_statement(const assign_statement& statement) {
+    bool SyrecSynthesisNoAdditionalLines::fullStatement(const AssignStatement& statement) {
         std::vector<unsigned> d;
         std::vector<unsigned> dd;
-        std::vector<unsigned> stat_lhs;
+        std::vector<unsigned> statLhs;
         std::vector<unsigned> comp;
         std::vector<unsigned> ddd;
         std::vector<unsigned> lines;
-        get_variables(statement.lhs, stat_lhs);
+        getVariables(statement.lhs, statLhs);
 
-        op_rhs_lhs_expression(statement.rhs, d);
+        opRhsLhsExpression(statement.rhs, d);
 
-        if (op_vec.empty()) {
+        if (opVec.empty()) {
             return false;
         }
         flow(statement.rhs, ddd);
 
         /// Only when the rhs input signals are repeated (since the results are stored in the rhs)
 
-        if (check_repeats()) {
+        if (checkRepeats()) {
             flow(statement.rhs, dd);
 
-            if (exp_op_vector.size() == 1) {
-                if (exp_op_vector.at(0) == 1 || exp_op_vector.at(0) == 2) {
+            if (expOpVector.size() == 1) {
+                if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
                     /// cancel out the signals
 
-                    exp_op_vector.clear();
-                    assign_op_vector.clear();
-                    exp_lhs_vector.clear();
-                    exp_rhs_vector.clear();
-                    op_vec.clear();
+                    expOpVector.clear();
+                    assignOpVector.clear();
+                    expLhsVector.clear();
+                    expRhsVector.clear();
+                    opVec.clear();
                 } else {
                     if (statement.op == 1) {
-                        expression_single_op(1, exp_lhs_vector.at(0), stat_lhs);
-                        expression_single_op(1, exp_rhs_vector.at(0), stat_lhs);
-                        exp_op_vector.clear();
-                        assign_op_vector.clear();
-                        exp_lhs_vector.clear();
-                        exp_rhs_vector.clear();
-                        op_vec.clear();
+                        expressionSingleOp(1, expLhsVector.at(0), statLhs);
+                        expressionSingleOp(1, expRhsVector.at(0), statLhs);
+                        expOpVector.clear();
+                        assignOpVector.clear();
+                        expLhsVector.clear();
+                        expRhsVector.clear();
+                        opVec.clear();
                     } else {
-                        expression_single_op(statement.op, exp_lhs_vector.at(0), stat_lhs);
-                        expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
-                        exp_op_vector.clear();
-                        assign_op_vector.clear();
-                        exp_lhs_vector.clear();
-                        exp_rhs_vector.clear();
-                        op_vec.clear();
+                        expressionSingleOp(statement.op, expLhsVector.at(0), statLhs);
+                        expressionSingleOp(expOpVector.at(0), expRhsVector.at(0), statLhs);
+                        expOpVector.clear();
+                        assignOpVector.clear();
+                        expLhsVector.clear();
+                        expRhsVector.clear();
+                        opVec.clear();
                     }
                 }
 
             } else {
-                if (exp_lhs_vector.at(0) == exp_rhs_vector.at(0)) {
-                    if (exp_op_vector.at(0) == 1 || exp_op_vector.at(0) == 2) {
+                if (expLhsVector.at(0) == expRhsVector.at(0)) {
+                    if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
                         /// cancel out the signals
-                    } else if (exp_op_vector.at(0) != 1 || exp_op_vector.at(0) != 2) {
-                        expression_single_op(statement.op, exp_lhs_vector.at(0), stat_lhs);
-                        expression_single_op(exp_op_vector.at(0), exp_rhs_vector.at(0), stat_lhs);
+                    } else if (expOpVector.at(0) != 1 || expOpVector.at(0) != 2) {
+                        expressionSingleOp(statement.op, expLhsVector.at(0), statLhs);
+                        expressionSingleOp(expOpVector.at(0), expRhsVector.at(0), statLhs);
                     }
                 } else {
-                    solver(stat_lhs, statement.op, exp_lhs_vector.at(0), exp_op_vector.at(0), exp_rhs_vector.at(0));
+                    solver(statLhs, statement.op, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
                 }
 
                 unsigned              j = 0;
-                unsigned              z;
-                std::vector<unsigned> stat_assign_op;
-                if ((exp_op_vector.size() % 2) == 0) {
-                    z = (static_cast<int>(exp_op_vector.size()) / 2);
+                unsigned              z = 0;
+                std::vector<unsigned> statAssignOp;
+                if ((expOpVector.size() % 2) == 0) {
+                    z = (static_cast<int>(expOpVector.size()) / 2);
                 } else {
-                    z = (static_cast<int>((exp_op_vector.size()) - 1) / 2);
+                    z = (static_cast<int>((expOpVector.size()) - 1) / 2);
                 }
 
                 for (unsigned k = 0; k <= z - 1; k++) {
-                    stat_assign_op.push_back(assign_op_vector.at(k));
+                    statAssignOp.push_back(assignOpVector.at(k));
                 }
 
                 /// Assignment operations
 
-                std::reverse(stat_assign_op.begin(), stat_assign_op.end());
+                std::reverse(statAssignOp.begin(), statAssignOp.end());
 
                 /// If reversible assignment is "-", the assignment operations must negated appropriately
 
                 if (statement.op == 1) {
-                    for (unsigned int& i: stat_assign_op) {
+                    for (unsigned int& i: statAssignOp) {
                         if (i == 0) {
                             i = 1;
                         } else if (i == 1) {
@@ -106,212 +106,212 @@ namespace syrec {
                     }
                 }
 
-                for (unsigned i = 1; i <= exp_op_vector.size() - 1; i++) {
+                for (unsigned i = 1; i <= expOpVector.size() - 1; i++) {
                     /// when both rhs and lhs exist
-                    if ((exp_lhs_vector.at(i) != comp) && (exp_rhs_vector.at(i) != comp)) {
-                        if (exp_lhs_vector.at(i) == exp_rhs_vector.at(i)) {
-                            if (exp_op_vector.at(i) == 1 || exp_op_vector.at(i) == 2) {
+                    if ((expLhsVector.at(i) != comp) && (expRhsVector.at(i) != comp)) {
+                        if (expLhsVector.at(i) == expRhsVector.at(i)) {
+                            if (expOpVector.at(i) == 1 || expOpVector.at(i) == 2) {
                                 /// cancel out the signals
                                 j = j + 1;
-                            } else if (exp_op_vector.at(i) != 1 || exp_op_vector.at(i) != 2) {
-                                if (stat_assign_op.at(j) == 1) {
-                                    expression_single_op(1, exp_lhs_vector.at(i), stat_lhs);
-                                    expression_single_op(1, exp_rhs_vector.at(i), stat_lhs);
+                            } else if (expOpVector.at(i) != 1 || expOpVector.at(i) != 2) {
+                                if (statAssignOp.at(j) == 1) {
+                                    expressionSingleOp(1, expLhsVector.at(i), statLhs);
+                                    expressionSingleOp(1, expRhsVector.at(i), statLhs);
                                     j = j + 1;
                                 } else {
-                                    expression_single_op(stat_assign_op.at(j), exp_lhs_vector.at(i), stat_lhs);
-                                    expression_single_op(exp_op_vector.at(i), exp_rhs_vector.at(i), stat_lhs);
+                                    expressionSingleOp(statAssignOp.at(j), expLhsVector.at(i), statLhs);
+                                    expressionSingleOp(expOpVector.at(i), expRhsVector.at(i), statLhs);
                                     j = j + 1;
                                 }
                             }
                         } else {
-                            solver(stat_lhs, stat_assign_op.at(j), exp_lhs_vector.at(i), exp_op_vector.at(i), exp_rhs_vector.at(i));
+                            solver(statLhs, statAssignOp.at(j), expLhsVector.at(i), expOpVector.at(i), expRhsVector.at(i));
                             j = j + 1;
                         }
                     }
 
                     /// when only lhs exists o rhs exists
-                    else if (((exp_lhs_vector.at(i) == comp) && (exp_rhs_vector.at(i) != comp)) || ((exp_lhs_vector.at(i) != comp) && (exp_rhs_vector.at(i) == comp))) {
-                        exp_evaluate(lines, stat_assign_op.at(j), exp_rhs_vector.at(i), stat_lhs);
+                    else if (((expLhsVector.at(i) == comp) && (expRhsVector.at(i) != comp)) || ((expLhsVector.at(i) != comp) && (expRhsVector.at(i) == comp))) {
+                        expEvaluate(lines, statAssignOp.at(j), expRhsVector.at(i), statLhs);
 
                         j = j + 1;
                     }
                 }
-                exp_op_vector.clear();
-                assign_op_vector.clear();
-                exp_lhs_vector.clear();
-                exp_rhs_vector.clear();
-                op_vec.clear();
+                expOpVector.clear();
+                assignOpVector.clear();
+                expLhsVector.clear();
+                expRhsVector.clear();
+                opVec.clear();
             }
         } else {
-            exp_op_vector.clear();
-            assign_op_vector.clear();
-            exp_lhs_vector.clear();
-            exp_rhs_vector.clear();
-            op_vec.clear();
+            expOpVector.clear();
+            assignOpVector.clear();
+            expLhsVector.clear();
+            expRhsVector.clear();
+            opVec.clear();
             return false;
         }
 
-        exp_op_vector.clear();
-        assign_op_vector.clear();
-        exp_lhs_vector.clear();
-        exp_rhs_vector.clear();
-        op_vec.clear();
+        expOpVector.clear();
+        assignOpVector.clear();
+        expLhsVector.clear();
+        expRhsVector.clear();
+        opVec.clear();
         return true;
     }
 
     bool SyrecSynthesisNoAdditionalLines::flow(const expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return flow(*binary, v);
-        } else if (auto const* var = dynamic_cast<variable_expression*>(expression.get())) {
-            return flow(*var, v);
-        } else {
-            return false;
         }
+        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get())) {
+            return flow(*var, v);
+        }
+        return false;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::flow(const variable_expression& expression, std::vector<unsigned>& v) {
-        get_variables(expression.var, v);
+    bool SyrecSynthesisNoAdditionalLines::flow(const VariableExpression& expression, std::vector<unsigned>& v) {
+        getVariables(expression.var, v);
         return true;
     }
 
     /// generating LHS and RHS (can be whole expressions as well)
-    bool SyrecSynthesisNoAdditionalLines::flow(const binary_expression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
+    bool SyrecSynthesisNoAdditionalLines::flow(const BinaryExpression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
         std::vector<unsigned> comp;
-        assign_op_vector.push_back(expression.op);
+        assignOpVector.push_back(expression.op);
 
         if (!flow(expression.lhs, lhs) || !flow(expression.rhs, rhs)) {
             return false;
         }
 
-        exp_lhs_vector.push_back(lhs);
-        exp_rhs_vector.push_back(rhs);
-        exp_op_vector.push_back(expression.op);
+        expLhsVector.push_back(lhs);
+        expRhsVector.push_back(rhs);
+        expOpVector.push_back(expression.op);
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs) {
+    bool SyrecSynthesisNoAdditionalLines::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
         std::vector<unsigned> lines;
-        if (stat_op == exp_op) {
-            if (exp_op == 1) {
-                expression_single_op(1, exp_lhs, stat_lhs);
-                expression_single_op(0, exp_rhs, stat_lhs);
+        if (statOp == expOp) {
+            if (expOp == 1) {
+                expressionSingleOp(1, expLhs, expRhs);
+                expressionSingleOp(0, statLhs, expRhs);
             } else {
-                expression_single_op(stat_op, exp_lhs, stat_lhs);
-                expression_single_op(stat_op, exp_rhs, stat_lhs);
+                expressionSingleOp(statOp, expLhs, expRhs);
+                expressionSingleOp(statOp, statLhs, expRhs);
             }
         } else {
-            sub_flag = true;
-            exp_evaluate(lines, exp_op, exp_lhs, exp_rhs);
-            sub_flag = false;
-            exp_evaluate(lines, stat_op, lines, stat_lhs);
-            sub_flag = true;
-            if (exp_op < 3) {
-                expression_op_inverse(exp_op, exp_lhs, exp_rhs);
+            subFlag = true;
+            expEvaluate(lines, expOp, expLhs, statLhs);
+            subFlag = false;
+            expEvaluate(lines, statOp, lines, expRhs);
+            subFlag = true;
+            if (expOp < 3) {
+                expressionOpInverse(expOp, expLhs, statLhs);
             }
         }
-        sub_flag = false;
+        subFlag = false;
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<binary_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*binary, v);
-        } else if (auto const* var = dynamic_cast<variable_expression*>(expression.get())) {
-            return op_rhs_lhs_expression(*var, v);
-        } else {
-            return false;
+    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) {
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
+            return opRhsLhsExpression(*binary, v);
         }
+        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get())) {
+            return opRhsLhsExpression(*var, v);
+        }
+        return false;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v) {
-        get_variables(expression.var, v);
+    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const VariableExpression& expression, std::vector<unsigned>& v) {
+        getVariables(expression.var, v);
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v) {
+    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const BinaryExpression& expression, std::vector<unsigned>& v) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
-        if (!op_rhs_lhs_expression(expression.lhs, lhs) || !op_rhs_lhs_expression(expression.rhs, rhs)) {
+        if (!opRhsLhsExpression(expression.lhs, lhs) || !opRhsLhsExpression(expression.rhs, rhs)) {
             return false;
         }
 
         v = rhs;
-        op_vec.push_back(expression.op);
+        opVec.push_back(expression.op);
         return true;
     }
 
-    void SyrecSynthesisNoAdditionalLines::pop_exp() {
-        SyrecSynthesis::exp_opp.pop();
-        SyrecSynthesis::exp_lhss.pop();
-        SyrecSynthesis::exp_rhss.pop();
+    void SyrecSynthesisNoAdditionalLines::popExp() {
+        SyrecSynthesis::expOpp.pop();
+        SyrecSynthesis::expLhss.pop();
+        SyrecSynthesis::expRhss.pop();
     }
 
     void SyrecSynthesisNoAdditionalLines::inverse() {
-        expression_op_inverse(SyrecSynthesis::exp_opp.top(), SyrecSynthesis::exp_lhss.top(), SyrecSynthesis::exp_rhss.top());
-        SyrecSynthesis::sub_flag = false;
-        pop_exp();
+        expressionOpInverse(SyrecSynthesis::expOpp.top(), SyrecSynthesis::expLhss.top(), SyrecSynthesis::expRhss.top());
+        SyrecSynthesis::subFlag = false;
+        popExp();
     }
 
-    void SyrecSynthesisNoAdditionalLines::assign_add(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
-        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
-            SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
-            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_rhss.top());
-            pop_exp();
+    void SyrecSynthesisNoAdditionalLines::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
+        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+            SyrecSynthesis::increase(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
+            status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
+            popExp();
         } else {
-            status = SyrecSynthesis::increase(lhs, rhs);
+            status = SyrecSynthesis::increase(rhs, lhs);
         }
-        while (!SyrecSynthesis::exp_opp.empty()) {
+        while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
     }
 
-    void SyrecSynthesisNoAdditionalLines::assign_subtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
-        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
-            SyrecSynthesis::decrease(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
-            status = SyrecSynthesis::increase(lhs, SyrecSynthesis::exp_rhss.top());
-            pop_exp();
+    void SyrecSynthesisNoAdditionalLines::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
+        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+            SyrecSynthesis::decrease(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
+            status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
+            popExp();
         } else {
-            status = SyrecSynthesis::decrease(lhs, rhs);
+            status = SyrecSynthesis::decrease(rhs, lhs);
         }
-        while (!SyrecSynthesis::exp_opp.empty()) {
+        while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
     }
 
-    void SyrecSynthesisNoAdditionalLines::assign_exor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
-        if (!SyrecSynthesis::exp_opp.empty() && SyrecSynthesis::exp_opp.top() == op) {
-            SyrecSynthesis::bitwise_cnot(lhs, SyrecSynthesis::exp_lhss.top()); //status = bitwise_cnot(lhs, exp_lhss.top())
-            status = SyrecSynthesis::bitwise_cnot(lhs, SyrecSynthesis::exp_rhss.top());
-            pop_exp();
+    void SyrecSynthesisNoAdditionalLines::assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+            SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
+            status = SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expRhss.top());
+            popExp();
         } else {
-            status = SyrecSynthesis::bitwise_cnot(lhs, rhs);
+            status = SyrecSynthesis::bitwiseCnot(lhs, rhs);
         }
-        while (!SyrecSynthesis::exp_opp.empty()) {
+        while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
     }
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
-    bool SyrecSynthesisNoAdditionalLines::exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
+    bool SyrecSynthesisNoAdditionalLines::expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
         switch (op) {
-            case binary_expression::add: // +
+            case BinaryExpression::Add: // +
                 increase(rhs, lhs);
                 lines = rhs;
                 break;
-            case binary_expression::subtract: // -
-                if (sub_flag) {
-                    decrease_new_assign(rhs, lhs);
+            case BinaryExpression::Subtract: // -
+                if (subFlag) {
+                    decreaseNewAssign(rhs, lhs);
                     lines = rhs;
                 } else {
                     decrease(rhs, lhs);
                     lines = rhs;
                 }
                 break;
-            case binary_expression::exor: // ^
-                bitwise_cnot(rhs, lhs);   // duplicate lhs
+            case BinaryExpression::Exor: // ^
+                bitwiseCnot(rhs, lhs);   // duplicate lhs
                 lines = rhs;
                 break;
             default:
@@ -321,37 +321,37 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
+    bool SyrecSynthesisNoAdditionalLines::decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
         for (unsigned int lh: lhs) {
-            (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(lh);
+            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(lh);
         }
 
         increase(rhs, lhs);
 
         for (unsigned int lh: lhs) {
-            (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(lh);
+            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(lh);
         }
 
-        for (unsigned i = 0u; i < lhs.size(); ++i) {
-            (*(get(boost::vertex_name, cct_man.tree)[cct_man.current].circ)).append_not(rhs.at(i));
+        for (unsigned i = 0U; i < lhs.size(); ++i) {
+            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(rhs.at(i));
         }
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
+    bool SyrecSynthesisNoAdditionalLines::expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
-            case binary_expression::add: // +
-                increase(exp_rhs, exp_lhs);
+            case BinaryExpression::Add: // +
+                increase(expRhs, expLhs);
                 break;
-            case binary_expression::subtract: // -
-                if (sub_flag) {
-                    decrease_new_assign(exp_rhs, exp_lhs);
+            case BinaryExpression::Subtract: // -
+                if (subFlag) {
+                    decreaseNewAssign(expRhs, expLhs);
                 } else {
-                    decrease(exp_rhs, exp_lhs);
+                    decrease(expRhs, expLhs);
                 }
                 break;
-            case binary_expression::exor: // ^
-                bitwise_cnot(exp_rhs, exp_lhs);
+            case BinaryExpression::Exor: // ^
+                bitwiseCnot(expRhs, expLhs);
                 break;
             default:
                 return false;
@@ -359,16 +359,16 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) {
+    bool SyrecSynthesisNoAdditionalLines::expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
-            case binary_expression::add: // +
-                decrease(exp_rhs, exp_lhs);
+            case BinaryExpression::Add: // +
+                decrease(expRhs, expLhs);
                 break;
-            case binary_expression::subtract: // -
-                decrease_new_assign(exp_rhs, exp_lhs);
+            case BinaryExpression::Subtract: // -
+                decreaseNewAssign(expRhs, expLhs);
                 break;
-            case binary_expression::exor: // ^
-                bitwise_cnot(exp_rhs, exp_lhs);
+            case BinaryExpression::Exor: // ^
+                bitwiseCnot(expRhs, expLhs);
                 break;
             default:
                 return false;
@@ -376,7 +376,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::synthesize(circuit& circ, const program& program, const properties::ptr& settings, const properties::ptr& statistics) {
+    bool SyrecSynthesisNoAdditionalLines::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         SyrecSynthesisNoAdditionalLines synthesizer(circ);
         return SyrecSynthesis::synthesize(&synthesizer, circ, program, settings, statistics);
     }

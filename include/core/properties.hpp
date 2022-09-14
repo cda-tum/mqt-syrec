@@ -16,23 +16,23 @@ namespace syrec {
    * can be of any type. To be type-safe, the getter corresponding get
    * functions have to be provided with a type.
    */
-    struct properties {
+    struct Properties {
         /**
      * @brief Internal storage type used with the internal property map
      */
-        typedef std::map<std::string, std::any> storage_type;
+        using storage_type = std::map<std::string, std::any>;
 
         /**
      * @brief Value type of the property map, i.e. \p std::string
      */
-        typedef storage_type::mapped_type value_type;
+        using value_type = storage_type::mapped_type;
 
         /**
      *
      * There are pre-defined getter methods, which can be called with a
      * type identifier for explicit casting.
      */
-        typedef storage_type::key_type key_type;
+        using key_type = storage_type::key_type;
 
         /**
      * @brief Smart Pointer version of this class
@@ -45,14 +45,14 @@ namespace syrec {
      * @sa get
      * @sa set_error_message
      */
-        typedef std::shared_ptr<properties> ptr;
+        using ptr = std::shared_ptr<Properties>;
 
         /**
      * @brief Standard constructor
      *
      * Creates the property map on base of the storage map
      */
-        properties() = default;
+        Properties() = default;
 
         /**
      * @brief Casted access to an existing element
@@ -83,12 +83,11 @@ namespace syrec {
      *         \p default_value is returned.
      */
         template<typename T>
-        T get(const key_type& k, const T& default_value) const {
+        T get(const key_type& k, const T& defaultValue) const {
             if (map.find(k) == map.end()) {
-                return default_value;
-            } else {
-                return std::any_cast<T>(map.find(k)->second);
+                return defaultValue;
             }
+            return std::any_cast<T>(map.find(k)->second);
         }
 
         /**
@@ -136,8 +135,8 @@ namespace syrec {
    * @return The value addressed by \p k or the \p default_value.
    */
     template<typename T>
-    T get(const properties::ptr& settings, const properties::key_type& k, const T& default_value) {
-        return settings ? settings->get<T>(k, default_value) : default_value;
+    T get(const Properties::ptr& settings, const Properties::key_type& k, const T& defaultValue) {
+        return settings ? settings->get<T>(k, defaultValue) : defaultValue;
     }
 
 } // namespace syrec

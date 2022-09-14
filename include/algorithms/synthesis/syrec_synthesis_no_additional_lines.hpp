@@ -7,59 +7,59 @@ namespace syrec {
     public:
         using SyrecSynthesis::SyrecSynthesis;
 
-        static bool synthesize(circuit& circ, const program& program, const properties::ptr& settings = std::make_shared<properties>(), const properties::ptr& statistics = std::make_shared<properties>());
+        static bool synthesize(Circuit& circ, const program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
 
     protected:
-        bool process_statement(const statement::ptr& statement) override {
-            return !full_statement(statement) && !SyrecSynthesis::on_statement(statement);
+        bool processStatement(const Statement::ptr& statement) override {
+            return !fullStatement(statement) && !SyrecSynthesis::onStatement(statement);
         }
 
-        bool full_statement(const statement::ptr& statement);
-        bool full_statement(const assign_statement& statement);
+        bool fullStatement(const Statement::ptr& statement);
+        bool fullStatement(const AssignStatement& statement);
 
-        bool op_rhs_lhs_expression(const expression::ptr& expression, std::vector<unsigned>& v) override;
+        bool opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) override;
 
-        bool op_rhs_lhs_expression(const variable_expression& expression, std::vector<unsigned>& v) override;
+        bool opRhsLhsExpression(const VariableExpression& expression, std::vector<unsigned>& v) override;
 
-        bool op_rhs_lhs_expression(const binary_expression& expression, std::vector<unsigned>& v) override;
+        bool opRhsLhsExpression(const BinaryExpression& expression, std::vector<unsigned>& v) override;
 
-        void pop_exp();
+        void popExp();
 
         void inverse();
 
-        void assign_add(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
 
-        void assign_subtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
 
-        void assign_exor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
 
-        bool solver(const std::vector<unsigned>& stat_lhs, unsigned stat_op, const std::vector<unsigned>& exp_lhs, unsigned exp_op, const std::vector<unsigned>& exp_rhs);
+        bool solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs);
 
         bool flow(const expression::ptr& expression, std::vector<unsigned>& v);
-        bool flow(const variable_expression& expression, std::vector<unsigned>& v);
-        bool flow(const binary_expression& expression, const std::vector<unsigned>& v);
+        bool flow(const VariableExpression& expression, std::vector<unsigned>& v);
+        bool flow(const BinaryExpression& expression, const std::vector<unsigned>& v);
 
-        void exp_add([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
+        void expAdd([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
             SyrecSynthesis::increase(rhs, lhs);
             lines = rhs;
         }
 
-        void exp_subtract([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
-            decrease_new_assign(rhs, lhs);
+        void expSubtract([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
+            decreaseNewAssign(rhs, lhs);
             lines = rhs;
         }
 
-        void exp_exor([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
-            bitwise_cnot(rhs, lhs); // duplicate lhs
+        void expExor([[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
+            bitwiseCnot(rhs, lhs); // duplicate lhs
             lines = rhs;
         }
 
-        bool exp_evaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
+        bool expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
 
-        bool expression_single_op(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs);
+        bool expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs);
 
-        bool decrease_new_assign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
+        bool decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
 
-        bool expression_op_inverse(unsigned op, const std::vector<unsigned>& exp_lhs, const std::vector<unsigned>& exp_rhs) override;
+        bool expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) override;
     };
 } // namespace syrec
