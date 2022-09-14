@@ -608,7 +608,7 @@ namespace syrec {
         if (auto stat = boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat))) {
             context.currentLineNumber = static_cast<unsigned>(std::count(context.begin, boost::fusion::at_c<0>(astStat), '\n')) + 1U;
             stat->lineNumber          = context.currentLineNumber;
-            return Statement::ptr(stat);
+            return {stat};
         }
         return {};
     }
