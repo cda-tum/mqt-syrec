@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/gate.hpp"
+#include "gate.hpp"
 
 #include <boost/signals2.hpp>
 #include <map>
@@ -13,54 +13,6 @@
 namespace syrec {
     /**
    * @brief Type for determine whether line is constant or not
-   *
-   * The following table summarizes the use of constant values
-   * in circuit representations.
-   *
-   * <table border="0">
-   *   <tr>
-   *     <td class="indexkey">Description</td>
-   *     <td class="indexkey">Char representation</td>
-   *     <td class="indexkey">Typed value</td>
-   *   </tr>
-   *   <tr>
-   *     <td class="indexvalue">No constant input line</td>
-   *     <td align="center" class="indexvalue">'-'</td>
-   *     <td class="indexvalue">@code constant() @endcode</td>
-   *   </tr>
-   *   <tr>
-   *     <td class="indexvalue">Constant input line with value 0</td>
-   *     <td align="center" class="indexvalue">'0'</td>
-   *     <td class="indexvalue">@code constant( 0 ) @endcode</td>
-   *   </tr>
-   *   <tr>
-   *     <td class="indexvalue">Constant input line with value 1</td>
-   *     <td align="center" class="indexvalue">'1'</td>
-   *     <td class="indexvalue">@code constant( 1 ) @endcode</td>
-   *   </tr>
-   * </table>
-   *
-   * @section Example
-   * This example demonstrates how to access the constant values.
-   * @code
-   * constant c = // some constant
-   *
-   * if ( c ) // checks whether c is set or not
-   * {
-   *   if ( *c ) // c is checked, checks the value of c
-   *   {
-   *     std::cout << "constant value 1" << std::endl;
-   *   }
-   *   else
-   *   {
-   *     std::cout << "constant value 0" << std::endl;
-   *   }
-   * }
-   * else
-   * {
-   *   std::cout << "no constant value" << std::endl;
-   * }
-   * @endcode
    */
     using constant = std::optional<bool>;
 
@@ -85,7 +37,7 @@ namespace syrec {
          *
          * @return Number of gates
          */
-        [[nodiscard]] unsigned numGates() const {
+        [[nodiscard]] auto numGates() const {
             return gates.size();
         }
 
@@ -304,19 +256,17 @@ namespace syrec {
      * This method returns all annotations for a given gate. For the
      * purpose of efficiency, this method returns an optional data type
      * containing the property map. So, first check whether there are
-     * items by assierting the optional, and then go through the map
+     * items by asserting the optional, and then go through the map
      * by dereferencing the optional:
      * @code
      *
      * if ( annotations )
      * {
-     *   // annotations exists
      *   typedef std::pair<std::string, std::string> pair_t;
      *   foreach_ ( const pair_t& p, *annotations )
      *   {
      *     const std::string& key = p.first;
      *     const std::string& value = p.second;
-     *     // do something with key and value
      *   }
      * }
      * @endcode
@@ -326,8 +276,7 @@ namespace syrec {
      * @return Map of annotations encapsulated in an optional
      */
         [[nodiscard]] std::optional<const std::map<std::string, std::string>> getAnnotations(const Gate& g) const {
-            auto it = annotations.find(&g);
-            if (it != annotations.end()) {
+            if (auto it = annotations.find(&g); it != annotations.end()) {
                 return {it->second};
             }
             return {};
@@ -374,15 +323,14 @@ namespace syrec {
         ///add circuit
 
         void insertCircuit(unsigned pos, const Circuit& src, const Gate::line_container& controls) {
-            using pair_t = std::pair<std::string, std::string>;
             if (controls.empty()) {
                 for (const auto& g: src) {
                     Gate& newGate = insertGate(pos++);
                     newGate       = *g;
                     auto anno     = src.getAnnotations(*g);
                     if (anno) {
-                        for (const pair_t p: *anno) {
-                            annotate(newGate, p.first, p.second);
+                        for (const auto& [first, second]: *anno) {
+                            annotate(newGate, first, second);
                         }
                     }
                 }
@@ -401,8 +349,8 @@ namespace syrec {
                     newGate.type = g->type;
                     auto anno    = src.getAnnotations(*g);
                     if (anno) {
-                        for (const pair_t p: *anno) {
-                            annotate(newGate, p.first, p.second);
+                        for (const auto& [first, second]: *anno) {
+                            annotate(newGate, first, second);
                         }
                     }
                 }

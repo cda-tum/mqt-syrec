@@ -25,6 +25,7 @@ namespace boost::spirit {
 namespace syrec::parser {
     struct IterPosParser: boost::spirit::qi::primitive_parser<IterPosParser> {
         template<typename Context, typename Iterator>
+        // NOLINTNEXTLINE (readability-identifier-naming) this is required by boost
         struct attribute {
             using type = Iterator;
         };

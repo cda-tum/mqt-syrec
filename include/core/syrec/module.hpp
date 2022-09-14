@@ -11,8 +11,6 @@
 
 namespace syrec {
 
-    struct Statement;
-
     /**
      * @brief SyReC module data type
      *

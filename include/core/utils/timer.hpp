@@ -2,6 +2,7 @@
 
 #include "core/properties.hpp"
 
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <utility>

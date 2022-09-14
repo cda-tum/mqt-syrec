@@ -68,10 +68,10 @@ namespace syrec {
         virtual bool              onStatement(const IfStatement& statement);
         virtual bool              onStatement(const ForStatement& statement);
         virtual bool              onStatement(const CallStatement& statement);
-        virtual bool              onStatement(const uncall_statement& statement);
+        virtual bool              onStatement(const UncallStatement& statement);
         bool                      onStatement(const SwapStatement& statement);
         bool                      onStatement(const UnaryStatement& statement);
-        [[nodiscard]] static bool onStatement(const skip_statement& statement);
+        [[nodiscard]] static bool onStatement(const SkipStatement& statement);
 
         virtual void assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
 

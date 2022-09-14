@@ -49,7 +49,7 @@ namespace syrec {
             return std::make_shared<Statement>(*this);
         };
     };
-    using skip_statement = Statement;
+    using SkipStatement = Statement;
 
     /**
      * @brief SWAP Statement
@@ -301,8 +301,6 @@ namespace syrec {
         Statement::vec                      statements{};
     };
 
-    struct uncall_statement;
-
     /**
      * @brief CALL Statement
      *
@@ -329,14 +327,14 @@ namespace syrec {
      *
      * This class represents the SyReC \b uncall statement to uncall a module.
      */
-    struct uncall_statement: public Statement {
+    struct UncallStatement: public Statement {
         /**
        * @brief Constructor with module and parameters
        *
        * @param target Module to uncall
        * @param parameters Parameters to assign
        */
-        uncall_statement(std::shared_ptr<Module> target, std::vector<std::string> parameters):
+        UncallStatement(std::shared_ptr<Module> target, std::vector<std::string> parameters):
             target(std::move(target)), parameters(std::move(parameters)) {}
 
         Statement::ptr reverse() override {
@@ -348,7 +346,7 @@ namespace syrec {
     };
 
     inline Statement::ptr CallStatement::reverse() {
-        return std::make_shared<uncall_statement>(target, parameters);
+        return std::make_shared<UncallStatement>(target, parameters);
     }
 
 } // namespace syrec

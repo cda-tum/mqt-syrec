@@ -396,7 +396,7 @@ namespace syrec {
             proc(proc),
             context(context) {}
 
-        Statement* operator()(const ast_swap_statement& astSwapStat) const {
+        Statement::ptr operator()(const ast_swap_statement& astSwapStat) const {
             const ast_variable& astVar1 = boost::fusion::at_c<0>(astSwapStat);
             const ast_variable& astVar2 = boost::fusion::at_c<1>(astSwapStat);
 
@@ -415,10 +415,10 @@ namespace syrec {
                 return nullptr;
             }
 
-            return reinterpret_cast<Statement*>(new SwapStatement(va1, va2));
+            return std::make_shared<SwapStatement>(va1, va2);
         }
 
-        Statement* operator()(const ast_unary_statement& astUnaryStat) const {
+        Statement::ptr operator()(const ast_unary_statement& astUnaryStat) const {
             const std::string&  astOp  = boost::fusion::at_c<0>(astUnaryStat);
             const ast_variable& astVar = boost::fusion::at_c<1>(astUnaryStat);
 
@@ -437,10 +437,10 @@ namespace syrec {
                 op = UnaryStatement::Decrement;
             }
 
-            return reinterpret_cast<Statement*>(new UnaryStatement(op, var));
+            return std::make_shared<UnaryStatement>(op, var);
         }
 
-        Statement* operator()(const ast_assign_statement& astAssignStat) const {
+        Statement::ptr operator()(const ast_assign_statement& astAssignStat) const {
             const ast_variable&   astVar = boost::fusion::at_c<0>(astAssignStat);
             char                  astOp  = boost::fusion::at_c<1>(astAssignStat);
             const ast_expression& astExp = boost::fusion::at_c<2>(astAssignStat);
@@ -463,11 +463,11 @@ namespace syrec {
                 return nullptr;
             }
 
-            return reinterpret_cast<Statement*>(new AssignStatement(lhs, op, rhs));
+            return std::make_shared<AssignStatement>(lhs, op, rhs);
         }
 
-        Statement* operator()(const ast_if_statement& astIfStat) const {
-            auto* ifStat = new IfStatement();
+        Statement::ptr operator()(const ast_if_statement& astIfStat) const {
+            auto ifStat = std::make_shared<IfStatement>();
 
             expression::ptr condition = parseExpression(astIfStat.condition, proc, 1U, context);
             if (!condition) {
@@ -497,11 +497,11 @@ namespace syrec {
                 ifStat->addElseStatement(stat);
             }
 
-            return reinterpret_cast<Statement*>(ifStat);
+            return ifStat;
         }
 
-        Statement* operator()(const ast_for_statement& astForStat) const {
-            auto* forStat = new ForStatement();
+        Statement::ptr operator()(const ast_for_statement& astForStat) const {
+            auto forStat = std::make_shared<ForStatement>();
 
             Number::ptr from;
             Number::ptr to = parseNumber(astForStat.to, proc, context);
@@ -548,10 +548,10 @@ namespace syrec {
                 context.loopVariables.erase(std::remove_if(context.loopVariables.begin(), context.loopVariables.end(), [&loopVariable](const auto& s) { return s == loopVariable; }), context.loopVariables.end());
             }
 
-            return reinterpret_cast<Statement*>(forStat);
+            return forStat;
         }
 
-        Statement* operator()(const ast_call_statement& astCallStat) const {
+        Statement::ptr operator()(const ast_call_statement& astCallStat) const {
             std::string procName  = boost::fusion::at_c<1>(astCallStat);
             Module::ptr otherProc = prog.findModule(procName);
 
@@ -589,13 +589,13 @@ namespace syrec {
             }
 
             if (boost::fusion::at_c<0>(astCallStat) == "call") {
-                return reinterpret_cast<Statement*>(new CallStatement(otherProc, parameters));
+                return std::make_shared<CallStatement>(otherProc, parameters);
             }
-            return reinterpret_cast<Statement*>(new uncall_statement(otherProc, parameters));
+            return std::make_shared<UncallStatement>(otherProc, parameters);
         }
 
-        Statement* operator()(const std::string& astSkipStat [[maybe_unused]]) const {
-            return reinterpret_cast<Statement*>(new skip_statement());
+        Statement::ptr operator()(const std::string& astSkipStat [[maybe_unused]]) const {
+            return std::make_shared<SkipStatement>();
         }
 
     private:
@@ -605,7 +605,7 @@ namespace syrec {
     };
 
     Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const Module& proc, ParserContext& context) {
-        if (auto* stat = reinterpret_cast<Statement*>(boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat)))) {
+        if (auto stat = boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat))) {
             context.currentLineNumber = static_cast<unsigned>(std::count(context.begin, boost::fusion::at_c<0>(astStat), '\n')) + 1U;
             stat->lineNumber          = context.currentLineNumber;
             return Statement::ptr(stat);
@@ -677,7 +677,7 @@ namespace syrec {
 
         // Modules
         for (const ast_module& astProc: astProg) {
-            Module::ptr proc(new Module(boost::fusion::at_c<0>(astProc)));
+            Module::ptr proc(std::make_shared<Module>(boost::fusion::at_c<0>(astProc)));
             if (!parseModule(*proc, astProc, *this, context)) {
                 if (error != nullptr) {
                     *error = "In line " + std::to_string(context.currentLineNumber) + ": " + context.errorMessage;

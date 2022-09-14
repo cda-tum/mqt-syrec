@@ -130,7 +130,7 @@ namespace syrec {
             okay = onStatement(*forStat);
         } else if (auto const* callStat = dynamic_cast<CallStatement*>(statement.get())) {
             okay = onStatement(*callStat);
-        } else if (auto const* uncallStat = dynamic_cast<uncall_statement*>(statement.get())) {
+        } else if (auto const* uncallStat = dynamic_cast<UncallStatement*>(statement.get())) {
             okay = onStatement(*uncallStat);
         } else if (auto const* skipStat = statement.get()) {
             okay = onStatement(*skipStat);
@@ -316,7 +316,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::onStatement(const uncall_statement& statement) {
+    bool SyrecSynthesis::onStatement(const UncallStatement& statement) {
         // 1. Adjust the references module's parameters to the call arguments
         for (unsigned i = 0U; i < statement.parameters.size(); ++i) {
             const std::string& parameter       = statement.parameters.at(i);
@@ -343,7 +343,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::onStatement(const skip_statement& statement [[maybe_unused]]) {
+    bool SyrecSynthesis::onStatement(const SkipStatement& statement [[maybe_unused]]) {
         return true;
     }
 
