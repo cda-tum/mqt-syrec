@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/syrec/expression.hpp"
-#include "core/syrec/module.hpp"
 #include "core/syrec/variable.hpp"
 
 #include <iostream>
