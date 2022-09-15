@@ -18,7 +18,7 @@ protected:
 TEST_F(TestDDSynth, CUSTOMTT1) {
     std::string circCUSTOMTT1 = test_circuits_dir + "CUSTOMTT1.pla";
 
-    EXPECT_TRUE(read_pla(tt, circCUSTOMTT1));
+    EXPECT_TRUE(readPla(tt, circCUSTOMTT1));
 
     EXPECT_EQ(tt.size(), 7U);
 
@@ -48,7 +48,7 @@ TEST_F(TestDDSynth, CUSTOMTT1) {
 TEST_F(TestDDSynth, CUSTOMTT2) {
     std::string circCUSTOMTT2 = test_circuits_dir + "CUSTOMTT2.pla";
 
-    EXPECT_TRUE(read_pla(tt, circCUSTOMTT2));
+    EXPECT_TRUE(readPla(tt, circCUSTOMTT2));
 
     EXPECT_EQ(tt.size(), 7U);
 
@@ -77,7 +77,7 @@ TEST_F(TestDDSynth, CUSTOMTT2) {
 TEST_F(TestDDSynth, CNOT) {
     std::string circCNOT = test_circuits_dir + "CNOT.pla";
 
-    EXPECT_TRUE(read_pla(tt, circCNOT));
+    EXPECT_TRUE(readPla(tt, circCNOT));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -107,7 +107,7 @@ TEST_F(TestDDSynth, CNOT) {
 TEST_F(TestDDSynth, SWAP) {
     std::string circSWAP = test_circuits_dir + "SWAP.pla";
 
-    EXPECT_TRUE(read_pla(tt, circSWAP));
+    EXPECT_TRUE(readPla(tt, circSWAP));
 
     EXPECT_EQ(tt.size(), 3U);
 
@@ -135,7 +135,7 @@ TEST_F(TestDDSynth, SWAP) {
 TEST_F(TestDDSynth, Toffoli) {
     std::string circToffoli = test_circuits_dir + "Toffoli.pla";
 
-    EXPECT_TRUE(read_pla(tt, circToffoli));
+    EXPECT_TRUE(readPla(tt, circToffoli));
 
     EXPECT_EQ(tt.size(), 7U);
 
@@ -164,7 +164,7 @@ TEST_F(TestDDSynth, Toffoli) {
 TEST_F(TestDDSynth, BitwiseXor2Bit) {
     std::string circBitwiseXor2Bit = test_circuits_dir + "BitwiseXor2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circBitwiseXor2Bit));
+    EXPECT_TRUE(readPla(tt, circBitwiseXor2Bit));
 
     EXPECT_EQ(tt.size(), 15U);
 
@@ -193,7 +193,7 @@ TEST_F(TestDDSynth, BitwiseXor2Bit) {
 TEST_F(TestDDSynth, Adder2Bit) {
     std::string circAdder2Bit = test_circuits_dir + "Adder2Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circAdder2Bit));
+    EXPECT_TRUE(readPla(tt, circAdder2Bit));
 
     EXPECT_EQ(tt.size(), 15U);
 
@@ -222,7 +222,7 @@ TEST_F(TestDDSynth, Adder2Bit) {
 TEST_F(TestDDSynth, Adder3Bit) {
     std::string circAdder3Bit = test_circuits_dir + "Adder3Bit.pla";
 
-    EXPECT_TRUE(read_pla(tt, circAdder3Bit));
+    EXPECT_TRUE(readPla(tt, circAdder3Bit));
 
     EXPECT_EQ(tt.size(), 64U);
 
