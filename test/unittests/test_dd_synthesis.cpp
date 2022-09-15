@@ -11,12 +11,12 @@ using namespace syrec;
 class TestDDSynth: public testing::Test {
 protected:
     TruthTable                     tt{};
-    std::string                    test_circuits_dir = "./circuits/";
-    std::unique_ptr<dd::Package<>> ddSynth           = std::make_unique<dd::Package<>>(6U);
+    std::string                    testCircuitsDir = "./circuits/";
+    std::unique_ptr<dd::Package<>> ddSynth         = std::make_unique<dd::Package<>>(6U);
 };
 
 TEST_F(TestDDSynth, CUSTOMTT1) {
-    std::string circCUSTOMTT1 = test_circuits_dir + "CUSTOMTT1.pla";
+    std::string circCUSTOMTT1 = testCircuitsDir + "CUSTOMTT1.pla";
 
     EXPECT_TRUE(readPla(tt, circCUSTOMTT1));
 
@@ -46,7 +46,7 @@ TEST_F(TestDDSynth, CUSTOMTT1) {
 }
 
 TEST_F(TestDDSynth, CUSTOMTT2) {
-    std::string circCUSTOMTT2 = test_circuits_dir + "CUSTOMTT2.pla";
+    std::string circCUSTOMTT2 = testCircuitsDir + "CUSTOMTT2.pla";
 
     EXPECT_TRUE(readPla(tt, circCUSTOMTT2));
 
@@ -75,7 +75,7 @@ TEST_F(TestDDSynth, CUSTOMTT2) {
 }
 
 TEST_F(TestDDSynth, CNOT) {
-    std::string circCNOT = test_circuits_dir + "CNOT.pla";
+    std::string circCNOT = testCircuitsDir + "CNOT.pla";
 
     EXPECT_TRUE(readPla(tt, circCNOT));
 
@@ -105,7 +105,7 @@ TEST_F(TestDDSynth, CNOT) {
 }
 
 TEST_F(TestDDSynth, SWAP) {
-    std::string circSWAP = test_circuits_dir + "SWAP.pla";
+    std::string circSWAP = testCircuitsDir + "SWAP.pla";
 
     EXPECT_TRUE(readPla(tt, circSWAP));
 
@@ -133,7 +133,7 @@ TEST_F(TestDDSynth, SWAP) {
 }
 
 TEST_F(TestDDSynth, Toffoli) {
-    std::string circToffoli = test_circuits_dir + "Toffoli.pla";
+    std::string circToffoli = testCircuitsDir + "Toffoli.pla";
 
     EXPECT_TRUE(readPla(tt, circToffoli));
 
@@ -162,7 +162,7 @@ TEST_F(TestDDSynth, Toffoli) {
 }
 
 TEST_F(TestDDSynth, BitwiseXor2Bit) {
-    std::string circBitwiseXor2Bit = test_circuits_dir + "BitwiseXor2Bit.pla";
+    std::string circBitwiseXor2Bit = testCircuitsDir + "BitwiseXor2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circBitwiseXor2Bit));
 
@@ -191,7 +191,7 @@ TEST_F(TestDDSynth, BitwiseXor2Bit) {
 }
 
 TEST_F(TestDDSynth, Adder2Bit) {
-    std::string circAdder2Bit = test_circuits_dir + "Adder2Bit.pla";
+    std::string circAdder2Bit = testCircuitsDir + "Adder2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circAdder2Bit));
 
@@ -220,7 +220,7 @@ TEST_F(TestDDSynth, Adder2Bit) {
 }
 
 TEST_F(TestDDSynth, Adder3Bit) {
-    std::string circAdder3Bit = test_circuits_dir + "Adder3Bit.pla";
+    std::string circAdder3Bit = testCircuitsDir + "Adder3Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circAdder3Bit));
 

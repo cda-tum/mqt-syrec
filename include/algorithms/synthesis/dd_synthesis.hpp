@@ -16,7 +16,7 @@ namespace syrec {
 
         auto pathSignature(dd::mNode* src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) -> void;
 
-        auto terminate(dd::mNode* current) const -> bool;
+        static auto terminate(dd::mNode* current) -> bool;
 
         auto unifyPath(dd::mEdge& src, dd::mNode* current, syrec::TruthTable::Cube::Vector& p1SigVec, syrec::TruthTable::Cube::Vector& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> void;
 

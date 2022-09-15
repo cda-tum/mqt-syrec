@@ -881,7 +881,7 @@ namespace syrec {
     bool SyrecSynthesis::assembleCircuit(const cct_node& current) {
         // leaf
         if (out_edges(current, cctMan.tree).first == out_edges(current, cctMan.tree).second /*get( boost::vertex_name, cctMan.tree )[current].circ.get()->num_gates() > 0u*/) {
-            circ.insertCircuit(circ.numGates(), *(get(boost::vertex_name, cctMan.tree)[current].circ), get(boost::vertex_name, cctMan.tree)[current].controls);
+            circ.insertCircuit(static_cast<unsigned>(circ.numGates()), *(get(boost::vertex_name, cctMan.tree)[current].circ), get(boost::vertex_name, cctMan.tree)[current].controls);
             return true;
         }
         // assemble optimized circuits of successors
