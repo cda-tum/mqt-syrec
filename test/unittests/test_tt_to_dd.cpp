@@ -17,7 +17,7 @@ protected:
 
 TEST_F(TruthTableDD, Ident2Bit) {
     // create identity truth table
-    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
@@ -34,7 +34,7 @@ TEST_F(TruthTableDD, Ident2Bit) {
 
 TEST_F(TruthTableDD, CNOT) {
     // create identity truth table
-    std::string circCNOT = testCircuitsDir + "CNOT.pla";
+    std::string circCNOT = testCircuitsDir + "cnot.pla";
 
     EXPECT_TRUE(readPla(tt, circCNOT));
 
@@ -54,7 +54,7 @@ TEST_F(TruthTableDD, CNOT) {
 TEST_F(TruthTableDD, SWAP) {
     // create identity truth table
 
-    std::string circSWAP = testCircuitsDir + "SWAP.pla";
+    std::string circSWAP = testCircuitsDir + "swap.pla";
 
     EXPECT_TRUE(readPla(tt, circSWAP));
 
@@ -74,7 +74,7 @@ TEST_F(TruthTableDD, SWAP) {
 TEST_F(TruthTableDD, Toffoli) {
     // create identity truth table
 
-    std::string circToffoli = testCircuitsDir + "Toffoli.pla";
+    std::string circToffoli = testCircuitsDir + "toffoli.pla";
 
     EXPECT_TRUE(readPla(tt, circToffoli));
 

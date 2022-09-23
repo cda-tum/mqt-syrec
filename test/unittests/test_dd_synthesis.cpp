@@ -1,248 +1,73 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
-#include "dd/FunctionalityConstruction.hpp"
 
 #include "gtest/gtest.h"
 
 using namespace dd::literals;
 using namespace syrec;
+using std::system;
 
-class TestDDSynth: public testing::Test {
+class TestDDSynth: public testing::TestWithParam<std::string> {
 protected:
     TruthTable                     tt{};
     std::string                    testCircuitsDir = "./circuits/";
-    std::unique_ptr<dd::Package<>> ddSynth         = std::make_unique<dd::Package<>>(6U);
+    std::unique_ptr<dd::Package<>> ddSynth         = std::make_unique<dd::Package<>>(9U);
+    std::string                    fileName;
+
+    void SetUp() override {
+        fileName = testCircuitsDir + GetParam() + ".pla";
+    }
 };
 
-TEST_F(TestDDSynth, CUSTOMTT1) {
-    std::string circCUSTOMTT1 = testCircuitsDir + "CUSTOMTT1.pla";
+INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
+                         testing::Values(
+                                 "cnot",
+                                 "swap",
+                                 "toffoli",
+                                 "x2Bit",
+                                 "test_dd_synthesis_1",
+                                 "test_dd_synthesis_2",
+                                 "3_17_6",
+                                 "bitwiseXor2Bit",
+                                 "adder2Bit",
+                                 "adder3Bit",
+                                 "4_49_7",
+                                 "hwb4_12",
+                                 "hwb5_13",
+                                 "hwb6_14",
+                                 "hwb7_15",
+                                 "hwb8_64",
+                                 "hwb9_65"),
+                         [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
+                             auto s = info.param;
+                             std::replace( s.begin(), s.end(), '-', '_');
+                             return s; });
 
-    EXPECT_TRUE(readPla(tt, circCUSTOMTT1));
-
-    EXPECT_EQ(tt.size(), 7U);
+TEST_P(TestDDSynth, GenericDDSynthesisTest) {
+    EXPECT_TRUE(readPla(tt, fileName));
 
     extend(tt);
-
-    EXPECT_EQ(tt.size(), 8U);
-
-    EXPECT_EQ(tt.nInputs(), 3U);
-    EXPECT_EQ(tt.nOutputs(), 3U);
 
     auto ttDD = buildDD(tt, ddSynth);
 
     EXPECT_TRUE(ttDD.p != nullptr);
 
-    EXPECT_NE(ttDD, ddSynth->makeIdent(3U));
+    EXPECT_NE(ttDD, ddSynth->makeIdent(tt.nInputs()));
 
-    DDSynthesis quantumCircuit(3U);
+    DDSynthesizer synthesizer(tt.nInputs());
 
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
+    const auto srcCpy = ttDD;
 
-    EXPECT_EQ(trueMatrix, synthMatrix);
+    ddSynth->incRef(srcCpy);
 
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(3U));
-}
+    synthesizer.synthesize(ttDD, ddSynth);
 
-TEST_F(TestDDSynth, CUSTOMTT2) {
-    std::string circCUSTOMTT2 = testCircuitsDir + "CUSTOMTT2.pla";
+    EXPECT_EQ(srcCpy, synthesizer.buildFunctionality(ddSynth));
 
-    EXPECT_TRUE(readPla(tt, circCUSTOMTT2));
+    std::cout << synthesizer.numGate() << std::endl;
 
-    EXPECT_EQ(tt.size(), 7U);
+    std::cout << synthesizer.getExecutionTime() << std::endl;
 
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 8U);
-
-    EXPECT_EQ(tt.nInputs(), 3U);
-    EXPECT_EQ(tt.nOutputs(), 3U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(3U));
-
-    DDSynthesis quantumCircuit(3U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(3U));
-}
-
-TEST_F(TestDDSynth, CNOT) {
-    std::string circCNOT = testCircuitsDir + "CNOT.pla";
-
-    EXPECT_TRUE(readPla(tt, circCNOT));
-
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 4U);
-
-    EXPECT_EQ(tt.nInputs(), 2U);
-    EXPECT_EQ(tt.nOutputs(), 2U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(2U));
-
-    DDSynthesis quantumCircuit(2U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(2U));
-}
-
-TEST_F(TestDDSynth, SWAP) {
-    std::string circSWAP = testCircuitsDir + "SWAP.pla";
-
-    EXPECT_TRUE(readPla(tt, circSWAP));
-
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 4U);
-
-    EXPECT_EQ(tt.nInputs(), 2U);
-    EXPECT_EQ(tt.nOutputs(), 2U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(2U));
-
-    DDSynthesis quantumCircuit(2U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(2U));
-}
-
-TEST_F(TestDDSynth, Toffoli) {
-    std::string circToffoli = testCircuitsDir + "Toffoli.pla";
-
-    EXPECT_TRUE(readPla(tt, circToffoli));
-
-    EXPECT_EQ(tt.size(), 7U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 8U);
-
-    EXPECT_EQ(tt.nInputs(), 3U);
-    EXPECT_EQ(tt.nOutputs(), 3U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(3U));
-
-    DDSynthesis quantumCircuit(3U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(3U));
-}
-
-TEST_F(TestDDSynth, BitwiseXor2Bit) {
-    std::string circBitwiseXor2Bit = testCircuitsDir + "BitwiseXor2Bit.pla";
-
-    EXPECT_TRUE(readPla(tt, circBitwiseXor2Bit));
-
-    EXPECT_EQ(tt.size(), 15U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 16U);
-
-    EXPECT_EQ(tt.nInputs(), 4U);
-    EXPECT_EQ(tt.nOutputs(), 4U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(4U));
-
-    DDSynthesis quantumCircuit(4U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(4U));
-}
-
-TEST_F(TestDDSynth, Adder2Bit) {
-    std::string circAdder2Bit = testCircuitsDir + "Adder2Bit.pla";
-
-    EXPECT_TRUE(readPla(tt, circAdder2Bit));
-
-    EXPECT_EQ(tt.size(), 15U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 16U);
-
-    EXPECT_EQ(tt.nInputs(), 4U);
-    EXPECT_EQ(tt.nOutputs(), 4U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(4U));
-
-    DDSynthesis quantumCircuit(4U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(4U));
-}
-
-TEST_F(TestDDSynth, Adder3Bit) {
-    std::string circAdder3Bit = testCircuitsDir + "Adder3Bit.pla";
-
-    EXPECT_TRUE(readPla(tt, circAdder3Bit));
-
-    EXPECT_EQ(tt.size(), 64U);
-
-    extend(tt);
-
-    EXPECT_EQ(tt.size(), 64U);
-
-    EXPECT_EQ(tt.nInputs(), 6U);
-    EXPECT_EQ(tt.nOutputs(), 6U);
-
-    auto ttDD = buildDD(tt, ddSynth);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_NE(ttDD, ddSynth->makeIdent(6U));
-
-    DDSynthesis quantumCircuit(6U);
-
-    auto trueMatrix  = ddSynth->getMatrix(ttDD);
-    auto synthMatrix = ddSynth->getMatrix(dd::buildFunctionality(&quantumCircuit.synthesize(ttDD, ddSynth), ddSynth));
-
-    EXPECT_EQ(trueMatrix, synthMatrix);
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(6U));
+    EXPECT_EQ(ttDD, ddSynth->makeIdent(tt.nInputs()));
 }

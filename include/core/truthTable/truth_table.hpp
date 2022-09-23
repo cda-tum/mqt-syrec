@@ -1,6 +1,5 @@
 #pragma once
 
-#include "QuantumComputation.hpp"
 #include "dd/Package.hpp"
 
 #include <algorithm>
@@ -54,6 +53,35 @@ namespace syrec {
                     default:
                         throw std::invalid_argument("Unknown Character");
                 }
+            }
+
+            static auto findMissingCube(TruthTable::Cube::Vector const& p1SigVec) -> Cube {
+                std::vector<uint64_t> p1IntSigVec;
+
+                for (const auto& i: p1SigVec) {
+                    p1IntSigVec.emplace_back(i.toInteger());
+                }
+
+                auto n = static_cast<uint64_t>(std::pow(2, p1SigVec[0].size()));
+
+                std::vector<uint64_t> temp;
+                temp.reserve(n);
+
+                for (std::size_t i = 0; i < n; i++) {
+                    temp[i] = 0U;
+                }
+
+                for (std::size_t i = 0; i < p1SigVec.size(); i++) {
+                    temp[p1IntSigVec[i]] = 1;
+                }
+
+                TruthTable::Cube::Vector missCube;
+                for (std::size_t i = 0; i <= p1SigVec.size(); i++) {
+                    if (temp[i] == 0) {
+                        missCube.emplace_back(TruthTable::Cube::fromInteger(i, p1SigVec[0].size()));
+                    }
+                }
+                return missCube.back();
             }
 
             // construct a cube from a (64bit) number with a given bitwidth

@@ -1,7 +1,5 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 
-#include "dd/FunctionalityConstruction.hpp"
-
 using namespace dd::literals;
 
 namespace syrec {
@@ -55,50 +53,35 @@ namespace syrec {
         return dd->makeDDNode(label, edges);
     }
 
-    auto DDSynthesis::pathFromRoot(dd::mNode* src, dd::mNode* dst, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) -> void {
-        if (bool bitMatch = (src->v > dst->v); !bitMatch) {
+    auto DDSynthesizer::pathFromSrcDst(dd::mNode* src, dd::mNode const* dst, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) const -> void {
+        if (src->v <= dst->v) {
             if (src == dst) {
-                sigVec.push_back(tempVec);
-                return;
+                sigVec.emplace_back(tempVec);
             }
             return;
         }
 
-        auto* n = src->e[0].p;
         tempVec.emplace_back(false);
-        pathFromRoot(n, dst, sigVec, tempVec);
+        pathFromSrcDst(src->e[0].p, dst, sigVec, tempVec);
         tempVec.pop_back();
 
-        auto* p = src->e[3].p;
         tempVec.emplace_back(true);
-        pathFromRoot(p, dst, sigVec, tempVec);
+        pathFromSrcDst(src->e[3].p, dst, sigVec, tempVec);
         tempVec.pop_back();
-        //return
     }
 
-    auto DDSynthesis::pathSignature(dd::mNode* src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) -> void {
+    auto DDSynthesizer::pathSignature(dd::mNode* src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) -> void {
         if (src->v == 0) {
-            if (src->e[0] == dd::mEdge::one) {
+            if (src->e[0] == dd::mEdge::one || src->e[2] == dd::mEdge::one) {
                 tempVec.emplace_back(false);
-                sigVec.push_back(tempVec);
+                sigVec.emplace_back(tempVec);
                 tempVec.pop_back();
             }
-            if (src->e[1] == dd::mEdge::one) {
+            if (src->e[1] == dd::mEdge::one || src->e[3] == dd::mEdge::one) {
                 tempVec.emplace_back(true);
-                sigVec.push_back(tempVec);
+                sigVec.emplace_back(tempVec);
                 tempVec.pop_back();
             }
-            if (src->e[2] == dd::mEdge::one) {
-                tempVec.emplace_back(false);
-                sigVec.push_back(tempVec);
-                tempVec.pop_back();
-            }
-            if (src->e[3] == dd::mEdge::one) {
-                tempVec.emplace_back(true);
-                sigVec.push_back(tempVec);
-                tempVec.pop_back();
-            }
-
             return;
         }
 
@@ -106,298 +89,254 @@ namespace syrec {
             return;
         }
 
-        auto* p1 = src->e[0].p;
-        tempVec.emplace_back(false);
-        pathSignature(p1, sigVec, tempVec);
-        tempVec.pop_back();
-
-        auto* p2 = src->e[1].p;
-        tempVec.emplace_back(true);
-        pathSignature(p2, sigVec, tempVec);
-        tempVec.pop_back();
-
-        auto* p3 = src->e[2].p;
-        tempVec.emplace_back(false);
-        pathSignature(p3, sigVec, tempVec);
-        tempVec.pop_back();
-
-        auto* p4 = src->e[3].p;
-        tempVec.emplace_back(true);
-        pathSignature(p4, sigVec, tempVec);
-        tempVec.pop_back();
-        //return
+        for (auto i = 0; i < static_cast<int>(src->e.size()); i++) {
+            if (i == 0 || i == 2) {
+                tempVec.emplace_back(false);
+            } else {
+                tempVec.emplace_back(true);
+            }
+            pathSignature(src->e.at(i).p, sigVec, tempVec);
+            tempVec.pop_back();
+        }
     }
 
-    auto DDSynthesis::unifyPath(dd::mEdge& src, dd::mNode* current, syrec::TruthTable::Cube::Vector& p1SigVec, syrec::TruthTable::Cube::Vector& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> void {
-        syrec::TruthTable::Cube::Vector p2SigVecCpy = p2SigVec;
+    auto DDSynthesizer::unifyPath(dd::mEdge& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> bool {
+        auto p2SigVecCpy = p2SigVec;
 
-        syrec::TruthTable::Cube::Vector rootSigVec;
-        syrec::TruthTable::Cube         rootTempVec;
+        TruthTable::Cube::Vector rootSigVec;
+        TruthTable::Cube         rootTempVec;
 
-        pathFromRoot(src.p, current, rootSigVec, rootTempVec);
+        pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
 
-        dd::Controls ctrlroot;
+        dd::Control currentNode;
+        currentNode.qubit = current.p->v;
+        currentNode.type  = dd::Control::Type::pos;
 
-        for (auto const& i: rootSigVec) {
-            for (std::size_t j = 0; j < i.size(); j++) {
-                if (i[j].has_value()) {
-                    if (*(i[j])) {
-                        dd::Control obj;
-                        obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                        obj.type  = dd::Control::Type::pos;
-                        ctrlroot.insert(obj);
-                    } else {
-                        dd::Control obj;
-                        obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                        obj.type  = dd::Control::Type::neg;
-                        ctrlroot.insert(obj);
-                    }
+        TruthTable::Cube missCube{TruthTable::Cube::findMissingCube(p1SigVec)};
+        TruthTable::Cube ctrl;
+        dd::Controls     ctrlFirst;
+        ctrl.resize(p2SigVecCpy[indices[0]].size());
+        TruthTable::Cube target;
+        target.resize(p2SigVecCpy[indices[0]].size());
+
+        for (std::size_t p2Obj = 0; p2Obj < p2SigVecCpy[indices[0]].size(); p2Obj++) {
+            if (p2SigVecCpy[indices[0]][p2Obj] == missCube[p2Obj]) {
+                ctrl[p2Obj] = missCube[p2Obj];
+            } else {
+                target[p2Obj] = true;
+            }
+        }
+
+        for (std::size_t p2ObjCpy = 0; p2ObjCpy < ctrl.size(); p2ObjCpy++) {
+            if (ctrl[p2ObjCpy].has_value()) {
+                if (*(ctrl[p2ObjCpy])) {
+                    ctrlFirst.emplace(dd::Control{static_cast<dd::Qubit>(current.p->v - (p2ObjCpy + 1)), dd::Control::Type::pos});
+                } else {
+                    ctrlFirst.emplace(dd::Control{static_cast<dd::Qubit>(current.p->v - (p2ObjCpy + 1)), dd::Control::Type::neg});
                 }
             }
         }
 
-        dd::Control currentNode;
-        currentNode.qubit = current->v;
-        currentNode.type  = dd::Control::Type::pos;
-
-        for (auto ind: indices) {
-            for (std::size_t p2Obj = 0; p2Obj < p2SigVecCpy[ind].size(); p2Obj++) {
-                dd::Controls ctrl;
-                if (*(p2SigVecCpy[ind][p2Obj])) {
-                    p2SigVecCpy[ind][p2Obj] = false;
-                } else {
-                    p2SigVecCpy[ind][p2Obj] = true;
-                }
-
-                auto it1 = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVecCpy[ind]);
-                auto it2 = std::find(p2SigVec.begin(), p2SigVec.end(), p2SigVecCpy[ind]);
-
-                if (it1 != p1SigVec.end() && it2 != p2SigVec.end()) {
-                    p2SigVecCpy = p2SigVec;
-                    continue;
-                }
-                for (std::size_t p2ObjCpy = 0; p2ObjCpy < p2SigVec[ind].size(); p2ObjCpy++) {
-                    if (p2ObjCpy != p2Obj) {
-                        if (*(p2SigVec[ind][p2ObjCpy])) {
-                            dd::Control objP;
-                            objP.qubit = static_cast<dd::Qubit>(current->v - (p2ObjCpy + 1));
-                            objP.type  = dd::Control::Type::pos;
-                            ctrl.insert(objP);
+        if (!rootSigVec.empty()) {
+            for (auto const& i: rootSigVec) {
+                dd::Controls ctrlFinal;
+                for (std::size_t j = 0; j < i.size(); j++) {
+                    if (i[j].has_value()) {
+                        if (*(i[j])) {
+                            ctrlFinal.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::pos});
                         } else {
-                            dd::Control objN;
-                            objN.qubit = static_cast<dd::Qubit>(current->v - (p2ObjCpy + 1));
-                            objN.type  = dd::Control::Type::neg;
-                            ctrl.insert(objN);
+                            ctrlFinal.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::neg});
                         }
                     }
                 }
 
-                if (!ctrlroot.empty()) {
-                    for (auto i: ctrlroot) {
-                        dd::Controls ctrlFinal;
-                        ctrlFinal.insert(i);
-                        ctrlFinal.insert(currentNode);
-                        ctrlFinal.insert(ctrl.begin(), ctrl.end());
+                ctrlFinal.emplace(currentNode);
+                ctrlFinal.insert(ctrlFirst.begin(), ctrlFirst.end());
 
-                        auto q = qc::QuantumComputation((src.p->v) + 1U);
-                        q.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current->v) - (p2Obj + 1U)), ctrlFinal);
-                        qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current->v) - (p2Obj + 1U)), ctrlFinal);
-                        ctrlFinal.clear();
-                        auto ddTest = dd::buildFunctionality(&q, dd);
-                        src         = dd->multiply(src, ddTest);
+                for (std::size_t p2Obj = 0; p2Obj < target.size(); p2Obj++) {
+                    if (target[p2Obj].has_value() && *(target[p2Obj])) {
+                        auto op = qc::StandardOperation((src.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
+                        qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), ctrlFinal);
+
+                        auto srcSaved = src;
+                        src           = dd->multiply(src, dd::getDD(&op, dd));
+                        dd->incRef(src);
+                        dd->decRef(srcSaved);
+                        dd->garbageCollect();
                     }
-                } else {
-                    dd::Controls ctrlFinal;
-                    ctrlFinal.insert(currentNode);
-                    ctrlFinal.insert(ctrl.begin(), ctrl.end());
-
-                    auto q = qc::QuantumComputation((src.p->v) + 1U);
-                    q.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current->v) - (p2Obj + 1U)), ctrlFinal);
-                    qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current->v) - (p2Obj + 1U)), ctrlFinal);
-                    ctrlFinal.clear();
-                    auto ddTest = dd::buildFunctionality(&q, dd);
-                    src         = dd->multiply(src, ddTest);
                 }
+            }
 
-                break;
+        } else {
+            dd::Controls ctrlFinal;
+            ctrlFinal.emplace(currentNode);
+            ctrlFinal.insert(ctrlFirst.begin(), ctrlFirst.end());
+
+            for (std::size_t p2Obj = 0; p2Obj < target.size(); p2Obj++) {
+                if (target[p2Obj].has_value() && *(target[p2Obj])) {
+                    auto op = qc::StandardOperation((src.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
+                    qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), ctrlFinal);
+
+                    auto srcSaved = src;
+                    src           = dd->multiply(src, dd::getDD(&op, dd));
+                    dd->incRef(src);
+                    dd->decRef(srcSaved);
+                    dd->garbageCollect();
+                }
             }
         }
         synthesize(src, dd);
+        return true;
     }
 
-    auto DDSynthesis::terminate(dd::mNode* current) -> bool {
-        if (!(dd::mNode::isTerminal(current))) {
-            return !(current->e[0].isZeroTerminal()) && current->e[1].isZeroTerminal();
+    auto DDSynthesizer::terminate(dd::mEdge const& current) -> bool {
+        if (!(dd::mNode::isTerminal(current.p))) {
+            return current.p->e[1].isZeroTerminal();
         }
-
         return false;
     }
 
-    auto DDSynthesis::swapPaths(dd::mEdge& src, dd::mNode* current, std::unique_ptr<dd::Package<>>& dd) -> void {
-        if (!(dd::mNode::isTerminal(current))) {
-            syrec::TruthTable::Cube::Vector p1SigVec;
-            syrec::TruthTable::Cube         p1TempVec;
+    auto DDSynthesizer::swapPaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
+        if (dd::mNode::isTerminal(current.p)) {
+            return false;
+        }
+        TruthTable::Cube::Vector p1SigVec;
+        TruthTable::Cube         p1TempVec;
 
-            syrec::TruthTable::Cube::Vector p2SigVec;
-            syrec::TruthTable::Cube         p2TempVec;
+        TruthTable::Cube::Vector p2SigVec;
+        TruthTable::Cube         p2TempVec;
 
-            pathSignature(current->e[0].p, p1SigVec, p1TempVec);
-            pathSignature(current->e[1].p, p2SigVec, p2TempVec);
+        pathSignature(current.p->e[0].p, p1SigVec, p1TempVec);
+        pathSignature(current.p->e[1].p, p2SigVec, p2TempVec);
 
-            if ((current->e[0].isZeroTerminal() && !current->e[1].isZeroTerminal()) || (p2SigVec.size() > p1SigVec.size())) {
-                syrec::TruthTable::Cube::Vector rootSigVec;
-                syrec::TruthTable::Cube         rootTempVec;
+        if ((current.p->e[0].isZeroTerminal() && !current.p->e[1].isZeroTerminal()) || (p2SigVec.size() > p1SigVec.size())) {
+            TruthTable::Cube::Vector rootSigVec;
+            TruthTable::Cube         rootTempVec;
 
-                pathFromRoot(src.p, current, rootSigVec, rootTempVec);
+            pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
+
+            dd::Controls ctrl;
+
+            for (auto const& i: rootSigVec) {
+                for (std::size_t j = 0; j < i.size(); j++) {
+                    if (*(i[j])) {
+                        ctrl.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::pos});
+                    } else {
+                        ctrl.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::neg});
+                    }
+                }
+
+                auto op = qc::StandardOperation((src.p->v) + 1U, ctrl, current.p->v, qc::X);
+                qc.x(current.p->v, ctrl);
+                ctrl.clear();
+
+                auto srcSaved = src;
+                src           = dd->multiply(src, dd::getDD(&op, dd));
+                dd->incRef(src);
+                dd->decRef(srcSaved);
+                dd->garbageCollect();
+            }
+            synthesize(src, dd);
+            return true;
+        }
+        return false;
+    }
+
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
+        if (dd::mNode::isTerminal(current.p)) {
+            return false;
+        }
+        TruthTable::Cube::Vector p1SigVec;
+        TruthTable::Cube         p1TempVec;
+
+        TruthTable::Cube::Vector p2SigVec;
+        TruthTable::Cube         p2TempVec;
+
+        std::vector<std::size_t> indices;
+
+        pathSignature(current.p->e[0].p, p1SigVec, p1TempVec);
+        pathSignature(current.p->e[1].p, p2SigVec, p2TempVec);
+
+        for (std::size_t index = 0; index < p2SigVec.size(); index++) {
+            auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVec[index]);
+            if (it != p1SigVec.end()) {
+                indices.emplace_back(index);
+            } else {
+                TruthTable::Cube::Vector rootSigVec;
+                TruthTable::Cube         rootTempVec;
+
+                pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
 
                 dd::Controls ctrl;
 
                 for (auto const& i: rootSigVec) {
                     for (std::size_t j = 0; j < i.size(); j++) {
                         if (*(i[j])) {
-                            dd::Control obj;
-                            obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::pos;
-                            ctrl.insert(obj);
+                            ctrl.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::pos});
                         } else {
-                            dd::Control obj;
-                            obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::neg;
-                            ctrl.insert(obj);
+                            ctrl.emplace(dd::Control{static_cast<dd::Qubit>((i.size() + current.p->v) - j), dd::Control::Type::neg});
                         }
                     }
-
-                    auto q = qc::QuantumComputation((src.p->v) + 1U);
-                    q.x(current->v, ctrl);
-                    qc.x(current->v, ctrl);
+                    for (std::size_t pj = 0; pj < p2SigVec[index].size(); pj++) {
+                        if (*(p2SigVec[index][pj])) {
+                            ctrl.emplace(dd::Control{static_cast<dd::Qubit>(current.p->v - (pj + 1)), dd::Control::Type::pos});
+                        } else {
+                            ctrl.emplace(dd::Control{static_cast<dd::Qubit>(current.p->v - (pj + 1)), dd::Control::Type::neg});
+                        }
+                    }
+                    auto op = qc::StandardOperation((src.p->v) + 1U, ctrl, current.p->v, qc::X);
+                    qc.x(current.p->v, ctrl);
                     ctrl.clear();
-                    auto ddTest = dd::buildFunctionality(&q, dd);
-                    src         = dd->multiply(src, ddTest);
+
+                    auto srcSaved = src;
+                    src           = dd->multiply(src, dd::getDD(&op, dd));
+                    dd->incRef(src);
+                    dd->decRef(srcSaved);
+                    dd->garbageCollect();
                 }
 
                 synthesize(src, dd);
+                return true;
             }
         }
+        return unifyPath(src, current, p1SigVec, p2SigVec, indices, dd);
     }
 
-    auto DDSynthesis::shiftUniquePaths(dd::mEdge& src, dd::mNode* current, std::unique_ptr<dd::Package<>>& dd) -> void {
-        if (!(dd::mNode::isTerminal(current))) {
-            syrec::TruthTable::Cube::Vector p1SigVec;
-            syrec::TruthTable::Cube         p1TempVec;
+    auto DDSynthesizer::shiftingPaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
+        return terminate(current) || swapPaths(src, current, dd) || shiftUniquePaths(src, current, dd);
+    }
 
-            syrec::TruthTable::Cube::Vector p2SigVec;
-            syrec::TruthTable::Cube         p2TempVec;
+    auto DDSynthesizer::synthesize(dd::mEdge& src, std::unique_ptr<dd::Package<>>& dd) -> void {
+        auto                   start = std::chrono::steady_clock::now();
+        std::queue<dd::mEdge>  q;
+        std::vector<dd::mEdge> visited;
 
-            std::vector<std::size_t> indices;
+        shiftingPaths(src, src, dd);
 
-            pathSignature(current->e[0].p, p1SigVec, p1TempVec);
-            pathSignature(current->e[1].p, p2SigVec, p2TempVec);
+        auto currEdge = src;
 
-            std::size_t flag = 0;
+        while (!src.p->isIdentity()) {
+            for (auto& edge: currEdge.p->e) {
+                if (edge.isTerminal()) {
+                    continue;
+                }
+                auto it = std::find(visited.begin(), visited.end(), edge);
 
-            for (std::size_t i = 0; i < p2SigVec.size(); i++) {
-                auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVec[i]);
-                if (it != p1SigVec.end()) {
-                    indices.push_back(i);
-                } else {
-                    flag = flag + 1;
+                if (it == visited.end()) {
+                    shiftingPaths(src, edge, dd);
+                    q.emplace(edge);
+                    visited.emplace_back(edge);
                 }
             }
-
-            if (flag == p2SigVec.size() && flag != 0) {
-                syrec::TruthTable::Cube::Vector rootSigVec;
-                syrec::TruthTable::Cube         rootTempVec;
-
-                pathFromRoot(src.p, current, rootSigVec, rootTempVec);
-
-                dd::Controls ctrl;
-
-                for (auto const& i: rootSigVec) {
-                    for (std::size_t j = 0; j < i.size(); j++) {
-                        if (*(i[j])) {
-                            dd::Control obj;
-                            obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::pos;
-                            ctrl.insert(obj);
-                        } else {
-                            dd::Control obj;
-                            obj.qubit = static_cast<dd::Qubit>((i.size() + current->v) - j);
-                            obj.type  = dd::Control::Type::neg;
-                            ctrl.insert(obj);
-                        }
-                    }
-
-                    for (auto const& p2: p2SigVec) {
-                        for (std::size_t pj = 0; pj < p2.size(); pj++) {
-                            if (*(p2[pj])) {
-                                dd::Control obj;
-                                obj.qubit = static_cast<dd::Qubit>(current->v - (pj + 1));
-                                obj.type  = dd::Control::Type::pos;
-                                ctrl.insert(obj);
-                            } else {
-                                dd::Control obj;
-                                obj.qubit = static_cast<dd::Qubit>(current->v - (pj + 1));
-                                obj.type  = dd::Control::Type::neg;
-                                ctrl.insert(obj);
-                            }
-                        }
-
-                        auto q = qc::QuantumComputation((src.p->v) + 1U);
-                        q.x(current->v, ctrl);
-                        qc.x(current->v, ctrl);
-                        ctrl.clear();
-                        auto ddTest = dd::buildFunctionality(&q, dd);
-                        src         = dd->multiply(src, ddTest);
-                    }
-                }
-
-                synthesize(src, dd);
-
-            }
-
-            else {
-                unifyPath(src, current, p1SigVec, p2SigVec, indices, dd);
-            }
+            currEdge = q.front();
+            q.pop();
         }
+
+        time = (std::chrono::steady_clock::now() - start);
     }
 
-    auto DDSynthesis::shiftingPaths(dd::mEdge& src, dd::mNode* current, std::unique_ptr<dd::Package<>>& dd) -> void {
-        auto srcCpy = src;
-
-        if (terminate(current)) {
-            return;
-        }
-
-        swapPaths(src, current, dd);
-
-        if (srcCpy == src) {
-            shiftUniquePaths(src, current, dd);
-        }
+    auto DDSynthesizer::buildFunctionality(std::unique_ptr<dd::Package<>>& dd) const -> dd::mEdge {
+        return dd::buildFunctionality(&qc, dd);
     }
 
-    auto DDSynthesis::synthesize(dd::mEdge& src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
-        std::vector<dd::mNode*> q;
-        std::vector<dd::mNode*> visited;
-
-        shiftingPaths(src, src.p, dd);
-
-        auto const* currNode = src.p;
-
-        while (src != dd->makeIdent(static_cast<dd::Qubit>((src.p->v) + 1U))) {
-            for (const auto& edge: currNode->e) {
-                if (!edge.isTerminal()) {
-                    auto it = std::find(visited.begin(), visited.end(), edge.p);
-
-                    if (it == visited.end()) {
-                        shiftingPaths(src, edge.p, dd);
-                        q.emplace_back(edge.p);
-                        visited.emplace_back(edge.p);
-                    }
-                }
-            }
-            currNode = q.front();
-            q.erase(q.begin());
-        }
-        return qc;
-    }
 } // namespace syrec

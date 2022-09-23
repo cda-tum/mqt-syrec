@@ -13,7 +13,7 @@ protected:
 };
 
 TEST_F(TestHuff, Ident2Bit) {
-    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
@@ -37,7 +37,7 @@ TEST_F(TestHuff, Ident2Bit) {
 }
 
 TEST_F(TestHuff, HUFF1) {
-    std::string circHUFF1 = testCircuitsDir + "HUFF1.pla";
+    std::string circHUFF1 = testCircuitsDir + "huff_1.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF1));
 
@@ -81,7 +81,7 @@ TEST_F(TestHuff, HUFF1) {
 }
 
 TEST_F(TestHuff, HUFF2) {
-    std::string circHUFF2 = testCircuitsDir + "HUFF2.pla";
+    std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF2));
 
