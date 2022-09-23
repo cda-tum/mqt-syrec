@@ -6,7 +6,6 @@
 
 using namespace dd::literals;
 using namespace syrec;
-using std::system;
 
 class TestDDSynth: public testing::TestWithParam<std::string> {
 protected:
