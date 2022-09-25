@@ -90,23 +90,22 @@ namespace syrec {
         }
 
         for (auto i = 0; i < static_cast<int>(src->e.size()); i++) {
-            if (i == 0 || i == 2) {
-                tempVec.emplace_back(false);
-            } else {
-                tempVec.emplace_back(true);
-            }
+            tempVec.emplace_back((i == 1 || i == 3));
             pathSignature(src->e.at(i).p, sigVec, tempVec);
             tempVec.pop_back();
         }
     }
 
-    auto DDSynthesizer::unifyPath(dd::mEdge& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> bool {
+    auto DDSynthesizer::unifyPath(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        std::cout << "P4" << std::endl;
+        auto unifyPathSrc = src;
+
         auto p2SigVecCpy = p2SigVec;
 
         TruthTable::Cube::Vector rootSigVec;
         TruthTable::Cube         rootTempVec;
 
-        pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
+        pathFromSrcDst(unifyPathSrc.p, current.p, rootSigVec, rootTempVec);
 
         dd::Control currentNode;
         currentNode.qubit = current.p->v;
@@ -155,12 +154,13 @@ namespace syrec {
 
                 for (std::size_t p2Obj = 0; p2Obj < target.size(); p2Obj++) {
                     if (target[p2Obj].has_value() && *(target[p2Obj])) {
-                        auto op = qc::StandardOperation((src.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
+                        auto op = qc::StandardOperation((unifyPathSrc.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
                         qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), ctrlFinal);
+                        numGates += 1;
 
-                        auto srcSaved = src;
-                        src           = dd->multiply(src, dd::getDD(&op, dd));
-                        dd->incRef(src);
+                        auto srcSaved = unifyPathSrc;
+                        unifyPathSrc  = dd->multiply(unifyPathSrc, dd::getDD(&op, dd));
+                        dd->incRef(unifyPathSrc);
                         dd->decRef(srcSaved);
                         dd->garbageCollect();
                     }
@@ -174,32 +174,37 @@ namespace syrec {
 
             for (std::size_t p2Obj = 0; p2Obj < target.size(); p2Obj++) {
                 if (target[p2Obj].has_value() && *(target[p2Obj])) {
-                    auto op = qc::StandardOperation((src.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
+                    auto op = qc::StandardOperation((unifyPathSrc.p->v) + 1U, ctrlFinal, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), qc::X);
                     qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (p2Obj + 1U)), ctrlFinal);
+                    numGates += 1;
 
-                    auto srcSaved = src;
-                    src           = dd->multiply(src, dd::getDD(&op, dd));
-                    dd->incRef(src);
+                    auto srcSaved = unifyPathSrc;
+                    unifyPathSrc  = dd->multiply(unifyPathSrc, dd::getDD(&op, dd));
+                    dd->incRef(unifyPathSrc);
                     dd->decRef(srcSaved);
                     dd->garbageCollect();
                 }
             }
         }
-        synthesize(src, dd);
-        return true;
+        return synthesizeRec(unifyPathSrc, dd);
     }
 
     auto DDSynthesizer::terminate(dd::mEdge const& current) -> bool {
+        std::cout << "P3" << std::endl;
         if (!(dd::mNode::isTerminal(current.p))) {
             return current.p->e[1].isZeroTerminal();
         }
         return false;
     }
 
-    auto DDSynthesizer::swapPaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
+    auto DDSynthesizer::swapPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        std::cout << "P1" << std::endl;
         if (dd::mNode::isTerminal(current.p)) {
-            return false;
+            return src;
         }
+
+        auto swapPathsSrc = src;
+
         TruthTable::Cube::Vector p1SigVec;
         TruthTable::Cube         p1TempVec;
 
@@ -213,7 +218,7 @@ namespace syrec {
             TruthTable::Cube::Vector rootSigVec;
             TruthTable::Cube         rootTempVec;
 
-            pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
+            pathFromSrcDst(swapPathsSrc.p, current.p, rootSigVec, rootTempVec);
 
             dd::Controls ctrl;
 
@@ -226,26 +231,32 @@ namespace syrec {
                     }
                 }
 
-                auto op = qc::StandardOperation((src.p->v) + 1U, ctrl, current.p->v, qc::X);
+                auto op = qc::StandardOperation((swapPathsSrc.p->v) + 1U, ctrl, current.p->v, qc::X);
                 qc.x(current.p->v, ctrl);
+                numGates += 1;
                 ctrl.clear();
 
-                auto srcSaved = src;
-                src           = dd->multiply(src, dd::getDD(&op, dd));
-                dd->incRef(src);
+                auto srcSaved = swapPathsSrc;
+                swapPathsSrc  = dd->multiply(swapPathsSrc, dd::getDD(&op, dd));
+                dd->incRef(swapPathsSrc);
                 dd->decRef(srcSaved);
                 dd->garbageCollect();
             }
-            synthesize(src, dd);
-            return true;
+
+            return synthesizeRec(swapPathsSrc, dd);
         }
-        return false;
+
+        return swapPathsSrc;
     }
 
-    auto DDSynthesizer::shiftUniquePaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        std::cout << "P2" << std::endl;
         if (dd::mNode::isTerminal(current.p)) {
-            return false;
+            return src;
         }
+
+        auto shiftUniquePathsSrc = src;
+
         TruthTable::Cube::Vector p1SigVec;
         TruthTable::Cube         p1TempVec;
 
@@ -265,7 +276,7 @@ namespace syrec {
                 TruthTable::Cube::Vector rootSigVec;
                 TruthTable::Cube         rootTempVec;
 
-                pathFromSrcDst(src.p, current.p, rootSigVec, rootTempVec);
+                pathFromSrcDst(shiftUniquePathsSrc.p, current.p, rootSigVec, rootTempVec);
 
                 dd::Controls ctrl;
 
@@ -284,38 +295,60 @@ namespace syrec {
                             ctrl.emplace(dd::Control{static_cast<dd::Qubit>(current.p->v - (pj + 1)), dd::Control::Type::neg});
                         }
                     }
-                    auto op = qc::StandardOperation((src.p->v) + 1U, ctrl, current.p->v, qc::X);
+                    auto op = qc::StandardOperation((shiftUniquePathsSrc.p->v) + 1U, ctrl, current.p->v, qc::X);
                     qc.x(current.p->v, ctrl);
+                    numGates += 1;
                     ctrl.clear();
 
-                    auto srcSaved = src;
-                    src           = dd->multiply(src, dd::getDD(&op, dd));
-                    dd->incRef(src);
+                    auto srcSaved       = shiftUniquePathsSrc;
+                    shiftUniquePathsSrc = dd->multiply(shiftUniquePathsSrc, dd::getDD(&op, dd));
+                    dd->incRef(shiftUniquePathsSrc);
                     dd->decRef(srcSaved);
                     dd->garbageCollect();
                 }
 
-                synthesize(src, dd);
-                return true;
+                return synthesizeRec(shiftUniquePathsSrc, dd);
             }
         }
-        return unifyPath(src, current, p1SigVec, p2SigVec, indices, dd);
+        return unifyPath(shiftUniquePathsSrc, current, p1SigVec, p2SigVec, indices, dd);
     }
 
-    auto DDSynthesizer::shiftingPaths(dd::mEdge& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> bool {
-        return terminate(current) || swapPaths(src, current, dd) || shiftUniquePaths(src, current, dd);
+    auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        std::cout << "P" << std::endl;
+        if (terminate(current)) {
+            return src;
+        }
+
+        auto swapPathsSrc = swapPaths(src, current, dd);
+
+        if (swapPathsSrc == src) {
+            return shiftUniquePaths(src, current, dd);
+        }
+        return swapPathsSrc;
     }
 
-    auto DDSynthesizer::synthesize(dd::mEdge& src, std::unique_ptr<dd::Package<>>& dd) -> void {
-        auto                   start = std::chrono::steady_clock::now();
+    auto DDSynthesizer::synthesizeRec(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        std::cout << "synthesizeRec" << std::endl;
+        auto start = std::chrono::steady_clock::now();
+
+        if (src.p->ref == 0U) {
+            dd->incRef(src);
+        }
+
         std::queue<dd::mEdge>  q;
         std::vector<dd::mEdge> visited;
 
-        shiftingPaths(src, src, dd);
+        auto shiftingPathsSrc = src;
 
-        auto currEdge = src;
+        shiftingPathsSrc = shiftingPaths(shiftingPathsSrc, shiftingPathsSrc, dd);
+        if (shiftingPathsSrc.p->isIdentity()) {
+            time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+            return shiftingPathsSrc;
+        }
 
-        while (!src.p->isIdentity()) {
+        auto currEdge = shiftingPathsSrc;
+
+        while (!shiftingPathsSrc.p->isIdentity()) {
             for (auto& edge: currEdge.p->e) {
                 if (edge.isTerminal()) {
                     continue;
@@ -323,7 +356,11 @@ namespace syrec {
                 auto it = std::find(visited.begin(), visited.end(), edge);
 
                 if (it == visited.end()) {
-                    shiftingPaths(src, edge, dd);
+                    shiftingPathsSrc = shiftingPaths(shiftingPathsSrc, edge, dd);
+                    if (shiftingPathsSrc.p->isIdentity()) {
+                        time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+                        return shiftingPathsSrc;
+                    }
                     q.emplace(edge);
                     visited.emplace_back(edge);
                 }
@@ -332,11 +369,18 @@ namespace syrec {
             q.pop();
         }
 
-        time = (std::chrono::steady_clock::now() - start);
+        time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+        return shiftingPathsSrc;
     }
 
-    auto DDSynthesizer::buildFunctionality(std::unique_ptr<dd::Package<>>& dd) const -> dd::mEdge {
-        return dd::buildFunctionality(&qc, dd);
+    auto DDSynthesizer::synthesize(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
+        std::cout << "synthesize" << std::endl;
+        qc.clear();
+        time     = 0;
+        numGates = 0U;
+
+        synthesizeRec(src, dd);
+        return qc;
     }
 
 } // namespace syrec

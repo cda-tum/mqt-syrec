@@ -65,11 +65,8 @@ namespace syrec {
                 auto n = static_cast<uint64_t>(std::pow(2, p1SigVec[0].size()));
 
                 std::vector<uint64_t> temp;
-                temp.reserve(n);
 
-                for (std::size_t i = 0; i < n; i++) {
-                    temp[i] = 0U;
-                }
+                temp.resize(n);
 
                 for (std::size_t i = 0; i < p1SigVec.size(); i++) {
                     temp[p1IntSigVec[i]] = 1;

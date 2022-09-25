@@ -1,6 +1,7 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
+#include "dd/FunctionalityConstruction.hpp"
 
 #include "gtest/gtest.h"
 
@@ -21,23 +22,8 @@ protected:
 
 INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
                          testing::Values(
-                                 "cnot",
-                                 "swap",
-                                 "toffoli",
-                                 "x2Bit",
-                                 "test_dd_synthesis_1",
-                                 "test_dd_synthesis_2",
-                                 "3_17_6",
-                                 "bitwiseXor2Bit",
-                                 "adder2Bit",
-                                 "adder3Bit",
-                                 "4_49_7",
-                                 "hwb4_12",
-                                 "hwb5_13",
-                                 "hwb6_14",
-                                 "hwb7_15",
-                                 "hwb8_64",
-                                 "hwb9_65"),
+                                 "hwb9_65",
+                                 "hwb8_64"),
                          [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
@@ -56,17 +42,9 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
 
     DDSynthesizer synthesizer(tt.nInputs());
 
-    const auto srcCpy = ttDD;
-
-    ddSynth->incRef(srcCpy);
-
-    synthesizer.synthesize(ttDD, ddSynth);
-
-    EXPECT_EQ(srcCpy, synthesizer.buildFunctionality(ddSynth));
+    EXPECT_EQ(ttDD, dd::buildFunctionality(&synthesizer.synthesize(ttDD, ddSynth), ddSynth));
 
     std::cout << synthesizer.numGate() << std::endl;
 
     std::cout << synthesizer.getExecutionTime() << std::endl;
-
-    EXPECT_EQ(ttDD, ddSynth->makeIdent(tt.nInputs()));
 }
