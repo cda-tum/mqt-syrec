@@ -56,29 +56,18 @@ namespace syrec {
             }
 
             static auto findMissingCube(TruthTable::Cube::Vector const& p1SigVec) -> Cube {
-                std::vector<uint64_t> p1IntSigVec;
-
-                for (const auto& i: p1SigVec) {
-                    p1IntSigVec.emplace_back(i.toInteger());
+                if (p1SigVec.empty()) {
+                    return {};
                 }
 
-                auto n = static_cast<uint64_t>(std::pow(2, p1SigVec[0].size()));
-
-                std::vector<uint64_t> temp;
-
-                temp.resize(n);
-
-                for (std::size_t i = 0; i < p1SigVec.size(); i++) {
-                    temp[p1IntSigVec[i]] = 1;
-                }
-
-                TruthTable::Cube::Vector missCube;
-                for (std::size_t i = 0; i <= p1SigVec.size(); i++) {
-                    if (temp[i] == 0) {
-                        missCube.emplace_back(TruthTable::Cube::fromInteger(i, p1SigVec[0].size()));
+                const auto    bitwidth = p1SigVec[0].size();
+                std::uint64_t idx      = 0U;
+                while (true) {
+                    if (auto cube = Cube::fromInteger(idx, bitwidth); std::find(p1SigVec.begin(), p1SigVec.end(), cube) == p1SigVec.end()) {
+                        return cube;
                     }
+                    ++idx;
                 }
-                return missCube.back();
             }
 
             // construct a cube from a (64bit) number with a given bitwidth
