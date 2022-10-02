@@ -26,8 +26,9 @@ namespace syrec {
             return time;
         }
 
-    private:
         qc::QuantumComputation qc;
+
+    private:
         qc::QuantumComputation qcSingleOp;
         double                 time     = 0;
         std::size_t            numGates = 0U;
@@ -39,13 +40,13 @@ namespace syrec {
 
         static auto terminate(dd::mEdge const& current) -> bool;
 
-        auto unifyPath(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices) -> dd::mEdge;
+        auto unifyPath(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto swapPaths(dd::mEdge const& src, dd::mEdge const& current) -> dd::mEdge;
+        auto swapPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current) -> dd::mEdge;
+        auto shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current) -> dd::mEdge;
+        auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
         auto synthesizeRec(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
     };

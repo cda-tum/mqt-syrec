@@ -45,7 +45,8 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
                                  "mod638192",
                                  "urf1",
                                  "urf2",
-                                 "urf5"),
+                                 "urf5",
+                                 "14_bit"),
                          [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
@@ -62,9 +63,7 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
 
     DDSynthesizer synthesizer(tt.nInputs());
 
-    auto& rc = synthesizer.synthesize(ttDD, ddSynth);
-
-    EXPECT_EQ(ttDD, dd::buildFunctionality(&rc, ddSynth));
+    EXPECT_EQ(ttDD, dd::buildFunctionality(&synthesizer.synthesize(ttDD, ddSynth), ddSynth));
 
     std::cout << synthesizer.numGate() << std::endl;
 
