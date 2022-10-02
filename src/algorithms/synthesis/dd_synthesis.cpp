@@ -160,11 +160,9 @@ namespace syrec {
                         auto srcSaved = unifyPathSrc;
                         unifyPathSrc  = dd->multiply(unifyPathSrc, dd::getDD(&op, dd));
 
-                        if (unifyPathSrc.p->ref == 0U) {
-                            dd->incRef(unifyPathSrc);
-                            dd->decRef(srcSaved);
-                            dd->garbageCollect();
-                        }
+                        dd->incRef(unifyPathSrc);
+                        dd->decRef(srcSaved);
+                        dd->garbageCollect();
 
                         qc.x(static_cast<dd::Qubit>(static_cast<std::size_t>(currentQubit) - (p2Obj + 1U)), ctrlFinal);
                         numGates += 1;
@@ -227,11 +225,9 @@ namespace syrec {
                 auto srcSaved = swapPathsSrc;
                 swapPathsSrc  = dd->multiply(swapPathsSrc, dd::getDD(&op, dd));
 
-                if (swapPathsSrc.p->ref == 0U) {
-                    dd->incRef(swapPathsSrc);
-                    dd->decRef(srcSaved);
-                    dd->garbageCollect();
-                }
+                dd->incRef(swapPathsSrc);
+                dd->decRef(srcSaved);
+                dd->garbageCollect();
 
                 qc.x(currentQubit, ctrl);
                 numGates += 1;
@@ -313,11 +309,11 @@ namespace syrec {
                 auto op             = qc::StandardOperation(sourceQubit + 1U, ctrlFinal, currentQubit, qc::X);
                 auto srcSaved       = shiftUniquePathsSrc;
                 shiftUniquePathsSrc = dd->multiply(shiftUniquePathsSrc, dd::getDD(&op, dd));
-                if (shiftUniquePathsSrc.p->ref == 0U) {
-                    dd->incRef(shiftUniquePathsSrc);
-                    dd->decRef(srcSaved);
-                    dd->garbageCollect();
-                }
+
+                dd->incRef(shiftUniquePathsSrc);
+                dd->decRef(srcSaved);
+                dd->garbageCollect();
+
                 qc.x(currentQubit, ctrlFinal);
                 numGates += 1;
 
