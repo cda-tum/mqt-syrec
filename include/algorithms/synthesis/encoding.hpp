@@ -16,13 +16,13 @@ namespace syrec {
             data(std::move(data)), freq(freq) {}
 
         auto operator>(const MinHeapNode& other) const -> bool {
-            return freq > other.freq;
+            return (freq > other.freq || (freq == other.freq && (data > other.data)));
         }
 
-        auto traverse(TruthTable::Cube&& encodedCube, TruthTable::CubeMap& encoding) const -> void {
+        auto traverse(TruthTable::Cube&& encodedCube, std::multimap<TruthTable::Cube, TruthTable::Cube>& encoding) const -> void {
             // leaf node -> add encoding
             if (!data.empty()) {
-                encoding.try_emplace(data, std::move(encodedCube));
+                encoding.emplace(data, std::move(encodedCube));
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace syrec {
 
     auto extend(TruthTable& tt) -> void;
 
-    auto encodeHuffman(TruthTable& tt) -> void;
+    auto encodeHuffman(TruthTable& tt, bool additionalLine = false) -> void;
 
     auto augmentWithConstants(TruthTable& tt) -> void;
 

@@ -43,10 +43,39 @@ namespace syrec {
         }
     }
 
-    auto encodeHuffman(TruthTable& tt) -> void {
-        std::map<TruthTable::Cube, std::size_t> outputFreq;
+    auto encodeHuffman(TruthTable& tt, bool additionalLine) -> void {
+        std::multimap<TruthTable::Cube, std::size_t>             outputFreq;
+        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
+
         for (const auto& [input, output]: tt) {
-            outputFreq[output]++;
+            auto it = outputFreq.find(output);
+
+            if (it == outputFreq.end()) {
+                outputFreq.emplace(output, 1U);
+            } else {
+                it->second++;
+            }
+        }
+
+        if (!additionalLine) {
+            for (auto& [input, output]: outputFreq) {
+                //check if the output is power of 2
+                if (std::ceil(std::log2(static_cast<double>(output))) != std::floor(std::log2(static_cast<double>(output)))) {
+                    auto        it     = outputFreq.find(input);
+                    std::size_t bitPos = 0U;
+
+                    while (output > 0) {
+                        if ((output % 2) != 0U) {
+                            outputFreq.emplace(input, static_cast<uint64_t>((std::pow(2, bitPos))));
+                        }
+
+                        bitPos++;
+                        output = output / 2;
+                    }
+                    //erase the existing inp/out combination
+                    outputFreq.erase(it);
+                }
+            }
         }
 
         // if the truth table function is already reversible, no encoding is necessary
@@ -88,17 +117,31 @@ namespace syrec {
 
         const auto requiredGarbage = minHeap.top()->freq;
         // determine encoding from Huffman tree
-        TruthTable::CubeMap encoding{};
+        std::multimap<TruthTable::Cube, TruthTable::Cube> encoding{};
         minHeap.top()->traverse({}, encoding);
 
         // resize all outputs to the correct size (by adding don't care values)
         for (auto& [input, output]: encoding) {
+            auto freq = static_cast<uint64_t>(std::pow(2, requiredGarbage - output.size()));
             output.resize(requiredGarbage);
+
+            if (!additionalLine) {
+                while (freq != 0U) {
+                    encFreq[input].emplace(output);
+                    freq--;
+                }
+            }
         }
 
         // encode all the outputs
         for (auto& [input, output]: tt) {
-            output = encoding[output];
+            if (!additionalLine) {
+                const auto out = output;
+                output         = (encFreq[out].top());
+                encFreq[out].pop();
+            } else {
+                output = encoding.find(output)->second;
+            }
         }
     }
 
