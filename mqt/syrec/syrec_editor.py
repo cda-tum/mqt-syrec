@@ -170,10 +170,10 @@ class SyReCEditor(QtWidgets.QWidget):
         )  # system-run
         self.stat_action = QtGui.QAction(QtGui.QIcon.fromTheme("applications-other"), "&Stats...", self.parent)
 
-        self.buttonAddLines = QtWidgets.QRadioButton("SyReC with Add. Lines", self)
+        self.buttonAddLines = QtWidgets.QRadioButton("Cost-aware synthesis", self)
         self.buttonAddLines.toggled.connect(self.item_selected)
 
-        self.buttonNoLines = QtWidgets.QRadioButton("SyReC with no lines", self)
+        self.buttonNoLines = QtWidgets.QRadioButton("Line-aware synthesis", self)
         self.buttonNoLines.setChecked(True)
         self.synthesize_without_additional_lines = 1
         self.buttonNoLines.toggled.connect(self.item_selected)
