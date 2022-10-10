@@ -13,7 +13,7 @@ protected:
 };
 
 TEST_F(TestHuff, Ident2Bit) {
-    std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
+    const std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
@@ -29,7 +29,7 @@ TEST_F(TestHuff, Ident2Bit) {
 
     EXPECT_TRUE(search->second.equals(0b00U, 2U));
 
-    TruthTable ttExtend(tt);
+    const TruthTable ttExtend(tt);
 
     encodeHuffman(tt, true);
 
@@ -37,7 +37,7 @@ TEST_F(TestHuff, Ident2Bit) {
 }
 
 TEST_F(TestHuff, HUFF1) {
-    std::string circHUFF1 = testCircuitsDir + "huff_1.pla";
+    const std::string circHUFF1 = testCircuitsDir + "huff_1.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF1));
 
@@ -59,7 +59,7 @@ TEST_F(TestHuff, HUFF1) {
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    std::vector<std::uint64_t> encInput{0b01U, 0b10U};
+    const std::vector<std::uint64_t> encInput{0b01U, 0b10U};
 
     for (const auto& in1: encInput) {
         auto search = tt.find(in1, 2U);
@@ -81,7 +81,7 @@ TEST_F(TestHuff, HUFF1) {
 }
 
 TEST_F(TestHuff, HUFF2) {
-    std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
+    const std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF2));
 
@@ -103,7 +103,7 @@ TEST_F(TestHuff, HUFF2) {
 
     EXPECT_EQ(tt.nOutputs(), 3U);
 
-    std::vector<std::uint64_t> encInput{0b01U, 0b10U, 0b11U};
+    const std::vector<std::uint64_t> encInput{0b01U, 0b10U, 0b11U};
 
     for (const auto& in1: encInput) {
         auto search2 = tt.find(in1, 2U);
@@ -124,7 +124,7 @@ TEST_F(TestHuff, HUFF2) {
 
     EXPECT_EQ(tt.nInputs(), 3U);
 
-    std::vector<std::uint64_t> augInput{0b000U, 0b001U, 0b010U, 0b011U};
+    const std::vector<std::uint64_t> augInput{0b000U, 0b001U, 0b010U, 0b011U};
 
     for (const auto& in2: augInput) {
         auto search4 = tt.find(in2, 3U);
@@ -134,7 +134,7 @@ TEST_F(TestHuff, HUFF2) {
 }
 
 TEST_F(TestHuff, HUFF2NOADDITIONALLINE) {
-    std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
+    const std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF2));
 
@@ -156,7 +156,7 @@ TEST_F(TestHuff, HUFF2NOADDITIONALLINE) {
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    std::vector<std::uint64_t> encInput1{0b01U, 0b10U};
+    const std::vector<std::uint64_t> encInput1{0b01U, 0b10U};
 
     for (const auto& in1: encInput1) {
         auto search2 = tt.find(in1, 2U);
@@ -172,7 +172,7 @@ TEST_F(TestHuff, HUFF2NOADDITIONALLINE) {
 }
 
 TEST_F(TestHuff, HUFF3NOADDITIONALLINE) {
-    std::string circHUFF2 = testCircuitsDir + "huff_3.pla";
+    const std::string circHUFF2 = testCircuitsDir + "huff_3.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF2));
 
@@ -194,7 +194,7 @@ TEST_F(TestHuff, HUFF3NOADDITIONALLINE) {
 
     EXPECT_EQ(tt.nOutputs(), 3U);
 
-    std::vector<std::uint64_t> encInput1{0b100U, 0b010U};
+    const std::vector<std::uint64_t> encInput1{0b100U, 0b010U};
 
     for (const auto& in1: encInput1) {
         auto search2 = tt.find(in1, 3U);
@@ -203,7 +203,7 @@ TEST_F(TestHuff, HUFF3NOADDITIONALLINE) {
         EXPECT_TRUE(search2->second.equals("11-"));
     }
 
-    std::vector<std::uint64_t> encInput2{0b011U, 0b000U};
+    const std::vector<std::uint64_t> encInput2{0b011U, 0b000U};
 
     for (const auto& in1: encInput2) {
         auto search2 = tt.find(in1, 3U);
