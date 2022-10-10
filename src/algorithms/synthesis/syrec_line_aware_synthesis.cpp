@@ -1,8 +1,8 @@
-#include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
+#include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 
 namespace syrec {
     /// checking the entire statement
-    bool SyrecSynthesisNoAdditionalLines::fullStatement(const Statement::ptr& statement) {
+    bool LineAware::fullStatement(const Statement::ptr& statement) {
         bool okay = false;
         if (auto const* stat = dynamic_cast<AssignStatement*>(statement.get())) {
             okay = fullStatement(*stat);
@@ -13,7 +13,7 @@ namespace syrec {
         return okay;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::fullStatement(const AssignStatement& statement) {
+    bool LineAware::fullStatement(const AssignStatement& statement) {
         std::vector<unsigned> d;
         std::vector<unsigned> dd;
         std::vector<unsigned> statLhs;
@@ -160,7 +160,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::flow(const expression::ptr& expression, std::vector<unsigned>& v) {
+    bool LineAware::flow(const expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return flow(*binary, v);
         }
@@ -170,13 +170,13 @@ namespace syrec {
         return false;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::flow(const VariableExpression& expression, std::vector<unsigned>& v) {
+    bool LineAware::flow(const VariableExpression& expression, std::vector<unsigned>& v) {
         getVariables(expression.var, v);
         return true;
     }
 
     /// generating LHS and RHS (can be whole expressions as well)
-    bool SyrecSynthesisNoAdditionalLines::flow(const BinaryExpression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
+    bool LineAware::flow(const BinaryExpression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
         std::vector<unsigned> comp;
@@ -192,7 +192,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
+    bool LineAware::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
         std::vector<unsigned> lines;
         if (statOp == expOp) {
             if (expOp == 1) {
@@ -216,7 +216,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) {
+    bool LineAware::opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return opRhsLhsExpression(*binary, v);
         }
@@ -226,12 +226,12 @@ namespace syrec {
         return false;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const VariableExpression& expression, std::vector<unsigned>& v) {
+    bool LineAware::opRhsLhsExpression(const VariableExpression& expression, std::vector<unsigned>& v) {
         getVariables(expression.var, v);
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::opRhsLhsExpression(const BinaryExpression& expression, std::vector<unsigned>& v) {
+    bool LineAware::opRhsLhsExpression(const BinaryExpression& expression, std::vector<unsigned>& v) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
@@ -244,19 +244,19 @@ namespace syrec {
         return true;
     }
 
-    void SyrecSynthesisNoAdditionalLines::popExp() {
+    void LineAware::popExp() {
         SyrecSynthesis::expOpp.pop();
         SyrecSynthesis::expLhss.pop();
         SyrecSynthesis::expRhss.pop();
     }
 
-    void SyrecSynthesisNoAdditionalLines::inverse() {
+    void LineAware::inverse() {
         expressionOpInverse(SyrecSynthesis::expOpp.top(), SyrecSynthesis::expLhss.top(), SyrecSynthesis::expRhss.top());
         SyrecSynthesis::subFlag = false;
         popExp();
     }
 
-    void SyrecSynthesisNoAdditionalLines::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
+    void LineAware::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
         if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
             SyrecSynthesis::increase(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
@@ -269,7 +269,7 @@ namespace syrec {
         }
     }
 
-    void SyrecSynthesisNoAdditionalLines::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
+    void LineAware::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
         if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
             SyrecSynthesis::decrease(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
@@ -282,7 +282,7 @@ namespace syrec {
         }
     }
 
-    void SyrecSynthesisNoAdditionalLines::assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
+    void LineAware::assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
         if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
             SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expRhss.top());
@@ -295,7 +295,7 @@ namespace syrec {
         }
     }
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
-    bool SyrecSynthesisNoAdditionalLines::expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
+    bool LineAware::expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
         switch (op) {
             case BinaryExpression::Add: // +
                 increase(rhs, lhs);
@@ -321,7 +321,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
+    bool LineAware::decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
         for (unsigned int lh: lhs) {
             (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(lh);
         }
@@ -338,7 +338,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAware::expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
             case BinaryExpression::Add: // +
                 increase(expRhs, expLhs);
@@ -359,7 +359,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAware::expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
             case BinaryExpression::Add: // +
                 decrease(expRhs, expLhs);
@@ -376,8 +376,8 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesisNoAdditionalLines::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
-        SyrecSynthesisNoAdditionalLines synthesizer(circ);
+    bool LineAware::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+        LineAware synthesizer(circ);
         return SyrecSynthesis::synthesize(&synthesizer, circ, program, settings, statistics);
     }
 } // namespace syrec

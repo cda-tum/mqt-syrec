@@ -7,8 +7,8 @@ from mqt.syrec.pysyrec import (
     properties,
     read_program_settings,
     simple_simulation,
-    syrec_synthesis_additional_lines,
-    syrec_synthesis_no_additional_lines,
+    cost_aware_synthesis,
+    line_aware_synthesis,
 )
 
 __all__ = [
@@ -20,6 +20,6 @@ __all__ = [
     "properties",
     "read_program_settings",
     "simple_simulation",
-    "syrec_synthesis_additional_lines",
-    "syrec_synthesis_no_additional_lines",
+    "cost_aware_synthesis",
+    "line_aware_synthesis",
 ]

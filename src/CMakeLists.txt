@@ -1,15 +1,15 @@
 add_library(
   ${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_additional_lines.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis_no_additional_lines.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_cost_aware_synthesis.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_line_aware_synthesis.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/dd_synthesis.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/encoding.cpp
   ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
   ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
-  ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_additional_lines.hpp
-  ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp
+  ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_cost_aware_synthesis.hpp
+  ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/syrec_line_aware_synthesis.hpp
   ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/dd_synthesis.hpp
   ${${PROJECT_NAME}_SOURCE_DIR}/include/algorithms/synthesis/encoding.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp

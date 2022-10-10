@@ -1,6 +1,6 @@
 #include "algorithms/simulation/simple_simulation.hpp"
-#include "algorithms/synthesis/syrec_synthesis_additional_lines.hpp"
-#include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
+#include "algorithms/synthesis/syrec_cost_aware_synthesis.hpp"
+#include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
 #include "core/properties.hpp"
@@ -85,8 +85,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_readwrite("targets", &Gate::targets)
             .def_readwrite("type", &Gate::type);
 
-    m.def("syrec_synthesis_additional_lines", &SyrecSynthesisAdditionalLines::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
-    m.def("syrec_synthesis_no_additional_lines", &SyrecSynthesisNoAdditionalLines::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
+    m.def("cost_aware_synthesis", &CostAware::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
+    m.def("line_aware_synthesis", &LineAware::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
     m.def("simple_simulation", &simpleSimulation, "output"_a, "circ"_a, "input"_a, "statistics"_a = Properties::ptr());
 
 #ifdef VERSION_INFO

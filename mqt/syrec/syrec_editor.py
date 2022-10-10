@@ -170,13 +170,13 @@ class SyReCEditor(QtWidgets.QWidget):
         )  # system-run
         self.stat_action = QtGui.QAction(QtGui.QIcon.fromTheme("applications-other"), "&Stats...", self.parent)
 
-        self.buttonAddLines = QtWidgets.QRadioButton("Cost-aware synthesis", self)
-        self.buttonAddLines.toggled.connect(self.item_selected)
+        self.butonCostAware = QtWidgets.QRadioButton("Cost-aware synthesis", self)
+        self.butonCostAware.toggled.connect(self.item_selected)
 
-        self.buttonNoLines = QtWidgets.QRadioButton("Line-aware synthesis", self)
-        self.buttonNoLines.setChecked(True)
+        self.buttonLineAware = QtWidgets.QRadioButton("Line-aware synthesis", self)
+        self.buttonLineAware.setChecked(True)
         self.synthesize_without_additional_lines = 1
-        self.buttonNoLines.toggled.connect(self.item_selected)
+        self.buttonLineAware.toggled.connect(self.item_selected)
 
         self.sim_action.setDisabled(True)
         self.stat_action.setDisabled(True)
@@ -196,30 +196,30 @@ class SyReCEditor(QtWidgets.QWidget):
         self.stat_action.setDisabled(True)
 
         # if first button is selected
-        if self.sender() == self.buttonAddLines:
-            if self.buttonAddLines.isChecked():
+        if self.sender() == self.butonCostAware:
+            if self.butonCostAware.isChecked():
                 self.synthesize_with_additional_lines = 1
                 self.synthesize_without_additional_lines = 0
                 # making other check box to uncheck
-                self.buttonNoLines.setChecked(False)
+                self.buttonLineAware.setChecked(False)
             else:
                 self.synthesize_with_additional_lines = 0
                 self.synthesize_without_additional_lines = 1
                 # making other check box to uncheck
-                self.buttonNoLines.setChecked(True)
+                self.buttonLineAware.setChecked(True)
 
         # if second button is selected
-        elif self.sender() == self.buttonNoLines:
-            if self.buttonNoLines.isChecked():
+        elif self.sender() == self.buttonLineAware:
+            if self.buttonLineAware.isChecked():
                 self.synthesize_with_additional_lines = 0
                 self.synthesize_without_additional_lines = 1
                 # making other check box to uncheck
-                self.buttonAddLines.setChecked(False)
+                self.butonCostAware.setChecked(False)
             else:
                 self.synthesize_with_additional_lines = 1
                 self.synthesize_without_additional_lines = 0
                 # making other check box to uncheck
-                self.buttonAddLines.setChecked(True)
+                self.butonCostAware.setChecked(True)
 
     def writeEditorContentsToFile(self):
         data = QtCore.QFile("/tmp/out.src")
@@ -272,9 +272,9 @@ class SyReCEditor(QtWidgets.QWidget):
         self.circ = syrec.circuit()
 
         if self.synthesize_with_additional_lines:
-            syrec.syrec_synthesis_additional_lines(self.circ, self.prog)
+            syrec.cost_aware_synthesis(self.circ, self.prog)
         else:
-            syrec.syrec_synthesis_no_additional_lines(self.circ, self.prog)
+            syrec.line_aware_synthesis(self.circ, self.prog)
 
         self.sim_action.setDisabled(False)
         self.stat_action.setDisabled(False)
@@ -633,8 +633,8 @@ class MainWindow(QtWidgets.QMainWindow):
         toolbar.addAction(self.editor.build_action)
         toolbar.addAction(self.editor.sim_action)
         toolbar.addAction(self.editor.stat_action)
-        toolbar.addWidget(self.editor.buttonAddLines)
-        toolbar.addWidget(self.editor.buttonNoLines)
+        toolbar.addWidget(self.editor.butonCostAware)
+        toolbar.addWidget(self.editor.buttonLineAware)
 
 
 def main():

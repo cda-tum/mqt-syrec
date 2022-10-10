@@ -1,4 +1,4 @@
-#include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
+#include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
@@ -27,7 +27,7 @@ protected:
     void SetUp() override {
         std::string synthesisParam = GetParam();
         fileName                   = testCircuitsDir + GetParam() + ".src";
-        std::ifstream i(testConfigsDir + "circuits_synthesis.json");
+        std::ifstream i(testConfigsDir + "circuits_line_aware_synthesis.json");
         json          j  = json::parse(i);
         expectedNumGates = j[synthesisParam]["num_gates"];
         expectedLines    = j[synthesisParam]["lines"];
@@ -78,7 +78,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
 
-    EXPECT_TRUE(SyrecSynthesisNoAdditionalLines::synthesize(circ, prog));
+    EXPECT_TRUE(LineAware::synthesize(circ, prog));
 
     qc = circ.quantumCost();
     tc = circ.transistorCost();
