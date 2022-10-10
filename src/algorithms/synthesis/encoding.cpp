@@ -44,12 +44,10 @@ namespace syrec {
     }
 
     auto encodeHuffman(TruthTable& tt, bool additionalLine) -> void {
-        std::multimap<TruthTable::Cube, std::size_t>             outputFreq;
-        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
+        std::multimap<TruthTable::Cube, std::size_t> outputFreq;
 
         for (const auto& [input, output]: tt) {
             auto it = outputFreq.find(output);
-
             if (it == outputFreq.end()) {
                 outputFreq.emplace(output, 1U);
             } else {
@@ -58,23 +56,27 @@ namespace syrec {
         }
 
         if (!additionalLine) {
-            for (auto& [input, output]: outputFreq) {
-                //check if the output is power of 2
-                if (std::ceil(std::log2(static_cast<double>(output))) != std::floor(std::log2(static_cast<double>(output)))) {
-                    auto        it     = outputFreq.find(input);
-                    std::size_t bitPos = 0U;
+            // ensure that all output frequencies are a power of two
+            for (auto it = outputFreq.begin(); it != outputFreq.end();) {
+                auto freq = it->second;
 
-                    while (output > 0) {
-                        if ((output % 2) != 0U) {
-                            outputFreq.emplace(input, static_cast<uint64_t>((std::pow(2, bitPos))));
-                        }
-
-                        bitPos++;
-                        output = output / 2;
-                    }
-                    //erase the existing inp/out combination
-                    outputFreq.erase(it);
+                // continue if the output frequency is a power of two
+                if ((freq & (freq - 1U)) == 0U) {
+                    ++it;
+                    continue;
                 }
+
+                // split frequency into powers of two
+                std::size_t bitPos = 0U;
+                while (freq > 0U) {
+                    if ((freq & 1U) == 1U) {
+                        outputFreq.emplace(it->first, 1U << bitPos);
+                    }
+                    freq >>= 1U;
+                    ++bitPos;
+                }
+                // need to update iterator after erasing to avoid invalidating it
+                it = outputFreq.erase(it);
             }
         }
 
@@ -115,14 +117,15 @@ namespace syrec {
             minHeap.emplace(std::move(top));
         }
 
-        const auto requiredGarbage = minHeap.top()->freq;
+        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
+        const auto                                               requiredGarbage = minHeap.top()->freq;
         // determine encoding from Huffman tree
         std::multimap<TruthTable::Cube, TruthTable::Cube> encoding{};
         minHeap.top()->traverse({}, encoding);
 
         // resize all outputs to the correct size (by adding don't care values)
         for (auto& [input, output]: encoding) {
-            auto freq = static_cast<uint64_t>(std::pow(2, requiredGarbage - output.size()));
+            auto freq = 1U << (requiredGarbage - output.size());
             output.resize(requiredGarbage);
 
             if (!additionalLine) {
@@ -137,7 +140,7 @@ namespace syrec {
         for (auto& [input, output]: tt) {
             if (!additionalLine) {
                 const auto out = output;
-                output         = (encFreq[out].top());
+                output         = encFreq[out].top();
                 encFreq[out].pop();
             } else {
                 output = encoding.find(output)->second;
