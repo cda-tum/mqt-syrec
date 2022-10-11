@@ -78,7 +78,7 @@ TEST_P(SyrecAddLinesSynthesisTest, GenericSynthesisTest) {
     errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
 
-    EXPECT_TRUE(CostAware::synthesize(circ, prog));
+    EXPECT_TRUE(CostAwareSynthesis::synthesize(circ, prog));
 
     qc = circ.quantumCost();
     tc = circ.transistorCost();

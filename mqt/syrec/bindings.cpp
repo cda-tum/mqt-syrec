@@ -85,8 +85,8 @@ PYBIND11_MODULE(pysyrec, m) {
             .def_readwrite("targets", &Gate::targets)
             .def_readwrite("type", &Gate::type);
 
-    m.def("cost_aware_synthesis", &CostAware::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
-    m.def("line_aware_synthesis", &LineAware::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
+    m.def("cost_aware_synthesis", &CostAwareSynthesis::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
+    m.def("line_aware_synthesis", &LineAwareSynthesis::synthesize, "circ"_a, "program"_a, "settings"_a = Properties::ptr(), "statistics"_a = Properties::ptr());
     m.def("simple_simulation", &simpleSimulation, "output"_a, "circ"_a, "input"_a, "statistics"_a = Properties::ptr());
 
 #ifdef VERSION_INFO

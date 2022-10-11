@@ -137,8 +137,8 @@ class SyReCEditor(QtWidgets.QWidget):
     before_build: Callable[[], None] = None
     parser_failed: Callable[[str], None] = None
 
-    synthesize_with_additional_lines = 0
-    synthesize_without_additional_lines = 0
+    cost_aware_synthesis = 0
+    line_aware_synthesis = 0
 
     def __init__(self, parent=None):
         super().__init__()
@@ -175,7 +175,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         self.buttonLineAware = QtWidgets.QRadioButton("Line-aware synthesis", self)
         self.buttonLineAware.setChecked(True)
-        self.synthesize_without_additional_lines = 1
+        self.line_aware_synthesis = 1
         self.buttonLineAware.toggled.connect(self.item_selected)
 
         self.sim_action.setDisabled(True)
@@ -198,26 +198,26 @@ class SyReCEditor(QtWidgets.QWidget):
         # if first button is selected
         if self.sender() == self.butonCostAware:
             if self.butonCostAware.isChecked():
-                self.synthesize_with_additional_lines = 1
-                self.synthesize_without_additional_lines = 0
+                self.cost_aware_synthesis = 1
+                self.line_aware_synthesis = 0
                 # making other check box to uncheck
                 self.buttonLineAware.setChecked(False)
             else:
-                self.synthesize_with_additional_lines = 0
-                self.synthesize_without_additional_lines = 1
+                self.cost_aware_synthesis = 0
+                self.line_aware_synthesis = 1
                 # making other check box to uncheck
                 self.buttonLineAware.setChecked(True)
 
         # if second button is selected
         elif self.sender() == self.buttonLineAware:
             if self.buttonLineAware.isChecked():
-                self.synthesize_with_additional_lines = 0
-                self.synthesize_without_additional_lines = 1
+                self.cost_aware_synthesis = 0
+                self.line_aware_synthesis = 1
                 # making other check box to uncheck
                 self.butonCostAware.setChecked(False)
             else:
-                self.synthesize_with_additional_lines = 1
-                self.synthesize_without_additional_lines = 0
+                self.cost_aware_synthesis = 1
+                self.line_aware_synthesis = 0
                 # making other check box to uncheck
                 self.butonCostAware.setChecked(True)
 
@@ -271,7 +271,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         self.circ = syrec.circuit()
 
-        if self.synthesize_with_additional_lines:
+        if self.cost_aware_synthesis:
             syrec.cost_aware_synthesis(self.circ, self.prog)
         else:
             syrec.line_aware_synthesis(self.circ, self.prog)

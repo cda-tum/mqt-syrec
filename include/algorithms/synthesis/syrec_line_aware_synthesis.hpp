@@ -3,7 +3,7 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 
 namespace syrec {
-    class LineAware: public SyrecSynthesis {
+    class LineAwareSynthesis: public SyrecSynthesis {
     public:
         using SyrecSynthesis::SyrecSynthesis;
 

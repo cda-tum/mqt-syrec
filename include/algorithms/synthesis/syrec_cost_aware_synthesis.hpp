@@ -3,7 +3,7 @@
 #include "algorithms/synthesis/syrec_synthesis.hpp"
 
 namespace syrec {
-    class CostAware: public SyrecSynthesis {
+    class CostAwareSynthesis: public SyrecSynthesis {
     public:
         using SyrecSynthesis::SyrecSynthesis;
 

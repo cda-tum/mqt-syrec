@@ -59,7 +59,7 @@ TEST_P(SyrecAddLinesSimulationTest, GenericSimulationTest) {
     errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
 
-    EXPECT_TRUE(CostAware::synthesize(circ, prog));
+    EXPECT_TRUE(CostAwareSynthesis::synthesize(circ, prog));
 
     input.resize(circ.getLines());
 
