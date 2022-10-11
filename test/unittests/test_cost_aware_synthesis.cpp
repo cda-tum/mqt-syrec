@@ -1,4 +1,4 @@
-#include "algorithms/synthesis/syrec_synthesis_no_additional_lines.hpp"
+#include "algorithms/synthesis/syrec_cost_aware_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 using namespace syrec;
 
-class SyrecSynthesisTest: public testing::TestWithParam<std::string> {
+class SyrecAddLinesSynthesisTest: public testing::TestWithParam<std::string> {
 protected:
     std::string  testConfigsDir  = "./configs/";
     std::string  testCircuitsDir = "./circuits/";
@@ -27,7 +27,7 @@ protected:
     void SetUp() override {
         std::string synthesisParam = GetParam();
         fileName                   = testCircuitsDir + GetParam() + ".src";
-        std::ifstream i(testConfigsDir + "circuits_synthesis.json");
+        std::ifstream i(testConfigsDir + "circuits_cost_aware_synthesis.json");
         json          j  = json::parse(i);
         expectedNumGates = j[synthesisParam]["num_gates"];
         expectedLines    = j[synthesisParam]["lines"];
@@ -36,7 +36,7 @@ protected:
     }
 };
 
-INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
+INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecAddLinesSynthesisTest,
                          testing::Values(
                                  "alu_2",
                                  "binary_numeric",
@@ -64,12 +64,12 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                                  "single_longstatement_4",
                                  "skip",
                                  "swap_2"),
-                         [](const testing::TestParamInfo<SyrecSynthesisTest::ParamType>& info) {
+                         [](const testing::TestParamInfo<SyrecAddLinesSynthesisTest::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
                              return s; });
 
-TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
+TEST_P(SyrecAddLinesSynthesisTest, GenericSynthesisTest) {
     Circuit             circ;
     program             prog;
     ReadProgramSettings settings;
@@ -78,7 +78,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
 
-    EXPECT_TRUE(SyrecSynthesisNoAdditionalLines::synthesize(circ, prog));
+    EXPECT_TRUE(CostAwareSynthesis::synthesize(circ, prog));
 
     qc = circ.quantumCost();
     tc = circ.transistorCost();
