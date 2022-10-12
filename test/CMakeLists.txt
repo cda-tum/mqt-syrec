@@ -41,10 +41,10 @@ endmacro()
 package_add_test(
   ${PROJECT_NAME}_test
   unittests/test_parser.cpp
-  unittests/test_synthesis.cpp
-  unittests/test_simulation.cpp
-  unittests/test_add_lines_synthesis.cpp
-  unittests/test_add_lines_simulation.cpp
+  unittests/test_line_aware_synthesis.cpp
+  unittests/test_line_aware_simulation.cpp
+  unittests/test_cost_aware_synthesis.cpp
+  unittests/test_cost_aware_simulation.cpp
   unittests/test_tt_to_dd.cpp
   unittests/test_extend_tt.cpp
   unittests/test_huffman.cpp
