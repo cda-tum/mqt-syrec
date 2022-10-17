@@ -123,8 +123,9 @@ namespace syrec {
         auto srcSaved = modifySrc;
         modifySrc     = dd->multiply(modifySrc, dd::getDD(&op, dd));
 
+        //The below debug statements should always return "circuit is going as planned in operation function". However, for the "urf3" benchmark, it returns "circuit is not going as planned".
         /*if (srcSaved == dd->multiply(modifySrc , dd::getDD(&op, dd))){
-                std::cout << "circuit is going as planned"<< std::endl;
+                std::cout << "circuit is going as planned operation function"<< std::endl;
         }*/
 
         dd->incRef(modifySrc);
