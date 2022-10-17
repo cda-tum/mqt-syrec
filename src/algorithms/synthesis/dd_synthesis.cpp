@@ -95,7 +95,7 @@ namespace syrec {
         }
     }
 
-    //This function stores all the ctrls not concerning root/src of the dd.
+    //This function stores all the ctrls of the node pointed by current not concerning root/src of the dd.
     auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void {
         for (std::size_t i = 0; i < ctrlCube.size(); i++) {
             if (ctrlCube[i].has_value() && *(ctrlCube[i])) {
@@ -106,7 +106,7 @@ namespace syrec {
         }
     }
 
-    //This function stores all the ctrls concerning the root/src of the dd.
+    //This function stores all the ctrls of the node pointed by current concerning the root/src of the dd.
     auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void {
         for (std::size_t j = 0; j < ctrlCube.size(); j++) {
             if (ctrlCube[j].has_value() && *(ctrlCube[j])) {
@@ -117,9 +117,9 @@ namespace syrec {
         }
     }
 
-    //This function performs the multi-control X operation. First, the dd is modified accordingly. Later on, the qc is emplaced with the same operation.
-    auto DDSynthesizer::operation(dd::Qubit const& totalQubits, dd::Qubit const& targetQubit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
-        auto op       = qc::StandardOperation(totalQubits, ctrl, targetQubit, qc::X);
+    //This function performs the multi-control (if any) X operation. First, the dd is modified accordingly. Later on, the qc is emplaced with the same operation.
+    auto DDSynthesizer::operation(dd::Qubit const& totalBits, dd::Qubit const& targetBit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
+        auto op       = qc::StandardOperation(totalBits, ctrl, targetBit, qc::X);
         auto srcSaved = modifySrc;
         modifySrc     = dd->multiply(modifySrc, dd::getDD(&op, dd));
 
@@ -131,7 +131,7 @@ namespace syrec {
         dd->decRef(srcSaved);
         dd->garbageCollect();
 
-        qc.x(targetQubit, ctrl);
+        qc.x(targetBit, ctrl);
         numGates += 1;
     }
 
@@ -162,6 +162,7 @@ namespace syrec {
     auto DDSynthesizer::shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         TruthTable::Cube::Vector uniqueCubeVec;
 
+        //Collect all the unique p' paths.
         for (const auto& p2Cube: p2SigVec) {
             auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Cube);
             if (it == p1SigVec.end()) {
@@ -217,6 +218,7 @@ namespace syrec {
             }
         }
 
+        // return one of the missing cubes.
         TruthTable::Cube missCube{TruthTable::Cube::findMissingCube(p1SigVec)};
 
         TruthTable::Cube ctrlVec;
@@ -225,6 +227,7 @@ namespace syrec {
         ctrlVec.resize(p2SigVec[indices[0]].size());
         targetVec.resize(p2SigVec[indices[0]].size());
 
+        // accordingly store the controls and targets.
         for (std::size_t p2Obj = 0; p2Obj < p2SigVec[indices[0]].size(); p2Obj++) {
             if (p2SigVec[indices[0]][p2Obj] == missCube[p2Obj]) {
                 ctrlVec[p2Obj] = missCube[p2Obj];
@@ -263,7 +266,7 @@ namespace syrec {
         return unifyPathSrc;
     }
 
-    //This algorithm ensures that the node pointed by current is an identity structure (refer to algorithm P of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf)
+    //This algorithm ensures that the node pointed by current is an identity structure (refer to algorithm P of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf).
     auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         dd::mEdge shiftUniquePathsSrc;
 
@@ -280,7 +283,9 @@ namespace syrec {
         pathSignature(current.p->e[0], p1SigVec, p1TempVec);
         pathSignature(current.p->e[1], p2SigVec, p2TempVec);
 
+        // P1 algorithm.
         if (auto swapPathsSrc = swapPaths(src, current, p1SigVec, p2SigVec, dd); swapPathsSrc == src) {
+            // P2 algorithm.
             shiftUniquePathsSrc = shiftUniquePaths(src, current, p1SigVec, p2SigVec, dd);
 
         } else {
@@ -288,15 +293,18 @@ namespace syrec {
         }
 
         if (shiftUniquePathsSrc == src) {
+            // P3 algorithm.
             if (terminate(current)) {
                 return src;
             }
 
+            // P4 algorithm.
             return unifyPath(src, current, p1SigVec, p2SigVec, dd);
         }
         return shiftUniquePathsSrc;
     }
 
+    //This algorithm ensures that the whole dd node is an identity structure (refer to algorithm Q of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf).
     auto DDSynthesizer::synthesizeRec(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         auto start = std::chrono::steady_clock::now();
 
@@ -315,10 +323,13 @@ namespace syrec {
         q.emplace(src);
         visited.emplace(src);
 
+        //BFS traversal.
+
         while (!q.empty()) {
             auto newEdge = q.front();
             q.pop();
 
+            //The below debug statements should always return "circuit is going as planned after identity". However, for the "urf3" benchmark, it returns "circuit is not going as planned after identity".
             if (auto shiftingPathsSrc = shiftingPaths(src, newEdge, dd); shiftingPathsSrc != src) {
                 if (shiftingPathsSrc.p->isIdentity()) {
                     /*if (srcGlobal == dd->multiply(shiftingPathsSrc , dd::buildFunctionality(&qc, dd))){
@@ -331,6 +342,7 @@ namespace syrec {
                     return shiftingPathsSrc;
                 }
 
+                //The below debug statements should always return "circuit is going as planned". However, for the "urf3" benchmark, it returns "circuit is not going as planned".
                 /*if (srcGlobal == dd->multiply(shiftingPathsSrc , dd::buildFunctionality(&qc, dd))){
                     std::cout << "circuit is going as planned"<< std::endl;
                 }
@@ -359,6 +371,7 @@ namespace syrec {
         return src;
     }
 
+    //This function returns the operations required to synthesize the dd.
     auto DDSynthesizer::synthesize(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
         qc.clear();
         time     = 0;

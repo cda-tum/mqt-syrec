@@ -36,8 +36,7 @@ namespace syrec {
 
         auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) const -> void;
 
-        auto operation(dd::Qubit const& totalQubits, dd::Qubit const& targetQubit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
-
+        auto        operation(dd::Qubit const& totalBits, dd::Qubit const& targetBit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
         static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void;
 
         static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void;
