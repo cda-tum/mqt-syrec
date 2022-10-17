@@ -46,7 +46,7 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
                                  "urf1",
                                  "urf2",
                                  "urf5",
-                                 "14_bit"),
+                                 "urf3"),
                          [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');

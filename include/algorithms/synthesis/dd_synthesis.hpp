@@ -14,7 +14,7 @@ namespace syrec {
         DDSynthesizer() = default;
 
         explicit DDSynthesizer(std::size_t nqubits):
-            qc(nqubits), qcSingleOp(nqubits) {}
+            qc(nqubits) {}
 
         auto synthesize(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation&;
 
@@ -26,25 +26,29 @@ namespace syrec {
             return time;
         }
 
-        qc::QuantumComputation qc;
-
     private:
-        qc::QuantumComputation qcSingleOp;
         double                 time     = 0;
         std::size_t            numGates = 0U;
         dd::mEdge              srcGlobal{};
+        qc::QuantumComputation qc;
 
         auto pathFromSrcDst(dd::mEdge const& src, dd::mEdge const& dst, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) const -> void;
 
         auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& tempVec) const -> void;
 
+        auto operation(dd::Qubit const& totalQubits, dd::Qubit const& targetQubit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
+
+        static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void;
+
+        static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void;
+
+        auto swapPaths(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+
+        auto shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+
         static auto terminate(dd::mEdge const& current) -> bool;
 
-        auto unifyPath(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, const std::vector<std::size_t>& indices, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
-
-        auto swapPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
-
-        auto shiftUniquePaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+        auto unifyPath(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
         auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
