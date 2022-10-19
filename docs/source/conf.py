@@ -13,6 +13,8 @@ author = "Smaran Adarsh"
 
 release = metadata.version("mqt.syrec")
 version = ".".join(release.split(".")[:3])
+language = "en"
+copyright = "Chair for Design Automation, Technical University of Munich"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -28,6 +30,17 @@ extensions = [
     "sphinx_copybutton",
     "hoverxref.extension",
 ]
+
+nbsphinx_execute = "auto"  # auto, never
+
+highlight_language = "python3"
+
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'png2x'}",
+    "--InlineBackend.rc=figure.dpi=96",
+]
+
+nbsphinx_kernel_name = "python3"
 
 autosectionlabel_prefix_document = True
 
@@ -45,7 +58,7 @@ hoverxref_role_types = {
     "attr": "tooltip",
     "property": "tooltip",
 }
-
+exclude_patterns = ["_build", "build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store", ".env"]
 
 class CDAStyle(UnsrtStyle):
     def format_url(self, e):
@@ -66,3 +79,5 @@ autosummary_generate = True
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
+html_baseurl = "https://syrec.readthedocs.io/en/latest/"
+autodoc_member_order = "groupwise"
