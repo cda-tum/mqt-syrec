@@ -289,4 +289,4 @@ To build the documentation without (re-)installing the Python package, you can u
             (venv) $ sphinx-build -b html docs/source docs/build
 
         The docs can then be found in the :code:`docs/build` directory.
-        
+

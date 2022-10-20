@@ -33,4 +33,3 @@ body:
         When I do X, I want to achieve Y in a situation when Z.
     validations:
       required: true
-      

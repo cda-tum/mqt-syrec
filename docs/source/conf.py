@@ -60,6 +60,7 @@ hoverxref_role_types = {
 }
 exclude_patterns = ["_build", "build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store", ".env"]
 
+
 class CDAStyle(UnsrtStyle):
     def format_url(self, e):
         url = field("url", raw=True)
