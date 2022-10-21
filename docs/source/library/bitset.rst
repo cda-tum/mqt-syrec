@@ -1,5 +1,5 @@
 bitset
-====
+======
 
 Class representing the boost::dynamic_bitset<>.
 

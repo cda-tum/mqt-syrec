@@ -33,7 +33,29 @@ Initial Setup
 
     Now you can make your changes locally.
 
-5. (Optional, **highly recommended**) Set up a virtual environment
+5. Building the project requires Boost library with a minimum version of *1.71.0*
+
+    .. tip::
+
+        Boost library can be installed by running the following commands:
+
+        Linux
+
+        .. code-block:: console
+
+                $ sudo apt-get -y install libboost-all-dev
+
+        macOS
+
+        .. code-block:: console
+
+                $ brew install boost
+
+        Windows
+
+                please refer to `MarkusJx/install-boost <https://github.com/MarkusJx/install-boost>`_ .
+
+6. (Optional, **highly recommended**) Set up a virtual environment
 
     .. code-block:: console
 
@@ -55,7 +77,7 @@ Initial Setup
 
         (venv) $ pip install --upgrade pip, setuptools, wheel
 
-6. (Optional, **highly recommended**) Setup `nox <https://nox.thea.codes/en/stable/index.html>`_ to conveniently run many development tasks.
+7. (Optional, **highly recommended**) Setup `nox <https://nox.thea.codes/en/stable/index.html>`_ to conveniently run many development tasks.
 
     .. code-block:: console
 
@@ -74,7 +96,7 @@ Initial Setup
 
         If you use macOS, then pipx is in brew, use :code:`brew install pipx`.
 
-7. (Optional) Install `pre-commit <https://pre-commit.com/>`_ to automatically run a set of checks before each commit.
+8. (Optional) Install `pre-commit <https://pre-commit.com/>`_ to automatically run a set of checks before each commit.
 
     .. code-block:: console
 
@@ -86,7 +108,7 @@ Initial Setup
 Working on the core C++ library
 ###############################
 
-Building the project requires a C++ compiler supporting *C++17* and CMake with a minimum version of *3.14*.
+Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.14* and Boost library with a minimum version of *1.71.0*.
 
     .. note::
         We noticed some issues when compiling with Microsoft's *MSCV* compiler toolchain.

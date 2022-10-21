@@ -1,5 +1,5 @@
 gate_type
-=============
+=========
 
 Enum holding different types of reversible gates.
 

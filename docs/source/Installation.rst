@@ -18,11 +18,6 @@ Once installed, start the SyReC editor GUI by running:
 
 In most practical cases (under 64-bit Linux, MacOS incl. Apple Silicon), this requires no compilation and merely downloads and installs a platform-specific pre-built wheel.
 
-.. warning::
-        Currently the FLINT2 dependency is not automatically installed. Thus, windows users need to install FLINT2 by hand.
-        Either by building `from source <http://www.flintlib.org/doc/building.html>`_ or downloading the corresponding `.zip file <http://www.flintlib.org/downloads.html>`_.
-        We are working towards fixing this issue.
-
 .. note::
     In order to set up a virtual environment, you can use the following commands:
 
@@ -53,7 +48,7 @@ In order to get the best performance out of SyReC and enable platform-specific c
 
         (venv) $ pip install mqt.syrec --no-binary mqt.syrec
 
-This requires a `C++ compiler <https://en.wikipedia.org/wiki/List_of_compilers#C++_compilers>`_ compiler supporting *C++17* and a minimum `CMake <https://cmake.org/>`_ version of *3.14*.
+This requires a `C++ compiler <https://en.wikipedia.org/wiki/List_of_compilers#C++_compilers>`_ compiler supporting *C++17*, a minimum `CMake <https://cmake.org/>`_ version of *3.14* and `Boost library <https://www.boost.org/>`_ with a minimum version of *1.71.0*.
 
 The library is continuously tested under Linux, MacOS, and Windows using the `latest available system versions for GitHub Actions <https://github.com/actions/virtual-environments>`_.
 In order to access the latest build logs, visit `syrec/actions/workflows/ci.yml <https://github.com/cda-tum/syrec/actions/workflows/ci.yml>`_.

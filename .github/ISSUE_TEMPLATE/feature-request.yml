@@ -3,7 +3,7 @@ description: Suggest an idea
 title: "✨ <title>"
 labels: ["enhancement"]
 assignees:
-  - burgholzer
+  - SmaranTum
 body:
   - type: markdown
     attributes:

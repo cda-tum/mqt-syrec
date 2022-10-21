@@ -31,17 +31,6 @@ extensions = [
     "hoverxref.extension",
 ]
 
-nbsphinx_execute = "auto"  # auto, never
-
-highlight_language = "python3"
-
-nbsphinx_execute_arguments = [
-    "--InlineBackend.figure_formats={'png2x'}",
-    "--InlineBackend.rc=figure.dpi=96",
-]
-
-nbsphinx_kernel_name = "python3"
-
 autosectionlabel_prefix_document = True
 
 hoverxref_auto_ref = True

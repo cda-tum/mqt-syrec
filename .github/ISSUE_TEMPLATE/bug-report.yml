@@ -3,7 +3,7 @@ description: Something is not working correctly.
 title: "🐛 <title>"
 labels: ["bug"]
 assignees:
-  - burgholzer
+  - SmaranTum
 body:
   - type: markdown
     attributes:
