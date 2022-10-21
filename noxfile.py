@@ -28,6 +28,7 @@ def tests(session: Session) -> None:
         session.install("-e", ".[test]")
     session.run("pytest", *session.posargs)
 
+
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def coverage(session: Session) -> None:
     """
@@ -42,6 +43,7 @@ def coverage(session: Session) -> None:
     if run_install:
         session.install("-e", ".[coverage]")
     session.run("pytest", "--cov", *session.posargs)
+
 
 @nox.session
 def lint(session: Session) -> None:
@@ -69,6 +71,7 @@ def pylint(session: Session) -> None:
         session.install("-e", ".")
     session.run("pylint", "mqt.syrec", "--extension-pkg-allow-list=mqt.syrec.pysyrec", *session.posargs)
 
+
 @nox.session
 def mypy(session: Session) -> None:
     """
@@ -77,6 +80,7 @@ def mypy(session: Session) -> None:
     """
     session.install("pre-commit")
     session.run("pre-commit", "run", "--all-files", "--hook-stage", "manual", "mypy", *session.posargs)
+
 
 @nox.session
 def docs(session: Session) -> None:
