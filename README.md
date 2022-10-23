@@ -8,26 +8,26 @@
 # MQT SyReC Synthesizer - A Programming Language for the Synthesis of Reversible Circuits
 
 A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
-*SyReC Synthesizer* is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
+_SyReC Synthesizer_ is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
 
 If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/syrec/issues).
 
 ## Getting Started
 
-*SyReC Synthesizer* is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
+_SyReC Synthesizer_ is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
 
 - In order to make the library as easy to use as possible (without compilation), we provide pre-built wheels for most common platforms (64-bit Linux, MacOS, Windows). These can be installed using
   ```bash
   (venv) $ pip install mqt.syrec
   ```
-- Once installed, start the *SyReC Synthesizer* editor GUI by running:
+- Once installed, start the _SyReC Synthesizer_ editor GUI by running:
   ```bash
   (venv) $ syrec-editor
   ```
 
 ## Reference
 
-*SyReC Synthesizer* has been developed based on methods proposed in the following papers:
+_SyReC Synthesizer_ has been developed based on methods proposed in the following papers:
 
 <details open>
 <summary>[1] Robert Wille, Sebastian Offermann, and Rolf Drechsler. "SyReC: A Programming Language for Synthesis of Reversible Circuits". In Forum on Specification and Design Languages (FDL), 2010</summary>
