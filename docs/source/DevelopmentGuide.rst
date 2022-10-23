@@ -33,11 +33,11 @@ Initial Setup
 
     Now you can make your changes locally.
 
-5. Building the project requires Boost library with a minimum version of *1.71.0*
+5. Building the project requires the Boost libraries with a minimum version of *1.71.0*
 
     .. tip::
 
-        Boost library can be installed by running the following commands:
+        The Boost libraries can be installed by running the following commands:
 
         Linux
 
@@ -53,7 +53,7 @@ Initial Setup
 
         Windows
 
-                please refer to `MarkusJx/install-boost <https://github.com/MarkusJx/install-boost>`_ .
+                please refer to documentation provided in `Boost library <https://www.boost.org/doc/libs/1_80_0/more/getting_started/windows.html>`_ .
 
 6. (Optional, **highly recommended**) Set up a virtual environment
 
@@ -108,7 +108,7 @@ Initial Setup
 Working on the core C++ library
 ###############################
 
-Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.14* and Boost library with a minimum version of *1.71.0*.
+Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.14*, and the Boost libraries with a minimum version of *1.71.0*.
 
     .. note::
         We noticed some issues when compiling with Microsoft's *MSCV* compiler toolchain.

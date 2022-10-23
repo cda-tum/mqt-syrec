@@ -8,7 +8,7 @@ from pybtex.style.formatting.unsrt import Style as UnsrtStyle
 from pybtex.style.template import field, href
 
 # -- Project information -----------------------------------------------------
-project = "SyReC"
+project = "*SyReC Synthesizer*"
 author = "Smaran Adarsh"
 
 release = metadata.version("mqt.syrec")

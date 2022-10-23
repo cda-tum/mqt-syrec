@@ -1,7 +1,7 @@
 Support
 =======
 
-If you are stuck with a problem using SyReC or are having questions, please do get in touch at our `Issues <https://github.com/cda-tum/syrec/issues>`_ or `Discussions <https://github.com/cda-tum/syrec/discussions>`_. We'd love to help.
+If you are stuck with a problem using *SyReC Synthesizer* or are having questions, please do get in touch at our `Issues <https://github.com/cda-tum/syrec/issues>`_ or `Discussions <https://github.com/cda-tum/syrec/discussions>`_. We'd love to help.
 
 You can save time by following this procedure when reporting a problem:
 
