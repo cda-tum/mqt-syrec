@@ -20,7 +20,7 @@ _SyReC Synthesizer_ is available via [PyPI](https://pypi.org/project/mqt.syrec/)
   ```bash
   (venv) $ pip install mqt.syrec
   ```
-- Once installed, start the _SyReC Synthesizer_ editor GUI by running:
+- Once installed, start the _SyReC Synthesizer_ GUI by running:
   ```bash
   (venv) $ syrec-editor
   ```

@@ -1,4 +1,4 @@
-Welcome to *SyReC Synthesizer*'s documentation!
+Welcome to the documentation of the SyReC Synthesizer!
 =================================
 
 *SyReC Synthesizer* is a tool for HDL-based synthesis of reversible circuits developed as part of the
