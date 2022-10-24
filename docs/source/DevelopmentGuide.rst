@@ -33,7 +33,7 @@ Initial Setup
 
     Now you can make your changes locally.
 
-5. Building the project requires the Boost libraries with a minimum version of *1.71.0*
+5. Building the project requires the Boost libraries with a minimum version of *1.71.0*.
 
     .. tip::
 

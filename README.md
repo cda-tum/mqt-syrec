@@ -31,8 +31,6 @@ _SyReC Synthesizer_ has been developed based on methods proposed in the followin
 
 <details open>
 <summary>[1] Robert Wille, Sebastian Offermann, and Rolf Drechsler. "SyReC: A Programming Language for Synthesis of Reversible Circuits". In Forum on Specification and Design Languages (FDL), 2010</summary>
-<summary>[2] Robert Wille, Eleonora Schönborn, Mathias Soeken, and Rolf Drechsler. "SyReC: A Hardware Description Language for the Specification and Synthesis of Reversible Circuits". INTEGRATION, the VLSI Jour., 2016</summary>
-<summary>[3] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
 
 ```bibtex
 
@@ -43,6 +41,14 @@ _SyReC Synthesizer_ has been developed based on methods proposed in the followin
   year={2010},
   url = {http://www.informatik.uni-bremen.de/agra/doc/konf/10_syrec_reversible_hardware_language.pdf},
 }
+```
+
+</details>
+
+<details open>
+<summary>[2] Robert Wille, Eleonora Schönborn, Mathias Soeken, and Rolf Drechsler. "SyReC: A Hardware Description Language for the Specification and Synthesis of Reversible Circuits". INTEGRATION, the VLSI Jour., 2016</summary>
+
+```bibtex
 
 @article{wille2016syrec,
   author={Wille, Robert and Sch{\"o}nborn, Eleonora and Soeken, Mathias and Drechsler, Rolf},
@@ -52,7 +58,14 @@ _SyReC Synthesizer_ has been developed based on methods proposed in the followin
   publisher={Elsevier},
   url = {https://www.sciencedirect.com/science/article/abs/pii/S016792601500125X?via%3Dihub},
 }
+```
 
+</details>
+
+<details open>
+<summary>[3] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
+
+```bibtex
 @inproceedings{wille2019towardsHDLsynthesis,
     author = {Wille, Robert and Haghparast, Majid and Adarsh, Smaran and M, Tanmay},
     title = {Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines},
