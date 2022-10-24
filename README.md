@@ -8,31 +8,29 @@
 # MQT SyReC Synthesizer - A Programming Language for the Synthesis of Reversible Circuits
 
 A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
-*SyReC Synthesizer* is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
+_SyReC Synthesizer_ is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
 
 If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/syrec/issues).
 
 ## Getting Started
 
-*SyReC Synthesizer* is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
+_SyReC Synthesizer_ is available via [PyPI](https://pypi.org/project/mqt.syrec/) for Linux, macOS, and Windows.
 
 - In order to make the library as easy to use as possible (without compilation), we provide pre-built wheels for most common platforms (64-bit Linux, MacOS, Windows). These can be installed using
   ```bash
   (venv) $ pip install mqt.syrec
   ```
-- Once installed, start the *SyReC Synthesizer* editor GUI by running:
+- Once installed, start the _SyReC Synthesizer_ editor GUI by running:
   ```bash
   (venv) $ syrec-editor
   ```
 
 ## Reference
 
-*SyReC Synthesizer* has been developed based on methods proposed in the following papers:
+_SyReC Synthesizer_ has been developed based on methods proposed in the following papers:
 
 <details open>
 <summary>[1] Robert Wille, Sebastian Offermann, and Rolf Drechsler. "SyReC: A Programming Language for Synthesis of Reversible Circuits". In Forum on Specification and Design Languages (FDL), 2010</summary>
-<summary>[2] Robert Wille, Eleonora Schönborn, Mathias Soeken, and Rolf Drechsler. "SyReC: A Hardware Description Language for the Specification and Synthesis of Reversible Circuits". INTEGRATION, the VLSI Jour., 2016</summary>
-<summary>[3] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
 
 ```bibtex
 
@@ -43,6 +41,14 @@ If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de]
   year={2010},
   url = {http://www.informatik.uni-bremen.de/agra/doc/konf/10_syrec_reversible_hardware_language.pdf},
 }
+```
+
+</details>
+
+<details open>
+<summary>[2] Robert Wille, Eleonora Schönborn, Mathias Soeken, and Rolf Drechsler. "SyReC: A Hardware Description Language for the Specification and Synthesis of Reversible Circuits". INTEGRATION, the VLSI Jour., 2016</summary>
+
+```bibtex
 
 @article{wille2016syrec,
   author={Wille, Robert and Sch{\"o}nborn, Eleonora and Soeken, Mathias and Drechsler, Rolf},
@@ -52,7 +58,14 @@ If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de]
   publisher={Elsevier},
   url = {https://www.sciencedirect.com/science/article/abs/pii/S016792601500125X?via%3Dihub},
 }
+```
 
+</details>
+
+<details open>
+<summary>[3] Robert Wille, Majid Haghparast, Smaran Adarsh, and Tanmay M. "Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines". In International Conference on Computer Aided Design (ICCAD), 2019</summary>
+
+```bibtex
 @inproceedings{wille2019towardsHDLsynthesis,
     author = {Wille, Robert and Haghparast, Majid and Adarsh, Smaran and M, Tanmay},
     title = {Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines},
