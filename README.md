@@ -44,7 +44,6 @@ Building (and running) is continuously tested under Linux, macOS, and Windows us
 
 _SyReC Synthesizer_ has been developed based on methods proposed in the following papers:
 
-
 [[1]](http://www.informatik.uni-bremen.de/agra/doc/konf/10_syrec_reversible_hardware_language.pdf)
 R. Wille, S. Offermann, and R. Drechsler. SyReC: A Programming Language for Synthesis of Reversible Circuits. In Forum on Specification and Design Languages (FDL), 2010.
 
