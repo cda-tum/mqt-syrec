@@ -27,7 +27,7 @@ are available:
        :alt: Adder circuit resulting from cost-aware synthesis.
        :align: center
 
-Furthermore, the tool allows to simulate the resulting circuit (By clicking on the |SimButtton| button) as well as to determine the gate costs of it (By clicking on the |CostButtton| button).
+Furthermore, the tool allows to simulate the resulting circuit (By clicking on the |SimButtton| button) as well as to determine the its gate costs (By clicking on the |CostButtton| button).
 
 .. |PlayButtton| image:: images/build.svg
    :width: 30
