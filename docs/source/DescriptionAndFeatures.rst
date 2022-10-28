@@ -20,7 +20,7 @@ are available:
        :align: center
 
     2. *Line-aware synthesis*:
-    This synthesis scheme aims to the keep the number of additional circuit lines as small as possible. To achieve this, the corresponding intermediate results of each operation are computed and stored using one of the available circuit lines (rather than additional circuit lines). Afterwards, the inputs are re-computed with the help of the corresponding inverse operations (for more details, refer :cite:p:`wille2019towardsHDLsynthesis`). Figure below depicts the circuit which results when synthesizing the SyReC Adder description using the line-aware scheme.
+    This synthesis scheme aims to the keep the number of additional circuit lines as small as possible. To achieve this, the corresponding intermediate results of each operation are computed and stored using one of the available circuit lines (rather than additional circuit lines). Afterwards, the inputs are re-computed with the help of the corresponding inverse operations (for more details, refer :cite:p:`wille2019towardsHDLsynthesis`). The figure below depicts the circuit which results when synthesizing the program from above using the line-aware scheme.
 
     .. image:: images/lineAwareAdder.svg
        :width: 500
