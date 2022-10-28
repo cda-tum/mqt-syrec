@@ -5,7 +5,7 @@
 [![Bindings](https://img.shields.io/github/workflow/status/cda-tum/syrec/Deploy%20to%20PyPI?style=flat-square&logo=github&label=python)](https://github.com/cda-tum/syrec/actions/workflows/deploy.yml)
 [![codecov](https://img.shields.io/codecov/c/github/cda-tum/syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/syrec)
 
-# MQT SyReC Synthesizer - A Programming Language for the Synthesis of Reversible Circuits
+# SyReC Synthesizer: An MQT Tool for the Synthesis of Reversible Circuits
 
 A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
 _SyReC Synthesizer_ is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
