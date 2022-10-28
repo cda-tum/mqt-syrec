@@ -12,7 +12,7 @@ This Adder computes the sum of the inputs x1 and x2 and stores the result in the
 are available:
 
     1. *Cost-aware synthesis*:
-    In this synthesis scheme, additional circuit lines (representing circuit signals) are introduced to store the corresponding intermediate results of each operation—thereby providing the liberty to accordingly modify the circuit without having any effect on the original inputs (for more details, refer :cite:p:`wille2010syrec` and :cite:p:`wille2016syrec`). This results in a circuit description where the gate costs are kept moderate at the expense of a substantially larger number of additionally needed circuit lines. Figure below depicts the circuit which results when synthesizing the SyReC Adder program.
+    In this synthesis scheme, additional circuit lines (representing circuit signals) are introduced to store the corresponding intermediate results of each operation—thereby providing the liberty to accordingly modify the circuit without having any effect on the original inputs (for more details, refer :cite:p:`wille2010syrec` and :cite:p:`wille2016syrec`). This results in a circuit description where the gate costs are kept moderate at the expense of a substantially larger number of additionally needed circuit lines. The following figure depicts the circuit which results when synthesizing the program from above.
 
     .. image:: images/costAwareAdder.svg
        :width: 400
