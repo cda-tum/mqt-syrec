@@ -1,7 +1,7 @@
 Description and Features
 ========================
 
-The *SyReC Synthesizer* allows users to automatically synthesize reversible circuits from a high-level HDL description. The proposed tool accepts any HDL description (example circuits (.src files) are available in test/circuits directory) following the SyReC grammar and syntax as described in detail in :cite:p:`wille2016syrec`. The tool provides an easy-to-use GUI with which the user can specify any preferred functionality. As an example, consider the SyReC program for a simple 2-bit Adder as shown in the figure below.
+The *SyReC Synthesizer* allows users to automatically synthesize reversible circuits from a high-level HDL description. The proposed tool accepts any HDL description following the SyReC grammar and syntax as described in detail in :cite:p:`wille2016syrec` (example circuits are available in the test/circuits directory). The tool provides an easy-to-use GUI with which the user can specify any preferred functionality. As an example, consider the SyReC program for a simple 2-bit Adder as shown in the figure below.
 
 .. image:: images/guiAdder.png
    :width: 500
