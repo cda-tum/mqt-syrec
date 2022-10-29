@@ -29,7 +29,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.1
+        uses: pypa/cibuildwheel@v2.11.2
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
@@ -45,7 +45,7 @@ jobs:
       - name: Install boost
         run: brew install boost
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.1
+        uses: pypa/cibuildwheel@v2.11.2
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
@@ -66,7 +66,7 @@ jobs:
           boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.1
+        uses: pypa/cibuildwheel@v2.11.2
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - uses: actions/upload-artifact@v3
@@ -86,7 +86,7 @@ jobs:
           curl -L -H "Authorization: Bearer QQ==" -o boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz https://ghcr.io/v2/homebrew/core/boost/blobs/sha256:${{ env.BOOST_HASH }}
           brew install -f boost-${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}.big_sur.bottle.tar.gz
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.1
+        uses: pypa/cibuildwheel@v2.11.2
         env:
           CIBW_ARCHS_MACOS: arm64
       - uses: actions/upload-artifact@v3
