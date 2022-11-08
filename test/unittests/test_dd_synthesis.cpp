@@ -12,7 +12,7 @@ class TestDDSynth: public testing::TestWithParam<std::string> {
 protected:
     TruthTable                     tt{};
     std::string                    testCircuitsDir = "./circuits/";
-    std::unique_ptr<dd::Package<>> ddSynth         = std::make_unique<dd::Package<>>(15U);
+    std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
     std::string                    fileName;
 
     void SetUp() override {
@@ -46,7 +46,7 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
                                  "urf1",
                                  "urf2",
                                  "urf5",
-                                 "urf6"), //Segfault detected for "urf6" benchmark (please comment the corresponding reference counts and garbage collection for faster testing)
+                                 "urf6"),
                          [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
@@ -54,18 +54,16 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
 
 TEST_P(TestDDSynth, GenericDDSynthesisTest) {
     EXPECT_TRUE(readPla(tt, fileName));
-
     extend(tt);
 
-    auto ttDD = buildDD(tt, ddSynth);
-
+    const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
     DDSynthesizer synthesizer(tt.nInputs());
+    const auto&   qc   = synthesizer.synthesize(ttDD, dd);
+    const auto&   qcDD = dd::buildFunctionality(&qc, dd);
+    EXPECT_EQ(ttDD, qcDD);
 
-    EXPECT_EQ(ttDD, dd::buildFunctionality(&synthesizer.synthesize(ttDD, ddSynth), ddSynth));
-
-    std::cout << synthesizer.numGate() << std::endl;
-
-    std::cout << synthesizer.getExecutionTime() << std::endl;
+    std::cout << synthesizer.numGate() << "\n";
+    std::cout << synthesizer.getExecutionTime() << "\n";
 }
