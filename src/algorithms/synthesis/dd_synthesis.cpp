@@ -306,7 +306,7 @@ namespace syrec {
         std::unordered_set<dd::mEdge> visited;
 
         if (src.p->isIdentity()) {
-            time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+            runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
             return;
         }
 
@@ -325,7 +325,7 @@ namespace syrec {
                 dd->garbageCollect();
 
                 if (shiftingPathsSrc.p->isIdentity()) {
-                    time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+                    runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
                     return;
                 }
 
@@ -350,13 +350,13 @@ namespace syrec {
             }
         }
 
-        time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+        runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
     }
 
     //This function returns the operations required to synthesize the dd.
     auto DDSynthesizer::synthesize(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
         qc.clear();
-        time     = 0;
+        runtime  = 0;
         numGates = 0U;
 
         srcGlobal = src;

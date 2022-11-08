@@ -23,11 +23,11 @@ namespace syrec {
         }
 
         [[nodiscard]] auto getExecutionTime() const -> double {
-            return time;
+            return runtime;
         }
 
     private:
-        double                 time     = 0;
+        double                 runtime  = 0.;
         std::size_t            numGates = 0U;
         dd::mEdge              srcGlobal{};
         qc::QuantumComputation qc;
