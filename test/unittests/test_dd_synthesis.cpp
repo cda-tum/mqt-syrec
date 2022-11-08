@@ -46,7 +46,7 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
                                  "urf1",
                                  "urf2",
                                  "urf5",
-                                 "urf3"),
+                                 "urf3"), //Segfault detected for "urf6" benchmark (please comment the corresponding reference counts and garbage collection for faster testing)
                          [](const testing::TestParamInfo<TestDDSynth::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');

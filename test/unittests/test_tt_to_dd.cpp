@@ -45,7 +45,7 @@ TEST_F(TruthTableDD, CNOT) {
 
     auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
-
+    dd->incRef(ttDD);
     auto qc = qc::QuantumComputation(2U);
     qc.x(0, 1_pc); // CNOT with target q0 and control q1
     EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
@@ -65,7 +65,7 @@ TEST_F(TruthTableDD, SWAP) {
 
     auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
-
+    dd->incRef(ttDD);
     auto qc = qc::QuantumComputation(2U);
     qc.swap(0, 1);
     EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));
@@ -85,7 +85,7 @@ TEST_F(TruthTableDD, Toffoli) {
 
     auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
-
+    dd->incRef(ttDD);
     auto qc = qc::QuantumComputation(3U);
     qc.x(0, {1_pc, 2_pc}); // Toffoli with target q0 and controls q1 and q2
     EXPECT_EQ(ttDD, dd::buildFunctionality(&qc, dd));

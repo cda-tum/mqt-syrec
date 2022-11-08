@@ -96,7 +96,7 @@ namespace syrec {
     }
 
     //This function stores all the ctrls of the node pointed by current not concerning root/src of the dd.
-    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void {
+    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         for (std::size_t i = 0; i < ctrlCube.size(); i++) {
             if (ctrlCube[i].has_value() && *(ctrlCube[i])) {
                 ctrl.emplace(dd::Control{static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1)), dd::Control::Type::pos});
@@ -107,7 +107,7 @@ namespace syrec {
     }
 
     //This function stores all the ctrls of the node pointed by current concerning the root/src of the dd.
-    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube ctrlCube) -> void {
+    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         for (std::size_t j = 0; j < ctrlCube.size(); j++) {
             if (ctrlCube[j].has_value() && *(ctrlCube[j])) {
                 ctrl.emplace(dd::Control{static_cast<dd::Qubit>((ctrlCube.size() + static_cast<std::size_t>(current.p->v)) - j), dd::Control::Type::pos});
@@ -119,18 +119,11 @@ namespace syrec {
 
     //This function performs the multi-control (if any) X operation. First, the dd is modified accordingly. Later on, the qc is emplaced with the same operation.
     auto DDSynthesizer::operation(dd::Qubit const& totalBits, dd::Qubit const& targetBit, dd::mEdge& modifySrc, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
-        auto op       = qc::StandardOperation(totalBits, ctrl, targetBit, qc::X);
-        auto srcSaved = modifySrc;
-        modifySrc     = dd->multiply(modifySrc, dd::getDD(&op, dd));
+        auto op = qc::StandardOperation(totalBits, ctrl, targetBit, qc::X);
 
-        //The below debug statements should always return "circuit is going as planned in operation function". However, for the "urf3" benchmark, it returns "circuit is not going as planned".
-        /*if (srcSaved == dd->multiply(modifySrc , dd::getDD(&op, dd))){
-                std::cout << "circuit is going as planned operation function"<< std::endl;
-        }*/
+        modifySrc = dd->multiply(modifySrc, dd::getDD(&op, dd));
 
         dd->incRef(modifySrc);
-        dd->decRef(srcSaved);
-        dd->garbageCollect();
 
         qc.x(targetBit, ctrl);
         numGates += 1;
@@ -220,7 +213,7 @@ namespace syrec {
         }
 
         // return one of the missing cubes.
-        TruthTable::Cube missCube{TruthTable::Cube::findMissingCube(p1SigVec)};
+        TruthTable::Cube const& missCube{TruthTable::Cube::findMissingCube(p1SigVec)};
 
         TruthTable::Cube ctrlVec;
         TruthTable::Cube targetVec;
@@ -306,19 +299,15 @@ namespace syrec {
     }
 
     //This algorithm ensures that the whole dd node is an identity structure (refer to algorithm Q of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf).
-    auto DDSynthesizer::synthesizeRec(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::synthesizeRec(dd::mEdge const& src, std::unique_ptr<dd::Package<>>& dd) -> void {
         auto start = std::chrono::steady_clock::now();
-
-        if (src.p->ref == 0U) {
-            dd->incRef(src);
-        }
 
         std::queue<dd::mEdge>         q;
         std::unordered_set<dd::mEdge> visited;
 
         if (src.p->isIdentity()) {
             time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
-            return src;
+            return;
         }
 
         q.emplace(src);
@@ -330,29 +319,22 @@ namespace syrec {
             auto newEdge = q.front();
             q.pop();
 
-            //The below debug statements should always return "circuit is going as planned after identity". However, for the "urf3" benchmark, it returns "circuit is not going as planned after identity".
+            dd->incRef(src);
             if (auto shiftingPathsSrc = shiftingPaths(src, newEdge, dd); shiftingPathsSrc != src) {
+                dd->decRef(src);
+                dd->garbageCollect();
+
                 if (shiftingPathsSrc.p->isIdentity()) {
-                    /*if (srcGlobal == dd->multiply(shiftingPathsSrc , dd::buildFunctionality(&qc, dd))){
-                        std::cout << "circuit is going as planned after identity"<< std::endl;
-                    }
-                    else{
-                        std::cout << "circuit is not going as planned after identity"<< std::endl;
-                    }*/
                     time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
-                    return shiftingPathsSrc;
+                    return;
                 }
 
-                //The below debug statements should always return "circuit is going as planned". However, for the "urf3" benchmark, it returns "circuit is not going as planned".
-                /*if (srcGlobal == dd->multiply(shiftingPathsSrc , dd::buildFunctionality(&qc, dd))){
-                    std::cout << "circuit is going as planned"<< std::endl;
-                }
-                else{
-                    std::cout << "circuit is not going as planned"<< std::endl;
-                }*/
-
-                return synthesizeRec(shiftingPathsSrc, dd);
+                synthesizeRec(shiftingPathsSrc, dd);
+                return;
             }
+
+            dd->decRef(src);
+            dd->garbageCollect();
 
             for (auto edge = 0U; edge < 4U; edge++) {
                 if (newEdge.p->e.at(edge).isTerminal()) {
@@ -369,7 +351,6 @@ namespace syrec {
         }
 
         time = static_cast<double>((std::chrono::steady_clock::now() - start).count());
-        return src;
     }
 
     //This function returns the operations required to synthesize the dd.
@@ -380,6 +361,7 @@ namespace syrec {
 
         srcGlobal = src;
 
+        dd->incRef(src);
         synthesizeRec(src, dd);
         return qc;
     }
