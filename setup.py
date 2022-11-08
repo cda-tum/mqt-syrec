@@ -117,7 +117,7 @@ setup(
             "sphinx-rtd-theme",
             "sphinxcontrib-bibtex~=2.5",
             "sphinx-copybutton",
-            "sphinx-hoverxref~=1.1.3",
+            "sphinx-hoverxref",
             "pybtex>=0.24",
             "importlib_metadata>=3.6; python_version < '3.10'",
         ],

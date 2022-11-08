@@ -8,11 +8,13 @@ from pybtex.style.formatting.unsrt import Style as UnsrtStyle
 from pybtex.style.template import field, href
 
 # -- Project information -----------------------------------------------------
-project = "SyReC"
+project = "SyReC Synthesizer"
 author = "Smaran Adarsh"
 
 release = metadata.version("mqt.syrec")
 version = ".".join(release.split(".")[:3])
+language = "en"
+copyright = "Chair for Design Automation, Technical University of Munich"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -45,6 +47,7 @@ hoverxref_role_types = {
     "attr": "tooltip",
     "property": "tooltip",
 }
+exclude_patterns = ["_build", "build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store", ".env"]
 
 
 class CDAStyle(UnsrtStyle):
@@ -66,3 +69,5 @@ autosummary_generate = True
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "sphinx_rtd_theme"
+html_baseurl = "https://syrec.readthedocs.io/en/latest/"
+autodoc_member_order = "groupwise"
