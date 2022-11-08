@@ -55,6 +55,21 @@ namespace syrec {
                 }
             }
 
+            static auto findMissingCube(TruthTable::Cube::Vector const& p1SigVec) -> Cube {
+                if (p1SigVec.empty()) {
+                    return {};
+                }
+
+                const auto    bitwidth = p1SigVec[0].size();
+                std::uint64_t idx      = 0U;
+                while (true) {
+                    if (auto cube = Cube::fromInteger(idx, bitwidth); std::find(p1SigVec.begin(), p1SigVec.end(), cube) == p1SigVec.end()) {
+                        return cube;
+                    }
+                    ++idx;
+                }
+            }
+
             // construct a cube from a (64bit) number with a given bitwidth
             static auto fromInteger(const std::uint64_t number, const std::size_t bw) -> Cube {
                 assert(bw <= 64U);

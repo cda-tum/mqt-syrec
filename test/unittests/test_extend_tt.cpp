@@ -14,7 +14,7 @@ protected:
 
 TEST_F(TruthTableExtend, Max) {
     // create identity truth table
-    std::string circMax = testCircuitsDir + "Max.pla";
+    std::string circMax = testCircuitsDir + "max.pla";
 
     EXPECT_TRUE(readPla(tt, circMax));
 
@@ -25,7 +25,7 @@ TEST_F(TruthTableExtend, Max) {
 
 TEST_F(TruthTableExtend, Ident2Bit) {
     // create identity truth table
-    std::string circIdent2Bit = testCircuitsDir + "Ident2Bit.pla";
+    std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
@@ -45,7 +45,7 @@ TEST_F(TruthTableExtend, Ident2Bit) {
 TEST_F(TruthTableExtend, X2Bit) {
     // create X truth table (X gate applied on both the bits)
 
-    std::string circX2Bit = testCircuitsDir + "X2Bit.pla";
+    std::string circX2Bit = testCircuitsDir + "x2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circX2Bit));
 
@@ -63,7 +63,7 @@ TEST_F(TruthTableExtend, X2Bit) {
 }
 
 TEST_F(TruthTableExtend, EXTENDTT) {
-    std::string circEXTENDTT = testCircuitsDir + "EXTENDTT.pla";
+    std::string circEXTENDTT = testCircuitsDir + "extend.pla";
 
     EXPECT_TRUE(readPla(tt, circEXTENDTT));
 
