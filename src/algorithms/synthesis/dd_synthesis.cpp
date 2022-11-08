@@ -326,9 +326,8 @@ namespace syrec {
 
         const auto start = std::chrono::steady_clock::now();
 
-        // in case the reference count of the source node is zero,
-        // it has to be increased once to avoid garbage collection.
-        if (src.p->ref == 0) {
+        // to preserve the `src` DD throughout the synthesis, its reference count has to be at least 2.
+        while (src.p->ref < 2U) {
             dd->incRef(src);
         }
 
