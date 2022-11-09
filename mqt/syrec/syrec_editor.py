@@ -97,7 +97,9 @@ class CircuitView(QtWidgets.QGraphicsView):
                 )
             )
             self.outputs.append(
-                self.add_line_label(width, i * 30, circ.outputs[i], QtCore.Qt.AlignmentFlag.AlignLeft, circ.constants[i] is not None)  #As a result, garbage lines are also made red
+                self.add_line_label(
+                    width, i * 30, circ.outputs[i], QtCore.Qt.AlignmentFlag.AlignLeft, circ.constants[i] is not None
+                )  # As a result, garbage lines are also made red
             )
 
         index = 0
