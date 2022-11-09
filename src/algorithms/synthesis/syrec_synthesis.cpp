@@ -990,7 +990,7 @@ namespace syrec {
 
             // types of constant and garbage
             constant constVar = (var->type == Variable::Out || var->type == Variable::Wire) ? constant(false) : constant();
-            bool     garbage  = (var->type == Variable::In || var->type == Variable::Wire);
+            bool     garbage  = var->type == Variable::Wire;
 
             addVariable(circVar, var->dimensions, var, constVar, garbage, std::string());
         }
