@@ -25,7 +25,7 @@ namespace minbool {
         using Value = syrec::TruthTable::Cube::Value;
 
         MinTerm(const std::uint64_t value = 0U, const std::uint64_t dash = 0U):
-            //NOLINT
+            //NOLINT(google-explicit-constructor)
             value(value),
             dash(dash) {}
 
