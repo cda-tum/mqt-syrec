@@ -24,7 +24,7 @@ namespace minbool {
     struct MinTerm {
         using Value = syrec::TruthTable::Cube::Value;
 
-        MinTerm(const std::uint64_t value = 0U, const std::uint64_t dash = 0U):
+        explicit MinTerm(const std::uint64_t value = 0U, const std::uint64_t dash = 0U):
             value(value),
             dash(dash) {}
 
