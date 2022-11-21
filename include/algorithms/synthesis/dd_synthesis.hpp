@@ -38,12 +38,10 @@ namespace syrec {
         auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec) const -> void;
         auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& cube) const -> void;
 
-        auto        applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
-        static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
-        static auto controlNonRootEsop(dd::mEdge const& current, dd::Controls& ctrl, minbool::MinTerm const& ctrlCube, std::size_t const& n2) -> void;
-        static auto controlRootEsop(dd::mEdge const& current, dd::Controls& ctrl, minbool::MinTerm const& ctrlCube, std::size_t const& n2) -> void;
+        auto applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
 
-        static auto esopOptimization(TruthTable::Cube::Vector const& sigVec) -> std::vector<minbool::MinTerm>;
+        static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
+        static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
 
         auto swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 

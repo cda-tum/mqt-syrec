@@ -18,8 +18,8 @@ namespace syrec {
         if (tt.nInputs() == 1U) {
             for (const auto& [input, output]: tt) {
                 // truth table has to be completely specified
-                assert(input[0].has_value());  //ignore
-                assert(output[0].has_value()); //ignore
+                assert(input[0].has_value());
+                assert(output[0].has_value());
                 const auto in    = *input[0];
                 const auto out   = *output[0];
                 const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
@@ -118,6 +118,21 @@ namespace syrec {
         }
     }
 
+    // This function stores all the controls of the `current` node concerning the root/src of the DD.
+    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
+        const auto cubeSize = ctrlCube.size();
+        for (auto i = 0U; i < cubeSize; ++i) {
+            if (ctrlCube[i].has_value()) {
+                const auto idx = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
+                if (*ctrlCube[i]) {
+                    ctrl.emplace(dd::Control{idx, dd::Control::Type::pos});
+                } else {
+                    ctrl.emplace(dd::Control{idx, dd::Control::Type::neg});
+                }
+            }
+        }
+    }
+
     // This function stores all the controls of the `current` node not concerning the root/src of the DD.
     auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         const auto cubeSize = ctrlCube.size();
@@ -131,41 +146,6 @@ namespace syrec {
                 }
             }
         }
-    }
-
-    // This function stores all the ESOP minimized version of all the controls of the `current` node not concerning the root/src of the DD.
-    auto DDSynthesizer::controlNonRootEsop(dd::mEdge const& current, dd::Controls& ctrl, minbool::MinTerm const& ctrlCube, std::size_t const& n2) -> void {
-        for (int j = static_cast<int>(n2) - 1; j >= 0; --j) {
-            if (ctrlCube[j] == minbool::MinTerm::Value::One) {
-                ctrl.emplace(dd::Control{static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (static_cast<int>(n2) - 1 - j + 1)), dd::Control::Type::pos});
-            } else if (ctrlCube[j] == minbool::MinTerm::Value::Zero) {
-                ctrl.emplace(dd::Control{static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (static_cast<int>(n2) - 1 - j + 1)), dd::Control::Type::neg});
-            }
-        }
-    }
-
-    // This function stores all the (ESOP minimized version) controls of the `current` node concerning the root/src of the DD.
-    auto DDSynthesizer::controlRootEsop(dd::mEdge const& current, dd::Controls& ctrl, minbool::MinTerm const& ctrlCube, std::size_t const& n2) -> void {
-        for (int j = static_cast<int>(n2) - 1; j >= 0; --j) {
-            if (ctrlCube[j] == minbool::MinTerm::Value::One) {
-                ctrl.emplace(dd::Control{static_cast<dd::Qubit>((n2 + static_cast<std::size_t>(current.p->v)) - (static_cast<int>(n2) - 1 - j)), dd::Control::Type::pos});
-            } else if (ctrlCube[j] == minbool::MinTerm::Value::Zero) {
-                ctrl.emplace(dd::Control{static_cast<dd::Qubit>((n2 + static_cast<std::size_t>(current.p->v)) - (static_cast<int>(n2) - 1 - j)), dd::Control::Type::neg});
-            }
-        }
-    }
-
-    // This function returns the ESOP minimized form of a signature.
-    auto DDSynthesizer::esopOptimization(TruthTable::Cube::Vector const& sigVec) -> std::vector<minbool::MinTerm> {
-        std::vector<uint64_t> on;
-        on.reserve(sigVec.size());
-
-        for (auto const& sigVecToInt: sigVec) {
-            if (!sigVecToInt.empty()) {
-                on.emplace_back(sigVecToInt.toInteger());
-            }
-        }
-        return minbool::minimizeBoolean(on, sigVec[0].size());
     }
 
     // This function performs the multi-control (if any) X operation.
@@ -191,19 +171,18 @@ namespace syrec {
             TruthTable::Cube::Vector rootSigVec;
             pathFromSrcDst(src, current.p, rootSigVec);
 
-            const auto rootSolution = esopOptimization(rootSigVec);
+            const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
             const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
             if (rootSolution.empty()) {
-                dd::Controls ctrlFinal1;
-                applyOperation(nQubits, current.p->v, src, ctrlFinal1, dd);
+                applyOperation(nQubits, current.p->v, src, {}, dd);
             }
 
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal;
 
-                controlRootEsop(current, ctrlFinal, rootVec, rootSigVec[0].size());
+                controlRoot(current, ctrlFinal, rootVec);
                 applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
         }
@@ -230,24 +209,22 @@ namespace syrec {
         TruthTable::Cube::Vector rootSigVec;
         pathFromSrcDst(src, current.p, rootSigVec);
 
-        const auto rootSolution = esopOptimization(rootSigVec);
-        const auto uniSolution  = esopOptimization(uniqueCubeVec);
+        const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
+        const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
         for (auto const& uniCube: uniSolution) {
             dd::Controls ctrlNonRoot;
-
-            controlNonRootEsop(current, ctrlNonRoot, uniCube, uniqueCubeVec[0].size());
+            controlNonRoot(current, ctrlNonRoot, uniCube);
 
             if (rootSolution.empty()) {
                 applyOperation(nQubits, current.p->v, src, ctrlNonRoot, dd);
             }
 
             for (auto const& rootVec: rootSolution) {
-                dd::Controls ctrlFinal;
-                controlRootEsop(current, ctrlFinal, rootVec, rootSigVec[0].size());
-                ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
+                dd::Controls ctrlFinal = ctrlNonRoot;
+                controlRoot(current, ctrlFinal, rootVec);
                 applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
         }
@@ -301,11 +278,13 @@ namespace syrec {
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
-        const auto rootSolution = esopOptimization(rootSigVec);
+        const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
+
+        const auto targetSize = targetVec.size();
 
         if (rootSolution.empty()) {
             ctrlNonRoot.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
-            for (std::size_t i = 0; i < targetVec.size(); i++) {
+            for (std::size_t i = 0; i < targetSize; i++) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
                     applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlNonRoot, dd);
                 }
@@ -315,13 +294,12 @@ namespace syrec {
         for (auto const& rootVec: rootSolution) {
             dd::Controls ctrlFinal;
 
-            controlRootEsop(current, ctrlFinal, rootVec, rootSigVec[0].size());
-
+            controlRoot(current, ctrlFinal, rootVec);
             ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
 
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
-            for (std::size_t i = 0; i < targetVec.size(); i++) {
+            for (std::size_t i = 0; i < targetSize; i++) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
                     applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
                 }
