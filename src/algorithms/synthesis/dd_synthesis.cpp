@@ -282,7 +282,7 @@ namespace syrec {
 
         if (rootSolution.empty()) {
             ctrlNonRoot.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
-            for (std::size_t i = 0; i < targetSize; i++) {
+            for (std::size_t i = 0; i < targetSize; ++i) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
                     applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlNonRoot, dd);
                 }
@@ -295,7 +295,7 @@ namespace syrec {
             ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
-            for (std::size_t i = 0; i < targetSize; i++) {
+            for (std::size_t i = 0; i < targetSize; ++i) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
                     applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
                 }
