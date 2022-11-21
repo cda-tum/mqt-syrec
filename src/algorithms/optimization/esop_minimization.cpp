@@ -5,7 +5,7 @@ namespace minbool {
     void ImplicantTable::fill(const std::vector<MinTerm>& minterms) {
         groups.resize(nBits + 2U, 0U);
         for (const auto& term: minterms) {
-            groups[popcount(term.value)]++;
+            ++groups[popcount(term.value)];
         }
         std::partial_sum(groups.begin(), groups.end(), groups.begin());
         terms.resize(minterms.size());
@@ -34,7 +34,7 @@ namespace minbool {
 
     void PrimeChart::fill(const std::vector<MinTerm>& primes) {
         for (const auto& prime: primes) {
-            prime.foreachValue([this, &prime](std::uint64_t value) {
+            prime.foreachValue([this, &prime](const std::uint64_t value) {
                 columns[value].emplace_back(prime);
             },
                                nBits);
@@ -59,7 +59,7 @@ namespace minbool {
         essentials.erase(std::unique(essentials.begin() + static_cast<int>(count), essentials.end()), essentials.end());
 
         std::for_each(essentials.begin() + static_cast<int>(count), essentials.end(), [&](const MinTerm& term) {
-            term.foreachValue([this](std::uint64_t value) {
+            term.foreachValue([this](const std::uint64_t value) {
                 columns.erase(value);
             },
                               nBits);
@@ -72,7 +72,7 @@ namespace minbool {
         std::unordered_map<MinTerm, std::size_t> covers;
         for (auto const& [first, second]: columns) {
             for (const auto& term: second) {
-                covers[term]++;
+                ++covers[term];
             }
         }
         // Heuristic: Remove the term that covers the most columns
@@ -85,7 +85,7 @@ namespace minbool {
             }
         }
         solution.emplace_back(term);
-        term.foreachValue([this](std::uint64_t value) {
+        term.foreachValue([this](const std::uint64_t value) {
             columns.erase(value);
         },
                           nBits);
@@ -170,9 +170,9 @@ namespace minbool {
             for (std::size_t i = 0U; i < n; ++i) {
                 bool const bit = ((v >> i) & 1) != 0;
                 if (term[i] == MinTerm::Value{true}) {
-                    prod &= bit;
+                    prod = prod && bit;
                 } else if (term[i] == MinTerm::Value{false}) {
-                    prod &= !bit;
+                    prod = prod && !bit;
                 }
             }
             if (prod) {
@@ -217,7 +217,7 @@ namespace minbool {
         }
 
         const auto n      = sigVec[0].size();
-        auto       primes = primeImplicants(init, n);
+        const auto primes = primeImplicants(init, n);
 
         PrimeChart chart(n);
         chart.fill(primes);
@@ -225,7 +225,7 @@ namespace minbool {
         std::vector<MinTerm> solution;
         do {
             bool change = chart.removeEssentials(solution);
-            change |= chart.simplify();
+            change      = change || chart.simplify();
             if (!change && chart.size() > 0) {
                 chart.removeHeuristic(solution);
             }

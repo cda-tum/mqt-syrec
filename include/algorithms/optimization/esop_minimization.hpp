@@ -25,12 +25,14 @@ namespace minbool {
         using Value = syrec::TruthTable::Cube::Value;
 
         MinTerm(const std::uint64_t value = 0U, const std::uint64_t dash = 0U):
-            //NOLINT(google-explicit-constructor)
             value(value),
             dash(dash) {}
 
         Value operator[](const std::size_t i) const {
-            return ((dash >> i) & 1) != 0U ? Value{} : static_cast<Value>((value >> i) & 1);
+            if (((dash >> i) & 1U) == 1U) {
+                return {};
+            }
+            return {((value >> i) & 1U) == 1U};
         }
 
         [[nodiscard]] MinTerm combine(const MinTerm& other) const {
@@ -43,22 +45,26 @@ namespace minbool {
             if (bit == n) {
                 f(cur);
             } else {
-                auto val = (*this)[bit];
+                const auto val = (*this)[bit];
                 if (val == Value{}) {
                     foreachValue(f, n, bit + 1U, cur);
                     foreachValue(f, n, bit + 1U, cur | (1 << bit));
                 } else {
-                    foreachValue(f, n, bit + 1U, cur | (val == Value{false} ? 0 : (1 << bit)));
+                    if (val == Value{false}) {
+                        foreachValue(f, n, bit + 1U, cur);
+                    } else {
+                        foreachValue(f, n, bit + 1U, cur | (1U << bit));
+                    }
                 }
             }
         }
 
-        bool operator<(const MinTerm& other) const {
-            return value < other.value || (value == other.value && dash < other.dash);
+        friend bool operator<(const MinTerm& lhs, const MinTerm& rhs) {
+            return lhs.value < rhs.value || (lhs.value == rhs.value && lhs.dash < rhs.dash);
         }
 
-        bool operator==(const MinTerm& other) const {
-            return value == other.value && dash == other.dash;
+        friend bool operator==(const MinTerm& lhs, const MinTerm& rhs) {
+            return lhs.value == rhs.value && lhs.dash == rhs.dash;
         }
 
         std::uint64_t value;
@@ -94,7 +100,8 @@ namespace minbool {
         void combine(std::vector<MinTerm>& res);
 
         void primes(std::vector<MinTerm>& res) {
-            for (std::size_t i = 0U; i < terms.size(); ++i) {
+            const auto nTerms = terms.size();
+            for (std::size_t i = 0U; i < nTerms; ++i) {
                 if (!marks[i]) {
                     res.emplace_back(terms[i]);
                 }
