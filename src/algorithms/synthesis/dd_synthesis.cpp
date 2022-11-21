@@ -118,12 +118,12 @@ namespace syrec {
         }
     }
 
-    // This function stores all the controls of the `current` node concerning the root/src of the DD.
-    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
+    // This function stores all the controls of the `current` node not concerning the root/src of the DD.
+    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
+                const auto idx = static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
                 if (*ctrlCube[i]) {
                     ctrl.emplace(dd::Control{idx, dd::Control::Type::pos});
                 } else {
@@ -133,12 +133,12 @@ namespace syrec {
         }
     }
 
-    // This function stores all the controls of the `current` node not concerning the root/src of the DD.
-    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
+    // This function stores all the controls of the `current` node concerning the root/src of the DD.
+    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx = static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
+                const auto idx = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
                 if (*ctrlCube[i]) {
                     ctrl.emplace(dd::Control{idx, dd::Control::Type::pos});
                 } else {
@@ -181,7 +181,6 @@ namespace syrec {
 
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal;
-
                 controlRoot(current, ctrlFinal, rootVec);
                 applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
@@ -213,7 +212,6 @@ namespace syrec {
         const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
-
         for (auto const& uniCube: uniSolution) {
             dd::Controls ctrlNonRoot;
             controlNonRoot(current, ctrlNonRoot, uniCube);
@@ -293,10 +291,8 @@ namespace syrec {
 
         for (auto const& rootVec: rootSolution) {
             dd::Controls ctrlFinal;
-
             controlRoot(current, ctrlFinal, rootVec);
             ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
-
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
             for (std::size_t i = 0; i < targetSize; i++) {
