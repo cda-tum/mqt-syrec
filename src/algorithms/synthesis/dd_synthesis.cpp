@@ -85,6 +85,39 @@ namespace syrec {
         cube.pop_back();
     }
 
+    //please refer to the second optimization approach introduced in https://www.cda.cit.tum.de/files/eda/2017_rc_improving_qmdd_synthesis_of_reversible_circuits.pdf
+    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) const -> TruthTable::Cube::Vector {
+        if (current.p->v == src.p->v || current.p->v == 0U) {
+            TruthTable::Cube::Vector rootSigVec;
+            pathFromSrcDst(src, current.p, rootSigVec);
+            return rootSigVec;
+        }
+
+        TruthTable::Cube::Vector rootSigVec;
+        pathFromSrcDst(src, current.p, rootSigVec);
+
+        const auto tables = dd->mUniqueTable.getTables();
+
+        auto const& table = tables[current.p->v];
+
+        for (auto* p: table) {
+            if (p != nullptr && p != current.p) {
+                TruthTable::Cube::Vector p1Vec;
+                pathSignature(p->e[0], p1Vec);
+
+                TruthTable::Cube::Vector p2Vec;
+                pathSignature(p->e[1], p2Vec);
+
+                if ((p1SigVec.size() == p1Vec.size() && p2SigVec.size() == p2Vec.size()) && std::is_permutation(p1SigVec.begin(), p1SigVec.end(), p1Vec.begin()) && std::is_permutation(p2SigVec.begin(), p2SigVec.end(), p2Vec.begin())) {
+                    TruthTable::Cube::Vector rootSigVecTmp;
+                    pathFromSrcDst(src, p, rootSigVecTmp);
+                    std::move(rootSigVecTmp.begin(), rootSigVecTmp.end(), std::back_inserter(rootSigVec));
+                }
+            }
+        }
+        return rootSigVec;
+    }
+
     // This algorithm provides all the paths with their signatures for the `src` node.
     // Refer to signature path section of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
     auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec) const -> void {
@@ -168,8 +201,7 @@ namespace syrec {
     // Refer to the P1 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
     auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         if ((current.p->e[0].isZeroTerminal() && !current.p->e[1].isZeroTerminal()) || (p2SigVec.size() > p1SigVec.size())) {
-            TruthTable::Cube::Vector rootSigVec;
-            pathFromSrcDst(src, current.p, rootSigVec);
+            auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
             const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
@@ -205,8 +237,7 @@ namespace syrec {
             return src;
         }
 
-        TruthTable::Cube::Vector rootSigVec;
-        pathFromSrcDst(src, current.p, rootSigVec);
+        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
         const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
@@ -271,8 +302,7 @@ namespace syrec {
         dd::Controls ctrlNonRoot;
         controlNonRoot(current, ctrlNonRoot, ctrlVec);
 
-        TruthTable::Cube::Vector rootSigVec;
-        pathFromSrcDst(src, current.p, rootSigVec);
+        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
