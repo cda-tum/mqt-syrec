@@ -197,7 +197,7 @@ namespace minbool {
         return onValues.count(0) != 0U || !evalBoolean(solution, 0U, n);
     }
 
-    syrec::TruthTable::Cube::Vector minimizeBoolean(syrec::TruthTable::Cube::Vector const& sigVec) {
+    syrec::TruthTable::Cube::Set minimizeBoolean(syrec::TruthTable::Cube::Set const& sigVec) {
         if (sigVec.size() <= 1U) {
             return sigVec;
         }
@@ -216,7 +216,7 @@ namespace minbool {
             init.emplace_back(on);
         }
 
-        const auto n      = sigVec[0].size();
+        const auto n      = sigVec.begin()->size();
         const auto primes = primeImplicants(init, n);
 
         PrimeChart chart(n);
@@ -233,15 +233,14 @@ namespace minbool {
 
         assert(checkSolution(solution, onValues, n));
 
-        syrec::TruthTable::Cube::Vector finalSigVec;
-        finalSigVec.reserve(solution.size());
+        syrec::TruthTable::Cube::Set finalSigVec;
 
         for (auto const& ctrlCube: solution) {
             syrec::TruthTable::Cube c;
             for (int j = static_cast<int>(n) - 1; j >= 0; --j) {
                 c.emplace_back(ctrlCube[j]);
             }
-            finalSigVec.emplace_back(c);
+            finalSigVec.emplace(c);
         }
 
         return finalSigVec;

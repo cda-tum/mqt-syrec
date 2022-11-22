@@ -135,6 +135,6 @@ namespace minbool {
 
     bool checkSolution(const std::vector<MinTerm>& solution, const std::unordered_set<std::uint64_t>& onValues, const std::size_t& n);
 
-    syrec::TruthTable::Cube::Vector minimizeBoolean(syrec::TruthTable::Cube::Vector const& sigVec);
+    syrec::TruthTable::Cube::Set minimizeBoolean(syrec::TruthTable::Cube::Set const& sigVec);
 
 } // namespace minbool
