@@ -45,6 +45,8 @@ namespace syrec {
         static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
         static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
 
+        static auto dcNodeCondition(dd::mEdge const& current) -> bool;
+
         auto swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
         auto shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;

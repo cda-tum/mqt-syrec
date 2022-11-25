@@ -19,11 +19,20 @@ namespace syrec {
             for (const auto& [input, output]: tt) {
                 // truth table has to be completely specified
                 assert(input[0].has_value());
-                assert(output[0].has_value());
-                const auto in    = *input[0];
-                const auto out   = *output[0];
-                const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
-                edges.at(index)  = dd::mEdge::one;
+
+                const auto in  = *input[0];
+                const auto out = *output[0];
+
+                if (output[0].has_value()) {
+                    const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
+                    edges.at(index)  = dd::mEdge::one;
+                } else if (!in) {
+                    edges.at(0U) = dd::mEdge::one;
+                    edges.at(2U) = dd::mEdge::one;
+                } else {
+                    edges.at(1U) = dd::mEdge::one;
+                    edges.at(3U) = dd::mEdge::one;
+                }
             }
             return dd->makeDDNode(0, edges);
         }
@@ -33,15 +42,29 @@ namespace syrec {
         for (const auto& [input, output]: tt) {
             // truth table has to be completely specified
             assert(input[0].has_value());
-            assert(output[0].has_value());
-            const auto       in    = *input[0];
-            const auto       out   = *output[0];
-            const auto       index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-            TruthTable::Cube reducedInput(input.begin() + 1, input.end());
-            TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
-            subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
-        }
 
+            const auto in  = *input[0];
+            const auto out = *output[0];
+
+            if (output[0].has_value()) {
+                const auto       index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
+                TruthTable::Cube reducedInput(input.begin() + 1, input.end());
+                TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
+            } else {
+                if (!in) {
+                    TruthTable::Cube reducedInput(input.begin() + 1, input.end());
+                    TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                    subTables.at(0).try_emplace(reducedInput, reducedOutput);
+                    subTables.at(2).try_emplace(reducedInput, reducedOutput);
+                } else {
+                    TruthTable::Cube reducedInput(input.begin() + 1, input.end());
+                    TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                    subTables.at(1).try_emplace(reducedInput, reducedOutput);
+                    subTables.at(3).try_emplace(reducedInput, reducedOutput);
+                }
+            }
+        }
         // recursively build the DD for each sub-table
         for (std::size_t i = 0U; i < 4U; ++i) {
             edges.at(i) = buildDD(subTables.at(i), dd);
@@ -179,6 +202,18 @@ namespace syrec {
                 }
             }
         }
+    }
+
+    //Checks whether all the edges of the node current is pointing the same node (indicating that the node is a dc Node).
+    auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
+        if (!(dd::mNode::isTerminal(current.p))) {
+            if (current.p->v == 0U) {
+                return std::all_of(current.p->e.begin(), current.p->e.end(), [](auto e) { return e == dd::mEdge::one; });
+            }
+
+            return std::all_of(current.p->e.begin(), current.p->e.end(), [&current](auto e) { return e.p == current.p->e[0].p; });
+        }
+        return false;
     }
 
     // This function performs the multi-control (if any) X operation.
@@ -354,7 +389,7 @@ namespace syrec {
         runtime  = 0.;
         numGates = 0U;
 
-        if (src.p == nullptr || src.p->isIdentity()) {
+        if (src.p == nullptr || src.p->isIdentity() || dcNodeCondition(src)) {
             return qc;
         }
 
@@ -380,7 +415,7 @@ namespace syrec {
             const auto current = queue.front();
             queue.pop();
 
-            if (current.p == nullptr || current.p->isIdentity()) {
+            if (current.p == nullptr || current.p->isIdentity() || dcNodeCondition(current)) {
                 continue;
             }
 
@@ -400,7 +435,7 @@ namespace syrec {
 
             if (pathsShifted) {
                 // stopping criterion
-                if (srcShifted.p->isIdentity()) {
+                if (srcShifted.p->isIdentity() && dcNodeCondition(srcShifted)) {
                     break;
                 }
 
@@ -414,7 +449,7 @@ namespace syrec {
 
             // if all paths have been shifted, the children of the current node need to be processed.
             for (const auto& e: current.p->e) {
-                if (!e.isTerminal() && visited.find(e) == visited.end()) {
+                if (!e.isTerminal() && !dcNodeCondition(e) && visited.find(e) == visited.end()) {
                     queue.emplace(e);
                     visited.emplace(e);
                 }

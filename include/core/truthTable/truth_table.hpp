@@ -136,6 +136,10 @@ namespace syrec {
                 return (cube < cv.cube);
             }
 
+            auto operator>(const Cube& cv) const -> bool {
+                return (cube > cv.cube);
+            }
+
             auto operator==(const Cube& cv) const -> bool {
                 return (cube == cv.cube);
             }
