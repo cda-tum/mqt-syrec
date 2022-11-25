@@ -11,9 +11,6 @@ namespace syrec {
         TruthTable newTT{};
 
         for (auto const& [input, output]: tt) {
-            // ensure that all outputs are complete
-            assert(std::none_of(output.cbegin(), output.cend(), [](auto const& v) { return !v.has_value(); }));
-
             // compute the complete cubes for the input
             auto completeInputs = input.completeCubes();
             // move all the complete cubes to the new cube map
