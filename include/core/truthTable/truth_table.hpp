@@ -23,6 +23,7 @@ namespace syrec {
         public:
             using Value  = std::optional<bool>;
             using Vector = std::vector<Cube>;
+            using Set    = std::set<Cube>;
 
         private:
             std::vector<Value> cube{};
@@ -55,12 +56,12 @@ namespace syrec {
                 }
             }
 
-            static auto findMissingCube(TruthTable::Cube::Vector const& p1SigVec) -> Cube {
+            static auto findMissingCube(TruthTable::Cube::Set const& p1SigVec) -> Cube {
                 if (p1SigVec.empty()) {
                     return {};
                 }
 
-                const auto    bitwidth = p1SigVec[0].size();
+                const auto    bitwidth = p1SigVec.begin()->size();
                 std::uint64_t idx      = 0U;
                 while (true) {
                     if (auto cube = Cube::fromInteger(idx, bitwidth); std::find(p1SigVec.begin(), p1SigVec.end(), cube) == p1SigVec.end()) {

@@ -55,10 +55,10 @@ namespace syrec {
 
     // This algorithm provides all paths with their signatures from the `src` node to the `current` node.
     // Refer to the control path section of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Vector& sigVec) const -> void {
+    auto DDSynthesizer::pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) const -> void {
         if (src.p->v <= dst->v) {
             if (src.p == dst) {
-                sigVec.emplace_back();
+                sigVec.emplace();
             }
             return;
         }
@@ -68,10 +68,10 @@ namespace syrec {
         pathFromSrcDst(src, dst, sigVec, cube);
     }
 
-    auto DDSynthesizer::pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& cube) const -> void {
+    auto DDSynthesizer::pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void {
         if (src.p->v <= dst->v) {
             if (src.p == dst) {
-                sigVec.emplace_back(cube);
+                sigVec.emplace(cube);
             }
             return;
         }
@@ -85,22 +85,55 @@ namespace syrec {
         cube.pop_back();
     }
 
+    //please refer to the second optimization approach introduced in https://www.cda.cit.tum.de/files/eda/2017_rc_improving_qmdd_synthesis_of_reversible_circuits.pdf
+    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) const -> TruthTable::Cube::Set {
+        if (current.p->v == src.p->v || current.p->v == 0U) {
+            TruthTable::Cube::Set rootSigVec;
+            pathFromSrcDst(src, current.p, rootSigVec);
+            return rootSigVec;
+        }
+
+        TruthTable::Cube::Set rootSigVec;
+        pathFromSrcDst(src, current.p, rootSigVec);
+
+        const auto tables = dd->mUniqueTable.getTables();
+
+        auto const& table = tables[current.p->v];
+
+        for (auto* p: table) {
+            if (p != nullptr && p != current.p && p->ref > 0) {
+                TruthTable::Cube::Set p1Vec;
+                pathSignature(p->e[0], p1Vec);
+
+                TruthTable::Cube::Set p2Vec;
+                pathSignature(p->e[1], p2Vec);
+
+                if (p1SigVec == p1Vec && p2SigVec == p2Vec) {
+                    TruthTable::Cube::Set rootSigVecTmp;
+                    pathFromSrcDst(src, p, rootSigVecTmp);
+                    rootSigVec.merge(rootSigVecTmp);
+                }
+            }
+        }
+        return rootSigVec;
+    }
+
     // This algorithm provides all the paths with their signatures for the `src` node.
     // Refer to signature path section of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec) const -> void {
+    auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec) const -> void {
         TruthTable::Cube cube{};
         const auto       pathLength = static_cast<std::size_t>(src.p->v + 1);
         cube.reserve(pathLength);
         pathSignature(src, sigVec, cube);
     }
 
-    auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Vector& sigVec, TruthTable::Cube& cube) const -> void {
+    auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void {
         const auto nEdges = src.p->e.size();
         if (src.p->v == 0) {
             for (auto i = 0U; i < nEdges; ++i) {
                 if (src.p->e.at(i) == dd::mEdge::one) {
                     cube.emplace_back((i == 1U || i == 3U));
-                    sigVec.emplace_back(cube);
+                    sigVec.emplace(cube);
                     cube.pop_back();
                 }
             }
@@ -166,18 +199,13 @@ namespace syrec {
 
     // This algorithm swaps the paths present in the p' edge to the n edge and vice versa.
     // Refer to the P1 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         if ((current.p->e[0].isZeroTerminal() && !current.p->e[1].isZeroTerminal()) || (p2SigVec.size() > p1SigVec.size())) {
-            TruthTable::Cube::Vector rootSigVec;
-            pathFromSrcDst(src, current.p, rootSigVec);
+            auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
             const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
             const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
-
-            if (rootSolution.empty()) {
-                applyOperation(nQubits, current.p->v, src, {}, dd);
-            }
 
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal;
@@ -190,14 +218,14 @@ namespace syrec {
 
     // This algorithm moves the unique paths present in the p' edge to the n edge.
     // Refer to the P2 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
-        TruthTable::Cube::Vector uniqueCubeVec;
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        TruthTable::Cube::Set uniqueCubeVec;
 
         // Collect all the unique p' paths.
         for (const auto& p2Cube: p2SigVec) {
             const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Cube);
             if (it == p1SigVec.end()) {
-                uniqueCubeVec.emplace_back(p2Cube);
+                uniqueCubeVec.emplace(p2Cube);
             }
         }
 
@@ -205,8 +233,7 @@ namespace syrec {
             return src;
         }
 
-        TruthTable::Cube::Vector rootSigVec;
-        pathFromSrcDst(src, current.p, rootSigVec);
+        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
         const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
@@ -215,10 +242,6 @@ namespace syrec {
         for (auto const& uniCube: uniSolution) {
             dd::Controls ctrlNonRoot;
             controlNonRoot(current, ctrlNonRoot, uniCube);
-
-            if (rootSolution.empty()) {
-                applyOperation(nQubits, current.p->v, src, ctrlNonRoot, dd);
-            }
 
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal = ctrlNonRoot;
@@ -240,12 +263,11 @@ namespace syrec {
 
     // This algorithm modifies the non-unique paths present in the p' edge to unique paths.
     // Refer to P4 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Vector const& p1SigVec, TruthTable::Cube::Vector const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
-        std::vector<std::size_t> indices;
-        const auto               sig2Size = p2SigVec.size();
-        for (std::size_t index = 0; index < sig2Size; ++index) {
-            if (const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2SigVec[index]); it != p1SigVec.end()) {
-                indices.emplace_back(index);
+    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        TruthTable::Cube repeatedCube;
+        for (auto const& p2Obj: p2SigVec) {
+            if (const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Obj); it != p1SigVec.end()) {
+                repeatedCube = p2Obj;
             }
         }
 
@@ -253,15 +275,15 @@ namespace syrec {
         const auto missCube = TruthTable::Cube::findMissingCube(p1SigVec);
 
         TruthTable::Cube ctrlVec;
-        ctrlVec.resize(p2SigVec[indices[0]].size());
+        ctrlVec.resize(repeatedCube.size());
 
         TruthTable::Cube targetVec;
-        targetVec.resize(p2SigVec[indices[0]].size());
+        targetVec.resize(repeatedCube.size());
 
         // accordingly store the controls and targets.
-        const auto sigLength = p2SigVec[indices[0]].size();
+        const auto sigLength = repeatedCube.size();
         for (std::size_t p2Obj = 0; p2Obj < sigLength; ++p2Obj) {
-            if (p2SigVec[indices[0]][p2Obj] == missCube[p2Obj]) {
+            if (repeatedCube[p2Obj] == missCube[p2Obj]) {
                 ctrlVec[p2Obj] = missCube[p2Obj];
             } else {
                 targetVec[p2Obj] = true;
@@ -271,23 +293,13 @@ namespace syrec {
         dd::Controls ctrlNonRoot;
         controlNonRoot(current, ctrlNonRoot, ctrlVec);
 
-        TruthTable::Cube::Vector rootSigVec;
-        pathFromSrcDst(src, current.p, rootSigVec);
+        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
         const auto targetSize = targetVec.size();
-
-        if (rootSolution.empty()) {
-            ctrlNonRoot.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
-            for (std::size_t i = 0; i < targetSize; ++i) {
-                if (targetVec[i].has_value() && *(targetVec[i])) {
-                    applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlNonRoot, dd);
-                }
-            }
-        }
 
         for (auto const& rootVec: rootSolution) {
             dd::Controls ctrlFinal;
@@ -311,10 +323,10 @@ namespace syrec {
             return src;
         }
 
-        TruthTable::Cube::Vector p1SigVec;
+        TruthTable::Cube::Set p1SigVec;
         pathSignature(current.p->e[0], p1SigVec);
 
-        TruthTable::Cube::Vector p2SigVec;
+        TruthTable::Cube::Set p2SigVec;
         pathSignature(current.p->e[1], p2SigVec);
 
         // P1 algorithm.
