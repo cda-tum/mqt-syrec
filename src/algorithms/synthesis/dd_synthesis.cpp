@@ -26,12 +26,10 @@ namespace syrec {
                 if (output[0].has_value()) {
                     const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
                     edges.at(index)  = dd::mEdge::one;
-                } else if (!in) {
-                    edges.at(0U) = dd::mEdge::one;
-                    edges.at(2U) = dd::mEdge::one;
                 } else {
-                    edges.at(1U) = dd::mEdge::one;
-                    edges.at(3U) = dd::mEdge::one;
+                    const auto offset     = in ? 1U : 0U;
+                    edges.at(0U + offset) = dd::mEdge::one;
+                    edges.at(2U + offset) = dd::mEdge::one;
                 }
             }
             return dd->makeDDNode(0, edges);
@@ -52,17 +50,11 @@ namespace syrec {
                 TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
                 subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
             } else {
-                if (!in) {
-                    TruthTable::Cube reducedInput(input.begin() + 1, input.end());
-                    TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
-                    subTables.at(0).try_emplace(reducedInput, reducedOutput);
-                    subTables.at(2).try_emplace(reducedInput, reducedOutput);
-                } else {
-                    TruthTable::Cube reducedInput(input.begin() + 1, input.end());
-                    TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
-                    subTables.at(1).try_emplace(reducedInput, reducedOutput);
-                    subTables.at(3).try_emplace(reducedInput, reducedOutput);
-                }
+                const auto       offset = in ? 1U : 0U;
+                TruthTable::Cube reducedInput(input.begin() + 1, input.end());
+                TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                subTables.at(0 + offset).try_emplace(reducedInput, reducedOutput);
+                subTables.at(2 + offset).try_emplace(reducedInput, reducedOutput);
             }
         }
         // recursively build the DD for each sub-table
@@ -208,10 +200,10 @@ namespace syrec {
     auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
         if (!(dd::mNode::isTerminal(current.p))) {
             if (current.p->v == 0U) {
-                return std::all_of(current.p->e.begin(), current.p->e.end(), [](auto e) { return e == dd::mEdge::one; });
+                return std::all_of(current.p->e.begin(), current.p->e.end(), [](const auto& e) { return e == dd::mEdge::one; });
             }
 
-            return std::all_of(current.p->e.begin(), current.p->e.end(), [&current](auto e) { return e.p == current.p->e[0].p; });
+            return std::all_of(current.p->e.begin(), current.p->e.end(), [&current](const auto& e) { return e.p == current.p->e[0].p; });
         }
         return false;
     }
