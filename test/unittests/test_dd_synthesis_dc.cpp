@@ -1,6 +1,7 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
+#include "dd/Simulation.hpp"
 
 #include "gtest/gtest.h"
 
@@ -45,6 +46,33 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     const auto&   qc = synthesizer.synthesize(ttDD, dd);
 
     EXPECT_TRUE(!qc.empty());
+
+    std::vector<dd::vEdge> inEdges;
+    inEdges.reserve(tt.size());
+    std::vector<std::string> outputStrings;
+    outputStrings.reserve(tt.size());
+
+    for (auto const& [input, output]: tt) {
+        const std::vector<bool> boolCube = input.toBoolVec();
+        inEdges.emplace_back(dd->makeBasisState(static_cast<dd::Qubit>(tt.nInputs()), boolCube));
+
+        TruthTable::Cube reverseCube;
+        reverseCube.reserve(tt.nInputs());
+
+        for (auto i = static_cast<int>(tt.nInputs()); i >= 0; i--) {
+            reverseCube.emplace_back(input[i]);
+        }
+
+        auto it = tt.find(reverseCube.toInteger(), tt.nInputs());
+
+        outputStrings.emplace_back(it->second.toString());
+    }
+
+    for (auto in = 0U; in < inEdges.size(); in++) {
+        const auto vOut       = dd::simulate(&qc, inEdges[in], dd, 1);
+        const auto vOutString = vOut.begin()->first;
+        EXPECT_TRUE(TruthTable::Cube::equalDcCube(vOutString, outputStrings[in]));
+    }
 
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";

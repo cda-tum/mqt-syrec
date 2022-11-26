@@ -105,6 +105,47 @@ namespace syrec {
                 return result;
             }
 
+            // return bool vec representation of the cube
+            [[nodiscard]] auto toBoolVec() const -> std::vector<bool> {
+                assert(cube.size() <= 64U);
+                assert(std::none_of(cube.cbegin(), cube.cend(), [](auto const& v) { return !v.has_value(); }));
+                std::vector<bool> result;
+                for (auto const& i: cube) {
+                    result.emplace_back(*i);
+                }
+                return result;
+            }
+
+            // return string representation of the cube
+            [[nodiscard]] auto toString() const -> std::string {
+                assert(cube.size() <= 64U);
+                std::string result;
+                for (auto const& i: cube) {
+                    if (!i.has_value()) {
+                        result.push_back('-');
+                    } else if (*i) {
+                        result.push_back('1');
+                    } else {
+                        result.push_back('0');
+                    }
+                }
+                return result;
+            }
+
+            // checks if 2 strings are equal irrespective of don't care
+            [[nodiscard]] static auto equalDcCube(const std::string& in, const std::string& out) -> bool {
+                for (auto i = 0U; i < in.size(); i++) {
+                    if (in[i] == out[i]) {
+                        continue;
+                    }
+                    if (out[i] == '-') {
+                        continue;
+                    }
+                    return false;
+                }
+                return true;
+            }
+
             [[nodiscard]] auto completeCubes() const -> Vector;
 
             auto insertZero() -> void {
