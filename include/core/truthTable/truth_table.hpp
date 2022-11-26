@@ -312,6 +312,10 @@ namespace syrec {
             return cubeMap.find(Cube::fromString(str));
         }
 
+        auto find(const Cube& c) -> decltype(cubeMap.cbegin()) {
+            return cubeMap.find(c);
+        }
+
         auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);

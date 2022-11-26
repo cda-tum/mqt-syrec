@@ -59,11 +59,11 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
         TruthTable::Cube reverseCube;
         reverseCube.reserve(tt.nInputs());
 
-        for (auto i = static_cast<int>(tt.nInputs()); i >= 0; i--) {
+        for (auto i = static_cast<int>(tt.nInputs()) - 1; i >= 0; i--) {
             reverseCube.emplace_back(input[i]);
         }
 
-        auto it = tt.find(reverseCube.toInteger(), tt.nInputs());
+        auto it = tt.find(reverseCube);
 
         outputStrings.emplace_back(it->second.toString());
     }
