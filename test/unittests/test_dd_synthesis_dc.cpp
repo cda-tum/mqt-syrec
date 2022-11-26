@@ -53,19 +53,8 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     outputStrings.reserve(tt.size());
 
     for (auto const& [input, output]: tt) {
-        const std::vector<bool> boolCube = input.toBoolVec();
-        inEdges.emplace_back(dd->makeBasisState(static_cast<dd::Qubit>(tt.nInputs()), boolCube));
-
-        TruthTable::Cube reverseCube;
-        reverseCube.reserve(tt.nInputs());
-
-        for (auto i = static_cast<int>(tt.nInputs()) - 1; i >= 0; i--) {
-            reverseCube.emplace_back(input[i]);
-        }
-
-        auto it = tt.find(reverseCube);
-
-        outputStrings.emplace_back(it->second.toString());
+        inEdges.emplace_back(dd->makeBasisState(static_cast<dd::Qubit>(tt.nInputs()), input.toBoolVec()));
+        outputStrings.emplace_back(output.toString());
     }
 
     for (auto in = 0U; in < inEdges.size(); in++) {

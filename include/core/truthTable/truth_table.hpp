@@ -105,13 +105,14 @@ namespace syrec {
                 return result;
             }
 
-            // return bool vec representation of the cube
+            // return bool vec representation of the cube (order is b0,b1,b2......bn)
             [[nodiscard]] auto toBoolVec() const -> std::vector<bool> {
                 assert(cube.size() <= 64U);
                 assert(std::none_of(cube.cbegin(), cube.cend(), [](auto const& v) { return !v.has_value(); }));
                 std::vector<bool> result;
-                for (auto const& i: cube) {
-                    result.emplace_back(*i);
+                result.reserve(size());
+                for (auto i = static_cast<int>(size()) - 1; i >= 0; i--) {
+                    result.emplace_back(*cube[i]);
                 }
                 return result;
             }
@@ -120,13 +121,13 @@ namespace syrec {
             [[nodiscard]] auto toString() const -> std::string {
                 assert(cube.size() <= 64U);
                 std::string result;
+                result.reserve(size());
                 for (auto const& i: cube) {
                     if (!i.has_value()) {
                         result.push_back('-');
-                    } else if (*i) {
-                        result.push_back('1');
                     } else {
-                        result.push_back('0');
+                        const auto valueChar = *i ? '1' : '0';
+                        result.push_back(valueChar);
                     }
                 }
                 return result;
