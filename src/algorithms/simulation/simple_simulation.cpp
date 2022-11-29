@@ -59,18 +59,4 @@ namespace syrec {
             t.stop();
         }
     }
-
-    auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable const& tt, std::unique_ptr<dd::Package<>>& dd) -> TruthTable {
-        TruthTable ttSimOut{};
-
-        for (auto const& [input, _]: tt) {
-            auto const inEdge    = dd->makeBasisState(static_cast<dd::Qubit>(tt.nInputs()), input.toBoolVec());
-            const auto out       = dd::simulate(&qc, inEdge, dd, 1);
-            const auto outString = out.begin()->first;
-            ttSimOut.try_emplace(input, TruthTable::Cube::fromString(outString));
-        }
-
-        return ttSimOut;
-    }
-
 } // namespace syrec

@@ -1,10 +1,7 @@
 #pragma once
 
-#include "QuantumComputation.hpp"
 #include "core/circuit.hpp"
 #include "core/properties.hpp"
-#include "core/truthTable/truth_table.hpp"
-#include "dd/Simulation.hpp"
 
 #include <boost/dynamic_bitset.hpp>
 #include <functional>
@@ -54,7 +51,5 @@ namespace syrec {
     */
     void simpleSimulation(boost::dynamic_bitset<>& output, const Circuit& circ, const boost::dynamic_bitset<>& input,
                           const Properties::ptr& statistics = Properties::ptr());
-
-    auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable const& tt, std::unique_ptr<dd::Package<>>& dd) -> TruthTable;
 
 } // namespace syrec

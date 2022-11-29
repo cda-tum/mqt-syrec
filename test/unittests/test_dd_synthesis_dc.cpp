@@ -1,4 +1,4 @@
-#include "algorithms/simulation/simple_simulation.hpp"
+#include "algorithms/simulation/circuit_to_truthtable.hpp"
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
@@ -47,7 +47,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     EXPECT_TRUE(!qc.empty());
 
-    auto ttSimOut = buildTruthTable(qc, tt, dd);
+    auto ttSimOut = buildTruthTable(qc);
 
     EXPECT_TRUE(TruthTable::equal(tt, ttSimOut));
 

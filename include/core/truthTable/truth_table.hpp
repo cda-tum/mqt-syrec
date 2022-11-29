@@ -110,8 +110,8 @@ namespace syrec {
                 assert(std::all_of(cube.cbegin(), cube.cend(), [](auto const& v) { return v.has_value(); }));
                 const auto        nBits = size();
                 std::vector<bool> result(nBits);
-                for (std::size_t i = 1U; i <= nBits; ++i) {
-                    result[nBits - i] = *cube[i - 1U];
+                for (std::size_t i = 0U; i < nBits; ++i) {
+                    result[nBits - 1 - i] = *cube[i];
                 }
                 return result;
             }
@@ -329,22 +329,18 @@ namespace syrec {
             cubeMap.insert(std::move(nh));
         }
 
-        static auto equal(TruthTable& ttOriginal, TruthTable& ttSimOut, const bool equalityUpToDontCare = true) -> bool {
-            if (ttOriginal.size() != ttSimOut.size()) {
-                return false;
-            }
-
+        static auto equal(TruthTable& tt1, TruthTable& tt2, const bool equalityUpToDontCare = true) -> bool {
             if (!equalityUpToDontCare) {
-                return (ttOriginal == ttSimOut);
+                return (tt1 == tt2);
             }
-
-            for (auto const& [input, output]: ttOriginal) {
-                if (Cube::checkCubeEquality(ttOriginal[input], ttSimOut[input])) {
+            for (auto const& [input, output]: tt1) {
+                if (auto it = tt2.find(input); it == tt2.end()) {
                     continue;
                 }
-                return false;
+                if (!Cube::checkCubeEquality(tt1[input], tt2[input])) {
+                    return false;
+                }
             }
-
             return true;
         }
 
