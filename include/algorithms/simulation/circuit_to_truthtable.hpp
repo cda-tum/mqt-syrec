@@ -6,6 +6,6 @@
 
 namespace syrec {
 
-    auto buildTruthTable(const qc::QuantumComputation& qc) -> TruthTable;
+    auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable& tt) -> void;
 
 } // namespace syrec

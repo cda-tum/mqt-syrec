@@ -11,6 +11,7 @@ using namespace syrec;
 class TestDDSynthDc: public testing::TestWithParam<std::string> {
 protected:
     TruthTable                     tt{};
+    TruthTable                     ttqc{};
     std::string                    testCircuitsDir = "./circuits/";
     std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
     std::string                    fileName;
@@ -47,9 +48,9 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     EXPECT_TRUE(!qc.empty());
 
-    auto ttSimOut = buildTruthTable(qc);
+    buildTruthTable(qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(tt, ttSimOut));
+    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
 
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";
