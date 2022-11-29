@@ -44,15 +44,14 @@ namespace syrec {
             const auto in  = *input[0];
             const auto out = *output[0];
 
+            TruthTable::Cube reducedInput(input.begin() + 1, input.end());
+            TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+
             if (output[0].has_value()) {
-                const auto       index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
-                TruthTable::Cube reducedInput(input.begin() + 1, input.end());
-                TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
                 subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
             } else {
-                const auto       offset = in ? 1U : 0U;
-                TruthTable::Cube reducedInput(input.begin() + 1, input.end());
-                TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
+                const auto offset = in ? 1U : 0U;
                 subTables.at(0 + offset).try_emplace(reducedInput, reducedOutput);
                 subTables.at(2 + offset).try_emplace(reducedInput, reducedOutput);
             }
@@ -196,7 +195,7 @@ namespace syrec {
         }
     }
 
-    //Checks whether all the edges of the node current is pointing the same node (indicating that the node is a dc Node).
+    // Check whether all the edges of the current node are pointing to the same node (indicating a don't care node).
     auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
         if (!(dd::mNode::isTerminal(current.p))) {
             if (current.p->v == 0U) {

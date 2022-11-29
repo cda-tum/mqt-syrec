@@ -107,42 +107,41 @@ namespace syrec {
 
             // return bool vec representation of the cube (order is b0,b1,b2......bn)
             [[nodiscard]] auto toBoolVec() const -> std::vector<bool> {
-                assert(cube.size() <= 64U);
-                assert(std::none_of(cube.cbegin(), cube.cend(), [](auto const& v) { return !v.has_value(); }));
-                std::vector<bool> result;
-                result.reserve(size());
-                for (auto i = static_cast<int>(size()) - 1; i >= 0; i--) {
-                    result.emplace_back(*cube[i]);
+                assert(std::all_of(cube.cbegin(), cube.cend(), [](auto const& v) { return v.has_value(); }));
+                const auto        nBits = size();
+                std::vector<bool> result(nBits);
+                for (std::size_t i = 1U; i <= nBits; ++i) {
+                    result[nBits - i] = *cube[i - 1U];
                 }
                 return result;
             }
 
             // return string representation of the cube
             [[nodiscard]] auto toString() const -> std::string {
-                assert(cube.size() <= 64U);
-                std::string result;
-                result.reserve(size());
-                for (auto const& i: cube) {
+                std::stringstream ss{};
+                for (const auto& i: cube) {
                     if (!i.has_value()) {
-                        result.push_back('-');
+                        ss << '-';
                     } else {
-                        const auto valueChar = *i ? '1' : '0';
-                        result.push_back(valueChar);
+                        ss << (*i ? '1' : '0');
                     }
                 }
-                return result;
+                return ss.str();
             }
 
-            // checks if 2 strings are equal irrespective of don't care
-            [[nodiscard]] static auto equalDcCube(const std::string& in, const std::string& out) -> bool {
-                for (auto i = 0U; i < in.size(); i++) {
-                    if (in[i] == out[i]) {
-                        continue;
-                    }
-                    if (out[i] == '-') {
-                        continue;
-                    }
+            // checks if 2 Cubes are equal irrespective of don't care
+            [[nodiscard]] static auto checkCubeEquality(const Cube& c1, const Cube& c2, const bool equalityUpToDontCare = true) -> bool {
+                if (c1.size() != c2.size()) {
                     return false;
+                }
+                const auto nBits = c1.size();
+                for (auto i = 0U; i < nBits; ++i) {
+                    if (equalityUpToDontCare && (!c1[i].has_value() || !c2[i].has_value())) {
+                        continue;
+                    }
+                    if (*c1[i] != *c2[i]) {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -328,6 +327,25 @@ namespace syrec {
 
         auto insert(CubeMap::node_type nh) -> void {
             cubeMap.insert(std::move(nh));
+        }
+
+        static auto equal(TruthTable& ttOriginal, TruthTable& ttSimOut, const bool equalityUpToDontCare = true) -> bool {
+            if (ttOriginal.size() != ttSimOut.size()) {
+                return false;
+            }
+
+            if (!equalityUpToDontCare) {
+                return (ttOriginal == ttSimOut);
+            }
+
+            for (auto const& [input, output]: ttOriginal) {
+                if (Cube::checkCubeEquality(ttOriginal[input], ttSimOut[input])) {
+                    continue;
+                }
+                return false;
+            }
+
+            return true;
         }
 
         auto clear() -> void {

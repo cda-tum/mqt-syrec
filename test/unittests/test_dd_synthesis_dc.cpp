@@ -1,7 +1,7 @@
+#include "algorithms/simulation/simple_simulation.hpp"
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
-#include "dd/Simulation.hpp"
 
 #include "gtest/gtest.h"
 
@@ -47,21 +47,9 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     EXPECT_TRUE(!qc.empty());
 
-    std::vector<dd::vEdge> inEdges;
-    inEdges.reserve(tt.size());
-    std::vector<std::string> outputStrings;
-    outputStrings.reserve(tt.size());
+    auto ttSimOut = buildTruthTable(qc, tt, dd);
 
-    for (auto const& [input, output]: tt) {
-        inEdges.emplace_back(dd->makeBasisState(static_cast<dd::Qubit>(tt.nInputs()), input.toBoolVec()));
-        outputStrings.emplace_back(output.toString());
-    }
-
-    for (auto in = 0U; in < inEdges.size(); in++) {
-        const auto vOut       = dd::simulate(&qc, inEdges[in], dd, 1);
-        const auto vOutString = vOut.begin()->first;
-        EXPECT_TRUE(TruthTable::Cube::equalDcCube(vOutString, outputStrings[in]));
-    }
+    EXPECT_TRUE(TruthTable::equal(tt, ttSimOut));
 
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";
