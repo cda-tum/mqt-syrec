@@ -2,7 +2,6 @@
 
 #include "QuantumComputation.hpp"
 #include "core/truthTable/truth_table.hpp"
-#include "dd/Simulation.hpp"
 
 namespace syrec {
 

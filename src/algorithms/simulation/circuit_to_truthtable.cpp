@@ -1,10 +1,14 @@
 #include "algorithms/simulation/circuit_to_truthtable.hpp"
 
+#include "dd/Simulation.hpp"
+
 namespace syrec {
 
     auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable& tt) -> void {
         const auto nBits = qc.getNqubits();
-        auto       dd    = std::make_unique<dd::Package<>>(nBits);
+        assert(nBits < 65U);
+
+        auto dd = std::make_unique<dd::Package<>>(nBits);
 
         const auto totalInputs = 1U << nBits;
 

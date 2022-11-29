@@ -334,9 +334,6 @@ namespace syrec {
                 return (tt1 == tt2);
             }
             for (auto const& [input, output]: tt1) {
-                if (auto it = tt2.find(input); it == tt2.end()) {
-                    continue;
-                }
                 if (!Cube::checkCubeEquality(tt1[input], tt2[input])) {
                     return false;
                 }

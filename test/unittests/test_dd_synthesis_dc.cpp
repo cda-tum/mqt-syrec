@@ -46,8 +46,6 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     DDSynthesizer synthesizer(tt.nInputs());
     const auto&   qc = synthesizer.synthesize(ttDD, dd);
 
-    EXPECT_TRUE(!qc.empty());
-
     buildTruthTable(qc, ttqc);
 
     EXPECT_TRUE(TruthTable::equal(tt, ttqc));
