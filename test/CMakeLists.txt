@@ -49,7 +49,8 @@ package_add_test(
   unittests/test_extend_tt.cpp
   unittests/test_huffman.cpp
   unittests/test_pla_parser.cpp
-  unittests/test_dd_synthesis.cpp)
+  unittests/test_dd_synthesis.cpp
+  unittests/test_dd_synthesis_dc.cpp)
 
 add_custom_command(
   TARGET ${PROJECT_NAME}_test

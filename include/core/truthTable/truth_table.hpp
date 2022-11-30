@@ -105,6 +105,47 @@ namespace syrec {
                 return result;
             }
 
+            // return bool vec representation of the cube (order is b0,b1,b2......bn)
+            [[nodiscard]] auto toBoolVec() const -> std::vector<bool> {
+                assert(std::all_of(cube.cbegin(), cube.cend(), [](auto const& v) { return v.has_value(); }));
+                const auto        nBits = size();
+                std::vector<bool> result(nBits);
+                for (std::size_t i = 0U; i < nBits; ++i) {
+                    result[nBits - 1 - i] = *cube[i];
+                }
+                return result;
+            }
+
+            // return string representation of the cube
+            [[nodiscard]] auto toString() const -> std::string {
+                std::stringstream ss{};
+                for (const auto& i: cube) {
+                    if (!i.has_value()) {
+                        ss << '-';
+                    } else {
+                        ss << (*i ? '1' : '0');
+                    }
+                }
+                return ss.str();
+            }
+
+            // checks if 2 Cubes are equal irrespective of don't care
+            [[nodiscard]] static auto checkCubeEquality(const Cube& c1, const Cube& c2, const bool equalityUpToDontCare = true) -> bool {
+                if (c1.size() != c2.size()) {
+                    return false;
+                }
+                const auto nBits = c1.size();
+                for (auto i = 0U; i < nBits; ++i) {
+                    if (equalityUpToDontCare && (!c1[i].has_value() || !c2[i].has_value())) {
+                        continue;
+                    }
+                    if (*c1[i] != *c2[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             [[nodiscard]] auto completeCubes() const -> Vector;
 
             auto insertZero() -> void {
@@ -134,6 +175,10 @@ namespace syrec {
 
             auto operator<(const Cube& cv) const -> bool {
                 return (cube < cv.cube);
+            }
+
+            auto operator>(const Cube& cv) const -> bool {
+                return (cube > cv.cube);
             }
 
             auto operator==(const Cube& cv) const -> bool {
@@ -267,6 +312,10 @@ namespace syrec {
             return cubeMap.find(Cube::fromString(str));
         }
 
+        auto find(const Cube& c) -> decltype(cubeMap.cbegin()) {
+            return cubeMap.find(c);
+        }
+
         auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
@@ -279,6 +328,8 @@ namespace syrec {
         auto insert(CubeMap::node_type nh) -> void {
             cubeMap.insert(std::move(nh));
         }
+
+        static auto equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare = true) -> bool;
 
         auto clear() -> void {
             cubeMap.clear();

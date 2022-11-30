@@ -59,5 +59,4 @@ namespace syrec {
             t.stop();
         }
     }
-
 } // namespace syrec

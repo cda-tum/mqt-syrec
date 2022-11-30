@@ -16,7 +16,7 @@ namespace syrec {
             data(std::move(data)), freq(freq) {}
 
         auto operator>(const MinHeapNode& other) const -> bool {
-            return freq > other.freq;
+            return (freq > other.freq || (freq == other.freq && (data > other.data)));
         }
 
         auto traverse(TruthTable::Cube&& encodedCube, TruthTable::CubeMap& encoding) const -> void {
