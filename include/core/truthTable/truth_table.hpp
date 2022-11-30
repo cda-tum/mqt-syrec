@@ -329,17 +329,7 @@ namespace syrec {
             cubeMap.insert(std::move(nh));
         }
 
-        static auto equal(TruthTable& tt1, TruthTable& tt2, const bool equalityUpToDontCare = true) -> bool {
-            if (!equalityUpToDontCare) {
-                return (tt1 == tt2);
-            }
-            for (auto const& [input, output]: tt1) {
-                if (!Cube::checkCubeEquality(tt1[input], tt2[input])) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        static auto equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare = true) -> bool;
 
         auto clear() -> void {
             cubeMap.clear();

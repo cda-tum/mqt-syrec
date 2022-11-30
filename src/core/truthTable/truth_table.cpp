@@ -39,4 +39,38 @@ namespace syrec {
         return result;
     }
 
+    auto TruthTable::equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare) -> bool {
+        if (!equalityUpToDontCare) {
+            return (tt1 == tt2);
+        }
+
+        if (tt1.nInputs() != tt2.nInputs()) {
+            return false;
+        }
+
+        const auto nBits = tt1.nInputs();
+        assert(nBits < 65U);
+        const auto totalInputs = 1U << nBits;
+
+        std::uint64_t n = 0U;
+
+        while (n < totalInputs) {
+            const auto input = TruthTable::Cube::fromInteger(n, nBits);
+            ++n;
+
+            const auto foundtt1 = tt1.find(input) != tt1.end();
+            const auto foundtt2 = tt2.find(input) != tt2.end();
+
+            if (!foundtt1 || !foundtt2) {
+                continue;
+            }
+
+            if (!Cube::checkCubeEquality(tt1[input], tt2[input])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 } // namespace syrec
