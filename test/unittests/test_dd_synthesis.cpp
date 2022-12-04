@@ -62,7 +62,7 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
     EXPECT_TRUE(ttDD.p != nullptr);
 
     DDSynthesizer synthesizer(tt.nInputs());
-    const auto&   qc   = synthesizer.synthesize(ttDD, dd);
+    const auto&   qc   = synthesizer.synthesize(ttDD, {}, 0U, tt.nOutputs(), dd);
     const auto&   qcDD = dd::buildFunctionality(&qc, dd);
     EXPECT_EQ(ttDD, qcDD);
 

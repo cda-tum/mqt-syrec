@@ -183,12 +183,9 @@ namespace syrec {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx = static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
-                if (*ctrlCube[i]) {
-                    ctrl.emplace(dd::Control{idx, dd::Control::Type::pos});
-                } else {
-                    ctrl.emplace(dd::Control{idx, dd::Control::Type::neg});
-                }
+                const auto idx      = static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
+                const auto ctrlType = *ctrlCube[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
+                ctrl.emplace(dd::Control{idx, ctrlType});
             }
         }
     }
@@ -198,12 +195,9 @@ namespace syrec {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
-                if (*ctrlCube[i]) {
-                    ctrl.emplace(dd::Control{idx, dd::Control::Type::pos});
-                } else {
-                    ctrl.emplace(dd::Control{idx, dd::Control::Type::neg});
-                }
+                const auto idx      = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
+                const auto ctrlType = *ctrlCube[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
+                ctrl.emplace(dd::Control{idx, ctrlType});
             }
         }
     }
@@ -372,11 +366,10 @@ namespace syrec {
         for (auto const& rootVec: rootSolution) {
             dd::Controls ctrlFinal;
             controlRoot(current, ctrlFinal, rootVec);
-            if (!changePaths) {
-                ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
-            } else {
-                ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::neg});
-            }
+
+            const auto ctrlType = changePaths ? dd::Control::Type::neg : dd::Control::Type::pos;
+            ctrlFinal.emplace(dd::Control{current.p->v, ctrlType});
+
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
             for (std::size_t i = 0; i < targetSize; ++i) {
@@ -433,20 +426,82 @@ namespace syrec {
         return unifyPath(src, current, p1SigVec, p2SigVec, changePaths, dd);
     }
 
-    // This function returns the operations required to synthesize the DD.
-    auto DDSynthesizer::synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
-        qc.clear();
-        runtime  = 0.;
-        numGates = 0U;
+    // Refer to the decoder algorithm of https://www.cda.cit.tum.de/files/eda/2018_aspdac_coding_techniques_in_synthesis.pdf.
+    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> void {
+        const auto codeLength = codeword.begin()->second.size();
+        const auto totalBits  = qc.getNqubits();
+        // if r = 0, skip to decoder part 2.
 
-        if (src.p == nullptr || src.p->isIdentity() || dcNodeCondition(src)) {
-            return qc;
+        //Decoder part 1.
+        if (r > 0U) {
+            for (const auto& [pattern, code]: codeword) {
+                TruthTable::Cube targetCube(pattern.begin(), pattern.begin() + static_cast<int>(r));
+
+                dd::Controls ctrl;
+                for (auto i = 0U; i < codeLength; i++) {
+                    if (code[i].has_value()) {
+                        const auto ctrlType = *code[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
+                        ctrl.emplace(dd::Control{static_cast<dd::Qubit>((codeLength - 1U) - i), ctrlType});
+                    }
+                }
+
+                const auto targetSize = targetCube.size();
+
+                for (std::size_t i = 0U; i < targetSize; ++i) {
+                    if (targetCube[i].has_value() && *(targetCube[i])) {
+                        auto op = std::make_unique<qc::StandardOperation>(totalBits, ctrl, static_cast<dd::Qubit>((static_cast<std::size_t>(totalBits) - 1U) - i), qc::X);
+                        qc.emplace_back(op);
+                        ++numGates;
+                    }
+                }
+            }
         }
+
+        //Decoder part 2.
+        const auto correctionBits = m - r;
+
+        if (correctionBits == 0U) {
+            return;
+        }
+
+        TruthTable ttCorrection{};
+
+        for (const auto& [pattern, code]: codeword) {
+            TruthTable::Cube outCube(pattern);
+            outCube.resize(totalBits);
+            TruthTable::Cube inCube(pattern.begin(), pattern.begin() + static_cast<int>(r));
+            for (auto i = 0U; i < codeLength; i++) {
+                inCube.emplace_back(code[i]);
+            }
+            ttCorrection.try_emplace(inCube, outCube);
+        }
+
+        // Extend the dc in the inputs.
+        TruthTable newTT{};
+        for (auto const& [input, output]: ttCorrection) {
+            auto completeInputs = input.completeCubes();
+            for (auto const& completeInput: completeInputs) {
+                newTT.try_emplace(completeInput, output);
+            }
+        }
+
+        const auto ttCorrectionDD = buildDD(newTT, dd);
+        synthesizeDD(ttCorrectionDD, dd, m, true);
+    }
+
+    // This function returns the operations required to synthesize the DD.
+    // flag -> If true, the synthesis is stopped after the nodeThreshold is reached.
+    // m -> No. of primary outputs.
+    auto DDSynthesizer::synthesizeDD(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd, std::size_t const& m, bool flag) -> void {
+        if (src.p == nullptr || src.p->isIdentity() || dcNodeCondition(src)) {
+            return;
+        }
+
+        // The Node after which the synthesis can be terminated without affecting the functionality.
+        const auto nodeThreshold = static_cast<dd::Qubit>(qc.getNqubits()) - static_cast<dd::Qubit>(m);
 
         // This following ensures that the `src` node resembles an identity structure.
         // Refer to algorithm Q of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf.
-
-        const auto start = std::chrono::steady_clock::now();
 
         // to preserve the `src` DD throughout the synthesis, its reference count has to be at least 2.
         while (src.p->ref < 2U) {
@@ -463,6 +518,12 @@ namespace syrec {
         // while there are nodes left to process.
         while (!queue.empty()) {
             const auto current = queue.front();
+
+            //The synthesis is stopped after the nodeThreshold is reached (considered only while synthesizing the decoder)
+            if (current.p->v == nodeThreshold - 1 && flag) {
+                break;
+            }
+
             queue.pop();
 
             if (current.p == nullptr || current.p->isIdentity() || dcNodeCondition(current)) {
@@ -505,6 +566,23 @@ namespace syrec {
                 }
             }
         }
+    }
+
+    auto DDSynthesizer::synthesize(dd::mEdge src, TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
+        qc.clear();
+        runtime  = 0.;
+        numGates = 0U;
+
+        const auto start = std::chrono::steady_clock::now();
+
+        synthesizeDD(src, dd, m, false);
+
+        // if codeword is empty, then function is src edge realizes a reversible function by default.
+        if (!codeword.empty()) {
+            // synthesizing decoder circuit.
+            decoder(codeword, r, m, dd);
+        }
+
         runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
 
         return qc;

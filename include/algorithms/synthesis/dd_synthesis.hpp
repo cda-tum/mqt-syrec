@@ -17,7 +17,7 @@ namespace syrec {
         explicit DDSynthesizer(const std::size_t nqubits):
             qc(nqubits) {}
 
-        auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation&;
+        auto synthesize(dd::mEdge src, TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation&;
 
         [[nodiscard]] auto numGate() const -> std::size_t {
             return numGates;
@@ -56,6 +56,9 @@ namespace syrec {
 
         auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
         auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+
+        auto decoder(TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> void;
+        auto synthesizeDD(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd, std::size_t const& m, bool flag) -> void;
     };
 
 } // namespace syrec

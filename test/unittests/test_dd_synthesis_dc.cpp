@@ -11,6 +11,7 @@ using namespace syrec;
 class TestDDSynthDc: public testing::TestWithParam<std::string> {
 protected:
     TruthTable                     tt{};
+    TruthTable                     ttExpected{};
     TruthTable                     ttqc{};
     std::string                    testCircuitsDir = "./circuits/";
     std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
@@ -38,35 +39,20 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
                                  "rd32_19",
                                  "c17",
                                  "con1",
-                                 "root",
                                  "sqr",
-                                 "sqrt8",
-                                 "life",
                                  "aludc",
                                  "minialu",
-                                 "dc2",
-                                 "dk27",
-                                 "pm1",
                                  "majority",
-                                 "max10",
                                  "4gt10",
                                  "counter",
                                  "4gt5",
                                  "4mod5",
                                  "decode24",
-                                 "mod10",
-                                 "asym",
                                  "decode24e",
-                                 "radd",
-                                 "radd8",
                                  "rd53",
-                                 "rd84",
-                                 "dist",
-                                 "mlp4",
                                  "wim",
                                  "z4",
-                                 "z4ml",
-                                 "misex"),
+                                 "z4ml"),
                          [](const testing::TestParamInfo<TestDDSynthDc::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
@@ -76,20 +62,49 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
     extend(tt);
 
-    encodeHuffman(tt);
+    TruthTable const ttOri(tt); //unchanged Truth Table.
 
-    augmentWithConstants(tt);
+    //n -> No. of primary inputs.
+    //m -> No. of primary outputs.
+    //k1 -> Minimum no. of additional lines required.
+    //codewords -> Output patterns with the respective codewords.
+    //totalNoBits -> Total no. of bits required to create the circuit
+    // r -> additional variables/bits required to decode r MSB bits of the circuit.
+
+    const auto n = tt.nInputs();
+    const auto m = tt.nOutputs();
+
+    const auto [codewords, k1] = encodeHuffman(tt);
+
+    const auto totalNoBits = std::max(n, m + k1);
+    const auto r           = totalNoBits - tt.nOutputs();
+
+    augmentWithConstants(tt, totalNoBits);
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
-    DDSynthesizer synthesizer(tt.nInputs());
-    const auto&   qc = synthesizer.synthesize(ttDD, dd);
+    DDSynthesizer synthesizer(totalNoBits);
+
+    // codewords, r, m required for decoding purposes.
+    const auto& qc = synthesizer.synthesize(ttDD, codewords, r, m, dd);
+
+    //Expected Truth table
+    for (const auto& [input, output]: ttOri) {
+        auto inCube(input);
+        for (auto i = 0U; i < (totalNoBits - input.size()); i++) {
+            inCube.insertZero();
+        }
+        TruthTable::Cube outCube(output);
+        outCube.resize(totalNoBits);
+        ttExpected.try_emplace(inCube, outCube);
+    }
 
     buildTruthTable(qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
+    EXPECT_TRUE(TruthTable::equal(ttExpected, ttqc));
 
+    std::cout << totalNoBits << "\n";
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";
 }
