@@ -100,7 +100,7 @@ namespace syrec {
     }
 
     //please refer to the second optimization approach introduced in https://www.cda.cit.tum.de/files/eda/2017_rc_improving_qmdd_synthesis_of_reversible_circuits.pdf
-    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) const -> TruthTable::Cube::Set {
+    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) const -> TruthTable::Cube::Set {
         if (current.p->v == src.p->v || current.p->v == 0U) {
             TruthTable::Cube::Set rootSigVec;
             pathFromSrcDst(src, current.p, rootSigVec);
@@ -117,10 +117,14 @@ namespace syrec {
         for (auto* p: table) {
             if (p != nullptr && p != current.p && p->ref > 0) {
                 TruthTable::Cube::Set p1Vec;
-                pathSignature(p->e[0], p1Vec);
-
                 TruthTable::Cube::Set p2Vec;
-                pathSignature(p->e[1], p2Vec);
+                if (changePaths) {
+                    pathSignature(p->e[3], p1Vec);
+                    pathSignature(p->e[2], p2Vec);
+                } else {
+                    pathSignature(p->e[0], p1Vec);
+                    pathSignature(p->e[1], p2Vec);
+                }
 
                 if (p1SigVec == p1Vec && p2SigVec == p2Vec) {
                     TruthTable::Cube::Set rootSigVecTmp;
@@ -162,6 +166,15 @@ namespace syrec {
             cube.emplace_back((i == 1U || i == 3U));
             pathSignature(src.p->e.at(i), sigVec, cube);
             cube.pop_back();
+        }
+    }
+
+    auto DDSynthesizer::completeUniCubes(TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set& uniqueCubeVec) -> void {
+        for (const auto& p2Cube: p2SigVec) {
+            const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Cube);
+            if (it == p1SigVec.end()) {
+                uniqueCubeVec.emplace(p2Cube);
+            }
         }
     }
 
@@ -224,11 +237,24 @@ namespace syrec {
     }
 
     // This algorithm swaps the paths present in the p' edge to the n edge and vice versa.
+    // If n' and p paths exists, we move on to P2 algorithm
     // Refer to the P1 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
-        if ((current.p->e[0].isZeroTerminal() && !current.p->e[1].isZeroTerminal()) || (p2SigVec.size() > p1SigVec.size())) {
-            auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
+    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        if (p2SigVec.size() > p1SigVec.size() || (p2SigVec.empty() && p1SigVec.empty())) {
+            if (p2SigVec.empty()) {
+                if (p3SigVec.empty() && p4SigVec.empty() && ((!current.p->e[0].isZeroTerminal() && current.p->e[1].isZeroTerminal()) || (!current.p->e[3].isZeroTerminal() && current.p->e[2].isZeroTerminal()))) {
+                    return src;
+                }
+                if (!p3SigVec.empty() || !p4SigVec.empty()) {
+                    return src;
+                }
+            }
 
+            if (!p2SigVec.empty() && p1SigVec == p3SigVec && p2SigVec == p4SigVec) {
+                return src;
+            }
+
+            auto       rootSigVec   = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, false, dd);
             const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
             const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
@@ -243,23 +269,38 @@ namespace syrec {
     }
 
     // This algorithm moves the unique paths present in the p' edge to the n edge.
+    // If there are no unique paths in p' edge, the unique paths present in the n' edge are moved to the p edge if required.
     // Refer to the P2 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
-        TruthTable::Cube::Set uniqueCubeVec;
-
-        // Collect all the unique p' paths.
-        for (const auto& p2Cube: p2SigVec) {
-            const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Cube);
-            if (it == p1SigVec.end()) {
-                uniqueCubeVec.emplace(p2Cube);
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+        if (p2SigVec.empty()) {
+            if (p3SigVec.empty() || (p1SigVec == p3SigVec && p2SigVec == p4SigVec)) {
+                return src;
             }
+            changePaths = true;
+        }
+
+        if (p1SigVec == p3SigVec && p2SigVec == p4SigVec) {
+            return src;
+        }
+
+        TruthTable::Cube::Set uniqueCubeVec;
+        // Collect all the unique paths.
+        if (changePaths) {
+            completeUniCubes(p4SigVec, p3SigVec, uniqueCubeVec);
+        } else {
+            completeUniCubes(p1SigVec, p2SigVec, uniqueCubeVec);
         }
 
         if (uniqueCubeVec.empty()) {
             return src;
         }
 
-        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
+        TruthTable::Cube::Set rootSigVec;
+        if (changePaths) {
+            rootSigVec = finalSrcPathSignature(src, current, p4SigVec, p3SigVec, changePaths, dd);
+        } else {
+            rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, changePaths, dd);
+        }
 
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
         const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
@@ -279,17 +320,18 @@ namespace syrec {
     }
 
     // This algorithm checks whether the p' edge is pointing to zero terminal node.
+    // This algorithm also checks if n paths == n' paths and p' paths == p paths.
     // Refer to P3 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::terminate(dd::mEdge const& current) -> bool {
+    auto DDSynthesizer::terminate(dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec) -> bool {
         if (!(dd::mNode::isTerminal(current.p))) {
-            return current.p->e[1].isZeroTerminal();
+            return ((p1SigVec == p3SigVec && p2SigVec == p4SigVec) || (current.p->e[1].isZeroTerminal() && current.p->e[2].isZeroTerminal()));
         }
         return false;
     }
 
-    // This algorithm modifies the non-unique paths present in the p' edge to unique paths.
+    // This algorithm modifies the non-unique paths present in the p' or n (based on changePaths) edge to unique paths.
     // Refer to P4 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
         TruthTable::Cube repeatedCube;
         for (auto const& p2Obj: p2SigVec) {
             if (const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Obj); it != p1SigVec.end()) {
@@ -319,7 +361,7 @@ namespace syrec {
         dd::Controls ctrlNonRoot;
         controlNonRoot(current, ctrlNonRoot, ctrlVec);
 
-        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, dd);
+        auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, changePaths, dd);
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
@@ -330,7 +372,11 @@ namespace syrec {
         for (auto const& rootVec: rootSolution) {
             dd::Controls ctrlFinal;
             controlRoot(current, ctrlFinal, rootVec);
-            ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
+            if (!changePaths) {
+                ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::pos});
+            } else {
+                ctrlFinal.emplace(dd::Control{current.p->v, dd::Control::Type::neg});
+            }
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
             for (std::size_t i = 0; i < targetSize; ++i) {
@@ -355,23 +401,36 @@ namespace syrec {
         TruthTable::Cube::Set p2SigVec;
         pathSignature(current.p->e[1], p2SigVec);
 
+        TruthTable::Cube::Set p3SigVec;
+        pathSignature(current.p->e[2], p3SigVec);
+
+        TruthTable::Cube::Set p4SigVec;
+        pathSignature(current.p->e[3], p4SigVec);
+
+        auto changePaths = false;
+
         // P1 algorithm.
-        if (const auto srcSwapped = swapPaths(src, current, p1SigVec, p2SigVec, dd); srcSwapped != src) {
+        if (const auto srcSwapped = swapPaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, dd); srcSwapped != src) {
             return srcSwapped;
         }
 
         // P2 algorithm.
-        if (const auto srcUnique = shiftUniquePaths(src, current, p1SigVec, p2SigVec, dd); srcUnique != src) {
+        // If there are no unique paths in p' edge, the unique paths present in the n' edge are moved to the p edge if required. changePaths flag is set accordingly.
+        if (const auto srcUnique = shiftUniquePaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, changePaths, dd); srcUnique != src) {
             return srcUnique;
         }
 
         // P3 algorithm.
-        if (terminate(current)) {
+        if (terminate(current, p1SigVec, p2SigVec, p3SigVec, p4SigVec)) {
             return src;
         }
 
         // P4 algorithm.
-        return unifyPath(src, current, p1SigVec, p2SigVec, dd);
+        // if changePaths flag is set, p and n' edges are considered instead of n and p' edges.
+        if (changePaths) {
+            return unifyPath(src, current, p4SigVec, p3SigVec, changePaths, dd);
+        }
+        return unifyPath(src, current, p1SigVec, p2SigVec, changePaths, dd);
     }
 
     // This function returns the operations required to synthesize the DD.

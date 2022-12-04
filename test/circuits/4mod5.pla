@@ -1,0 +1,9 @@
+# Function: 4mod5
+# This file have been taken from RevLib (www.revlib.org).
+.i 4
+.o 1
+0000 1
+0101 1
+1010 1
+1111 1
+.e
