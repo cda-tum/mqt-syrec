@@ -1,0 +1,13 @@
+# Function: 1-bit adder/rd32
+# This file has been taken from RevLib (www.revlib.org).
+.i 3
+.o 2
+000 00
+001 01
+010 01
+011 10
+100 01
+101 10
+110 10
+111 11
+.e

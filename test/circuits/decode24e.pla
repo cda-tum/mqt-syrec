@@ -1,0 +1,9 @@
+# Function: decod24-enable
+# This file has been taken from RevLib (www.revlib.org).
+.i 3
+.o 4
+001 1000
+011 0100
+101 0010
+111 0001
+.e

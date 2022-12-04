@@ -1,0 +1,12 @@
+# Function: C17
+# This file has been taken from RevLib (www.revlib.org).
+.i 5
+.o 2
+1-1-- 10
+-10-- 10
+-1-0- 10
+-10-- 01
+-1-0- 01
+--0-1 01
+---01 01
+.e
