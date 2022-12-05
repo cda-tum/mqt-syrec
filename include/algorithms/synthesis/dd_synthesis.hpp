@@ -13,17 +13,12 @@ namespace syrec {
 
     class DDSynthesizer {
     public:
-        DDSynthesizer() = default;
-
-        explicit DDSynthesizer(TruthTable const& tt):
-            m(tt.nOutputs()), totalNoBits(tt.nOutputs()) {}
-
-        auto synthesize(TruthTable const& tt) -> std::shared_ptr<qc::QuantumComputation>;
-        auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void;
-
-        [[nodiscard]] auto getNbits() const -> std::size_t {
-            return totalNoBits;
+        static auto synthesize(const TruthTable& tt) -> std::shared_ptr<qc::QuantumComputation> {
+            DDSynthesizer synthesizer{};
+            return synthesizer.synthesizeTT(tt);
         }
+
+        auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> std::shared_ptr<qc::QuantumComputation>;
 
         [[nodiscard]] auto numGate() const -> std::size_t {
             return numGates;
@@ -34,14 +29,20 @@ namespace syrec {
         }
 
     private:
-        double      runtime  = 0.;
-        std::size_t numGates = 0U;
+        double                                  runtime  = 0.;
+        std::size_t                             numGates = 0U;
+        std::unique_ptr<dd::Package<>>          ddSynth;
+        std::shared_ptr<qc::QuantumComputation> qc;
 
+        // n -> No. of primary inputs.
         // m -> No. of primary outputs.
         // totalNoBits -> Total no. of bits required to create the circuit
+        // r -> Additional variables/bits required to decode the output patterns.
 
+        std::size_t n           = 0U;
         std::size_t m           = 0U;
         std::size_t totalNoBits = 0U;
+        std::size_t r           = 0U;
         bool        garbageFlag = false;
 
         auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) const -> void;
@@ -54,22 +55,24 @@ namespace syrec {
 
         static auto completeUniCubes(TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set& uniqueCubeVec) -> void;
 
-        auto applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void;
+        auto applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
 
         static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
         static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
 
         static auto dcNodeCondition(dd::mEdge const& current) -> bool;
 
-        auto swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge;
+        auto swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto        shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge;
+        auto        shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
         static auto terminate(dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec) -> bool;
 
-        auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge;
-        auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge;
+        auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+        auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto decoder(TruthTable::CubeMap const& codewords, std::size_t const& r, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void;
+        auto decoder(TruthTable::CubeMap const& codewords, std::unique_ptr<dd::Package<>>& dd) -> void;
+
+        auto synthesizeTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
     };
 
 } // namespace syrec

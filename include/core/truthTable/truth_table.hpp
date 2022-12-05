@@ -239,10 +239,6 @@ namespace syrec {
         CubeMap cubeMap{};
 
     public:
-        TruthTable()                     = default;
-        TruthTable(TruthTable& tt)       = default;
-        TruthTable(TruthTable const& tt) = default;
-
         auto operator==(const TruthTable& tt) const -> bool {
             return (cubeMap == tt.cubeMap);
         }

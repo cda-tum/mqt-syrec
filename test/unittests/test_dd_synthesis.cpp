@@ -60,14 +60,10 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
-    DDSynthesizer synthesizer(tt);
-    const auto    totalNoBits = synthesizer.getNbits();
+    DDSynthesizer synthesizer{};
 
-    auto qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
-
-    synthesizer.synthesize(ttDD, dd, qc);
-    auto const* qcPtr = qc.get();
-    const auto& qcDD  = dd::buildFunctionality(qcPtr, dd);
+    const auto  qc   = synthesizer.synthesize(ttDD, dd);
+    const auto& qcDD = dd::buildFunctionality(qc.get(), dd);
     EXPECT_EQ(ttDD, qcDD);
 
     std::cout << synthesizer.numGate() << "\n";

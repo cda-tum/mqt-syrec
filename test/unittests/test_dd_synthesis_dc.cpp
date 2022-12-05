@@ -11,7 +11,6 @@ using namespace syrec;
 class TestDDSynthDc: public testing::TestWithParam<std::string> {
 protected:
     TruthTable  tt{};
-    TruthTable  ttExpected{};
     TruthTable  ttqc{};
     std::string testCircuitsDir = "./circuits/";
     std::string fileName;
@@ -60,19 +59,16 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    DDSynthesizer synthesizer(tt);
-    const auto&   qc          = synthesizer.synthesize(tt);
-    const auto    totalNoBits = synthesizer.getNbits();
-    auto const*   qcPtr       = qc.get();
+    const auto& qc          = DDSynthesizer::synthesize(tt);
+    const auto  totalNoBits = qc->getNqubits();
 
     // generate the complete truth table.
-    TruthTable ttExpected{tt};
-    completeTruthTable(ttExpected, totalNoBits);
+    extend(tt);
+    augmentWithConstants(tt, totalNoBits, true);
 
-    buildTruthTable(qcPtr, ttqc);
+    buildTruthTable(*qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(ttExpected, ttqc));
+    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
 
-    std::cout << synthesizer.numGate() << "\n";
-    std::cout << synthesizer.getExecutionTime() << "\n";
+    std::cout << qc->getNops() << "\n";
 }
