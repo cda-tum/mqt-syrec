@@ -40,7 +40,15 @@ namespace syrec {
         }
     }
 
-    auto encodeHuffman(TruthTable& tt) -> std::tuple<TruthTable::CubeMap, std::size_t> {
+    auto completeTruthTable(TruthTable& ttExpected, std::size_t const& totalNoBits) -> void {
+        extend(ttExpected);
+        for (auto& [input, output]: ttExpected) {
+            output.resize(totalNoBits);
+        }
+        augmentWithConstants(ttExpected, totalNoBits);
+    }
+
+    auto encodeHuffman(TruthTable& tt) -> std::pair<TruthTable::CubeMap, std::size_t> {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
         for (const auto& [input, output]: tt) {
             outputFreq[output]++;
@@ -48,7 +56,7 @@ namespace syrec {
 
         // if the truth table function is already reversible, no encoding is necessary
         if (outputFreq.size() == tt.size()) {
-            return std::make_tuple(TruthTable::CubeMap{}, 0U);
+            return {TruthTable::CubeMap{}, 0U};
         }
 
         // create a priority queue for building the Huffman tree
@@ -126,19 +134,18 @@ namespace syrec {
             output = encoding[output];
         }
 
-        return std::make_tuple(encoding, additionalLines);
+        return {encoding, additionalLines};
     }
 
     auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits) -> void {
-        //add necessary constant inputs to the outputs based on the total number of bits (nBits)
         const auto ancillaBits = nBits - tt.nOutputs();
+
         for (auto& [input, output]: tt) {
+            // add necessary constant inputs to the outputs based on the total number of bits (nBits).
             for (auto i = 0U; i < ancillaBits; i++) {
                 output.insertZero();
             }
-        }
 
-        for (auto const& [input, output]: tt) {
             const auto inputSize  = input.size();
             const auto outputSize = output.size();
             if (inputSize >= outputSize) {
