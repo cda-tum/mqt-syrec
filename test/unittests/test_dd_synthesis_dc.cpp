@@ -10,12 +10,11 @@ using namespace syrec;
 
 class TestDDSynthDc: public testing::TestWithParam<std::string> {
 protected:
-    TruthTable                     tt{};
-    TruthTable                     ttExpected{};
-    TruthTable                     ttqc{};
-    std::string                    testCircuitsDir = "./circuits/";
-    std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
-    std::string                    fileName;
+    TruthTable  tt{};
+    TruthTable  ttExpected{};
+    TruthTable  ttqc{};
+    std::string testCircuitsDir = "./circuits/";
+    std::string fileName;
 
     void SetUp() override {
         fileName = testCircuitsDir + GetParam() + ".pla";
@@ -60,51 +59,20 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
 
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
-    extend(tt);
 
-    TruthTable const ttOri(tt); //unchanged Truth Table.
+    DDSynthesizer synthesizer(tt);
+    const auto&   qc          = synthesizer.synthesize(tt);
+    const auto    totalNoBits = synthesizer.getNbits();
+    auto const*   qcPtr       = qc.get();
 
-    //n -> No. of primary inputs.
-    //m -> No. of primary outputs.
-    //k1 -> Minimum no. of additional lines required.
-    //codewords -> Output patterns with the respective codewords.
-    //totalNoBits -> Total no. of bits required to create the circuit
-    // r -> additional variables/bits required to decode r MSB bits of the circuit.
+    // generate the complete truth table.
+    TruthTable ttExpected{tt};
+    completeTruthTable(ttExpected, totalNoBits);
 
-    const auto n = tt.nInputs();
-    const auto m = tt.nOutputs();
-
-    const auto [codewords, k1] = encodeHuffman(tt);
-
-    const auto totalNoBits = std::max(n, m + k1);
-    const auto r           = totalNoBits - tt.nOutputs();
-
-    augmentWithConstants(tt, totalNoBits);
-
-    const auto ttDD = buildDD(tt, dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    DDSynthesizer synthesizer(totalNoBits);
-
-    // codewords, r, m required for decoding purposes.
-    const auto& qc = synthesizer.synthesize(ttDD, codewords, r, m, dd);
-
-    //Expected Truth table
-    for (const auto& [input, output]: ttOri) {
-        auto inCube(input);
-        for (auto i = 0U; i < (totalNoBits - input.size()); i++) {
-            inCube.insertZero();
-        }
-        TruthTable::Cube outCube(output);
-        outCube.resize(totalNoBits);
-        ttExpected.try_emplace(inCube, outCube);
-    }
-
-    buildTruthTable(qc, ttqc);
+    buildTruthTable(qcPtr, ttqc);
 
     EXPECT_TRUE(TruthTable::equal(ttExpected, ttqc));
 
-    std::cout << totalNoBits << "\n";
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";
 }

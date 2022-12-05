@@ -1,5 +1,7 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 
+#include "algorithms/synthesis/encoding.hpp"
+
 using namespace dd::literals;
 
 namespace syrec {
@@ -215,7 +217,7 @@ namespace syrec {
     }
 
     // This function performs the multi-control (if any) X operation.
-    auto DDSynthesizer::applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
+    auto DDSynthesizer::applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void {
         // create operation and corresponding decision diagram
         auto       op   = std::make_unique<qc::StandardOperation>(totalBits, ctrl, targetBit, qc::X);
         const auto opDD = dd::getDD(op.get(), dd);
@@ -226,14 +228,14 @@ namespace syrec {
         to = tmp;
         dd->garbageCollect();
 
-        qc.emplace_back(op);
+        qc->emplace_back(op);
         ++numGates;
     }
 
     // This algorithm swaps the paths present in the p' edge to the n edge and vice versa.
     // If n' and p paths exists, we move on to P2 algorithm
     // Refer to the P1 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge {
         if (p2SigVec.size() > p1SigVec.size() || (p2SigVec.empty() && p1SigVec.empty())) {
             if (p2SigVec.empty()) {
                 if (p3SigVec.empty() && p4SigVec.empty() && ((!current.p->e[0].isZeroTerminal() && current.p->e[1].isZeroTerminal()) || (!current.p->e[3].isZeroTerminal() && current.p->e[2].isZeroTerminal()))) {
@@ -256,7 +258,7 @@ namespace syrec {
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal;
                 controlRoot(current, ctrlFinal, rootVec);
-                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
+                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd, qc);
             }
         }
         return src;
@@ -265,7 +267,7 @@ namespace syrec {
     // This algorithm moves the unique paths present in the p' edge to the n edge.
     // If there are no unique paths in p' edge, the unique paths present in the n' edge are moved to the p edge if required.
     // Refer to the P2 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge {
         if (p2SigVec.empty()) {
             if (p3SigVec.empty() || (p1SigVec == p3SigVec && p2SigVec == p4SigVec)) {
                 return src;
@@ -307,7 +309,7 @@ namespace syrec {
             for (auto const& rootVec: rootSolution) {
                 dd::Controls ctrlFinal = ctrlNonRoot;
                 controlRoot(current, ctrlFinal, rootVec);
-                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
+                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd, qc);
             }
         }
         return src;
@@ -325,7 +327,7 @@ namespace syrec {
 
     // This algorithm modifies the non-unique paths present in the p' or n (based on changePaths) edge to unique paths.
     // Refer to P4 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge {
         TruthTable::Cube repeatedCube;
         for (auto const& p2Obj: p2SigVec) {
             if (const auto it = std::find(p1SigVec.begin(), p1SigVec.end(), p2Obj); it != p1SigVec.end()) {
@@ -374,7 +376,7 @@ namespace syrec {
 
             for (std::size_t i = 0; i < targetSize; ++i) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
-                    applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
+                    applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd, qc);
                 }
             }
         }
@@ -383,7 +385,7 @@ namespace syrec {
 
     // This algorithm ensures that the `current` node has the identity structure.
     // Refer to algorithm P of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf)
-    auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> dd::mEdge {
         if (dd::mNode::isTerminal(current.p)) {
             return src;
         }
@@ -403,13 +405,13 @@ namespace syrec {
         auto changePaths = false;
 
         // P1 algorithm.
-        if (const auto srcSwapped = swapPaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, dd); srcSwapped != src) {
+        if (const auto srcSwapped = swapPaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, dd, qc); srcSwapped != src) {
             return srcSwapped;
         }
 
         // P2 algorithm.
         // If there are no unique paths in p' edge, the unique paths present in the n' edge are moved to the p edge if required. changePaths flag is set accordingly.
-        if (const auto srcUnique = shiftUniquePaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, changePaths, dd); srcUnique != src) {
+        if (const auto srcUnique = shiftUniquePaths(src, current, p1SigVec, p2SigVec, p3SigVec, p4SigVec, changePaths, dd, qc); srcUnique != src) {
             return srcUnique;
         }
 
@@ -421,20 +423,18 @@ namespace syrec {
         // P4 algorithm.
         // if changePaths flag is set, p and n' edges are considered instead of n and p' edges.
         if (changePaths) {
-            return unifyPath(src, current, p4SigVec, p3SigVec, changePaths, dd);
+            return unifyPath(src, current, p4SigVec, p3SigVec, changePaths, dd, qc);
         }
-        return unifyPath(src, current, p1SigVec, p2SigVec, changePaths, dd);
+        return unifyPath(src, current, p1SigVec, p2SigVec, changePaths, dd, qc);
     }
 
     // Refer to the decoder algorithm of https://www.cda.cit.tum.de/files/eda/2018_aspdac_coding_techniques_in_synthesis.pdf.
-    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> void {
-        const auto codeLength = codeword.begin()->second.size();
-        const auto totalBits  = qc.getNqubits();
-        // if r = 0, skip to decoder part 2.
+    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codewords, std::size_t const& r, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void {
+        const auto codeLength = codewords.begin()->second.size();
 
-        //Decoder part 1.
-        if (r > 0U) {
-            for (const auto& [pattern, code]: codeword) {
+        // decode the r most significant bits of the original output pattern.
+        if (r != 0U) {
+            for (const auto& [pattern, code]: codewords) {
                 TruthTable::Cube targetCube(pattern.begin(), pattern.begin() + static_cast<int>(r));
 
                 dd::Controls ctrl;
@@ -449,15 +449,15 @@ namespace syrec {
 
                 for (std::size_t i = 0U; i < targetSize; ++i) {
                     if (targetCube[i].has_value() && *(targetCube[i])) {
-                        auto op = std::make_unique<qc::StandardOperation>(totalBits, ctrl, static_cast<dd::Qubit>((static_cast<std::size_t>(totalBits) - 1U) - i), qc::X);
-                        qc.emplace_back(op);
+                        const auto targetBit = static_cast<dd::Qubit>((totalNoBits - 1U) - i);
+                        qc->x(targetBit, ctrl);
                         ++numGates;
                     }
                 }
             }
         }
 
-        //Decoder part 2.
+        // decode the remaining (m − r) primary outputs.
         const auto correctionBits = m - r;
 
         if (correctionBits == 0U) {
@@ -466,9 +466,10 @@ namespace syrec {
 
         TruthTable ttCorrection{};
 
-        for (const auto& [pattern, code]: codeword) {
+        for (const auto& [pattern, code]: codewords) {
             TruthTable::Cube outCube(pattern);
-            outCube.resize(totalBits);
+            outCube.resize(totalNoBits);
+
             TruthTable::Cube inCube(pattern.begin(), pattern.begin() + static_cast<int>(r));
             for (auto i = 0U; i < codeLength; i++) {
                 inCube.emplace_back(code[i]);
@@ -486,19 +487,20 @@ namespace syrec {
         }
 
         const auto ttCorrectionDD = buildDD(newTT, dd);
-        synthesizeDD(ttCorrectionDD, dd, m, true);
+        garbageFlag               = true;
+        synthesize(ttCorrectionDD, dd, qc);
     }
 
     // This function returns the operations required to synthesize the DD.
     // flag -> If true, the synthesis is stopped after the nodeThreshold is reached.
     // m -> No. of primary outputs.
-    auto DDSynthesizer::synthesizeDD(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd, std::size_t const& m, bool flag) -> void {
+    auto DDSynthesizer::synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd, const std::shared_ptr<qc::QuantumComputation>& qc) -> void {
         if (src.p == nullptr || src.p->isIdentity() || dcNodeCondition(src)) {
             return;
         }
 
-        // The Node after which the synthesis can be terminated without affecting the functionality.
-        const auto nodeThreshold = static_cast<dd::Qubit>(qc.getNqubits()) - static_cast<dd::Qubit>(m);
+        // the threshold after which the outputs are considered to be garbage.
+        const auto garbageThreshold = static_cast<dd::Qubit>(totalNoBits) - static_cast<dd::Qubit>(m);
 
         // This following ensures that the `src` node resembles an identity structure.
         // Refer to algorithm Q of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf.
@@ -515,12 +517,14 @@ namespace syrec {
         // set of nodes that have already been processed.
         std::unordered_set<dd::mEdge> visited{};
 
+        const auto start = std::chrono::steady_clock::now();
+
         // while there are nodes left to process.
         while (!queue.empty()) {
             const auto current = queue.front();
 
-            //The synthesis is stopped after the nodeThreshold is reached (considered only while synthesizing the decoder)
-            if (current.p->v == nodeThreshold - 1 && flag) {
+            // if the garbageFlag is true, the synthesis is terminated once the garbage threshold is reached.
+            if (garbageFlag && current.p->v == garbageThreshold - 1) {
                 break;
             }
 
@@ -537,7 +541,7 @@ namespace syrec {
             dd->incRef(src);
 
             // perform the shifting paths algorithm.
-            const auto srcShifted   = shiftingPaths(src, current, dd);
+            const auto srcShifted   = shiftingPaths(src, current, dd, qc);
             const auto pathsShifted = (srcShifted != src);
 
             // decrement reference count of `src` node again and trigger garbage collection.
@@ -566,25 +570,48 @@ namespace syrec {
                 }
             }
         }
+
+        runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
     }
 
-    auto DDSynthesizer::synthesize(dd::mEdge src, TruthTable::CubeMap const& codeword, std::size_t const& r, std::size_t const& m, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation& {
-        qc.clear();
-        runtime  = 0.;
-        numGates = 0U;
+    auto DDSynthesizer::synthesize(TruthTable const& tt) -> std::shared_ptr<qc::QuantumComputation> {
+        runtime     = 0.;
+        numGates    = 0U;
+        garbageFlag = false;
 
+        // no. of primary inputs.
+        const auto n = tt.nInputs();
+
+        TruthTable ttCpy(tt);
+
+        extend(ttCpy);
+
+        // codewords -> Output patterns with the respective codewords.
+        // k1 -> Minimum no. of additional lines required.
+        const auto [codewords, k1] = encodeHuffman(ttCpy);
+
+        totalNoBits  = std::max(n, m + k1);
+        const auto r = totalNoBits - ttCpy.nOutputs();
+
+        augmentWithConstants(ttCpy, totalNoBits);
+
+        auto       dd  = std::make_unique<dd::Package<>>(totalNoBits);
+        const auto src = buildDD(ttCpy, dd);
+
+        // clear ttCpy as early as possible.
+        ttCpy.clear();
         const auto start = std::chrono::steady_clock::now();
 
-        synthesizeDD(src, dd, m, false);
+        auto qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
+        synthesize(src, dd, qc);
 
-        // if codeword is empty, then function is src edge realizes a reversible function by default.
-        if (!codeword.empty()) {
-            // synthesizing decoder circuit.
-            decoder(codeword, r, m, dd);
+        // if codeword is not empty, the above synthesized encoded function should be decoded.
+        if (!codewords.empty()) {
+            // synthesizing the corresponding decoder circuit.
+            decoder(codewords, r, dd, qc);
         }
 
         runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
-
         return qc;
     }
 
