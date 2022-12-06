@@ -10,11 +10,10 @@ using namespace syrec;
 
 class TestDDSynthDc: public testing::TestWithParam<std::string> {
 protected:
-    TruthTable                     tt{};
-    TruthTable                     ttqc{};
-    std::string                    testCircuitsDir = "./circuits/";
-    std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
-    std::string                    fileName;
+    TruthTable  tt{};
+    TruthTable  ttqc{};
+    std::string testCircuitsDir = "./circuits/";
+    std::string fileName;
 
     void SetUp() override {
         fileName = testCircuitsDir + GetParam() + ".pla";
@@ -38,35 +37,20 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
                                  "rd32_19",
                                  "c17",
                                  "con1",
-                                 "root",
                                  "sqr",
-                                 "sqrt8",
-                                 "life",
                                  "aludc",
                                  "minialu",
-                                 "dc2",
-                                 "dk27",
-                                 "pm1",
                                  "majority",
-                                 "max10",
                                  "4gt10",
                                  "counter",
                                  "4gt5",
                                  "4mod5",
                                  "decode24",
-                                 "mod10",
-                                 "asym",
                                  "decode24e",
-                                 "radd",
-                                 "radd8",
                                  "rd53",
-                                 "rd84",
-                                 "dist",
-                                 "mlp4",
                                  "wim",
                                  "z4",
-                                 "z4ml",
-                                 "misex"),
+                                 "z4ml"),
                          [](const testing::TestParamInfo<TestDDSynthDc::ParamType>& info) {
                              auto s = info.param;
                              std::replace( s.begin(), s.end(), '-', '_');
@@ -74,22 +58,17 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
 
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
+
+    const auto& qc          = DDSynthesizer::synthesize(tt);
+    const auto  totalNoBits = qc->getNqubits();
+
+    // generate the complete truth table.
     extend(tt);
+    augmentWithConstants(tt, totalNoBits, true);
 
-    encodeHuffman(tt);
-
-    augmentWithConstants(tt);
-
-    const auto ttDD = buildDD(tt, dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    DDSynthesizer synthesizer(tt.nInputs());
-    const auto&   qc = synthesizer.synthesize(ttDD, dd);
-
-    buildTruthTable(qc, ttqc);
+    buildTruthTable(*qc, ttqc);
 
     EXPECT_TRUE(TruthTable::equal(tt, ttqc));
 
-    std::cout << synthesizer.numGate() << "\n";
-    std::cout << synthesizer.getExecutionTime() << "\n";
+    std::cout << qc->getNops() << "\n";
 }

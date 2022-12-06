@@ -2,6 +2,7 @@
 
 #include "QuantumComputation.hpp"
 #include "algorithms/optimization/esop_minimization.hpp"
+#include "algorithms/synthesis/encoding.hpp"
 #include "core/truthTable/truth_table.hpp"
 
 #include <chrono>
@@ -12,12 +13,12 @@ namespace syrec {
 
     class DDSynthesizer {
     public:
-        DDSynthesizer() = default;
+        static auto synthesize(const TruthTable& tt) -> std::shared_ptr<qc::QuantumComputation> {
+            DDSynthesizer synthesizer{};
+            return synthesizer.synthesizeTT(tt);
+        }
 
-        explicit DDSynthesizer(const std::size_t nqubits):
-            qc(nqubits) {}
-
-        auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> qc::QuantumComputation&;
+        auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> std::shared_ptr<qc::QuantumComputation>;
 
         [[nodiscard]] auto numGate() const -> std::size_t {
             return numGates;
@@ -28,9 +29,21 @@ namespace syrec {
         }
 
     private:
-        double                 runtime  = 0.;
-        std::size_t            numGates = 0U;
-        qc::QuantumComputation qc;
+        double                                  runtime  = 0.;
+        std::size_t                             numGates = 0U;
+        std::unique_ptr<dd::Package<>>          ddSynth;
+        std::shared_ptr<qc::QuantumComputation> qc;
+
+        // n -> No. of primary inputs.
+        // m -> No. of primary outputs.
+        // totalNoBits -> Total no. of bits required to create the circuit
+        // r -> Additional variables/bits required to decode the output patterns.
+
+        std::size_t n           = 0U;
+        std::size_t m           = 0U;
+        std::size_t totalNoBits = 0U;
+        std::size_t r           = 0U;
+        bool        garbageFlag = false;
 
         auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) const -> void;
         auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void;
@@ -56,6 +69,10 @@ namespace syrec {
 
         auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
         auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
+
+        auto decoder(TruthTable::CubeMap const& codewords) -> void;
+
+        auto synthesizeTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
     };
 
 } // namespace syrec

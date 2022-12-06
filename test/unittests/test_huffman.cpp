@@ -121,14 +121,14 @@ TEST_F(TestHuff, HUFF2) {
 
     EXPECT_EQ(tt.nInputs(), 2U);
 
-    augmentWithConstants(tt);
+    augmentWithConstants(tt, 4U);
 
-    EXPECT_EQ(tt.nInputs(), 3U);
+    EXPECT_EQ(tt.nInputs(), 4U);
 
-    const std::vector<std::uint64_t> augInput{0b000U, 0b001U, 0b010U, 0b011U};
+    const std::vector<std::uint64_t> augInput{0b0000U, 0b0001U, 0b0010U, 0b0011U};
 
     for (const auto& in2: augInput) {
-        auto search4 = tt.find(in2, 3U);
+        auto search4 = tt.find(in2, 4U);
 
         EXPECT_TRUE(search4 != tt.end());
     }

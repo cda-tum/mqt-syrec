@@ -60,10 +60,10 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
+    DDSynthesizer synthesizer{};
 
-    DDSynthesizer synthesizer(tt.nInputs());
-    const auto&   qc   = synthesizer.synthesize(ttDD, dd);
-    const auto&   qcDD = dd::buildFunctionality(&qc, dd);
+    const auto  qc   = synthesizer.synthesize(ttDD, dd);
+    const auto& qcDD = dd::buildFunctionality(qc.get(), dd);
     EXPECT_EQ(ttDD, qcDD);
 
     std::cout << synthesizer.numGate() << "\n";
