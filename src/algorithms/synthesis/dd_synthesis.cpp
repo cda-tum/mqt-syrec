@@ -429,7 +429,7 @@ namespace syrec {
     }
 
     // Refer to the decoder algorithm of https://www.cda.cit.tum.de/files/eda/2018_aspdac_coding_techniques_in_synthesis.pdf.
-    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codewords, std::unique_ptr<dd::Package<>>& dd) -> void {
+    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codewords) -> void {
         const auto codeLength = codewords.begin()->second.size();
 
         // decode the r most significant bits of the original output pattern.
@@ -482,9 +482,9 @@ namespace syrec {
             }
         }
 
-        const auto ttCorrectionDD = buildDD(ttCorrection, dd);
+        const auto ttCorrectionDD = buildDD(ttCorrection, ddSynth);
         garbageFlag               = true;
-        synthesize(ttCorrectionDD, dd);
+        synthesize(ttCorrectionDD, ddSynth);
     }
 
     // This function returns the operations required to synthesize the DD.
@@ -603,7 +603,7 @@ namespace syrec {
         // if codeword is not empty, the above synthesized encoded function should be decoded.
         if (!codewords.empty()) {
             // synthesizing the corresponding decoder circuit.
-            decoder(codewords, ddSynth);
+            decoder(codewords);
         }
 
         runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());

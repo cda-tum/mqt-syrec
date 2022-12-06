@@ -70,7 +70,7 @@ namespace syrec {
         auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
         auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto decoder(TruthTable::CubeMap const& codewords, std::unique_ptr<dd::Package<>>& dd) -> void;
+        auto decoder(TruthTable::CubeMap const& codewords) -> void;
 
         auto synthesizeTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
     };
