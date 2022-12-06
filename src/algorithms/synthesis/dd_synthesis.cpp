@@ -474,14 +474,11 @@ namespace syrec {
             for (auto i = 0U; i < codeLength; i++) {
                 inCube.emplace_back(code[i]);
             }
-            ttCorrection.try_emplace(inCube, outCube);
-        }
 
-        // Extend the dc in the inputs.
-        for (auto const& [input, output]: ttCorrection) {
-            auto completeInputs = input.completeCubes();
+            // Extend the dc in the inputs.
+            const auto completeInputs = inCube.completeCubes();
             for (auto const& completeInput: completeInputs) {
-                ttCorrection.try_emplace(completeInput, output);
+                ttCorrection.try_emplace(completeInput, outCube);
             }
         }
 
