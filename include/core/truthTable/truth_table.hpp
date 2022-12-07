@@ -328,6 +328,8 @@ namespace syrec {
 
         static auto equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare = true) -> bool;
 
+        [[nodiscard]] auto minimumAdditionalLinesRequired() const -> std::size_t;
+
         auto clear() -> void {
             cubeMap.clear();
         }

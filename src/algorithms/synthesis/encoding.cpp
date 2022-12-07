@@ -40,7 +40,7 @@ namespace syrec {
         }
     }
 
-    auto encodeHuffman(TruthTable& tt, bool log2MaxOccurrences) -> std::pair<TruthTable::CubeMap, std::size_t> {
+    auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
         for (const auto& [input, output]: tt) {
             outputFreq[output]++;
@@ -48,7 +48,7 @@ namespace syrec {
 
         // if the truth table function is already reversible, no encoding is necessary
         if (outputFreq.size() == tt.size()) {
-            return {{}, 0U};
+            return {};
         }
 
         // create a priority queue for building the Huffman tree
@@ -60,22 +60,10 @@ namespace syrec {
                             decltype(comp)>
                 minHeap(comp);
 
-        std::unordered_set<std::size_t> freqSet;
-        freqSet.reserve(outputFreq.size());
-
         // initialize the leaves of the Huffman tree from the output frequencies
         for (const auto& [output, freq]: outputFreq) {
             const auto requiredGarbage = static_cast<std::size_t>(std::ceil(std::log2(freq)));
-            freqSet.emplace(requiredGarbage);
             minHeap.emplace(std::make_shared<MinHeapNode>(output, requiredGarbage));
-        }
-
-        // Minimum no. of additional lines required.
-        const auto additionalLines = *std::max_element(freqSet.begin(), freqSet.end());
-
-        // return only the additionalLines (no further encoding is performed).
-        if (log2MaxOccurrences) {
-            return {{}, additionalLines};
         }
 
         // combine the nodes with the smallest weights until there is only one node left
@@ -94,6 +82,9 @@ namespace syrec {
             // add node to queue
             minHeap.emplace(std::move(top));
         }
+
+        // Minimum no. of additional lines required.
+        const auto additionalLines = tt.minimumAdditionalLinesRequired();
 
         const auto requiredGarbage = minHeap.top()->freq;
         const auto nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
@@ -131,28 +122,30 @@ namespace syrec {
             output = encoding[output];
         }
 
-        return {encoding, additionalLines};
+        return encoding;
     }
 
-    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool dc, bool appendZeroOut, bool appendZeroIn) -> void {
+    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero, bool appendDc) -> void {
         const auto requiredOutConstants = nBits - tt.nOutputs();
         const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
             // add necessary constant inputs to the outputs based on the total number of bits (nBits).
-            if (!dc || appendZeroOut) {
-                for (auto i = 0U; i < requiredOutConstants; i++) {
-                    if (appendZeroOut) {
-                        // based on the nBits, zeros are appended to the outputs.
+            if (appendDc || appendZero) {
+                if (appendDc) {
+                    // based on the nBits, don't cares are appended to the outputs.
+                    output.resize(nBits);
+                } else {
+                    // based on the requiredOutConstants, zeros are appended to the outputs.
+                    for (auto i = 0U; i < requiredOutConstants; i++) {
                         output.emplace_back(false);
-                    } else {
-                        // based on the nBits, zeros are inserted to the outputs.
-                        output.insertZero();
                     }
                 }
             } else {
-                // based on the nBits, don't cares are appended to the outputs.
-                output.resize(nBits);
+                // based on the requiredOutConstants, zeros are inserted to the outputs.
+                for (auto i = 0U; i < requiredOutConstants; i++) {
+                    output.insertZero();
+                }
             }
             const auto inputSize  = input.size();
             const auto outputSize = output.size();
@@ -163,14 +156,14 @@ namespace syrec {
             const auto requiredConstants = outputSize - inputSize;
             auto       newCube           = input;
             newCube.reserve(outputSize);
-            if (appendZeroIn) {
+            if (appendZero) {
+                // based on the requiredInConstants, zeros are appended to the inputs.
                 for (std::size_t i = 0; i < requiredInConstants; i++) {
-                    // based on the nBits, zeros are appended to the inputs.
                     newCube.emplace_back(false);
                 }
             } else {
+                // based on the requiredConstants, zeros are inserted to the inputs.
                 for (std::size_t i = 0; i < requiredConstants; i++) {
-                    // based on the nBits, zeros are inserted to the inputs.
                     newCube.insertZero();
                 }
             }

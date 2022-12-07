@@ -495,7 +495,7 @@ namespace syrec {
 
         totalNoBits = static_cast<std::size_t>(src.p->v + 1);
 
-        if (!garbageFlag) {
+        if (qcConstruct) {
             qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
         }
 
@@ -578,12 +578,22 @@ namespace syrec {
         runtime     = 0.;
         numGates    = 0U;
         garbageFlag = false;
+        qcConstruct = true;
 
         n = tt.nInputs();
         m = tt.nOutputs();
 
         extend(tt);
 
+        // k1 -> Minimum no. of additional lines required.
+        const auto k1 = tt.minimumAdditionalLinesRequired();
+
+        totalNoBits = std::max(n, m + k1);
+
+        // codewords -> Output patterns with the respective codewords.
+        TruthTable::CubeMap codewords;
+
+        ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
         // Refer to the one-pass synthesis  algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
         if (onePass) {
             if (m > n) {
@@ -591,50 +601,29 @@ namespace syrec {
                 augmentWithConstants(tt, m);
             }
 
-            // k -> Minimum no. of additional lines required (no encoding is performed).
-            const auto [_, k] = encodeHuffman(tt, true);
-
-            const auto maxIO = std::max(n, m);
-
-            r           = (m + k) - maxIO;
-            totalNoBits = maxIO + r;
+            r = (m + k1) - std::max(n, m);
 
             // based on the totalNoBits, zeros are appended to the inputs and the outputs.
-            augmentWithConstants(tt, totalNoBits, false, true, true);
-
-            ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
-            qc      = std::make_shared<qc::QuantumComputation>(totalNoBits);
-
-            const auto src = buildDD(tt, ddSynth);
-
-            garbageFlag = true;
-
-            const auto start = std::chrono::steady_clock::now();
-            synthesize(src, ddSynth);
-
-            runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
-            return qc;
+            augmentWithConstants(tt, totalNoBits, true);
+        } else {
+            codewords = encodeHuffman(tt);
+            r         = totalNoBits - tt.nOutputs();
+            augmentWithConstants(tt, totalNoBits);
         }
-
-        // codewords -> Output patterns with the respective codewords.
-        // k1 -> Minimum no. of additional lines required.
-        const auto [codewords, k1] = encodeHuffman(tt);
-
-        totalNoBits = std::max(n, m + k1);
-        r           = totalNoBits - tt.nOutputs();
-
-        augmentWithConstants(tt, totalNoBits);
-
-        ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
 
         const auto src = buildDD(tt, ddSynth);
 
         const auto start = std::chrono::steady_clock::now();
+
+        // If the one-pass synthesis is selected, the appended garbage bits need not be considered during the synthesis process.
+        garbageFlag = onePass;
         synthesize(src, ddSynth);
 
         // if codeword is not empty, the above synthesized encoded function should be decoded.
         if (!codewords.empty()) {
             // synthesizing the corresponding decoder circuit.
+            // the same qc is used while synthesizing the decoder circuit.
+            qcConstruct = false;
             decoder(codewords);
         }
 

@@ -63,4 +63,22 @@ namespace syrec {
         return true;
     }
 
+    auto TruthTable::minimumAdditionalLinesRequired() const -> std::size_t {
+        // calculate the frequency of each unique output pattern.
+        std::map<TruthTable::Cube, std::size_t> outputFreq;
+        for (const auto& [input, output]: cubeMap) {
+            outputFreq[output]++;
+        }
+
+        std::unordered_set<std::size_t> freqSet;
+        freqSet.reserve(outputFreq.size());
+
+        for (const auto& [output, freq]: outputFreq) {
+            const auto requiredGarbage = static_cast<std::size_t>(std::ceil(std::log2(freq)));
+            freqSet.emplace(requiredGarbage);
+        }
+
+        const auto additionalLines = *std::max_element(freqSet.begin(), freqSet.end());
+        return additionalLines;
+    }
 } // namespace syrec

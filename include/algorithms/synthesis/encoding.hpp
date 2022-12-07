@@ -38,8 +38,8 @@ namespace syrec {
 
     auto extend(TruthTable& tt) -> void;
 
-    auto encodeHuffman(TruthTable& tt, bool log2MaxOccurrences = false) -> std::pair<TruthTable::CubeMap, std::size_t>;
+    auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap;
 
-    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool dc = false, bool appendZero = false, bool appendZeroIn = false) -> void;
+    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero = false, bool appendDc = false) -> void;
 
 } //namespace syrec

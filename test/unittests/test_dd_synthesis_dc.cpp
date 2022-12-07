@@ -62,7 +62,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     // generate the complete truth table.
     extend(tt);
-    augmentWithConstants(tt, totalNoBits, true);
+    augmentWithConstants(tt, totalNoBits, false, true);
 
     buildTruthTable(*qc, ttqc);
 
@@ -87,7 +87,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
         augmentWithConstants(tt, m);
     }
 
-    augmentWithConstants(tt, totalNoBits, true, false, true);
+    augmentWithConstants(tt, totalNoBits, true, true);
 
     buildTruthTable(*qc, ttqc);
 
