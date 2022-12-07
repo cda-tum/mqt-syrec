@@ -574,7 +574,7 @@ namespace syrec {
         return qc;
     }
 
-    auto DDSynthesizer::synthesizeTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation> {
+    auto DDSynthesizer::synthesizeTT(TruthTable tt, bool onePass) -> std::shared_ptr<qc::QuantumComputation> {
         runtime     = 0.;
         numGates    = 0U;
         garbageFlag = false;
@@ -583,6 +583,38 @@ namespace syrec {
         m = tt.nOutputs();
 
         extend(tt);
+
+        // Refer to the one-pass synthesis  algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
+        if (onePass) {
+            if (m > n) {
+                // zeros are inserted to match the length of the output patterns.
+                augmentWithConstants(tt, m);
+            }
+
+            // k -> Minimum no. of additional lines required (no encoding is performed).
+            const auto [_, k] = encodeHuffman(tt, true);
+
+            const auto maxIO = std::max(n, m);
+
+            r           = (m + k) - maxIO;
+            totalNoBits = maxIO + r;
+
+            // based on the totalNoBits, zeros are appended to the inputs and the outputs.
+            augmentWithConstants(tt, totalNoBits, false, true, true);
+
+            ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
+            qc      = std::make_shared<qc::QuantumComputation>(totalNoBits);
+
+            const auto src = buildDD(tt, ddSynth);
+
+            garbageFlag = true;
+
+            const auto start = std::chrono::steady_clock::now();
+            synthesize(src, ddSynth);
+
+            runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+            return qc;
+        }
 
         // codewords -> Output patterns with the respective codewords.
         // k1 -> Minimum no. of additional lines required.

@@ -40,7 +40,7 @@ namespace syrec {
         }
     }
 
-    auto encodeHuffman(TruthTable& tt) -> std::pair<TruthTable::CubeMap, std::size_t> {
+    auto encodeHuffman(TruthTable& tt, bool log2MaxOccurrences) -> std::pair<TruthTable::CubeMap, std::size_t> {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
         for (const auto& [input, output]: tt) {
             outputFreq[output]++;
@@ -72,6 +72,11 @@ namespace syrec {
 
         // Minimum no. of additional lines required.
         const auto additionalLines = *std::max_element(freqSet.begin(), freqSet.end());
+
+        // return only the additionalLines (no further encoding is performed).
+        if (log2MaxOccurrences) {
+            return {{}, additionalLines};
+        }
 
         // combine the nodes with the smallest weights until there is only one node left
         while (minHeap.size() > 1U) {
@@ -129,16 +134,24 @@ namespace syrec {
         return {encoding, additionalLines};
     }
 
-    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool dc) -> void {
-        const auto ancillaBits = nBits - tt.nOutputs();
+    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool dc, bool appendZeroOut, bool appendZeroIn) -> void {
+        const auto requiredOutConstants = nBits - tt.nOutputs();
+        const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
             // add necessary constant inputs to the outputs based on the total number of bits (nBits).
-            if (!dc) {
-                for (auto i = 0U; i < ancillaBits; i++) {
-                    output.insertZero();
+            if (!dc || appendZeroOut) {
+                for (auto i = 0U; i < requiredOutConstants; i++) {
+                    if (appendZeroOut) {
+                        // based on the nBits, zeros are appended to the outputs.
+                        output.emplace_back(false);
+                    } else {
+                        // based on the nBits, zeros are inserted to the outputs.
+                        output.insertZero();
+                    }
                 }
             } else {
+                // based on the nBits, don't cares are appended to the outputs.
                 output.resize(nBits);
             }
             const auto inputSize  = input.size();
@@ -150,8 +163,16 @@ namespace syrec {
             const auto requiredConstants = outputSize - inputSize;
             auto       newCube           = input;
             newCube.reserve(outputSize);
-            for (std::size_t i = 0; i < requiredConstants; i++) {
-                newCube.insertZero();
+            if (appendZeroIn) {
+                for (std::size_t i = 0; i < requiredInConstants; i++) {
+                    // based on the nBits, zeros are appended to the inputs.
+                    newCube.emplace_back(false);
+                }
+            } else {
+                for (std::size_t i = 0; i < requiredConstants; i++) {
+                    // based on the nBits, zeros are inserted to the inputs.
+                    newCube.insertZero();
+                }
             }
             auto nh  = tt.extract(input);
             nh.key() = newCube;

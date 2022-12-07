@@ -45,8 +45,6 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
                                  "counter",
                                  "4gt5",
                                  "4mod5",
-                                 "decode24",
-                                 "decode24e",
                                  "rd53",
                                  "wim",
                                  "z4",
@@ -65,6 +63,31 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     // generate the complete truth table.
     extend(tt);
     augmentWithConstants(tt, totalNoBits, true);
+
+    buildTruthTable(*qc, ttqc);
+
+    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
+
+    std::cout << qc->getNops() << "\n";
+}
+
+TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
+    EXPECT_TRUE(readPla(tt, fileName));
+
+    const auto& qc          = DDSynthesizer::synthesize(tt, true);
+    const auto  totalNoBits = qc->getNqubits();
+
+    // generate the reference truth table for one-pass synthesis.
+    extend(tt);
+
+    const auto n = tt.nInputs();
+    const auto m = tt.nOutputs();
+
+    if (m > n) {
+        augmentWithConstants(tt, m);
+    }
+
+    augmentWithConstants(tt, totalNoBits, true, false, true);
 
     buildTruthTable(*qc, ttqc);
 

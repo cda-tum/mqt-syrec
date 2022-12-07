@@ -13,9 +13,9 @@ namespace syrec {
 
     class DDSynthesizer {
     public:
-        static auto synthesize(const TruthTable& tt) -> std::shared_ptr<qc::QuantumComputation> {
+        static auto synthesize(const TruthTable& tt, bool onePass = false) -> std::shared_ptr<qc::QuantumComputation> {
             DDSynthesizer synthesizer{};
-            return synthesizer.synthesizeTT(tt);
+            return synthesizer.synthesizeTT(tt, onePass);
         }
 
         auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> std::shared_ptr<qc::QuantumComputation>;
@@ -72,7 +72,7 @@ namespace syrec {
 
         auto decoder(TruthTable::CubeMap const& codewords) -> void;
 
-        auto synthesizeTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
+        auto synthesizeTT(TruthTable tt, bool onePass) -> std::shared_ptr<qc::QuantumComputation>;
     };
 
 } // namespace syrec
