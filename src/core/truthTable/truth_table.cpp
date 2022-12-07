@@ -70,15 +70,8 @@ namespace syrec {
             outputFreq[output]++;
         }
 
-        std::unordered_set<std::size_t> freqSet;
-        freqSet.reserve(outputFreq.size());
+        const auto maxPair = std::max_element(outputFreq.begin(), outputFreq.end(), [](const std::pair<TruthTable::Cube, std::size_t>& p1, const std::pair<TruthTable::Cube, std::size_t>& p2) { return p1.second < p2.second; });
 
-        for (const auto& [output, freq]: outputFreq) {
-            const auto requiredGarbage = static_cast<std::size_t>(std::ceil(std::log2(freq)));
-            freqSet.emplace(requiredGarbage);
-        }
-
-        const auto additionalLines = *std::max_element(freqSet.begin(), freqSet.end());
-        return additionalLines;
+        return static_cast<std::size_t>(std::ceil(std::log2(maxPair->second)));
     }
 } // namespace syrec

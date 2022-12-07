@@ -44,7 +44,6 @@ namespace syrec {
         std::size_t totalNoBits = 0U;
         std::size_t r           = 0U;
         bool        garbageFlag = false;
-        bool        qcConstruct = true;
 
         auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) const -> void;
         auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void;

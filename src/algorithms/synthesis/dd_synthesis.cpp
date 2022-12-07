@@ -495,7 +495,8 @@ namespace syrec {
 
         totalNoBits = static_cast<std::size_t>(src.p->v + 1);
 
-        if (qcConstruct) {
+        // construct qc only if it is pointing to null
+        if (qc == nullptr) {
             qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
         }
 
@@ -578,7 +579,6 @@ namespace syrec {
         runtime     = 0.;
         numGates    = 0U;
         garbageFlag = false;
-        qcConstruct = true;
 
         n = tt.nInputs();
         m = tt.nOutputs();
@@ -593,7 +593,10 @@ namespace syrec {
         // codewords -> Output patterns with the respective codewords.
         TruthTable::CubeMap codewords;
 
-        ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
+        // construct ddSynth only if it is pointing to null
+        if (ddSynth == nullptr) {
+            ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
+        }
         // Refer to the one-pass synthesis  algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
         if (onePass) {
             if (m > n) {
@@ -622,8 +625,6 @@ namespace syrec {
         // if codeword is not empty, the above synthesized encoded function should be decoded.
         if (!codewords.empty()) {
             // synthesizing the corresponding decoder circuit.
-            // the same qc is used while synthesizing the decoder circuit.
-            qcConstruct = false;
             decoder(codewords);
         }
 
