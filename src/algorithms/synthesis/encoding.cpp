@@ -15,7 +15,27 @@ namespace syrec {
             auto completeInputs = input.completeCubes();
             // move all the complete cubes to the new cube map
             for (auto const& completeInput: completeInputs) {
-                newTT.try_emplace(completeInput, output);
+                const auto inputIt = newTT.find(input);
+
+                if (inputIt != newTT.end()) {
+                    TruthTable::Cube newOutCube{newTT[input]};
+
+                    // clubbing the 1's of the new output with the old one
+                    for (auto i = 0U; i < tt.nOutputs(); i++) {
+                        if (output[i].has_value() && newOutCube[i].has_value() && *output[i]) {
+                            newOutCube[i] = true;
+                        }
+                    }
+
+                    assert(output != newOutCube);
+                    // erasing the old output.
+                    newTT.erase(inputIt);
+                    newTT.try_emplace(completeInput, newOutCube);
+                }
+
+                else {
+                    newTT.try_emplace(completeInput, output);
+                }
             }
         }
         // swap the new cube map with the old one
@@ -125,22 +145,18 @@ namespace syrec {
         return encoding;
     }
 
-    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero, bool appendDc) -> void {
+    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero) -> void {
         const auto requiredOutConstants = nBits - tt.nOutputs();
         const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
             // add necessary constant inputs to the outputs based on the total number of bits (nBits).
-            if (appendDc || appendZero) {
-                if (appendDc) {
-                    // based on the nBits, don't cares are appended to the outputs.
-                    output.resize(nBits);
-                } else {
-                    // based on the requiredOutConstants, zeros are appended to the outputs.
-                    for (auto i = 0U; i < requiredOutConstants; i++) {
-                        output.emplace_back(false);
-                    }
+            if (appendZero) {
+                // based on the requiredOutConstants, zeros are appended to the outputs.
+                for (auto i = 0U; i < requiredOutConstants; i++) {
+                    output.emplace_back(false);
                 }
+
             } else {
                 // based on the requiredOutConstants, zeros are inserted to the outputs.
                 for (auto i = 0U; i < requiredOutConstants; i++) {

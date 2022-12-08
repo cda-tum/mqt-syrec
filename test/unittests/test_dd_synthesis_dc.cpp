@@ -58,15 +58,13 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
 
     const auto& qc          = DDSynthesizer::synthesize(tt);
-    const auto  totalNoBits = qc->getNqubits();
 
-    // generate the complete truth table.
+    // extend the truth table.
     extend(tt);
-    augmentWithConstants(tt, totalNoBits, false, true);
 
     buildTruthTable(*qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
+    EXPECT_TRUE(TruthTable::equal(ttqc, tt));
 
     std::cout << qc->getNops() << "\n";
 }
@@ -75,23 +73,13 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
     EXPECT_TRUE(readPla(tt, fileName));
 
     const auto& qc          = DDSynthesizer::synthesize(tt, true);
-    const auto  totalNoBits = qc->getNqubits();
 
-    // generate the reference truth table for one-pass synthesis.
+    // extend the truth table.
     extend(tt);
-
-    const auto n = tt.nInputs();
-    const auto m = tt.nOutputs();
-
-    if (m > n) {
-        augmentWithConstants(tt, m);
-    }
-
-    augmentWithConstants(tt, totalNoBits, true, true);
 
     buildTruthTable(*qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(tt, ttqc));
+    EXPECT_TRUE(TruthTable::equal(ttqc, tt, true));
 
     std::cout << qc->getNops() << "\n";
 }

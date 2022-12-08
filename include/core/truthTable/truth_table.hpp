@@ -185,6 +185,10 @@ namespace syrec {
                 return (cube == cv.cube);
             }
 
+            auto operator!=(const Cube& cv) const -> bool {
+                return (cube != cv.cube);
+            }
+
             auto reserve(const std::size_t n) -> void {
                 cube.reserve(n);
             }
@@ -313,6 +317,11 @@ namespace syrec {
             return cubeMap.find(c);
         }
 
+        template<class It>
+        auto erase(It elem) -> It {
+            return cubeMap.erase(elem);
+        }
+
         auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
@@ -326,7 +335,7 @@ namespace syrec {
             cubeMap.insert(std::move(nh));
         }
 
-        static auto equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare = true) -> bool;
+        static auto equal(TruthTable& tt1, TruthTable& tt2, bool append = false, bool equalityUpToDontCare = true) -> bool;
 
         [[nodiscard]] auto minimumAdditionalLinesRequired() const -> std::size_t;
 
