@@ -597,14 +597,30 @@ namespace syrec {
         if (ddSynth == nullptr) {
             ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
         }
+
+        // construct qc only if it is pointing to null
+        if (qc == nullptr) {
+            qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
+        }
+
         // Refer to the one-pass synthesis  algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
         if (onePass) {
             if (m > n) {
+                for (auto i = 0U; i < m - n; i++) {
+                    // corresponding bits are considered as ancillary bits.
+                    qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
+                }
                 // zeros are inserted to match the length of the output patterns.
                 augmentWithConstants(tt, m);
             }
 
             r = (m + k1) - std::max(n, m);
+
+            for (auto i = 0U; i < r; i++) {
+                // corresponding bits are considered as ancillary and garbage bits.
+                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
+                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+            }
 
             // based on the totalNoBits, zeros are appended to the inputs and the outputs.
             augmentWithConstants(tt, totalNoBits, true);
@@ -612,6 +628,18 @@ namespace syrec {
             codewords = encodeHuffman(tt);
             r         = totalNoBits - tt.nOutputs();
             augmentWithConstants(tt, totalNoBits);
+
+            const auto nAncillaBits = totalNoBits - n;
+            const auto nGarbageBits = totalNoBits - m;
+
+            for (auto i = 0U; i < nAncillaBits; i++) {
+                // corresponding bits are considered as ancillary bits.
+                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
+            }
+            for (auto i = 0U; i < nGarbageBits; i++) {
+                // corresponding bits are considered as garbage bits.
+                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+            }
         }
 
         const auto src = buildDD(tt, ddSynth);

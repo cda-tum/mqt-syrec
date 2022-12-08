@@ -6,6 +6,10 @@ namespace syrec {
 
     auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable& tt) -> void {
         const auto nBits = qc.getNqubits();
+
+        tt.setConstant(qc.getAncillary());
+        tt.setGarbage(qc.getGarbage());
+
         assert(nBits < 65U);
 
         auto dd = std::make_unique<dd::Package<>>(nBits);
@@ -16,13 +20,27 @@ namespace syrec {
 
         while (n < totalInputs) {
             const auto inCube = TruthTable::Cube::fromInteger(n, nBits);
+            ++n;
 
-            auto const inEdge    = dd->makeBasisState(nBits, inCube.toBoolVec());
+            const auto boolCube  = inCube.toBoolVec();
+            bool       nextInput = false;
+
+            for (auto i = 0U; i < nBits; i++) {
+                if (qc.getAncillary()[i] && (boolCube[i])) {
+                    nextInput = true;
+                    break;
+                }
+            }
+
+            if (nextInput) {
+                continue;
+            }
+
+            auto const inEdge    = dd->makeBasisState(nBits, boolCube);
             const auto out       = dd::simulate(&qc, inEdge, dd, 1);
             const auto outString = out.begin()->first;
 
             tt.try_emplace(inCube, TruthTable::Cube::fromString(outString));
-            ++n;
         }
     }
 

@@ -240,9 +240,27 @@ namespace syrec {
         using CubeMap = std::map<Cube, Cube>;
 
     private:
-        CubeMap cubeMap{};
+        CubeMap           cubeMap{};
+        std::vector<bool> constants;
+        std::vector<bool> garbage;
 
     public:
+        auto setConstant(std::vector<bool> const& c) -> void {
+            constants = c;
+        }
+
+        auto setGarbage(std::vector<bool> const& g) -> void {
+            garbage = g;
+        }
+
+        [[maybe_unused]] auto getConstant() -> std::vector<bool> {
+            return constants;
+        }
+
+        [[maybe_unused]] auto getGarbage() -> std::vector<bool> {
+            return garbage;
+        }
+
         auto operator==(const TruthTable& tt) const -> bool {
             return (cubeMap == tt.cubeMap);
         }
@@ -335,7 +353,7 @@ namespace syrec {
             cubeMap.insert(std::move(nh));
         }
 
-        static auto equal(TruthTable& tt1, TruthTable& tt2, bool append = false, bool equalityUpToDontCare = true) -> bool;
+        static auto equal(TruthTable const& tt1, TruthTable const& tt2, bool equalityUpToDontCare = true) -> bool;
 
         [[nodiscard]] auto minimumAdditionalLinesRequired() const -> std::size_t;
 
