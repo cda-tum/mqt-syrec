@@ -57,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    const auto& qc          = DDSynthesizer::synthesize(tt);
+    const auto& qc = DDSynthesizer::synthesize(tt);
 
     // extend the truth table.
     extend(tt);
@@ -72,7 +72,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    const auto& qc          = DDSynthesizer::synthesize(tt, true);
+    const auto& qc = DDSynthesizer::synthesize(tt, true);
 
     // extend the truth table.
     extend(tt);
