@@ -21,8 +21,6 @@ TEST_F(TruthTableDD, Ident2Bit) {
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    extend(tt);
-
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
@@ -34,7 +32,6 @@ TEST_F(TruthTableDD, CNOT) {
     EXPECT_TRUE(readPla(tt, circCNOT));
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
-    extend(tt);
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
@@ -49,7 +46,6 @@ TEST_F(TruthTableDD, SWAP) {
     EXPECT_TRUE(readPla(tt, circSWAP));
     EXPECT_EQ(tt.nInputs(), 2U);
     EXPECT_EQ(tt.nOutputs(), 2U);
-    extend(tt);
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
@@ -64,7 +60,6 @@ TEST_F(TruthTableDD, Toffoli) {
     EXPECT_TRUE(readPla(tt, circToffoli));
     EXPECT_EQ(tt.nInputs(), 3U);
     EXPECT_EQ(tt.nOutputs(), 3U);
-    extend(tt);
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);

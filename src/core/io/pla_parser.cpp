@@ -1,12 +1,14 @@
 #include "core/io/pla_parser.hpp"
 
+#include "algorithms/synthesis/encoding.hpp"
+
 namespace syrec {
 
     void parsePla(TruthTable& tt, std::istream& in) {
-        std::string line;
-        std::size_t nInputs  = 0;
-        std::size_t nOutputs = 0;
-        std::regex  whitespace("\\s+");
+        std::string      line;
+        std::size_t      nInputs  = 0;
+        std::size_t      nOutputs = 0;
+        std::regex const whitespace("\\s+");
 
         while (in.good() && getline(in, line)) {
             trim(line);
@@ -80,6 +82,8 @@ namespace syrec {
         }
 
         parsePla(tt, is);
+
+        extend(tt);
 
         return true;
     }

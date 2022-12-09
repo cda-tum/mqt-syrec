@@ -583,8 +583,6 @@ namespace syrec {
         n = tt.nInputs();
         m = tt.nOutputs();
 
-        extend(tt);
-
         // k1 -> Minimum no. of additional lines required.
         const auto k1 = tt.minimumAdditionalLinesRequired();
 

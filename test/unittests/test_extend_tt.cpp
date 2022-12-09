@@ -16,11 +16,11 @@ TEST_F(TruthTableExtend, Max) {
     // create identity truth table
     std::string circMax = testCircuitsDir + "max.pla";
 
-    EXPECT_TRUE(readPla(tt, circMax));
+    EXPECT_ANY_THROW(readPla(tt, circMax));
 
-    EXPECT_EQ(tt.size(), 1U);
+    //EXPECT_EQ(tt.size(), 1U);
 
-    EXPECT_ANY_THROW(extend(tt));
+    //EXPECT_ANY_THROW(extend(tt));
 }
 
 TEST_F(TruthTableExtend, Ident2Bit) {
@@ -28,10 +28,6 @@ TEST_F(TruthTableExtend, Ident2Bit) {
     std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
-
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
 
     EXPECT_EQ(tt.size(), 4U);
 
@@ -49,10 +45,6 @@ TEST_F(TruthTableExtend, X2Bit) {
 
     EXPECT_TRUE(readPla(tt, circX2Bit));
 
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
-
     EXPECT_EQ(tt.size(), 4U);
 
     auto search = tt.find(0b11U, 2U);
@@ -66,10 +58,6 @@ TEST_F(TruthTableExtend, EXTENDTT) {
     std::string circEXTENDTT = testCircuitsDir + "extend.pla";
 
     EXPECT_TRUE(readPla(tt, circEXTENDTT));
-
-    EXPECT_EQ(tt.size(), 2U);
-
-    extend(tt);
 
     EXPECT_EQ(tt.size(), 8U);
 

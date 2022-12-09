@@ -59,9 +59,6 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     const auto& qc = DDSynthesizer::synthesize(tt);
 
-    // extend the truth table.
-    extend(tt);
-
     buildTruthTable(*qc, ttqc);
 
     EXPECT_TRUE(TruthTable::equal(ttqc, tt));
@@ -73,9 +70,6 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
     EXPECT_TRUE(readPla(tt, fileName));
 
     const auto& qc = DDSynthesizer::synthesize(tt, true);
-
-    // extend the truth table.
-    extend(tt);
 
     buildTruthTable(*qc, ttqc);
 

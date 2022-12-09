@@ -18,10 +18,6 @@ TEST_F(TestHuff, Ident2Bit) {
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
-
     EXPECT_EQ(tt.size(), 4U);
 
     auto search = tt.find(0b00U, 2U);
@@ -41,10 +37,6 @@ TEST_F(TestHuff, HUFF1) {
     const std::string circHUFF1 = testCircuitsDir + "huff_1.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF1));
-
-    EXPECT_EQ(tt.size(), 3U);
-
-    extend(tt);
 
     EXPECT_EQ(tt.size(), 4U);
 
@@ -85,10 +77,6 @@ TEST_F(TestHuff, HUFF2) {
     const std::string circHUFF2 = testCircuitsDir + "huff_2.pla";
 
     EXPECT_TRUE(readPla(tt, circHUFF2));
-
-    EXPECT_EQ(tt.size(), 2U);
-
-    extend(tt);
 
     EXPECT_EQ(tt.size(), 4U);
 
