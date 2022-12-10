@@ -23,7 +23,7 @@ namespace syrec {
 
             else if (line.rfind(".o", 0) == 0) {
                 nOutputs = std::stoi(line.substr(3));
-                // resize the tt garabge.
+                // resize the tt garbage.
                 tt.resizeGarbage(nOutputs);
             }
 
