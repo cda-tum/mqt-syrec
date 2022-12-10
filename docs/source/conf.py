@@ -29,7 +29,6 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "hoverxref.extension",
-    "sphinx_rtd_dark_mode",
 ]
 
 autosectionlabel_prefix_document = True
