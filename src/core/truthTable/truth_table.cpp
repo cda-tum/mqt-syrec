@@ -29,27 +29,53 @@ namespace syrec {
         return result;
     }
 
+    auto TruthTable::filteredInput(const Cube& input) const -> Cube {
+        // the size of the provided input should be the same as the constants stored in the tt.
+        assert(input.size() == constants.size());
+        const auto inputSize = input.size();
+
+        Cube filteredInput{};
+        filteredInput.reserve(nPrimaryInputs());
+        for (auto i = 0U; i < inputSize; i++) {
+            if (!isConstant(inputSize - 1 - i)) {
+                filteredInput.emplace_back(input[i]);
+            }
+        }
+
+        return filteredInput;
+    }
+
+    auto TruthTable::filteredOutput(const Cube& output) const -> Cube {
+        // the size of the provided output should be the same as the garbage stored in the tt.
+        assert(output.size() == garbage.size());
+        const auto outputSize = output.size();
+
+        Cube filteredOutput{};
+        filteredOutput.reserve(nPrimaryOutputs());
+        for (auto i = 0U; i < outputSize; i++) {
+            if (!isGarbage(outputSize - 1 - i)) {
+                filteredOutput.emplace_back(output[i]);
+            }
+        }
+
+        return filteredOutput;
+    }
+
     auto TruthTable::equal(TruthTable const& tt1, TruthTable const& tt2, bool equalityUpToDontCare) -> bool {
         if (!equalityUpToDontCare) {
             return (tt1 == tt2);
         }
 
-        // both the truth table must have the same number of I/O combinations.
-        if (tt1.size() != tt2.size()) {
+        // the number of primary inputs and outputs should be equal for both the truth tables.
+        if (tt1.nPrimaryInputs() != tt2.nPrimaryInputs() && tt1.nPrimaryOutputs() != tt2.nPrimaryOutputs()) {
             return false;
         }
-
-        // no. of primary outputs.
-        const auto noOfPrimaryOutputs = static_cast<int>(std::min(tt1.nOutputs(), tt2.nOutputs()));
 
         auto tt1It = tt1.begin();
         auto tt2It = tt2.begin();
 
         while (tt1It != tt1.end() || tt2It != tt2.end()) {
-            TruthTable::Cube const out1{tt1It->second.begin(), tt1It->second.begin() + noOfPrimaryOutputs};
-            TruthTable::Cube const out2{tt2It->second.begin(), tt2It->second.begin() + noOfPrimaryOutputs};
-
-            if (!(TruthTable::Cube::checkCubeEquality(out1, out2))) {
+            if (tt1.filteredInput(tt1It->first) != tt2.filteredInput(tt2It->first) && (!(TruthTable::Cube::checkCubeEquality(tt1.filteredOutput(tt1It->second), tt2.filteredOutput(tt2It->second))))) {
                 return false;
             }
             ++tt1It;

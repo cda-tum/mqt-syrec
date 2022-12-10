@@ -61,7 +61,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 
     buildTruthTable(*qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(ttqc, tt));
+    EXPECT_TRUE(TruthTable::equal(ttqc, tt) && TruthTable::equal(tt, ttqc));
 
     std::cout << qc->getNops() << "\n";
 }
@@ -73,7 +73,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
 
     buildTruthTable(*qc, ttqc);
 
-    EXPECT_TRUE(TruthTable::equal(ttqc, tt));
+    EXPECT_TRUE(TruthTable::equal(ttqc, tt) && TruthTable::equal(tt, ttqc));
 
     std::cout << qc->getNops() << "\n";
 }

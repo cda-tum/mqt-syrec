@@ -588,7 +588,7 @@ namespace syrec {
 
         totalNoBits = std::max(n, m + k1);
 
-        // codewords -> Output patterns with the respective codewords.
+                // codewords -> Output patterns with the respective codewords.
         TruthTable::CubeMap codewords;
 
         // construct ddSynth only if it is pointing to null
@@ -614,14 +614,24 @@ namespace syrec {
 
             r = (m + k1) - std::max(n, m);
 
-            for (auto i = 0U; i < r; i++) {
-                // corresponding bits are considered as ancillary and garbage bits.
-                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
-                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
-            }
+            const auto oldPrimaryInputs  = tt.nInputs();
+            const auto oldPrimaryOutputs = tt.nOutputs();
 
             // based on the totalNoBits, zeros are appended to the inputs and the outputs.
             augmentWithConstants(tt, totalNoBits, true);
+
+            const auto nAncillaBits = tt.nInputs() - oldPrimaryInputs;
+            const auto nGarbageBits = tt.nOutputs() - oldPrimaryOutputs;
+
+            for (auto i = 0U; i < nAncillaBits; i++) {
+                // corresponding bits are considered as ancillary bits.
+                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
+            }
+            for (auto i = 0U; i < nGarbageBits; i++) {
+                // corresponding bits are considered as garbage bits.
+                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+            }
+
         } else {
             codewords = encodeHuffman(tt);
             r         = totalNoBits - tt.nOutputs();
@@ -639,6 +649,9 @@ namespace syrec {
                 qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
             }
         }
+
+        // the garbage and constants stored in the tt must be equal to the garbage and constants stored in qc.
+        assert(tt.getGarbage() == qc->getGarbage() && tt.getConstants() == qc->getAncillary());
 
         const auto src = buildDD(tt, ddSynth);
 

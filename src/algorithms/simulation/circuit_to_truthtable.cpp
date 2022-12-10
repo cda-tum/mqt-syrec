@@ -7,7 +7,8 @@ namespace syrec {
     auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable& tt) -> void {
         const auto nBits = qc.getNqubits();
 
-        tt.setConstant(qc.getAncillary());
+        // set the constants and the garbage of the tt.
+        tt.setConstants(qc.getAncillary());
         tt.setGarbage(qc.getGarbage());
 
         assert(nBits < 65U);
@@ -26,7 +27,7 @@ namespace syrec {
             bool       nextInput = false;
 
             for (auto i = 0U; i < nBits; i++) {
-                if (qc.getAncillary()[i] && (boolCube[i])) {
+                if (tt.isConstant(i) && (boolCube[i])) {
                     nextInput = true;
                     break;
                 }

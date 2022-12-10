@@ -245,7 +245,7 @@ namespace syrec {
         std::vector<bool> garbage;
 
     public:
-        auto setConstant(std::vector<bool> const& c) -> void {
+        auto setConstants(std::vector<bool> const& c) -> void {
             constants = c;
         }
 
@@ -253,12 +253,28 @@ namespace syrec {
             garbage = g;
         }
 
-        [[maybe_unused]] auto getConstant() -> std::vector<bool> {
+        auto setConstant(std::size_t n) -> void {
+            constants[n] = true;
+        }
+
+        auto setGarbage(std::size_t n) -> void {
+            garbage[n] = true;
+        }
+
+        [[nodiscard]] auto getConstants() const -> const std::vector<bool>& {
             return constants;
         }
 
-        [[maybe_unused]] auto getGarbage() -> std::vector<bool> {
+        [[nodiscard]] auto getGarbage() const -> const std::vector<bool>& {
             return garbage;
+        }
+
+        [[nodiscard]] auto isConstant(std::size_t i) const -> bool {
+            return constants[i];
+        }
+
+        [[nodiscard]] auto isGarbage(std::size_t i) const -> bool {
+            return garbage[i];
         }
 
         auto operator==(const TruthTable& tt) const -> bool {
@@ -308,11 +324,19 @@ namespace syrec {
             return cubeMap.begin()->first.size();
         }
 
+        [[nodiscard]] auto nPrimaryInputs() const -> std::size_t {
+            return std::count(constants.begin(), constants.end(), false);
+        }
+
         [[nodiscard]] auto nOutputs() const -> std::size_t {
             if (cubeMap.empty()) {
                 return 0U;
             }
             return cubeMap.begin()->second.size();
+        }
+
+        [[nodiscard]] auto nPrimaryOutputs() const -> std::size_t {
+            return std::count(garbage.begin(), garbage.end(), false);
         }
 
         auto extract(Cube const& key) -> CubeMap::node_type {
@@ -339,6 +363,22 @@ namespace syrec {
         auto erase(It elem) -> It {
             return cubeMap.erase(elem);
         }
+
+        auto resizeConstants(std::size_t n) -> void {
+            constants.clear();
+            constants.resize(n);
+        }
+
+        auto resizeGarbage(std::size_t n) -> void {
+            garbage.clear();
+            garbage.resize(n);
+        }
+
+        // filters the inputs based on the number of primary inputs.
+        [[nodiscard]] auto filteredInput(const Cube& input) const -> Cube;
+
+        // filters the outputs based on the number of primary outputs.
+        [[nodiscard]] auto filteredOutput(const Cube& output) const -> Cube;
 
         auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));

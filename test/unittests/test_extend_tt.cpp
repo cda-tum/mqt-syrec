@@ -13,14 +13,9 @@ protected:
 };
 
 TEST_F(TruthTableExtend, Max) {
-    // create identity truth table
     std::string circMax = testCircuitsDir + "max.pla";
 
     EXPECT_ANY_THROW(readPla(tt, circMax));
-
-    //EXPECT_EQ(tt.size(), 1U);
-
-    //EXPECT_ANY_THROW(extend(tt));
 }
 
 TEST_F(TruthTableExtend, Ident2Bit) {

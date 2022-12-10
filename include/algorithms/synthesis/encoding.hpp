@@ -36,8 +36,6 @@ namespace syrec {
         }
     };
 
-    auto extend(TruthTable& tt) -> void;
-
     auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap;
 
     auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero = false) -> void;

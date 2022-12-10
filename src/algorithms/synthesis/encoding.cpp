@@ -2,64 +2,6 @@
 
 namespace syrec {
 
-    auto extend(TruthTable& tt) -> void {
-        // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
-        if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U)) {
-            throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
-        }
-
-        TruthTable newTT{};
-
-        for (auto const& [input, output]: tt) {
-            // compute the complete cubes for the input
-            auto completeInputs = input.completeCubes();
-            // move all the complete cubes to the new cube map
-            for (auto const& completeInput: completeInputs) {
-                const auto inputIt = newTT.find(input);
-
-                if (inputIt != newTT.end()) {
-                    TruthTable::Cube newOutCube{newTT[input]};
-
-                    // clubbing the 1's of the new output with the old one
-                    for (auto i = 0U; i < tt.nOutputs(); i++) {
-                        if (output[i].has_value() && newOutCube[i].has_value() && *output[i]) {
-                            newOutCube[i] = true;
-                        }
-                    }
-
-                    assert(output != newOutCube);
-                    // erasing the old output.
-                    newTT.erase(inputIt);
-                    newTT.try_emplace(completeInput, newOutCube);
-                }
-
-                else {
-                    newTT.try_emplace(completeInput, output);
-                }
-            }
-        }
-        // swap the new cube map with the old one
-        tt.swap(newTT);
-
-        // construct output cube
-        const auto output = TruthTable::Cube(tt.nOutputs(), false);
-
-        std::uint64_t pos = 0U;
-        for (const auto& [input, _]: tt) {
-            // fill in all the missing inputs
-            const auto number = input.toInteger();
-            for (std::uint64_t i = pos; i < number; ++i) {
-                tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
-            }
-            pos = number + 1U;
-        }
-        // fill in the remaining missing inputs (if any)
-        const std::uint64_t max = 1ULL << tt.nInputs();
-        for (std::uint64_t i = pos; i < max; ++i) {
-            tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
-        }
-    }
-
     auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
         for (const auto& [input, output]: tt) {
@@ -114,9 +56,25 @@ namespace syrec {
         TruthTable::CubeMap encoding{};
         minHeap.top()->traverse({}, encoding);
 
+        const auto nPrimaryOutputs = tt.nPrimaryOutputs();
+
         // resize all outputs to the correct size (by adding don't care values)
         for (auto& [input, output]: encoding) {
             output.resize(requiredGarbage);
+        }
+
+        // reset and resize the garbage bits.
+        tt.resizeGarbage(requiredGarbage);
+
+        // the bits excluding the primary outputs.
+        const auto garbageBits = nBits - nPrimaryOutputs;
+
+        // the bits excluding the primary outputs must be lesser than the codeword length.
+        assert(garbageBits < requiredGarbage);
+
+        // the bits excluding the primary outputs are set to garbage.
+        for (auto i = 0U; i < garbageBits; i++) {
+            tt.setGarbage(i);
         }
 
         // modify the codewords by filling in the redundant dc positions.
@@ -150,19 +108,47 @@ namespace syrec {
         const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
-            // add necessary constant inputs to the outputs based on the total number of bits (nBits).
+            const auto oldGarbageVec         = tt.getGarbage();
+            const auto currentGarbageVecSize = oldGarbageVec.size();
+
             if (appendZero) {
                 // based on the requiredOutConstants, zeros are appended to the outputs.
                 for (auto i = 0U; i < requiredOutConstants; i++) {
+                    // based on the requiredOutConstants, zeros are appended to the outputs.
                     output.emplace_back(false);
+
+                    if (currentGarbageVecSize != nBits) {
+                        // reset and resize the garbage.
+                        tt.resizeGarbage(currentGarbageVecSize + 1);
+
+                        for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
+                            if (oldGarbageVec[cg]) {
+                                // storing the old garbage bits in proper order.
+                                tt.setGarbage(cg + 1);
+                            }
+                        }
+                        // setting the newly added garbage bits.
+                        tt.setGarbage(0);
+                    }
                 }
 
             } else {
-                // based on the requiredOutConstants, zeros are inserted to the outputs.
                 for (auto i = 0U; i < requiredOutConstants; i++) {
+                    // based on the requiredOutConstants, zeros are inserted to the outputs.
                     output.insertZero();
+                    if (currentGarbageVecSize != nBits) {
+                        // reset and resize the garbage.
+                        tt.resizeGarbage(currentGarbageVecSize + 1U);
+                        for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
+                            // storing the old garbage bits in proper order.
+                            if (oldGarbageVec[cg]) {
+                                tt.setGarbage(cg);
+                            }
+                        }
+                    }
                 }
             }
+
             const auto inputSize  = input.size();
             const auto outputSize = output.size();
             if (inputSize >= outputSize) {
@@ -172,15 +158,43 @@ namespace syrec {
             const auto requiredConstants = outputSize - inputSize;
             auto       newCube           = input;
             newCube.reserve(outputSize);
+
+            const auto oldConstantVec         = tt.getConstants();
+            const auto currentConstantVecSize = oldConstantVec.size();
+
             if (appendZero) {
-                // based on the requiredInConstants, zeros are appended to the inputs.
                 for (std::size_t i = 0; i < requiredInConstants; i++) {
+                    // based on the requiredInConstants, zeros are appended to the inputs.
                     newCube.emplace_back(false);
+                    if (currentConstantVecSize != nBits) {
+                        // reset and resize the constants.
+                        tt.resizeConstants(currentConstantVecSize + 1);
+                        for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
+                            // storing the old constant bits in proper order.
+                            if (oldConstantVec[cg]) {
+                                tt.setConstant(cg + 1);
+                            }
+                        }
+                        // setting the newly added constant bit.
+                        tt.setConstant(0);
+                    }
                 }
             } else {
                 // based on the requiredConstants, zeros are inserted to the inputs.
                 for (std::size_t i = 0; i < requiredConstants; i++) {
                     newCube.insertZero();
+                    if (currentConstantVecSize != nBits) {
+                        // reset and resize the constants.
+                        tt.resizeConstants(currentConstantVecSize + 1);
+                        for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
+                            if (oldConstantVec[cg]) {
+                                // storing the old constant bits in proper order.
+                                tt.setConstant(cg);
+                            }
+                        }
+                        // setting the newly added constant bit.
+                        tt.setConstant(currentConstantVecSize);
+                    }
                 }
             }
             auto nh  = tt.extract(input);
