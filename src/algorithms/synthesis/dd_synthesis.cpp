@@ -588,7 +588,7 @@ namespace syrec {
 
         totalNoBits = std::max(n, m + k1);
 
-                // codewords -> Output patterns with the respective codewords.
+        // codewords -> Output patterns with the respective codewords.
         TruthTable::CubeMap codewords;
 
         // construct ddSynth only if it is pointing to null
