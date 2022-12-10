@@ -7,11 +7,6 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
-[project.optional-dependencies]
-docs = [
-    "sphinx-rtd-dark-mode",
-]
-
 [tool.setuptools_scm]
 
 [tool.cibuildwheel]
