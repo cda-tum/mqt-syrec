@@ -29,6 +29,7 @@ extensions = [
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "hoverxref.extension",
+    "sphinxext-opengraph",
 ]
 
 autosectionlabel_prefix_document = True
