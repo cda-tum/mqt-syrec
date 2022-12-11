@@ -253,7 +253,7 @@ namespace syrec {
             garbage = g;
         }
 
-        auto setConstant(const std::size_t n) -> void {
+        [[maybe_unused]] auto setConstant(const std::size_t n) -> void {
             constants[n] = true;
         }
 
@@ -261,11 +261,11 @@ namespace syrec {
             garbage[n] = true;
         }
 
-        [[nodiscard]] auto getConstants() const -> const std::vector<bool>& {
+        [[nodiscard]] auto getConstants() -> std::vector<bool>& {
             return constants;
         }
 
-        [[nodiscard]] auto getGarbage() const -> const std::vector<bool>& {
+        [[nodiscard]] auto getGarbage() -> std::vector<bool>& {
             return garbage;
         }
 
@@ -362,22 +362,6 @@ namespace syrec {
         template<class It>
         auto erase(It elem) -> It {
             return cubeMap.erase(elem);
-        }
-
-        auto resizeConstants(const std::size_t n) -> void {
-            constants.resize(n);
-        }
-
-        auto resizeGarbage(const std::size_t n) -> void {
-            garbage.resize(n);
-        }
-
-        auto resetConstants() -> void {
-            constants.clear();
-        }
-
-        auto resetGarbage() -> void {
-            garbage.clear();
         }
 
         // filters the inputs based on the number of primary inputs.

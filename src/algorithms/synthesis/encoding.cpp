@@ -63,9 +63,8 @@ namespace syrec {
             output.resize(requiredGarbage);
         }
 
-        // reset and resize the garbage bits.
-        tt.resetGarbage();
-        tt.resizeGarbage(requiredGarbage);
+        // resize garbage to the correct size.
+        tt.getGarbage().resize(requiredGarbage);
 
         // the bits excluding the primary outputs.
         const auto garbageBits = nBits - nPrimaryOutputs;
@@ -109,28 +108,16 @@ namespace syrec {
         const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
-            const auto oldGarbageVec         = tt.getGarbage();
-            const auto currentGarbageVecSize = oldGarbageVec.size();
+            const auto currentGarbageVecSize = tt.getGarbage().size();
 
             if (appendZero) {
                 // based on the requiredOutConstants, zeros are appended to the outputs.
                 for (auto i = 0U; i < requiredOutConstants; i++) {
                     // based on the requiredOutConstants, zeros are appended to the outputs.
                     output.emplace_back(false);
-
                     if (currentGarbageVecSize != nBits) {
-                        // reset and resize the garbage.
-                        tt.resetGarbage();
-                        tt.resizeGarbage(currentGarbageVecSize + 1);
-
-                        for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
-                            if (oldGarbageVec[cg]) {
-                                // storing the old garbage bits in proper order.
-                                tt.setGarbage(cg + 1);
-                            }
-                        }
-                        // setting the newly added garbage bits.
-                        tt.setGarbage(0);
+                        // add garbage at the LSB.
+                        tt.getGarbage().insert(tt.getGarbage().begin(), true);
                     }
                 }
 
@@ -139,15 +126,7 @@ namespace syrec {
                     // based on the requiredOutConstants, zeros are inserted to the outputs.
                     output.insertZero();
                     if (currentGarbageVecSize != nBits) {
-                        // reset and resize the garbage.
-                        tt.resetGarbage();
-                        tt.resizeGarbage(currentGarbageVecSize + 1U);
-                        for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
-                            // storing the old garbage bits in proper order.
-                            if (oldGarbageVec[cg]) {
-                                tt.setGarbage(cg);
-                            }
-                        }
+                        tt.getGarbage().resize(currentGarbageVecSize + 1);
                     }
                 }
             }
@@ -162,25 +141,15 @@ namespace syrec {
             auto       newCube           = input;
             newCube.reserve(outputSize);
 
-            const auto oldConstantVec         = tt.getConstants();
-            const auto currentConstantVecSize = oldConstantVec.size();
+            const auto currentConstantVecSize = tt.getConstants().size();
 
             if (appendZero) {
                 for (std::size_t i = 0; i < requiredInConstants; i++) {
                     // based on the requiredInConstants, zeros are appended to the inputs.
                     newCube.emplace_back(false);
                     if (currentConstantVecSize != nBits) {
-                        // reset and resize the constants.
-                        tt.resetConstants();
-                        tt.resizeConstants(currentConstantVecSize + 1);
-                        for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
-                            // storing the old constant bits in proper order.
-                            if (oldConstantVec[cg]) {
-                                tt.setConstant(cg + 1);
-                            }
-                        }
-                        // setting the newly added constant bit.
-                        tt.setConstant(0);
+                        // add a constant at the LSB.
+                        tt.getConstants().insert(tt.getConstants().begin(), true);
                     }
                 }
             } else {
@@ -188,17 +157,8 @@ namespace syrec {
                 for (std::size_t i = 0; i < requiredConstants; i++) {
                     newCube.insertZero();
                     if (currentConstantVecSize != nBits) {
-                        // reset and resize the constants.
-                        tt.resetConstants();
-                        tt.resizeConstants(currentConstantVecSize + 1);
-                        for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
-                            if (oldConstantVec[cg]) {
-                                // storing the old constant bits in proper order.
-                                tt.setConstant(cg);
-                            }
-                        }
-                        // setting the newly added constant bit.
-                        tt.setConstant(currentConstantVecSize);
+                        // add a constant at the MSB.
+                        tt.getConstants().emplace_back(true);
                     }
                 }
             }
