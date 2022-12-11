@@ -15,6 +15,7 @@ protected:
 TEST_F(TruthTableExtend, Max) {
     std::string circMax = testCircuitsDir + "max.pla";
 
+    // the max.pla consist of 64 inputs. Currently, functions with less than 63 inputs are supported.
     EXPECT_ANY_THROW(readPla(tt, circMax));
 }
 

@@ -64,6 +64,7 @@ namespace syrec {
         }
 
         // reset and resize the garbage bits.
+        tt.resetGarbage();
         tt.resizeGarbage(requiredGarbage);
 
         // the bits excluding the primary outputs.
@@ -119,6 +120,7 @@ namespace syrec {
 
                     if (currentGarbageVecSize != nBits) {
                         // reset and resize the garbage.
+                        tt.resetGarbage();
                         tt.resizeGarbage(currentGarbageVecSize + 1);
 
                         for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
@@ -138,6 +140,7 @@ namespace syrec {
                     output.insertZero();
                     if (currentGarbageVecSize != nBits) {
                         // reset and resize the garbage.
+                        tt.resetGarbage();
                         tt.resizeGarbage(currentGarbageVecSize + 1U);
                         for (auto cg = 0U; cg < currentGarbageVecSize; cg++) {
                             // storing the old garbage bits in proper order.
@@ -168,6 +171,7 @@ namespace syrec {
                     newCube.emplace_back(false);
                     if (currentConstantVecSize != nBits) {
                         // reset and resize the constants.
+                        tt.resetConstants();
                         tt.resizeConstants(currentConstantVecSize + 1);
                         for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
                             // storing the old constant bits in proper order.
@@ -185,6 +189,7 @@ namespace syrec {
                     newCube.insertZero();
                     if (currentConstantVecSize != nBits) {
                         // reset and resize the constants.
+                        tt.resetConstants();
                         tt.resizeConstants(currentConstantVecSize + 1);
                         for (auto cg = 0U; cg < currentConstantVecSize; cg++) {
                             if (oldConstantVec[cg]) {

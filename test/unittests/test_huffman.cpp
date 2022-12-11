@@ -30,7 +30,7 @@ TEST_F(TestHuff, Ident2Bit) {
 
     encodeHuffman(tt);
 
-    ASSERT_TRUE(tt == ttExtend);
+    ASSERT_TRUE(TruthTable::equal(tt, ttExtend));
 }
 
 TEST_F(TestHuff, HUFF1) {

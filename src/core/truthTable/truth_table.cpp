@@ -57,7 +57,6 @@ namespace syrec {
                 filteredOutput.emplace_back(output[i]);
             }
         }
-
         return filteredOutput;
     }
 
@@ -75,7 +74,9 @@ namespace syrec {
         auto tt2It = tt2.begin();
 
         while (tt1It != tt1.end() || tt2It != tt2.end()) {
-            if (tt1.filteredInput(tt1It->first) != tt2.filteredInput(tt2It->first) && (!(TruthTable::Cube::checkCubeEquality(tt1.filteredOutput(tt1It->second), tt2.filteredOutput(tt2It->second))))) {
+            const auto& [input1, output1] = *tt1It;
+            const auto& [input2, output2] = *tt2It;
+            if ((tt1.filteredInput(input1) != tt2.filteredInput(input2)) || (!TruthTable::Cube::checkCubeEquality(tt1.filteredOutput(output1), tt2.filteredOutput(output2)))) {
                 return false;
             }
             ++tt1It;

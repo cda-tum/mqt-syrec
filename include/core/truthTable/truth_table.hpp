@@ -269,12 +269,12 @@ namespace syrec {
             return garbage;
         }
 
-        [[nodiscard]] auto isConstant(std::size_t i) const -> bool {
-            return constants[i];
+        [[nodiscard]] auto isConstant(const std::size_t n) const -> bool {
+            return constants[n];
         }
 
-        [[nodiscard]] auto isGarbage(std::size_t i) const -> bool {
-            return garbage[i];
+        [[nodiscard]] auto isGarbage(const std::size_t n) const -> bool {
+            return garbage[n];
         }
 
         auto operator==(const TruthTable& tt) const -> bool {
@@ -364,14 +364,20 @@ namespace syrec {
             return cubeMap.erase(elem);
         }
 
-        auto resizeConstants(std::size_t n) -> void {
-            constants.clear();
+        auto resizeConstants(const std::size_t n) -> void {
             constants.resize(n);
         }
 
-        auto resizeGarbage(std::size_t n) -> void {
-            garbage.clear();
+        auto resizeGarbage(const std::size_t n) -> void {
             garbage.resize(n);
+        }
+
+        auto resetConstants() -> void {
+            constants.clear();
+        }
+
+        auto resetGarbage() -> void {
+            garbage.clear();
         }
 
         // filters the inputs based on the number of primary inputs.

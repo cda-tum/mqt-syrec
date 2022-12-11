@@ -7,7 +7,6 @@ namespace syrec {
     auto buildTruthTable(const qc::QuantumComputation& qc, TruthTable& tt) -> void {
         const auto nBits = qc.getNqubits();
 
-        // set the constants and the garbage of the tt.
         tt.setConstants(qc.getAncillary());
         tt.setGarbage(qc.getGarbage());
 

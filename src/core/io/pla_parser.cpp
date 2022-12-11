@@ -17,13 +17,15 @@ namespace syrec {
 
             if (line.rfind(".i", 0) == 0) {
                 nInputs = std::stoi(line.substr(3));
-                // resize the tt constants.
+                // reset and resize the tt constants.
+                tt.resetConstants();
                 tt.resizeConstants(nInputs);
             }
 
             else if (line.rfind(".o", 0) == 0) {
                 nOutputs = std::stoi(line.substr(3));
-                // resize the tt garbage.
+                // reset and resize the tt garbage.
+                tt.resetGarbage();
                 tt.resizeGarbage(nOutputs);
             }
 
