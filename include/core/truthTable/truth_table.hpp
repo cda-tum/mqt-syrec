@@ -253,11 +253,11 @@ namespace syrec {
             garbage = g;
         }
 
-        auto setConstant(std::size_t n) -> void {
+        auto setConstant(const std::size_t n) -> void {
             constants[n] = true;
         }
 
-        auto setGarbage(std::size_t n) -> void {
+        auto setGarbage(const std::size_t n) -> void {
             garbage[n] = true;
         }
 
