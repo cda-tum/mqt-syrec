@@ -3,10 +3,10 @@
 namespace syrec {
 
     void parsePla(TruthTable& tt, std::istream& in) {
-        std::string line;
-        std::size_t nInputs  = 0;
-        std::size_t nOutputs = 0;
-        std::regex  whitespace("\\s+");
+        std::string      line;
+        std::size_t      nInputs  = 0;
+        std::size_t      nOutputs = 0;
+        std::regex const whitespace("\\s+");
 
         while (in.good() && getline(in, line)) {
             trim(line);
@@ -17,10 +17,14 @@ namespace syrec {
 
             if (line.rfind(".i", 0) == 0) {
                 nInputs = std::stoi(line.substr(3));
+                // resize the tt constants.
+                tt.getConstants().resize(nInputs);
             }
 
             else if (line.rfind(".o", 0) == 0) {
                 nOutputs = std::stoi(line.substr(3));
+                // resize the tt garbage.
+                tt.getGarbage().resize(nOutputs);
             }
 
             else if (line == ".e") {
@@ -69,17 +73,75 @@ namespace syrec {
         }
     }
 
+    auto extend(TruthTable& tt) -> void {
+        // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
+        if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U)) {
+            throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
+        }
+
+        TruthTable newTT{};
+
+        for (auto const& [input, output]: tt) {
+            // compute the complete cubes for the input
+            auto completeInputs = input.completeCubes();
+            // move all the complete cubes to the new cube map
+            for (auto const& completeInput: completeInputs) {
+                const auto inputIt = newTT.find(input);
+
+                if (inputIt != newTT.end()) {
+                    TruthTable::Cube newOutCube{inputIt->second};
+
+                    // clubbing the 1's of the new output with the old one
+                    for (auto i = 0U; i < tt.nOutputs(); i++) {
+                        if (output[i].has_value() && newOutCube[i].has_value() && *output[i]) {
+                            newOutCube[i] = true;
+                        }
+                    }
+
+                    assert(output != newOutCube);
+                    // erasing the old output.
+                    newTT.erase(inputIt);
+                    newTT.try_emplace(completeInput, newOutCube);
+                } else {
+                    newTT.try_emplace(completeInput, output);
+                }
+            }
+        }
+        // swap the new cube map with the old one
+        tt.swap(newTT);
+
+        // construct output cube
+        const auto output = TruthTable::Cube(tt.nOutputs(), false);
+
+        std::uint64_t pos = 0U;
+        for (const auto& [input, _]: tt) {
+            // fill in all the missing inputs
+            const auto number = input.toInteger();
+            for (std::uint64_t i = pos; i < number; ++i) {
+                tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
+            }
+            pos = number + 1U;
+        }
+        // fill in the remaining missing inputs (if any)
+        const std::uint64_t max = 1ULL << tt.nInputs();
+        for (std::uint64_t i = pos; i < max; ++i) {
+            tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
+        }
+    }
+
     bool readPla(TruthTable& tt, const std::string& filename) {
         std::ifstream is;
         is.open(filename.c_str(), std::ifstream::in);
 
         if (!is.good()) {
             std::cerr << "Cannot open " + filename << std::endl;
-
             return false;
         }
 
         parsePla(tt, is);
+
+        // extending the truth table.
+        extend(tt);
 
         return true;
     }

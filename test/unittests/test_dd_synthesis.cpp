@@ -56,7 +56,6 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynth,
 
 TEST_P(TestDDSynth, GenericDDSynthesisTest) {
     EXPECT_TRUE(readPla(tt, fileName));
-    extend(tt);
 
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);

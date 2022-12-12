@@ -185,6 +185,10 @@ namespace syrec {
                 return (cube == cv.cube);
             }
 
+            auto operator!=(const Cube& cv) const -> bool {
+                return (cube != cv.cube);
+            }
+
             auto reserve(const std::size_t n) -> void {
                 cube.reserve(n);
             }
@@ -236,9 +240,43 @@ namespace syrec {
         using CubeMap = std::map<Cube, Cube>;
 
     private:
-        CubeMap cubeMap{};
+        CubeMap           cubeMap{};
+        std::vector<bool> constants;
+        std::vector<bool> garbage;
 
     public:
+        auto setConstants(std::vector<bool> const& c) -> void {
+            constants = c;
+        }
+
+        auto setGarbage(std::vector<bool> const& g) -> void {
+            garbage = g;
+        }
+
+        [[maybe_unused]] auto setConstant(const std::size_t n) -> void {
+            constants[n] = true;
+        }
+
+        auto setGarbage(const std::size_t n) -> void {
+            garbage[n] = true;
+        }
+
+        [[nodiscard]] auto getConstants() -> std::vector<bool>& {
+            return constants;
+        }
+
+        [[nodiscard]] auto getGarbage() -> std::vector<bool>& {
+            return garbage;
+        }
+
+        [[nodiscard]] auto isConstant(const std::size_t n) const -> bool {
+            return constants[n];
+        }
+
+        [[nodiscard]] auto isGarbage(const std::size_t n) const -> bool {
+            return garbage[n];
+        }
+
         auto operator==(const TruthTable& tt) const -> bool {
             return (cubeMap == tt.cubeMap);
         }
@@ -286,11 +324,19 @@ namespace syrec {
             return cubeMap.begin()->first.size();
         }
 
+        [[nodiscard]] auto nPrimaryInputs() const -> std::size_t {
+            return std::count(constants.begin(), constants.end(), false);
+        }
+
         [[nodiscard]] auto nOutputs() const -> std::size_t {
             if (cubeMap.empty()) {
                 return 0U;
             }
             return cubeMap.begin()->second.size();
+        }
+
+        [[nodiscard]] auto nPrimaryOutputs() const -> std::size_t {
+            return std::count(garbage.begin(), garbage.end(), false);
         }
 
         auto extract(Cube const& key) -> CubeMap::node_type {
@@ -313,6 +359,17 @@ namespace syrec {
             return cubeMap.find(c);
         }
 
+        template<class It>
+        auto erase(It elem) -> It {
+            return cubeMap.erase(elem);
+        }
+
+        // filters the inputs based on the number of primary inputs.
+        [[nodiscard]] auto filteredInput(const Cube& input) const -> Cube;
+
+        // filters the outputs based on the number of primary outputs.
+        [[nodiscard]] auto filteredOutput(const Cube& output) const -> Cube;
+
         auto try_emplace(const Cube& input, const Cube& output) -> void { // NOLINT(readability-identifier-naming) keeping same Interface as std::vector
             assert(cubeMap.empty() || (input.size() == nInputs() && output.size() == nOutputs()));
             cubeMap.try_emplace(input, output);
@@ -326,7 +383,9 @@ namespace syrec {
             cubeMap.insert(std::move(nh));
         }
 
-        static auto equal(TruthTable& tt1, TruthTable& tt2, bool equalityUpToDontCare = true) -> bool;
+        static auto equal(TruthTable const& tt1, TruthTable const& tt2, bool equalityUpToDontCare = true) -> bool;
+
+        [[nodiscard]] auto minimumAdditionalLinesRequired() const -> std::size_t;
 
         auto clear() -> void {
             cubeMap.clear();

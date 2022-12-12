@@ -2,45 +2,7 @@
 
 namespace syrec {
 
-    auto extend(TruthTable& tt) -> void {
-        // ensure that the resulting complete table can be stored in the cube map (at most 63 inputs, probably less in practice)
-        if (!tt.empty() && (tt.nInputs() > static_cast<std::size_t>(std::log2(tt.max_size())) || tt.nInputs() > 63U)) {
-            throw std::invalid_argument("Overflow!, Number of inputs is greater than maximum capacity " + std::string("(") + std::to_string(std::min(static_cast<unsigned>(std::log2(tt.max_size())), 63U)) + std::string(")"));
-        }
-
-        TruthTable newTT{};
-
-        for (auto const& [input, output]: tt) {
-            // compute the complete cubes for the input
-            auto completeInputs = input.completeCubes();
-            // move all the complete cubes to the new cube map
-            for (auto const& completeInput: completeInputs) {
-                newTT.try_emplace(completeInput, output);
-            }
-        }
-        // swap the new cube map with the old one
-        tt.swap(newTT);
-
-        // construct output cube
-        const auto output = TruthTable::Cube(tt.nOutputs(), false);
-
-        std::uint64_t pos = 0U;
-        for (const auto& [input, _]: tt) {
-            // fill in all the missing inputs
-            const auto number = input.toInteger();
-            for (std::uint64_t i = pos; i < number; ++i) {
-                tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
-            }
-            pos = number + 1U;
-        }
-        // fill in the remaining missing inputs (if any)
-        const std::uint64_t max = 1ULL << tt.nInputs();
-        for (std::uint64_t i = pos; i < max; ++i) {
-            tt[TruthTable::Cube::fromInteger(i, tt.nInputs())] = output;
-        }
-    }
-
-    auto encodeHuffman(TruthTable& tt) -> std::pair<TruthTable::CubeMap, std::size_t> {
+    auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap {
         std::map<TruthTable::Cube, std::size_t> outputFreq;
         for (const auto& [input, output]: tt) {
             outputFreq[output]++;
@@ -48,7 +10,7 @@ namespace syrec {
 
         // if the truth table function is already reversible, no encoding is necessary
         if (outputFreq.size() == tt.size()) {
-            return {{}, 0U};
+            return {};
         }
 
         // create a priority queue for building the Huffman tree
@@ -60,18 +22,11 @@ namespace syrec {
                             decltype(comp)>
                 minHeap(comp);
 
-        std::unordered_set<std::size_t> freqSet;
-        freqSet.reserve(outputFreq.size());
-
         // initialize the leaves of the Huffman tree from the output frequencies
         for (const auto& [output, freq]: outputFreq) {
             const auto requiredGarbage = static_cast<std::size_t>(std::ceil(std::log2(freq)));
-            freqSet.emplace(requiredGarbage);
             minHeap.emplace(std::make_shared<MinHeapNode>(output, requiredGarbage));
         }
-
-        // Minimum no. of additional lines required.
-        const auto additionalLines = *std::max_element(freqSet.begin(), freqSet.end());
 
         // combine the nodes with the smallest weights until there is only one node left
         while (minHeap.size() > 1U) {
@@ -90,6 +45,9 @@ namespace syrec {
             minHeap.emplace(std::move(top));
         }
 
+        // Minimum no. of additional lines required.
+        const auto additionalLines = tt.minimumAdditionalLinesRequired();
+
         const auto requiredGarbage = minHeap.top()->freq;
         const auto nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
         const auto r               = nBits - requiredGarbage;
@@ -98,9 +56,25 @@ namespace syrec {
         TruthTable::CubeMap encoding{};
         minHeap.top()->traverse({}, encoding);
 
+        const auto nPrimaryOutputs = tt.nPrimaryOutputs();
+
         // resize all outputs to the correct size (by adding don't care values)
         for (auto& [input, output]: encoding) {
             output.resize(requiredGarbage);
+        }
+
+        // resize garbage to the correct size.
+        tt.getGarbage().resize(requiredGarbage);
+
+        // the bits excluding the primary outputs.
+        const auto garbageBits = nBits - nPrimaryOutputs;
+
+        // the bits excluding the primary outputs must be lesser than the codeword length.
+        assert(garbageBits < requiredGarbage);
+
+        // the bits excluding the primary outputs are set to garbage.
+        for (auto i = 0U; i < garbageBits; i++) {
+            tt.setGarbage(i);
         }
 
         // modify the codewords by filling in the redundant dc positions.
@@ -126,21 +100,37 @@ namespace syrec {
             output = encoding[output];
         }
 
-        return {encoding, additionalLines};
+        return encoding;
     }
 
-    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool dc) -> void {
-        const auto ancillaBits = nBits - tt.nOutputs();
+    auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero) -> void {
+        const auto requiredOutConstants = nBits - tt.nOutputs();
+        const auto requiredInConstants  = nBits - tt.nInputs();
 
         for (auto& [input, output]: tt) {
-            // add necessary constant inputs to the outputs based on the total number of bits (nBits).
-            if (!dc) {
-                for (auto i = 0U; i < ancillaBits; i++) {
-                    output.insertZero();
+            const auto currentGarbageVecSize = tt.getGarbage().size();
+
+            if (appendZero) {
+                // based on the requiredOutConstants, zeros are appended to the outputs.
+                for (auto i = 0U; i < requiredOutConstants; i++) {
+                    // based on the requiredOutConstants, zeros are appended to the outputs.
+                    output.emplace_back(false);
+                    if (currentGarbageVecSize != nBits) {
+                        // add garbage at the LSB.
+                        tt.getGarbage().insert(tt.getGarbage().begin(), true);
+                    }
                 }
+
             } else {
-                output.resize(nBits);
+                for (auto i = 0U; i < requiredOutConstants; i++) {
+                    // based on the requiredOutConstants, zeros are inserted to the outputs.
+                    output.insertZero();
+                    if (currentGarbageVecSize != nBits) {
+                        tt.getGarbage().resize(currentGarbageVecSize + 1);
+                    }
+                }
             }
+
             const auto inputSize  = input.size();
             const auto outputSize = output.size();
             if (inputSize >= outputSize) {
@@ -150,8 +140,27 @@ namespace syrec {
             const auto requiredConstants = outputSize - inputSize;
             auto       newCube           = input;
             newCube.reserve(outputSize);
-            for (std::size_t i = 0; i < requiredConstants; i++) {
-                newCube.insertZero();
+
+            const auto currentConstantVecSize = tt.getConstants().size();
+
+            if (appendZero) {
+                for (std::size_t i = 0; i < requiredInConstants; i++) {
+                    // based on the requiredInConstants, zeros are appended to the inputs.
+                    newCube.emplace_back(false);
+                    if (currentConstantVecSize != nBits) {
+                        // add a constant at the LSB.
+                        tt.getConstants().insert(tt.getConstants().begin(), true);
+                    }
+                }
+            } else {
+                // based on the requiredConstants, zeros are inserted to the inputs.
+                for (std::size_t i = 0; i < requiredConstants; i++) {
+                    newCube.insertZero();
+                    if (currentConstantVecSize != nBits) {
+                        // add a constant at the MSB.
+                        tt.getConstants().emplace_back(true);
+                    }
+                }
             }
             auto nh  = tt.extract(input);
             nh.key() = newCube;

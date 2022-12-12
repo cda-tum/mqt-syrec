@@ -13,6 +13,8 @@ namespace syrec {
 
     void parsePla(TruthTable& tt, std::istream& in);
 
+    auto extend(TruthTable& tt) -> void;
+
     bool readPla(TruthTable& tt, const std::string& filename);
 
 } // namespace syrec

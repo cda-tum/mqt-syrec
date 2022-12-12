@@ -38,7 +38,7 @@ TEST_F(PlaParserTest, andTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.size(), 1U);
+    EXPECT_EQ(testPla.size(), 4U);
 
     auto it11 = testPla.find(0b11U, 2U);
 
@@ -53,14 +53,14 @@ TEST_F(PlaParserTest, orTest) {
 
     EXPECT_EQ(testPla.nInputs(), 2U);
     EXPECT_EQ(testPla.nOutputs(), 1U);
-    EXPECT_EQ(testPla.size(), 2U);
+    EXPECT_EQ(testPla.size(), 4U);
 
-    auto itDcOne = testPla.find("-1");
+    auto itDcOne = testPla.find("11");
 
     EXPECT_TRUE(itDcOne != testPla.end());
     EXPECT_TRUE(itDcOne->second.equals(0b1U, 1U));
 
-    auto it1 = testPla.find("1-");
+    auto it1 = testPla.find("10");
 
     EXPECT_TRUE(it1 != testPla.end());
     EXPECT_TRUE(it1->second.equals(0b1U, 1U));
