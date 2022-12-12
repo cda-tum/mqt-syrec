@@ -44,7 +44,7 @@ namespace syrec {
 
         // if the truth table function is already reversible, no encoding is necessary
         if (outputFreq.size() == tt.size()) {
-            return {{}};
+            return {};
         }
 
         // create a priority queue for building the Huffman tree
