@@ -19,10 +19,10 @@ namespace syrec {
             return (freq > other.freq || (freq == other.freq && (data > other.data)));
         }
 
-        auto traverse(TruthTable::Cube&& encodedCube, TruthTable::CubeMap& encoding) const -> void {
+        auto traverse(TruthTable::Cube&& encodedCube, TruthTable::CubeMultiMap& encoding) const -> void {
             // leaf node -> add encoding
             if (!data.empty()) {
-                encoding.try_emplace(data, std::move(encodedCube));
+                encoding.emplace(data, std::move(encodedCube));
                 return;
             }
 
@@ -36,7 +36,7 @@ namespace syrec {
         }
     };
 
-    auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap;
+    auto encodeHuffman(TruthTable& tt, bool additionalLine = true) -> TruthTable::CubeMultiMap;
 
     auto augmentWithConstants(TruthTable& tt, std::size_t const& nBits, bool appendZero = false) -> void;
 

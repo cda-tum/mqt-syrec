@@ -2,15 +2,49 @@
 
 namespace syrec {
 
-    auto encodeHuffman(TruthTable& tt) -> TruthTable::CubeMap {
-        std::map<TruthTable::Cube, std::size_t> outputFreq;
+    auto encodeHuffman(TruthTable& tt, bool additionalLine) -> TruthTable::CubeMultiMap {
+        std::multimap<TruthTable::Cube, std::size_t> outputFreq;
+
         for (const auto& [input, output]: tt) {
-            outputFreq[output]++;
+            auto it = outputFreq.find(output);
+            if (it == outputFreq.end()) {
+                outputFreq.emplace(output, 1U);
+            } else {
+                it->second++;
+            }
+        }
+
+        // Minimum no. of additional lines required.
+        const auto additionalLines = tt.minimumAdditionalLinesRequired();
+
+        if (!additionalLine) {
+            // ensure that all output frequencies are a power of two
+            for (auto it = outputFreq.begin(); it != outputFreq.end();) {
+                auto freq = it->second;
+
+                // continue if the output frequency is a power of two
+                if ((freq & (freq - 1U)) == 0U) {
+                    ++it;
+                    continue;
+                }
+
+                // split frequency into powers of two
+                std::size_t bitPos = 0U;
+                while (freq > 0U) {
+                    if ((freq & 1U) == 1U) {
+                        outputFreq.emplace(it->first, 1U << bitPos);
+                    }
+                    freq >>= 1U;
+                    ++bitPos;
+                }
+                // need to update iterator after erasing to avoid invalidating it
+                it = outputFreq.erase(it);
+            }
         }
 
         // if the truth table function is already reversible, no encoding is necessary
         if (outputFreq.size() == tt.size()) {
-            return {};
+            return {{}};
         }
 
         // create a priority queue for building the Huffman tree
@@ -45,23 +79,45 @@ namespace syrec {
             minHeap.emplace(std::move(top));
         }
 
-        // Minimum no. of additional lines required.
-        const auto additionalLines = tt.minimumAdditionalLinesRequired();
-
-        const auto requiredGarbage = minHeap.top()->freq;
-        const auto nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
-        const auto r               = nBits - requiredGarbage;
+        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
+        const auto                                               requiredGarbage = minHeap.top()->freq;
+        const auto                                               nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
+        const auto                                               r               = nBits - requiredGarbage;
 
         // determine encoding from Huffman tree
-        TruthTable::CubeMap encoding{};
+        TruthTable::CubeMultiMap encoding{};
         minHeap.top()->traverse({}, encoding);
-
-        const auto nPrimaryOutputs = tt.nPrimaryOutputs();
 
         // resize all outputs to the correct size (by adding don't care values)
         for (auto& [input, output]: encoding) {
+            auto freq = 1U << (requiredGarbage - output.size());
             output.resize(requiredGarbage);
+
+            // modify the codewords by filling in the redundant dc positions.
+            TruthTable::Cube outCube(input);
+            outCube.resize(nBits);
+
+            TruthTable::Cube newCode{};
+            newCode.reserve(requiredGarbage);
+            for (auto i = 0U; i < requiredGarbage; i++) {
+                if (output[i].has_value()) {
+                    newCode.emplace_back(output[i]);
+                } else {
+                    newCode.emplace_back(outCube[r + i]);
+                }
+            }
+
+            output = newCode;
+
+            if (!additionalLine) {
+                while (freq != 0U) {
+                    encFreq[input].emplace(output);
+                    freq--;
+                }
+            }
         }
+
+        const auto nPrimaryOutputs = tt.nPrimaryOutputs();
 
         // resize garbage to the correct size.
         tt.getGarbage().resize(requiredGarbage);
@@ -69,35 +125,23 @@ namespace syrec {
         // the bits excluding the primary outputs.
         const auto garbageBits = nBits - nPrimaryOutputs;
 
-        // the bits excluding the primary outputs must be lesser than the codeword length.
-        assert(garbageBits < requiredGarbage);
+        // the bits excluding the primary outputs must be lesser than or equal to the codeword length.
+        assert(garbageBits <= requiredGarbage);
 
         // the bits excluding the primary outputs are set to garbage.
         for (auto i = 0U; i < garbageBits; i++) {
             tt.setGarbage(i);
         }
 
-        // modify the codewords by filling in the redundant dc positions.
-        for (auto& [pattern, code]: encoding) {
-            TruthTable::Cube outCube(pattern);
-            outCube.resize(nBits);
-
-            TruthTable::Cube newCode{};
-            newCode.reserve(requiredGarbage);
-            for (auto i = 0U; i < requiredGarbage; i++) {
-                if (code[i].has_value()) {
-                    newCode.emplace_back(code[i]);
-                } else {
-                    newCode.emplace_back(outCube[r + i]);
-                }
-            }
-
-            encoding[pattern] = newCode;
-        }
-
         // encode all the outputs
         for (auto& [input, output]: tt) {
-            output = encoding[output];
+            if (!additionalLine) {
+                const auto out = output;
+                output         = encFreq[out].top();
+                encFreq[out].pop();
+            } else {
+                output = encoding.find(output)->second;
+            }
         }
 
         return encoding;

@@ -237,7 +237,8 @@ namespace syrec {
             }
         };
 
-        using CubeMap = std::map<Cube, Cube>;
+        using CubeMap      = std::map<Cube, Cube>;
+        using CubeMultiMap = std::multimap<Cube, Cube>;
 
     private:
         CubeMap           cubeMap{};

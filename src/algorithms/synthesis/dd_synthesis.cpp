@@ -429,7 +429,7 @@ namespace syrec {
     }
 
     // Refer to the decoder algorithm of https://www.cda.cit.tum.de/files/eda/2018_aspdac_coding_techniques_in_synthesis.pdf.
-    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codewords) -> void {
+    auto DDSynthesizer::decoder(TruthTable::CubeMultiMap const& codewords) -> void {
         const auto codeLength = codewords.begin()->second.size();
 
         // decode the r most significant bits of the original output pattern.
@@ -575,7 +575,7 @@ namespace syrec {
         return qc;
     }
 
-    auto DDSynthesizer::synthesizeTT(TruthTable tt, bool onePass) -> std::shared_ptr<qc::QuantumComputation> {
+    auto DDSynthesizer::synthesizeTT(TruthTable tt, bool encodeWithoutAdditionalLine, bool onePass) -> std::shared_ptr<qc::QuantumComputation> {
         runtime     = 0.;
         numGates    = 0U;
         garbageFlag = false;
@@ -589,7 +589,7 @@ namespace syrec {
         totalNoBits = std::max(n, m + k1);
 
         // codewords -> Output patterns with the respective codewords.
-        TruthTable::CubeMap codewords;
+        TruthTable::CubeMultiMap codewords;
 
         // construct ddSynth only if it is pointing to null
         if (ddSynth == nullptr) {
@@ -633,7 +633,7 @@ namespace syrec {
             }
 
         } else {
-            codewords = encodeHuffman(tt);
+            codewords = encodeWithoutAdditionalLine ? encodeHuffman(tt) : encodeHuffman(tt, false);
             r         = totalNoBits - tt.nOutputs();
             augmentWithConstants(tt, totalNoBits);
 
