@@ -2,9 +2,8 @@
 
 namespace syrec {
 
-    auto encodeHuffman(TruthTable& tt, bool additionalLine) -> TruthTable::CubeMultiMap {
-        std::multimap<TruthTable::Cube, std::size_t> outputFreq;
-
+    template<class T>
+    auto computeOutputFreq(TruthTable const& tt, T& outputFreq) -> void {
         for (const auto& [input, output]: tt) {
             auto it = outputFreq.find(output);
             if (it == outputFreq.end()) {
@@ -13,47 +12,16 @@ namespace syrec {
                 it->second++;
             }
         }
+    }
 
-        // Minimum no. of additional lines required.
-        const auto additionalLines = tt.minimumAdditionalLinesRequired();
-
-        if (!additionalLine) {
-            // ensure that all output frequencies are a power of two
-            for (auto it = outputFreq.begin(); it != outputFreq.end();) {
-                auto freq = it->second;
-
-                // continue if the output frequency is a power of two
-                if ((freq & (freq - 1U)) == 0U) {
-                    ++it;
-                    continue;
-                }
-
-                // split frequency into powers of two
-                std::size_t bitPos = 0U;
-                while (freq > 0U) {
-                    if ((freq & 1U) == 1U) {
-                        outputFreq.emplace(it->first, 1U << bitPos);
-                    }
-                    freq >>= 1U;
-                    ++bitPos;
-                }
-                // need to update iterator after erasing to avoid invalidating it
-                it = outputFreq.erase(it);
-            }
-        }
-
-        // if the truth table function is already reversible, no encoding is necessary
-        if (outputFreq.size() == tt.size()) {
-            return {};
-        }
-
+    template<class T>
+    auto topNodeOfHuffmanTree(T const& outputFreq) -> std::shared_ptr<MinHeapNode> {
         // create a priority queue for building the Huffman tree
         auto comp = [](const std::shared_ptr<MinHeapNode>& a, const std::shared_ptr<MinHeapNode>& b) {
             return *a > *b;
         };
-        std::priority_queue<std::shared_ptr<MinHeapNode>,
-                            std::vector<std::shared_ptr<MinHeapNode>>,
-                            decltype(comp)>
+
+        std::priority_queue<std::shared_ptr<MinHeapNode>, std::vector<std::shared_ptr<MinHeapNode>>, decltype(comp)>
                 minHeap(comp);
 
         // initialize the leaves of the Huffman tree from the output frequencies
@@ -79,44 +47,15 @@ namespace syrec {
             minHeap.emplace(std::move(top));
         }
 
-        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
-        const auto                                               requiredGarbage = minHeap.top()->freq;
-        const auto                                               nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
-        const auto                                               r               = nBits - requiredGarbage;
+        return minHeap.top();
+    }
 
-        // determine encoding from Huffman tree
-        TruthTable::CubeMultiMap encoding{};
-        minHeap.top()->traverse({}, encoding);
-
-        // resize all outputs to the correct size (by adding don't care values)
-        for (auto& [input, output]: encoding) {
-            auto freq = 1U << (requiredGarbage - output.size());
-            output.resize(requiredGarbage);
-
-            // modify the codewords by filling in the redundant dc positions.
-            TruthTable::Cube outCube(input);
-            outCube.resize(nBits);
-
-            TruthTable::Cube newCode{};
-            newCode.reserve(requiredGarbage);
-            for (auto i = 0U; i < requiredGarbage; i++) {
-                if (output[i].has_value()) {
-                    newCode.emplace_back(output[i]);
-                } else {
-                    newCode.emplace_back(outCube[r + i]);
-                }
-            }
-
-            output = newCode;
-
-            if (!additionalLine) {
-                while (freq != 0U) {
-                    encFreq[input].emplace(output);
-                    freq--;
-                }
-            }
-        }
-
+    template<class T>
+    auto alterTTAndCodewords(TruthTable& tt, T& encoding, std::size_t const& requiredGarbage) -> void {
+        // Minimum no. of additional lines required.
+        const auto additionalLines = tt.minimumAdditionalLinesRequired();
+        const auto nBits           = std::max(tt.nInputs(), tt.nOutputs() + additionalLines);
+        const auto r               = nBits - requiredGarbage;
         const auto nPrimaryOutputs = tt.nPrimaryOutputs();
 
         // resize garbage to the correct size.
@@ -133,15 +72,117 @@ namespace syrec {
             tt.setGarbage(i);
         }
 
+        // modify the codewords by filling in the redundant dc positions.
+        for (auto& [pattern, code]: encoding) {
+            TruthTable::Cube outCube(pattern);
+            outCube.resize(nBits);
+
+            TruthTable::Cube newCode{};
+            newCode.reserve(requiredGarbage);
+            for (auto i = 0U; i < requiredGarbage; i++) {
+                if (code[i].has_value()) {
+                    newCode.emplace_back(code[i]);
+                } else {
+                    newCode.emplace_back(outCube[r + i]);
+                }
+            }
+
+            code = newCode;
+        }
+    }
+
+    auto encodeWithAdditionalLine(TruthTable& tt) -> TruthTable::CubeMap {
+        std::map<TruthTable::Cube, std::size_t> outputFreq;
+
+        computeOutputFreq(tt, outputFreq);
+
+        // if the truth table function is already reversible, no encoding is necessary
+        if (outputFreq.size() == tt.size()) {
+            return {};
+        }
+
+        auto const& topNode = topNodeOfHuffmanTree(outputFreq);
+
+        // determine encoding from Huffman tree
+        TruthTable::CubeMap encoding{};
+        topNode->traverse({}, encoding);
+
+        const auto requiredGarbage = topNode->freq;
+
+        // resize all outputs to the correct size (by adding don't care values)
+        for (auto& [input, output]: encoding) {
+            output.resize(requiredGarbage);
+        }
+
+        alterTTAndCodewords(tt, encoding, requiredGarbage);
+
         // encode all the outputs
         for (auto& [input, output]: tt) {
-            if (!additionalLine) {
-                const auto out = output;
-                output         = encFreq[out].top();
-                encFreq[out].pop();
-            } else {
-                output = encoding.find(output)->second;
+            output = encoding[output];
+        }
+
+        return encoding;
+    }
+
+    auto encodeWithoutAdditionalLine(TruthTable& tt) -> TruthTable::CubeMultiMap {
+        std::multimap<TruthTable::Cube, std::size_t> outputFreq;
+        computeOutputFreq(tt, outputFreq);
+
+        // ensure that all output frequencies are a power of two
+        for (auto it = outputFreq.begin(); it != outputFreq.end();) {
+            auto freq = it->second;
+
+            // continue if the output frequency is a power of two
+            if ((freq & (freq - 1U)) == 0U) {
+                ++it;
+                continue;
             }
+
+            // split frequency into powers of two
+            std::size_t bitPos = 0U;
+            while (freq > 0U) {
+                if ((freq & 1U) == 1U) {
+                    outputFreq.emplace(it->first, 1U << bitPos);
+                }
+                freq >>= 1U;
+                ++bitPos;
+            }
+            // need to update iterator after erasing to avoid invalidating it
+            it = outputFreq.erase(it);
+        }
+
+        // if the truth table function is already reversible, no encoding is necessary
+        if (outputFreq.size() == tt.size()) {
+            return {};
+        }
+
+        auto const& topNode = topNodeOfHuffmanTree(outputFreq);
+
+        // determine encoding from Huffman tree
+        TruthTable::CubeMultiMap encoding{};
+        topNode->traverse({}, encoding);
+
+        const auto requiredGarbage = topNode->freq;
+
+        std::map<TruthTable::Cube, std::stack<TruthTable::Cube>> encFreq;
+        // resize all outputs to the correct size (by adding don't care values)
+        for (auto& [input, output]: encoding) {
+            auto freq = 1U << (requiredGarbage - output.size());
+            output.resize(requiredGarbage);
+
+            while (freq != 0U) {
+                encFreq[input].emplace(output);
+                freq--;
+            }
+        }
+
+        alterTTAndCodewords(tt, encoding, requiredGarbage);
+
+        // encode all the outputs
+        for (auto& [input, output]: tt) {
+            const auto out = output;
+            output         = encFreq[out].top();
+            encFreq[out].pop();
         }
 
         return encoding;
@@ -211,5 +252,13 @@ namespace syrec {
             tt.insert(std::move(nh));
         }
     }
+
+    // explicitly instantiate function templates.
+    template void                         computeOutputFreq(TruthTable const& tt, std::map<TruthTable::Cube, std::size_t>& outputFreq);
+    template void                         computeOutputFreq(TruthTable const& tt, std::multimap<TruthTable::Cube, std::size_t>& outputFreq);
+    template std::shared_ptr<MinHeapNode> topNodeOfHuffmanTree(std::map<TruthTable::Cube, std::size_t> const& outputFreq);
+    template std::shared_ptr<MinHeapNode> topNodeOfHuffmanTree(std::multimap<TruthTable::Cube, std::size_t> const& outputFreq);
+    template void                         alterTTAndCodewords(TruthTable& tt, TruthTable::CubeMap& encoding, std::size_t const& requiredGarbage);
+    template void                         alterTTAndCodewords(TruthTable& tt, TruthTable::CubeMultiMap& encoding, std::size_t const& requiredGarbage);
 
 } // namespace syrec

@@ -262,6 +262,14 @@ namespace syrec {
             garbage[n] = true;
         }
 
+        [[nodiscard]] auto getConstants() const -> const std::vector<bool>& {
+            return constants;
+        }
+
+        [[nodiscard]] auto getGarbage() const -> const std::vector<bool>& {
+            return garbage;
+        }
+
         [[nodiscard]] auto getConstants() -> std::vector<bool>& {
             return constants;
         }

@@ -57,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(TestDDSynth, TestDDSynthDc,
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    const auto& qc = DDSynthesizer::synthesize(tt);
+    const auto& qc = DDSynthesizer::synthesizeCodingTechniques(tt);
 
     buildTruthTable(*qc, ttqc);
 
@@ -70,7 +70,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTest) {
 TEST_P(TestDDSynthDc, GenericDDSynthesisDcTestEncodingWithoutAdditionalLine) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    const auto& qc = DDSynthesizer::synthesize(tt, false);
+    const auto& qc = DDSynthesizer::synthesizeCodingTechniques(tt, false);
 
     buildTruthTable(*qc, ttqc);
 
@@ -83,7 +83,7 @@ TEST_P(TestDDSynthDc, GenericDDSynthesisDcTestEncodingWithoutAdditionalLine) {
 TEST_P(TestDDSynthDc, GenericDDSynthesisOnePass) {
     EXPECT_TRUE(readPla(tt, fileName));
 
-    const auto& qc = DDSynthesizer::synthesize(tt, false, true);
+    const auto& qc = DDSynthesizer::synthesizeOnePass(tt);
 
     buildTruthTable(*qc, ttqc);
 
