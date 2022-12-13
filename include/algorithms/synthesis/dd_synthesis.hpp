@@ -13,9 +13,9 @@ namespace syrec {
 
     class DDSynthesizer {
     public:
-        static auto synthesizeCodingTechniques(const TruthTable& tt, const bool encodeWithoutAdditionalLine = true) -> std::shared_ptr<qc::QuantumComputation> {
+        static auto synthesizeCodingTechniques(const TruthTable& tt, const bool withAdditionalLine = true) -> std::shared_ptr<qc::QuantumComputation> {
             DDSynthesizer synthesizer{};
-            return synthesizer.synthesizeCodingTechniquesTT(tt, encodeWithoutAdditionalLine);
+            return synthesizer.synthesizeCodingTechniquesTT(tt, withAdditionalLine);
         }
 
         static auto synthesizeOnePass(const TruthTable& tt) -> std::shared_ptr<qc::QuantumComputation> {
@@ -94,7 +94,7 @@ namespace syrec {
 
         auto synthesizeOnePassTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
 
-        auto synthesizeCodingTechniquesTT(TruthTable tt, bool encodeWithoutAdditionalLine) -> std::shared_ptr<qc::QuantumComputation>;
+        auto synthesizeCodingTechniquesTT(TruthTable tt, bool withAdditionalLine) -> std::shared_ptr<qc::QuantumComputation>;
     };
 
 } // namespace syrec
