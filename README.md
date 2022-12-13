@@ -51,11 +51,14 @@ Building (and running) is continuously tested under Linux, macOS, and Windows us
 
 _SyReC Synthesizer_ has been developed based on methods proposed in the following papers:
 
-[[1]](http://www.informatik.uni-bremen.de/agra/doc/konf/10_syrec_reversible_hardware_language.pdf)
+[[1]](https://doi.org/10.1016/j.simpa.2022.100451)
+S. Adarsh, L. Burgholzer, T. Manjunath and R. Wille. SyReC Synthesizer: An MQT tool for synthesis of reversible circuits. Software Impacts, 2022.
+
+[[2]](http://www.informatik.uni-bremen.de/agra/doc/konf/10_syrec_reversible_hardware_language.pdf)
 R. Wille, S. Offermann, and R. Drechsler. SyReC: A Programming Language for Synthesis of Reversible Circuits. In Forum on Specification and Design Languages (FDL), 2010.
 
-[[2]](https://www.sciencedirect.com/science/article/abs/pii/S016792601500125X?via%3Dihub)
+[[3]](https://doi.org/10.1016/j.vlsi.2015.10.001)
 R. Wille, E. Schönborn, M. Soeken, and R. Drechsler. SyReC: A hardware description language for the specification and synthesis of reversible circuits. Integration (The VLSI Journal), 2016.
 
-[[3]](https://www.cda.cit.tum.de/files/eda/2019_iccad_hdl_based_reversible_circuit_synthesis_without_additional_lines.pdf)
+[[4]](https://www.cda.cit.tum.de/files/eda/2019_iccad_hdl_based_reversible_circuit_synthesis_without_additional_lines.pdf)
 R. Wille, M. Haghparast, S. Adarsh, and T. Manjunath. Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines. In International Conference on Computer Aided Design (ICCAD), 2019.
