@@ -681,17 +681,9 @@ namespace syrec {
         buildAndSynthesize(tt);
 
         const auto start = std::chrono::steady_clock::now();
-        // if codeword is not empty, the above synthesized encoded function should be decoded.
 
-        if (!codewordWithAdditionalLine.empty()) {
-            // synthesizing the corresponding decoder circuit.
-            decoder(codewordWithAdditionalLine);
-        }
-
-        if (!codewordWithoutAdditionalLine.empty()) {
-            // synthesizing the corresponding decoder circuit.
-            decoder(codewordWithoutAdditionalLine);
-        }
+        // synthesizing the corresponding decoder circuit.
+        withAdditionalLine ? decoder(codewordWithAdditionalLine) : decoder(codewordWithoutAdditionalLine);
 
         runtime = runtime + static_cast<double>((std::chrono::steady_clock::now() - start).count());
         return qc;
