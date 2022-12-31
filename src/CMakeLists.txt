@@ -45,7 +45,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CMAKE_CXX_STANDARD_REQUIRED ON 
 
 # add MQT::qfr library
 add_subdirectory("${PROJECT_SOURCE_DIR}/extern/qfr" "extern/qfr")
-target_link_libraries(${PROJECT_NAME} PUBLIC MQT::qfr)
+target_link_libraries(${PROJECT_NAME} PUBLIC MQT::qfr_dd)
 
 # add header-only part of the Boost library
 set(BOOST_USE_MULTITHREADED ON)
