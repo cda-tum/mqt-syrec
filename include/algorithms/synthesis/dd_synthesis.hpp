@@ -13,15 +13,30 @@ namespace syrec {
 
     class DDSynthesizer {
     public:
-        static auto synthesize(const TruthTable& tt, const bool onePass = false) -> std::shared_ptr<qc::QuantumComputation> {
+        static auto synthesizeCodingTechniques(const TruthTable& tt, const bool withAdditionalLine = true) -> std::shared_ptr<qc::QuantumComputation> {
             DDSynthesizer synthesizer{};
-            return synthesizer.synthesizeTT(tt, onePass);
+            return synthesizer.synthesizeCodingTechniquesTT(tt, withAdditionalLine);
+        }
+
+        static auto synthesizeOnePass(const TruthTable& tt) -> std::shared_ptr<qc::QuantumComputation> {
+            DDSynthesizer synthesizer{};
+            return synthesizer.synthesizeOnePassTT(tt);
         }
 
         auto synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> std::shared_ptr<qc::QuantumComputation>;
 
         [[nodiscard]] auto numGate() const -> std::size_t {
             return numGates;
+        }
+
+        auto reset() -> void {
+            runtime     = 0.;
+            numGates    = 0U;
+            n           = 0U;
+            m           = 0U;
+            totalNoBits = 0U;
+            r           = 0U;
+            garbageFlag = false;
         }
 
         [[nodiscard]] auto getExecutionTime() const -> double {
@@ -70,9 +85,16 @@ namespace syrec {
         auto unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
         auto shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge;
 
-        auto decoder(TruthTable::CubeMap const& codewords) -> void;
+        template<class T>
+        auto decoder(T const& codewords) -> void;
 
-        auto synthesizeTT(TruthTable tt, bool onePass) -> std::shared_ptr<qc::QuantumComputation>;
+        auto initializeSynthesizer(TruthTable const& tt) -> void;
+
+        auto buildAndSynthesize(TruthTable const& tt) -> void;
+
+        auto synthesizeOnePassTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation>;
+
+        auto synthesizeCodingTechniquesTT(TruthTable tt, bool withAdditionalLine) -> std::shared_ptr<qc::QuantumComputation>;
     };
 
 } // namespace syrec

@@ -237,7 +237,8 @@ namespace syrec {
             }
         };
 
-        using CubeMap = std::map<Cube, Cube>;
+        using CubeMap      = std::map<Cube, Cube>;
+        using CubeMultiMap = std::multimap<Cube, Cube>;
 
     private:
         CubeMap           cubeMap{};
@@ -259,6 +260,14 @@ namespace syrec {
 
         auto setGarbage(const std::size_t n) -> void {
             garbage[n] = true;
+        }
+
+        [[nodiscard]] auto getConstants() const -> const std::vector<bool>& {
+            return constants;
+        }
+
+        [[nodiscard]] auto getGarbage() const -> const std::vector<bool>& {
+            return garbage;
         }
 
         [[nodiscard]] auto getConstants() -> std::vector<bool>& {

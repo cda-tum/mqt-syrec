@@ -430,7 +430,8 @@ namespace syrec {
     }
 
     // Refer to the decoder algorithm of https://www.cda.cit.tum.de/files/eda/2018_aspdac_coding_techniques_in_synthesis.pdf.
-    auto DDSynthesizer::decoder(TruthTable::CubeMap const& codewords) -> void {
+    template<class T>
+    auto DDSynthesizer::decoder(T const& codewords) -> void {
         const auto codeLength = codewords.begin()->second.size();
 
         // decode the r most significant bits of the original output pattern.
@@ -576,11 +577,7 @@ namespace syrec {
         return qc;
     }
 
-    auto DDSynthesizer::synthesizeTT(TruthTable tt, bool onePass) -> std::shared_ptr<qc::QuantumComputation> {
-        runtime     = 0.;
-        numGates    = 0U;
-        garbageFlag = false;
-
+    auto DDSynthesizer::initializeSynthesizer(TruthTable const& tt) -> void {
         n = tt.nInputs();
         m = tt.nOutputs();
 
@@ -589,8 +586,7 @@ namespace syrec {
 
         totalNoBits = std::max(n, m + k1);
 
-        // codewords -> Output patterns with the respective codewords.
-        TruthTable::CubeMap codewords;
+        r = (m + k1) - std::max(n, m);
 
         // construct ddSynth only if it is pointing to null
         if (ddSynth == nullptr) {
@@ -601,75 +597,101 @@ namespace syrec {
         if (qc == nullptr) {
             qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
         }
+    }
 
-        // Refer to the one-pass synthesis  algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
-        if (onePass) {
-            if (m > n) {
-                for (auto i = 0U; i < m - n; i++) {
-                    // corresponding bits are considered as ancillary bits.
-                    qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
-                }
-                // zeros are inserted to match the length of the output patterns.
-                augmentWithConstants(tt, m);
-            }
+    auto DDSynthesizer::buildAndSynthesize(TruthTable const& tt) -> void {
+        // the garbage and constants stored in the tt must be equal to the garbage and constants stored in qc.
+        assert(tt.getGarbage() == qc->getGarbage() && tt.getConstants() == qc->getAncillary());
+        const auto start = std::chrono::steady_clock::now();
 
-            r = (m + k1) - std::max(n, m);
+        const auto src = buildDD(tt, ddSynth);
+        synthesize(src, ddSynth);
 
-            const auto oldPrimaryInputs  = tt.nInputs();
-            const auto oldPrimaryOutputs = tt.nOutputs();
+        runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+    }
 
-            // based on the totalNoBits, zeros are appended to the inputs and the outputs.
-            augmentWithConstants(tt, totalNoBits, true);
+    auto DDSynthesizer::synthesizeOnePassTT(TruthTable tt) -> std::shared_ptr<qc::QuantumComputation> {
+        reset();
+        initializeSynthesizer(tt);
 
-            const auto nAncillaBits = tt.nInputs() - oldPrimaryInputs;
-            const auto nGarbageBits = tt.nOutputs() - oldPrimaryOutputs;
+        // Refer to the one-pass synthesis algorithm of https://www.cda.cit.tum.de/files/eda/2017_tcad_one_pass_synthesis_reversible_circuits.pdf.
 
-            for (auto i = 0U; i < nAncillaBits; i++) {
-                // corresponding bits are considered as ancillary bits.
-                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
-            }
-            for (auto i = 0U; i < nGarbageBits; i++) {
-                // corresponding bits are considered as garbage bits.
-                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
-            }
-
-        } else {
-            codewords = encodeHuffman(tt);
-            r         = totalNoBits - tt.nOutputs();
-            augmentWithConstants(tt, totalNoBits);
-
-            const auto nAncillaBits = totalNoBits - n;
-            const auto nGarbageBits = totalNoBits - m;
-
-            for (auto i = 0U; i < nAncillaBits; i++) {
+        if (m > n) {
+            for (auto i = 0U; i < m - n; i++) {
                 // corresponding bits are considered as ancillary bits.
                 qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
             }
-            for (auto i = 0U; i < nGarbageBits; i++) {
-                // corresponding bits are considered as garbage bits.
-                qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
-            }
+            // zeros are inserted to match the length of the output patterns.
+            augmentWithConstants(tt, m);
         }
 
-        // the garbage and constants stored in the tt must be equal to the garbage and constants stored in qc.
-        assert(tt.getGarbage() == qc->getGarbage() && tt.getConstants() == qc->getAncillary());
+        const auto oldPrimaryInputs  = tt.nInputs();
+        const auto oldPrimaryOutputs = tt.nOutputs();
 
-        const auto src = buildDD(tt, ddSynth);
+        // based on the totalNoBits, zeros are appended to the inputs and the outputs.
+        augmentWithConstants(tt, totalNoBits, true);
+
+        const auto nAncillaBits = tt.nInputs() - oldPrimaryInputs;
+        const auto nGarbageBits = tt.nOutputs() - oldPrimaryOutputs;
+
+        for (auto i = 0U; i < nAncillaBits; i++) {
+            // corresponding bits are considered as ancillary bits.
+            qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
+        }
+        for (auto i = 0U; i < nGarbageBits; i++) {
+            // corresponding bits are considered as garbage bits.
+            qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+        }
+
+        // If the one-pass synthesis is selected, the appended garbage bits need not be considered during the synthesis process.
+        garbageFlag = true;
+
+        buildAndSynthesize(tt);
+
+        return qc;
+    }
+
+    auto DDSynthesizer::synthesizeCodingTechniquesTT(TruthTable tt, bool withAdditionalLine) -> std::shared_ptr<qc::QuantumComputation> {
+        reset();
+        initializeSynthesizer(tt);
+
+        TruthTable::CubeMultiMap codewordWithoutAdditionalLine{};
+        TruthTable::CubeMap      codewordWithAdditionalLine{};
+
+        if (withAdditionalLine) {
+            codewordWithAdditionalLine = encodeWithAdditionalLine(tt);
+        } else {
+            codewordWithoutAdditionalLine = encodeWithoutAdditionalLine(tt);
+        }
+
+        r = totalNoBits - tt.nOutputs();
+        augmentWithConstants(tt, totalNoBits);
+
+        const auto nAncillaBits = totalNoBits - n;
+        const auto nGarbageBits = totalNoBits - m;
+
+        for (auto i = 0U; i < nAncillaBits; i++) {
+            // corresponding bits are considered as ancillary bits.
+            qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
+        }
+        for (auto i = 0U; i < nGarbageBits; i++) {
+            // corresponding bits are considered as garbage bits.
+            qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+        }
+
+        buildAndSynthesize(tt);
 
         const auto start = std::chrono::steady_clock::now();
 
-        // If the one-pass synthesis is selected, the appended garbage bits need not be considered during the synthesis process.
-        garbageFlag = onePass;
-        synthesize(src, ddSynth);
+        // synthesizing the corresponding decoder circuit.
+        withAdditionalLine ? decoder(codewordWithAdditionalLine) : decoder(codewordWithoutAdditionalLine);
 
-        // if codeword is not empty, the above synthesized encoded function should be decoded.
-        if (!codewords.empty()) {
-            // synthesizing the corresponding decoder circuit.
-            decoder(codewords);
-        }
-
-        runtime = static_cast<double>((std::chrono::steady_clock::now() - start).count());
+        runtime = runtime + static_cast<double>((std::chrono::steady_clock::now() - start).count());
         return qc;
     }
+
+    // explicitly instantiate the template function decoder.
+    template void DDSynthesizer::decoder(TruthTable::CubeMap const& codewords);
+    template void DDSynthesizer::decoder(TruthTable::CubeMultiMap const& codewords);
 
 } // namespace syrec

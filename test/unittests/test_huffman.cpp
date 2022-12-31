@@ -28,7 +28,7 @@ TEST_F(TestHuff, Ident2Bit) {
 
     const TruthTable ttExtend(tt);
 
-    encodeHuffman(tt);
+    encodeWithAdditionalLine(tt);
 
     ASSERT_TRUE(TruthTable::equal(tt, ttExtend, false));
 }
@@ -48,7 +48,7 @@ TEST_F(TestHuff, HUFF1) {
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    encodeHuffman(tt);
+    encodeWithAdditionalLine(tt);
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
@@ -88,7 +88,7 @@ TEST_F(TestHuff, HUFF2) {
 
     EXPECT_EQ(tt.nOutputs(), 2U);
 
-    encodeHuffman(tt);
+    encodeWithAdditionalLine(tt);
 
     EXPECT_EQ(tt.nOutputs(), 3U);
 
