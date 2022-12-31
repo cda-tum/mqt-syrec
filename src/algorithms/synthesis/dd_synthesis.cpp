@@ -1,6 +1,7 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 
 #include "algorithms/synthesis/encoding.hpp"
+#include "dd/Operations.hpp"
 
 using namespace dd::literals;
 
@@ -181,25 +182,25 @@ namespace syrec {
     }
 
     // This function stores all the controls of the `current` node not concerning the root/src of the DD.
-    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
+    auto DDSynthesizer::controlNonRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx      = static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
-                const auto ctrlType = *ctrlCube[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
-                ctrl.emplace(dd::Control{idx, ctrlType});
+                const auto idx      = static_cast<qc::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
+                const auto ctrlType = *ctrlCube[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
+                ctrl.emplace(qc::Control{idx, ctrlType});
             }
         }
     }
 
     // This function stores all the controls of the `current` node concerning the root/src of the DD.
-    auto DDSynthesizer::controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
+    auto DDSynthesizer::controlRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx      = static_cast<dd::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
-                const auto ctrlType = *ctrlCube[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
-                ctrl.emplace(dd::Control{idx, ctrlType});
+                const auto idx      = static_cast<qc::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
+                const auto ctrlType = *ctrlCube[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
+                ctrl.emplace(qc::Control{idx, ctrlType});
             }
         }
     }
@@ -217,7 +218,7 @@ namespace syrec {
     }
 
     // This function performs the multi-control (if any) X operation.
-    auto DDSynthesizer::applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
+    auto DDSynthesizer::applyOperation(const std::size_t totalBits, const qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void {
         // create operation and corresponding decision diagram
         auto       op   = std::make_unique<qc::StandardOperation>(totalBits, ctrl, targetBit, qc::X);
         const auto opDD = dd::getDD(op.get(), dd);
@@ -256,7 +257,7 @@ namespace syrec {
             const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
 
             for (auto const& rootVec: rootSolution) {
-                dd::Controls ctrlFinal;
+                qc::Controls ctrlFinal;
                 controlRoot(current, ctrlFinal, rootVec);
                 applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
@@ -303,11 +304,11 @@ namespace syrec {
 
         const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
         for (auto const& uniCube: uniSolution) {
-            dd::Controls ctrlNonRoot;
+            qc::Controls ctrlNonRoot;
             controlNonRoot(current, ctrlNonRoot, uniCube);
 
             for (auto const& rootVec: rootSolution) {
-                dd::Controls ctrlFinal = ctrlNonRoot;
+                qc::Controls ctrlFinal = ctrlNonRoot;
                 controlRoot(current, ctrlFinal, rootVec);
                 applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
@@ -354,7 +355,7 @@ namespace syrec {
             }
         }
 
-        dd::Controls ctrlNonRoot;
+        qc::Controls ctrlNonRoot;
         controlNonRoot(current, ctrlNonRoot, ctrlVec);
 
         auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, changePaths, dd);
@@ -366,11 +367,11 @@ namespace syrec {
         const auto targetSize = targetVec.size();
 
         for (auto const& rootVec: rootSolution) {
-            dd::Controls ctrlFinal;
+            qc::Controls ctrlFinal;
             controlRoot(current, ctrlFinal, rootVec);
 
-            const auto ctrlType = changePaths ? dd::Control::Type::neg : dd::Control::Type::pos;
-            ctrlFinal.emplace(dd::Control{current.p->v, ctrlType});
+            const auto ctrlType = changePaths ? qc::Control::Type::Neg : qc::Control::Type::Pos;
+            ctrlFinal.emplace(qc::Control{static_cast<qc::Qubit>(current.p->v), ctrlType});
 
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
@@ -438,11 +439,11 @@ namespace syrec {
             for (const auto& [pattern, code]: codewords) {
                 TruthTable::Cube targetCube(pattern.begin(), pattern.begin() + static_cast<int>(r));
 
-                dd::Controls ctrl;
+                qc::Controls ctrl;
                 for (auto i = 0U; i < codeLength; i++) {
                     if (code[i].has_value()) {
-                        const auto ctrlType = *code[i] ? dd::Control::Type::pos : dd::Control::Type::neg;
-                        ctrl.emplace(dd::Control{static_cast<dd::Qubit>((codeLength - 1U) - i), ctrlType});
+                        const auto ctrlType = *code[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
+                        ctrl.emplace(qc::Control{static_cast<qc::Qubit>((codeLength - 1U) - i), ctrlType});
                     }
                 }
 
@@ -450,7 +451,7 @@ namespace syrec {
 
                 for (std::size_t i = 0U; i < targetSize; ++i) {
                     if (targetCube[i].has_value() && *(targetCube[i])) {
-                        const auto targetBit = static_cast<dd::Qubit>((totalNoBits - 1U) - i);
+                        const auto targetBit = static_cast<qc::Qubit>((totalNoBits - 1U) - i);
                         qc->x(targetBit, ctrl);
                         ++numGates;
                     }

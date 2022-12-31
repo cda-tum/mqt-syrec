@@ -70,10 +70,10 @@ namespace syrec {
 
         static auto completeUniCubes(TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set& uniqueCubeVec) -> void;
 
-        auto applyOperation(dd::QubitCount const& totalBits, dd::Qubit const& targetBit, dd::mEdge& to, dd::Controls const& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
+        auto applyOperation(std::size_t totalBits, qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
 
-        static auto controlRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
-        static auto controlNonRoot(dd::mEdge const& current, dd::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
+        static auto controlRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
+        static auto controlNonRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
 
         static auto dcNodeCondition(dd::mEdge const& current) -> bool;
 
