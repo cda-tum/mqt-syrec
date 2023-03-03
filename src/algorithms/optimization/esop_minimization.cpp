@@ -238,7 +238,7 @@ namespace minbool {
         for (auto const& ctrlCube: solution) {
             syrec::TruthTable::Cube c;
             for (int j = static_cast<int>(n) - 1; j >= 0; --j) {
-                c.emplace_back(ctrlCube[j]);
+                c.emplace_back(ctrlCube[static_cast<std::size_t>(j)]);
             }
             finalSigVec.emplace(c);
         }

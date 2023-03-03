@@ -3,6 +3,7 @@
 #include <fstream>
 #include <memory>
 #include <optional>
+#include <set>
 
 namespace syrec {
 
