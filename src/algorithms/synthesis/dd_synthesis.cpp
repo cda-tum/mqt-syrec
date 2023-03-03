@@ -115,7 +115,7 @@ namespace syrec {
 
         const auto tables = dd->mUniqueTable.getTables();
 
-        auto const& table = tables[current.p->v];
+        auto const& table = tables[static_cast<std::size_t>(current.p->v)];
 
         for (auto* p: table) {
             if (p != nullptr && p != current.p && p->ref > 0) {
@@ -259,7 +259,7 @@ namespace syrec {
             for (auto const& rootVec: rootSolution) {
                 qc::Controls ctrlFinal;
                 controlRoot(current, ctrlFinal, rootVec);
-                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
+                applyOperation(nQubits, static_cast<qc::Qubit>(current.p->v), src, ctrlFinal, dd);
             }
         }
         return src;
@@ -310,7 +310,7 @@ namespace syrec {
             for (auto const& rootVec: rootSolution) {
                 qc::Controls ctrlFinal = ctrlNonRoot;
                 controlRoot(current, ctrlFinal, rootVec);
-                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
+                applyOperation(nQubits, static_cast<qc::Qubit>(current.p->v), src, ctrlFinal, dd);
             }
         }
         return src;
@@ -377,7 +377,7 @@ namespace syrec {
 
             for (std::size_t i = 0; i < targetSize; ++i) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
-                    applyOperation(nQubits, static_cast<dd::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
+                    applyOperation(nQubits, static_cast<qc::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
                 }
             }
         }
@@ -619,7 +619,7 @@ namespace syrec {
         if (m > n) {
             for (auto i = 0U; i < m - n; i++) {
                 // corresponding bits are considered as ancillary bits.
-                qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
+                qc->setLogicalQubitAncillary(static_cast<qc::Qubit>((totalNoBits - 1) - i));
             }
             // zeros are inserted to match the length of the output patterns.
             augmentWithConstants(tt, m);
@@ -636,11 +636,11 @@ namespace syrec {
 
         for (auto i = 0U; i < nAncillaBits; i++) {
             // corresponding bits are considered as ancillary bits.
-            qc->setLogicalQubitAncillary(static_cast<dd::Qubit>(i));
+            qc->setLogicalQubitAncillary(static_cast<qc::Qubit>(i));
         }
         for (auto i = 0U; i < nGarbageBits; i++) {
             // corresponding bits are considered as garbage bits.
-            qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+            qc->setLogicalQubitGarbage(static_cast<qc::Qubit>(i));
         }
 
         // If the one-pass synthesis is selected, the appended garbage bits need not be considered during the synthesis process.
@@ -672,11 +672,11 @@ namespace syrec {
 
         for (auto i = 0U; i < nAncillaBits; i++) {
             // corresponding bits are considered as ancillary bits.
-            qc->setLogicalQubitAncillary(static_cast<dd::Qubit>((totalNoBits - 1) - i));
+            qc->setLogicalQubitAncillary(static_cast<qc::Qubit>((totalNoBits - 1) - i));
         }
         for (auto i = 0U; i < nGarbageBits; i++) {
             // corresponding bits are considered as garbage bits.
-            qc->setLogicalQubitGarbage(static_cast<dd::Qubit>(i));
+            qc->setLogicalQubitGarbage(static_cast<qc::Qubit>(i));
         }
 
         buildAndSynthesize(tt);

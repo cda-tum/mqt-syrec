@@ -108,7 +108,7 @@ Initial Setup
 Working on the core C++ library
 ###############################
 
-Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.14*, and the Boost libraries with a minimum version of *1.71.0*.
+Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.19*, and the Boost libraries with a minimum version of *1.71.0*.
 
     .. note::
         We noticed some issues when compiling with Microsoft's *MSCV* compiler toolchain.

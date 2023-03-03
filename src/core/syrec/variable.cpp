@@ -46,7 +46,7 @@ namespace syrec {
             }
 
             Number::loop_variable_mapping map; // empty map
-            return abs(static_cast<int>(first->evaluate(map) - second->evaluate(map))) + 1;
+            return static_cast<unsigned>(abs(static_cast<int>(first->evaluate(map) - second->evaluate(map)))) + 1U;
         }
         return var->bitwidth;
     }

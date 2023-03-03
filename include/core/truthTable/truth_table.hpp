@@ -334,7 +334,7 @@ namespace syrec {
         }
 
         [[nodiscard]] auto nPrimaryInputs() const -> std::size_t {
-            return std::count(constants.begin(), constants.end(), false);
+            return static_cast<std::size_t>(std::count(constants.begin(), constants.end(), false));
         }
 
         [[nodiscard]] auto nOutputs() const -> std::size_t {
@@ -345,7 +345,7 @@ namespace syrec {
         }
 
         [[nodiscard]] auto nPrimaryOutputs() const -> std::size_t {
-            return std::count(garbage.begin(), garbage.end(), false);
+            return static_cast<std::size_t>(std::count(garbage.begin(), garbage.end(), false));
         }
 
         auto extract(Cube const& key) -> CubeMap::node_type {

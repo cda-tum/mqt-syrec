@@ -2,18 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 env:
   BUILD_TYPE: Release
-  MAKEFLAGS: "-j3"
+  CMAKE_BUILD_PARALLEL_LEVEL: 3
+  CTEST_PARALLEL_LEVEL: 3
   BOOST_VERSION_MAJOR: 1
   BOOST_VERSION_MINOR: 76
   BOOST_VERSION_PATCH: 0

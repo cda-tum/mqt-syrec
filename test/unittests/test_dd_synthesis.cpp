@@ -63,7 +63,7 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
 
     const auto  qc   = synthesizer.synthesize(ttDD, dd);
     const auto& qcDD = dd::buildFunctionality(qc.get(), dd);
-    EXPECT_EQ(ttDD, qcDD);
+    EXPECT_TRUE(ttDD == qcDD);
 
     std::cout << synthesizer.numGate() << "\n";
     std::cout << synthesizer.getExecutionTime() << "\n";
