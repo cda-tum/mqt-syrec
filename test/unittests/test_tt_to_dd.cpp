@@ -24,7 +24,7 @@ TEST_F(TruthTableDD, Ident2Bit) {
     const auto ttDD = buildDD(tt, dd);
     EXPECT_TRUE(ttDD.p != nullptr);
 
-    EXPECT_EQ(ttDD, dd->makeIdent(2U));
+    EXPECT_TRUE(ttDD == dd->makeIdent(2U));
 }
 
 TEST_F(TruthTableDD, CNOT) {
@@ -38,7 +38,7 @@ TEST_F(TruthTableDD, CNOT) {
 
     // CNOT with target q0 and control q1
     const auto cnot = qc::StandardOperation(2U, 1_pc, 0, qc::X);
-    EXPECT_EQ(ttDD, dd::getDD(&cnot, dd));
+    EXPECT_TRUE(ttDD == dd::getDD(&cnot, dd));
 }
 
 TEST_F(TruthTableDD, SWAP) {
@@ -52,7 +52,7 @@ TEST_F(TruthTableDD, SWAP) {
 
     // SWAP with q0 and q1
     const auto swap = qc::StandardOperation(2U, {0, 1}, qc::SWAP);
-    EXPECT_EQ(ttDD, dd::getDD(&swap, dd));
+    EXPECT_TRUE(ttDD == dd::getDD(&swap, dd));
 }
 
 TEST_F(TruthTableDD, Toffoli) {
@@ -66,5 +66,5 @@ TEST_F(TruthTableDD, Toffoli) {
 
     // Toffoli with target q0, control q1 and control q2
     const auto toffoli = qc::StandardOperation(3U, {1_pc, 2_pc}, 0, qc::X);
-    EXPECT_EQ(ttDD, dd::getDD(&toffoli, dd));
+    EXPECT_TRUE(ttDD == dd::getDD(&toffoli, dd));
 }
