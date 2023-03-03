@@ -42,7 +42,7 @@ The _SyReC Synthesizer_ is available via [PyPI](https://pypi.org/project/mqt.syr
 
 ## System Requirements and Building
 
-The implementation is compatible with any C++17 compiler and a minimum CMake version of 3.14.
+The implementation is compatible with any C++17 compiler and a minimum CMake version of 3.19.
 Please refer to the [documentation](https://syrec.readthedocs.io/en/latest/) on how to build the project.
 
 Building (and running) is continuously tested under Linux, macOS, and Windows using the [latest available system versions for GitHub Actions](https://github.com/actions/virtual-environments).

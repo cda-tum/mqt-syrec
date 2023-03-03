@@ -6,7 +6,6 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <iostream>
 #include <optional>
@@ -81,7 +80,7 @@ namespace syrec {
     using ast_module                = boost::fusion::vector<std::string, std::vector<ast_parameter>, std::vector<ast_variable_declarations>, std::vector<ast_statement>>;
     using ast_program               = std::vector<ast_module>;
 
-    struct ast_variable {
+    struct ast_variable { // NOLINT (bugprone-exception-escape) controlled by boost fusion
         std::string                 name;
         std::vector<ast_expression> indexes;
         ast_range                   range;
