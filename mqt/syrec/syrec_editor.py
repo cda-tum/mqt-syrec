@@ -190,7 +190,6 @@ class SyReCEditor(QtWidgets.QWidget):
         self.stat_action.triggered.connect(self.stat)
 
     def item_selected(self):
-
         # Disable sim and stat function
         self.sim_action.setDisabled(True)
         self.stat_action.setDisabled(True)
@@ -249,7 +248,6 @@ class SyReCEditor(QtWidgets.QWidget):
                 self.setText(ts.readAll())
 
     def build(self):
-
         if self.before_build is not None:
             self.before_build()
 
@@ -292,7 +290,6 @@ class SyReCEditor(QtWidgets.QWidget):
             self.build_successful(self.circ)
 
     def stat(self):
-
         gates = self.circ.num_gates
         lines = self.circ.lines
 
@@ -312,13 +309,11 @@ class SyReCEditor(QtWidgets.QWidget):
         msg.exec()
 
     def sim(self):
-
         bit_mask = 0
         bit_pos = 0
         bit1_mask = 0
 
         for i in self.circ.constants:
-
             if i is None:
                 bit_mask = bit_mask + 2**bit_pos
 
