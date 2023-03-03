@@ -80,7 +80,7 @@ namespace syrec {
     using ast_module                = boost::fusion::vector<std::string, std::vector<ast_parameter>, std::vector<ast_variable_declarations>, std::vector<ast_statement>>;
     using ast_program               = std::vector<ast_module>;
 
-    struct ast_variable {
+    struct ast_variable { // NOLINT (bugprone-exception-escape) controlled by boost fusion
         std::string                 name;
         std::vector<ast_expression> indexes;
         ast_range                   range;
