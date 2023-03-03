@@ -2,20 +2,18 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [main, master]
   pull_request:
-    branches: [main, master]
   schedule:
     - cron: "15 21 * * 6"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
 
