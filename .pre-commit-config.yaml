@@ -93,7 +93,7 @@ repos:
 
   # Check for spelling
   - repo: https://github.com/codespell-project/codespell
-    rev: "v2.2.2"
+    rev: "v2.2.4"
     hooks:
       - id: codespell
         args: ["-L", "wille,linz,inout", "--skip", "test/circuits/*"]
