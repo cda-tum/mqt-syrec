@@ -148,7 +148,7 @@ setup(
         "Documentation": "https://syrec.readthedocs.io",
     },
     install_requires=[
-        "PyQt6>=6.2.3,<6.5.0",
+        "PyQt6>=6.2.3,<6.6.0",
     ],
     entry_points={
         "console_scripts": ["syrec-editor=mqt.syrec.syrec_editor:main"],
