@@ -124,14 +124,14 @@ First, CMake needs to be *configured* by calling
 
     .. code-block:: console
 
-        $ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_QECC_TESTS=ON -DBINDINGS=ON
+        $ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
 
 This tells CMake to
 
 - search the current directory :code:`.` (passed via :code:`-S`) for a :code:`CMakeLists.txt` file.
 - process it into a directory :code:`build` (passed via :code:`-B`).
 - the flag :code:`-DCMAKE_BUILD_TYPE=Release` tells CMake to configure a *Release* build (as opposed to, e.g., a *Debug* build).
-- the flag :code:`-DBUILD_QECC_TESTS=ON` tells CMake to also build the C++ tests.
+- the flag :code:`-DBUILD_SYREC_TESTS=ON` tells CMake to also build the C++ tests.
 - the flag :code:`-DBINDINGS=ON` tells CMake to also build the Python bindings.
 
 After configuring with CMake, the project can be built by calling
