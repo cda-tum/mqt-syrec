@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <any>
-#include <cassert>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -137,11 +136,8 @@ namespace syrec {
                 ss << " q[" << control << "],";
             }
             if (type == Types::Toffoli) {
-                assert(targets.size() == 1U);
                 ss << " q[" << *targets.begin() << "];";
             } else {
-                assert(type == Types::Fredkin);
-                assert(targets.size() == 2U);
                 ss << " q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
             }
             return ss.str();
