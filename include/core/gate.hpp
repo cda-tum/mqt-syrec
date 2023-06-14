@@ -47,7 +47,7 @@ namespace syrec {
                 c += 1U;
             }
 
-            c += std::max(-1 * static_cast<int>(c), 0);
+            c += static_cast<std::size_t>(std::max(-1 * static_cast<int>(c), 0));
             c = std::min(static_cast<unsigned>(c), lines - 1U);
 
             unsigned e = n - static_cast<unsigned>(c) - 1U; // empty lines
