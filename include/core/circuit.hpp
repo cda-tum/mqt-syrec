@@ -449,7 +449,7 @@ namespace syrec {
         [[nodiscard]] bool toQasmFile(const std::string& filename) const {
             std::ofstream file(filename);
             if (!file.is_open()) {
-                return false;
+                return false; // GCOVR_EXCL_LINE
             }
             file << toQasm();
             file.close();

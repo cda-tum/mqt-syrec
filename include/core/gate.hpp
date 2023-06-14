@@ -128,9 +128,10 @@ namespace syrec {
                 case Types::Toffoli:
                     ss << "x";
                     break;
+                // GCOVR_EXCL_START
                 default:
-                    // throw gate not supported error
                     throw std::runtime_error("Gate not supported");
+                    // GCOVR_EXCL_STOP
             }
             for (const auto& control: controls) {
                 ss << " q[" << control << "],";
