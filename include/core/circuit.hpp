@@ -3,6 +3,7 @@
 #include "gate.hpp"
 
 #include <boost/signals2.hpp>
+#include <fstream>
 #include <map>
 #include <memory>
 #include <optional>
@@ -425,6 +426,34 @@ namespace syrec {
                 cost += (8ULL * g->controls.size());
             }
             return cost;
+        }
+
+        /**
+         * @brief Convert circuit to QASM string.
+         * @return QASM string
+         */
+        [[nodiscard]] std::string toQasm() const {
+            std::stringstream ss;
+            ss << "OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[" << lines << "];\n";
+            for (const auto& g: gates) {
+                ss << g->toQasm() << "\n";
+            }
+            return ss.str();
+        }
+
+        /**
+         * @brief Write circuit to QASM file.
+         * @param filename Filename (should end with .qasm)
+         * @return True if successful, false otherwise
+         */
+        [[nodiscard]] bool toQasmFile(const std::string& filename) const {
+            std::ofstream file(filename);
+            if (!file.is_open()) {
+                return false; // GCOVR_EXCL_LINE
+            }
+            file << toQasm();
+            file.close();
+            return true;
         }
 
     private:

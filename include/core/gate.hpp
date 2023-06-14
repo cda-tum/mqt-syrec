@@ -4,6 +4,7 @@
 #include <any>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <vector>
 
 namespace syrec {
@@ -46,7 +47,7 @@ namespace syrec {
                 c += 1U;
             }
 
-            c += std::max(-1 * static_cast<int>(c), 0);
+            c += static_cast<std::size_t>(std::max(-1 * static_cast<int>(c), 0));
             c = std::min(static_cast<unsigned>(c), lines - 1U);
 
             unsigned e = n - static_cast<unsigned>(c) - 1U; // empty lines
@@ -103,6 +104,43 @@ namespace syrec {
             }
 
             return costs;
+        }
+
+        /**
+         * @brief Returns the QASM representation of the gate.
+         *
+         * @note Multiple controls are not supported by QASM without corresponding definitions.
+         * Since these definitions grow really large, we do not add them to the resulting QASM files.
+         * Instead, multiple controls are merely indicated by prefixing the gate name with as many 'c' as there are controls.
+         * The MQT can handle this notation.
+         * This special handling will become obsolete once OpenQASM 3.0 is supported within the MQT.
+         *
+         * @return QASM string
+         */
+        [[nodiscard]] std::string toQasm() const {
+            std::stringstream ss;
+            ss << std::string(controls.size(), 'c');
+            switch (type) {
+                case Types::Fredkin:
+                    ss << "swap";
+                    break;
+                case Types::Toffoli:
+                    ss << "x";
+                    break;
+                // GCOVR_EXCL_START
+                default:
+                    throw std::runtime_error("Gate not supported");
+                    // GCOVR_EXCL_STOP
+            }
+            for (const auto& control: controls) {
+                ss << " q[" << control << "],";
+            }
+            if (type == Types::Toffoli) {
+                ss << " q[" << *targets.begin() << "];";
+            } else {
+                ss << " q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
+            }
+            return ss.str();
         }
 
         line_container controls{};

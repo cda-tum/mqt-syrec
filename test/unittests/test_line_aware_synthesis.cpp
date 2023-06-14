@@ -88,3 +88,17 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     EXPECT_EQ(expectedQc, qc);
     EXPECT_EQ(expectedTc, tc);
 }
+
+TEST_P(SyrecSynthesisTest, GenericSynthesisQASMTest) {
+    Circuit             circ;
+    program             prog;
+    ReadProgramSettings settings;
+
+    const auto errorString = prog.read(fileName, settings);
+    EXPECT_TRUE(errorString.empty());
+    EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
+
+    const auto lastIndex      = fileName.find_last_of('.');
+    const auto outputFileName = fileName.substr(0, lastIndex);
+    EXPECT_TRUE(circ.toQasmFile(outputFileName + ".qasm"));
+}
