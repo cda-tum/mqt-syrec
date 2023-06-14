@@ -428,6 +428,12 @@ namespace syrec {
             return cost;
         }
 
+        // To QASM
+        /**
+         * @brief Convert circuit to QASM string. Only supports X, CX, CCX, CCCX, SWAP, c-SWAP gates.
+         * @return QASM string
+         */
+
         [[nodiscard]] std::string toQasm() const {
             std::stringstream ss;
             ss << "OPENQASM 2.0;\n";
@@ -441,7 +447,11 @@ namespace syrec {
             return ss.str();
         }
 
-        // write directly to file given the path
+        /**
+         * @brief Write circuit to QASM file. Only supports X, CX, CCX, CCCX, SWAP, c-SWAP gates.
+         * @param filename Filename
+         * @return True if successful
+         */
         [[nodiscard]] bool toQasmFile(const std::string& filename) const {
             std::ofstream of;
             of.open(filename.c_str());

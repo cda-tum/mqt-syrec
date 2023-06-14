@@ -106,6 +106,10 @@ namespace syrec {
             return costs;
         }
 
+        /**
+         * @brief Returns the QASM string representation of the gate. Only supports X, CX, CCX, and SWAP gates.
+         * @return
+         */
         [[nodiscard]] std::string toQasm() const {
             std::stringstream ss;
             if (type == Types::Fredkin) {
