@@ -107,40 +107,40 @@ namespace syrec {
         }
 
         /**
-         * @brief Returns the QASM string representation of the gate. Only supports X, CX, CCX, and SWAP gates.
-         * @return
+         * @brief Returns the QASM representation of the gate.
+         *
+         * @note Multiple controls are not supported by QASM without corresponding definitions.
+         * Since these definitions grow really large, we do not add them to the resulting QASM files.
+         * Instead, multiple controls are merely indicated by prefixing the gate name with as many 'c' as there are controls.
+         * The MQT can handle this notation.
+         * This special handling will become obsolete once OpenQASM 3.0 is supported within the MQT.
+         *
+         * @return QASM string
          */
         [[nodiscard]] std::string toQasm() const {
             std::stringstream ss;
-            if (type == Types::Fredkin) {
-                switch (controls.size()) {
-                    case 0:
-                        ss << "swap q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
-                        break;
-                    case 1:
-                        ss << "cswap q[" << *controls.begin() << "], q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
-                }
-            } else if (type == Types::Toffoli && controls.size() <= 3) {
-                switch (controls.size()) {
-                    case 0:
-                        ss << "x q[" << *targets.begin() << "];";
-                        break;
-                    case 1:
-                        ss << "cx q[" << *controls.begin() << "], q[" << *targets.begin() << "];";
-                        break;
-                    case 2:
-                        ss << "ccx q[" << *controls.begin() << "], q[" << *std::next(controls.begin()) << "], q[" << *targets.begin() << "];";
-                        break;
-                    case 3:
-                        ss << "mcx q[" << *controls.begin() << "], q["
-                           << *std::next(controls.begin()) << "], q["
-                           << *std::next(std::next(controls.begin())) << "], q["
-                           << *targets.begin() << "];";
-                        break;
-                }
+            ss << std::string(controls.size(), 'c');
+            switch (type) {
+                case Types::Fredkin:
+                    ss << "swap";
+                    break;
+                case Types::Toffoli:
+                    ss << "x";
+                    break;
+                default:
+                    // throw gate not supported error
+                    throw std::runtime_error("Gate not supported");
+            }
+            for (const auto& control: controls) {
+                ss << " q[" << control << "], ";
+            }
+            if (type == Types::Toffoli) {
+                assert(targets.size() == 1U);
+                ss << "q[" << *targets.begin() << "];";
             } else {
-                // throw gate not supported error
-                throw std::runtime_error("Gate not supported");
+                assert(type == Types::Fredkin);
+                assert(targets.size() == 2U);
+                ss << "q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
             }
             return ss.str();
         }
