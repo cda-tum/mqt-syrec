@@ -88,3 +88,21 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     EXPECT_EQ(expectedQc, qc);
     EXPECT_EQ(expectedTc, tc);
 }
+
+TEST_P(SyrecSynthesisTest, GenericSynthesisQASMTest) {
+    Circuit             circ;
+    program             prog;
+    ReadProgramSettings settings;
+    std::string         errorString;
+
+    errorString = prog.read(fileName, settings);
+    EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
+
+    // negate_8.src creates gate which is not supported by QASM
+    if (fileName != testCircuitsDir + "negate_8.src") {
+        auto lastIndex      = fileName.find_last_of('.');
+        auto outputFileName = fileName.substr(0, lastIndex);
+        auto success        = circ.toQasmFile(outputFileName + ".qasm");
+        EXPECT_TRUE(success);
+    }
+}
