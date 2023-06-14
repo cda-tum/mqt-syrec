@@ -43,7 +43,9 @@ PYBIND11_MODULE(pysyrec, m) {
                     },
                     "This method returns all annotations for a given gate.")
             .def("quantum_cost", &syrec::Circuit::quantumCost, "Returns the quantum cost of the circuit.")
-            .def("transistor_cost", &syrec::Circuit::transistorCost, "Returns the transistor cost of the circuit.");
+            .def("transistor_cost", &syrec::Circuit::transistorCost, "Returns the transistor cost of the circuit.")
+            .def("to_qasm_str", &syrec::Circuit::toQasm, "Returns the QASM representation of the circuit.")
+            .def("to_qasm_file", &syrec::Circuit::toQasmFile, "filename"_a, "Writes the QASM representation of the circuit to a file.");
 
     py::class_<Properties, std::shared_ptr<Properties>>(m, "properties")
             .def(py::init<>(), "Constructs property map object.")
