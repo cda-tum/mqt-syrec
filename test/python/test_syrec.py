@@ -107,3 +107,13 @@ def test_simulation_add_lines(data_cost_aware_simulation):
 
         syrec.simple_simulation(my_out_bitset, circ, my_inp_bitset)
         assert data_cost_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
+
+
+def test_no_lines_to_qasm(data_line_aware_synthesis):
+    for file_name in data_line_aware_synthesis:
+        circ = syrec.circuit()
+        prog = syrec.program()
+        prog.read(str(circuit_dir / (file_name + ".src")))
+        if file_name != "negate_8":
+            b = circ.to_qasm_file(str(circuit_dir / (file_name + ".qasm")))
+            assert b is True
