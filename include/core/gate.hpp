@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <any>
+#include <cassert>
 #include <iostream>
 #include <set>
 #include <sstream>
