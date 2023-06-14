@@ -4,6 +4,7 @@
 #include <any>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <vector>
 
 namespace syrec {
@@ -103,6 +104,41 @@ namespace syrec {
             }
 
             return costs;
+        }
+
+        [[nodiscard]] std::string toQasm() const {
+            std::stringstream ss;
+            if (type == Types::Fredkin) {
+                switch (controls.size()) {
+                    case 0:
+                        ss << "swap q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
+                        break;
+                    case 1:
+                        ss << "cswap q[" << *controls.begin() << "], q[" << *targets.begin() << "], q[" << *std::next(targets.begin()) << "];";
+                }
+            } else if (type == Types::Toffoli && controls.size() <= 3) {
+                switch (controls.size()) {
+                    case 0:
+                        ss << "x q[" << *targets.begin() << "];";
+                        break;
+                    case 1:
+                        ss << "cx q[" << *controls.begin() << "], q[" << *targets.begin() << "];";
+                        break;
+                    case 2:
+                        ss << "ccx q[" << *controls.begin() << "], q[" << *std::next(controls.begin()) << "], q[" << *targets.begin() << "];";
+                        break;
+                    case 3:
+                        ss << "mcx q[" << *controls.begin() << "], q["
+                           << *std::next(controls.begin()) << "], q["
+                           << *std::next(std::next(controls.begin())) << "], q["
+                           << *targets.begin() << "];";
+                        break;
+                }
+            } else {
+                // throw gate not supported error
+                throw std::runtime_error("Gate not supported");
+            }
+            return ss.str();
         }
 
         line_container controls{};
