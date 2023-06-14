@@ -114,6 +114,4 @@ def test_no_lines_to_qasm(data_line_aware_synthesis):
         circ = syrec.circuit()
         prog = syrec.program()
         prog.read(str(circuit_dir / (file_name + ".src")))
-        if file_name != "negate_8":
-            b = circ.to_qasm_file(str(circuit_dir / (file_name + ".qasm")))
-            assert b is True
+        assert circ.to_qasm_file(str(circuit_dir / (file_name + ".qasm")))
