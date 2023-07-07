@@ -1,5 +1,5 @@
 # add MQT::qfr library
-add_subdirectory("${PROJECT_SOURCE_DIR}/extern/qfr" "extern/qfr" EXCLUDE_FROM_ALL)
+add_subdirectory("${PROJECT_SOURCE_DIR}/extern/mqt-core" "extern/mqt-core" EXCLUDE_FROM_ALL)
 
 add_library(
   ${PROJECT_NAME}
@@ -43,7 +43,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
                                                   ${PROJECT_BINARY_DIR}/include)
 
 # link to the MQT::qfr DD library
-target_link_libraries(${PROJECT_NAME} PUBLIC MQT::qfr_dd)
+target_link_libraries(${PROJECT_NAME} PUBLIC MQT::CoreDD)
 
 # add header-only part of the Boost library
 set(BOOST_USE_MULTITHREADED ON)
