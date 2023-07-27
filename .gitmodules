@@ -1,5 +1,4 @@
-[submodule "extern/qfr"]
-	path = extern/qfr
-	url = https://github.com/cda-tum/qfr
+[submodule "extern/mqt-core"]
+	path = extern/mqt-core
+	url = https://github.com/cda-tum/mqt-core
 	branch = main
-	shallow = true
