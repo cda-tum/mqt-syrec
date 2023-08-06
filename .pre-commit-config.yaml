@@ -38,7 +38,7 @@ repos:
 
   # Upgrade old Python syntax
   - repo: https://github.com/asottile/pyupgrade
-    rev: "v3.9.0"
+    rev: "v3.10.1"
     hooks:
       - id: pyupgrade
         args: ["--py37-plus"]
@@ -78,7 +78,7 @@ repos:
 
   # Run Flake8 checks
   - repo: https://github.com/PyCQA/flake8
-    rev: "6.0.0"
+    rev: "6.1.0"
     hooks:
       - id: flake8
         additional_dependencies: [flake8-bugbear]
