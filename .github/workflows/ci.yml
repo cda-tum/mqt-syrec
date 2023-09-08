@@ -27,7 +27,7 @@ jobs:
     name: Ubuntu (Build, Test, and Coverage)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install boost
@@ -57,7 +57,7 @@ jobs:
     name: macOS (Build and Test)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install boost
@@ -74,7 +74,7 @@ jobs:
     name: Windows (Build and Test)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install boost
