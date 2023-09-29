@@ -61,8 +61,8 @@ linux_aarch64_wheels_task:
     architecture: arm64
     platform: linux
     cpu: 8
-  setup_pyhton_script:
-    - apt-get install -y python3-venv python-is-python3 libboost-all-dev
+  setup_python_script:
+    - apt-get update && apt-get install -y python3-venv python-is-python3 libboost-all-dev
   <<: *BUILD_AND_STORE_WHEELS
 
 macos_arm64_wheels_task:
