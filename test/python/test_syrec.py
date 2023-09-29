@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
 import pytest
+
 from mqt import syrec
 
 test_dir = Path(__file__).resolve().parent.parent
@@ -9,31 +12,31 @@ configs_dir = test_dir / "configs"
 circuit_dir = test_dir / "circuits"
 
 
-@pytest.fixture
+@pytest.fixture()
 def data_line_aware_synthesis():
-    with open(configs_dir / "circuits_line_aware_synthesis.json") as f:
+    with (configs_dir / "circuits_line_aware_synthesis.json").open() as f:
         return json.load(f)
 
 
-@pytest.fixture
+@pytest.fixture()
 def data_cost_aware_synthesis():
-    with open(configs_dir / "circuits_cost_aware_synthesis.json") as f:
+    with (configs_dir / "circuits_cost_aware_synthesis.json").open() as f:
         return json.load(f)
 
 
-@pytest.fixture
+@pytest.fixture()
 def data_line_aware_simulation():
-    with open(configs_dir / "circuits_line_aware_simulation.json") as f:
+    with (configs_dir / "circuits_line_aware_simulation.json").open as f:
         return json.load(f)
 
 
-@pytest.fixture
+@pytest.fixture()
 def data_cost_aware_simulation():
-    with open(configs_dir / "circuits_cost_aware_simulation.json") as f:
+    with (configs_dir / "circuits_cost_aware_simulation.json").open() as f:
         return json.load(f)
 
 
-def test_parser(data_line_aware_synthesis):
+def test_parser(data_line_aware_synthesis) -> None:
     for file_name in data_line_aware_synthesis:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
@@ -41,7 +44,7 @@ def test_parser(data_line_aware_synthesis):
         assert error == ""
 
 
-def test_synthesis_no_lines(data_line_aware_synthesis):
+def test_synthesis_no_lines(data_line_aware_synthesis) -> None:
     for file_name in data_line_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -55,7 +58,7 @@ def test_synthesis_no_lines(data_line_aware_synthesis):
         assert data_line_aware_synthesis[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_synthesis_add_lines(data_cost_aware_synthesis):
+def test_synthesis_add_lines(data_cost_aware_synthesis) -> None:
     for file_name in data_cost_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -69,7 +72,7 @@ def test_synthesis_add_lines(data_cost_aware_synthesis):
         assert data_cost_aware_synthesis[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_simulation_no_lines(data_line_aware_simulation):
+def test_simulation_no_lines(data_line_aware_simulation) -> None:
     for file_name in data_line_aware_simulation:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -89,7 +92,7 @@ def test_simulation_no_lines(data_line_aware_simulation):
         assert data_line_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
 
 
-def test_simulation_add_lines(data_cost_aware_simulation):
+def test_simulation_add_lines(data_cost_aware_simulation) -> None:
     for file_name in data_cost_aware_simulation:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -109,7 +112,7 @@ def test_simulation_add_lines(data_cost_aware_simulation):
         assert data_cost_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
 
 
-def test_no_lines_to_qasm(data_line_aware_synthesis):
+def test_no_lines_to_qasm(data_line_aware_synthesis) -> None:
     for file_name in data_line_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
