@@ -26,7 +26,7 @@ def data_cost_aware_synthesis():
 
 @pytest.fixture()
 def data_line_aware_simulation():
-    with (configs_dir / "circuits_line_aware_simulation.json").open as f:
+    with (configs_dir / "circuits_line_aware_simulation.json").open() as f:
         return json.load(f)
 
 
