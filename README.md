@@ -1,9 +1,9 @@
 [![PyPI](https://img.shields.io/pypi/v/mqt.syrec?logo=pypi&style=flat-square)](https://pypi.org/project/mqt.syrec/)
 ![OS](https://img.shields.io/badge/os-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/syrec/ci.yml?branch=main&style=flat-square&logo=github&label=c%2B%2B)](https://github.com/cda-tum/syrec/actions/workflows/ci.yml)
-[![Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/syrec/deploy.yml?branch=main&style=flat-square&logo=github&label=python)](https://github.com/cda-tum/syrec/actions/workflows/deploy.yml)
-[![codecov](https://img.shields.io/codecov/c/github/cda-tum/syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/syrec)
+[![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/mqt-syrec/ci.yml?branch=main&style=flat-square&logo=github&label=c%2B%2B)](https://github.com/cda-tum/mqt-syrec/actions/workflows/ci.yml)
+[![Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/mqt-syrec/deploy.yml?branch=main&style=flat-square&logo=github&label=python)](https://github.com/cda-tum/mqt-syrec/actions/workflows/deploy.yml)
+[![codecov](https://img.shields.io/codecov/c/github/cda-tum/mqt-syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/mqt-syrec)
 
 <p align="center">
   <picture>
@@ -18,12 +18,12 @@ A tool for HDL-based synthesis of reversible circuits developed by the [Chair fo
 The _SyReC Synthesizer_ is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
 
 <p align="center">
-  <a href="https://syrec.readthedocs.io/en/latest/">
+  <a href="https://mqt.readthedocs.io/projects/syrec">
   <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation" />
   </a>
 </p>
 
-If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/syrec/issues).
+If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/mqt-syrec/issues).
 
 ## Getting Started
 
@@ -38,12 +38,12 @@ The _SyReC Synthesizer_ is available via [PyPI](https://pypi.org/project/mqt.syr
   (venv) $ syrec-editor
   ```
 
-**Detailed documentation on all available methods, options, and input formats is available at [ReadTheDocs](https://syrec.readthedocs.io/en/latest/).**
+**Detailed documentation on all available methods, options, and input formats is available at [ReadTheDocs](https://mqt.readthedocs.io/projects/syrec).**
 
 ## System Requirements and Building
 
 The implementation is compatible with any C++17 compiler and a minimum CMake version of 3.19.
-Please refer to the [documentation](https://syrec.readthedocs.io/en/latest/) on how to build the project.
+Please refer to the [documentation](https://mqt.readthedocs.io/projects/syrec) on how to build the project.
 
 Building (and running) is continuously tested under Linux, macOS, and Windows using the [latest available system versions for GitHub Actions](https://github.com/actions/virtual-environments).
 
