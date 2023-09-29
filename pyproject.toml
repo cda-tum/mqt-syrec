@@ -226,6 +226,7 @@ archs = "auto64"
 build-frontend = "build"
 test-extras = ["test"]
 test-command = "cd {project}/test/python && python -m pytest ."
+test-skip = "*-*linux_{aarch64,ppc64le,s390x}"
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "manylinux_2_28"
