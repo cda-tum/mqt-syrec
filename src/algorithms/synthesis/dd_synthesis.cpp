@@ -181,7 +181,7 @@ namespace syrec {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx      = static_cast<qc::Qubit>(current.p->v - i - 1U);
+                const auto idx      = current.p->v - i - 1U;
                 const auto ctrlType = *ctrlCube[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
                 ctrl.emplace(qc::Control{idx, ctrlType});
             }
