@@ -12,10 +12,10 @@
   </picture>
   </p>
 
-# SyReC Synthesizer: An MQT Tool for the Synthesis of Reversible Circuits
+# SyReC Synthesizer: A Tool for HDL-based Synthesis of Reversible Circuits
 
-A tool for HDL-based synthesis of reversible circuits developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
-The _SyReC Synthesizer_ is part of the Munich Quantum Toolkit (MQT) and builds upon [our quantum functionality representation (QFR)](https://github.com/cda-tum/qfr).
+A tool for HDL-based synthesis of reversible circuits developed as part of the [_Munich Quantum Toolkit_](https://mqt.readthedocs.io) (_MQT_) by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
+It builds upon [MQT Core](https://github.com/cda-tum/mqt-core), which forms the backbone of the MQT.
 
 <p align="center">
   <a href="https://mqt.readthedocs.io/projects/syrec">

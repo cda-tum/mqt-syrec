@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "mqt.syrec"
-description = "A Programming Language for Synthesis of Reversible Circuits"
+description = "A Tool for HDL-based Synthesis of Reversible Circuits"
 readme = "README.md"
 authors = [
     { name = "Lukas Burgholzer", email = "lukas.burgholzer@tum.de" },
