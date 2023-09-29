@@ -21,13 +21,9 @@ namespace syrec {
         if (tt.nInputs() == 1U) {
             for (const auto& [input, output]: tt) {
                 // truth table has to be completely specified
-                assert(input[0].has_value());
-
-                const auto in  = *input[0];
-                const auto out = *output[0];
-
+                const auto in = input[0].value();
                 if (output[0].has_value()) {
-                    const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
+                    const auto index = (static_cast<std::size_t>(*output[0]) * 2U) + static_cast<std::size_t>(in);
                     edges.at(index)  = dd::mEdge::one;
                 } else {
                     const auto offset     = in ? 1U : 0U;
@@ -42,16 +38,13 @@ namespace syrec {
         std::array<TruthTable, 4U> subTables{};
         for (const auto& [input, output]: tt) {
             // truth table has to be completely specified
-            assert(input[0].has_value());
-
-            const auto in  = *input[0];
-            const auto out = *output[0];
+            const auto in = input[0].value();
 
             TruthTable::Cube reducedInput(input.begin() + 1, input.end());
             TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
 
             if (output[0].has_value()) {
-                const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
+                const auto index = static_cast<std::size_t>(*output[0]) * 2U + static_cast<std::size_t>(in);
                 subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
             } else {
                 const auto offset = in ? 1U : 0U;
@@ -209,7 +202,7 @@ namespace syrec {
 
     // Check whether all the edges of the current node are pointing to the same node (indicating a don't care node).
     auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
-        if (!(dd::mNode::isTerminal(current.p))) {
+        if (!current.isTerminal()) {
             if (current.p->v == 0U) {
                 return std::all_of(current.p->e.begin(), current.p->e.end(), [](const auto& e) { return e == dd::mEdge::one; });
             }
