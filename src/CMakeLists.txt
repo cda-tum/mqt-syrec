@@ -1,4 +1,7 @@
-# add MQT::qfr library
+# add MQT::Core target
+set(BUILD_MQT_CORE_TESTS
+    OFF
+    CACHE BOOL "Build MQT Core tests")
 add_subdirectory("${PROJECT_SOURCE_DIR}/extern/mqt-core" "extern/mqt-core" EXCLUDE_FROM_ALL)
 
 add_library(
@@ -53,3 +56,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 
 # add MQT alias
 add_library(MQT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+if(BUILD_MQT_SYREC_BINDINGS)
+  add_subdirectory(python)
+endif()
