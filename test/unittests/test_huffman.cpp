@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace dd::literals;
+using namespace qc::literals;
 using namespace syrec;
 
 class TestHuff: public testing::Test {

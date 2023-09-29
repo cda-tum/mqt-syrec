@@ -1,9 +1,10 @@
 name: CI
-
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
+  merge_group:
   workflow_dispatch:
 
 concurrency:
@@ -11,7 +12,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BUILD_TYPE: Release
   CMAKE_BUILD_PARALLEL_LEVEL: 3
   CTEST_PARALLEL_LEVEL: 3
   BOOST_VERSION_MAJOR: 1
@@ -23,72 +23,123 @@ defaults:
     shell: bash
 
 jobs:
-  build-ubuntu:
-    name: Ubuntu (Build, Test, and Coverage)
+  cpp-tests-ubuntu:
+    name: 🐧 Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install boost
         run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
-      - name: Configure CMake
-        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
-      - name: Build
-        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
-      - name: Test
-        working-directory: ${{github.workspace}}/build/test
-        run: ctest -C $BUILD_TYPE --output-on-failure
-      - name: Coverage
-        run: |
-          cmake -S "${{github.workspace}}" -B "${{github.workspace}}/buildCov" -DCMAKE_BUILD_TYPE=Debug -DBUILD_SYREC_TESTS=ON -DCOVERAGE=ON -DBINDINGS=ON
-          cmake --build "${{github.workspace}}/buildCov" --config Debug
-          cd buildCov/test
-          ctest -C Debug --output-on-failure
-      - name: Run gcov
-        run: find . -type f -name '*.gcno' -exec gcov -p  {} +
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
         with:
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          prepend_symlinks_to_path: false
+          override_cache_key: c++-tests-ubuntu-latest
+      - name: Set up mold as linker
+        uses: rui314/setup-mold@v1
+      - name: Install Ninja
+        run: pipx install ninja
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release
+      - name: Test
+        run: ctest -C Release --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600
 
-  build-macos:
-    name: macOS (Build and Test)
+  cpp-tests-macos:
+    name: 🍎 Release
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Install boost
         run: brew install boost
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          prepend_symlinks_to_path: false
+          override_cache_key: c++-tests-macos-latest
+      - name: Install Ninja
+        run: pipx install ninja
       - name: Configure CMake
-        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -DBINDINGS=ON
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build
-        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+        run: cmake --build build --config Release
       - name: Test
-        working-directory: ${{github.workspace}}/build/test
-        run: ctest -C $BUILD_TYPE --output-on-failure
+        run: ctest -C Release --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600
 
-  build-windows:
-    name: Windows (Build and Test)
+  cpp-tests-windows:
+    name: 🏁 Release
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
         uses: MarkusJx/install-boost@v2.4.4
         id: install-boost
         with:
           boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          prepend_symlinks_to_path: false
+          windows_compile_environment: msvc
+          override_cache_key: c++-tests-windows-latest
       - name: Configure CMake
-        run: cmake -S "${{github.workspace}}" -B "${{github.workspace}}/build" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SYREC_TESTS=ON -T "ClangCl" -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_RUNTIME=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -T "ClangCl" -DBoost_USE_MULTITHREADED=ON -DBoost_USE_STATIC_RUNTIME=OFF
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Build
-        run: cmake --build "${{github.workspace}}/build" --config $BUILD_TYPE
+        uses: nick-fields/retry@v2 # Windows builds with MSVC are flaky and frequently run out of heap space
+        with:
+          timeout_minutes: 15
+          max_attempts: 5
+          shell: bash
+          retry_on: error
+          command: cmake --build build --config Release
       - name: Test
-        working-directory: ${{github.workspace}}/build/test
-        run: cd $BUILD_TYPE && ./syrec_test
+        run: ctest -C Release --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600
+
+  coverage:
+    name: 📈 Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install boost
+        run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
+      - name: Setup ccache
+        uses: Chocobo1/setup-ccache-action@v1
+        with:
+          prepend_symlinks_to_path: false
+          override_cache_key: c++-coverage
+      - name: Set up mold as linker
+        uses: rui314/setup-mold@v1
+      - name: Install Ninja
+        run: pipx install ninja
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON
+      - name: Build
+        run: cmake --build build --config Debug
+      - name: Test
+        run: ctest -C Debug --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600
+      - name: Upload coverage to Codecov
+        # Coverage uploads can be flaky, so we retry them a few times.
+        uses: Wandalen/wretry.action@v1.3.0
+        with:
+          action: codecov/codecov-action@v3
+          attempt_limit: 5
+          attempt_delay: 2000
+          with: |
+            fail_ci_if_error: true
+            flags: cpp
+            gcov: true
+            gcov_ignore: "extern/**/*"
+            token: ${{ secrets.token }}

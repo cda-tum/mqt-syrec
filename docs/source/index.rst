@@ -1,5 +1,5 @@
 Welcome to the documentation of the SyReC Synthesizer!
-=================================
+======================================================
 
 The *SyReC Synthesizer* is a tool for HDL-based synthesis of reversible circuits developed as part of the
 *Munich Quantum Toolkit* (*MQT*) by the `Chair for Design Automation <https://www.cda.cit.tum.de/>`_ at the

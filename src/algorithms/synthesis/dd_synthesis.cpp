@@ -3,7 +3,7 @@
 #include "algorithms/synthesis/encoding.hpp"
 #include "dd/Operations.hpp"
 
-using namespace dd::literals;
+using namespace qc::literals;
 
 namespace syrec {
 
@@ -21,13 +21,9 @@ namespace syrec {
         if (tt.nInputs() == 1U) {
             for (const auto& [input, output]: tt) {
                 // truth table has to be completely specified
-                assert(input[0].has_value());
-
-                const auto in  = *input[0];
-                const auto out = *output[0];
-
+                const auto in = input[0].value();
                 if (output[0].has_value()) {
-                    const auto index = (static_cast<std::size_t>(out) * 2U) + static_cast<std::size_t>(in);
+                    const auto index = (static_cast<std::size_t>(*output[0]) * 2U) + static_cast<std::size_t>(in);
                     edges.at(index)  = dd::mEdge::one;
                 } else {
                     const auto offset     = in ? 1U : 0U;
@@ -42,16 +38,13 @@ namespace syrec {
         std::array<TruthTable, 4U> subTables{};
         for (const auto& [input, output]: tt) {
             // truth table has to be completely specified
-            assert(input[0].has_value());
-
-            const auto in  = *input[0];
-            const auto out = *output[0];
+            const auto in = input[0].value();
 
             TruthTable::Cube reducedInput(input.begin() + 1, input.end());
             TruthTable::Cube reducedOutput(output.begin() + 1, output.end());
 
             if (output[0].has_value()) {
-                const auto index = static_cast<std::size_t>(out) * 2U + static_cast<std::size_t>(in);
+                const auto index = static_cast<std::size_t>(*output[0]) * 2U + static_cast<std::size_t>(in);
                 subTables.at(index).try_emplace(std::move(reducedInput), std::move(reducedOutput));
             } else {
                 const auto offset = in ? 1U : 0U;
@@ -86,7 +79,7 @@ namespace syrec {
     }
 
     auto DDSynthesizer::pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void {
-        if (src.p->v <= dst->v) {
+        if (src.isTerminal() || src.p->v <= dst->v) {
             if (src.p == dst) {
                 sigVec.emplace(cube);
             }
@@ -143,12 +136,18 @@ namespace syrec {
     // Refer to signature path section of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
     auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec) const -> void {
         TruthTable::Cube cube{};
-        const auto       pathLength = static_cast<std::size_t>(src.p->v + 1);
-        cube.reserve(pathLength);
+        if (!src.isTerminal()) {
+            const auto pathLength = static_cast<std::size_t>(src.p->v + 1);
+            cube.reserve(pathLength);
+        }
         pathSignature(src, sigVec, cube);
     }
 
     auto DDSynthesizer::pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void {
+        if (src.isTerminal()) {
+            return;
+        }
+
         const auto nEdges = src.p->e.size();
         if (src.p->v == 0) {
             for (auto i = 0U; i < nEdges; ++i) {
@@ -158,10 +157,6 @@ namespace syrec {
                     cube.pop_back();
                 }
             }
-            return;
-        }
-
-        if (dd::mNode::isTerminal(src.p)) {
             return;
         }
 
@@ -186,7 +181,7 @@ namespace syrec {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx      = static_cast<qc::Qubit>(static_cast<std::size_t>(current.p->v) - i - 1U);
+                const auto idx      = current.p->v - i - 1U;
                 const auto ctrlType = *ctrlCube[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
                 ctrl.emplace(qc::Control{idx, ctrlType});
             }
@@ -198,7 +193,7 @@ namespace syrec {
         const auto cubeSize = ctrlCube.size();
         for (auto i = 0U; i < cubeSize; ++i) {
             if (ctrlCube[i].has_value()) {
-                const auto idx      = static_cast<qc::Qubit>((cubeSize - i) + static_cast<std::size_t>(current.p->v));
+                const auto idx      = static_cast<qc::Qubit>((cubeSize - i) + current.p->v);
                 const auto ctrlType = *ctrlCube[i] ? qc::Control::Type::Pos : qc::Control::Type::Neg;
                 ctrl.emplace(qc::Control{idx, ctrlType});
             }
@@ -207,7 +202,7 @@ namespace syrec {
 
     // Check whether all the edges of the current node are pointing to the same node (indicating a don't care node).
     auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
-        if (!(dd::mNode::isTerminal(current.p))) {
+        if (!current.isTerminal()) {
             if (current.p->v == 0U) {
                 return std::all_of(current.p->e.begin(), current.p->e.end(), [](const auto& e) { return e == dd::mEdge::one; });
             }
@@ -254,12 +249,12 @@ namespace syrec {
             auto       rootSigVec   = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, false, dd);
             const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
-            const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
+            const auto nQubits = src.p->v + 1U;
 
             for (auto const& rootVec: rootSolution) {
                 qc::Controls ctrlFinal;
                 controlRoot(current, ctrlFinal, rootVec);
-                applyOperation(nQubits, static_cast<qc::Qubit>(current.p->v), src, ctrlFinal, dd);
+                applyOperation(nQubits, current.p->v, src, ctrlFinal, dd);
             }
         }
         return src;
@@ -302,7 +297,7 @@ namespace syrec {
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
         const auto uniSolution  = minbool::minimizeBoolean(uniqueCubeVec);
 
-        const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
+        const auto nQubits = src.p->v + 1U;
         for (auto const& uniCube: uniSolution) {
             qc::Controls ctrlNonRoot;
             controlNonRoot(current, ctrlNonRoot, uniCube);
@@ -360,7 +355,7 @@ namespace syrec {
 
         auto rootSigVec = finalSrcPathSignature(src, current, p1SigVec, p2SigVec, changePaths, dd);
 
-        const auto nQubits = static_cast<dd::QubitCount>(src.p->v + 1);
+        const auto nQubits = src.p->v + 1U;
 
         const auto rootSolution = minbool::minimizeBoolean(rootSigVec);
 
@@ -371,13 +366,13 @@ namespace syrec {
             controlRoot(current, ctrlFinal, rootVec);
 
             const auto ctrlType = changePaths ? qc::Control::Type::Neg : qc::Control::Type::Pos;
-            ctrlFinal.emplace(qc::Control{static_cast<qc::Qubit>(current.p->v), ctrlType});
+            ctrlFinal.emplace(qc::Control{current.p->v, ctrlType});
 
             ctrlFinal.insert(ctrlNonRoot.begin(), ctrlNonRoot.end());
 
             for (std::size_t i = 0; i < targetSize; ++i) {
                 if (targetVec[i].has_value() && *(targetVec[i])) {
-                    applyOperation(nQubits, static_cast<qc::Qubit>(static_cast<std::size_t>(current.p->v) - (i + 1U)), src, ctrlFinal, dd);
+                    applyOperation(nQubits, static_cast<qc::Qubit>(current.p->v - (i + 1U)), src, ctrlFinal, dd);
                 }
             }
         }
@@ -503,7 +498,7 @@ namespace syrec {
         }
 
         // The threshold after which the outputs are considered to be garbage.
-        const auto garbageThreshold = static_cast<dd::Qubit>(totalNoBits) - static_cast<dd::Qubit>(m);
+        const auto garbageThreshold = static_cast<dd::Qubit>(totalNoBits - m);
 
         // This following ensures that the `src` node resembles an identity structure.
         // Refer to algorithm Q of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf.
@@ -634,13 +629,13 @@ namespace syrec {
         const auto nAncillaBits = tt.nInputs() - oldPrimaryInputs;
         const auto nGarbageBits = tt.nOutputs() - oldPrimaryOutputs;
 
-        for (auto i = 0U; i < nAncillaBits; i++) {
+        for (qc::Qubit i = 0U; i < nAncillaBits; i++) {
             // corresponding bits are considered as ancillary bits.
-            qc->setLogicalQubitAncillary(static_cast<qc::Qubit>(i));
+            qc->setLogicalQubitAncillary(i);
         }
-        for (auto i = 0U; i < nGarbageBits; i++) {
+        for (qc::Qubit i = 0U; i < nGarbageBits; i++) {
             // corresponding bits are considered as garbage bits.
-            qc->setLogicalQubitGarbage(static_cast<qc::Qubit>(i));
+            qc->setLogicalQubitGarbage(i);
         }
 
         // If the one-pass synthesis is selected, the appended garbage bits need not be considered during the synthesis process.
@@ -670,13 +665,13 @@ namespace syrec {
         const auto nAncillaBits = totalNoBits - n;
         const auto nGarbageBits = totalNoBits - m;
 
-        for (auto i = 0U; i < nAncillaBits; i++) {
+        for (qc::Qubit i = 0U; i < nAncillaBits; i++) {
             // corresponding bits are considered as ancillary bits.
             qc->setLogicalQubitAncillary(static_cast<qc::Qubit>((totalNoBits - 1) - i));
         }
-        for (auto i = 0U; i < nGarbageBits; i++) {
+        for (qc::Qubit i = 0U; i < nGarbageBits; i++) {
             // corresponding bits are considered as garbage bits.
-            qc->setLogicalQubitGarbage(static_cast<qc::Qubit>(i));
+            qc->setLogicalQubitGarbage(i);
         }
 
         buildAndSynthesize(tt);

@@ -36,7 +36,7 @@ namespace syrec {
                 continue;
             }
 
-            auto const inEdge    = dd->makeBasisState(static_cast<dd::QubitCount>(nBits), boolCube);
+            auto const inEdge    = dd->makeBasisState(nBits, boolCube);
             const auto out       = dd::simulate(&qc, inEdge, dd, 1);
             const auto outString = out.begin()->first;
 

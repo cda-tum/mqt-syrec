@@ -1,15 +1,16 @@
-#!/usr/bin/python
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Callable
 
-from mqt import syrec
 from PyQt6 import QtCore, QtGui, QtWidgets
+
+from mqt import syrec
 
 
 class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
-    def __init__(self, index, width, parent=None):
+    def __init__(self, index, width, parent=None) -> None:
         QtWidgets.QGraphicsItemGroup.__init__(self, parent)
 
         # Tool Tip
@@ -17,14 +18,14 @@ class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
 
         # Create sub-lines
         x = 0
-        for i in range(0, width + 1):
+        for i in range(width + 1):
             e_width = 15 if i in {0, width} else 30
             self.addToGroup(QtWidgets.QGraphicsLineItem(x, index * 30, x + e_width, index * 30))
             x += e_width
 
 
 class GateItem(QtWidgets.QGraphicsItemGroup):
-    def __init__(self, g, index, circ, parent=None):
+    def __init__(self, g, index, circ, parent=None) -> None:
         QtWidgets.QGraphicsItemGroup.__init__(self, parent)
         self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
@@ -33,12 +34,12 @@ class GateItem(QtWidgets.QGraphicsItemGroup):
         lines.sort()
 
         self.gate = g
-        annotations = [["Index", index]] + list(circ.annotations(g).items())
+        annotations = [["Index", index], *list(circ.annotations(g).items())]
         self.setToolTip("\n".join([f'<b><font color="#606060">{k}:</font></b> {v}' for (k, v) in annotations]))
 
         if len(lines) > 1:
-            circuitLine = QtWidgets.QGraphicsLineItem(0, lines[0] * 30, 0, lines[-1] * 30, self)
-            self.addToGroup(circuitLine)
+            circuit_line = QtWidgets.QGraphicsLineItem(0, lines[0] * 30, 0, lines[-1] * 30, self)
+            self.addToGroup(circuit_line)
 
         for t in g.targets:
             if g.type == syrec.gate_type.toffoli:
@@ -49,10 +50,10 @@ class GateItem(QtWidgets.QGraphicsItemGroup):
                 self.addToGroup(target_line)
                 self.addToGroup(target_line2)
             if g.type == syrec.gate_type.fredkin:
-                crossTL_BR = QtWidgets.QGraphicsLineItem(-5, t * 30 - 5, 5, t * 30 + 5, self)
-                crossTR_BL = QtWidgets.QGraphicsLineItem(5, t * 30 - 5, -5, t * 30 + 5, self)
-                self.addToGroup(crossTL_BR)
-                self.addToGroup(crossTR_BL)
+                cross_tl_br = QtWidgets.QGraphicsLineItem(-5, t * 30 - 5, 5, t * 30 + 5, self)
+                cross_tr_bl = QtWidgets.QGraphicsLineItem(5, t * 30 - 5, -5, t * 30 + 5, self)
+                self.addToGroup(cross_tl_br)
+                self.addToGroup(cross_tr_bl)
 
         for c in g.controls:
             control = QtWidgets.QGraphicsEllipseItem(-5, c * 30 - 5, 10, 10, self)
@@ -61,7 +62,7 @@ class GateItem(QtWidgets.QGraphicsItemGroup):
 
 
 class CircuitView(QtWidgets.QGraphicsView):
-    def __init__(self, circ=None, parent=None):
+    def __init__(self, circ=None, parent=None) -> None:
         QtWidgets.QGraphicsView.__init__(self, parent)
 
         # Scene
@@ -87,7 +88,7 @@ class CircuitView(QtWidgets.QGraphicsView):
 
         width = 30 * circ.num_gates
 
-        for i in range(0, circ.lines):
+        for i in range(circ.lines):
             line = CircuitLineItem(i, circ.num_gates)
             self.lines.append(line)
             self.scene().addItem(line)
@@ -121,7 +122,7 @@ class CircuitView(QtWidgets.QGraphicsView):
 
         return text_item
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event):  # noqa: N802
         factor = 1.2
         if event.angleDelta().y() < 0 or event.angleDelta().x() < 0:
             factor = 1.0 / factor
@@ -140,7 +141,7 @@ class SyReCEditor(QtWidgets.QWidget):
     cost_aware_synthesis = 0
     line_aware_synthesis = 0
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__()
 
         self.parent = parent
@@ -181,7 +182,7 @@ class SyReCEditor(QtWidgets.QWidget):
         self.sim_action.setDisabled(True)
         self.stat_action.setDisabled(True)
 
-        self.open_action.triggered.connect(self.open)
+        self.open_action.triggered.connect(self.open_file)
 
         self.build_action.triggered.connect(self.build)
 
@@ -220,7 +221,7 @@ class SyReCEditor(QtWidgets.QWidget):
                 # making other check box to uncheck
                 self.butonCostAware.setChecked(True)
 
-    def writeEditorContentsToFile(self):
+    def write_editor_contents_to_file(self):
         data = QtCore.QFile("/tmp/out.src")
         if data.open(QtCore.QFile.OpenModeFlag.WriteOnly | QtCore.QFile.OpenModeFlag.Truncate):
             out = QtCore.QTextStream(data)
@@ -232,7 +233,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         return
 
-    def open(self):
+    def open_file(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(
             parent=self.parent, caption="Open Specification", filter="SyReC specification (*.src)"
         )
@@ -251,7 +252,7 @@ class SyReCEditor(QtWidgets.QWidget):
         if self.before_build is not None:
             self.before_build()
 
-        self.writeEditorContentsToFile()
+        self.write_editor_contents_to_file()
 
         self.prog = syrec.program()
 
@@ -405,14 +406,14 @@ class SyReCEditor(QtWidgets.QWidget):
 
 
 class SyReCHighligher(QtGui.QSyntaxHighlighter):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         QtGui.QSyntaxHighlighter.__init__(self, parent)
 
         self.highlightingRules = []
 
-        keywordFormat = QtGui.QTextCharFormat()
-        keywordFormat.setForeground(QtGui.QColorConstants.DarkBlue)
-        keywordFormat.setFontWeight(QtGui.QFont.Weight.Bold)
+        keyword_format = QtGui.QTextCharFormat()
+        keyword_format.setForeground(QtGui.QColorConstants.DarkBlue)
+        keyword_format.setFontWeight(QtGui.QFont.Weight.Bold)
         keywords = [
             "module",
             "in",
@@ -435,17 +436,17 @@ class SyReCHighligher(QtGui.QSyntaxHighlighter):
         ]
 
         for pattern in [f"\\b{keyword}\\b" for keyword in keywords]:
-            self.highlightingRules.append([QtCore.QRegularExpression(pattern), keywordFormat])
+            self.highlightingRules.append([QtCore.QRegularExpression(pattern), keyword_format])
 
-        numberFormat = QtGui.QTextCharFormat()
-        numberFormat.setForeground(QtGui.QColorConstants.DarkCyan)
-        self.highlightingRules.append([QtCore.QRegularExpression("\\b[0-9]+\\b"), numberFormat])
+        number_format = QtGui.QTextCharFormat()
+        number_format.setForeground(QtGui.QColorConstants.DarkCyan)
+        self.highlightingRules.append([QtCore.QRegularExpression("\\b[0-9]+\\b"), number_format])
 
-        loopFormat = QtGui.QTextCharFormat()
-        loopFormat.setForeground(QtGui.QColorConstants.DarkRed)
-        self.highlightingRules.append([QtCore.QRegularExpression("\\$[A-Za-z_0-9]+"), loopFormat])
+        loop_format = QtGui.QTextCharFormat()
+        loop_format.setForeground(QtGui.QColorConstants.DarkRed)
+        self.highlightingRules.append([QtCore.QRegularExpression("\\$[A-Za-z_0-9]+"), loop_format])
 
-    def highlightBlock(self, text):
+    def highlightBlock(self, text):  # noqa: N802
         for rule in self.highlightingRules:
             expression = rule[0]
             match = expression.match(text)
@@ -457,34 +458,34 @@ class SyReCHighligher(QtGui.QSyntaxHighlighter):
 
 
 class QtSyReCEditor(SyReCEditor):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         SyReCEditor.__init__(self, parent)
 
         self.widget = CodeEditor(parent)
         self.widget.setFont(QtGui.QFont("Monospace", 10, QtGui.QFont.Weight.Normal))
         self.widget.highlighter = SyReCHighligher(self.widget.document())
 
-    def setText(self, text):
+    def setText(self, text):  # noqa: N802
         self.widget.setPlainText(text)
 
-    def getText(self):
+    def getText(self):  # noqa: N802
         return self.widget.toPlainText()
 
 
 class LineNumberArea(QtWidgets.QWidget):
-    def __init__(self, editor):
+    def __init__(self, editor) -> None:
         QtWidgets.QWidget.__init__(self, editor)
         self.codeEditor = editor
 
-    def sizeHint(self):
+    def sizeHint(self):  # noqa: N802
         return QtCore.QSize(self.codeEditor.lineNumberAreaWidth(), 0)
 
-    def paintEvent(self, event):
+    def paintEvent(self, event):  # noqa: N802
         self.codeEditor.lineNumberAreaPaintEvent(event)
 
 
 class CodeEditor(QtWidgets.QPlainTextEdit):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         QtWidgets.QPlainTextEdit.__init__(self, parent)
 
         self.lineNumberArea = LineNumberArea(self)
@@ -498,10 +499,10 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
     def load(self, filename):
         if len(filename) > 0:
-            with open(filename, encoding="utf-8") as f:
+            with Path(filename).open(encoding="utf-8") as f:
                 self.setPlainText(f.read())
 
-    def lineNumberAreaPaintEvent(self, event):
+    def lineNumberAreaPaintEvent(self, event):  # noqa: N802
         painter = QtGui.QPainter(self.lineNumberArea)
         painter.fillRect(event.rect(), QtGui.QColorConstants.LightGray)
 
@@ -528,42 +529,41 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             bottom = top + self.blockBoundingGeometry(block).height()
             block_number += 1
 
-    def lineNumberAreaWidth(self):
+    def lineNumberAreaWidth(self):  # noqa: N802
         digits = 1
         max_ = max(1, self.blockCount())
         while max_ >= 10:
             max_ /= 10
             digits += 1
 
-        space = 3 + self.fontMetrics().horizontalAdvance("9") * digits
-        return space
+        return 3 + self.fontMetrics().horizontalAdvance("9") * digits
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event):  # noqa: N802
         QtWidgets.QPlainTextEdit.resizeEvent(self, event)
 
         cr = self.contentsRect()
         self.lineNumberArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
 
-    def updateLineNumberAreaWidth(self):
+    def updateLineNumberAreaWidth(self):  # noqa: N802
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
 
-    def highlightCurrentLine(self):
-        extraSelections = []
+    def highlightCurrentLine(self):  # noqa: N802
+        extra_selections = []
 
         if not self.isReadOnly():
             selection = QtWidgets.QTextEdit.ExtraSelection()
 
-            lineColor = QtGui.QColorConstants.Yellow.lighter(160)
+            line_color = QtGui.QColorConstants.Yellow.lighter(160)
 
-            selection.format.setBackground(lineColor)
+            selection.format.setBackground(line_color)
             selection.format.setProperty(QtGui.QTextFormat.Property.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
-            extraSelections.append(selection)
+            extra_selections.append(selection)
 
-        self.setExtraSelections(extraSelections)
+        self.setExtraSelections(extra_selections)
 
-    def updateLineNumberArea(self, rect, dy):
+    def updateLineNumberArea(self, rect, dy):  # noqa: N802
         if dy != 0:
             self.lineNumberArea.scroll(0, dy)
         else:
@@ -574,19 +574,19 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
 
 class LogWidget(QtWidgets.QTreeWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         QtWidgets.QTreeWidget.__init__(self, parent)
 
         self.setRootIsDecorated(False)
         self.setHeaderLabels(["Message"])
 
-    def addMessage(self, message):
+    def addMessage(self, message):  # noqa: N802
         item = QtWidgets.QTreeWidgetItem([message])
         self.addTopLevelItem(item)
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         QtWidgets.QWidget.__init__(self, parent)
 
         self.setWindowTitle("SyReC Editor")
