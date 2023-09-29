@@ -236,6 +236,7 @@ before-all = [
     "./bootstrap.sh",
     "./b2 install --with-system"
 ]
+environment = { DEPLOY="ON" }
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
