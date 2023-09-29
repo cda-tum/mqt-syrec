@@ -13,7 +13,7 @@ protected:
 };
 
 TEST_F(TruthTableExtend, Max) {
-    std::string circMax = testCircuitsDir + "max.pla";
+    const std::string circMax = testCircuitsDir + "max.pla";
 
     // the max.pla consist of 64 inputs. Currently, functions with less than 63 inputs are supported.
     EXPECT_ANY_THROW(readPla(tt, circMax));
@@ -21,7 +21,7 @@ TEST_F(TruthTableExtend, Max) {
 
 TEST_F(TruthTableExtend, Ident2Bit) {
     // create identity truth table
-    std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
+    const std::string circIdent2Bit = testCircuitsDir + "ident2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circIdent2Bit));
 
@@ -37,7 +37,7 @@ TEST_F(TruthTableExtend, Ident2Bit) {
 TEST_F(TruthTableExtend, X2Bit) {
     // create X truth table (X gate applied on both the bits)
 
-    std::string circX2Bit = testCircuitsDir + "x2Bit.pla";
+    const std::string circX2Bit = testCircuitsDir + "x2Bit.pla";
 
     EXPECT_TRUE(readPla(tt, circX2Bit));
 
@@ -51,13 +51,13 @@ TEST_F(TruthTableExtend, X2Bit) {
 }
 
 TEST_F(TruthTableExtend, EXTENDTT) {
-    std::string circEXTENDTT = testCircuitsDir + "extend.pla";
+    const std::string circEXTENDTT = testCircuitsDir + "extend.pla";
 
     EXPECT_TRUE(readPla(tt, circEXTENDTT));
 
     EXPECT_EQ(tt.size(), 8U);
 
-    std::vector<std::uint64_t> outAssigned1{0b011U, 0b111U};
+    const std::vector<std::uint64_t> outAssigned1{0b011U, 0b111U};
 
     for (const auto& in1: outAssigned1) {
         auto search = tt.find(in1, 3U);
@@ -67,7 +67,7 @@ TEST_F(TruthTableExtend, EXTENDTT) {
         EXPECT_TRUE(search->second.equals(0b111U, 3U));
     }
 
-    std::vector<std::uint64_t> outAssigned2{0b100U, 0b110U};
+    const std::vector<std::uint64_t> outAssigned2{0b100U, 0b110U};
 
     for (const auto& in2: outAssigned2) {
         auto search = tt.find(in2, 3U);
@@ -77,7 +77,7 @@ TEST_F(TruthTableExtend, EXTENDTT) {
         EXPECT_TRUE(search->second.equals(0b101U, 3U));
     }
 
-    std::vector<std::uint64_t> notAssigned{0b000U, 0b001U, 0b010U, 0b101U};
+    const std::vector<std::uint64_t> notAssigned{0b000U, 0b001U, 0b010U, 0b101U};
 
     for (const auto& in3: notAssigned) {
         auto search = tt.find(in3, 3U);
