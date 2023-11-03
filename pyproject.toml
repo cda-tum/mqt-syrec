@@ -34,7 +34,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-    "PyQt6>=6.2.3,<6.6.0"
+    "PyQt6>=6.2.3,<6.7.0"
 ]
 dynamic = ["version"]
 
