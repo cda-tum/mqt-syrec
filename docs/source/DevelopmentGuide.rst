@@ -75,7 +75,7 @@ Initial Setup
 
     .. code-block:: console
 
-        (venv) $ pip install --upgrade pip, setuptools, wheel
+        (venv) $ pip install --upgrade pip setuptools wheel
 
 7. (Optional, **highly recommended**) Setup `nox <https://nox.thea.codes/en/stable/index.html>`_ to conveniently run many development tasks.
 
