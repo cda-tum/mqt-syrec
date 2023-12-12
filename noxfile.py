@@ -27,17 +27,6 @@ def lint(session: nox.Session) -> None:
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
-@nox.session(reuse_venv=True)
-def pylint(session: nox.Session) -> None:
-    """Run PyLint.
-
-    Simply execute `nox -rs pylint` to run PyLint.
-    """
-    session.install("scikit-build-core[pyproject]", "setuptools_scm", "pybind11")
-    session.install("--no-build-isolation", "-ve.", "pylint")
-    session.run("pylint", "mqt.syrec", *session.posargs)
-
-
 def _run_tests(
     session: nox.Session,
     *,
@@ -113,13 +102,3 @@ def docs(session: nox.Session) -> None:
         session.run("sphinx-autobuild", *shared_args)
     else:
         session.run("sphinx-build", "--keep-going", *shared_args)
-
-
-@nox.session(reuse_venv=True)
-def min_qiskit_version(session: nox.Session) -> None:
-    """Installs the minimum supported version of Qiskit, runs the test suite and collects the coverage."""
-    session.install("qiskit-terra~=0.20.2")
-    session.install("scikit-build-core[pyproject]", "setuptools_scm", "pybind11")
-    session.install("--no-build-isolation", "-ve.[coverage]")
-    session.run("pip", "show", "qiskit-terra")
-    session.run("pytest", "--cov", *session.posargs)
