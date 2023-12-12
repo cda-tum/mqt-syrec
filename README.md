@@ -5,6 +5,9 @@
 [![Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/mqt-syrec/deploy.yml?branch=main&style=flat-square&logo=github&label=python)](https://github.com/cda-tum/mqt-syrec/actions/workflows/deploy.yml)
 [![codecov](https://img.shields.io/codecov/c/github/cda-tum/mqt-syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/mqt-syrec)
 
+> [!NOTE]
+> This project is currently in low maintenance mode. We will still fix bugs and accept pull requests, but we will not actively develop new features.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/qmap/main/docs/source/_static/mqt_light.png" width="60%">
@@ -23,7 +26,7 @@ It builds upon [MQT Core](https://github.com/cda-tum/mqt-core), which forms the 
   </a>
 </p>
 
-If you have any questions, feel free to contact us via [quantum.cda@xcit.tum.de](mailto:quantum.cda@xcit.tum.de) or by creating an issue on [GitHub](https://github.com/cda-tum/mqt-syrec/issues).
+If you have any questions, feel free to contact us by creating an issue on [GitHub](https://github.com/cda-tum/mqt-syrec/issues).
 
 ## Getting Started
 
