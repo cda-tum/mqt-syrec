@@ -12,10 +12,10 @@ namespace syrec {
         assert(tt.nInputs() == tt.nOutputs());
 
         if (tt.nInputs() == 0U) {
-            return dd::mEdge::zero;
+            return dd::mEdge::zero();
         }
 
-        auto edges = std::array<dd::mEdge, 4U>{dd::mEdge::zero, dd::mEdge::zero, dd::mEdge::zero, dd::mEdge::zero};
+        auto edges = std::array<dd::mEdge, 4U>{dd::mEdge::zero(), dd::mEdge::zero(), dd::mEdge::zero(), dd::mEdge::zero()};
 
         // base case
         if (tt.nInputs() == 1U) {
@@ -24,11 +24,11 @@ namespace syrec {
                 const auto in = input[0].value();
                 if (output[0].has_value()) {
                     const auto index = (static_cast<std::size_t>(*output[0]) * 2U) + static_cast<std::size_t>(in);
-                    edges.at(index)  = dd::mEdge::one;
+                    edges.at(index)  = dd::mEdge::one();
                 } else {
                     const auto offset     = in ? 1U : 0U;
-                    edges.at(0U + offset) = dd::mEdge::one;
-                    edges.at(2U + offset) = dd::mEdge::one;
+                    edges.at(0U + offset) = dd::mEdge::one();
+                    edges.at(2U + offset) = dd::mEdge::one();
                 }
             }
             return dd->makeDDNode(0, edges);
@@ -151,7 +151,7 @@ namespace syrec {
         const auto nEdges = src.p->e.size();
         if (src.p->v == 0) {
             for (auto i = 0U; i < nEdges; ++i) {
-                if (src.p->e.at(i) == dd::mEdge::one) {
+                if (src.p->e.at(i).isOneTerminal()) {
                     cube.emplace_back((i == 1U || i == 3U));
                     sigVec.emplace(cube);
                     cube.pop_back();
@@ -204,7 +204,7 @@ namespace syrec {
     auto DDSynthesizer::dcNodeCondition(dd::mEdge const& current) -> bool {
         if (!current.isTerminal()) {
             if (current.p->v == 0U) {
-                return std::all_of(current.p->e.begin(), current.p->e.end(), [](const auto& e) { return e == dd::mEdge::one; });
+                return std::all_of(current.p->e.begin(), current.p->e.end(), [](const auto& e) { return e.isOneTerminal(); });
             }
 
             return std::all_of(current.p->e.begin(), current.p->e.end(), [&current](const auto& e) { return e.p == current.p->e[0].p; });
@@ -447,7 +447,7 @@ namespace syrec {
                 for (std::size_t i = 0U; i < targetSize; ++i) {
                     if (targetCube[i].has_value() && *(targetCube[i])) {
                         const auto targetBit = static_cast<qc::Qubit>((totalNoBits - 1U) - i);
-                        qc->x(targetBit, ctrl);
+                        qc->mcx(ctrl, targetBit);
                         ++numGates;
                     }
                 }
@@ -494,7 +494,7 @@ namespace syrec {
 
         // construct qc only if it is pointing to null
         if (qc == nullptr) {
-            qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
+            qc = std::make_shared<qc::QuantumComputation>(totalNoBits, totalNoBits);
         }
 
         // The threshold after which the outputs are considered to be garbage.
@@ -590,7 +590,7 @@ namespace syrec {
 
         // construct qc only if it is pointing to null
         if (qc == nullptr) {
-            qc = std::make_shared<qc::QuantumComputation>(totalNoBits);
+            qc = std::make_shared<qc::QuantumComputation>(totalNoBits, totalNoBits);
         }
     }
 
