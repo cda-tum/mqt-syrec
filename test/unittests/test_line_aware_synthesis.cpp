@@ -71,7 +71,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     Circuit             circ;
-    program             prog;
+    Program             prog;
     ReadProgramSettings settings;
     std::string         errorString;
 
@@ -91,7 +91,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisQASMTest) {
     Circuit             circ;
-    program             prog;
+    Program             prog;
     ReadProgramSettings settings;
 
     const auto errorString = prog.read(fileName, settings);

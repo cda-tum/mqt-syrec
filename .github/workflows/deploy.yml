@@ -14,7 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BOOST_HASH: 3a336c8b1a917f7d9c55abba2905be99dade914bf9b829aab9d5fb6069b6ffcc
   BOOST_VERSION_MAJOR: 1
   BOOST_VERSION_MINOR: 76
   BOOST_VERSION_PATCH: 0

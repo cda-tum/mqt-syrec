@@ -15,23 +15,23 @@ namespace syrec {
      * Eeach expression is derived from this class and has to
      * implement the bitwidth() and the print() methods.
      */
-    struct expression {
+    struct Expression {
         /**
        * @brief Shared Pointer interface to the class
        */
-        using ptr = std::shared_ptr<expression>;
+        using ptr = std::shared_ptr<Expression>;
 
         using vec = std::vector<ptr>;
 
         /**
        * @brief Standard constructor
        */
-        expression() = default;
+        Expression() = default;
 
         /**
        * @brief Standard destructor
        */
-        virtual ~expression() = default;
+        virtual ~Expression() = default;
 
         /**
        * @brief Bit-width of the expression
@@ -46,7 +46,7 @@ namespace syrec {
     /**
      * @brief Numeric Expression
      */
-    struct NumericExpression: public expression {
+    struct NumericExpression: public Expression {
         /**
        * @brief Operation to perform in case of binary numeric expression
        */
@@ -118,7 +118,7 @@ namespace syrec {
      * This class represents a variable expression and
      * capsulates a variable access pointer var().
      */
-    struct VariableExpression: public expression {
+    struct VariableExpression: public Expression {
         /**
        * @brief Constructor with variable
        *
@@ -140,7 +140,7 @@ namespace syrec {
      * This class represents a binary expression between two sub
      * expressions lhs() and rhs() by an operation op().
      */
-    struct BinaryExpression: public expression {
+    struct BinaryExpression: public Expression {
         /**
        * @brief Operation to perform
        */
@@ -244,9 +244,9 @@ namespace syrec {
        * @param op Operation to be performed
        * @param rhs Expression on right hand side
        */
-        BinaryExpression(expression::ptr lhs,
+        BinaryExpression(Expression::ptr lhs,
                          unsigned        op,
-                         expression::ptr rhs):
+                         Expression::ptr rhs):
             lhs(std::move(lhs)),
             op(op), rhs(std::move(rhs)) {}
 
@@ -279,9 +279,9 @@ namespace syrec {
             }
         }
 
-        expression::ptr lhs = nullptr;
+        Expression::ptr lhs = nullptr;
         unsigned        op{};
-        expression::ptr rhs = nullptr;
+        Expression::ptr rhs = nullptr;
     };
 
     /**
@@ -290,9 +290,9 @@ namespace syrec {
      * This class represents a binary expression with a
      * sub-expression lhs() and a number rhs() by a shift operation op().
      */
-    struct ShiftExpression: public expression {
+    struct ShiftExpression: public Expression {
         /**
-       * @brief Shft Operation
+       * @brief Shift Operation
        */
         enum {
             /**
@@ -317,7 +317,7 @@ namespace syrec {
        * @param op Shift operation
        * @param rhs Number of bits to shift
        */
-        ShiftExpression(expression::ptr lhs,
+        ShiftExpression(Expression::ptr lhs,
                         unsigned        op,
                         Number::ptr     rhs):
             lhs(std::move(lhs)),
@@ -335,7 +335,7 @@ namespace syrec {
             return lhs->bitwidth();
         }
 
-        expression::ptr lhs = nullptr;
+        Expression::ptr lhs = nullptr;
         unsigned        op{};
         Number::ptr     rhs = nullptr;
     };

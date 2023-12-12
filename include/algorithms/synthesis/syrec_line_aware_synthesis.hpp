@@ -7,7 +7,7 @@ namespace syrec {
     public:
         using SyrecSynthesis::SyrecSynthesis;
 
-        static bool synthesize(Circuit& circ, const program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
+        static bool synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
 
     protected:
         bool processStatement(const Statement::ptr& statement) override {
@@ -17,7 +17,7 @@ namespace syrec {
         bool fullStatement(const Statement::ptr& statement);
         bool fullStatement(const AssignStatement& statement);
 
-        bool opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) override;
+        bool opRhsLhsExpression(const Expression::ptr& expression, std::vector<unsigned>& v) override;
 
         bool opRhsLhsExpression(const VariableExpression& expression, std::vector<unsigned>& v) override;
 
@@ -35,7 +35,7 @@ namespace syrec {
 
         bool solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs);
 
-        bool flow(const expression::ptr& expression, std::vector<unsigned>& v);
+        bool flow(const Expression::ptr& expression, std::vector<unsigned>& v);
         bool flow(const VariableExpression& expression, std::vector<unsigned>& v);
         bool flow(const BinaryExpression& expression, const std::vector<unsigned>& v);
 

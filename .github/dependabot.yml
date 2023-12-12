@@ -8,8 +8,6 @@ updates:
           - "*"
     schedule:
       interval: "monthly"
-      time: "06:00"
-      timezone: "Europe/Vienna"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -18,10 +16,7 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "06:00"
-      timezone: "Europe/Vienna"
+      interval: "monthly"
 
   - package-ecosystem: "pip"
     directory: "/"
@@ -30,7 +25,4 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "06:00"
-      timezone: "Europe/Vienna"
+      interval: "monthly"

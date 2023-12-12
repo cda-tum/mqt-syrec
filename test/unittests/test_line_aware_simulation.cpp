@@ -51,7 +51,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
 
 TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     Circuit             circ;
-    program             prog;
+    Program             prog;
     ReadProgramSettings settings;
     Properties::ptr     statistics;
     std::string         errorString;

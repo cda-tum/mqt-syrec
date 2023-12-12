@@ -160,7 +160,7 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::flow(const expression::ptr& expression, std::vector<unsigned>& v) {
+    bool LineAwareSynthesis::flow(const Expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return flow(*binary, v);
         }
@@ -216,7 +216,7 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::opRhsLhsExpression(const expression::ptr& expression, std::vector<unsigned>& v) {
+    bool LineAwareSynthesis::opRhsLhsExpression(const Expression::ptr& expression, std::vector<unsigned>& v) {
         if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return opRhsLhsExpression(*binary, v);
         }
@@ -376,7 +376,7 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+    bool LineAwareSynthesis::synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         LineAwareSynthesis synthesizer(circ);
         return SyrecSynthesis::synthesize(&synthesizer, circ, program, settings, statistics);
     }

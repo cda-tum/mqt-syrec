@@ -41,7 +41,7 @@ def test_parser(data_line_aware_synthesis) -> None:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
 
-        assert error == ""
+        assert not error
 
 
 def test_synthesis_no_lines(data_line_aware_synthesis) -> None:
@@ -50,7 +50,7 @@ def test_synthesis_no_lines(data_line_aware_synthesis) -> None:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
 
-        assert error == ""
+        assert not error
         assert syrec.line_aware_synthesis(circ, prog)
         assert data_line_aware_synthesis[file_name]["num_gates"] == circ.num_gates
         assert data_line_aware_synthesis[file_name]["lines"] == circ.lines
@@ -64,7 +64,7 @@ def test_synthesis_add_lines(data_cost_aware_synthesis) -> None:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
 
-        assert error == ""
+        assert not error
         assert syrec.cost_aware_synthesis(circ, prog)
         assert data_cost_aware_synthesis[file_name]["num_gates"] == circ.num_gates
         assert data_cost_aware_synthesis[file_name]["lines"] == circ.lines
@@ -78,7 +78,7 @@ def test_simulation_no_lines(data_line_aware_simulation) -> None:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
 
-        assert error == ""
+        assert not error
         assert syrec.line_aware_synthesis(circ, prog)
 
         my_inp_bitset = syrec.bitset(circ.lines)
@@ -98,7 +98,7 @@ def test_simulation_add_lines(data_cost_aware_simulation) -> None:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
 
-        assert error == ""
+        assert not error
         assert syrec.cost_aware_synthesis(circ, prog)
 
         my_inp_bitset = syrec.bitset(circ.lines)

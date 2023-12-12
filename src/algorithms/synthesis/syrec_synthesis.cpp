@@ -105,7 +105,7 @@ namespace syrec {
         return false;
     }
 
-    bool SyrecSynthesis::opRhsLhsExpression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v) {
+    bool SyrecSynthesis::opRhsLhsExpression([[maybe_unused]] const Expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v) {
         return true;
     }
     bool SyrecSynthesis::opRhsLhsExpression([[maybe_unused]] const VariableExpression& expression, [[maybe_unused]] std::vector<unsigned>& v) {
@@ -348,7 +348,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::onExpression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op) {
+    bool SyrecSynthesis::onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op) {
         if (auto const* numeric = dynamic_cast<NumericExpression*>(expression.get())) {
             return onExpression(*numeric, lines);
         }
@@ -996,7 +996,7 @@ namespace syrec {
         }
     }
 
-    bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+    bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         // Settings parsing
         auto variableNameFormat = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto mainModule         = get<std::string>(settings, "main_module", std::string());

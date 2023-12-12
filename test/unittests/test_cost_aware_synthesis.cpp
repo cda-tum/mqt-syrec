@@ -71,7 +71,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecAddLinesSynthesisTest,
 
 TEST_P(SyrecAddLinesSynthesisTest, GenericSynthesisTest) {
     Circuit             circ;
-    program             prog;
+    Program             prog;
     ReadProgramSettings settings;
     std::string         errorString;
 

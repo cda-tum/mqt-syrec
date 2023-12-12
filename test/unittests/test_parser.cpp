@@ -48,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecParserTest, SyrecParserTest,
                              return s; });
 
 TEST_P(SyrecParserTest, GenericParserTest) {
-    program             prog;
+    Program             prog;
     ReadProgramSettings settings;
     std::string         errorString;
     errorString = prog.read(fileName, settings);

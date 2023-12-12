@@ -59,7 +59,7 @@ namespace syrec {
 
         virtual bool onModule(const Module::ptr&);
 
-        virtual bool opRhsLhsExpression([[maybe_unused]] const expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v);
+        virtual bool opRhsLhsExpression([[maybe_unused]] const Expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v);
         virtual bool opRhsLhsExpression([[maybe_unused]] const VariableExpression& expression, [[maybe_unused]] std::vector<unsigned>& v);
         virtual bool opRhsLhsExpression([[maybe_unused]] const BinaryExpression& expression, [[maybe_unused]] std::vector<unsigned>& v);
 
@@ -78,7 +78,7 @@ namespace syrec {
         virtual void assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
         virtual void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op)     = 0;
 
-        virtual bool onExpression(const expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
+        virtual bool onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
         virtual bool onExpression(const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
         virtual bool onExpression(const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
         virtual bool onExpression(const NumericExpression& expression, std::vector<unsigned>& lines);
@@ -135,7 +135,7 @@ namespace syrec {
         unsigned getConstantLine(bool value);
         void     getConstantLines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
 
-        static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
+        static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
 
         std::stack<Statement::ptr>    stmts;
         Circuit&                      circ;

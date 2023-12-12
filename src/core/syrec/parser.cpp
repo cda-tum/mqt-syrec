@@ -241,9 +241,9 @@ namespace syrec {
             return {};
         }
 
-        expression::vec indexes;
+        Expression::vec indexes;
         for (const ast_expression& astExp: astVar.indexes) {
-            expression::ptr index = parseExpression(astExp, proc, var->bitwidth, context);
+            Expression::ptr index = parseExpression(astExp, proc, var->bitwidth, context);
             if (!index) {
                 return {};
             }
@@ -260,7 +260,7 @@ namespace syrec {
             bitwidth(bitwidth),
             context(context) {}
 
-        expression* operator()(const ast_number& astNum) const {
+        Expression* operator()(const ast_number& astNum) const {
             Number::ptr num = parseNumber(astNum, proc, context);
             if (!num) {
                 return nullptr;
@@ -268,7 +268,7 @@ namespace syrec {
             return new NumericExpression(num, bitwidth);
         }
 
-        expression* operator()(const ast_variable& astVar) const {
+        Expression* operator()(const ast_variable& astVar) const {
             VariableAccess::ptr access = parseVariableAccess(astVar, proc, context);
             if (!access) {
                 return nullptr;
@@ -276,7 +276,7 @@ namespace syrec {
             return new VariableExpression(access);
         }
 
-        expression* operator()(const ast_binary_expression& astExp) const {
+        Expression* operator()(const ast_binary_expression& astExp) const {
             ast_expression astExp1 = astExp.operand1;
             std::string    astOp   = astExp.op;
             ast_expression astExp2 = astExp.operand2;
@@ -318,12 +318,12 @@ namespace syrec {
                 op = BinaryExpression::GreaterEquals;
             }
 
-            expression::ptr lhs = parseExpression(astExp1, proc, 0U, context);
+            Expression::ptr lhs = parseExpression(astExp1, proc, 0U, context);
             if (!lhs) {
                 return nullptr;
             }
 
-            expression::ptr rhs = parseExpression(astExp2, proc, lhs->bitwidth(), context);
+            Expression::ptr rhs = parseExpression(astExp2, proc, lhs->bitwidth(), context);
             if (!rhs) {
                 return nullptr;
             }
@@ -331,7 +331,7 @@ namespace syrec {
             return new BinaryExpression(lhs, op, rhs);
         }
 
-        expression* operator()(const ast_shift_expression& astExp) const {
+        Expression* operator()(const ast_shift_expression& astExp) const {
             ast_expression astExp1 = astExp.operand1;
             std::string    astOp   = astExp.op;
             ast_number     astNum  = astExp.operand2;
@@ -343,7 +343,7 @@ namespace syrec {
                 op = ShiftExpression::Right;
             }
 
-            expression::ptr lhs = parseExpression(astExp1, proc, bitwidth, context);
+            Expression::ptr lhs = parseExpression(astExp1, proc, bitwidth, context);
             if (!lhs) {
                 return nullptr;
             }
@@ -387,12 +387,12 @@ namespace syrec {
         ParserContext& context;
     };
 
-    expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context) {
-        return expression::ptr(boost::apply_visitor(ExpressionVisitor(proc, bitwidth, context), astExp));
+    Expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context) {
+        return Expression::ptr(boost::apply_visitor(ExpressionVisitor(proc, bitwidth, context), astExp));
     }
 
     struct StatementVisitor {
-        StatementVisitor(const program& prog, const Module& proc, ParserContext& context):
+        StatementVisitor(const Program& prog, const Module& proc, ParserContext& context):
             prog(prog),
             proc(proc),
             context(context) {}
@@ -454,7 +454,7 @@ namespace syrec {
             unsigned op = astOp == '+' ? AssignStatement::Add :
                                          (astOp == '-' ? AssignStatement::Subtract : AssignStatement::Exor);
 
-            expression::ptr rhs = parseExpression(astExp, proc, lhs->bitwidth(), context);
+            Expression::ptr rhs = parseExpression(astExp, proc, lhs->bitwidth(), context);
             if (!rhs) {
                 return nullptr;
             }
@@ -470,13 +470,13 @@ namespace syrec {
         Statement::ptr operator()(const ast_if_statement& astIfStat) const {
             auto ifStat = std::make_shared<IfStatement>();
 
-            expression::ptr condition = parseExpression(astIfStat.condition, proc, 1U, context);
+            Expression::ptr condition = parseExpression(astIfStat.condition, proc, 1U, context);
             if (!condition) {
                 return nullptr;
             }
             ifStat->setCondition(condition);
 
-            expression::ptr fiCondition = parseExpression(astIfStat.fiCondition, proc, 1U, context);
+            Expression::ptr fiCondition = parseExpression(astIfStat.fiCondition, proc, 1U, context);
             if (!fiCondition) {
                 return nullptr;
             }
@@ -600,12 +600,12 @@ namespace syrec {
         }
 
     private:
-        const program& prog;
+        const Program& prog;
         const Module&  proc;
         ParserContext& context;
     };
 
-    Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const Module& proc, ParserContext& context) {
+    Statement::ptr parseStatement(const ast_statement& astStat, const Program& prog, const Module& proc, ParserContext& context) {
         if (auto stat = boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat))) {
             context.currentLineNumber = static_cast<unsigned>(std::count(context.begin, boost::fusion::at_c<0>(astStat), '\n')) + 1U;
             stat->lineNumber          = context.currentLineNumber;
@@ -635,7 +635,7 @@ namespace syrec {
         return 0U;
     }
 
-    bool parseModule(Module& proc, const ast_module& astProc, const program& prog, ParserContext& context) {
+    bool parseModule(Module& proc, const ast_module& astProc, const Program& prog, ParserContext& context) {
         std::set<std::string> variableNames;
 
         for (const ast_parameter& astParam: boost::fusion::at_c<1>(astProc)) {
@@ -666,7 +666,7 @@ namespace syrec {
         return true;
     }
 
-    bool program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
+    bool Program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
         ast_program astProg;
         if (!parseString(astProg, content)) {
             *error = "PARSE_STRING_FAILED";
