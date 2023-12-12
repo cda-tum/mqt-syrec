@@ -292,7 +292,7 @@ namespace syrec {
      */
     struct ShiftExpression: public expression {
         /**
-       * @brief Shft Operation
+       * @brief Shift Operation
        */
         enum {
             /**
