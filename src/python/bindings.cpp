@@ -58,10 +58,10 @@ PYBIND11_MODULE(pysyrec, m) {
             .def(py::init<>(), "Constructs ReadProgramSettings object.")
             .def_readwrite("default_bitwidth", &ReadProgramSettings::defaultBitwidth);
 
-    py::class_<program>(m, "program")
+    py::class_<Program>(m, "program")
             .def(py::init<>(), "Constructs SyReC program object.")
-            .def("add_module", &program::addModule)
-            .def("read", &program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.");
+            .def("add_module", &Program::addModule)
+            .def("read", &Program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.");
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>(), "Constructs bitset object of size zero.")
