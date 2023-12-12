@@ -7,7 +7,7 @@ namespace syrec {
     public:
         using SyrecSynthesis::SyrecSynthesis;
 
-        static bool synthesize(Circuit& circ, const program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
+        static bool synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
 
     protected:
         bool processStatement(const Statement::ptr& statement) override {

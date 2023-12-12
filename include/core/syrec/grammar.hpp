@@ -299,5 +299,5 @@ namespace syrec {
         return parse(prog, program.begin(), program.end());
     }
 
-    class program;
+    class Program;
 } // namespace syrec

@@ -392,7 +392,7 @@ namespace syrec {
     }
 
     struct StatementVisitor {
-        StatementVisitor(const program& prog, const Module& proc, ParserContext& context):
+        StatementVisitor(const Program& prog, const Module& proc, ParserContext& context):
             prog(prog),
             proc(proc),
             context(context) {}
@@ -600,12 +600,12 @@ namespace syrec {
         }
 
     private:
-        const program& prog;
+        const Program& prog;
         const Module&  proc;
         ParserContext& context;
     };
 
-    Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const Module& proc, ParserContext& context) {
+    Statement::ptr parseStatement(const ast_statement& astStat, const Program& prog, const Module& proc, ParserContext& context) {
         if (auto stat = boost::apply_visitor(StatementVisitor(prog, proc, context), boost::fusion::at_c<1>(astStat))) {
             context.currentLineNumber = static_cast<unsigned>(std::count(context.begin, boost::fusion::at_c<0>(astStat), '\n')) + 1U;
             stat->lineNumber          = context.currentLineNumber;
@@ -635,7 +635,7 @@ namespace syrec {
         return 0U;
     }
 
-    bool parseModule(Module& proc, const ast_module& astProc, const program& prog, ParserContext& context) {
+    bool parseModule(Module& proc, const ast_module& astProc, const Program& prog, ParserContext& context) {
         std::set<std::string> variableNames;
 
         for (const ast_parameter& astParam: boost::fusion::at_c<1>(astProc)) {
@@ -666,7 +666,7 @@ namespace syrec {
         return true;
     }
 
-    bool program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
+    bool Program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
         ast_program astProg;
         if (!parseString(astProg, content)) {
             *error = "PARSE_STRING_FAILED";

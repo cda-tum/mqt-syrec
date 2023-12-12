@@ -135,7 +135,7 @@ namespace syrec {
         unsigned getConstantLine(bool value);
         void     getConstantLines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
 
-        static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
+        static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
 
         std::stack<Statement::ptr>    stmts;
         Circuit&                      circ;

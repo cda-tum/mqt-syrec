@@ -376,7 +376,7 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+    bool LineAwareSynthesis::synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         LineAwareSynthesis synthesizer(circ);
         return SyrecSynthesis::synthesize(&synthesizer, circ, program, settings, statistics);
     }

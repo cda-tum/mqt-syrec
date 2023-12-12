@@ -20,7 +20,7 @@ namespace syrec {
         SyrecSynthesis::bitwiseCnot(lines, rhs);
     }
 
-    bool CostAwareSynthesis::synthesize(Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+    bool CostAwareSynthesis::synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         CostAwareSynthesis synthesizer(circ);
         return SyrecSynthesis::synthesize(&synthesizer, circ, program, settings, statistics);
     }

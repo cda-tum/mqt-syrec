@@ -996,7 +996,7 @@ namespace syrec {
         }
     }
 
-    bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
+    bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         // Settings parsing
         auto variableNameFormat = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto mainModule         = get<std::string>(settings, "main_module", std::string());

@@ -18,9 +18,9 @@ namespace syrec {
         unsigned defaultBitwidth;
     };
 
-    class program {
+    class Program {
     public:
-        program() = default;
+        Program() = default;
 
         void addModule(const Module::ptr& module) {
             modulesVec.emplace_back(module);
