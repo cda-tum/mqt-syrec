@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Any
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from mqt import syrec
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
@@ -71,9 +74,9 @@ class CircuitView(QtWidgets.QGraphicsView):
 
         # Load circuit
         self.circ = None
-        self.lines = []
-        self.inputs = []
-        self.outputs = []
+        self.lines: list[CircuitLineItem] = []
+        self.inputs: list[QtWidgets.QGraphicsTextItem | None] = []
+        self.outputs: list[QtWidgets.QGraphicsTextItem | None] = []
         if circ is not None:
             self.load(circ)
 
@@ -132,11 +135,11 @@ class CircuitView(QtWidgets.QGraphicsView):
 
 
 class SyReCEditor(QtWidgets.QWidget):
-    widget = None
-    build_successful: Callable[[syrec.circuit], None] = None
-    build_failed: Callable[[str], None] = None
-    before_build: Callable[[], None] = None
-    parser_failed: Callable[[str], None] = None
+    widget: CodeEditor | None = None
+    build_successful: Callable[[syrec.circuit], None] | None = None
+    build_failed: Callable[[str], None] | None = None
+    before_build: Callable[[], None] | None = None
+    parser_failed: Callable[[str], None] | None = None
 
     cost_aware_synthesis = 0
     line_aware_synthesis = 0
@@ -222,7 +225,7 @@ class SyReCEditor(QtWidgets.QWidget):
                 self.butonCostAware.setChecked(True)
 
     def write_editor_contents_to_file(self):
-        data = QtCore.QFile("/tmp/out.src")
+        data = QtCore.QFile("/tmp/out.src")  # noqa: S108
         if data.open(QtCore.QFile.OpenModeFlag.WriteOnly | QtCore.QFile.OpenModeFlag.Truncate):
             out = QtCore.QTextStream(data)
             out << self.getText()
@@ -256,14 +259,14 @@ class SyReCEditor(QtWidgets.QWidget):
 
         self.prog = syrec.program()
 
-        error_string = self.prog.read("/tmp/out.src")
+        error_string = self.prog.read("/tmp/out.src")  # noqa: S108
 
         if error_string == "PARSE_STRING_FAILED":
             if self.parser_failed is not None:
                 self.parser_failed("Editor is Empty")
             return
 
-        if error_string != "":
+        if error_string:
             if self.build_failed is not None:
                 self.build_failed(error_string)
             return
@@ -458,10 +461,10 @@ class SyReCHighligher(QtGui.QSyntaxHighlighter):
 
 
 class QtSyReCEditor(SyReCEditor):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any | None = None) -> None:
         SyReCEditor.__init__(self, parent)
 
-        self.widget = CodeEditor(parent)
+        self.widget: CodeEditor = CodeEditor(parent)
         self.widget.setFont(QtGui.QFont("Monospace", 10, QtGui.QFont.Weight.Normal))
         self.widget.highlighter = SyReCHighligher(self.widget.document())
 
@@ -485,7 +488,7 @@ class LineNumberArea(QtWidgets.QWidget):
 
 
 class CodeEditor(QtWidgets.QPlainTextEdit):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any | None = None) -> None:
         QtWidgets.QPlainTextEdit.__init__(self, parent)
 
         self.lineNumberArea = LineNumberArea(self)
@@ -596,7 +599,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_actions()
         self.setup_toolbar()
 
-    def setup_widgets(self):
+    def setup_widgets(self) -> None:
         self.editor = QtSyReCEditor(self)
         self.viewer = CircuitView(parent=self)
 
@@ -606,21 +609,23 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(splitter)
 
-    def setup_dock_widgets(self):
+    def setup_dock_widgets(self) -> None:
         self.logWidget = LogWidget(self)
         self.logDockWidget = QtWidgets.QDockWidget("Log Messages", self)
         self.logDockWidget.setWidget(self.logWidget)
         self.addDockWidget(QtCore.Qt.DockWidgetArea.BottomDockWidgetArea, self.logDockWidget)
 
-    def setup_actions(self):
+    def setup_actions(self) -> None:
         self.editor.before_build = self.logWidget.clear
         self.editor.build_successful = self.viewer.load
         self.editor.parser_failed = self.logWidget.addMessage
-        self.editor.build_failed = lambda error_message: self.logWidget.addMessage(
-            re.search("In line (.*): (.*)", error_message).group(2)
+        self.editor.build_failed = (
+            lambda error_message: self.logWidget.addMessage(match.group(2))
+            if (match := re.search("In line (.*): (.*)", error_message))
+            else self.logWidget.addMessage("No matching lines found in error message")
         )
 
-    def setup_toolbar(self):
+    def setup_toolbar(self) -> None:
         toolbar = self.addToolBar("Main")
         toolbar.setIconSize(QtCore.QSize(32, 32))
 
@@ -632,7 +637,7 @@ class MainWindow(QtWidgets.QMainWindow):
         toolbar.addWidget(self.editor.buttonLineAware)
 
 
-def main():
+def main() -> int:
     a = QtWidgets.QApplication([])
 
     w = MainWindow()
