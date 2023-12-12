@@ -11,7 +11,7 @@
 
 namespace syrec {
 
-    struct expression;
+    struct Expression;
 
     /**
      * @brief SyReC variable data type
@@ -114,7 +114,7 @@ namespace syrec {
 
         Variable::ptr                                      var{};
         std::optional<std::pair<Number::ptr, Number::ptr>> range{};
-        std::vector<std::shared_ptr<expression>>           indexes{};
+        std::vector<std::shared_ptr<Expression>>           indexes{};
     };
 
 } // namespace syrec

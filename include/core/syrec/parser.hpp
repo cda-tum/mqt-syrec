@@ -28,7 +28,7 @@ namespace syrec {
 
     Number::ptr parseNumber(const ast_number& astNum, const Module& proc, ParserContext& context);
 
-    expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context);
+    Expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context);
 
     Statement::ptr parseStatement(const ast_statement& astStat, const program& prog, const Module& proc, ParserContext& context);
 

@@ -164,7 +164,7 @@ namespace syrec {
        */
         AssignStatement(VariableAccess::ptr lhs,
                         unsigned            op,
-                        expression::ptr     rhs):
+                        Expression::ptr     rhs):
             lhs(std::move(lhs)),
             op(op), rhs(std::move(rhs)) {}
 
@@ -184,7 +184,7 @@ namespace syrec {
 
         VariableAccess::ptr lhs{};
         unsigned            op{};
-        expression::ptr     rhs{};
+        Expression::ptr     rhs{};
     };
 
     /**
@@ -207,7 +207,7 @@ namespace syrec {
        *
        * @param condition Expression
        */
-        void setCondition(expression::ptr cond) {
+        void setCondition(Expression::ptr cond) {
             condition = std::move(cond);
         }
 
@@ -239,7 +239,7 @@ namespace syrec {
        *
        * @param fi_condition Expression
        */
-        void setFiCondition(expression::ptr fiCond) {
+        void setFiCondition(Expression::ptr fiCond) {
             fiCondition = std::move(fiCond);
         }
 
@@ -256,10 +256,10 @@ namespace syrec {
             return fi;
         }
 
-        expression::ptr condition{};
+        Expression::ptr condition{};
         Statement::vec  thenStatements{};
         Statement::vec  elseStatements{};
-        expression::ptr fiCondition{};
+        Expression::ptr fiCondition{};
     };
 
     /**
