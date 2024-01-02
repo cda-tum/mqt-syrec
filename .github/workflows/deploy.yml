@@ -29,9 +29,10 @@ jobs:
           fetch-depth: 0
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          path: ./wheelhouse/*.whl
+          name: cibw-wheels-ubuntu-latest-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
 
   build_macos_wheels:
     name: Build wheels on macOS
@@ -45,9 +46,10 @@ jobs:
         run: brew install boost
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          path: ./wheelhouse/*.whl
+          name: cibw-wheels-macos-latest-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
 
   build_windows_wheels:
     name: Build wheels on Windows
@@ -68,9 +70,10 @@ jobs:
         uses: pypa/cibuildwheel@v2.16
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          path: ./wheelhouse/*.whl
+          name: cibw-wheels-windows-latest-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
 
   build_sdist:
     name: Build source distribution
@@ -86,8 +89,9 @@ jobs:
         run: pipx run build --sdist
       - name: Check metadata
         run: pipx run twine check dist/*
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: cibw-sdist
           path: dist/*.tar.gz
 
   upload_pypi:
@@ -107,8 +111,9 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: cibw-*
           path: dist
+          merge-multiple: true
       - uses: pypa/gh-action-pypi-publish@release/v1
