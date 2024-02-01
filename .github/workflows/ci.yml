@@ -96,7 +96,7 @@ jobs:
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - name: Build
-        uses: nick-fields/retry@v2 # Windows builds with MSVC are flaky and frequently run out of heap space
+        uses: nick-fields/retry@v3 # Windows builds with MSVC are flaky and frequently run out of heap space
         with:
           timeout_minutes: 15
           max_attempts: 5
