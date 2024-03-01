@@ -80,7 +80,7 @@ jobs:
           submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.4
+        uses: MarkusJx/install-boost@v2.4.5
         id: install-boost
         with:
           boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
@@ -132,7 +132,7 @@ jobs:
         run: ctest -C Debug --output-on-failure --test-dir build --repeat until-pass:3 --timeout 600
       - name: Upload coverage to Codecov
         # Coverage uploads can be flaky, so we retry them a few times.
-        uses: Wandalen/wretry.action@v1.3.0
+        uses: Wandalen/wretry.action@v1.4.5
         with:
           action: codecov/codecov-action@v3
           attempt_limit: 5
