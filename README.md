@@ -9,15 +9,17 @@
 > This project is currently in low maintenance mode. We will still fix bugs and accept pull requests, but we will not actively develop new features.
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/qmap/main/docs/source/_static/mqt_light.png" width="60%">
-    <img src="https://raw.githubusercontent.com/cda-tum/qmap/main/docs/source/_static/mqt_dark.png" width="60%">
-  </picture>
-  </p>
+  <a href="https://mqt.readthedocs.io">
+   <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/mqt_light.png" width="60%">
+     <img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/mqt_dark.png" width="60%">
+   </picture>
+  </a>
+</p>
 
 # SyReC Synthesizer: A Tool for HDL-based Synthesis of Reversible Circuits
 
-A tool for HDL-based synthesis of reversible circuits developed as part of the [_Munich Quantum Toolkit_](https://mqt.readthedocs.io) (_MQT_) by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
+A tool for HDL-based synthesis of reversible circuits developed as part of the [_Munich Quantum Toolkit (MQT)_](https://mqt.readthedocs.io) by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
 It builds upon [MQT Core](https://github.com/cda-tum/mqt-core), which forms the backbone of the MQT.
 
 <p align="center">
@@ -65,3 +67,29 @@ R. Wille, E. Schönborn, M. Soeken, and R. Drechsler. SyReC: A hardware descript
 
 [[4]](https://www.cda.cit.tum.de/files/eda/2019_iccad_hdl_based_reversible_circuit_synthesis_without_additional_lines.pdf)
 R. Wille, M. Haghparast, S. Adarsh, and T. Manjunath. Towards HDL-based Synthesis of Reversible Circuits with No Additional Lines. In International Conference on Computer Aided Design (ICCAD), 2019.
+
+---
+
+## Acknowledgements
+
+The Munich Quantum Toolkit has been supported by the European
+Research Council (ERC) under the European Union's Horizon 2020 research and innovation program (grant agreement
+No. 101001318), the Bavarian State Ministry for Science and Arts through the Distinguished Professorship Program, as well as the
+Munich Quantum Valley, which is supported by the Bavarian state government with funds from the Hightech Agenda Bayern Plus.
+
+<p align="center">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_dark.svg" width="28%">
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_light.svg" width="28%">
+</picture>
+<picture>
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/logo-bavaria.svg" width="16%">
+</picture>
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/erc_dark.svg" width="24%">
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/erc_light.svg" width="24%">
+</picture>
+<picture>
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/logo-mqv.svg" width="28%">
+</picture>
+</p>
