@@ -135,4 +135,4 @@ jobs:
         with:
           fail_ci_if_error: true
           flags: cpp
-          token: ${{ secrets.token }}
+          token: ${{ secrets.CODECOV_TOKEN }}
