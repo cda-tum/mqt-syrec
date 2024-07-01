@@ -104,12 +104,10 @@ class CircuitView(QtWidgets.QGraphicsView):
                 self.add_line_label(width, i * 30, circ.outputs[i], QtCore.Qt.AlignmentFlag.AlignLeft, circ.garbage[i])
             )
 
-        index = 0
-        for g in circ:
+        for index, g in enumerate(circ):
             gate_item = GateItem(g, index, self.circ)
             gate_item.setPos(index * 30 + 15, 0)
             self.scene().addItem(gate_item)
-            index += 1
 
     def add_line_label(self, x, y, text, align, color):
         text_item = self.scene().addText(text)
@@ -314,14 +312,11 @@ class SyReCEditor(QtWidgets.QWidget):
 
     def sim(self):
         bit_mask = 0
-        bit_pos = 0
         bit1_mask = 0
 
-        for i in self.circ.constants:
+        for bit_pos, i in enumerate(self.circ.constants):
             if i is None:
                 bit_mask += 2**bit_pos
-
-            bit_pos += 1
 
         no_of_bits = len(self.circ.constants)
 
