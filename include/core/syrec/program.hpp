@@ -14,7 +14,7 @@ namespace syrec {
 
     struct ReadProgramSettings {
         explicit ReadProgramSettings(unsigned bitwidth = 32U):
-            defaultBitwidth(bitwidth){};
+            defaultBitwidth(bitwidth) {};
         unsigned defaultBitwidth;
     };
 
