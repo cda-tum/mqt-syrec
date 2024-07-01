@@ -319,7 +319,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         for i in self.circ.constants:
             if i is None:
-                bit_mask = bit_mask + 2**bit_pos
+                bit_mask += 2**bit_pos
 
             bit_pos += 1
 
@@ -329,7 +329,7 @@ class SyReCEditor(QtWidgets.QWidget):
 
         for i, constant in enumerate(self.circ.constants):
             if constant:
-                bit1_mask = bit1_mask + 2**i
+                bit1_mask += 2**i
 
         input_list = [i + bit1_mask for i in input_list]
 
