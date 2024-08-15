@@ -4,6 +4,9 @@
 if(POLICY CMP0114)
     cmake_policy(SET CMP0114 NEW)
 endif()
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
 
 INCLUDE(ExternalProject)
 FIND_PACKAGE(Git REQUIRED)
