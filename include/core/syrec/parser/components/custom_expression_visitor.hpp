@@ -6,6 +6,7 @@
 
 namespace syrecParser {
     class CustomExpressionVisitor: CustomBaseVisitor {
+    protected:
         std::any visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) override;
         std::any visitExpressionFromSignal(TSyrecParser::ExpressionFromSignalContext* context) override;
         std::any visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) override;

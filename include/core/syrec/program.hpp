@@ -3,11 +3,6 @@
 #include "core/syrec/expression.hpp"
 #include "core/syrec/grammar.hpp"
 #include "core/syrec/module.hpp"
-#include "core/syrec/number.hpp"
-#include "core/syrec/statement.hpp"
-#include "core/syrec/variable.hpp"
-
-#include <fstream>
 #include <vector>
 
 namespace syrec {
@@ -40,7 +35,7 @@ namespace syrec {
             return {};
         }
 
-        std::string read(const std::string& filename, ReadProgramSettings settings = ReadProgramSettings{});
+        static std::string read(const std::string& filename, ReadProgramSettings settings = ReadProgramSettings{});
 
     private:
         Module::vec modulesVec;
@@ -59,8 +54,9 @@ namespace syrec {
         *
         * @return true if parsing was successful, otherwise false
         */
-        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
-        bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error);
+        static bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
+        static bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error);
+        [[nodiscard]] static std::optional<std::string> tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors);
     };
 
 } // namespace syrec

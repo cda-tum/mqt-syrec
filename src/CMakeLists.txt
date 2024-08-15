@@ -33,7 +33,6 @@ add_library(
   ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/syrec_line_aware_synthesis.hpp
   ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/dd_synthesis.hpp
   ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/encoding.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp
@@ -62,7 +61,9 @@ target_sources(${PROJECT_NAME}-parser
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParser.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserBaseVisitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserVisitor.cpp
-		
+
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/parser_messages_container.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_base_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_error_listener.hpp
@@ -90,7 +91,7 @@ else()
                    POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                            -E copy ${ANTLR4_RUNTIME_LIBRARIES} .
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-parser)
 endif()
 
 # set include directories

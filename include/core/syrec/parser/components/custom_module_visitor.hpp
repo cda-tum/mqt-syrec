@@ -5,8 +5,11 @@
 #include "custom_base_visitor.hpp"
 
 namespace syrecParser {
-    class CustomModuleVisitor: CustomBaseVisitor {
+    class CustomModuleVisitor: public CustomBaseVisitor {
     public:
+        CustomModuleVisitor(std::shared_ptr<ParserMessagesContainer> messagesGenerator)
+            : CustomBaseVisitor(std::move(messagesGenerator)) {}
+
         std::any visitProgram(TSyrecParser::ProgramContext* context) override;
         std::any visitModule(TSyrecParser::ModuleContext* context) override;
         std::any visitParameterList(TSyrecParser::ParameterListContext* context) override;

@@ -3,5 +3,8 @@
 using namespace syrecParser;
 
 void CustomErrorListener::syntaxError(antlr4::Recognizer*, antlr4::Token*, size_t line, size_t charPositionInLine, const std::string& msg, std::exception_ptr) {
-    return;
+    if (!parserMessagesGenerator)
+        return;
+
+    parserMessagesGenerator->recordMessage(Message({MessageType::Error, line, charPositionInLine, msg}));
 }
