@@ -5,7 +5,8 @@ project(
   syrec
   LANGUAGES CXX
   DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits")
-
+  
+option(BUILD_MQT_SYREC_TESTS "Also build tests for the MQT SYREC project" ON)
 option(BUILD_MQT_SYREC_BINDINGS "Build the MQT SYREC Python bindings" OFF)
 if(BUILD_MQT_SYREC_BINDINGS)
   # ensure that the BINDINGS option is set
@@ -28,14 +29,14 @@ if(BUILD_MQT_SYREC_BINDINGS)
 endif()
 
 include(cmake/ExternalDependencies.cmake)
+include(cmake/ExternalAntlr4Cpp.cmake)
 
 # add main library code
 add_subdirectory(src)
 
 # add test code
-option(BUILD_MQT_SYREC_TESTS "Also build tests for the MQT SYREC project" ON)
 if(BUILD_MQT_SYREC_TESTS)
   enable_testing()
-  include(GoogleTest)
+  include(googletest)
   add_subdirectory(test)
 endif()

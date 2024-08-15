@@ -13,6 +13,8 @@ package_add_test(
   unittests/test_dd_synthesis.cpp
   unittests/test_dd_synthesis_dc.cpp)
 
+#target_link_libraries(${PROJECT_NAME}_test PRIVATE antlr4_static)
+
 add_custom_command(
   TARGET ${PROJECT_NAME}_test
   POST_BUILD
