@@ -78,6 +78,7 @@ target_include_directories(${PROJECT_NAME}-parser
 		${ANTLR4_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}-parser PRIVATE ${PROJECT_NAME}-ir)
+target_link_libraries(${PROJECT_NAME}-parser PRIVATE fmt::fmt)
 
 if(ANTLR4_WITH_STATIC_CRT)
 	# required if linking to static library

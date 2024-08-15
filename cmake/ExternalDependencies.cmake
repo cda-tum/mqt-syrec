@@ -49,5 +49,25 @@ if(BUILD_MQT_SYREC_TESTS)
   endif()
 endif()
 
+set(FMT_VERSION 11.0.2
+    CACHE STRING "FMT library version")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+    FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG ${FMT_VERSION}
+    )
+    list(APPEND FETCH_PACKAGES fmt)
+else()
+    find_package(fmt ${FMT_VERSION} QUIET)
+    if(NOT fmt_FOUND)
+        FetchContent_Declare(
+            fmt
+            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        )
+        list(APPEND FETCH_PACKAGES fmt)
+    endif()
+endif()
+
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
