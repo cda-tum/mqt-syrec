@@ -2,7 +2,6 @@
 set(BUILD_MQT_CORE_TESTS
     OFF
     CACHE BOOL "Build MQT Core tests")
-add_subdirectory("${PROJECT_SOURCE_DIR}/extern/mqt-core" "extern/mqt-core" EXCLUDE_FROM_ALL)
 
 add_library(
   ${PROJECT_NAME}

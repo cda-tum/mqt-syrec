@@ -6,19 +6,6 @@ project(
   LANGUAGES CXX
   DESCRIPTION "SyReC - A Programming Language for the Synthesis of Reversible Circuits")
 
-# check whether the submodule ``modulename`` is correctly cloned in the ``/extern`` directory.
-macro(CHECK_SUBMODULE_PRESENT modulename)
-  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/${modulename}/CMakeLists.txt")
-    message(
-      FATAL_ERROR
-        "${modulename} submodule not cloned properly. \
-        Please run `git submodule update --init --recursive` \
-        from the main project directory")
-  endif()
-endmacro()
-
-check_submodule_present(mqt-core)
-
 option(BUILD_MQT_SYREC_BINDINGS "Build the MQT SYREC Python bindings" OFF)
 if(BUILD_MQT_SYREC_BINDINGS)
   # ensure that the BINDINGS option is set
@@ -39,6 +26,8 @@ if(BUILD_MQT_SYREC_BINDINGS)
     COMPONENTS Interpreter Development.Module
     OPTIONAL_COMPONENTS Development.SABIModule)
 endif()
+
+include(cmake/ExternalDependencies.cmake)
 
 # add main library code
 add_subdirectory(src)
