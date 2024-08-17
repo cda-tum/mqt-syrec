@@ -3,8 +3,12 @@ set(BUILD_MQT_CORE_TESTS
     OFF
     CACHE BOOL "Build MQT Core tests")
 
-add_library(${PROJECT_NAME}-ir INTERFACE)
-target_include_directories(${PROJECT_NAME}-ir
+set(MQT_SYREC_TARGET ${PROJECT_NAME} CACHE INTERNAL "")
+set(MQT_SYREC_IR_TARGET "${PROJECT_NAME}-ir")
+set(MQT_SYREC_PARSER_TARGET "${PROJECT_NAME}-parser")
+
+add_library(${MQT_SYREC_IR_TARGET} INTERFACE)
+target_include_directories(${MQT_SYREC_IR_TARGET}
 	INTERFACE
 		${PROJECT_SOURCE_DIR}/include/core/syrec/expression.hpp
 		${PROJECT_SOURCE_DIR}/include/core/syrec/grammar.hpp
@@ -16,7 +20,7 @@ target_include_directories(${PROJECT_NAME}-ir
 )
 
 add_library(
-  ${PROJECT_NAME}
+  ${MQT_SYREC_TARGET}
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_cost_aware_synthesis.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_line_aware_synthesis.cpp
@@ -44,8 +48,8 @@ add_library(
   ${PROJECT_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
   ${PROJECT_SOURCE_DIR}/include/core/io/pla_parser.hpp)
 
-add_library(${PROJECT_NAME}-parser "")
-target_sources(${PROJECT_NAME}-parser
+add_library(${MQT_SYREC_PARSER_TARGET})
+target_sources(${MQT_SYREC_PARSER_TARGET}
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_base_visitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_error_listener.cpp
@@ -71,46 +75,46 @@ target_sources(${PROJECT_NAME}-parser
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_statement_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_module_visitor.hpp
 )
-target_include_directories(${PROJECT_NAME}-parser
+target_include_directories(${MQT_SYREC_PARSER_TARGET}
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/include
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/antlr
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr
 		${ANTLR4_INCLUDE_DIRS}
 )
-target_link_libraries(${PROJECT_NAME}-parser PRIVATE ${PROJECT_NAME}-ir)
-target_link_libraries(${PROJECT_NAME}-parser PRIVATE fmt::fmt)
+target_link_libraries(${MQT_SYREC_PARSER_TARGET} PRIVATE ${MQT_SYREC_IR_TARGET})
+target_link_libraries(${MQT_SYREC_PARSER_TARGET} PRIVATE fmt::fmt)
 
-if(ANTLR4_WITH_STATIC_CRT)
-	# required if linking to static library
-	target_compile_definitions(${PROJECT_NAME}-parser PRIVATE -DANTLR4CPP_STATIC)
-	target_link_libraries(${PROJECT_NAME}-parser PRIVATE antlr4_static)
-else()
-	target_link_libraries(${PROJECT_NAME}-parser PRIVATE antlr4_shared)
-	add_custom_command(TARGET ${PROJECT_NAME}-parser
+if(BUILD_SHARED_LIBS)
+	target_link_libraries(${MQT_SYREC_PARSER_TARGET} PRIVATE antlr4_shared)
+	add_custom_command(TARGET ${MQT_SYREC_PARSER_TARGET}
                    POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                            -E copy ${ANTLR4_RUNTIME_LIBRARIES} .
-                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-parser)
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+else()
+	# required if linking to static library
+	target_compile_definitions(${MQT_SYREC_PARSER_TARGET} PUBLIC -DANTLR4CPP_STATIC)
+	target_link_libraries(${MQT_SYREC_PARSER_TARGET} PUBLIC antlr4_static)
 endif()
 
 # set include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
+target_include_directories(${MQT_SYREC_TARGET} PUBLIC ${PROJECT_SOURCE_DIR}/include
                                                   ${PROJECT_BINARY_DIR}/include)
 
 # link to the MQT::qfr DD library
-target_link_libraries(${PROJECT_NAME} PUBLIC MQT::CoreDD)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}-ir)
-target_link_libraries(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}-parser)
+target_link_libraries(${MQT_SYREC_TARGET} PUBLIC MQT::CoreDD)
+target_link_libraries(${MQT_SYREC_TARGET} PUBLIC ${MQT_SYREC_IR_TARGET})
+target_link_libraries(${MQT_SYREC_TARGET} PUBLIC ${MQT_SYREC_PARSER_TARGET})
 
 # add header-only part of the Boost library
 set(BOOST_USE_MULTITHREADED ON)
 set(BOOST_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.71 REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+target_link_libraries(${MQT_SYREC_TARGET} PUBLIC Boost::boost)
 
 # add MQT alias
-add_library(MQT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(MQT::${MQT_SYREC_TARGET} ALIAS ${MQT_SYREC_TARGET})
 
 if(BUILD_MQT_SYREC_BINDINGS)
   add_subdirectory(python)

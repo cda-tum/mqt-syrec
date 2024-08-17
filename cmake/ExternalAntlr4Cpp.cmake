@@ -36,12 +36,12 @@ message(STATUS "ANLTR libraries will use output directory: ${ANTLR4_OUTPUT_DIR}"
 message(STATUS "ANTLR will be compiled using compiler: ${CMAKE_CXX_COMPILER}")
 
 if(NOT DEFINED ANTLR4_WITH_STATIC_CRT)
-  set(ANTLR4_WITH_STATIC_CRT ON)
-endif()
-
-if (MSVC OR WIN32)
-    # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
+  if (MSVC OR WIN32)
+     # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
     set(ANTLR4_WITH_STATIC_CRT OFF)
+  else()
+    set(ANTLR4_WITH_STATIC_CRT ON)
+  endif()
 endif()
 
 if(MSVC OR WIN32)
