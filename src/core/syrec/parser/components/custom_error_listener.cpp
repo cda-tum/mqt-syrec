@@ -6,5 +6,5 @@ void CustomErrorListener::syntaxError(antlr4::Recognizer*, antlr4::Token*, size_
     if (!parserMessagesGenerator)
         return;
 
-    parserMessagesGenerator->recordMessage(Message({MessageType::Error, line, charPositionInLine, msg}));
+    parserMessagesGenerator->recordMessage(Message({Message::MessageType::Error, {line, charPositionInLine}, msg}));
 }

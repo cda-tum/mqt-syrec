@@ -1,6 +1,7 @@
 #include "core/syrec/program.hpp"
 
 #include "gtest/gtest.h"
+#include <algorithm>
 
 using namespace syrec;
 

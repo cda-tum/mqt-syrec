@@ -35,7 +35,7 @@ namespace syrec {
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());
 
-        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::MessageType::Error); !generatedErrorMessages.empty()) {
+        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::MessageType::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
             for (std::size_t i = 0; i < generatedErrorMessages.size(); ++i)
                 concatenatedErrorMessageContainer << generatedErrorMessages.at(i).content << "\n";

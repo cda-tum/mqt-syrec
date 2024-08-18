@@ -1,7 +1,7 @@
+#ifndef CORE_SYREC_PROGRAM_HPP
+#define CORE_SYREC_PROGRAM_HPP
 #pragma once
 
-#include "core/syrec/expression.hpp"
-#include "core/syrec/grammar.hpp"
 #include "core/syrec/module.hpp"
 #include <vector>
 
@@ -60,3 +60,4 @@ namespace syrec {
     };
 
 } // namespace syrec
+#endif

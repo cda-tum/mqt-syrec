@@ -3,7 +3,7 @@
 using namespace syrecParser;
 
 void ParserMessagesContainer::recordMessage(Message&& message) {
-    if (message.mType != MessageType::Error)
+    if (message.mType != Message::MessageType::Error)
         return;
 
     if (!errorMessages.empty() && recordAtMostOneError)
@@ -12,9 +12,9 @@ void ParserMessagesContainer::recordMessage(Message&& message) {
     errorMessages.push_back(std::move(message));
 }
 
-std::vector<Message> ParserMessagesContainer::getMessagesOfType(MessageType messageType) const {
+std::vector<Message> ParserMessagesContainer::getMessagesOfType(Message::MessageType messageType) const {
     switch (messageType) {
-        case MessageType::Error:
+        case Message::MessageType::Error:
             return errorMessages;
         default:
             return {};

@@ -7,28 +7,42 @@
 #include <string>
 
 namespace syrecParser {
-    enum class MessageType {
-        Error,
-        Information,
-        Warning
-    };
-
     struct Message {
+        virtual ~Message() = default;
+
+        struct Position {
+            std::size_t line;
+            std::size_t column;
+        
+        };
+
+        enum class MessageType {
+            Error,
+            Information,
+            Warning
+        };
+    
         MessageType mType;
-        std::size_t line;
-        std::size_t column;
+        Position    position;
         std::string content;
+
+        Message(const MessageType mType, const Position position, std::string content):
+            mType(mType), position(position), content(std::move(content)) {}
+
+        [[nodiscard]] virtual std::string stringify() const {
+            return "-- line " + std::to_string(position.line) + " col " + std::to_string(position.column) + ": " + content;
+        }
     };
 
     class ParserMessagesContainer {
     public:
         using ptr = std::shared_ptr<ParserMessagesContainer>;
 
-        ParserMessagesContainer(bool recordAtMostOneError)
+        ParserMessagesContainer(const bool recordAtMostOneError)
             : recordAtMostOneError(recordAtMostOneError) {}
 
         void                               recordMessage(Message&& message);
-        [[nodiscard]] std::vector<Message> getMessagesOfType(MessageType messageType) const;
+        [[nodiscard]] std::vector<Message> getMessagesOfType(Message::MessageType messageType) const;
 
     protected:
         std::vector<Message> errorMessages;
