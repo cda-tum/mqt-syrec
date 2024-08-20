@@ -36,15 +36,15 @@ namespace syrec {
 
     class SyrecSynthesis {
     public:
-        std::stack<unsigned>               expOpp;
-        std::stack<std::vector<unsigned>>  expLhss;
-        std::stack<std::vector<unsigned>>  expRhss;
-        bool                               subFlag = false;
-        std::vector<unsigned>              opVec;
-        std::vector<unsigned>              assignOpVector;
-        std::vector<unsigned>              expOpVector;
-        std::vector<std::vector<unsigned>> expLhsVector;
-        std::vector<std::vector<unsigned>> expRhsVector;
+        std::stack<BinaryExpression::BinaryOperation>  expOpp;
+        std::stack<std::vector<unsigned>>              expLhss;
+        std::stack<std::vector<unsigned>>              expRhss;
+        bool                                           subFlag = false;
+        std::vector<BinaryExpression::BinaryOperation> opVec;
+        std::vector<AssignStatement::AssignOperation>  assignOpVector;
+        std::vector<BinaryExpression::BinaryOperation> expOpVector;
+        std::vector<std::vector<unsigned>>             expLhsVector;
+        std::vector<std::vector<unsigned>>             expRhsVector;
 
         using var_lines_map = std::map<Variable::ptr, unsigned int>;
 
@@ -55,6 +55,7 @@ namespace syrec {
         void setMainModule(const Module::ptr& mainModule);
 
     protected:
+        using OperationVariant = std::variant<AssignStatement::AssignOperation, BinaryExpression::BinaryOperation, ShiftExpression::ShiftOperation>;
         virtual bool processStatement(const Statement::ptr& statement) = 0;
 
         virtual bool onModule(const Module::ptr&);
@@ -73,14 +74,14 @@ namespace syrec {
         bool                      onStatement(const UnaryStatement& statement);
         [[nodiscard]] static bool onStatement(const SkipStatement& statement);
 
-        virtual void assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
+        virtual void assignAdd(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) = 0;
 
-        virtual void assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
-        virtual void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op)     = 0;
+        virtual void assignSubtract(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) = 0;
+        virtual void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const AssignStatement::AssignOperation& op)     = 0;
 
-        virtual bool onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
-        virtual bool onExpression(const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
-        virtual bool onExpression(const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
+        virtual bool onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant op);
+        virtual bool onExpression(const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant op);
+        virtual bool onExpression(const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant op);
         virtual bool onExpression(const NumericExpression& expression, std::vector<unsigned>& lines);
         virtual bool onExpression(const VariableExpression& expression, std::vector<unsigned>& lines);
 
@@ -115,7 +116,7 @@ namespace syrec {
         void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
         bool         decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool         increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        virtual bool expressionOpInverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs);
+        virtual bool expressionOpInverse([[maybe_unused]] BinaryExpression::BinaryOperation op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs);
         bool         checkRepeats();
 
         // shift operations
@@ -139,7 +140,7 @@ namespace syrec {
 
         std::stack<Statement::ptr>    stmts;
         Circuit&                      circ;
-        Number::loop_variable_mapping loopMap;
+        Number::LoopVariableMapping   loopMap;
         std::stack<Module::ptr>       modules;
 
     private:

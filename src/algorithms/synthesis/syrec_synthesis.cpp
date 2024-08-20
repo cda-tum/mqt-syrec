@@ -161,14 +161,14 @@ namespace syrec {
         std::vector<unsigned> var;
         getVariables(statement.var, var);
 
-        switch (statement.op) {
-            case UnaryStatement::Invert:
+        switch (statement.unaryOperation) {
+            case UnaryStatement::UnaryOperation::Invert:
                 bitwiseNegation(var);
                 break;
-            case UnaryStatement::Increment:
+            case UnaryStatement::UnaryOperation::Increment:
                 increment(var);
                 break;
-            case UnaryStatement::Decrement:
+            case UnaryStatement::UnaryOperation::Decrement:
                 decrement(var);
                 break;
             default:
@@ -185,22 +185,22 @@ namespace syrec {
         getVariables(statement.lhs, lhs);
 
         opRhsLhsExpression(statement.rhs, d);
-        SyrecSynthesis::onExpression(statement.rhs, rhs, lhs, statement.op);
+        SyrecSynthesis::onExpression(statement.rhs, rhs, lhs, statement.assignOperation);
         opVec.clear();
 
         bool status = false;
 
-        switch (statement.op) {
-            case AssignStatement::Add: {
-                assignAdd(status, lhs, rhs, statement.op);
+        switch (statement.assignOperation) {
+            case AssignStatement::AssignOperation::Add: {
+                assignAdd(status, lhs, rhs, statement.assignOperation);
             } break;
 
-            case AssignStatement::Subtract: {
-                assignSubtract(status, lhs, rhs, statement.op);
+            case AssignStatement::AssignOperation::Subtract: {
+                assignSubtract(status, lhs, rhs, statement.assignOperation);
             } break;
 
-            case AssignStatement::Exor: {
-                assignExor(status, lhs, rhs, statement.op);
+            case AssignStatement::AssignOperation::Exor: {
+                assignExor(status, lhs, rhs, statement.assignOperation);
             } break;
 
             default:
@@ -213,7 +213,14 @@ namespace syrec {
     bool SyrecSynthesis::onStatement(const IfStatement& statement) {
         // calculate expression
         std::vector<unsigned> expressionResult;
-        onExpression(statement.condition, expressionResult, {}, 0U);
+
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(statement.condition.get())) 
+            onExpression(statement.condition, expressionResult, {}, binary->binaryOperation);
+        else if (auto const* shift = dynamic_cast<ShiftExpression*>(statement.condition.get())) 
+            onExpression(statement.condition, expressionResult, {}, shift->shiftOperation);
+        else
+            onExpression(statement.condition, expressionResult, {}, BinaryExpression::BinaryOperation::Add);
+        
         assert(expressionResult.size() == 1U);
 
         // add new helper line
@@ -348,7 +355,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op) {
+    bool SyrecSynthesis::onExpression(const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, const OperationVariant op) {
         if (auto const* numeric = dynamic_cast<NumericExpression*>(expression.get())) {
             return onExpression(*numeric, lines);
         }
@@ -364,7 +371,7 @@ namespace syrec {
         return false;
     }
 
-    bool SyrecSynthesis::onExpression(const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op) {
+    bool SyrecSynthesis::onExpression(const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, const OperationVariant op) {
         std::vector<unsigned> lhs;
         if (!onExpression(expression.lhs, lhs, lhsStat, op)) {
             return false;
@@ -372,12 +379,12 @@ namespace syrec {
 
         unsigned rhs = expression.rhs->evaluate(loopMap);
 
-        switch (expression.op) {
-            case ShiftExpression::Left: // <<
+        switch (expression.shiftOperation) {
+            case ShiftExpression::ShiftOperation::Left: // <<
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 leftShift(lines, lhs, rhs);
                 break;
-            case ShiftExpression::Right: // <<
+            case ShiftExpression::ShiftOperation::Right: // <<
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 rightShift(lines, lhs, rhs);
                 break;
@@ -398,7 +405,7 @@ namespace syrec {
         return true;
     }
 
-    bool SyrecSynthesis::onExpression(const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op) {
+    bool SyrecSynthesis::onExpression(const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, const OperationVariant op) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
@@ -408,31 +415,31 @@ namespace syrec {
 
         expLhss.push(lhs);
         expRhss.push(rhs);
-        expOpp.push(expression.op);
+        expOpp.push(expression.binaryOperation);
 
-        if ((expOpp.size() == opVec.size()) && (expOpp.top() == op)) {
+        if (expOpp.size() == opVec.size() && std::holds_alternative<BinaryExpression::BinaryOperation>(op) && expOpp.top() == std::get<BinaryExpression::BinaryOperation>(op)) {
             return true;
         }
 
-        switch (expression.op) {
-            case BinaryExpression::Add: // +
+        switch (expression.binaryOperation) {
+            case BinaryExpression::BinaryOperation::Add: // +
                 expAdd(expression.bitwidth(), lines, lhs, rhs);
                 break;
-            case BinaryExpression::Subtract: // -
+            case BinaryExpression::BinaryOperation::Subtract: // -
                 expSubtract(expression.bitwidth(), lines, lhs, rhs);
                 break;
-            case BinaryExpression::Exor: // ^
+            case BinaryExpression::BinaryOperation::Exor: // ^
                 expExor(expression.bitwidth(), lines, lhs, rhs);
                 break;
-            case BinaryExpression::Multiply: // *
+            case BinaryExpression::BinaryOperation::Multiply: // *
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 multiplication(lines, lhs, rhs);
                 break;
-            case BinaryExpression::Divide: // /
+            case BinaryExpression::BinaryOperation::Divide: // /
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 division(lines, lhs, rhs);
                 break;
-            case BinaryExpression::Modulo: { // %
+            case BinaryExpression::BinaryOperation::Modulo: { // %
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 std::vector<unsigned> quot;
                 getConstantLines(expression.bitwidth(), 0U, quot);
@@ -440,43 +447,43 @@ namespace syrec {
                 bitwiseCnot(lines, lhs); // duplicate lhs
                 modulo(quot, lines, rhs);
             } break;
-            case BinaryExpression::LogicalAnd: // &&
+            case BinaryExpression::BinaryOperation::LogicalAnd: // &&
                 lines.emplace_back(getConstantLine(false));
                 conjunction(lines.at(0), lhs.at(0), rhs.at(0));
                 break;
-            case BinaryExpression::LogicalOr: // ||
+            case BinaryExpression::BinaryOperation::LogicalOr: // ||
                 lines.emplace_back(getConstantLine(false));
                 disjunction(lines.at(0), lhs.at(0), rhs.at(0));
                 break;
-            case BinaryExpression::BitwiseAnd: // &
+            case BinaryExpression::BinaryOperation::BitwiseAnd: // &
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 bitwiseAnd(lines, lhs, rhs);
                 break;
-            case BinaryExpression::BitwiseOr: // |
+            case BinaryExpression::BinaryOperation::BitwiseOr: // |
                 getConstantLines(expression.bitwidth(), 0U, lines);
                 bitwiseOr(lines, lhs, rhs);
                 break;
-            case BinaryExpression::LessThan: // <
+            case BinaryExpression::BinaryOperation::LessThan: // <
                 lines.emplace_back(getConstantLine(false));
                 lessThan(lines.at(0), lhs, rhs);
                 break;
-            case BinaryExpression::GreaterThan: // >
+            case BinaryExpression::BinaryOperation::GreaterThan: // >
                 lines.emplace_back(getConstantLine(false));
                 greaterThan(lines.at(0), lhs, rhs);
                 break;
-            case BinaryExpression::Equals: // =
+            case BinaryExpression::BinaryOperation::Equals: // =
                 lines.emplace_back(getConstantLine(false));
                 equals(lines.at(0), lhs, rhs);
                 break;
-            case BinaryExpression::NotEquals: // !=
+            case BinaryExpression::BinaryOperation::NotEquals: // !=
                 lines.emplace_back(getConstantLine(false));
                 notEquals(lines.at(0), lhs, rhs);
                 break;
-            case BinaryExpression::LessEquals: // <=
+            case BinaryExpression::BinaryOperation::LessEquals: // <=
                 lines.emplace_back(getConstantLine(false));
                 lessEquals(lines.at(0), lhs, rhs);
                 break;
-            case BinaryExpression::GreaterEquals: // >=
+            case BinaryExpression::BinaryOperation::GreaterEquals: // >=
                 lines.emplace_back(getConstantLine(false));
                 greaterEquals(lines.at(0), lhs, rhs);
                 break;
@@ -834,7 +841,7 @@ namespace syrec {
         }
     }
 
-    bool SyrecSynthesis::expressionOpInverse([[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) {
+    bool SyrecSynthesis::expressionOpInverse([[maybe_unused]] BinaryExpression::BinaryOperation op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) {
         return true;
     }
     //**********************************************************************
@@ -989,8 +996,8 @@ namespace syrec {
             varLines.try_emplace(var, circVar.getLines());
 
             // types of constant and garbage
-            constant constVar = (var->type == Variable::Out || var->type == Variable::Wire) ? constant(false) : constant();
-            bool     garbage  = (var->type == Variable::In || var->type == Variable::Wire);
+            constant constVar = (var->type == Variable::Type::Out || var->type == Variable::Type::Wire) ? constant(false) : constant();
+            bool     garbage  = (var->type == Variable::Type::In || var->type == Variable::Type::Wire);
 
             addVariable(circVar, var->dimensions, var, constVar, garbage, std::string());
         }

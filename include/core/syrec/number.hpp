@@ -20,7 +20,7 @@ namespace syrec {
     public:
         using ptr = std::shared_ptr<Number>;
 
-        using loop_variable_mapping = std::map<std::string, unsigned int>;
+        using LoopVariableMapping = std::map<std::string, unsigned int>;
 
         explicit Number(std::variant<unsigned, std::string> number):
             numberVar(std::move(number)) {}
@@ -47,7 +47,7 @@ namespace syrec {
             return std::get<std::string>(numberVar);
         }
 
-        [[nodiscard]] unsigned evaluate(const loop_variable_mapping& map) const {
+        [[nodiscard]] unsigned evaluate(const LoopVariableMapping& map) const {
             return std::visit(Overloaded{
                                       [](unsigned arg) { return arg; },
                                       [&map](const std::string& value) { return map.find(value)->second; }},

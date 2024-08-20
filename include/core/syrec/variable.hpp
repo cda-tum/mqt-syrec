@@ -24,7 +24,7 @@ namespace syrec {
         /**
        * @brief Type of variable
        */
-        enum Types {
+        enum class Type : std::uint8_t {
             /**
          * @brief Module Input Parameter (garbage output)
          */
@@ -61,11 +61,11 @@ namespace syrec {
        */
         using vec = std::vector<ptr>;
 
-        Variable(unsigned type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth);
+        Variable(Type type, std::string name, std::vector<unsigned> dimensions, unsigned bitwidth);
 
-        void setReference(Variable::ptr reference);
+        void setReference(Variable::ptr updatedReference);
 
-        unsigned              type{};
+        Type                  type{};
         std::string           name{};
         std::vector<unsigned> dimensions{};
         unsigned              bitwidth{};

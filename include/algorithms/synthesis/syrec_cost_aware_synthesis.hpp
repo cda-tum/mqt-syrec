@@ -14,15 +14,15 @@ namespace syrec {
             return !SyrecSynthesis::onStatement(statement);
         }
 
-        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::increase(rhs, lhs);
         }
 
-        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::decrease(rhs, lhs);
         }
 
-        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::bitwiseCnot(lhs, rhs);
         }
 
