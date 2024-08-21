@@ -7,14 +7,14 @@
 namespace syrecParser {
     class CustomErrorListener: public antlr4::BaseErrorListener {
     public:
-        CustomErrorListener(std::shared_ptr<ParserMessagesContainer> parserMessagesGenerator)
+        CustomErrorListener(ParserMessagesContainer::ptr parserMessagesGenerator)
             : parserMessagesGenerator(std::move(parserMessagesGenerator)) {}
 
         void syntaxError(antlr4::Recognizer* /*recognizer*/, antlr4::Token* /*offendingSymbol*/, size_t line,
                          size_t charPositionInLine, const std::string& msg, std::exception_ptr /*e*/) override;
 
         protected:
-            std::shared_ptr<ParserMessagesContainer> parserMessagesGenerator;
+            ParserMessagesContainer::ptr parserMessagesGenerator;
     };
 } // namespace parser
 

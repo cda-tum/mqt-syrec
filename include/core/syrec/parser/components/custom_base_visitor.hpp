@@ -11,11 +11,11 @@
 namespace syrecParser {
     class CustomBaseVisitor: TSyrecParserBaseVisitor {
     public:
-        CustomBaseVisitor(std::shared_ptr<ParserMessagesContainer> generatedMessagesContainer):
+        CustomBaseVisitor(ParserMessagesContainer::ptr generatedMessagesContainer):
             generatedMessagesContainer(std::move(generatedMessagesContainer)) {}
 
     protected:
-        std::shared_ptr<ParserMessagesContainer> generatedMessagesContainer;
+        ParserMessagesContainer::ptr generatedMessagesContainer;
 
         std::any visitSignal(TSyrecParser::SignalContext* context) override;
         std::any visitNumberFromConstant(TSyrecParser::NumberFromConstantContext* context) override;

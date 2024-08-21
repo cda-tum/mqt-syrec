@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <variant>
+#include <optional>
 
 template<class... Ts>
 struct Overloaded: Ts... {
@@ -52,6 +53,15 @@ namespace syrec {
                                       [](unsigned arg) { return arg; },
                                       [&map](const std::string& value) { return map.find(value)->second; }},
                               numberVar);
+        }
+
+        [[nodiscard]] std::optional<unsigned> tryEvaluate(const LoopVariableMapping& loopVariableValueLookup) const {
+            if (isConstant())
+                return std::get<unsigned>(numberVar);
+            if (isLoopVariable() && loopVariableValueLookup.count(std::get<std::string>(numberVar)) > 0)
+                return loopVariableValueLookup.at(std::get<std::string>(numberVar));
+
+            return std::nullopt;
         }
 
     private:

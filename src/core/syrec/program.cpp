@@ -37,7 +37,7 @@ namespace syrec {
 
         if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::MessageType::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
-            for (std::size_t i = 0; i < generatedErrorMessages.size(); ++i)
+            for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i)
                 concatenatedErrorMessageContainer << generatedErrorMessages.at(i).content << "\n";
 
             concatenatedErrorMessageContainer << generatedErrorMessages.back().content;
@@ -61,11 +61,13 @@ namespace syrec {
     std::optional<std::string> Program::tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors) {
         if (std::ifstream inputFileStream(filename.data(), std::ifstream::in | std::ifstream::binary); inputFileStream.is_open()) {
             inputFileStream.ignore(std::numeric_limits<std::streamsize>::max());
-            const auto fileContentLength = inputFileStream.gcount();
+            const std::streampos fileContentLength = inputFileStream.gcount();
             inputFileStream.clear(); //  Since ignore will have set eof.
             inputFileStream.seekg(0, std::ios_base::beg);
 
-            std::string fileContentBuffer(fileContentLength, ' ');
+            // Since std::streampos is a signed data type, std::string::size_type will always be larger thus or static_case will work in all cases
+            // ReSharper disable once CppRedundantCastExpression
+            std::string fileContentBuffer(static_cast<std::string::size_type>(fileContentLength), ' ');
             inputFileStream.read(fileContentBuffer.data(), fileContentLength);
             if (!inputFileStream.bad())
                 return std::make_optional(fileContentBuffer);
