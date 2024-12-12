@@ -40,12 +40,12 @@ add_library(
   ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/ir_entity_stringifier.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/base_syrec_ir_entity_stringifier.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/core/io/pla_parser.cpp
   ${PROJECT_SOURCE_DIR}/include/core/gate.hpp
   ${PROJECT_SOURCE_DIR}/include/core/circuit.hpp
   ${PROJECT_SOURCE_DIR}/include/core/syrec/program.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/utils/ir_entity_stringifier.hpp
+  ${PROJECT_SOURCE_DIR}/include/core/utils/base_syrec_ir_entity_stringifier.hpp
   ${PROJECT_SOURCE_DIR}/include/core/utils/timer.hpp
   ${PROJECT_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
   ${PROJECT_SOURCE_DIR}/include/core/io/pla_parser.hpp)
