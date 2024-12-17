@@ -90,6 +90,8 @@ namespace utils {
         [[nodiscard]] static bool    appendIdentationPaddingSequence(std::ostream& outputStream, const std::string& indentationSequence);
         [[nodiscard]] static bool    appendNewlineToStream(std::ostream& outputStream);
         [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, const std::string& characterSequence);
+        [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, char character);
+        [[nodiscard]] static bool    stringifyModuleCallVariant(std::ostream& outputStream, const std::string& moduleCallVariantKeyword, const syrec::Module& callTarget, const std::vector<std::string>& callerArguments);
     };
 } // namespace syrec
 
