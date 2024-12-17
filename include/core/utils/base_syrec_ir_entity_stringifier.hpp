@@ -3,6 +3,7 @@
 
 #include "core/syrec/program.hpp"
 
+#include <optional>
 #include <string>
 
 namespace utils {
@@ -12,11 +13,15 @@ namespace utils {
             bool        useWhitespaceBetweenOperandsOfBinaryOperation;
             bool        useWhitespaceAfterAfterModuleParameterDeclaration;
             bool        useWhitespaceAfterCallStatementArgumentDefinition;
-            bool        useWhitespaceAfterAnyKeyword;
+            bool        omitVariableTypeSharedBySequenceOfLocalVariables;
             std::size_t defaultSignalBitwidth;
 
             AdditionalFormattingOptions():
-                useWhitespaceBetweenOperandsOfBinaryOperation(true), useWhitespaceAfterAfterModuleParameterDeclaration(true), useWhitespaceAfterCallStatementArgumentDefinition(true), useWhitespaceAfterAnyKeyword(true), defaultSignalBitwidth(16) {}
+                useWhitespaceBetweenOperandsOfBinaryOperation(true),
+                useWhitespaceAfterAfterModuleParameterDeclaration(true),
+                useWhitespaceAfterCallStatementArgumentDefinition(true),
+                omitVariableTypeSharedBySequenceOfLocalVariables(true),
+                defaultSignalBitwidth(16) {}
         };
 
         virtual ~BaseSyrecIrEntityStringifier() = default;
@@ -48,7 +53,7 @@ namespace utils {
         std::string            rofKeywordIdent         = "rof";
         std::string            swapOperationIdent      = "<=>";
         std::string            indentIdent             = "\t";
-        std::string::size_type currIndentationLevel     = 0;
+        std::string            indentationSequence;
 
         AdditionalFormattingOptions additionalFormattingOptions;
 
@@ -57,7 +62,7 @@ namespace utils {
         [[maybe_unused]] bool decrementIdentationLevel() noexcept;
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Module& programModule);
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable& variable) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable& variable, bool stringifyVariableType) const;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Statement& statement) const;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::AssignStatement& assignStatement) const;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::CallStatement& callStatement);
@@ -73,8 +78,8 @@ namespace utils {
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::VariableAccess& variableAccess) const;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Number& number) const;
 
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable::vec& variables);
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Statement::vec& statements, std::ostringstream& containerForStringifiedResult);
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable::vec& variables, bool stringifyVariableTypeForEveryEntry);
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Statement::vec& statements);
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Variable::Type variableType) const noexcept;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::BinaryExpression::BinaryOperation operation) const noexcept;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::UnaryStatement::UnaryOperation operation) const noexcept;
@@ -82,8 +87,9 @@ namespace utils {
         [[maybe_unused]] virtual bool stringifySkipStatement(std::ostream& outputStream) const noexcept;
 
         [[maybe_unused]] static bool setStreamInFailedState(std::ostream& stream);
-        [[nodiscard]] static bool    appendIdentationPaddingSequence(std::ostream& outputStream, const std::string& identiationSequence, std::string::size_type currentIdentationLevel);
+        [[nodiscard]] static bool    appendIdentationPaddingSequence(std::ostream& outputStream, const std::string& indentationSequence);
         [[nodiscard]] static bool    appendNewlineToStream(std::ostream& outputStream);
+        [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, const std::string& characterSequence);
     };
 } // namespace syrec
 
