@@ -1,5 +1,5 @@
-#ifndef PARSER_MESSAGES_CONTAINER_HPP
-#define PARSER_MESSAGES_CONTAINER_HPP
+#ifndef CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
+#define CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
 
 #include <cstddef>
 #include <memory>
@@ -9,7 +9,6 @@
 namespace syrecParser {
     struct Message {
         virtual ~Message() = default;
-
         struct Position {
             std::size_t line;
             std::size_t column;
@@ -36,8 +35,6 @@ namespace syrecParser {
 
     class ParserMessagesContainer {
     public:
-        using ptr = std::shared_ptr<ParserMessagesContainer>;
-
         ParserMessagesContainer(const bool recordAtMostOneError)
             : recordAtMostOneError(recordAtMostOneError) {}
 

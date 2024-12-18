@@ -2,6 +2,7 @@
 
 using namespace syrecParser;
 
+// START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) {
     return 0;
 }

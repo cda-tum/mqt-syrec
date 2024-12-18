@@ -2,6 +2,7 @@
 
 using namespace syrecParser;
 
+// START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomStatementVisitor::visitStatementList(TSyrecParser::StatementListContext* ctx) {
     return 0;
 }

@@ -2,6 +2,11 @@
 
 using namespace syrecParser;
 
+std::optional<std::unique_ptr<syrec::Program>> CustomModuleVisitor::parseProgram(TSyrecParser::ProgramContext* context) {
+    return std::nullopt;
+}
+
+// START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomModuleVisitor::visitProgram(TSyrecParser::ProgramContext* context) {
     return 0;
 }

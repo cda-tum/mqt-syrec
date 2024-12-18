@@ -1,35 +1,29 @@
-#ifndef CUSTOM_BASE_VISISTOR_HPP
-#define CUSTOM_BASE_VISISTOR_HPP
-#pragma once
+#ifndef CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
+#define CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
 
 #include "antlr4-runtime.h"
 #include "TSyrecParserBaseVisitor.h"
+
 #include <core/syrec/parser/utils/parser_messages_container.hpp>
-#include <memory>
 #include <fmt/core.h>
 
 namespace syrecParser {
-    class CustomBaseVisitor: TSyrecParserBaseVisitor {
+    class CustomBaseVisitor: protected TSyrecParserBaseVisitor {
     public:
-        CustomBaseVisitor(ParserMessagesContainer::ptr generatedMessagesContainer):
-            generatedMessagesContainer(std::move(generatedMessagesContainer)) {}
+        CustomBaseVisitor(std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance):
+            sharedGeneratedMessageContainerInstance(std::move(sharedGeneratedMessageContainerInstance)) {}
 
     protected:
-        ParserMessagesContainer::ptr generatedMessagesContainer;
+        std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
 
-        std::any visitSignal(TSyrecParser::SignalContext* context) override;
-        std::any visitNumberFromConstant(TSyrecParser::NumberFromConstantContext* context) override;
-        std::any visitNumberFromSignalwidth(TSyrecParser::NumberFromSignalwidthContext* context) override;
-        std::any visitNumberFromExpression(TSyrecParser::NumberFromExpressionContext* context) override;
-        std::any visitNumberFromLoopVariable(TSyrecParser::NumberFromLoopVariableContext* context) override;
-
-        template<typename ...T>
+        template<typename... T>
         void recordMessage(Message::MessageType messageType, Message::Position messagePosition, const std::string& messageFormatString, T&&... args) {
-            if (!generatedMessagesContainer)
+            if (!sharedGeneratedMessageContainerInstance)
                 return;
 
-            generatedMessagesContainer->recordMessage(Message({messageType, messagePosition, fmt::format(FMT_STRING(messageFormatString), std::forward<T>(args)...)}));
+            sharedGeneratedMessageContainerInstance->recordMessage(Message({messageType, messagePosition, fmt::format(FMT_STRING(messageFormatString), std::forward<T>(args)...)}));
         }
     };
-} // namespace syrecParser
+}
+
 #endif

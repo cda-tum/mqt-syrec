@@ -30,7 +30,7 @@ namespace syrec {
         lexer.addErrorListener(customErrorListener.get());
         antlrParser.addErrorListener(customErrorListener.get());
 
-        customVisitor->visitProgram(antlrParser.program());
+        customVisitor->parseProgram(antlrParser.program());
 
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());

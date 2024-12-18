@@ -1,12 +1,22 @@
-#ifndef CUSTOM_STATEMENT_VISITOR_HPP
-#define CUSTOM_STATEMENT_VISITOR_HPP
+#ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_STATEMENT_VISITOR_HPP
+#define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_STATEMENT_VISITOR_HPP
 #pragma once
 
-#include "custom_base_visitor.hpp"
+#include <core/syrec/parser/components/custom_number_and_signal_visitor.hpp>
+#include <core/syrec/parser/components/custom_expression_visitor.hpp>
 
 namespace syrecParser {
-    class CustomStatementVisitor: public CustomBaseVisitor {
+    class CustomStatementVisitor: protected CustomBaseVisitor {
+    public:
+        CustomStatementVisitor(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
+            CustomBaseVisitor(sharedMessagesContainerInstance),
+            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)),
+            numberAndSignalVisitorInstance(std::make_unique<CustomNumberAndSignalVisitor>(sharedMessagesContainerInstance)) {}
+
     protected:
+        std::unique_ptr<CustomExpressionVisitor> expressionVisitorInstance;
+        std::unique_ptr<CustomNumberAndSignalVisitor> numberAndSignalVisitorInstance;
+
         std::any visitStatementList(TSyrecParser::StatementListContext* ctx) override;
         std::any visitStatement(TSyrecParser::StatementContext* ctx) override;
         std::any visitCallStatement(TSyrecParser::CallStatementContext* ctx) override;

@@ -1,14 +1,22 @@
-#ifndef CUSTOM_MODULE_VISITOR_HPP
-#define CUSTOM_MODULE_VISITOR_HPP
+#ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_MODULE_VISITOR_HPP
+#define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_MODULE_VISITOR_HPP
 #pragma once
 
-#include "custom_base_visitor.hpp"
+#include <core/syrec/program.hpp>
+#include <core/syrec/parser/components/custom_base_visitor.hpp>
+#include <core/syrec/parser/components/custom_statement_visitor.hpp>
 
 namespace syrecParser {
-    class CustomModuleVisitor: public CustomBaseVisitor {
+    class CustomModuleVisitor: protected CustomBaseVisitor {
     public:
-        CustomModuleVisitor(std::shared_ptr<ParserMessagesContainer> messagesGenerator)
-            : CustomBaseVisitor(std::move(messagesGenerator)) {}
+        CustomModuleVisitor(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
+            CustomBaseVisitor(sharedMessagesContainerInstance),
+            statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedMessagesContainerInstance)) {}
+
+        [[maybe_unused]] std::optional<std::unique_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context); 
+
+    protected:
+        std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
 
         std::any visitProgram(TSyrecParser::ProgramContext* context) override;
         std::any visitModule(TSyrecParser::ModuleContext* context) override;

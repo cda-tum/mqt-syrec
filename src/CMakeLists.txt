@@ -53,7 +53,7 @@ add_library(
 add_library(${MQT_SYREC_PARSER_TARGET})
 target_sources(${MQT_SYREC_PARSER_TARGET}
 	PRIVATE
-		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_base_visitor.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_number_and_signal_visitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_error_listener.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_expression_visitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_statement_visitor.cpp
@@ -72,6 +72,7 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_base_visitor.hpp
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_number_and_signal_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_error_listener.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_expression_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_statement_visitor.hpp
