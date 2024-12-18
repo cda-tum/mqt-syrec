@@ -182,42 +182,89 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return true;
+    if (const auto& castedToBinaryExpr = dynamic_cast<const syrec::BinaryExpression*>(&expression); castedToBinaryExpr)
+        return stringify(outputStream, *castedToBinaryExpr);
+    if (const auto& castedToNumericExpr = dynamic_cast<const syrec::NumericExpression*>(&expression); castedToNumericExpr)
+        return stringify(outputStream, *castedToNumericExpr);
+    if (const auto& castedToVariableExpr = dynamic_cast<const syrec::VariableExpression*>(&expression); castedToVariableExpr)
+        return stringify(outputStream, *castedToVariableExpr);
+    if (const auto& castedToShiftExpr = dynamic_cast<const syrec::ShiftExpression*>(&expression); castedToShiftExpr)
+        return stringify(outputStream, *castedToShiftExpr);
+
+    return false;
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::BinaryExpression& binaryExpression) const {
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return true;
-}
-
-bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::VariableExpression& variableExpression) const {
-    if (!outputStream.good())
-        return setStreamInFailedState(outputStream);
-
-    return true;
+    return binaryExpression.lhs && binaryExpression.rhs
+        && appendToStream(outputStream, '(') && stringify(outputStream, *binaryExpression.lhs)
+        && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation 
+                ? appendToStream(outputStream, " ") && stringify(outputStream, binaryExpression.binaryOperation) && appendToStream(outputStream, " ")
+                : stringify(outputStream, binaryExpression.binaryOperation))
+        && appendToStream(outputStream, ')');
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::NumericExpression& numericExpression) const {
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return true;
+    return numericExpression.value && stringify(outputStream, *numericExpression.value);
+}
+
+bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::VariableExpression& variableExpression) const {
+    if (!outputStream.good())
+        return setStreamInFailedState(outputStream);
+
+    return variableExpression.var && stringify(outputStream, *variableExpression.var);
+}
+
+bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::ShiftExpression& shiftExpression) const {
+    if (!outputStream.good())
+        return setStreamInFailedState(outputStream);
+
+    return shiftExpression.lhs && shiftExpression.rhs
+        && appendToStream(outputStream, '(') && stringify(outputStream, *shiftExpression.lhs)
+        && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation 
+                ? appendToStream(outputStream, " ") && stringify(outputStream, shiftExpression.shiftOperation) && appendToStream(outputStream, " ")
+                : stringify(outputStream, shiftExpression.shiftOperation))
+        && stringify(outputStream, *shiftExpression.rhs);
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::VariableAccess& variableAccess) const {
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return true;
+    bool stringificationSuccessful = variableAccess.var && !variableAccess.var->name.empty() && (variableAccess.range.has_value() ? variableAccess.range->first && variableAccess.range->second : true)
+        && appendToStream(outputStream, variableAccess.var->name);
+
+    for (std::size_t i = 0; stringificationSuccessful && i < variableAccess.indexes.size(); ++i) {
+        const auto& expressionDefiningAccessedValueOfDimension = variableAccess.indexes.at(i);
+        stringificationSuccessful &= expressionDefiningAccessedValueOfDimension
+            && appendToStream(outputStream, '[') && stringify(outputStream, *expressionDefiningAccessedValueOfDimension) && appendToStream(outputStream, ']');   
+    }
+
+    if (stringificationSuccessful && variableAccess.range.has_value())
+        stringificationSuccessful &= appendToStream(outputStream, bitRangeStartIdent)
+            && stringify(outputStream, *variableAccess.range->first)
+            && (variableAccess.range->first != variableAccess.range->second
+                    ? appendToStream(outputStream, bitRangeEndIdent) && stringify(outputStream, *variableAccess.range->second)
+                    : true);
+
+    return stringificationSuccessful;
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Number& number) const {
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return true;
+    if (number.isConstant())
+        return appendToStream(outputStream, std::to_string(number.evaluate({})));
+    if (number.isLoopVariable())
+        return appendToStream(outputStream, number.variableName());
+
+    return false;
 }
 
 
@@ -393,6 +440,22 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, syrec::
             break;
         case syrec::AssignStatement::AssignOperation::Exor:
             outputStream << "^=";
+            break;
+        default:
+            return setStreamInFailedState(outputStream);
+    }
+    return true;
+}
+
+bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, syrec::ShiftExpression::ShiftOperation operation) const noexcept {
+    if (!outputStream.good())
+        return setStreamInFailedState(outputStream);
+    switch (operation) {
+        case syrec::ShiftExpression::ShiftOperation::Left:
+            outputStream << "<<";
+            break;
+        case syrec::ShiftExpression::ShiftOperation::Right:
+            outputStream << ">>";
             break;
         default:
             return setStreamInFailedState(outputStream);
