@@ -14,11 +14,9 @@ namespace syrecParser {
             expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)),
             numberAndSignalVisitorInstance(std::make_unique<CustomNumberAndSignalVisitor>(sharedMessagesContainerInstance)) {}
  
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitStatementListTyped(TSyrecParser::StatementListContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::vec> visitStatementListTyped(TSyrecParser::StatementListContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitStatementTyped(TSyrecParser::StatementContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitCallStatementTyped(TSyrecParser::CallStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitForStatementTyped(TSyrecParser::ForStatementContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitIfStatementTyped(TSyrecParser::IfStatementContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* ctx);
@@ -29,6 +27,14 @@ namespace syrecParser {
     protected:
         std::unique_ptr<CustomExpressionVisitor> expressionVisitorInstance;
         std::unique_ptr<CustomNumberAndSignalVisitor> numberAndSignalVisitorInstance;
+
+        struct LoopStepsizeDefinition {
+            bool               hasMinusPrefix;
+            syrec::Number::ptr stepsize;
+        };
+
+        [[nodiscard]] std::optional<std::string>            visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx);
+        [[nodiscard]] std::optional<LoopStepsizeDefinition> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx);
 
         std::any visitStatementList(TSyrecParser::StatementListContext* ctx) override;
         std::any visitStatement(TSyrecParser::StatementContext* ctx) override;

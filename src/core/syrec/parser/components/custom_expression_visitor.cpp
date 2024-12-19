@@ -2,6 +2,26 @@
 
 using namespace syrecParser;
 
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpressionTyped(TSyrecParser::BinaryExpressionContext* context) {
+    return visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context);
+}
+
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpressionTyped(TSyrecParser::ShiftExpressionContext* context) {
+    return visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context);
+}
+
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpressionTyped(TSyrecParser::UnaryExpressionContext* context) {
+    return visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context);
+}
+
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) {
+    return visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context);
+}
+
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromSignalTyped(TSyrecParser::ExpressionFromSignalContext* context) {
+    return visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context);
+}
+
 // START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) {
     return 0;
