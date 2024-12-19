@@ -18,6 +18,15 @@ namespace syrecParser {
     protected:
         std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
 
+        [[nodiscard]] std::optional<std::unique_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context);
+        [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(TSyrecParser::ModuleContext* context);
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(TSyrecParser::ParameterListContext* context);
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(TSyrecParser::ParameterContext* context);
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitSignalListTyped(TSyrecParser::SignalListContext* context);
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context);
+        [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(TSyrecParser::StatementListContext* context);
+
+    private:
         std::any visitProgram(TSyrecParser::ProgramContext* context) override;
         std::any visitModule(TSyrecParser::ModuleContext* context) override;
         std::any visitParameterList(TSyrecParser::ParameterListContext* context) override;
