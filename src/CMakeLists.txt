@@ -45,6 +45,8 @@ add_library(
   ${PROJECT_SOURCE_DIR}/include/core/gate.hpp
   ${PROJECT_SOURCE_DIR}/include/core/circuit.hpp
   ${PROJECT_SOURCE_DIR}/include/core/syrec/program.hpp
+  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/symbolTable/base_symbol_table.hpp
+  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp
   ${PROJECT_SOURCE_DIR}/include/core/utils/base_syrec_ir_entity_stringifier.hpp
   ${PROJECT_SOURCE_DIR}/include/core/utils/timer.hpp
   ${PROJECT_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
@@ -70,6 +72,8 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserBaseVisitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserVisitor.cpp
 
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/base_symbol_table.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/temporary_variable_scope.cpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/parser_messages_container.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
 	PUBLIC
