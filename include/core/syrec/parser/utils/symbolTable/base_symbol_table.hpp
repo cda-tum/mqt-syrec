@@ -11,7 +11,6 @@ namespace utils {
     public:
         [[maybe_unused]] bool                         insertModule(const syrec::Module::ptr& module);
         [[nodiscard]] std::vector<syrec::Module::ptr> getModulesByName(const std::string_view& accessedModuleIdentifier) const;
-        // TODO: Allow for implicit casts between variable types (i.e. inout -> out) or use exact match?
         [[nodiscard]] syrec::Module::vec              getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments) const;
 
         [[nodiscard]] std::optional<std::shared_ptr<TemporaryVariableScope>>    getActiveTemporaryScope() const;
