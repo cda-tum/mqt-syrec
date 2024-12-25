@@ -1,28 +1,27 @@
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
 bool utils::TemporaryVariableScope::ScopeEntry::isReferenceToLoopVariable() const {
-    const std::shared_ptr<const syrec::Number>& entryAsNumber = getReadOnlyLoopVariableData().value_or(nullptr);
-    return entryAsNumber && entryAsNumber->isLoopVariable();
+    return getReadOnlyLoopVariableData().value_or(nullptr) != nullptr;
 }
 
 std::string utils::TemporaryVariableScope::ScopeEntry::getVariableIdentifier() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && entryAsVariable.value())
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.value_or(nullptr))
         return entryAsVariable->get()->name;
-    if (const std::optional<std::shared_ptr<const syrec::Number>>& entryAsNumber = getReadOnlyLoopVariableData(); entryAsNumber.has_value() && entryAsNumber.value() && entryAsNumber->get()->isLoopVariable())
+    if (const std::optional<std::shared_ptr<const syrec::Number>>& entryAsNumber = getReadOnlyLoopVariableData(); entryAsNumber.value_or(nullptr))
         return entryAsNumber->get()->variableName();
 
     return "";
 }
 
 std::vector<unsigned> utils::TemporaryVariableScope::ScopeEntry::getDeclaredVariableDimensions() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && entryAsVariable.value())
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.value_or(nullptr))
         return entryAsVariable->get()->dimensions;
 
     return {1};
 }
 
 std::optional<unsigned> utils::TemporaryVariableScope::ScopeEntry::getDeclaredVariableBitwidth() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && entryAsVariable.value())
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.value_or(nullptr))
         return entryAsVariable->get()->bitwidth;
 
     return std::nullopt;
