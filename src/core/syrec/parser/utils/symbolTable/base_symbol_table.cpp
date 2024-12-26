@@ -61,16 +61,16 @@ syrec::Module::vec utils::BaseSymbolTable::getModulesMatchingSignature(const std
     return modulesMatchingIdentifier;
 }
 
-std::optional<std::shared_ptr<utils::TemporaryVariableScope>> utils::BaseSymbolTable::getActiveTemporaryScope() const {
+std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::getActiveTemporaryScope() const {
     return temporaryVariableScopes.empty() ? std::nullopt : std::make_optional(temporaryVariableScopes.back());
 }
 
-std::shared_ptr<utils::TemporaryVariableScope> utils::BaseSymbolTable::openTemporaryScope() {
+utils::TemporaryVariableScope::ptr utils::BaseSymbolTable::openTemporaryScope() {
     temporaryVariableScopes.emplace_back(std::make_shared<utils::TemporaryVariableScope>());
     return temporaryVariableScopes.back();
 }
 
-std::optional<std::shared_ptr<utils::TemporaryVariableScope>> utils::BaseSymbolTable::closeTemporaryScope() {
+std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeTemporaryScope() {
     if (temporaryVariableScopes.empty())
         return std::nullopt;
 

@@ -9,8 +9,12 @@
 namespace utils {
     class TemporaryVariableScope {
     public:
+        using ptr = std::shared_ptr<TemporaryVariableScope>;
         class ScopeEntry {
         public:
+            using ptr = std::shared_ptr<ScopeEntry>;
+            using readOnylPtr = std::shared_ptr<const ScopeEntry>;
+
             explicit ScopeEntry(syrec::Variable::ptr signalData):
                 data(signalData) {}
 
@@ -28,16 +32,16 @@ namespace utils {
             std::variant<syrec::Variable::ptr, syrec::Number::ptr> data;
         };
 
-        [[nodiscard]] bool                                             existsVariableForName(const std::string_view& signalIdentifier) const;
-        [[nodiscard]] std::optional<std::shared_ptr<const ScopeEntry>> getVariableByName(const std::string_view& signalIdentifier) const;
-        [[nodiscard]] std::vector<std::shared_ptr<const ScopeEntry>>   getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const;
-        [[maybe_unused]] bool                                          recordVariable(const syrec::Variable::ptr& signal);
-        [[maybe_unused]] bool                                          recordLoopVariable(const syrec::Number::ptr& loopVariable);
-        [[maybe_unused]] bool                                          removeVariable(const std::string_view& signalIdentifier);
+        [[nodiscard]] bool                                   existsVariableForName(const std::string_view& signalIdentifier) const;
+        [[nodiscard]] std::optional<ScopeEntry::readOnylPtr> getVariableByName(const std::string_view& signalIdentifier) const;
+        [[nodiscard]] std::vector<ScopeEntry::readOnylPtr>   getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const;
+        [[maybe_unused]] bool                                recordVariable(const syrec::Variable::ptr& signal);
+        [[maybe_unused]] bool                                recordLoopVariable(const syrec::Number::ptr& loopVariable);
+        [[maybe_unused]] bool                                removeVariable(const std::string_view& signalIdentifier);
 
     protected:
         // To be able to perform heterogeneous lookup using std::string_view in a STL set/dictionary container in C++17 only std::map and std::set can be used. C++20 supports this functionality also for the unordered STL container variants.
-        std::map<std::string, std::shared_ptr<ScopeEntry>, std::less<>> signalIdentifierLookup;
+        std::map<std::string, ScopeEntry::ptr, std::less<>> signalIdentifierLookup;
     };
 }
 #endif

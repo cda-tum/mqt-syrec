@@ -45,7 +45,7 @@ bool utils::TemporaryVariableScope::existsVariableForName(const std::string_view
     return getVariableByName(signalIdentifier).has_value();
 }
 
-std::optional<std::shared_ptr<const utils::TemporaryVariableScope::ScopeEntry>> utils::TemporaryVariableScope::getVariableByName(const std::string_view& signalIdentifier) const {
+std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::TemporaryVariableScope::getVariableByName(const std::string_view& signalIdentifier) const {
     const auto scopeEntryMatchingSignalIdentifier = !signalIdentifier.empty() ? signalIdentifierLookup.find(signalIdentifier) : signalIdentifierLookup.end();
     if (scopeEntryMatchingSignalIdentifier == signalIdentifierLookup.end())
         return std::nullopt;
@@ -53,11 +53,11 @@ std::optional<std::shared_ptr<const utils::TemporaryVariableScope::ScopeEntry>> 
     return scopeEntryMatchingSignalIdentifier->second;
 }
 
-std::vector<std::shared_ptr<const utils::TemporaryVariableScope::ScopeEntry>> utils::TemporaryVariableScope::getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const {
+std::vector<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::TemporaryVariableScope::getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const {
     if (lookedForVariableTypes.empty())
         return {};
 
-    std::vector<std::shared_ptr<const utils::TemporaryVariableScope::ScopeEntry>> variablesMatchingType;
+    std::vector<ScopeEntry::readOnylPtr> variablesMatchingType;
 
     auto signalsIterator = signalIdentifierLookup.begin();
     auto endSignalIterator = signalIdentifierLookup.end();
@@ -75,7 +75,7 @@ bool utils::TemporaryVariableScope::recordVariable(const syrec::Variable::ptr& s
     if (!signal || signal->name.empty() || existsVariableForName(signal->name))
         return false;
 
-    auto scopeEntryForSignal = std::make_shared<TemporaryVariableScope::ScopeEntry>(signal);
+    auto scopeEntryForSignal = std::make_shared<ScopeEntry>(signal);
     signalIdentifierLookup.insert({signal->name, scopeEntryForSignal});
     return true;
 }
@@ -84,7 +84,7 @@ bool utils::TemporaryVariableScope::recordLoopVariable(const syrec::Number::ptr&
     if (!loopVariable || !loopVariable->isLoopVariable() || loopVariable->variableName().empty() || existsVariableForName(loopVariable->variableName()))
         return false;
 
-    auto scopeEntryForSignal = std::make_shared<TemporaryVariableScope::ScopeEntry>(loopVariable);
+    auto scopeEntryForSignal = std::make_shared<ScopeEntry>(loopVariable);
     signalIdentifierLookup.insert({loopVariable->variableName(), scopeEntryForSignal});
     return true;
 }
