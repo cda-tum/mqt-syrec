@@ -1,11 +1,45 @@
 #include <algorithm>
 #include <set>
+
+#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/variable_assignability_check.hpp"
 
 bool utils::BaseSymbolTable::insertModule(const syrec::Module::ptr& module) {
-    if (!module || module->name.empty())
+    if (!module || module->name.empty() 
+        || !std::all_of(
+            module->parameters.cbegin(),
+            module->parameters.cend(),
+            [](const syrec::Variable::ptr& moduleParameter) { return moduleParameter && !moduleParameter->name.empty(); })
+        )
         return false;
+
+    // Check whether the insertion of the module will not create any ambiguity for any future module overload resolution attempts.
+    // I.e. Two modules sharing the same identifier, number of parameters (n) and structure for each of their defined parameters can only exist,
+    // if no index 0 <= i < n exists where the variable types of the module_1[i]->type and module_2[i]->type allows for the assignment of a variable of arbitrary type.
+    // The valid combinations for a pair of parameters from two modules are:
+    // * (in, out) and vice versa
+    // * (inout, in) and vice versa
+    //
+    const syrec::Module::vec& modulesMatchingIdentifier = getModulesByName(module->name);
+    if (std::any_of(
+            modulesMatchingIdentifier.cbegin(),
+            modulesMatchingIdentifier.cend(),
+            [&module](const syrec::Module::ptr& existingModuleMatchingIdentifier) {
+                return existingModuleMatchingIdentifier->parameters.size() == module->parameters.size()
+                    && std::equal(
+                        existingModuleMatchingIdentifier->parameters.cbegin(),
+                        existingModuleMatchingIdentifier->parameters.cend(),
+                        module->parameters.cbegin(),
+                        module->parameters.cend(),
+                        [](const syrec::Variable::ptr& symTabModuleParameter, const syrec::Variable::ptr& userModuleParameter) {
+                            return doVariableStructuresMatch(*symTabModuleParameter, *userModuleParameter)
+                                ? doesVariableTypePairCreateOverloadResolutionAmbiguity(symTabModuleParameter->type, userModuleParameter->type)
+                                : false;
+                        });
+            })) {
+        return false;
+    }
 
     if (declaredModules.find(module->name) == declaredModules.end())
         declaredModules.insert({module->name, syrec::Module::vec()});
@@ -22,43 +56,12 @@ syrec::Module::vec utils::BaseSymbolTable::getModulesByName(const std::string_vi
     return modulesMatchingIdentifier->second;
 }
 
-syrec::Module::vec utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments) const {
-    // TODO: Should we validate the caller arguments or should it be the responsibility of the caller to provide valid arguments?
-    bool                                    areCallerArgumentsUsable = true;
-    std::set<std::string_view, std::less<>> callerArgumentsIdentifierLookup;
-    for (const auto& callerArgument : callerArguments) {
-        areCallerArgumentsUsable &= callerArgument && !callerArgument->name.empty() && !callerArgumentsIdentifierLookup.count(callerArgument->name);
-        callerArgumentsIdentifierLookup.insert(callerArgument->name);
-    }
+bool utils::BaseSymbolTable::existsModuleForName(const std::string_view& accessedModuleIdentifier) const {
+    return !getModulesByName(accessedModuleIdentifier).empty();
+}
 
-    syrec::Module::vec modulesMatchingIdentifier = areCallerArgumentsUsable ? getModulesByName(accessedModuleIdentifier) : syrec::Module::vec();
-    modulesMatchingIdentifier.erase(
-        std::remove_if(
-            modulesMatchingIdentifier.begin(),
-            modulesMatchingIdentifier.end(),
-            [&callerArguments](const syrec::Module::ptr& moduleMatchingIdentifier) {
-                        return moduleMatchingIdentifier->parameters.size() != callerArguments.size()
-                            || std::find_first_of(
-                                moduleMatchingIdentifier->parameters.cbegin(),
-                                moduleMatchingIdentifier->parameters.cend(),
-                                callerArguments.cbegin(),
-                                callerArguments.cend(),
-                                [](const syrec::Variable::ptr& moduleParameter, const syrec::Variable::ptr& callerArgument) {
-                                    return moduleParameter->bitwidth != callerArgument->bitwidth
-                                    || moduleParameter->dimensions.size() != callerArgument->dimensions.size()
-                                    || std::find_first_of(
-                                        moduleParameter->dimensions.cbegin(),
-                                        moduleParameter->dimensions.cend(),
-                                        callerArgument->dimensions.cbegin(),
-                                        callerArgument->dimensions.cend(),
-                                        [](const auto moduleParameterNumValuesOfDimension, const auto callerArgumentNumValuesOfDimension) {
-                                            return moduleParameterNumValuesOfDimension == callerArgumentNumValuesOfDimension;
-                                        }) != moduleParameter->dimensions.cend()
-                                    || !variableAssignability::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type);
-                        }) != moduleMatchingIdentifier->parameters.cend();
-            }),
-            modulesMatchingIdentifier.end());
-    return modulesMatchingIdentifier;
+utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments) const {
+    return getModulesMatchingSignature(accessedModuleIdentifier, callerArguments, true);
 }
 
 std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::getActiveTemporaryScope() const {
@@ -77,3 +80,61 @@ std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeT
     temporaryVariableScopes.pop_back();
     return getActiveTemporaryScope();
 }
+
+// NON-PUBLIC FUNCTIONALITY
+utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments, bool validateCallerArguments) const {
+    // TODO: Should we validate the caller arguments or should it be the responsibility of the caller to provide valid arguments?
+    if (validateCallerArguments) {
+        bool                                    areCallerArgumentUsable = true;
+        std::set<std::string_view, std::less<>> callerArgumentsIdentifierLookup;
+
+        for (std::size_t i = 0; i < callerArguments.size() && areCallerArgumentUsable; ++i) {
+            const syrec::Variable::ptr& callerArgument = callerArguments.at(i);
+            areCallerArgumentUsable &= callerArgument && !callerArgument->name.empty() && !callerArgumentsIdentifierLookup.count(callerArgument->name);
+            if (areCallerArgumentUsable)
+                callerArgumentsIdentifierLookup.insert(callerArgument->name);
+        }
+
+        if (!areCallerArgumentUsable)
+            return ModuleOverloadResolutionResult({ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid, std::nullopt});
+    }
+
+    syrec::Module::vec modulesMatchingIdentifier = getModulesByName(accessedModuleIdentifier);
+    modulesMatchingIdentifier.erase(
+            std::remove_if(
+                    modulesMatchingIdentifier.begin(),
+                    modulesMatchingIdentifier.end(),
+                    [&callerArguments](const syrec::Module::ptr& moduleMatchingIdentifier) {
+                        return moduleMatchingIdentifier->parameters.size() != callerArguments.size()
+                            || !std::equal(
+                                moduleMatchingIdentifier->parameters.cbegin(),
+                                moduleMatchingIdentifier->parameters.cend(),
+                                callerArguments.cbegin(),
+                                callerArguments.cend(),
+                                [](const syrec::Variable::ptr& moduleParameter, const syrec::Variable::ptr& callerArgument) {
+                                        return variableAssignability::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type)
+                                            && doVariableStructuresMatch(*moduleParameter, *callerArgument);
+                        });
+                    }),
+            modulesMatchingIdentifier.end());
+
+    if (modulesMatchingIdentifier.empty())
+        return ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt};
+
+    return modulesMatchingIdentifier.size() == 1
+        ? ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front()}
+        : ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt};
+}
+
+bool utils::BaseSymbolTable::doVariableStructuresMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) noexcept {
+    return lVariable.bitwidth == rVariable.bitwidth
+        && std::equal(
+            lVariable.dimensions.cbegin(),
+            lVariable.dimensions.cend(),
+            rVariable.dimensions.cbegin(),
+            rVariable.dimensions.cend(),
+            [](const auto moduleParameterNumValuesOfDimension, const auto callerArgumentNumValuesOfDimension) {
+                return moduleParameterNumValuesOfDimension == callerArgumentNumValuesOfDimension;
+    });
+}
+
