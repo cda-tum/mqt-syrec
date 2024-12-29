@@ -13,6 +13,8 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
   unittests/test_pla_parser.cpp
   unittests/test_dd_synthesis.cpp
   unittests/test_dd_synthesis_dc.cpp
+
+  unittests/syrec/parser/test_base_symbol_table.cpp
 )
 
 # link the Google test infrastructure and a default main function to the test executable.
