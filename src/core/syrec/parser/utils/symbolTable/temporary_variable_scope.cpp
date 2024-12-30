@@ -60,13 +60,13 @@ std::vector<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::Tempo
     std::vector<ScopeEntry::readOnylPtr> variablesMatchingType;
 
     auto signalsIterator = signalIdentifierLookup.begin();
-    auto endSignalIterator = signalIdentifierLookup.end();
+    const auto endSignalIterator = signalIdentifierLookup.end();
     while (signalsIterator != endSignalIterator) {
         if (const std::shared_ptr<const syrec::Variable> variableData = signalsIterator->second->getReadonlyVariableData().value_or(nullptr);
             variableData && lookedForVariableTypes.count(variableData->type))
             variablesMatchingType.emplace_back(signalsIterator->second);
 
-        ++endSignalIterator;
+        ++signalsIterator;
     }
     return variablesMatchingType;
 }
@@ -81,7 +81,7 @@ bool utils::TemporaryVariableScope::recordVariable(const syrec::Variable::ptr& s
 }
 
 bool utils::TemporaryVariableScope::recordLoopVariable(const syrec::Number::ptr& loopVariable) {
-    if (!loopVariable || !loopVariable->isLoopVariable() || loopVariable->variableName().empty() || existsVariableForName(loopVariable->variableName()))
+    if (!loopVariable || !loopVariable->isLoopVariable() || loopVariable->variableName().empty() || loopVariable->variableName().front() != '$' || existsVariableForName(loopVariable->variableName()))
         return false;
 
     auto scopeEntryForSignal = std::make_shared<ScopeEntry>(loopVariable);
@@ -95,5 +95,5 @@ bool utils::TemporaryVariableScope::removeVariable(const std::string_view& signa
         return false;
 
     signalIdentifierLookup.erase(scopeEntryMatchingSignalIdentifier);
-    return false;
+    return true;
 }
