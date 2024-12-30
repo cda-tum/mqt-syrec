@@ -15,7 +15,7 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
   unittests/test_dd_synthesis_dc.cpp
 
   unittests/syrec/parser/test_base_symbol_table.cpp
-)
+  unittests/syrec/parser/test_temporary_variable_scope.cpp)
 
 # link the Google test infrastructure and a default main function to the test executable.
 target_link_libraries(${MQT_SYREC_TESTS_TARGET} PRIVATE ${MQT_SYREC_TARGET} gmock gtest_main)
