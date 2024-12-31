@@ -1,0 +1,12 @@
+{
+  "defaultTest": {
+    "circuit": "module test()",
+    "expectedErrors": [
+      {
+        "line": 0,
+        "col": 0,
+        "msg": "test"
+      }
+    ]
+  }
+}

@@ -15,6 +15,7 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
   unittests/test_dd_synthesis_dc.cpp
 
   unittests/syrec/parser/test_base_symbol_table.cpp
+  unittests/syrec/parser/test_syrec_parser.cpp
   unittests/syrec/parser/test_temporary_variable_scope.cpp)
 
 # link the Google test infrastructure and a default main function to the test executable.
@@ -41,22 +42,32 @@ add_custom_command(
           $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
           ${CMAKE_BINARY_DIR}/configs
+
+  # Solution is sufficient for now but surely there is a better way where this explicit recreation of the folder structure is not necessary
+  # I.e. we might only need to update the paths for creation of the symlinks correctly since there files are only copied to the ouput directory?
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/error
+  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/success
+
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/data
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/error
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/success
+
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/data/error
+          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/error
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/error
+          ${CMAKE_BINARY_DIR}/unittests/syrec/parser/data/error
+
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/data/success
+          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/success
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/success
+          ${CMAKE_BINARY_DIR}/unittests/syrec/parser/data/success
+
   COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
   VERBATIM)
-
-#add_custom_command(
-#  TARGET ${MQT_SYREC_TESTS_TARGET}
-#  POST_BUILD
-#  COMMAND
-#    ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${MQT_SYREC_TESTS_TARGET}/${MQT_SYREC_TESTS_TARGET}
-#    ${CMAKE_BINARY_DIR}/${MQT_SYREC_TESTS_TARGET}
-#  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits
-#          $<TARGET_FILE_DIR:${MQT_SYREC_TESTS_TARGET}>/circuits
-#  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${MQT_SYREC_TESTS_TARGET}>/circuits
-#          ${CMAKE_BINARY_DIR}/circuits
-#  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/configs
-#          $<TARGET_FILE_DIR:${MQT_SYREC_TESTS_TARGET}>/configs
-#  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${MQT_SYREC_TESTS_TARGET}>/configs
-#          ${CMAKE_BINARY_DIR}/configs
-#  COMMENT "Copying circuits and creating symlinks for ${MQT_SYREC_TESTS_TARGET}"
-#  VERBATIM)
