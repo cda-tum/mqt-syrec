@@ -1,49 +1,54 @@
 #ifndef CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
 #define CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace syrecParser {
     struct Message {
-        virtual ~Message() = default;
+        using ptr = std::shared_ptr<Message>;
         struct Position {
             std::size_t line;
             std::size_t column;
-        
+
+            explicit Position(std::size_t line, std::size_t column):
+                line(line), column(column) {}
         };
 
-        enum class MessageType {
+        enum class Type {
             Error,
             Information,
             Warning
         };
-    
-        MessageType mType;
-        Position    position;
-        std::string content;
 
-        Message(const MessageType mType, const Position position, std::string content):
-            mType(mType), position(position), content(std::move(content)) {}
+        Type                     type;
+        std::string              id;
+        Position                 position;
+        std::string              message;
 
-        [[nodiscard]] virtual std::string stringify() const {
-            return "-- line " + std::to_string(position.line) + " col " + std::to_string(position.column) + ": " + content;
+        Message(Type type, std::string id, const Position position, std::string message):
+            type(type), id(std::move(id)), position(position), message(std::move(message)) {}
+
+        [[nodiscard]] std::string stringify() const {
+            return "-- line " + std::to_string(position.line) + " col " + std::to_string(position.column) + ": " + message;
         }
     };
 
     class ParserMessagesContainer {
     public:
-        ParserMessagesContainer(const bool recordAtMostOneError)
-            : recordAtMostOneError(recordAtMostOneError) {}
+        ParserMessagesContainer() {
+            messagesPerType.emplace(std::make_pair(Message::Type::Error, std::vector<Message::ptr>()));
+            messagesPerType.emplace(std::make_pair(Message::Type::Information, std::vector<Message::ptr>()));
+            messagesPerType.emplace(std::make_pair(Message::Type::Warning, std::vector<Message::ptr>()));
+        }
 
-        void                               recordMessage(Message&& message);
-        [[nodiscard]] std::vector<Message> getMessagesOfType(Message::MessageType messageType) const;
+        void                                    recordMessage(std::unique_ptr<Message> message);
+        [[nodiscard]] std::vector<Message::ptr> getMessagesOfType(Message::Type messageType) const;
 
     protected:
-        std::vector<Message> errorMessages;
-        bool                 recordAtMostOneError;
+        std::unordered_map<Message::Type, std::vector<Message::ptr>> messagesPerType;
     };
 } // namespace syrecParser
 #endif

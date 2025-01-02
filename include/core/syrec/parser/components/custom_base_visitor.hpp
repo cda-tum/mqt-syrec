@@ -5,9 +5,10 @@
 #include "TSyrecParserBaseVisitor.h"
 
 #include <core/syrec/parser/components/generic_visitor_result.hpp>
+#include <core/syrec/parser/utils/custom_error_mesages.hpp>
 #include <core/syrec/parser/utils/parser_messages_container.hpp>
-#include <fmt/core.h>
 
+#include <fmt/core.h>
 #include <optional>
 
 namespace syrecParser {
@@ -19,12 +20,17 @@ namespace syrecParser {
     protected:
         std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
 
-        template<typename... T>
-        void recordMessage(Message::MessageType messageType, Message::Position messagePosition, const std::string& messageFormatString, T&&... args) {
+        template<SemanticError semanticError, typename... T>
+        void recordSemanticError(Message::Position messagePosition, T&&... args) {
             if (!sharedGeneratedMessageContainerInstance)
                 return;
 
-            sharedGeneratedMessageContainerInstance->recordMessage(Message({messageType, messagePosition, fmt::format(FMT_STRING(messageFormatString), std::forward<T>(args)...)}));
+            static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty(), "No format for message of semantic error found!");
+            static_assert(!identifierForSemanticErrore.empty(), "No identifiers for semantic error found!");
+
+            constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
+            // TODO: How should runtime errors be handled?
+            sharedGeneratedMessageContainerInstance->recordMessage(Message({Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...), {}}));
         }
 
         /// Process the tokens of a non-terminal symbol of an ANTLR grammar and return a single entity of the IR representing the non-terminal symbol.

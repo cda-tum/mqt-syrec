@@ -10,8 +10,8 @@ namespace syrecParser {
         CustomErrorListener(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
             sharedMessagesContainerInstance(std::move(sharedMessagesContainerInstance)) {}
 
-        void syntaxError(antlr4::Recognizer* /*recognizer*/, antlr4::Token* /*offendingSymbol*/, size_t line,
-                         size_t charPositionInLine, const std::string& msg, std::exception_ptr /*e*/) override;
+        void syntaxError(antlr4::Recognizer* /*recognizer*/, antlr4::Token* /*offendingSymbol*/, std::size_t line,
+                         std::size_t charPositionInLine, const std::string& msg, std::exception_ptr /*e*/) override;
 
         protected:
         std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance;

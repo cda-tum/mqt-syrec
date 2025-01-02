@@ -25,19 +25,13 @@ struct TestFromJsonConfig {
 class SyrecParserBaseTestsFixture : public testing::TestWithParam<TestFromJsonConfig> {
 protected:
     struct TestFromJson {
-        std::string                stringifiedSyrecProgramToProcess;
-        std::optional<std::string> stringifedExpectedOptimizedSyrecProgram;
-        std::vector<std::string>   expectedErrors;
+        std::string stringifiedSyrecProgramToProcess;
+        std::string stringifedExpectedOptimizedSyrecProgram;
     };
 
     std::string jsonKeyInTestCaseDataForCircuit                       = "circuit";
     std::string jsonKeyInTestCaseDataForExpectedOptimizedCircuit      = "optimizedCircuit";
-    std::string jsonKeyInTestCaseDataForExpectedErrors                = "expectedErrors";
-    std::string jsonKeyInTestCaseDataForExpectedErrorMessage          = "msg";
-    std::string jsonKeyInTestCaseDataForExpectedErrorPositionInLine   = "line";
-    std::string jsonKeyInTestCaseDataForExpectedErrorPositionInColumn = "col";
 
-    const std::string expectedErrorMessageFormat = "-- line {0:d} col {1:d}: {2:s}";
     TestFromJson      loadedTestCaseData;
     syrec::Program    parserInstance;
 
@@ -60,60 +54,11 @@ protected:
             ASSERT_TRUE(testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedOptimizedCircuit).is_string()) << "Expected optimized circuit must be defined as a string";
             loadedTestCaseData.stringifedExpectedOptimizedSyrecProgram = testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedOptimizedCircuit).get<std::string>();
         }
-
-        if (testCaseDataJson.contains(jsonKeyInTestCaseDataForExpectedErrors)) {
-            ASSERT_TRUE(testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedErrors).is_array()) << "Expected errors detected during processing of unoptimized circuit must be defined as a JSON array";
-            ASSERT_NO_FATAL_FAILURE(loadExpectedErrorsFromJson(testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedErrors), loadedTestCaseData));
-        }
     }
 
     static void assertKeyInJsonObjectExists(const json& jsonObject, const std::string& key) {
         ASSERT_TRUE(jsonObject.is_object());
         ASSERT_TRUE(jsonObject.contains(key)) << "Required key '" << key << "' was not found in the JSON object";
-    }
-
-    void loadExpectedErrorsFromJson(const json& testCaseDataFromJson, TestFromJson& parsedTestCaseDataFromJson) const {
-        for (const auto& errorJsonObject : testCaseDataFromJson) {
-            ASSERT_TRUE(errorJsonObject.is_object()) << "Expected test case data to a json object";
-            ASSERT_NO_FATAL_FAILURE(assertKeyInJsonObjectExists(errorJsonObject, jsonKeyInTestCaseDataForExpectedErrorMessage));
-            ASSERT_NO_FATAL_FAILURE(assertKeyInJsonObjectExists(errorJsonObject, jsonKeyInTestCaseDataForExpectedErrorPositionInLine));
-            ASSERT_NO_FATAL_FAILURE(assertKeyInJsonObjectExists(errorJsonObject, jsonKeyInTestCaseDataForExpectedErrorPositionInColumn));
-
-            ASSERT_TRUE(errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorMessage).is_string()) << "Expected error message must be declared as a string in the JSON test case data";
-            ASSERT_TRUE(errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorPositionInLine).is_number_unsigned()) << "Expected line position of error must be defined as an unsigned integer in the JSON test case data";
-            ASSERT_TRUE(errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorPositionInColumn).is_number_unsigned()) << "Expected column position of error must be defined as an unsigned integer in the JSON test case data";
-
-            ASSERT_NO_THROW(parsedTestCaseDataFromJson.expectedErrors.emplace_back(
-                fmt::format(expectedErrorMessageFormat,
-                    errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorPositionInLine).get<unsigned int>(),
-                    errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorPositionInColumn).get<unsigned int>(),
-                    errorJsonObject.at(jsonKeyInTestCaseDataForExpectedErrorMessage).get<std::string>()))
-            );
-        }
-    }
-
-    static void assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(const std::string_view& aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, const std::vector<std::string>& expectedErrorsDetectedDuringProcessingOfSyrecProgram) {
-        std::vector<std::string_view> errorsDetectedDuringProcessingOfSyrecProgram;
-        // In the best case scenario, no further resizing of the container is necessary (i.e. the number of actually found errors is equal to the number of expected ones).
-        errorsDetectedDuringProcessingOfSyrecProgram.reserve(expectedErrorsDetectedDuringProcessingOfSyrecProgram.size());
-
-        std::size_t lastFoundPositionOfNewlineDelimiter   = 0;
-        std::size_t currNewLineDelimiterPosition = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
-        while (currNewLineDelimiterPosition != std::string::npos) {
-            const std::size_t lengthOfErrorMessage   = (currNewLineDelimiterPosition - lastFoundPositionOfNewlineDelimiter) + 1;
-            const auto        actualCurrErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfErrorMessage);
-            errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(actualCurrErrorMessage);
-
-            // On Windows system we assume that the newline is encoded as the '\r\n' character sequence while on all other system it should be equal to the '\n' character
-            lastFoundPositionOfNewlineDelimiter = currNewLineDelimiterPosition + 1;
-
-            #if _WIN32
-                ++lastFoundPositionOfNewlineDelimiter;
-            #endif
-
-            currNewLineDelimiterPosition = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
-        }
-        ASSERT_NO_FATAL_FAILURE(assertExpectedAndActualErrorsMatch(expectedErrorsDetectedDuringProcessingOfSyrecProgram, errorsDetectedDuringProcessingOfSyrecProgram));
     }
 
     static void assertStringificationOfParsedSyrecProgramIsSuccessful(const syrec::Program& syrecProgramToStringifiy, std::ostream& containerForStringifiedProgram) {
@@ -128,36 +73,17 @@ protected:
     // TODO: Stringification function to compare generated optimized circuit with user provided version
     // TODO: Processing of parser config from json
 
-    static void assertExpectedAndActualErrorsMatch(const std::vector<std::string>& expectedErrors, const std::vector<std::string_view>& actualErrorsInUnifiedFormat) {
-        // TODO: Find better solution ot print errors
-        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected " << expectedErrors.size() << " errors but only " << actualErrorsInUnifiedFormat.size() << " were found";
-        for (size_t errorIdx = 0; errorIdx < expectedErrors.size(); ++errorIdx) {
-            ASSERT_EQ(expectedErrors.at(errorIdx), actualErrorsInUnifiedFormat.at(errorIdx)) << "Expected error: " << expectedErrors.at(errorIdx) << "| Actual Error: " << actualErrorsInUnifiedFormat.at(errorIdx);
-        }
-    }
-
     virtual void performTestExecution() {
-        if (loadedTestCaseData.stringifedExpectedOptimizedSyrecProgram.has_value())
+        if (!loadedTestCaseData.stringifedExpectedOptimizedSyrecProgram.empty())
             FAIL() << "Definition of expected optimized syrec program is not supported for now";
 
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
         ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.read(loadedTestCaseData.stringifiedSyrecProgramToProcess));
-        ASSERT_NO_FATAL_FAILURE(assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, loadedTestCaseData.expectedErrors));
-        if (!loadedTestCaseData.expectedErrors.empty())
-            return;
-
+        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.empty());
+        
         std::ostringstream containerForStringifiedProgram;
         ASSERT_NO_FATAL_FAILURE(assertStringificationOfParsedSyrecProgramIsSuccessful(parserInstance, containerForStringifiedProgram));
         ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedSyrecProgramToProcess) << "SyReC program processed by the parser needs to match the user defined input circuit";
-    }
-
-private:
-    [[nodiscard]] static std::size_t findNextNewlineDelimiterInString(const std::string_view& stringToSearchThrough, std::size_t searchStartPosition) {
-        #if _WIN32
-            return stringToSearchThrough.find_first_of("\r\n", searchStartPosition);
-        #else
-            return stringToSearchThrough.find_first_of('\n', searchStartPosition);
-        #endif
     }
 };
 

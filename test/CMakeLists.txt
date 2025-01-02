@@ -16,7 +16,9 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
 
   unittests/syrec/parser/test_base_symbol_table.cpp
   unittests/syrec/parser/test_syrec_parser.cpp
-  unittests/syrec/parser/test_temporary_variable_scope.cpp)
+  unittests/syrec/parser/test_syrec_parser_errors.cpp
+  unittests/syrec/parser/test_temporary_variable_scope.cpp
+)
 
 # link the Google test infrastructure and a default main function to the test executable.
 target_link_libraries(${MQT_SYREC_TESTS_TARGET} PRIVATE ${MQT_SYREC_TARGET} gmock gtest_main)
@@ -49,20 +51,13 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data
-  COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/error
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/success
 
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/data
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/error
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/unittests/syrec/parser/success
-
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/data/error
-          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/error
-  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/error
-          ${CMAKE_BINARY_DIR}/unittests/syrec/parser/data/error
 
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/data/success
           $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/unittests/syrec/parser/data/success

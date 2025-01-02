@@ -1,10 +1,9 @@
-#include "core/syrec/program.hpp"
-
 #include "ANTLRInputStream.h"
 #include "TSyrecParser.h"
 #include "TSyrecLexer.h"
 #include "core/syrec/parser/components/custom_error_listener.hpp"
 
+#include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/components/custom_module_visitor.hpp"
 
@@ -24,7 +23,7 @@ namespace syrec {
         antlr4::CommonTokenStream tokens(&lexer);
         syrecParser::TSyrecParser antlrParser(&tokens);
 
-        auto       parserMessageGenerator = std::make_shared<syrecParser::ParserMessagesContainer>(error == nullptr);
+        auto       parserMessageGenerator = std::make_shared<syrecParser::ParserMessagesContainer>();
         const auto customVisitor          = std::make_unique<syrecParser::CustomModuleVisitor>(parserMessageGenerator);
         const auto customErrorListener    = std::make_unique<syrecParser::CustomErrorListener>(parserMessageGenerator);
         lexer.addErrorListener(customErrorListener.get());
@@ -35,12 +34,12 @@ namespace syrec {
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());
 
-        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::MessageType::Error); !generatedErrorMessages.empty()) {
+        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::Type::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
             for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i)
-                concatenatedErrorMessageContainer << generatedErrorMessages.at(i).content << "\n";
+                concatenatedErrorMessageContainer << generatedErrorMessages.at(i)->message << "\n";
 
-            concatenatedErrorMessageContainer << generatedErrorMessages.back().content;
+            concatenatedErrorMessageContainer << generatedErrorMessages.back()->message;
             if (error)
                 *error = concatenatedErrorMessageContainer.str();
             return false;

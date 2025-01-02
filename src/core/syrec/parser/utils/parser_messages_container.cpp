@@ -2,21 +2,16 @@
 
 using namespace syrecParser;
 
-void ParserMessagesContainer::recordMessage(Message&& message) {
-    if (message.mType != Message::MessageType::Error)
+void ParserMessagesContainer::recordMessage(std::unique_ptr<Message> message) {
+    if (message->type != Message::Type::Error)
         return;
 
-    if (!errorMessages.empty() && recordAtMostOneError)
-        return;
-
-    errorMessages.push_back(std::move(message));
+    messagesPerType[message->type].emplace_back(std::move(message));
 }
 
-std::vector<Message> ParserMessagesContainer::getMessagesOfType(Message::MessageType messageType) const {
-    switch (messageType) {
-        case Message::MessageType::Error:
-            return errorMessages;
-        default:
-            return {};
-    }
+std::vector<Message::ptr> ParserMessagesContainer::getMessagesOfType(Message::Type messageType) const {
+    if (!messagesPerType.count(messageType))
+        return {};
+
+    return messagesPerType.at(messageType);
 }
