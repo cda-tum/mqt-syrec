@@ -30,7 +30,11 @@ namespace syrecParser {
 
             constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
             // TODO: How should runtime errors be handled?
-            sharedGeneratedMessageContainerInstance->recordMessage(Message({Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...), {}}));
+            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique(Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...), {}));
+        }
+
+        void recordCustomError(Message::Position messagePosition, const std::string& errorMessage) {
+            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, "UNKNOWN", messagePosition, errorMessage));
         }
 
         /// Process the tokens of a non-terminal symbol of an ANTLR grammar and return a single entity of the IR representing the non-terminal symbol.

@@ -76,6 +76,8 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/parser_messages_container.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/variable_assignability_check.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/variable_access_index_check.cpp
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/variable_access_index_check.hpp
 	PUBLIC
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_base_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_error_listener.hpp
