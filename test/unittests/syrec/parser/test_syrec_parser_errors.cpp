@@ -676,6 +676,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
 // TODO: Test for overlapping signal accesses
 
 // Tests for production binary-expression
+// TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInBinaryExpressionCausesError) {
     GTEST_SKIP();
 }
@@ -714,6 +715,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
 // TODO: Add tests when IR supports unary expressions
 
 // Tests for production shift-expression
+// TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInLhsOperandOfShiftExpressionCausesError) {
     GTEST_SKIP();
 }
@@ -780,6 +782,8 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredLoopVariableInNumericExpre
 }
 
 // Tests for production signal
+// TODO: Tests for indices out of range and division by zero errors in dynamic expressions (i.e. loop variables evaluated at compile time)
+// TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessCausesError) {
     GTEST_SKIP();
 }
@@ -801,6 +805,10 @@ TEST_F(SyrecParserErrorTestsFixture, AccessedDimensionOfVariableOutOfRangeCauses
 }
 
 TEST_F(SyrecParserErrorTestsFixture, None1DSizeOfVariableAccessCausesError) {
+    GTEST_SKIP();
+}
+
+TEST_F(SyrecParserErrorTestsFixture, None1DAccessOnExpressionForValueOfDimensionCausesError) {
     GTEST_SKIP();
 }
 
