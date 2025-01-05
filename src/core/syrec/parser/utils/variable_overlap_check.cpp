@@ -15,7 +15,7 @@ std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr&
     return std::nullopt;
 }
 
-[[nodiscard]] VariableAccessOverlapCheckResult checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
+[[nodiscard]] VariableAccessOverlapCheckResult utils::checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
     const syrec::Variable::ptr& lVarPtr = lVariableAccess.getVar();
     const syrec::Variable::ptr& rVarPtr = rVariableAccess.getVar();
     if (!lVarPtr && !rVarPtr || lVarPtr != nullptr ^ rVarPtr != nullptr || lVarPtr->name != rVarPtr->name)
