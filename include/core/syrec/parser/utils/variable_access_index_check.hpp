@@ -32,12 +32,15 @@ namespace utils {
 
     // TODO: What about evaluation of expressions (handling unknown loop variables, division by zero => should index validity be considered as unknown?)
     // TODO: Providing valid variable accesses could also be the reponsibility of the caller?
+    // TODO: Offer overload with evaluation of expressions?
 
-    /// Determine whether the defined indices of the variable access are within range of the dimensions of the accessed variable. \n
-    /// Note that no expressions are evaluated and no loop variable value lookup is performed, both cases will lead to the validity of the index being considered as unknown. \n
-    /// Additionally, the validity of the indices of all accessed dimensions at indices larger than the number of dimensions of the accessed variable are considered as unknown.
-    /// @param variableAccess The variable access to validate
-    /// @return The validity of the indeces defined in the accessed values per dimension and bitrange.
-    [[nodiscard]] std::optional<VariableAccessIndicesValidity> validate(const syrec::VariableAccess& variableAccess);
+    /**
+     * @brief   Determine whether the defined indices of the variable access are within range of the dimensions of the accessed variable.
+     * @details Note that no expressions are evaluated and no loop variable value lookup is performed, both cases will lead to the validity of the index to be considered as unknown.
+     *          Additionally, the validity of index values in accessed dimensions at indices larger than the number of dimensions of the accessed variable is considered to be unknown.
+     * @param variableAccess The variable access to validate
+     * @return The validity of the indices defined in the accessed values per dimension and bitrange.
+     */
+    [[nodiscard]] std::optional<VariableAccessIndicesValidity> validateVariableAccessIndices(const syrec::VariableAccess& variableAccess);
 }
 #endif
