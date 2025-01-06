@@ -15,12 +15,13 @@ namespace utils {
      * @details Two variable accesses overlap iff:
      * - The variable identifiers match
      * - The accessed values per dimension match
-     * - The accessed bit ranges overlap
-     * Note: Expressions defined in either the bitrange or accessed values per dimension are not evaluated and will result in an inconclusive result being returned.
+     * - The accessed bit ranges overlap <br>
+     * Note: Expressions defined in either the bitrange or accessed values per dimension are not evaluated and will result in an inconclusive result being determined for
+     * the dimension and/or bitrange in which said non-constant index was defined. 
      * @param lVariableAccess The first operand of the binary overlap operation
      * @param rVariableAccess The second operand of the binary overlap operation
-     * @return An enumeration value returning whether the two variable accesses overlap or if an inconclusive result was determined.
+     * @return An enumeration value returning whether the result of the overlap check, std::nullopt if the dimensions or bitwidths of the reference variable did not match.
      */
-    [[nodiscard]] VariableAccessOverlapCheckResult checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess);
+    [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess);
 }
 #endif

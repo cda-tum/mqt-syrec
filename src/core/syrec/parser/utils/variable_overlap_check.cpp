@@ -15,16 +15,25 @@ std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr&
     return std::nullopt;
 }
 
-[[nodiscard]] VariableAccessOverlapCheckResult utils::checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
+inline bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec::Variable& rVarReference) noexcept {
+    return lVarReference.name == rVarReference.name
+        && lVarReference.bitwidth == rVarReference.bitwidth
+        && std::equal(lVarReference.dimensions.cbegin(), lVarReference.dimensions.cend(), rVarReference.dimensions.cbegin(), rVarReference.dimensions.cend());
+}
+
+[[nodiscard]] std::optional<VariableAccessOverlapCheckResult> utils::checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
     const syrec::Variable::ptr& lVarPtr = lVariableAccess.getVar();
     const syrec::Variable::ptr& rVarPtr = rVariableAccess.getVar();
-    if (!lVarPtr && !rVarPtr || lVarPtr != nullptr ^ rVarPtr != nullptr || lVarPtr->name != rVarPtr->name)
-        return VariableAccessOverlapCheckResult::NotOverlapping;
+    if (!lVarPtr || !rVarPtr || !doReferenceVariablesMatch(*lVarPtr, *rVarPtr))
+        return std::nullopt;
 
     const syrec::Variable& lVar = *lVarPtr;
     const syrec::Variable& rVar = *rVarPtr;
 
-    const std::size_t numDimensionsToCheck = std::min(std::min(lVar.dimensions.size(), lVariableAccess.indexes.size()), std::min(rVar.dimensions.size(), rVariableAccess.indexes.size()));
+    const std::size_t numDimensionsToCheck = std::min(
+        std::min(lVar.dimensions.size(), lVariableAccess.indexes.size()), 
+        std::min(rVar.dimensions.size(), rVariableAccess.indexes.size())
+    );
     for (std::size_t i = 0; i < numDimensionsToCheck; ++i) {
         const auto& exprDefiningAccessedValueOfDimensionInLVar = lVariableAccess.indexes.at(i);
         const auto& exprDefiningAccessedValueOfDimensionInRVar = rVariableAccess.indexes.at(i);
@@ -34,7 +43,7 @@ std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr&
         const std::optional<unsigned int> accessedValueInLVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInLVar);
         const std::optional<unsigned int> accessedValueInRVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInRVar);
         
-        if (!(accessedValueInLVar.has_value() && accessedValueInRVar.has_value()))
+        if (!accessedValueInLVar.has_value() || !accessedValueInRVar.has_value())
             return VariableAccessOverlapCheckResult::MaybeOverlapping;
         if (accessedValueInLVar.value() != accessedValueInRVar.value())
             return VariableAccessOverlapCheckResult::NotOverlapping;
@@ -54,7 +63,7 @@ std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr&
 
     const std::optional<unsigned int> evaluatedLVarBitRangeStart = tryEvaluateNumber(lVarBitrangeStart);
     const std::optional<unsigned int> evaluatedRVarBitRangeStart = tryEvaluateNumber(rVarBitrangeStart);
-    if (!(evaluatedLVarBitRangeStart.has_value() && evaluatedRVarBitRangeStart.has_value()))
+    if (!evaluatedLVarBitRangeStart.has_value() || !evaluatedRVarBitRangeStart.has_value())
         return VariableAccessOverlapCheckResult::MaybeOverlapping;
 
     const std::optional<unsigned int> evaluatedLVarBitRangeEnd = lVarBitrangeStart == lVarBitrangeEnd ? evaluatedLVarBitRangeStart : tryEvaluateNumber(lVarBitrangeEnd);
