@@ -36,7 +36,7 @@ namespace utils {
 
     /**
      * @brief   Determine whether the defined indices of the variable access are within range of the dimensions of the accessed variable.
-     * @details Note that no expressions are evaluated and no loop variable value lookup is performed, both cases will lead to the validity of the index to be considered as unknown.
+     * @details Note that no expressions are evaluated and no loop variable value lookup is performed, both cases will lead to the validity of the index to be considered as unknown. <br>
      *          Additionally, the validity of index values in accessed dimensions at indices larger than the number of dimensions of the accessed variable is considered to be unknown.
      * @param variableAccess The variable access to validate
      * @return The validity of the indices defined in the accessed values per dimension and bitrange.

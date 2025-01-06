@@ -18,7 +18,8 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
   unittests/syrec/parser/test_syrec_parser.cpp
   unittests/syrec/parser/test_syrec_parser_errors.cpp
   unittests/syrec/parser/test_temporary_variable_scope.cpp
-  unittests/syrec/parser/test_variable_access_index_validity.cpp)
+  unittests/syrec/parser/test_variable_access_index_validity.cpp
+  unittests/syrec/parser/test_variable_overlap_check.cpp)
 
 # link the Google test infrastructure and a default main function to the test executable.
 target_link_libraries(${MQT_SYREC_TESTS_TARGET} PRIVATE ${MQT_SYREC_TARGET} gmock gtest_main)
