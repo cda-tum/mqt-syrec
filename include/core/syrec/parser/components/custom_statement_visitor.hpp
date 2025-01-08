@@ -2,6 +2,8 @@
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_STATEMENT_VISITOR_HPP
 #pragma once
 
+#include "core/syrec/variable.hpp"
+
 #include <core/syrec/statement.hpp>
 #include <core/syrec/parser/components/custom_expression_visitor.hpp>
 
@@ -30,7 +32,7 @@ namespace syrecParser {
             syrec::Number::ptr stepsize;
         };
 
-        [[nodiscard]] std::optional<std::string>            visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx);
+        [[nodiscard]] std::optional<std::string>            visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const;
         [[nodiscard]] std::optional<LoopStepsizeDefinition> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx);
 
         std::any visitStatementList(TSyrecParser::StatementListContext* ctx) override;
@@ -45,8 +47,13 @@ namespace syrecParser {
         std::any visitSwapStatement(TSyrecParser::SwapStatementContext* ctx) override;
         std::any visitSkipStatement(TSyrecParser::SkipStatementContext* ctx) override;
 
+        void recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
+
         [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
         [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
+        [[nodiscard]] static bool                                                   doesVariableTypeAllowAssignment(const syrec::Variable::Type variableType) noexcept {
+            return variableType == syrec::Variable::Type::Inout || variableType == syrec::Variable::Type::Out || variableType == syrec::Variable::Type::Wire;
+        }
     };
 } // namespace TSyrecParser
 #endif

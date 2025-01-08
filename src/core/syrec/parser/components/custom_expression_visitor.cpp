@@ -212,8 +212,8 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
     if (!context->BITRANGE_START_PREFIX())
         return generatedVariableAccess;
 
-    const std::optional<syrec::Number::ptr> bitRangeStart = context->bitStart ? visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitStart) : std::nullopt;
-    const std::optional<syrec::Number::ptr> bitRangeEnd   = context->bitRangeEnd ? visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitRangeEnd) : bitRangeStart;
+    const std::optional<syrec::Number::ptr> bitRangeStart = visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitStart);
+    const std::optional<syrec::Number::ptr> bitRangeEnd   = visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitRangeEnd);
 
     // TODO: Are range checks executed if the parsing of either the bit range start or end fails?
     if (bitRangeStart.has_value() && bitRangeEnd.has_value()) {
@@ -244,7 +244,7 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
             if (wasBitrangeWithinRange) {
                 if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
                     if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
-                        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, userAccessedBitrangeLength);
+                        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, *userAccessedBitrangeLength);
                 } else {
                     setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
                 }

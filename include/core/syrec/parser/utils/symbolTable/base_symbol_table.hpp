@@ -25,6 +25,7 @@ namespace utils {
         [[nodiscard]] bool               existsModuleForName(const std::string_view& accessedModuleIdentifier) const;
         // TODO: Should we allow variable type assignments that are not valid based on their semantics if we can prove that no assignment is performed (i.e. assignment of variable of type 'in' to type 'out')
         // TODO: Should module overload resolution be an optional feature and the lookup be performed using exact variable type matching?
+        // TODO: Change signature to use std::vector of const variable pointers
         [[nodiscard]] ModuleOverloadResolutionResult getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments) const;
 
         [[nodiscard]] std::optional<TemporaryVariableScope::ptr>    getActiveTemporaryScope() const;

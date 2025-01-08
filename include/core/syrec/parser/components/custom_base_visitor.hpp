@@ -27,7 +27,7 @@ namespace syrecParser {
         }
 
         template<SemanticError semanticError, typename... T>
-        void recordSemanticError(Message::Position messagePosition, T&&... args) {
+        void recordSemanticError(Message::Position messagePosition, T&&... args) const {
             if (!sharedGeneratedMessageContainerInstance)
                 return;
 
@@ -37,6 +37,19 @@ namespace syrecParser {
             constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
             // TODO: How should runtime errors be handled?
             sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...)));
+        }
+
+        template<SemanticError semanticError>
+        void recordSemanticError(Message::Position messagePosition) const {
+            if (!sharedGeneratedMessageContainerInstance)
+                return;
+
+            static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty(), "No format for message of semantic error found!");
+            static_assert(!getIdentifierForSemanticError<semanticError>().empty(), "No identifiers for semantic error found!");
+
+            constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
+            // TODO: How should runtime errors be handled?
+            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, std::string(identifierForSemanticError), messagePosition,  std::string(getFormatForSemanticErrorMessage<semanticError>())));
         }
 
         void recordCustomError(Message::Position messagePosition, const std::string& errorMessage) const {
@@ -51,7 +64,8 @@ namespace syrecParser {
         [[nodiscard]] std::optional<std::shared_ptr<ExpectedResultType>> visitNonTerminalSymbolWithSingleResult(antlr4::ParserRuleContext* ruleContext) {
             // Utilizing the dynamic dispatch mechanism to process the non-terminal symbol thus assuming that the visitor will implement an adequate visit overload for the given ParserRuleContext of the non-terminal symbol
             // TODO: Should the use provide the callback that shall be used to the processing of the non-terminal instead of relying on the dynamic dispatch mechanism (that only throws an exception during runtime if no matching callback was found) with the latter detecting errors during compile time
-            if (const GenericVisitorResult<ExpectedResultType>* genericProductionResult = std::any_cast<GenericVisitorResult<ExpectedResultType>*>(visit(ruleContext)); genericProductionResult)
+            // TODO: Should we create copy of vector instead of using pointer?
+            if (const GenericVisitorResult<ExpectedResultType>* genericProductionResult = std::any_cast<GenericVisitorResult<ExpectedResultType>*>(visit(ruleContext)); genericProductionResult && genericProductionResult->getData())
                 return genericProductionResult->getData();
             return std::nullopt;
         }
@@ -64,11 +78,12 @@ namespace syrecParser {
         [[nodiscard]] std::optional<std::vector<std::shared_ptr<ExpectedResultType>>> visitNonTerminalSymbolWithManyResults(antlr4::ParserRuleContext* ruleContext) {
             // Utilizing the dynamic dispatch mechanism to process the non-terminal symbol thus assuming that the visitor will implement an adequate visit overload for the given ParserRuleContext of the non-terminal symbol
             // TODO: Should the use provide the callback that shall be used to the processing of the non-terminal instead of relying on the dynamic dispatch mechanism (that only throws an exception during runtime if no matching callback was found) with the latter detecting errors during compile time
+            // TODO: Should we create copy of vector instead of using pointer?
             const std::vector<GenericVisitorResult<ExpectedResultType>>* genericProductionResult = std::any_cast<std::vector<GenericVisitorResult<ExpectedResultType>>*>(visit(ruleContext));
             if (!genericProductionResult)
                 return std::nullopt;
 
-            std::vector<std::shared_ptr<ExpectedResultType>>             aggregateContainer(genericProductionResult->size(), nullptr);
+            std::vector<std::shared_ptr<ExpectedResultType>> aggregateContainer(genericProductionResult->size(), nullptr);
 
             bool                                                         aggregationSuccessful = true;
             for (std::size_t i = 0; aggregationSuccessful && i < genericProductionResult->size(); ++i) {

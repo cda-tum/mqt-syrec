@@ -16,7 +16,8 @@ namespace syrecParser {
         IfGuardExpressionMissmatch,
         NoModuleMatchingCallSignature,
         ExpressionBitwidthMissmatches,
-        OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue
+        OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue,
+        NegativeStepsizeValueNotAllowed
     };
 
     /// Get the identifier associated with a given semantic error
@@ -40,6 +41,7 @@ namespace syrecParser {
             case SemanticError::NoModuleMatchingCallSignature:
             case SemanticError::ExpressionBitwidthMissmatches:
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
+            case SemanticError::NegativeStepsizeValueNotAllowed:
                 return "TEST";
             default:
                 return "";
@@ -82,6 +84,8 @@ namespace syrecParser {
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";
+            case SemanticError::NegativeStepsizeValueNotAllowed:
+                return "Negative values for the step size of a 'for' loop are not allowed";
             default:
                 return "";
         }
