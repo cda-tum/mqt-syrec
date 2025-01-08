@@ -55,15 +55,34 @@ void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
 
 // START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) {
-    return 0;
+    if (!context)
+        return std::nullopt;
+
+    const std::optional<syrec::Expression::ptr>                   lhsOperand              = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->lhsOperand);
+    const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
+    const std::optional<syrec::Expression::ptr>                   rhsOperand              = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->rhsOperand);
+    if (lhsOperand.has_value() && mappedToBinaryOperation.has_value() && rhsOperand.has_value())
+        return std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand);
+    return std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitShiftExpression(TSyrecParser::ShiftExpressionContext* context) {
-    return 0;
+    if (!context)
+        return std::nullopt;
+
+    const std::optional<syrec::Expression::ptr>                 toBeShiftedOperand     = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->expression());
+    const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
+    const std::optional<syrec::Number::ptr>                     shiftAmount            = visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->number());
+    if (toBeShiftedOperand.has_value() && mappedToShiftOperation.has_value() && shiftAmount.has_value())
+        return std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount);
+    return std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitUnaryExpression(TSyrecParser::UnaryExpressionContext* context) {
-    return 0;
+    if (context && context->start)
+        recordCustomError(mapTokenPositionToMessagePosition(*context->start), "Unary expressions are currently not supported");
+    
+    return std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) {
@@ -297,6 +316,9 @@ std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::d
 }
 
 inline unsigned int CustomExpressionVisitor::truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth) {
+    if (!expectedResultBitwidth)
+        return 0;
+
     return expectedResultBitwidth < 32 && valueToTruncate > (1 << expectedResultBitwidth)
         ? valueToTruncate % (1 << expectedResultBitwidth)
         : valueToTruncate;
