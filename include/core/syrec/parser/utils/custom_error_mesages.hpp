@@ -7,14 +7,16 @@ namespace syrecParser {
         NoModuleMatchingIdentifier,
         IndexOfAccessedValueForDimensionOutOfRange,
         TooManyDimensionsAccessed,
-        IndexOfAccessedBitrangeOutOfRange,
+        TooFewDimensionsAccessed,
+        IndexOfAccessedBitOutOfRange,
         DuplicateVariableDeclaration,
         DuplicateModuleDeclaration,
         AssignmentToReadonlyVariable,
         ExpressionEvaluationFailedByDivisionByZero,
         IfGuardExpressionMissmatch,
         NoModuleMatchingCallSignature,
-        ExpressionBitwidthMissmatches
+        ExpressionBitwidthMissmatches,
+        OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue
     };
 
     /// Get the identifier associated with a given semantic error
@@ -28,7 +30,8 @@ namespace syrecParser {
             case SemanticError::NoModuleMatchingIdentifier:
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
             case SemanticError::TooManyDimensionsAccessed:
-            case SemanticError::IndexOfAccessedBitrangeOutOfRange:
+            case SemanticError::TooFewDimensionsAccessed:
+            case SemanticError::IndexOfAccessedBitOutOfRange:
             case SemanticError::DuplicateVariableDeclaration:
             case SemanticError::DuplicateModuleDeclaration:
             case SemanticError::AssignmentToReadonlyVariable:
@@ -36,6 +39,7 @@ namespace syrecParser {
             case SemanticError::IfGuardExpressionMissmatch:
             case SemanticError::NoModuleMatchingCallSignature:
             case SemanticError::ExpressionBitwidthMissmatches:
+            case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "TEST";
             default:
                 return "";
@@ -57,9 +61,11 @@ namespace syrecParser {
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
                 return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values";
             case SemanticError::TooManyDimensionsAccessed:
-                return "Accessed variable was declared with having {:d} dimensions while user defined variable access accessed {:d} dimensions";
-            case SemanticError::IndexOfAccessedBitrangeOutOfRange:
-                return "Accessed bitrange .{:d}.{:d} was out of range, accessed variable was declared with a bitrange of {:d}";
+                return "User specified access on {:d} dimensions of variable that was declared with {:d} dimensions";
+            case SemanticError::TooFewDimensionsAccessed:
+                return "Access on N dimensions signal must be fully specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
+            case SemanticError::IndexOfAccessedBitOutOfRange:
+                return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}";
             case SemanticError::DuplicateVariableDeclaration:
                 return "Duplicate variable declaration sharing same identifier {:s}";
             case SemanticError::DuplicateModuleDeclaration:
@@ -74,6 +80,8 @@ namespace syrecParser {
                 return "No module matching user provided call signature";   // TODO: Print closest matching signature, user provided call signature?
             case SemanticError::ExpressionBitwidthMissmatches:
                 return "Bitwidths of evaluated expressions need to match, left hand side expression has a bitwidth of {:d} while right hand side expression has a bitwidth of {:d}";
+            case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
+                return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";
             default:
                 return "";
         }

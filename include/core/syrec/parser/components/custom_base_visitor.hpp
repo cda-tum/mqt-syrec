@@ -3,6 +3,7 @@
 #pragma once
 
 #include "TSyrecParserBaseVisitor.h"
+#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
 #include <core/syrec/parser/components/generic_visitor_result.hpp>
 #include <core/syrec/parser/utils/custom_error_mesages.hpp>
@@ -14,11 +15,16 @@
 namespace syrecParser {
     class CustomBaseVisitor: protected TSyrecParserBaseVisitor {
     public:
-        CustomBaseVisitor(std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance):
-            sharedGeneratedMessageContainerInstance(std::move(sharedGeneratedMessageContainerInstance)) {}
+        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance):
+            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(std::make_unique<utils::BaseSymbolTable>()) {}
 
     protected:
         std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
+        std::unique_ptr<utils::BaseSymbolTable>  symbolTable;
+
+        [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
+            return Message::Position(token.getLine(), token.getCharPositionInLine());
+        }
 
         template<SemanticError semanticError, typename... T>
         void recordSemanticError(Message::Position messagePosition, T&&... args) {
@@ -26,14 +32,14 @@ namespace syrecParser {
                 return;
 
             static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty(), "No format for message of semantic error found!");
-            static_assert(!identifierForSemanticErrore.empty(), "No identifiers for semantic error found!");
+            static_assert(!getIdentifierForSemanticError<semanticError>().empty(), "No identifiers for semantic error found!");
 
             constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
             // TODO: How should runtime errors be handled?
-            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique(Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...), {}));
+            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, std::string(identifierForSemanticError), messagePosition, fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...)));
         }
 
-        void recordCustomError(Message::Position messagePosition, const std::string& errorMessage) {
+        void recordCustomError(Message::Position messagePosition, const std::string& errorMessage) const {
             sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, "UNKNOWN", messagePosition, errorMessage));
         }
 

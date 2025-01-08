@@ -59,7 +59,6 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_error_listener.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_expression_visitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_module_visitor.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_number_and_signal_visitor.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/components/custom_statement_visitor.cpp
 		
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecLexer.h
@@ -73,6 +72,7 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/base_symbol_table.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/temporary_variable_scope.cpp
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/syrec_operation_utils.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/parser_messages_container.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/variable_assignability_check.hpp
@@ -85,7 +85,6 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_error_listener.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_expression_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_module_visitor.hpp
-		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_number_and_signal_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_statement_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/generic_visitor_result.hpp
 		

@@ -3,16 +3,14 @@
 #pragma once
 
 #include <core/syrec/statement.hpp>
-#include <core/syrec/parser/components/custom_number_and_signal_visitor.hpp>
 #include <core/syrec/parser/components/custom_expression_visitor.hpp>
 
 namespace syrecParser {
     class CustomStatementVisitor: protected CustomBaseVisitor {
     public:
-        CustomStatementVisitor(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
+        CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
             CustomBaseVisitor(sharedMessagesContainerInstance),
-            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)),
-            numberAndSignalVisitorInstance(std::make_unique<CustomNumberAndSignalVisitor>(sharedMessagesContainerInstance)) {}
+            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)) {}
  
         [[nodiscard]] std::optional<syrec::Statement::vec> visitStatementListTyped(TSyrecParser::StatementListContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitStatementTyped(TSyrecParser::StatementContext* ctx);
@@ -26,7 +24,6 @@ namespace syrecParser {
 
     protected:
         std::unique_ptr<CustomExpressionVisitor> expressionVisitorInstance;
-        std::unique_ptr<CustomNumberAndSignalVisitor> numberAndSignalVisitorInstance;
 
         struct LoopStepsizeDefinition {
             bool               hasMinusPrefix;
@@ -47,6 +44,9 @@ namespace syrecParser {
         std::any visitAssignStatement(TSyrecParser::AssignStatementContext* ctx) override;
         std::any visitSwapStatement(TSyrecParser::SwapStatementContext* ctx) override;
         std::any visitSkipStatement(TSyrecParser::SkipStatementContext* ctx) override;
+
+        [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
+        [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
     };
 } // namespace TSyrecParser
 #endif

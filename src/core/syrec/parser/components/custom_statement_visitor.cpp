@@ -90,3 +90,23 @@ std::any CustomStatementVisitor::visitLoopStepsizeDefinition(TSyrecParser::LoopS
 std::any CustomStatementVisitor::visitForStatement(TSyrecParser::ForStatementContext* ctx) {
     return 0;
 }
+
+std::optional<syrec::AssignStatement::AssignOperation> CustomStatementVisitor::deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation) {
+    if (stringifiedAssignmentOperation == "+=")
+        return syrec::AssignStatement::AssignOperation::Add;
+    if (stringifiedAssignmentOperation == "-=")
+        return syrec::AssignStatement::AssignOperation::Subtract;
+    if (stringifiedAssignmentOperation == "^=")
+        return syrec::AssignStatement::AssignOperation::Exor;
+    return std::nullopt;
+}
+
+std::optional<syrec::UnaryStatement::UnaryOperation> CustomStatementVisitor::deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation) {
+    if (stringifiedUnaryAssignmentOperation == "++=")
+        return syrec::UnaryStatement::UnaryOperation::Increment;
+    if (stringifiedUnaryAssignmentOperation == "--=")
+        return syrec::UnaryStatement::UnaryOperation::Decrement;
+    if (stringifiedUnaryAssignmentOperation == "~=")
+        return syrec::UnaryStatement::UnaryOperation::Invert;
+    return std::nullopt;
+}
