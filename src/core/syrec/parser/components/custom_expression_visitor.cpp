@@ -45,6 +45,14 @@ std::optional<syrec::Variable::ptr> CustomExpressionVisitor::visitSignalTyped(TS
     return visitNonTerminalSymbolWithSingleResult<syrec::Variable>(context);
 }
 
+void CustomExpressionVisitor::setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth) {
+    optionalExpectedBitwidthForAnyProcessedEntity = bitwidth;
+}
+
+void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
+    optionalExpectedBitwidthForAnyProcessedEntity.reset();
+}
+
 // START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) {
     return 0;
@@ -59,18 +67,32 @@ std::any CustomExpressionVisitor::visitUnaryExpression(TSyrecParser::UnaryExpres
 }
 
 std::any CustomExpressionVisitor::visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) {
-    return 0;
+    if (!context)
+        return std::nullopt;
+
+    return visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->number());
 }
 
 std::any CustomExpressionVisitor::visitExpressionFromSignal(TSyrecParser::ExpressionFromSignalContext* context) {
-    return 0;
+    if (!context)
+        return std::nullopt;
+
+    return visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(context->signal());
 }
 
 std::any CustomExpressionVisitor::visitNumberFromConstant(TSyrecParser::NumberFromConstantContext* context) {
     // TODO: Check these assumptions
     // Production should only be called if the token contains only numeric characters and thus deserialization should only fail if an overflow occurs.
     // Leading and trailing whitespace should also be trimmed from the token text by the parser.
-    return context && context->INT() ? deserializeConstantFromString(context->INT()->getText()) : std::nullopt;
+    if (!context || !context->INT())
+        return std::nullopt;
+
+    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText()); constantValue.has_value()) {
+        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value())
+            return truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity);
+        return constantValue;
+    }
+    return std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitNumberFromExpression(TSyrecParser::NumberFromExpressionContext* context) {
@@ -108,8 +130,11 @@ std::any CustomExpressionVisitor::visitNumberFromSignalwidth(TSyrecParser::Numbe
         return std::nullopt;
 
     const std::string& variableIdentifier = context->IDENT()->getSymbol()->getText();
-    if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier); matchingVariableForIdentifier.has_value())
-        return matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth();
+    if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier); matchingVariableForIdentifier.has_value()) {
+        return optionalExpectedBitwidthForAnyProcessedEntity.has_value() && matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth().has_value()
+            ? truncateConstantValueToExpectedBitwidth(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth(), *optionalExpectedBitwidthForAnyProcessedEntity)
+            : matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth();
+    }
 
     recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
     return std::nullopt;
@@ -150,12 +175,13 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
         if (numUserAccessedDimensions > declaredValuesPerDimensionOfReferenceVariable.size())
             recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
         else
+            // Checking whether the dimension access of the variable was fully defined by the user prevents the propagation of non-1D signal values 
             recordSemanticError<SemanticError::TooFewDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
     }
     
     if (const std::optional<utils::VariableAccessIndicesValidity> indexValidityOfUserDefinedAccessedValuesPerDimension = utils::validateVariableAccessIndices(*generatedVariableAccess); indexValidityOfUserDefinedAccessedValuesPerDimension.has_value() && !indexValidityOfUserDefinedAccessedValuesPerDimension->isValid()) {
         
-        const std::size_t                numDimensionsToCheck          = declaredValuesPerDimensionOfReferenceVariable.size();
+        const std::size_t numDimensionsToCheck = declaredValuesPerDimensionOfReferenceVariable.size();
         for (std::size_t dimensionIdx = 0; dimensionIdx < numDimensionsToCheck; ++dimensionIdx) {
             const utils::VariableAccessIndicesValidity::IndexValidationResult validityOfAccessedValueOfDimension = indexValidityOfUserDefinedAccessedValuesPerDimension->accessedValuePerDimensionValidity.at(dimensionIdx);
             // TODO: We should not have to check whether the index validation result for the given index contains a value when an out of range access is reported.
@@ -170,6 +196,7 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
     const std::optional<syrec::Number::ptr> bitRangeStart = context->bitStart ? visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitStart) : std::nullopt;
     const std::optional<syrec::Number::ptr> bitRangeEnd   = context->bitRangeEnd ? visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->bitRangeEnd) : bitRangeStart;
 
+    // TODO: Are range checks executed if the parsing of either the bit range start or end fails?
     if (bitRangeStart.has_value() && bitRangeEnd.has_value()) {
         generatedVariableAccess->range = std::make_pair(bitRangeStart.value(), bitRangeEnd.value());
         syrec::VariableAccess temporaryVariableAccess = syrec::VariableAccess();
@@ -178,11 +205,31 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
 
         if (const std::optional<utils::VariableAccessIndicesValidity> indexValidityOfUserDefinedAccessOnBitrange = utils::validateVariableAccessIndices(temporaryVariableAccess); indexValidityOfUserDefinedAccessOnBitrange.has_value() && !indexValidityOfUserDefinedAccessOnBitrange->isValid()
             && indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity.has_value()) {
-            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangeStartIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity; accessedBitRangeStartIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangeStartIndexValidity.indexValue.has_value())
+            bool wasBitrangeWithinRange = true;
+            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangeStartIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity; accessedBitRangeStartIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangeStartIndexValidity.indexValue.has_value()) {
                 recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), accessedBitRangeStartIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
+                wasBitrangeWithinRange = false;
+            }
 
-            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangEndIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; accessedBitRangEndIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangEndIndexValidity.indexValue.has_value())
+            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangEndIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; accessedBitRangEndIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangEndIndexValidity.indexValue.has_value()) {
                 recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitRangeEnd->getStart()), accessedBitRangEndIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
+                wasBitrangeWithinRange = false;
+            }
+
+            const std::optional<unsigned int> accessedBitRangeStart = bitRangeStart->get()->tryEvaluate({});
+            const std::optional<unsigned int> accessedBitRangeEnd   = accessedBitRangeStart.has_value() ? bitRangeEnd->get()->tryEvaluate({}) : std::nullopt;
+            std::optional<unsigned int>       userAccessedBitrangeLength;
+            if (accessedBitRangeStart.has_value() && accessedBitRangeEnd.has_value())
+                userAccessedBitrangeLength = (*accessedBitRangeStart > *accessedBitRangeEnd ? *accessedBitRangeStart - *accessedBitRangeEnd : *accessedBitRangeEnd - *accessedBitRangeStart) + 1;
+
+            if (wasBitrangeWithinRange) {
+                if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
+                    if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
+                        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, userAccessedBitrangeLength);
+                } else {
+                    setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
+                }
+            }
         }
     }
     return generatedVariableAccess;
@@ -247,4 +294,10 @@ std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::d
     if (stringifiedOperation == ">>")
         return syrec::ShiftExpression::ShiftOperation::Right;
     return std::nullopt;
+}
+
+inline unsigned int CustomExpressionVisitor::truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth) {
+    return expectedResultBitwidth < 32 && valueToTruncate > (1 << expectedResultBitwidth)
+        ? valueToTruncate % (1 << expectedResultBitwidth)
+        : valueToTruncate;
 }

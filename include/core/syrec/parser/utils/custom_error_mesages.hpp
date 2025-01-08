@@ -79,7 +79,7 @@ namespace syrecParser {
             case SemanticError::NoModuleMatchingCallSignature:
                 return "No module matching user provided call signature";   // TODO: Print closest matching signature, user provided call signature?
             case SemanticError::ExpressionBitwidthMissmatches:
-                return "Bitwidths of evaluated expressions need to match, left hand side expression has a bitwidth of {:d} while right hand side expression has a bitwidth of {:d}";
+                return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";
             default:

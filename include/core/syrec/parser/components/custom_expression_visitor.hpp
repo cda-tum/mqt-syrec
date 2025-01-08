@@ -23,7 +23,12 @@ namespace syrecParser {
         [[nodiscard]] std::optional<syrec::Number::ptr>   visitNumberFromExpressionTyped(TSyrecParser::NumberFromExpressionContext* context);
         [[nodiscard]] std::optional<syrec::Number::ptr>   visitNumberFromLoopVariableTyped(TSyrecParser::NumberFromLoopVariableContext* context);
 
+        void setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
+        void clearExpectedBitwidthForAnyProcessedEntity();
+
     protected:
+        std::optional<unsigned int> optionalExpectedBitwidthForAnyProcessedEntity;
+
         std::any visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) override;
         std::any visitExpressionFromSignal(TSyrecParser::ExpressionFromSignalContext* context) override;
         std::any visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) override;
@@ -39,6 +44,7 @@ namespace syrecParser {
         [[nodiscard]] static std::optional<unsigned int>                             deserializeConstantFromString(const std::string& stringifiedConstantValue);
         [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation> deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>   deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static unsigned int                                            truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth);
     };
 } // namespace syrecParser
 #endif
