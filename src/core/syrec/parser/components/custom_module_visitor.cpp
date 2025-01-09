@@ -115,6 +115,7 @@ std::any CustomModuleVisitor::visitModule(TSyrecParser::ModuleContext* context) 
             recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);
     }
     symbolTable->closeTemporaryScope();
+    statementVisitorInstance->clearCallStatementsWithNotPerformedOverloadResolution();
     return generatedModule;
 }
 
