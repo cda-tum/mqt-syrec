@@ -26,6 +26,24 @@ namespace syrecParser {
             return Message::Position(token.getLine(), token.getCharPositionInLine());
         }
 
+        [[nodiscard]] static std::optional<unsigned int> deserializeConstantFromString(const std::string& stringifiedConstantValue, bool* didDeserializationFailDueToOverflow) {
+            char* pointerToLastCharacterInString = nullptr;
+            // Need to reset errno to not reuse already set values
+            errno = 0;
+
+            // Using this conversion method for any user provided constant value forces the maximum possible value of a constant that can be specified
+            // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
+            const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastCharacterInString, 10);
+            // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
+            if (*didDeserializationFailDueToOverflow && errno == ERANGE)
+                *didDeserializationFailDueToOverflow = true;
+
+            if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || *pointerToLastCharacterInString)
+                return std::nullopt;
+
+            return constantValue;
+        }
+
         template<SemanticError semanticError, typename... T>
         void recordSemanticError(Message::Position messagePosition, T&&... args) const {
             if (!sharedGeneratedMessageContainerInstance)

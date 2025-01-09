@@ -41,7 +41,6 @@ namespace syrecParser {
         std::any visitNumberFromExpression(TSyrecParser::NumberFromExpressionContext* context) override;
         std::any visitNumberFromLoopVariable(TSyrecParser::NumberFromLoopVariableContext* context) override;
 
-        [[nodiscard]] static std::optional<unsigned int>                             deserializeConstantFromString(const std::string& stringifiedConstantValue);
         [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation> deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>   deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static unsigned int                                            truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth);

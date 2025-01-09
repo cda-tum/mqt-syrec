@@ -106,7 +106,7 @@ std::any CustomExpressionVisitor::visitNumberFromConstant(TSyrecParser::NumberFr
     if (!context || !context->INT())
         return std::nullopt;
 
-    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText()); constantValue.has_value()) {
+    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), nullptr); constantValue.has_value()) {
         if (optionalExpectedBitwidthForAnyProcessedEntity.has_value())
             return truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity);
         return constantValue;
@@ -252,21 +252,6 @@ std::any CustomExpressionVisitor::visitSignal(TSyrecParser::SignalContext* conte
         }
     }
     return generatedVariableAccess;
-}
-
-std::optional<unsigned> CustomExpressionVisitor::deserializeConstantFromString(const std::string& stringifiedConstantValue) {
-    char* pointerToLastCharacterInString = nullptr;
-    // Need to reset errno to not reuse already set values
-    errno = 0;
-
-    // Using this conversion method for any user provided constant value forces the maximum possible value of a constant that can be specified
-    // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
-    const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastCharacterInString, 10);
-    // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
-    if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || *pointerToLastCharacterInString)
-        return std::nullopt;
-
-    return constantValue;
 }
 
 std::optional<syrec::BinaryExpression::BinaryOperation> CustomExpressionVisitor::deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation) {

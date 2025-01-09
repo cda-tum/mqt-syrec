@@ -9,16 +9,15 @@
 namespace syrecParser {
     class CustomModuleVisitor: protected CustomBaseVisitor {
     public:
-        CustomModuleVisitor(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
+        CustomModuleVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
             CustomBaseVisitor(sharedMessagesContainerInstance),
             statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedMessagesContainerInstance)) {}
 
-        [[maybe_unused]] std::optional<std::unique_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context); 
+        [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context); 
 
     protected:
         std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
-
-        [[nodiscard]] std::optional<std::unique_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context);
+        [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context);
         [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(TSyrecParser::ModuleContext* context);
         [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(TSyrecParser::ParameterListContext* context);
         [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(TSyrecParser::ParameterContext* context);
@@ -27,6 +26,7 @@ namespace syrecParser {
         [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(TSyrecParser::StatementListContext* context);
 
     private:
+
         std::any visitProgram(TSyrecParser::ProgramContext* context) override;
         std::any visitModule(TSyrecParser::ModuleContext* context) override;
         std::any visitParameterList(TSyrecParser::ParameterListContext* context) override;

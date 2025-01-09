@@ -17,7 +17,11 @@ namespace syrecParser {
         NoModuleMatchingCallSignature,
         ExpressionBitwidthMissmatches,
         OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue,
-        NegativeStepsizeValueNotAllowed
+        NegativeStepsizeValueNotAllowed,
+        DuplicateMainModuleDefinition,
+        SelfRecursionNotAllowed,
+        ValueOverflowDueToNoImplicitTruncationPerformed,
+        CannotCallMainModule,
     };
 
     /// Get the identifier associated with a given semantic error
@@ -42,6 +46,10 @@ namespace syrecParser {
             case SemanticError::ExpressionBitwidthMissmatches:
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
             case SemanticError::NegativeStepsizeValueNotAllowed:
+            case SemanticError::DuplicateMainModuleDefinition:
+            case SemanticError::SelfRecursionNotAllowed:
+            case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
+            case SemanticError::CannotCallMainModule:
                 return "TEST";
             default:
                 return "";
@@ -86,6 +94,14 @@ namespace syrecParser {
                 return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";
             case SemanticError::NegativeStepsizeValueNotAllowed:
                 return "Negative values for the step size of a 'for' loop are not allowed";
+            case SemanticError::DuplicateMainModuleDefinition:
+                return "Module with identifier 'main' can only be defined once";
+            case SemanticError::SelfRecursionNotAllowed:
+                return "Self recursion is not allowed";
+            case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
+                return "Implicit truncation of values is disabled at this point of the program thus value ({:s}) that was large than the maximum storable value of {:d} lead to an overflow";
+            case SemanticError::CannotCallMainModule:
+                return "Cannot call 'main' module of SyReC program"; // TODO: Should we also print signature of 'main' module
             default:
                 return "";
         }

@@ -39,6 +39,15 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
 }
 
+std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatement> CustomStatementVisitor::getCallStatementsWithNotPerformedOverloadResolution() const {
+    return callStatementsWithNotPerformedOverloadResolution;
+}
+
+void CustomStatementVisitor::clearCallStatementsWithNotPerformedOverloadResolution() {
+    callStatementsWithNotPerformedOverloadResolution.clear();
+}
+
+
 // START OF NON-PUBLIC FUNCTIONALITY
 std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const {
     if (!ctx || !ctx->IDENT())
@@ -156,7 +165,7 @@ std::any CustomStatementVisitor::visitCallStatement(TSyrecParser::CallStatementC
     const std::optional<std::string>                        calledModuleIdentifier = ctx->moduleIdent ? std::optional(ctx->moduleIdent->getText()) : std::nullopt;
     const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
     // Should rename callee arguments to caller arguments in grammar
-    std::vector<std::shared_ptr<const syrec::Variable>> symbolTableEntryPerCallerArgument;
+    syrec::Variable::vec symbolTableEntryPerCallerArgument;
     symbolTableEntryPerCallerArgument.reserve(ctx->calleeArguments.size());
 
     std::vector<std::string> callerArgumentVariableIdentifiers;
@@ -170,30 +179,29 @@ std::any CustomStatementVisitor::visitCallStatement(TSyrecParser::CallStatementC
         if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingSymbolTableEntryForCallerArgument = activeSymbolTableScope->get()->getVariableByName(antlrCallerArgumentToken->getText()); matchingSymbolTableEntryForCallerArgument.has_value()) {
             // TODO: Technically we should not have to check whether the requested variable data exists when a matching entry in the symbol table is found since no loop variable can match the same variable identifier due to the loop variable prefix
             if (matchingSymbolTableEntryForCallerArgument->get()->getReadonlyVariableData().has_value())
-                symbolTableEntryPerCallerArgument.emplace_back(matchingSymbolTableEntryForCallerArgument->get()->getReadonlyVariableData().value());
+                symbolTableEntryPerCallerArgument.emplace_back(std::make_shared<syrec::Variable>(**matchingSymbolTableEntryForCallerArgument->get()->getReadonlyVariableData()));
         } else {
             recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*antlrCallerArgumentToken), antlrCallerArgumentToken->getText());
         }
     }
 
-    // TODO: Provide correct caller arguments
-    // TODO: Should overload resolution be performed if any of the provided caller arguments had no matching symbol table entry
-    const utils::BaseSymbolTable::ModuleOverloadResolutionResult overloadResolutionResult = symbolTable->getModulesMatchingSignature(*calledModuleIdentifier, {});
-    if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::SingleMatchFound) {
-        if (overloadResolutionResult.moduleMatchingSignature.has_value()) {
-            //return std::make_shared<syrec::CallStatement>(overloadResolutionResult.moduleMatchingSignature.value(), std::vector<std::string>());
-            if (ctx->OP_CALL())
-                return std::make_shared<syrec::CallStatement>(nullptr, callerArgumentVariableIdentifiers);
-            return std::make_shared<syrec::UncallStatement>(nullptr, callerArgumentVariableIdentifiers);
-        }
-    } else {
-        // TODO: Overload error handling
-    }
+    if (!calledModuleIdentifier.has_value())
+        return std::nullopt;
 
-    // TODO: Add tests for this behaviour
-    // TODO: Cannot call module with identifier 'main' if such a module was defined (cannot be determined here)
-    // TODO: Cannot call main module last defined in syrec module (cannot be determined here)
-    // TODO: Cannot perform recursive call to itself
+    // TODO: Check that no recursive calls are performed which do not require overload resolution?
+    std::optional<NotOverloadResolutedCallStatement::CallStatementInstanceVariant> callStatementInstanceVariant;
+    if (ctx->OP_CALL())
+        callStatementInstanceVariant = std::make_shared<syrec::CallStatement>(nullptr, callerArgumentVariableIdentifiers);
+    else if (ctx->OP_UNCALL())
+        callStatementInstanceVariant = std::make_shared<syrec::UncallStatement>(nullptr, callerArgumentVariableIdentifiers);
+
+    if (callStatementInstanceVariant.has_value()) {
+        callStatementsWithNotPerformedOverloadResolution.emplace_back(*callStatementInstanceVariant, *calledModuleIdentifier, symbolTableEntryPerCallerArgument, ctx->moduleIdent->getLine(), ctx->moduleIdent->getCharPositionInLine());
+        if (ctx->OP_CALL())
+            return std::get<std::shared_ptr<syrec::CallStatement>>(*callStatementInstanceVariant);
+        if (ctx->OP_UNCALL())
+            return std::get<std::shared_ptr<syrec::UncallStatement>>(*callStatementInstanceVariant);
+    }
     return std::nullopt;
 }
 

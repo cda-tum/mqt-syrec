@@ -10,6 +10,20 @@
 namespace syrecParser {
     class CustomStatementVisitor: protected CustomBaseVisitor {
     public:
+        struct NotOverloadResolutedCallStatement {
+            using CallStatementInstanceVariant = std::variant<std::shared_ptr<syrec::CallStatement>, std::shared_ptr<syrec::UncallStatement>>;
+            CallStatementInstanceVariant                        callStatementVariantInstance;
+            std::string                                         calledModuleIdentifier;
+            syrec::Variable::vec                                symbolTableEntriesForCallerArguments;
+            std::size_t                                         linePositionOfModuleIdentifier;
+            std::size_t                                         columnPositionOfModuleIdentifier;
+
+            explicit NotOverloadResolutedCallStatement(CallStatementInstanceVariant callStatementVariantInstance, std::string calledModuleIdentifier, syrec::Variable::vec symbolTableEntriesForCallerArguments, std::size_t linePositionOfModuleIdentifier, std::size_t columnPositionOfModuleIdentifier):
+                callStatementVariantInstance(std::move(callStatementVariantInstance)),
+                calledModuleIdentifier(std::move(calledModuleIdentifier)), symbolTableEntriesForCallerArguments(std::move(symbolTableEntriesForCallerArguments)),
+                linePositionOfModuleIdentifier(linePositionOfModuleIdentifier), columnPositionOfModuleIdentifier(columnPositionOfModuleIdentifier) {}
+        };
+
         CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
             CustomBaseVisitor(sharedMessagesContainerInstance),
             expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)) {}
@@ -24,8 +38,12 @@ namespace syrecParser {
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitSwapStatementTyped(TSyrecParser::SwapStatementContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitSkipStatementTyped(TSyrecParser::SkipStatementContext* ctx);
 
+        [[nodiscard]] std::vector<NotOverloadResolutedCallStatement> getCallStatementsWithNotPerformedOverloadResolution() const;
+        void                                                         clearCallStatementsWithNotPerformedOverloadResolution();
+
     protected:
-        std::unique_ptr<CustomExpressionVisitor> expressionVisitorInstance;
+        std::unique_ptr<CustomExpressionVisitor>       expressionVisitorInstance;
+        std::vector<NotOverloadResolutedCallStatement> callStatementsWithNotPerformedOverloadResolution;
 
         struct LoopStepsizeDefinition {
             bool               hasMinusPrefix;
