@@ -25,6 +25,8 @@ namespace syrecParser {
         [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context);
         [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(TSyrecParser::StatementListContext* context);
 
+        [[nodiscard]] static bool doVariablesMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable);
+        [[nodiscard]] static bool doVariableCollectionsMatch(const syrec::Variable::vec& lVariableCollection, const syrec::Variable::vec& rVariableCollection);
     private:
 
         std::any visitProgram(TSyrecParser::ProgramContext* context) override;

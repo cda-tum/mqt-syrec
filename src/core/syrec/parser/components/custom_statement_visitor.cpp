@@ -39,14 +39,13 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
 }
 
-std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatement> CustomStatementVisitor::getCallStatementsWithNotPerformedOverloadResolution() const {
-    return callStatementsWithNotPerformedOverloadResolution;
+std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> CustomStatementVisitor::getCallStatementsWithNotPerformedOverloadResolution() const {
+    return callStatementsWithNotPerformedOverloadResolutionScopes;
 }
 
-void CustomStatementVisitor::clearCallStatementsWithNotPerformedOverloadResolution() {
-    callStatementsWithNotPerformedOverloadResolution.clear();
+void CustomStatementVisitor::openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature) {
+    callStatementsWithNotPerformedOverloadResolutionScopes.emplace_back(enclosingModuleSignature);
 }
-
 
 // START OF NON-PUBLIC FUNCTIONALITY
 std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const {
@@ -188,15 +187,19 @@ std::any CustomStatementVisitor::visitCallStatement(TSyrecParser::CallStatementC
     if (!calledModuleIdentifier.has_value())
         return std::nullopt;
 
-    // TODO: Check that no recursive calls are performed which do not require overload resolution?
-    std::optional<NotOverloadResolutedCallStatement::CallStatementInstanceVariant> callStatementInstanceVariant;
+    NotOverloadResolutedCallStatementScope*                                             activeModuleScopeRecordingCallStatements = getActiveModuleScopeRecordingCallStatements();
+    std::optional<NotOverloadResolutedCallStatementScope::CallStatementInstanceVariant> callStatementInstanceVariant;
     if (ctx->OP_CALL())
         callStatementInstanceVariant = std::make_shared<syrec::CallStatement>(nullptr, callerArgumentVariableIdentifiers);
     else if (ctx->OP_UNCALL())
         callStatementInstanceVariant = std::make_shared<syrec::UncallStatement>(nullptr, callerArgumentVariableIdentifiers);
 
     if (callStatementInstanceVariant.has_value()) {
-        callStatementsWithNotPerformedOverloadResolution.emplace_back(*callStatementInstanceVariant, *calledModuleIdentifier, symbolTableEntryPerCallerArgument, ctx->moduleIdent->getLine(), ctx->moduleIdent->getCharPositionInLine());
+        if (activeModuleScopeRecordingCallStatements)
+            activeModuleScopeRecordingCallStatements->callStatementsToPerformOverloadResolutionOn.emplace_back(*callStatementInstanceVariant, *calledModuleIdentifier, symbolTableEntryPerCallerArgument, ctx->moduleIdent->getLine(), ctx->moduleIdent->getCharPositionInLine());
+        else
+            recordCustomError(Message::Position(ctx->moduleIdent->getLine(), ctx->moduleIdent->getCharPositionInLine()), "Cannot record call statement variant due to no scope to record such statements is open! This is an internal error that should not happen");
+
         if (ctx->OP_CALL())
             return std::get<std::shared_ptr<syrec::CallStatement>>(*callStatementInstanceVariant);
         if (ctx->OP_UNCALL())
@@ -279,6 +282,13 @@ std::any CustomStatementVisitor::visitForStatement(TSyrecParser::ForStatementCon
 void CustomStatementVisitor::recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const {
     if (!doesVariableTypeAllowAssignment(accessedVariable.type))
         recordSemanticError<SemanticError::AssignmentToReadonlyVariable>(mapTokenPositionToMessagePosition(reportedErrorPosition), accessedVariable.name);
+}
+
+CustomStatementVisitor::NotOverloadResolutedCallStatementScope* CustomStatementVisitor::getActiveModuleScopeRecordingCallStatements() {
+    if (callStatementsWithNotPerformedOverloadResolutionScopes.empty())
+        return nullptr;
+
+    return &*callStatementsWithNotPerformedOverloadResolutionScopes.end();
 }
 
 std::optional<syrec::AssignStatement::AssignOperation> CustomStatementVisitor::deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation) {

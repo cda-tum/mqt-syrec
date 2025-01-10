@@ -10,18 +10,35 @@
 namespace syrecParser {
     class CustomStatementVisitor: protected CustomBaseVisitor {
     public:
-        struct NotOverloadResolutedCallStatement {
+        struct NotOverloadResolutedCallStatementScope {
             using CallStatementInstanceVariant = std::variant<std::shared_ptr<syrec::CallStatement>, std::shared_ptr<syrec::UncallStatement>>;
-            CallStatementInstanceVariant                        callStatementVariantInstance;
-            std::string                                         calledModuleIdentifier;
-            syrec::Variable::vec                                symbolTableEntriesForCallerArguments;
-            std::size_t                                         linePositionOfModuleIdentifier;
-            std::size_t                                         columnPositionOfModuleIdentifier;
 
-            explicit NotOverloadResolutedCallStatement(CallStatementInstanceVariant callStatementVariantInstance, std::string calledModuleIdentifier, syrec::Variable::vec symbolTableEntriesForCallerArguments, std::size_t linePositionOfModuleIdentifier, std::size_t columnPositionOfModuleIdentifier):
-                callStatementVariantInstance(std::move(callStatementVariantInstance)),
-                calledModuleIdentifier(std::move(calledModuleIdentifier)), symbolTableEntriesForCallerArguments(std::move(symbolTableEntriesForCallerArguments)),
-                linePositionOfModuleIdentifier(linePositionOfModuleIdentifier), columnPositionOfModuleIdentifier(columnPositionOfModuleIdentifier) {}
+            struct DeclaredModuleSignature {
+                std::string          moduleIdentifier;
+                syrec::Variable::vec parameters;
+
+                explicit DeclaredModuleSignature(std::string moduleIdentifier, syrec::Variable::vec parameters):
+                    moduleIdentifier(std::move(moduleIdentifier)), parameters(std::move(parameters)) {}
+            };
+
+            struct CallStatementData {
+                CallStatementInstanceVariant callStatementVariantInstance;
+                std::string                  calledModuleIdentifier;
+                syrec::Variable::vec         symbolTableEntriesForCallerArguments;
+                std::size_t                  linePositionOfModuleIdentifier;
+                std::size_t                  columnPositionOfModuleIdentifier;
+
+                explicit CallStatementData(CallStatementInstanceVariant callStatementVariantInstance, std::string calledModuleIdentifier, syrec::Variable::vec symbolTableEntriesForCallerArguments, std::size_t linePositionOfModuleIdentifier, std::size_t columnPositionOfModuleIdentifier):
+                    callStatementVariantInstance(std::move(callStatementVariantInstance)),
+                    calledModuleIdentifier(std::move(calledModuleIdentifier)), symbolTableEntriesForCallerArguments(std::move(symbolTableEntriesForCallerArguments)),
+                    linePositionOfModuleIdentifier(linePositionOfModuleIdentifier), columnPositionOfModuleIdentifier(columnPositionOfModuleIdentifier) {}
+            };
+
+            DeclaredModuleSignature        signatureOfModuleContainingCallStatement;
+            std::vector<CallStatementData> callStatementsToPerformOverloadResolutionOn;
+
+            explicit NotOverloadResolutedCallStatementScope(DeclaredModuleSignature signatureOfModuleContainingCallStatement):
+                signatureOfModuleContainingCallStatement(std::move(signatureOfModuleContainingCallStatement)) {}
         };
 
         CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
@@ -38,12 +55,12 @@ namespace syrecParser {
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitSwapStatementTyped(TSyrecParser::SwapStatementContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr> visitSkipStatementTyped(TSyrecParser::SkipStatementContext* ctx);
 
-        [[nodiscard]] std::vector<NotOverloadResolutedCallStatement> getCallStatementsWithNotPerformedOverloadResolution() const;
-        void                                                         clearCallStatementsWithNotPerformedOverloadResolution();
+        [[nodiscard]] std::vector<NotOverloadResolutedCallStatementScope> getCallStatementsWithNotPerformedOverloadResolution() const;
+        void                                                              openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature);
 
     protected:
-        std::unique_ptr<CustomExpressionVisitor>       expressionVisitorInstance;
-        std::vector<NotOverloadResolutedCallStatement> callStatementsWithNotPerformedOverloadResolution;
+        std::unique_ptr<CustomExpressionVisitor>                   expressionVisitorInstance;
+        std::vector<NotOverloadResolutedCallStatementScope>        callStatementsWithNotPerformedOverloadResolutionScopes;
 
         struct LoopStepsizeDefinition {
             bool               hasMinusPrefix;
@@ -65,7 +82,8 @@ namespace syrecParser {
         std::any visitSwapStatement(TSyrecParser::SwapStatementContext* ctx) override;
         std::any visitSkipStatement(TSyrecParser::SkipStatementContext* ctx) override;
 
-        void recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
+        void                                                  recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
+        [[nodiscard]] NotOverloadResolutedCallStatementScope* getActiveModuleScopeRecordingCallStatements();
 
         [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
         [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
