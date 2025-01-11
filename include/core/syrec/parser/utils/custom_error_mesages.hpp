@@ -12,7 +12,7 @@ namespace syrecParser {
         DuplicateVariableDeclaration,
         DuplicateModuleDeclaration,
         AssignmentToReadonlyVariable,
-        ExpressionEvaluationFailedByDivisionByZero,
+        ExpressionEvaluationFailedDueToDivisionByZero,
         IfGuardExpressionMissmatch,
         NoModuleMatchingCallSignature,
         ExpressionBitwidthMissmatches,
@@ -40,7 +40,7 @@ namespace syrecParser {
             case SemanticError::DuplicateVariableDeclaration:
             case SemanticError::DuplicateModuleDeclaration:
             case SemanticError::AssignmentToReadonlyVariable:
-            case SemanticError::ExpressionEvaluationFailedByDivisionByZero:
+            case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
             case SemanticError::IfGuardExpressionMissmatch:
             case SemanticError::NoModuleMatchingCallSignature:
             case SemanticError::ExpressionBitwidthMissmatches:
@@ -82,7 +82,7 @@ namespace syrecParser {
                 return "Duplicate module declaration with identifier {:s} sharing same signature";
             case SemanticError::AssignmentToReadonlyVariable:
                 return "No assignment to readonly variable {:s} possible";
-            case SemanticError::ExpressionEvaluationFailedByDivisionByZero:
+            case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
                 return "Expression evaluation failed due to a division by zero";
             case SemanticError::IfGuardExpressionMissmatch:
                 return "Guard and closing guard expression of IfStatement did not match";

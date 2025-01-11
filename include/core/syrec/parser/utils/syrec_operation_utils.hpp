@@ -4,6 +4,15 @@
 #include <core/syrec/expression.hpp>
 
 namespace utils {
+    [[nodiscard]] inline unsigned int truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth) {
+        if (!expectedResultBitwidth)
+            return 0;
+
+        return expectedResultBitwidth < 32 && valueToTruncate > (1 << expectedResultBitwidth)
+            ? valueToTruncate % (1 << expectedResultBitwidth)
+            : valueToTruncate;
+    }
+
     [[nodiscard]] bool isOperandIdentityElementOfOperation(const unsigned int operandValue, syrec::BinaryExpression::BinaryOperation binaryOperation) {
         return false;
     }

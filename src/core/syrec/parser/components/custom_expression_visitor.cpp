@@ -1,7 +1,9 @@
 #include "core/syrec/parser/components/custom_expression_visitor.hpp"
 
+#include "core/syrec/expression.hpp"
 #include "core/syrec/parser/utils/variable_access_index_check.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 
 using namespace syrecParser;
 
@@ -61,21 +63,51 @@ std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpr
     const std::optional<syrec::Expression::ptr>                   lhsOperand              = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->lhsOperand);
     const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
     const std::optional<syrec::Expression::ptr>                   rhsOperand              = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->rhsOperand);
-    if (lhsOperand.has_value() && mappedToBinaryOperation.has_value() && rhsOperand.has_value())
-        return std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand);
-    return std::nullopt;
+
+    if (!mappedToBinaryOperation.has_value())
+        return std::nullopt;
+
+    const std::optional<unsigned int> constantValueOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? tryGetConstantValueOfExpression(**lhsOperand) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? tryGetConstantValueOfExpression(**rhsOperand) : std::nullopt;
+
+    if (*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Divide && ((constantValueOfLhsOperand.has_value() && !*constantValueOfLhsOperand) || (constantValueOfRhsOperand.has_value() && !*constantValueOfRhsOperand)))
+        recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*(context->lhsOperand ? context->lhsOperand->getStart() : context->rhsOperand->getStart())));
+    else if (constantValueOfLhsOperand.has_value() && constantValueOfRhsOperand.has_value()) {
+        if (const std::optional<unsigned int> evaluationResultOfExpr = utils::tryEvaluate(constantValueOfLhsOperand, *mappedToBinaryOperation, constantValueOfRhsOperand, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH)); evaluationResultOfExpr.has_value())
+            return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(*evaluationResultOfExpr), optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
+    }
+
+    return lhsOperand.has_value() && rhsOperand.has_value()
+        ? std::make_optional(std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand))
+        : std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitShiftExpression(TSyrecParser::ShiftExpressionContext* context) {
     if (!context)
         return std::nullopt;
 
-    const std::optional<syrec::Expression::ptr>                 toBeShiftedOperand     = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->expression());
+    std::optional<syrec::Expression::ptr>                 toBeShiftedOperand     = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(context->expression());
     const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
     const std::optional<syrec::Number::ptr>                     shiftAmount            = visitNonTerminalSymbolWithSingleResult<syrec::Number>(context->number());
-    if (toBeShiftedOperand.has_value() && mappedToShiftOperation.has_value() && shiftAmount.has_value())
-        return std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount);
-    return std::nullopt;
+
+    if (!mappedToShiftOperation.has_value())
+        return std::nullopt;
+
+    const std::optional<unsigned int> constantValueOfToBeShiftedOperand = toBeShiftedOperand.has_value() && *toBeShiftedOperand ? tryGetConstantValueOfExpression(**toBeShiftedOperand) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfShiftAmount        = shiftAmount.has_value() && *shiftAmount ? shiftAmount.value()->tryEvaluate({}) : std::nullopt;
+
+    if (constantValueOfShiftAmount.has_value()) {
+        if (!*constantValueOfShiftAmount)
+            return toBeShiftedOperand;
+        if (constantValueOfToBeShiftedOperand.has_value()) {
+            if (const std::optional<unsigned int> evaluationResultOfShiftOperation = utils::tryEvaluate(constantValueOfToBeShiftedOperand, *mappedToShiftOperation, constantValueOfShiftAmount, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH)); evaluationResultOfShiftOperation.has_value())
+                return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(*evaluationResultOfShiftOperation), optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
+        }
+    }
+
+    return toBeShiftedOperand.has_value() && shiftAmount.has_value()
+        ? std::make_optional(std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount))
+        : std::nullopt;
 }
 
 std::any CustomExpressionVisitor::visitUnaryExpression(TSyrecParser::UnaryExpressionContext* context) {
@@ -108,7 +140,7 @@ std::any CustomExpressionVisitor::visitNumberFromConstant(TSyrecParser::NumberFr
 
     if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), nullptr); constantValue.has_value()) {
         if (optionalExpectedBitwidthForAnyProcessedEntity.has_value())
-            return truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity);
+            return utils::truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity);
         return constantValue;
     }
     return std::nullopt;
@@ -151,7 +183,7 @@ std::any CustomExpressionVisitor::visitNumberFromSignalwidth(TSyrecParser::Numbe
     const std::string& variableIdentifier = context->IDENT()->getSymbol()->getText();
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier); matchingVariableForIdentifier.has_value()) {
         return optionalExpectedBitwidthForAnyProcessedEntity.has_value() && matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth().has_value()
-            ? truncateConstantValueToExpectedBitwidth(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth(), *optionalExpectedBitwidthForAnyProcessedEntity)
+            ? utils::truncateConstantValueToExpectedBitwidth(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth(), *optionalExpectedBitwidthForAnyProcessedEntity)
             : matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth();
     }
 
@@ -298,13 +330,4 @@ std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::d
     if (stringifiedOperation == ">>")
         return syrec::ShiftExpression::ShiftOperation::Right;
     return std::nullopt;
-}
-
-inline unsigned int CustomExpressionVisitor::truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth) {
-    if (!expectedResultBitwidth)
-        return 0;
-
-    return expectedResultBitwidth < 32 && valueToTruncate > (1 << expectedResultBitwidth)
-        ? valueToTruncate % (1 << expectedResultBitwidth)
-        : valueToTruncate;
 }

@@ -1,6 +1,5 @@
-#include "core/syrec/parser/components/custom_module_visitor.hpp"
-
 #include "core/syrec/module.hpp"
+#include "core/syrec/parser/components/custom_module_visitor.hpp"
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
 
 using namespace syrecParser;

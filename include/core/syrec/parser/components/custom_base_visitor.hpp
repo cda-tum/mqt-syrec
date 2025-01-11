@@ -21,6 +21,7 @@ namespace syrecParser {
     protected:
         std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
         std::unique_ptr<utils::BaseSymbolTable>  symbolTable;
+        static constexpr unsigned int            DEFAULT_EXPRESSION_BITWIDTH = 32;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
             return Message::Position(token.getLine(), token.getCharPositionInLine());
@@ -42,6 +43,12 @@ namespace syrecParser {
                 return std::nullopt;
 
             return constantValue;
+        }
+
+        [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOfExpression(const syrec::Expression& expression) {
+            if (const auto& expressionAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&expression); expressionAsNumericOne && expressionAsNumericOne->value && expressionAsNumericOne->value)
+                return expressionAsNumericOne->value->tryEvaluate({});
+            return std::nullopt;
         }
 
         template<SemanticError semanticError, typename... T>

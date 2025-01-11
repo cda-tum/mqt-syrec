@@ -43,7 +43,6 @@ namespace syrecParser {
 
         [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation> deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>   deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
-        [[nodiscard]] static unsigned int                                            truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth);
     };
 } // namespace syrecParser
 #endif
