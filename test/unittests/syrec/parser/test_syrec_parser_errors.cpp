@@ -26,11 +26,14 @@ public:
     }
 
     void performTestExecution(const std::string& stringifiedSyrecProgramToProcess) const {
-        ASSERT_FALSE(expectedErrorMessages.empty());
         syrec::Program program;
 
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = program.read(stringifiedSyrecProgramToProcess));
+        // We needed to modifiy the syrec::Program interface to allow processing of programs from a string due to the missing cross platform support
+        // to create temporary or in-memory files (see mkstemp and fmemopen functions which are POSIX specific ones) without using the boost library.
+        // Using the tmpfile/tmpfile_s of the C++ standard library is also not viable for the creating of temporary files due to the missing ability
+        // to determine the path/filename of the generated file descriptor on all platforms.
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = program.readFromString(stringifiedSyrecProgramToProcess));
         ASSERT_NO_FATAL_FAILURE(assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, expectedErrorMessages));
     }
 
@@ -89,588 +92,666 @@ private:
 };
 
 // TODO: Should we tests for non-integer numbers used in any signal declaration
+// TODO: Check whether swaps or assignments (both unary and binary ones) between N-d signals are possible
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("main() skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidModuleKeywordUsageCausesError) {
-    GTEST_SKIP();
+    performTestExecution("modul main() skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInModuleIdentifierCausesError) {
-    GTEST_SKIP();
+    performTestExecution("mod-ule main() skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyModuleIdentifierCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module () skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterListOpeningBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidModuleParameterListOpeningBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main[) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterListClosingBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main( skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidModuleParameterListClosingBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(] skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterDelimiterCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2](16) out b(16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableDeclarationAfterModuleParameterDelimiterCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2](16), ) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyModuleBodyCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2](16))");
 }
 
 // TODO: According to the specification, an overload of the top level module not named 'main' is possible
 // TODO: The specification also does not disallow the definition of an overload of the module named 'main' but specifies that the user can define a top-level module with the special identifier 'main'
 // see section 2.1
 TEST_F(SyrecParserErrorTestsFixture, OverloadOfModuleNamedMainCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2](16)) skip module main(out b[1](16)) skip");
 }
+
+// TODO: Tests for overload of main module (not using identifier 'main')
 
 // Tests for production parameter
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableTypeCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(a[2](16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableTypeCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(int a(16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in (16))");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierSharingSameVariableTypeCausesError) {
+    performTestExecution("module main(in a(16), in a(8))");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierUsingDifferentVariableTypeCausesError) {
+    performTestExecution("module main(in a(16), out a(16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInModuleParameterIdentifierCausesError) {
-    GTEST_SKIP();
-}
-
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferUsingDifferentVariableTypeCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a-t(16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionOpeningBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a16](16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionOpeningBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a{16](2)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionClosingBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionClosingBracketCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[2}) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NoneNumericValueForNumberOfValuesForDimensionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[test](2)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingValueForNumberOfValuesForDimensionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a[]) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForModuleParameterBitwidthDeclarationCausesError) {
+    performTestExecution("module main(in a16)) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForModuleParameterBitwidthDeclarationCausesError) {
+    performTestExecution("module main(in a{16)) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketForModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketForModuleParameterBitwidthDeclarationCausesError) {
+    performTestExecution("module main(in a(16) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketForModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketForModuleParameterBitwidthDeclarationCausesError) {
+    performTestExecution("module main(in a(16}) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterBitwidthCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterBitwidthWithBracketsDefinedCausesError) {
+    performTestExecution("module main(in a()) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NoneNumericModuleParameterBitwidthCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(2 -3)) skip");
 }
 
 // Tests for signal-list
 TEST_F(SyrecParserErrorTestsFixture, OmittingLocalModuleParameterTypeInDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() a(16) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidLocalModuleParameterTypeInDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() int a(16) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLocalVariableDelimiterInDeclarationsNotSharingSameVariableType) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a(16) state b(16) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLocalVariableDelimiterInDeclarationsSharingSameVariableType) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a(16) b(16) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire (16) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInLocalModuleParameterDeclarationSharingSameVariableTypeCausesError) {
+    performTestExecution("module main() wire a(16), [2](4) skip");
 }
 
 // TODO: Test in declaration sharing variable type and single variable type declaration
 TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a(16), b(8), a(4) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeInSeparateDeclarationInLocalModuleParameterDeclarationCausesError) {
+    performTestExecution("module main() wire a(16), b(8) wire a(4) skip");
 }
 
 // TODO: Test in declaration sharing variable type and single variable type declaration
 TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferUsingDifferentVariableTypeInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a(16) state b(8), a(4) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferBetweenModuleParameterAndLocalVariable) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferBetweenModuleParameterAndLocalVariableInSeparateLocalVariableDeclaration) {
+    performTestExecution("module main(in a(16)) wire b(8) state a(4) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInLocalModuleVariableIdentifierCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferBetweenModuleParameterAndLocalVariableDeclarationWithLatterDefiningMultipleVariablesOfSameType) {
+    performTestExecution("module main(in a(16)) wire c(4) state b(8), a(4) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInLocalModuleVariableIdentifierDefinedInSeparateDeclarationCausesError) {
+    performTestExecution("module main() wire a-2(16) state b(4) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInLocalModuleVariableIdentifierDefinedInDeclarationSharingVariableTypesCausesError) {
+    performTestExecution("module main() wire a(16), b#2 skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionOpeningBracketInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a2](4) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionOpeningBracketInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a{2] skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionClosingBracketInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a[2 skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionClosingBracketInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a[2) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NoneNumericValueForNumberOfValuesForDimensionInLocalModuleParameterDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire b(4) wire a[#b) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingValueForNumberOfValuesForDimensionInLocalModuleVariableDeclarationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a[] skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketInLocalModuleVariableDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfBitwidthInLocalModuleVariableDeclarationCausesError) {
+    performTestExecution("module main() wire a16) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketInLocalModuleVariableDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfBitwidthInLocalModuleVariableDeclarationCausesError) {
+    performTestExecution("module main() wire a16} skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketInLocalModuleVariableDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfBitwidthInLocalModuleVariableDeclarationCausesError) {
+    performTestExecution("module main() wire a(16 skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketInModuleVariableDeclarationCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfBitwidthInModuleVariableDeclarationCausesError) {
+    performTestExecution("module main() wire a(16} skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingLocalModuleVariableBitwidthCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, OmittingLocalModuleVariableBitwidthValueWhenBracketsWereDefinedCausesError) {
+    performTestExecution("module main() wire a() skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NoneNumericLocalModuleVariableBitwidthCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() wire a(test) skip");
 }
 
 // Tests for production call-statement
 // TODO: All call statements should be repeated with the uncall keyword
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidCallKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) performCall add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInCallStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), in b(4), out c(4)) call (a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, ModuleIdentifierNotMatchingAnyDeclaredModuleIdentifierInCallStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), in b(4), out c(4)) call add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterOpeningBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call adda, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidCallStatementParameterOpeningBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterIdentifierCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, CallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterDelimiterCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidUncallKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) performCall add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInUncallStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), in b(4), out c(4)) uncall (a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, ModuleIdentifierNotMatchingAnyDeclaredModuleIdentifierInUncallStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), in b(4), out c(4)) uncall add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterOpeningBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall adda, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterOpeningBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterIdentifierCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UncallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterDelimiterCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a b, c)");
 }
 
 // TODO: Overload tests
-
+// TODO: Modifiable parameter overlap tests (i.e. module x(inout a(4), out b(4)) a <=> b ... module main() wire t(4) call x(t, t)
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterClosingBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a, b, c");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidCallStatementParameterClosingBracket) {
-    GTEST_SKIP();
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a, b, c]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterClosingBracket) {
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBracket) {
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c]");
 }
 
 // Tests for production for-statement
 TEST_F(SyrecParserErrorTestsFixture, OmittingForStatementKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) $i = 0 to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidForStatementKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) do $i = 0 to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableIdentPrefixCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for i = 0 to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableInitialValueInitializationEqualSignCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) do $i 0 to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopVariableInitialValueInitializationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = b to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInInitialValueInitializationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = $i to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingToKeywordInLoopVariableDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = 0 3 do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingToKeywordInForLoopIterationNumbersCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 0 3 do b.0 ^= 1 rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopIterationNmberStartValueCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopIterationNumberStartValueInLoopVariableInitializationCausesError) {
+    performTestExecution("module main(in a(4), out b(4)) for $i=b to 3 do b.$i ^= 1 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopIterationNumberStartValueCausesError) {
+    performTestExecution("module main(in a(4), out b(4)) for b to 3 do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopIterationNumberEndValueCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for to b do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopVariableEndValueCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = 0 to b do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidForLoopStepSizeKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 incr 1 do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopVariableStepsizeValueCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 step b do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsingNonMinusSymbolAfterStepKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 step 1 - do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsingMultipleMinusSymbolsAfterStepkeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 step --1 do b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingDoKeywordAfterLoopHeaderDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 step 1 b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidDoKeywordAfterLoopHeaderDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 loop b.0 ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyLoopBodyCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 do rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DuplicateDefinitionOfLoopVariableInNestedLoopCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 do for $i=1 to 3 do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInLoopVariableInitializationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = (b - 2) step 1 do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInLoopVariableEndValueDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for $i = 0 to (b - 2) step 1 do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInLoopVariableStepsizeDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 3 step (b - 2) do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInForLoopIterationNumberStartValueDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for (b - 2) step 1 do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInForLoopIterationNumberEndValueDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 0 to (b - 2) step 1 do skip rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInForLoopIterationNumberStepsizeDefinitionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) for 0 to 3 step (b - 2) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingRofKeywordAfterLoopBodyCausesError) {
+    performTestExecution("module main(in a(4), out b(4)) for 3 step 1 do  ++=b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidRofKeywordAfterLoopBodyCausesError) {
+    performTestExecution("module main(in a(4), out b(4)) for 3 step 1 do  done; ++=b");
 }
 
 // Tests for production if-statement
+TEST_F(SyrecParserErrorTestsFixture, OmittingIfKeywordCausesError) {
+    performTestExecution("module main(out a(4)) (a > 2) then skip else skip fi (a > 2)");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, InvalidIfKeywordCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if-cond (a > 2) then skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfIfStatementInNonConstantValueGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if a > 2) then skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfIfStatementInNonConstantValueGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if {a > 2) then skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfIfStatementInNonConstantValueGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2 then skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfIfStatementInNonConstantValueGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2} then skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingThenKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidThenKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) do skip else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingElseKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidElseKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip elif skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingFiKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidFiKeywordAfterGuardConditionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip done (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi {a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi (a > 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi (a > 2]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissingmatchBetweenGuardAndClosingGuardConditionCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnBitwidthCausesError) {
+    performTestExecution("module main(out a(4)) if (a.0 > 2) then skip else skip fi (a.1:2 > 2)");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnAccessedValueOfDimensionCausesError) {
+    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (a[2] > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnNumberOfAccessedDimensionsCausesError) {
+    performTestExecution("module main(out a[2][3](4)) if (a[0] > 2) then skip else skip fi (a[1][0] > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnOperandOrderCausesError) {
+    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (2 < a[1])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnTypeOfExpressionCausesError) {
+    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi ((a[0] << 2) > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnConstantValuesCausesError) {
+    performTestExecution("module main(out a[2](4), out b(2)) if (#a > 2) then skip else skip fi (#b > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionUsingLoopVariablesCausesError) {
+    performTestExecution("module main(out a[2](4), out b(2)) for $i = 0 to 2 step 1 do if ($i > 2) then skip else skip fi ($i << 2) rof");
+}
+
+// TODO: Should numeric expressions that evaluate to the same value but are defined using a different structure be considered as usable in the guard/closing-guard condition of the if statement?
+// TODO: Should omitting of the accessed value of a 1-D signal in the guard condition while the closing guard condition explicitly defined the accessed value of the dimension be causing an error?
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInGuardExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) if (a > 2) then skip else skip fi (a > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, EmptyTrueBranchInIfStatementCausesError) {
+    performTestExecution("module main(out a(4)) if (a > 2) then else skip fi (a > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, EmptyFalseBranchInIfStatementCausesError) {
+    performTestExecution("module main(out a(4)) if (a > 2) then skip else fi (a > 2)");
 }
 
 // Tests for production unary-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableInUnaryStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in b(4)) ++=b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInUnaryStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main() ++=b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownUnaryAssignmentOperationInUnaryStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) *=b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionInUnaryStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in b(4)) ++= (b - 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInUnaryAssignmentCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in b(4)) for $i = 0 to 3 step 1 do ++= $i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInUnaryAssignmentCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in b[2](4)) ++=b");
 }
 
 // Tests for production assign-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfAssignStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) a += b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnLhsOfAssignStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) a += b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnRhsOfAssignStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) a += c");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownAssignOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) a := b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingEqualSignFromAssignOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) a + b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsLhsOperandOfAssignmentCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) for $i = 0 to 3 step 1 do $i += b rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInLhsOperandOfAssignmentCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b[2](4)) b += 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInBitwidthsOfOperandsOfAssignmentCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) a.1 += b.2:3");
 }
 
 // TODO: Tests for overlaping signals
 
 // Tests for production swap-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) a <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnLhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) c <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnRhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(in a(4), out b(4)) b <=> a");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnRhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b(4)) a <=> c");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionOnLhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b(4)) (a - 2) <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionOnRhsOfSwapStatementCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b(4)) a <=> (b - 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b:2.3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVaribleAccessOfLhsSwapOperandCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a[2](4), out b(4)) a <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVaribleAccessOfRhsSwapOperandCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b[2](4)) a <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfConstantOperandAsLhsSwapOperandCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) 2 <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfConstantOperandAsRhsSwapOperandCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b <=> 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidSwapOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(inout a(4), out b(4)) a => b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsLhsOperandOfSwapOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) for $i = 0 to 3 do $i <=> b rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) for $i = 0 to 3 do b <=> $i rof");
 }
 
 // TODO: Test for overlapping signal accesses
@@ -678,35 +759,35 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
 // Tests for production binary-expression
 // TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += (a - 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownBinaryOperationInBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += (a <=> 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += a + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += [a + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += (a + 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out b(4)) b += (a + 2]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInLhsOperandOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += (b + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInRhsOperandOfBinaryExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += (2 - b)");
 }
 
 // TODO: Tests for nested expressions
@@ -717,144 +798,156 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
 // Tests for production shift-expression
 // TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInLhsOperandOfShiftExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((c << 2) + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInRhsOperandOfShiftExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((b[0] << #c) + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidShiftOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((b[0] <=> 2) + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLhsOperandOfShiftExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((<< #b) + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingRhsOperandOfShiftExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += (b[1] + (b[0] >>))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NonNumericExpressionInRhsOperandOfShiftExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((b[0] << (b[1] - 2) + 2))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableUsedAsLhsOperandOfShiftOperationCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) a += ((b >> #a) + 2)");
 }
 
 // Tests for production number
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[(#c - 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOperationInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[(#a << 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBrackerOfNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[#a + 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOpeningBracketInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[{#a + 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBrackerOfNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[(#a + 2]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidClosingBracketInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[(#a + 2]]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[((#a + 2) / 0)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInEvaluatedNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a[(#a - 4)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredLoopVariableInNumericExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4), out b[2](4)) for $i = 0 to 3 step 1 do ++= a[(($i + 2) / 0)] rof");
 }
 
 // Tests for production signal
 // TODO: Tests for indices out of range and division by zero errors in dynamic expressions (i.e. loop variables evaluated at compile time)
 // TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a(4)) ++= .0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForAccessOnDimensionOfVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForAccessOnDimensionOfVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a(1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionOutOfRangeCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[2].0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionInNonConstantExpressionOutOfRangeCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a[#a].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, AccessedDimensionOfVariableOutOfRangeCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0][1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, None1DSizeOfVariableAccessCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a.0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, None1DAccessOnExpressionForValueOfDimensionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4), out b[2](2)) ++= a[b].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketForAccessOnDimensionOfVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0.0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketForAccessOnDimensionOfVariableCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0}.0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingBitrangeStartSymbolCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0]0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidBitrangeStartSymbolCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0]:0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingBitrangEndSymbolCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0].00");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidBitrangEndSymbolCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a[0].0.0");
 }
 
 // TODO: Division by zero error are tested in tests for production 'number', should we explicitly tests the same behaviour for every usage of the production in other productions?
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeStartValueExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a.(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeEndValueExpressionCausesError) {
-    GTEST_SKIP();
+    performTestExecution("module main(out a[2](4)) ++= a.0:(2 / (#a - 4))");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueOutOfRangeCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicExpressionForAccessValueOfDimensionCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a[(2 / (#a - 4))]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueOutOfRangeCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueIsConstantAndOutOfRangeCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a.5");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicExpressionForValueOfDimensionCausesError) {
-    GTEST_SKIP();
+TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsConstantAndOutOfRangeCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a.0:5");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueIsDynamicExpressionAndOutOfRangeCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a.(#a + 1):5");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsDynamicExpressionAndOutOfRangeCausesError) {
+    performTestExecution("module main(out a[2](4)) ++= a.0:(#a + 1)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, TestError) {
