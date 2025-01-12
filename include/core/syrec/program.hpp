@@ -36,6 +36,7 @@ namespace syrec {
         }
 
         static std::string read(const std::string& filename, ReadProgramSettings settings = ReadProgramSettings{});
+        static std::string readFromString(const std::string_view& stringifiedProgram, ReadProgramSettings = ReadProgramSettings{});
 
     private:
         Module::vec modulesVec;
@@ -55,7 +56,7 @@ namespace syrec {
         * @return true if parsing was successful, otherwise false
         */
         static bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
-        static bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error);
+        static bool readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string* error);
         [[nodiscard]] static std::optional<std::string> tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors);
     };
 

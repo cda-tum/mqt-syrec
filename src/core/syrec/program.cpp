@@ -17,7 +17,7 @@ namespace syrec {
         return true;
     }
 
-    bool Program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
+    bool Program::readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string* error) {
         antlr4::ANTLRInputStream  input(content);
         syrecParser::TSyrecLexer  lexer(&input);
         antlr4::CommonTokenStream tokens(&lexer);
@@ -54,6 +54,12 @@ namespace syrec {
         if (foundErrorWhileReadingFileContent.empty())
             readProgramFromString(*readFileContent, settings, &foundErrorWhileReadingFileContent);
 
+        return foundErrorWhileReadingFileContent;
+    }
+
+    std::string Program::readFromString(const std::string_view& stringifiedProgram, const ReadProgramSettings settings) {
+        std::string foundErrorWhileReadingFileContent;
+        readProgramFromString(stringifiedProgram, settings, &foundErrorWhileReadingFileContent);
         return foundErrorWhileReadingFileContent;
     }
 
