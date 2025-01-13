@@ -246,7 +246,6 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInLocalModulePara
     performTestExecution("module main() wire a(16), [2](4) skip");
 }
 
-// TODO: Test in declaration sharing variable type and single variable type declaration
 TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeInLocalModuleParameterDeclarationCausesError) {
     performTestExecution("module main() wire a(16), b(8), a(4) skip");
 }
@@ -255,7 +254,6 @@ TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariab
     performTestExecution("module main() wire a(16), b(8) wire a(4) skip");
 }
 
-// TODO: Test in declaration sharing variable type and single variable type declaration
 TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferUsingDifferentVariableTypeInLocalModuleParameterDeclarationCausesError) {
     performTestExecution("module main() wire a(16) state b(8), a(4) skip");
 }
@@ -637,6 +635,18 @@ TEST_F(SyrecParserErrorTestsFixture, EmptyFalseBranchInIfStatementCausesError) {
     performTestExecution("module main(out a(4)) if (a > 2) then skip else fi (a > 2)");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInNotTakenTrueBranchWithConstantValueGuardConditionCausesError) {
+    performTestExecution("module main(in a(4)) wire b(4) if (2 < 1) then --= c else ++= b fi (2 < 1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInNotTakenFalseBranchWithConstantValueGuardConditionCausesError) {
+    performTestExecution("module main(in a(4)) wire b(4) if (2 > 1) then ++= b else --= c fi (2 > 1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInGuardConditionSubexpressionThatCouldBeSkippedDueToShortCircuitEvaluationCausesError) {
+    performTestExecution("module main(in a(4)) wire b(4) if ((2 > 1) || (c > a)) then ++= b else skip fi ((2 > 1) || (c > a))");
+}
+
 // Tests for production unary-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableInUnaryStatementCausesError) {
     performTestExecution("module main(in b(4)) ++=b");
@@ -695,7 +705,49 @@ TEST_F(SyrecParserErrorTestsFixture, MissmatchInBitwidthsOfOperandsOfAssignmentC
     performTestExecution("module main(in a(4), out b(4)) a.1 += b.2:3");
 }
 
-// TODO: Tests for overlaping signals
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitUsingOnlyConstantIndicesDefinedInAssignmentRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0].1 += (1 + a[0].1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeUsingOnlyConstantIndicesDefinedInAssignmentRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0].1:3 += (1 + a[0].1:3)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeStartBeingConstantIndexDefinedInAssignmentRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].1:$i += (1 + a[0].1:$i)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeEndBeingConstantIndexDefinedInAssignmentRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].$i:#a += (1 + a[0].$i:#a)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeStartOfLatterOverlappingFormerOfAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a.0 += (1 + a.0:1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeEndOfLatterOverlappingFormerOfAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a.0 += (1 + a.1:0)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeStartOfLatterOverlappingFormerOfAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a.0:1 += (1 + a.0)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeEndOfLatterOverlappingFormerOfAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a.1:0 += (1 + a.1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnSameValueOfDimensionInAssignmentCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0] += (1 + a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionNotExplicitlyDefinedInAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a += (1 + a)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionExplicitlyDefinedInAssignmentCausesError) {
+    performTestExecution("module main(inout a(4)) a[0] += (1 + a[0])");
+}
 
 // Tests for production swap-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {
@@ -754,10 +806,56 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
     performTestExecution("module main(out b(4)) for $i = 0 to 3 do b <=> $i rof");
 }
 
-// TODO: Test for overlapping signal accesses
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitUsingOnlyConstantIndicesDefinedInSwapRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0].1 <=> a[0].1");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeUsingOnlyConstantIndicesDefinedInSwapRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0].1:3 <=> a[0].1:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeStartBeingConstantIndexDefinedInSwapRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].1:$i <=> a[0].1:$i");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeEndBeingConstantIndexDefinedInSwapRhsCausesError) {
+    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].$i:#a <=> a[0].$i:#a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeStartOfLatterOverlappingFormerOfSwapCausesError) {
+    performTestExecution("module main(inout a(4)) a.0 <=> a.0:1");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeEndOfLatterOverlappingFormerOfSwapCausesError) {
+    performTestExecution("module main(inout a(4)) a.0 <=> a.1:0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeStartOfLatterOverlappingFormerOfSwapCausesError) {
+    performTestExecution("module main(inout a(4)) a.0:1 <=> a.0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeEndOfLatterOverlappingFormerOfSwapCausesError) {
+    performTestExecution("module main(inout a(4)) a.1:0 <=> a.1");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnSameValueOfDimensionOfSwapCausesError) {
+    performTestExecution("module main(inout a[2](4)) a[0] <=> a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionNotExplicitlyInSwapDefinedCausesError) {
+    performTestExecution("module main(inout a(4)) a <=> a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionExplicitlyDefinedInSwapCausesError) {
+    performTestExecution("module main(inout a(4)) a[0] <=> a[0]");
+}
+
+
+// TODO: Test for overlapping signal accesses (using only constant indices or dynamic expressions with resolvable operands
 
 // Tests for production binary-expression
 // TODO: Tests for truncation of values larger than the expected bitwidth
+// TODO: If short circuit evaluation of a binary expression can be performed, should semantic errors be reported? 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInBinaryExpressionCausesError) {
     performTestExecution("module main(out b(4)) b += (a - 2)");
 }
