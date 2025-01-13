@@ -15,15 +15,18 @@ std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr&
     return std::nullopt;
 }
 
-inline bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec::Variable& rVarReference) noexcept {
+bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec::Variable& rVarReference) noexcept {
     return lVarReference.name == rVarReference.name
         && lVarReference.bitwidth == rVarReference.bitwidth
         && std::equal(lVarReference.dimensions.cbegin(), lVarReference.dimensions.cend(), rVarReference.dimensions.cbegin(), rVarReference.dimensions.cend());
 }
 
 [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> utils::checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
-    const syrec::Variable::ptr& lVarPtr = lVariableAccess.getVar();
-    const syrec::Variable::ptr& rVarPtr = rVariableAccess.getVar();
+    // TODO: syrec::VariableAccess getVar(...) will crash if the variable smart pointer is not set due to the function accessing var->reference
+    // I.   Why does the variable need a smart pointer member field to a syrec::Variable instance
+    // II.  Why does the getVar(...) call access this smart pointer instance instead of simply returning syrec::VariableAccess var member?
+    const syrec::Variable::ptr& lVarPtr = lVariableAccess.var;
+    const syrec::Variable::ptr& rVarPtr = rVariableAccess.var;
     if (!lVarPtr || !rVarPtr || !doReferenceVariablesMatch(*lVarPtr, *rVarPtr))
         return std::nullopt;
 
@@ -49,29 +52,25 @@ inline bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, cons
             return VariableAccessOverlapCheckResult::NotOverlapping;
     }
 
-    if (!(lVariableAccess.range.has_value() && rVariableAccess.range.has_value()))
-        return VariableAccessOverlapCheckResult::Overlapping;
+    // The caller does not need to explicitly define the accessed bit range in the variable access if he wishes to access the whole variable bitwidth
+    std::optional<unsigned int> evaluatedLVarBitRangeStart = 0;
+    std::optional               evaluatedLVarBitRangeEnd   = lVariableAccess.var->bitwidth - 1;
+    if (lVariableAccess.range.has_value()) {
+        evaluatedLVarBitRangeStart = tryEvaluateNumber(lVariableAccess.range->first);
+        evaluatedLVarBitRangeEnd   = lVariableAccess.range->first == lVariableAccess.range->second ? evaluatedLVarBitRangeStart : tryEvaluateNumber(lVariableAccess.range->second);
+    }
 
-    const auto& [lVarBitrangeStart, lVarBitrangeEnd] = lVariableAccess.range.value();
-    const auto& [rVarBitrangeStart, rVarBitrangeEnd] = rVariableAccess.range.value();
+    std::optional<unsigned int> evaluatedRVarBitRangeStart = 0;
+    std::optional               evaluatedRVarBitRangeEnd   = rVariableAccess.var->bitwidth - 1;
+    if (rVariableAccess.range.has_value()) {
+        evaluatedRVarBitRangeStart = tryEvaluateNumber(rVariableAccess.range->first);
+        evaluatedRVarBitRangeEnd   = rVariableAccess.range->first == rVariableAccess.range->second ? evaluatedRVarBitRangeStart : tryEvaluateNumber(rVariableAccess.range->second);
+    }
 
-    // We are assuming that even a bit access has both the start and end component set (with a bit access being identified by the associated smart pointers being equal).
-    // Whether our distincation between bit and bitrange access using the smart pointers should be swapped with an actual compare of their values needs to be defined.
-    // However, the stringifiction utility class also utilizes the same behaviour.
-    if (!lVarBitrangeEnd || !rVarBitrangeEnd)
+    if (!evaluatedLVarBitRangeStart.has_value() || !evaluatedLVarBitRangeEnd.has_value() || !evaluatedRVarBitRangeStart.has_value() || !evaluatedRVarBitRangeEnd.has_value())
         return VariableAccessOverlapCheckResult::MaybeOverlapping;
 
-    const std::optional<unsigned int> evaluatedLVarBitRangeStart = tryEvaluateNumber(lVarBitrangeStart);
-    const std::optional<unsigned int> evaluatedRVarBitRangeStart = tryEvaluateNumber(rVarBitrangeStart);
-    if (!evaluatedLVarBitRangeStart.has_value() || !evaluatedRVarBitRangeStart.has_value())
-        return VariableAccessOverlapCheckResult::MaybeOverlapping;
-
-    const std::optional<unsigned int> evaluatedLVarBitRangeEnd = lVarBitrangeStart == lVarBitrangeEnd ? evaluatedLVarBitRangeStart : tryEvaluateNumber(lVarBitrangeEnd);
-    const std::optional<unsigned int> evaluatedRVarBitRangeEnd = rVarBitrangeStart == rVarBitrangeEnd ? evaluatedRVarBitRangeStart : tryEvaluateNumber(rVarBitrangeEnd);
-    if (!evaluatedLVarBitRangeEnd.has_value() || !evaluatedRVarBitRangeEnd.has_value())
-        return VariableAccessOverlapCheckResult::MaybeOverlapping;
-
-    // To support both bit range variants (I. start > end && II. end < start) we reorder both variants to the I. variant for easier handling.
+     // To support both bit range variants (I. start > end && II. end < start) we reorder both variants to the I. variant for easier handling.
     const std::pair<unsigned int, unsigned int> orderedBitrangeOfLVar = *evaluatedLVarBitRangeStart <= *evaluatedLVarBitRangeEnd
         ? std::make_pair(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd)
         : std::make_pair(*evaluatedLVarBitRangeEnd, *evaluatedLVarBitRangeStart);
@@ -83,6 +82,6 @@ inline bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, cons
     if ((orderedBitrangeOfLVar.first < orderedBitrangeOfRVar.first && orderedBitrangeOfLVar.second < orderedBitrangeOfRVar.first) 
         || (orderedBitrangeOfLVar.first > orderedBitrangeOfRVar.first && orderedBitrangeOfLVar.first > orderedBitrangeOfRVar.second))
         return VariableAccessOverlapCheckResult::NotOverlapping;
-    
+
     return VariableAccessOverlapCheckResult::Overlapping;
 }
