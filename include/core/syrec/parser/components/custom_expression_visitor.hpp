@@ -26,8 +26,12 @@ namespace syrecParser {
         void setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
         void clearExpectedBitwidthForAnyProcessedEntity();
 
+        [[maybe_unused]] bool setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
+        void                  clearRestrictionOnVariableAccesses();
+
     protected:
-        std::optional<unsigned int> optionalExpectedBitwidthForAnyProcessedEntity;
+        std::optional<unsigned int>               optionalExpectedBitwidthForAnyProcessedEntity;
+        std::optional<syrec::VariableAccess::ptr> optionalRestrictionOnVariableAccesses;
 
         std::any visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) override;
         std::any visitExpressionFromSignal(TSyrecParser::ExpressionFromSignalContext* context) override;

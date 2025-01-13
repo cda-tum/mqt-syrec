@@ -51,6 +51,27 @@ namespace syrecParser {
             return std::nullopt;
         }
 
+        [[nodiscard]] static std::optional<std::pair<unsigned int, unsigned int>> tryDetermineAccessedBitrangeOfVariableAccess(const syrec::VariableAccess& variableAccess) {
+            if (!variableAccess.range.has_value())
+                return std::make_pair(0, variableAccess.bitwidth() - 1);
+
+            if (!variableAccess.range->first || !variableAccess.range->second)
+                return std::nullopt;
+
+            const std::optional<unsigned int> accessedBitrangeStart = variableAccess.range->first->tryEvaluate({});
+            const std::optional<unsigned int> accessedBitRangeEnd   = accessedBitrangeStart.has_value() ? variableAccess.range->second->tryEvaluate({}) : std::nullopt;
+            if (accessedBitRangeEnd.has_value())
+                return std::nullopt;
+
+            return std::make_pair(*accessedBitrangeStart, *accessedBitRangeEnd);
+        }
+
+        [[nodiscard]] static unsigned int getLengthOfAccessedBitrange(const std::pair<unsigned int, unsigned int> accessedBitrange) {
+            return (accessedBitrange.first > accessedBitrange.second
+                ? accessedBitrange.first - accessedBitrange.second
+                : accessedBitrange.second - accessedBitrange.first) + 1;
+        }
+
         template<SemanticError semanticError, typename... T>
         void recordSemanticError(Message::Position messagePosition, T&&... args) const {
             if (!sharedGeneratedMessageContainerInstance)

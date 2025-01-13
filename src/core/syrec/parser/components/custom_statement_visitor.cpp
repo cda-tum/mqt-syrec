@@ -106,14 +106,16 @@ std::any CustomStatementVisitor::visitAssignStatement(TSyrecParser::AssignStatem
         return std::nullopt;
 
     const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->signal());
-    if (assignmentLhsOperand.has_value() && !doesVariableTypeAllowAssignment(assignmentLhsOperand->get()->var->type))
-        recordSemanticError<SemanticError::AssignmentToReadonlyVariable>(mapTokenPositionToMessagePosition(*ctx->signal()->start), assignmentLhsOperand->get()->var->name);
-
+    if (assignmentLhsOperand.has_value()) {
+        recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignmentLhsOperand->get()->var, *ctx->signal()->start);
+        expressionVisitorInstance->setRestrictionOnVariableAccesses(*assignmentLhsOperand);
+        if (const auto& accessedBitrangeOfLhsOperand = assignmentLhsOperand.value()->var ? tryDetermineAccessedBitrangeOfVariableAccess(**assignmentLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value())
+            expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
+    }
     const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation  = ctx->assignmentOp ? deserializeAssignmentOperationFromString(ctx->assignmentOp->getText()) : std::nullopt;
-
-    // TODO: Setting expected operand bitwidth from lhs operand
-    // TODO: Perform overlap checks (use class member and check in expression visitor)
-    const std::optional<syrec::Expression::ptr> assignmentRhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(ctx->expression());
+    const std::optional<syrec::Expression::ptr>                  assignmentRhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(ctx->expression());
+    expressionVisitorInstance->clearRestrictionOnVariableAccesses();
+    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     return assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value()
         ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand))
@@ -139,21 +141,25 @@ std::any CustomStatementVisitor::visitSwapStatement(TSyrecParser::SwapStatementC
         return std::nullopt;
 
     const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->lhsOperand);
-    if (swapLhsOperand.has_value())
+    if (swapLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapLhsOperand->get()->var, *ctx->lhsOperand->getStart());
-    
-    // TODO: Setting expected operand bitwidth from lhs operand
-    // TODO: Perform overlap checks (use class member and check in expression visitor)
+        expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapLhsOperand);
+        if (const auto& accessedBitrangeOfLhsOperand = swapLhsOperand.value()->var ? tryDetermineAccessedBitrangeOfVariableAccess(**swapLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value())
+            expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
+    }
     const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->rhsOperand);
     if (swapRhsOperand.has_value())
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *ctx->rhsOperand->getStart());
+
+    expressionVisitorInstance->clearRestrictionOnVariableAccesses();
+    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     return swapLhsOperand.has_value() && swapRhsOperand.has_value()
         ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand))
         : std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitSkipStatement(TSyrecParser::SkipStatementContext* ctx) {
+std::any CustomStatementVisitor::visitSkipStatement(TSyrecParser::SkipStatementContext*) {
     return std::make_shared<syrec::SkipStatement>();
 }
 

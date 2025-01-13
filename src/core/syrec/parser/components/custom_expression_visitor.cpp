@@ -5,6 +5,8 @@
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 
+// TODO: Truncation of values in expressions where a signal access is defined in a nested expression needs to be propagated to the 'past' operands
+
 using namespace syrecParser;
 
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpressionTyped(TSyrecParser::BinaryExpressionContext* context) {
@@ -53,6 +55,26 @@ void CustomExpressionVisitor::setExpectedBitwidthForAnyProcessedEntity(unsigned 
 
 void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
     optionalExpectedBitwidthForAnyProcessedEntity.reset();
+}
+
+bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {
+    if (!notAccessiblePartsForFutureVariableAccesses->var 
+        || notAccessiblePartsForFutureVariableAccesses->var->name.empty()
+        || std::any_of(
+        notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
+        notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
+        [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
+            return !tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension).has_value();
+        }) 
+        || !tryDetermineAccessedBitrangeOfVariableAccess(*notAccessiblePartsForFutureVariableAccesses).has_value())
+        return false;
+
+    optionalRestrictionOnVariableAccesses = notAccessiblePartsForFutureVariableAccesses;
+    return true;
+}
+
+void CustomExpressionVisitor::clearRestrictionOnVariableAccesses() {
+    optionalRestrictionOnVariableAccesses.reset();
 }
 
 // START OF NON-PUBLIC FUNCTIONALITY
