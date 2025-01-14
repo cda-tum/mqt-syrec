@@ -530,9 +530,14 @@ TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopVariableInitialValueInitializ
     performTestExecution("module main(in a(4), out b(4)) for $i = b to 3 do b.$i ^= 1 rof");
 }
 
-// TODO: Semantic error that loop variable cannot be used in the definition of its initial value declaration
-TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInInitialValueInitializationCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInInitialValueInitializationUsingSingleOperandCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(Message::Position(1, 40), "$i");
     performTestExecution("module main(in a(4), out b(4)) for $i = $i to 3 do b.$i ^= 1 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInInitialValueInitializationUsingExpressionCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(Message::Position(1, 78), "$i");
+    performTestExecution("module main(in a(4), out b(4)) for $j = 0 to 2 step 1 do for $i = ((2 - $j) * $i) to 3 do b.$i ^= 1 rof rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingToKeywordInLoopVariableDefinitionCausesError) {
@@ -1264,6 +1269,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredLoopVariableInNumericExpre
 // Tests for production signal
 // TODO: Tests for indices out of range and division by zero errors in dynamic expressions (i.e. loop variables evaluated at compile time)
 // TODO: Tests for truncation of values larger than the expected bitwidth
+// TODO: Tests for out of range indices for variable with no explicit dimension and bitwidth declaration
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessCausesError) {
     recordSyntaxError(Message::Position(1, 26), "missing IDENT at '.'");
     performTestExecution("module main(out a(4)) ++= .0");

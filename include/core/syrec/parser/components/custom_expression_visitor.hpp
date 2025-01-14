@@ -29,9 +29,13 @@ namespace syrecParser {
         [[maybe_unused]] bool setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
         void                  clearRestrictionOnVariableAccesses();
 
+        void setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
+        void clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
+
     protected:
         std::optional<unsigned int>               optionalExpectedBitwidthForAnyProcessedEntity;
         std::optional<syrec::VariableAccess::ptr> optionalRestrictionOnVariableAccesses;
+        std::optional<std::string_view>           optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
 
         std::any visitExpressionFromNumber(TSyrecParser::ExpressionFromNumberContext* context) override;
         std::any visitExpressionFromSignal(TSyrecParser::ExpressionFromSignalContext* context) override;

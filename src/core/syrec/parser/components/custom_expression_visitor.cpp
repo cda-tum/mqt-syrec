@@ -77,6 +77,14 @@ void CustomExpressionVisitor::clearRestrictionOnVariableAccesses() {
     optionalRestrictionOnVariableAccesses.reset();
 }
 
+void CustomExpressionVisitor::setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier) {
+    optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization = loopVariableIdentifier;
+}
+
+void CustomExpressionVisitor::clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations() {
+    optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.reset();
+}
+
 // START OF NON-PUBLIC FUNCTIONALITY
 std::any CustomExpressionVisitor::visitBinaryExpression(TSyrecParser::BinaryExpressionContext* context) {
     if (!context)
@@ -186,9 +194,11 @@ std::any CustomExpressionVisitor::visitNumberFromLoopVariable(TSyrecParser::Numb
         return std::nullopt;
 
     const std::string loopVariableIdentifier = "$" + context->IDENT()->getText();
-    if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingLoopVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(loopVariableIdentifier); matchingLoopVariableForIdentifier.has_value() && matchingLoopVariableForIdentifier->get()->isReferenceToLoopVariable())
+    if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingLoopVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(loopVariableIdentifier); matchingLoopVariableForIdentifier.has_value() && matchingLoopVariableForIdentifier->get()->isReferenceToLoopVariable()) {
+        if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier)
+            recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), loopVariableIdentifier);
         return std::make_shared<syrec::Number>(loopVariableIdentifier);
-
+    }
     recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), loopVariableIdentifier);
     return std::nullopt;
 }

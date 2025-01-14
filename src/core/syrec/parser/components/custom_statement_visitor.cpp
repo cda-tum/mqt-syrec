@@ -55,7 +55,6 @@ std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTy
     std::string loopVariableIdentifier = "$" + ctx->IDENT()->getText();
     if (const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope(); activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->getVariableByName(loopVariableIdentifier))
         recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*ctx->IDENT()->getSymbol()), loopVariableIdentifier);
-
     return loopVariableIdentifier;
 }
 
@@ -254,17 +253,22 @@ std::any CustomStatementVisitor::visitForStatement(TSyrecParser::ForStatementCon
 
     const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
     const std::optional<std::string>                        loopVariableIdentifier = visitLoopVariableDefinitionTyped(ctx->loopVariableDefinition());
+    if (loopVariableIdentifier.has_value()) {
+        if (activeSymbolTableScope.has_value())
+            activeSymbolTableScope->get()->recordLoopVariable(std::make_shared<syrec::Number>(*loopVariableIdentifier));
+        expressionVisitorInstance->setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(*loopVariableIdentifier);
+    }
 
     const std::optional<syrec::Number::ptr>     iterationRangeStartValue         = visitNonTerminalSymbolWithSingleResult<syrec::Number>(ctx->startValue);
+    expressionVisitorInstance->clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
+
     const std::optional<syrec::Number::ptr>     iterationRangeEndValue           = visitNonTerminalSymbolWithSingleResult<syrec::Number>(ctx->endValue);
     const std::optional<LoopStepsizeDefinition> iterationRangeStepSizeDefinition = visitLoopStepsizeDefinitionTyped(ctx->loopStepsizeDefinition());
     const std::optional<syrec::Number::ptr>     iterationRangeStepsizeValue      = iterationRangeStepSizeDefinition.has_value() ? std::make_optional(iterationRangeStepSizeDefinition->stepsize) : std::nullopt;
 
     auto generatedForStatement = std::make_shared<syrec::ForStatement>();
     generatedForStatement->loopVariable = loopVariableIdentifier.value_or("");
-    if (!loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value())
-        activeSymbolTableScope->get()->recordLoopVariable(std::make_shared<syrec::Number>(*loopVariableIdentifier));
-
+    
     if (iterationRangeStartValue.has_value())
         generatedForStatement->range        = ctx->endValue != nullptr
             ? std::make_pair(*iterationRangeStartValue, iterationRangeEndValue.value_or(nullptr))

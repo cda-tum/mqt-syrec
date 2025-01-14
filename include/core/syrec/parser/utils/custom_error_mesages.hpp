@@ -22,6 +22,7 @@ namespace syrecParser {
         SelfRecursionNotAllowed,
         ValueOverflowDueToNoImplicitTruncationPerformed,
         CannotCallMainModule,
+        ValueOfLoopVariableNotUsableInItsInitialValueDeclaration
     };
 
     /// Get the identifier associated with a given semantic error
@@ -50,6 +51,7 @@ namespace syrecParser {
             case SemanticError::SelfRecursionNotAllowed:
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
             case SemanticError::CannotCallMainModule:
+            case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
                 return "TEST";
             default:
                 return "";
@@ -102,6 +104,8 @@ namespace syrecParser {
                 return "Implicit truncation of values is disabled at this point of the program thus value ({:s}) that was large than the maximum storable value of {:d} lead to an overflow";
             case SemanticError::CannotCallMainModule:
                 return "Cannot call 'main' module of SyReC program"; // TODO: Should we also print signature of 'main' module
+            case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
+                return "Loop variable {:s} cannot be used in the definition of its initial value";
             default:
                 return "";
         }
