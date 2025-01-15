@@ -73,9 +73,9 @@ namespace syrecParser {
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
                 return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values";
             case SemanticError::TooManyDimensionsAccessed:
-                return "User specified access on {:d} dimensions of variable that was declared with {:d} dimensions";
+                return "Access on N dimensional signal must be correctly specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::TooFewDimensionsAccessed:
-                return "Access on N dimensions signal must be fully specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
+                return "Access on N dimensional signal must be fully specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::IndexOfAccessedBitOutOfRange:
                 return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}";
             case SemanticError::DuplicateVariableDeclaration:

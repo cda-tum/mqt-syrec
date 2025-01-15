@@ -16,6 +16,10 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTy
         return visitShiftExpressionTyped(shiftExpressionContext->shiftExpression());
     if (const auto unaryExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromUnaryExpressionContext*>(context))
         return visitUnaryExpressionTyped(unaryExpressionContext->unaryExpression());
+    if (const auto expressionFromNumberContext = dynamic_cast<TSyrecParser::ExpressionFromNumberContext*>(context))
+        return visitExpressionFromNumberTyped(expressionFromNumberContext);
+    if (const auto expressionFromSignalContext = dynamic_cast<TSyrecParser::ExpressionFromSignalContext*>(context))
+        return visitExpressionFromSignalTyped(expressionFromSignalContext);
 
     recordCustomError(Message::Position(0, 0), "Unhandled expression context variant. This should not happen");
     return std::nullopt;
@@ -175,14 +179,14 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
 
     const std::string&                                                          variableIdentifier            = context->IDENT()->getSymbol()->getText();
     const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier);
-    if (!matchingVariableForIdentifier.has_value()) {
+    if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value()) {
         recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
         return std::nullopt;
     }
 
     syrec::VariableAccess::ptr generatedVariableAccess = std::make_shared<syrec::VariableAccess>();
     // TODO: Current shared_pointer to const T does not allow for assignment of variable to variable access
-    //generatedVariableAccess->setVar(*matchingVariableForIdentifier->get()->getReadonlyVariableData())
+    generatedVariableAccess->setVar(std::make_shared<syrec::Variable>(**matchingVariableForIdentifier->get()->getReadonlyVariableData()));
 
     const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
     const std::size_t                numUserAccessedDimensions                     = context->accessedDimensions.size();
