@@ -10,8 +10,8 @@
 namespace syrecParser {
     class CustomExpressionVisitor: protected CustomBaseVisitor {
     public:
-        CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
-            CustomBaseVisitor(sharedMessagesContainerInstance) {}
+        CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance):
+            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance) {}
 
         [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionTyped(TSyrecParser::ExpressionContext* context);
         [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const;

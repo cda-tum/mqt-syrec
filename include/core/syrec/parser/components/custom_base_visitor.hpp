@@ -43,12 +43,12 @@ namespace syrecParser {
      */
     class CustomBaseVisitor {
     public:
-        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance):
-            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(std::make_unique<utils::BaseSymbolTable>()) {}
+        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance):
+            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance) {}
 
     protected:
         std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
-        std::unique_ptr<utils::BaseSymbolTable>  symbolTable;
+        std::shared_ptr<utils::BaseSymbolTable>  symbolTable;
         static constexpr unsigned int            DEFAULT_EXPRESSION_BITWIDTH = 32;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
@@ -64,7 +64,7 @@ namespace syrecParser {
             // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
             const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastCharacterInString, 10);
             // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
-            if (*didDeserializationFailDueToOverflow && errno == ERANGE)
+            if (didDeserializationFailDueToOverflow && errno == ERANGE)
                 *didDeserializationFailDueToOverflow = true;
 
             if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || *pointerToLastCharacterInString)

@@ -41,9 +41,9 @@ namespace syrecParser {
                 signatureOfModuleContainingCallStatement(std::move(signatureOfModuleContainingCallStatement)) {}
         };
 
-        CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
-            CustomBaseVisitor(sharedMessagesContainerInstance),
-            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)) {}
+        CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance):
+            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance),
+            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance, sharedSymbolTableInstance)) {}
  
         [[nodiscard]] std::optional<syrec::Statement::vec>        visitStatementListTyped(const TSyrecParser::StatementListContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(TSyrecParser::StatementContext* ctx);

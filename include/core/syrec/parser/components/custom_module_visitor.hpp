@@ -10,8 +10,8 @@ namespace syrecParser {
     class CustomModuleVisitor: protected CustomBaseVisitor {
     public:
         CustomModuleVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance):
-            CustomBaseVisitor(sharedMessagesContainerInstance),
-            statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedMessagesContainerInstance)) {}
+            CustomBaseVisitor(sharedMessagesContainerInstance, std::make_shared<utils::BaseSymbolTable>()),
+            statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedGeneratedMessageContainerInstance, this->symbolTable)) {}
 
         [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context) const; 
 
