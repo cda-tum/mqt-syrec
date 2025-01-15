@@ -13,29 +13,20 @@ namespace syrecParser {
             CustomBaseVisitor(sharedMessagesContainerInstance),
             statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedMessagesContainerInstance)) {}
 
-        [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context); 
+        [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context) const; 
 
     protected:
         std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
-        [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context);
-        [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(TSyrecParser::ModuleContext* context);
-        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(TSyrecParser::ParameterListContext* context);
-        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(TSyrecParser::ParameterContext* context);
-        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitSignalListTyped(TSyrecParser::SignalListContext* context);
-        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context);
-        [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(TSyrecParser::StatementListContext* context);
+        [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context) const;
+        [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(TSyrecParser::ModuleContext* context) const;
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(TSyrecParser::ParameterListContext* context) const;
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(TSyrecParser::ParameterContext* context) const;
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitSignalListTyped(TSyrecParser::SignalListContext* context) const;
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context) const;
+        [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(const TSyrecParser::StatementListContext* context) const;
 
         [[nodiscard]] static bool doVariablesMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable);
         [[nodiscard]] static bool doVariableCollectionsMatch(const syrec::Variable::vec& lVariableCollection, const syrec::Variable::vec& rVariableCollection);
-    private:
-
-        std::any visitProgram(TSyrecParser::ProgramContext* context) override;
-        std::any visitModule(TSyrecParser::ModuleContext* context) override;
-        std::any visitParameterList(TSyrecParser::ParameterListContext* context) override;
-        std::any visitParameter(TSyrecParser::ParameterContext* context) override;
-        std::any visitSignalList(TSyrecParser::SignalListContext* context) override;
-        std::any visitSignalDeclaration(TSyrecParser::SignalDeclarationContext* context) override;
-        std::any visitStatementList(TSyrecParser::StatementListContext* context) override;
     };
 } // namespace syrecParser
 #endif

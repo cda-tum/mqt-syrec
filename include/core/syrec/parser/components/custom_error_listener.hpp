@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_ERROR_LISTENER_HPP
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_ERROR_LISTENER_HPP
+#pragma once
 
 #include "BaseErrorListener.h"
 #include <core/syrec/parser/utils/parser_messages_container.hpp>

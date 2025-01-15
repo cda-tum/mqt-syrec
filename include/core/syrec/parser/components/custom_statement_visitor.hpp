@@ -45,15 +45,15 @@ namespace syrecParser {
             CustomBaseVisitor(sharedMessagesContainerInstance),
             expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance)) {}
  
-        [[nodiscard]] std::optional<syrec::Statement::vec> visitStatementListTyped(TSyrecParser::StatementListContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitStatementTyped(TSyrecParser::StatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitCallStatementTyped(TSyrecParser::CallStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitForStatementTyped(TSyrecParser::ForStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitIfStatementTyped(TSyrecParser::IfStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitAssignStatementTyped(TSyrecParser::AssignStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitSwapStatementTyped(TSyrecParser::SwapStatementContext* ctx);
-        [[nodiscard]] std::optional<syrec::Statement::ptr> visitSkipStatementTyped(TSyrecParser::SkipStatementContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::vec>        visitStatementListTyped(const TSyrecParser::StatementListContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(TSyrecParser::StatementContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitCallStatementTyped(TSyrecParser::CallStatementContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitForStatementTyped(TSyrecParser::ForStatementContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitIfStatementTyped(const TSyrecParser::IfStatementContext* ctx);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* ctx) const;
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitAssignStatementTyped(TSyrecParser::AssignStatementContext* ctx) const;
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitSwapStatementTyped(const TSyrecParser::SwapStatementContext* ctx) const;
+        [[nodiscard]] static std::optional<syrec::Statement::ptr> visitSkipStatementTyped(TSyrecParser::SkipStatementContext* ctx);
 
         [[nodiscard]] std::vector<NotOverloadResolutedCallStatementScope> getCallStatementsWithNotPerformedOverloadResolution() const;
         void                                                              openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature);
@@ -68,19 +68,7 @@ namespace syrecParser {
         };
 
         [[nodiscard]] std::optional<std::string>            visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const;
-        [[nodiscard]] std::optional<LoopStepsizeDefinition> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx);
-
-        std::any visitStatementList(TSyrecParser::StatementListContext* ctx) override;
-        std::any visitStatement(TSyrecParser::StatementContext* ctx) override;
-        std::any visitCallStatement(TSyrecParser::CallStatementContext* ctx) override;
-        std::any visitLoopVariableDefinition(TSyrecParser::LoopVariableDefinitionContext* ctx) override;
-        std::any visitLoopStepsizeDefinition(TSyrecParser::LoopStepsizeDefinitionContext* ctx) override;
-        std::any visitForStatement(TSyrecParser::ForStatementContext* ctx) override;
-        std::any visitIfStatement(TSyrecParser::IfStatementContext* ctx) override;
-        std::any visitUnaryStatement(TSyrecParser::UnaryStatementContext* ctx) override;
-        std::any visitAssignStatement(TSyrecParser::AssignStatementContext* ctx) override;
-        std::any visitSwapStatement(TSyrecParser::SwapStatementContext* ctx) override;
-        std::any visitSkipStatement(TSyrecParser::SkipStatementContext* ctx) override;
+        [[nodiscard]] std::optional<LoopStepsizeDefinition> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const;
 
         void                                                  recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
         [[nodiscard]] NotOverloadResolutedCallStatementScope* getActiveModuleScopeRecordingCallStatements();

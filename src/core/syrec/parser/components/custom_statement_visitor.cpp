@@ -3,72 +3,7 @@
 
 using namespace syrecParser;
 
-std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListTyped(TSyrecParser::StatementListContext* ctx) {
-    return visitNonTerminalSymbolWithManyResults<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped(TSyrecParser::StatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatementTyped(TSyrecParser::AssignStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementTyped(TSyrecParser::SwapStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSkipStatementTyped(TSyrecParser::SkipStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementTyped(TSyrecParser::CallStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyped(TSyrecParser::IfStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTyped(TSyrecParser::ForStatementContext* ctx) {
-    return visitNonTerminalSymbolWithSingleResult<syrec::Statement>(ctx);
-}
-
-std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> CustomStatementVisitor::getCallStatementsWithNotPerformedOverloadResolution() const {
-    return callStatementsWithNotPerformedOverloadResolutionScopes;
-}
-
-void CustomStatementVisitor::openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature) {
-    callStatementsWithNotPerformedOverloadResolutionScopes.emplace_back(enclosingModuleSignature);
-}
-
-// START OF NON-PUBLIC FUNCTIONALITY
-std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const {
-    if (!ctx || !ctx->IDENT())
-        return std::nullopt;
-
-    std::string loopVariableIdentifier = "$" + ctx->IDENT()->getText();
-    if (const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope(); activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->getVariableByName(loopVariableIdentifier))
-        recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*ctx->IDENT()->getSymbol()), loopVariableIdentifier);
-    return loopVariableIdentifier;
-}
-
-std::optional<CustomStatementVisitor::LoopStepsizeDefinition> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) {
-    if (!ctx || ctx->number())
-        return std::nullopt;
-
-    if (ctx->OP_MINUS())
-        recordSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(mapTokenPositionToMessagePosition(*ctx->OP_MINUS()->getSymbol()));
-
-    return LoopStepsizeDefinition({ctx->OP_MINUS() != nullptr, visitNonTerminalSymbolWithSingleResult<syrec::Number>(ctx->number()).value_or(nullptr)});
-}
-
-std::any CustomStatementVisitor::visitStatementList(TSyrecParser::StatementListContext* ctx) {
+std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListTyped(const TSyrecParser::StatementListContext* ctx) {
     if (!ctx)
         return std::nullopt;
 
@@ -82,7 +17,7 @@ std::any CustomStatementVisitor::visitStatementList(TSyrecParser::StatementListC
     return statements;
 }
 
-std::any CustomStatementVisitor::visitStatement(TSyrecParser::StatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped(TSyrecParser::StatementContext* ctx) {
     if (ctx->callStatement())
         return visitCallStatementTyped(ctx->callStatement());
     if (ctx->forStatement())
@@ -100,11 +35,11 @@ std::any CustomStatementVisitor::visitStatement(TSyrecParser::StatementContext* 
     return std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitAssignStatement(TSyrecParser::AssignStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatementTyped(TSyrecParser::AssignStatementContext* ctx) const {
     if (!ctx)
         return std::nullopt;
 
-    const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->signal());
+    const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = expressionVisitorInstance->visitSignalTyped(ctx->signal());
     if (assignmentLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignmentLhsOperand->get()->var, *ctx->signal()->start);
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*assignmentLhsOperand);
@@ -112,57 +47,51 @@ std::any CustomStatementVisitor::visitAssignStatement(TSyrecParser::AssignStatem
             expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
     }
     const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation  = ctx->assignmentOp ? deserializeAssignmentOperationFromString(ctx->assignmentOp->getText()) : std::nullopt;
-    const std::optional<syrec::Expression::ptr>                  assignmentRhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::Expression>(ctx->expression());
+    const std::optional<syrec::Expression::ptr>                  assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(ctx->expression());
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
-    return assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value()
-        ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand))
-        : std::nullopt;
+    return assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value() ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitUnaryStatement(TSyrecParser::UnaryStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* ctx) const {
     if (!ctx)
         return std::nullopt;
 
-    const std::optional<syrec::VariableAccess::ptr> assignedToVariable = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->signal());
+    const std::optional<syrec::VariableAccess::ptr> assignedToVariable = expressionVisitorInstance->visitSignalTyped(ctx->signal());
     if (assignedToVariable.has_value())
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignedToVariable->get()->var, *ctx->signal()->start);
 
     const std::optional<syrec::UnaryStatement::UnaryOperation> assignmentOperation = deserializeUnaryAssignmentOperationFromString(ctx->unaryOp->getText());
-    return assignedToVariable.has_value() && assignmentOperation.has_value()
-        ? std::make_optional(std::make_shared<syrec::UnaryStatement>(*assignmentOperation, *assignedToVariable))
-        : std::nullopt;
+    return assignedToVariable.has_value() && assignmentOperation.has_value() ? std::make_optional(std::make_shared<syrec::UnaryStatement>(*assignmentOperation, *assignedToVariable)) : std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitSwapStatement(TSyrecParser::SwapStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementTyped(const TSyrecParser::SwapStatementContext* ctx) const {
     if (!ctx)
         return std::nullopt;
 
-    const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->lhsOperand);
+    const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = expressionVisitorInstance->visitSignalTyped(ctx->lhsOperand);
     if (swapLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapLhsOperand->get()->var, *ctx->lhsOperand->getStart());
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapLhsOperand);
         if (const auto& accessedBitrangeOfLhsOperand = swapLhsOperand.value()->var ? tryDetermineAccessedBitrangeOfVariableAccess(**swapLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value())
             expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
     }
-    const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = visitNonTerminalSymbolWithSingleResult<syrec::VariableAccess>(ctx->rhsOperand);
+    const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(ctx->rhsOperand);
     if (swapRhsOperand.has_value())
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *ctx->rhsOperand->getStart());
 
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
-    return swapLhsOperand.has_value() && swapRhsOperand.has_value()
-        ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand))
-        : std::nullopt;
+    return swapLhsOperand.has_value() && swapRhsOperand.has_value() ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand)) : std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitSkipStatement(TSyrecParser::SkipStatementContext*) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSkipStatementTyped(TSyrecParser::SkipStatementContext*) {
     return std::make_shared<syrec::SkipStatement>();
 }
 
-std::any CustomStatementVisitor::visitCallStatement(TSyrecParser::CallStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementTyped(TSyrecParser::CallStatementContext* ctx) {
     if (!ctx)
         return std::nullopt;
 
@@ -213,24 +142,23 @@ std::any CustomStatementVisitor::visitCallStatement(TSyrecParser::CallStatementC
     return std::nullopt;
 }
 
-std::any CustomStatementVisitor::visitIfStatement(TSyrecParser::IfStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyped(const TSyrecParser::IfStatementContext* ctx) {
     if (!ctx)
         return std::nullopt;
 
     auto generatedIfStatement = std::make_shared<syrec::IfStatement>();
-    generatedIfStatement->setCondition(visitNonTerminalSymbolWithSingleResult<syrec::Expression>(ctx->guardCondition).value_or(nullptr));
-    generatedIfStatement->thenStatements = visitNonTerminalSymbolWithManyResults<syrec::Statement>(ctx->trueBranchStmts).value_or(syrec::Statement::vec());
-    generatedIfStatement->elseStatements = visitNonTerminalSymbolWithManyResults<syrec::Statement>(ctx->falseBranchStmts).value_or(syrec::Statement::vec());
-    generatedIfStatement->setFiCondition(visitNonTerminalSymbolWithSingleResult<syrec::Expression>(ctx->matchingGuardExpression).value_or(nullptr));
+    generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(ctx->guardCondition).value_or(nullptr));
+    generatedIfStatement->thenStatements = visitStatementListTyped(ctx->trueBranchStmts).value_or(syrec::Statement::vec());
+    generatedIfStatement->elseStatements = visitStatementListTyped(ctx->falseBranchStmts).value_or(syrec::Statement::vec());
+    generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(ctx->matchingGuardExpression).value_or(nullptr));
 
     if (generatedIfStatement->condition && generatedIfStatement->fiCondition) {
         std::ostringstream stringifiedGuardConditionContainer;
         std::ostringstream stringifiedClosingGuardConditionContainer;
-        // TODO: Should we use a single instance stored as a class member or can we create a new instance for every IfStatement 
+        // TODO: Should we use a single instance stored as a class member or can we create a new instance for every IfStatement
         auto expressionStringifier = utils::BaseSyrecIrEntityStringifier(std::nullopt);
         // TODO: Replace with expressions which requires that the stringification functionality for expressions needs to be public (could also involve making the stringification of statements to be public)
-        if (expressionStringifier.stringify(stringifiedGuardConditionContainer, syrec::Program()) && expressionStringifier.stringify(stringifiedClosingGuardConditionContainer, syrec::Program())
-            && stringifiedGuardConditionContainer.str() != stringifiedClosingGuardConditionContainer.str()) {
+        if (expressionStringifier.stringify(stringifiedGuardConditionContainer, syrec::Program()) && expressionStringifier.stringify(stringifiedClosingGuardConditionContainer, syrec::Program()) && stringifiedGuardConditionContainer.str() != stringifiedClosingGuardConditionContainer.str()) {
             recordSemanticError<SemanticError::IfGuardExpressionMissmatch>(mapTokenPositionToMessagePosition(*ctx->guardCondition->getStart()));
         }
     }
@@ -239,15 +167,7 @@ std::any CustomStatementVisitor::visitIfStatement(TSyrecParser::IfStatementConte
     return generatedIfStatement;
 }
 
-std::any CustomStatementVisitor::visitLoopVariableDefinition(TSyrecParser::LoopVariableDefinitionContext* ctx) {
-    return visitLoopVariableDefinitionTyped(ctx);
-}
-
-std::any CustomStatementVisitor::visitLoopStepsizeDefinition(TSyrecParser::LoopStepsizeDefinitionContext* ctx) {
-    return visitLoopStepsizeDefinitionTyped(ctx);
-}
-
-std::any CustomStatementVisitor::visitForStatement(TSyrecParser::ForStatementContext* ctx) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTyped(TSyrecParser::ForStatementContext* ctx) {
     if (!ctx)
         return std::nullopt;
 
@@ -259,34 +179,59 @@ std::any CustomStatementVisitor::visitForStatement(TSyrecParser::ForStatementCon
         expressionVisitorInstance->setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(*loopVariableIdentifier);
     }
 
-    const std::optional<syrec::Number::ptr>     iterationRangeStartValue         = visitNonTerminalSymbolWithSingleResult<syrec::Number>(ctx->startValue);
+    const std::optional<syrec::Number::ptr> iterationRangeStartValue = expressionVisitorInstance->visitNumberTyped(ctx->startValue);
     expressionVisitorInstance->clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
 
-    const std::optional<syrec::Number::ptr>     iterationRangeEndValue           = visitNonTerminalSymbolWithSingleResult<syrec::Number>(ctx->endValue);
+    const std::optional<syrec::Number::ptr>     iterationRangeEndValue           = expressionVisitorInstance->visitNumberTyped(ctx->endValue);
     const std::optional<LoopStepsizeDefinition> iterationRangeStepSizeDefinition = visitLoopStepsizeDefinitionTyped(ctx->loopStepsizeDefinition());
     const std::optional<syrec::Number::ptr>     iterationRangeStepsizeValue      = iterationRangeStepSizeDefinition.has_value() ? std::make_optional(iterationRangeStepSizeDefinition->stepsize) : std::nullopt;
 
-    auto generatedForStatement = std::make_shared<syrec::ForStatement>();
+    auto generatedForStatement          = std::make_shared<syrec::ForStatement>();
     generatedForStatement->loopVariable = loopVariableIdentifier.value_or("");
-    
-    if (iterationRangeStartValue.has_value())
-        generatedForStatement->range        = ctx->endValue != nullptr
-            ? std::make_pair(*iterationRangeStartValue, iterationRangeEndValue.value_or(nullptr))
-            : std::make_pair(*iterationRangeStartValue, *iterationRangeStartValue);
 
-    generatedForStatement->step         = iterationRangeStepsizeValue.value_or(std::make_shared<syrec::Number>(1));
+    if (iterationRangeStartValue.has_value())
+        generatedForStatement->range = ctx->endValue != nullptr ? std::make_pair(*iterationRangeStartValue, iterationRangeEndValue.value_or(nullptr)) : std::make_pair(*iterationRangeStartValue, *iterationRangeStartValue);
+
+    generatedForStatement->step = iterationRangeStepsizeValue.value_or(std::make_shared<syrec::Number>(1));
 
     // TODO: Does the parser prevent the execution of this function for loops with an empty statement body (due to the statement list production being required to consist of at least one statement) or do we need to check the validity of the statement body manually?
     // TODO: Make value range of loop variable available for index checks in expressions
     if (ctx->statementList())
-        generatedForStatement->statements = visitNonTerminalSymbolWithManyResults<syrec::Statement>(ctx->statementList()).value_or(syrec::Statement::vec());
+        generatedForStatement->statements = visitStatementListTyped(ctx->statementList()).value_or(syrec::Statement::vec());
 
     if (!loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value())
         activeSymbolTableScope->get()->removeVariable(*loopVariableIdentifier);
 
-    return  generatedForStatement->step && generatedForStatement->range.first && generatedForStatement->range.second
-        ? std::make_optional(generatedForStatement)
-        : std::nullopt;
+    return generatedForStatement->step && generatedForStatement->range.first && generatedForStatement->range.second ? std::make_optional(generatedForStatement) : std::nullopt;
+}
+
+std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> CustomStatementVisitor::getCallStatementsWithNotPerformedOverloadResolution() const {
+    return callStatementsWithNotPerformedOverloadResolutionScopes;
+}
+
+void CustomStatementVisitor::openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature) {
+    callStatementsWithNotPerformedOverloadResolutionScopes.emplace_back(enclosingModuleSignature);
+}
+
+// START OF NON-PUBLIC FUNCTIONALITY
+std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const {
+    if (!ctx || !ctx->IDENT())
+        return std::nullopt;
+
+    std::string loopVariableIdentifier = "$" + ctx->IDENT()->getText();
+    if (const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope(); activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->getVariableByName(loopVariableIdentifier))
+        recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*ctx->IDENT()->getSymbol()), loopVariableIdentifier);
+    return loopVariableIdentifier;
+}
+
+std::optional<CustomStatementVisitor::LoopStepsizeDefinition> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const {
+    if (!ctx || ctx->number())
+        return std::nullopt;
+
+    if (ctx->OP_MINUS())
+        recordSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(mapTokenPositionToMessagePosition(*ctx->OP_MINUS()->getSymbol()));
+
+    return LoopStepsizeDefinition({ctx->OP_MINUS() != nullptr,   expressionVisitorInstance->visitNumberTyped(ctx->number()).value_or(nullptr)});
 }
 
 void CustomStatementVisitor::recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const {

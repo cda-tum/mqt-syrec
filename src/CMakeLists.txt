@@ -63,12 +63,9 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecLexer.h
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParser.h
-		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserBaseVisitor.h
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserVisitor.h
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecLexer.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParser.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserBaseVisitor.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr/TSyrecParserVisitor.cpp
 
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/base_symbol_table.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/temporary_variable_scope.cpp
@@ -86,7 +83,6 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_expression_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_module_visitor.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/custom_statement_visitor.hpp
-		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/components/generic_visitor_result.hpp
 		
 )
 target_include_directories(${MQT_SYREC_PARSER_TARGET}
