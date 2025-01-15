@@ -61,9 +61,10 @@ protected:
         std::size_t lastFoundPositionOfNewlineDelimiter = 0;
         std::size_t currNewLineDelimiterPosition        = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
         while (currNewLineDelimiterPosition != std::string::npos) {
-            const std::size_t lengthOfErrorMessage   = (currNewLineDelimiterPosition - lastFoundPositionOfNewlineDelimiter) + 1;
-            const auto        actualCurrErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfErrorMessage);
-            errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(actualCurrErrorMessage);
+            if (const std::size_t lengthOfErrorMessage = currNewLineDelimiterPosition - lastFoundPositionOfNewlineDelimiter; lengthOfErrorMessage) {
+                const auto actualCurrErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfErrorMessage);
+                errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(actualCurrErrorMessage);
+            }
 
             // On Windows system we assume that the newline is encoded as the '\r\n' character sequence while on all other system it should be equal to the '\n' character
             lastFoundPositionOfNewlineDelimiter = currNewLineDelimiterPosition + 1;
@@ -74,14 +75,19 @@ protected:
 
             currNewLineDelimiterPosition = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
         }
+
+        if (lastFoundPositionOfNewlineDelimiter < aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.size()) {
+            if (const std::size_t lengthOfLastErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.size() - lastFoundPositionOfNewlineDelimiter; lengthOfLastErrorMessage)
+                errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfLastErrorMessage));
+        }
         ASSERT_NO_FATAL_FAILURE(assertExpectedAndActualErrorsMatch(expectedErrorsDetectedDuringProcessingOfSyrecProgram, errorsDetectedDuringProcessingOfSyrecProgram));
     }
 
     static void assertExpectedAndActualErrorsMatch(const MessagesContainer& expectedErrors, const std::vector<std::string_view>& actualErrorsInUnifiedFormat) {
         // TODO: Find better solution ot print errors
-        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected " << expectedErrors.size() << " errors but only " << actualErrorsInUnifiedFormat.size() << " were found";
+        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected " << expectedErrors.size() << " errors but " << actualErrorsInUnifiedFormat.size() << " were found";
         for (size_t errorIdx = 0; errorIdx < expectedErrors.size(); ++errorIdx) {
-            ASSERT_EQ(expectedErrors.at(errorIdx).stringify(), actualErrorsInUnifiedFormat.at(errorIdx)) << "Expected error: " << expectedErrors.at(errorIdx).stringify() << "| Actual Error: " << actualErrorsInUnifiedFormat.at(errorIdx);
+            ASSERT_EQ(expectedErrors.at(errorIdx).stringify(), actualErrorsInUnifiedFormat.at(errorIdx)) << "Error " << std::to_string(errorIdx) << ":\nExpected error: " << expectedErrors.at(errorIdx).stringify() << "\nActual Error: " << actualErrorsInUnifiedFormat.at(errorIdx);
         }
     }
 
@@ -1296,7 +1302,7 @@ TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionInNonConsta
 }
 
 TEST_F(SyrecParserErrorTestsFixture, AccessedDimensionOfVariableOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 1), 2, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 29), 2, 1);
     performTestExecution("module main(out a[2](4)) ++= a[0][1].0");
 }
 
@@ -1339,12 +1345,12 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidBitrangEndSymbolCausesError) {
 // TODO: Division by zero error are tested in tests for production 'number', should we explicitly tests the same behaviour for every usage of the production in other productions?
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeStartValueExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
-    performTestExecution("module main(out a[2](4)) ++= a.(2 / (#a - 4))");
+    performTestExecution("module main(out a(4)) ++= a.(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeEndValueExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 33));
-    performTestExecution("module main(out a[2](4)) ++= a.0:(2 / (#a - 4))");
+    performTestExecution("module main(out a(4)) ++= a.0:(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicExpressionForAccessValueOfDimensionCausesError) {
@@ -1353,21 +1359,21 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicExpressionForAccessV
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueIsConstantAndOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 31), 5, 4);
-    performTestExecution("module main(out a[2](4)) ++= a.5");
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), 5, 4);
+    performTestExecution("module main(out a(4)) ++= a.5");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsConstantAndOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 33), 5, 4);
-    performTestExecution("module main(out a[2](4)) ++= a.0:5");
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 30), 5, 4);
+    performTestExecution("module main(out a(4)) ++= a.0:5");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueIsDynamicExpressionAndOutOfRangeCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 31), 5, 4);
-    performTestExecution("module main(out a[2](4)) ++= a.(#a + 1):3");
+    performTestExecution("module main(out a(4)) ++= a.(#a + 1):3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsDynamicExpressionAndOutOfRangeCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 33), 5, 4);
-    performTestExecution("module main(out a[2](4)) ++= a.0:(#a + 1)");
+    performTestExecution("module main(out a(4)) ++= a.0:(#a + 1)");
 }

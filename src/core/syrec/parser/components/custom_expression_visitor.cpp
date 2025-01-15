@@ -10,6 +10,9 @@
 using namespace syrecParser;
 
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(TSyrecParser::ExpressionContext* context) {
+    if (!context)
+        return std::nullopt;
+
     if (const auto binaryExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromBinaryExpressionContext*>(context))
         return visitBinaryExpressionTyped(binaryExpressionContext->binaryExpression());
     if (const auto shiftExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromShiftExpressionContext*>(context))
@@ -95,6 +98,9 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFr
 }
 
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(TSyrecParser::NumberContext* context) const {
+    if (!context)
+        return std::nullopt;
+
     if (const auto numberFromConstantContext = dynamic_cast<TSyrecParser::NumberFromConstantContext*>(context))
         return visitNumberFromConstantTyped(numberFromConstantContext);
     if (const auto& numberFromExpressionContext = dynamic_cast<TSyrecParser::NumberFromExpressionContext*>(context))
@@ -196,10 +202,13 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             generatedVariableAccess->indexes.emplace_back(*exprDefiningAccessedValueOfDimension);
     }
 
-    if (context->accessedDimensions.empty() && declaredValuesPerDimensionOfReferenceVariable.front() > 1)
-        recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
-
-    if (numUserAccessedDimensions != declaredValuesPerDimensionOfReferenceVariable.size()) {
+    if (!numUserAccessedDimensions) {
+        if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1)
+            generatedVariableAccess->indexes.emplace_back(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1));
+        else
+            recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
+    }
+    else if (numUserAccessedDimensions != declaredValuesPerDimensionOfReferenceVariable.size()) {
         if (numUserAccessedDimensions > declaredValuesPerDimensionOfReferenceVariable.size())
             recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
         else
@@ -223,39 +232,59 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     const std::optional<syrec::Number::ptr> bitRangeStart = visitNumberTyped(context->bitStart);
     const std::optional<syrec::Number::ptr> bitRangeEnd   = visitNumberTyped(context->bitRangeEnd);
 
-    // TODO: Are range checks executed if the parsing of either the bit range start or end fails?
-    if (bitRangeStart.has_value() && bitRangeEnd.has_value()) {
-        generatedVariableAccess->range                = std::make_pair(bitRangeStart.value(), bitRangeEnd.value());
+    bool wasBitrangeWithinRange = true;
+    if (bitRangeStart.has_value() || bitRangeEnd.has_value()) {
+        if (bitRangeStart.has_value() && bitRangeEnd.has_value())
+            generatedVariableAccess->range = std::make_pair(bitRangeStart.value(), bitRangeEnd.value());
+        else if (bitRangeStart.has_value())
+            generatedVariableAccess->range = std::make_pair(bitRangeStart.value(), bitRangeStart.value());
+        else
+            generatedVariableAccess->range = std::make_pair(bitRangeEnd.value(), bitRangeEnd.value());
+
         syrec::VariableAccess temporaryVariableAccess = syrec::VariableAccess();
         temporaryVariableAccess.setVar(generatedVariableAccess->var);
         temporaryVariableAccess.range = generatedVariableAccess->range;
 
         if (const std::optional<utils::VariableAccessIndicesValidity> indexValidityOfUserDefinedAccessOnBitrange = utils::validateVariableAccessIndices(temporaryVariableAccess); indexValidityOfUserDefinedAccessOnBitrange.has_value() && !indexValidityOfUserDefinedAccessOnBitrange->isValid() && indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity.has_value()) {
-            bool wasBitrangeWithinRange = true;
-            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangeStartIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity; accessedBitRangeStartIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangeStartIndexValidity.indexValue.has_value()) {
-                recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), accessedBitRangeStartIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
-                wasBitrangeWithinRange = false;
-            }
+            if (bitRangeStart.has_value() && bitRangeEnd.has_value()) {
+                if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangeStartIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity; 
+                    accessedBitRangeStartIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangeStartIndexValidity.indexValue.has_value()) {
+                    recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), accessedBitRangeStartIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
+                    wasBitrangeWithinRange = false;
+                }
 
-            if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangEndIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; accessedBitRangEndIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangEndIndexValidity.indexValue.has_value()) {
-                recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitRangeEnd->getStart()), accessedBitRangEndIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
-                wasBitrangeWithinRange = false;
-            }
-
-            const std::optional<unsigned int> accessedBitRangeStart = bitRangeStart->get()->tryEvaluate({});
-            const std::optional<unsigned int> accessedBitRangeEnd   = accessedBitRangeStart.has_value() ? bitRangeEnd->get()->tryEvaluate({}) : std::nullopt;
-            std::optional<unsigned int>       userAccessedBitrangeLength;
-            if (accessedBitRangeStart.has_value() && accessedBitRangeEnd.has_value())
-                userAccessedBitrangeLength = (*accessedBitRangeStart > *accessedBitRangeEnd ? *accessedBitRangeStart - *accessedBitRangeEnd : *accessedBitRangeEnd - *accessedBitRangeStart) + 1;
-
-            if (wasBitrangeWithinRange) {
-                if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
-                    if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
-                        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, *userAccessedBitrangeLength);
-                } else {
-                    setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
+                if (const utils::VariableAccessIndicesValidity::IndexValidationResult accessedBitRangEndIndexValidity = indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; 
+                    accessedBitRangEndIndexValidity.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitRangEndIndexValidity.indexValue.has_value()) {
+                    recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(mapTokenPositionToMessagePosition(*context->bitRangeEnd->getStart()), accessedBitRangEndIndexValidity.indexValue.value(), generatedVariableAccess->var->bitwidth);
+                    wasBitrangeWithinRange = false;
+                }
+            } else {
+                if (const std::optional accessedBitIndexValidity = bitRangeStart.has_value() ? indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity : indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; 
+                    accessedBitIndexValidity.has_value() && accessedBitIndexValidity->indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitIndexValidity->indexValue.has_value()) {
+                    recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(
+                            mapTokenPositionToMessagePosition(bitRangeStart.has_value() ? *context->bitStart->getStart() : *context->bitRangeEnd->getStart()),
+                            accessedBitIndexValidity->indexValue.value(),
+                            generatedVariableAccess->var->bitwidth);
+                    wasBitrangeWithinRange = false;
                 }
             }
+        }
+    }
+
+    if (wasBitrangeWithinRange) {
+        const std::optional<unsigned int> accessedBitRangeStart = bitRangeStart.has_value() ? bitRangeStart->get()->tryEvaluate({}) : std::make_optional(0u);
+        const std::optional<unsigned int> accessedBitRangeEnd   = bitRangeEnd.has_value() ? bitRangeEnd->get()->tryEvaluate({}) : std::make_optional(generatedVariableAccess->getVar()->bitwidth - 1);
+        std::optional<unsigned int>       userAccessedBitrangeLength;
+        if (accessedBitRangeStart.has_value() && accessedBitRangeEnd.has_value())
+            userAccessedBitrangeLength = (*accessedBitRangeStart > *accessedBitRangeEnd 
+                    ? *accessedBitRangeStart - *accessedBitRangeEnd
+                    : *accessedBitRangeEnd - *accessedBitRangeStart) + 1;
+
+        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
+            if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
+                recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, *userAccessedBitrangeLength);
+        } else {
+            setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
         }
     }
     return generatedVariableAccess;
