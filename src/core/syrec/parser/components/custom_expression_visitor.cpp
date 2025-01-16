@@ -197,10 +197,10 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
     const std::size_t                numUserAccessedDimensions                     = context->accessedDimensions.size();
     generatedVariableAccess->indexes                                               = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
-    for (const auto& antlrContextForAccessedValueOfDimension: context->accessedDimensions) {
-        if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(antlrContextForAccessedValueOfDimension); exprDefiningAccessedValueOfDimension.has_value())
-            generatedVariableAccess->indexes.emplace_back(*exprDefiningAccessedValueOfDimension);
-    }
+
+    for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i)
+        if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(context->accessedDimensions.at(i)); exprDefiningAccessedValueOfDimension.has_value())
+            generatedVariableAccess->indexes[i] = *exprDefiningAccessedValueOfDimension;
 
     if (!numUserAccessedDimensions) {
         if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1)
@@ -259,7 +259,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
                     wasBitrangeWithinRange = false;
                 }
             } else {
-                if (const std::optional accessedBitIndexValidity = bitRangeStart.has_value() ? indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity : indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; 
+                if (const std::optional<utils::VariableAccessIndicesValidity::IndexValidationResult> accessedBitIndexValidity = bitRangeStart.has_value() ? indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeStartValidity : indexValidityOfUserDefinedAccessOnBitrange->bitRangeAccessValidity->bitRangeEndValiditiy; 
                     accessedBitIndexValidity.has_value() && accessedBitIndexValidity->indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && accessedBitIndexValidity->indexValue.has_value()) {
                     recordSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(
                             mapTokenPositionToMessagePosition(bitRangeStart.has_value() ? *context->bitStart->getStart() : *context->bitRangeEnd->getStart()),
@@ -271,21 +271,30 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         }
     }
 
-    if (wasBitrangeWithinRange) {
-        const std::optional<unsigned int> accessedBitRangeStart = bitRangeStart.has_value() ? bitRangeStart->get()->tryEvaluate({}) : std::make_optional(0u);
-        const std::optional<unsigned int> accessedBitRangeEnd   = bitRangeEnd.has_value() ? bitRangeEnd->get()->tryEvaluate({}) : std::make_optional(generatedVariableAccess->getVar()->bitwidth - 1);
-        std::optional<unsigned int>       userAccessedBitrangeLength;
-        if (accessedBitRangeStart.has_value() && accessedBitRangeEnd.has_value())
-            userAccessedBitrangeLength = (*accessedBitRangeStart > *accessedBitRangeEnd 
-                    ? *accessedBitRangeStart - *accessedBitRangeEnd
-                    : *accessedBitRangeEnd - *accessedBitRangeStart) + 1;
+    if (!wasBitrangeWithinRange)
+        return generatedVariableAccess;
 
-        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
-            if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
-                recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, *userAccessedBitrangeLength);
-        } else {
-            setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
-        }
+    std::optional<unsigned int> accessedBitRangeStart;
+    if (context->bitStart)
+        accessedBitRangeStart = bitRangeStart.has_value() ? bitRangeStart->get()->tryEvaluate({}) : std::nullopt;
+    else
+        accessedBitRangeStart = 0;
+
+    std::optional<unsigned int> accessedBitRangeEnd;
+    if (context->bitRangeEnd)
+        accessedBitRangeEnd = bitRangeEnd.has_value() ? bitRangeEnd->get()->tryEvaluate({}) : std::nullopt;
+    else
+        accessedBitRangeEnd = context->bitStart ? accessedBitRangeStart : generatedVariableAccess->getVar()->bitwidth - 1;
+
+    if (accessedBitRangeStart.has_value() && accessedBitRangeEnd.has_value()) {
+        const unsigned int userAccessedBitrangeLength = (*accessedBitRangeStart > *accessedBitRangeEnd 
+            ? *accessedBitRangeStart - *accessedBitRangeEnd
+            : *accessedBitRangeEnd - *accessedBitRangeStart) + 1;
+
+        if (!optionalExpectedBitwidthForAnyProcessedEntity.has_value())
+            setExpectedBitwidthForAnyProcessedEntity(userAccessedBitrangeLength);
+        else if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->bitStart->getStart()), *optionalExpectedBitwidthForAnyProcessedEntity, userAccessedBitrangeLength);
     }
     return generatedVariableAccess;
 }

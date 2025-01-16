@@ -16,9 +16,8 @@ bool VariableAccessIndicesValidity::isValid() const {
     [](const IndexValidationResult& validityOfAccessedValueOfDimension) {
         return validityOfAccessedValueOfDimension.indexValidity == IndexValidationResult::IndexValidity::Ok;
     })
-    && bitRangeAccessValidity.has_value()
-        ? bitRangeAccessValidity->bitRangeStartValidity.indexValidity == IndexValidationResult::IndexValidity::Ok && bitRangeAccessValidity->bitRangeEndValiditiy.indexValidity == IndexValidationResult::IndexValidity::Ok
-        : true;
+    && (!bitRangeAccessValidity.has_value() 
+        || (bitRangeAccessValidity->bitRangeStartValidity.indexValidity == IndexValidationResult::IndexValidity::Ok && bitRangeAccessValidity->bitRangeEndValiditiy.indexValidity == IndexValidationResult::IndexValidity::Ok));
 }
 
 std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndices(const syrec::VariableAccess& variableAccess) {

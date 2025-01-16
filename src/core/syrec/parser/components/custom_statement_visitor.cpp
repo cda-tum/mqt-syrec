@@ -243,7 +243,7 @@ CustomStatementVisitor::NotOverloadResolutedCallStatementScope* CustomStatementV
     if (callStatementsWithNotPerformedOverloadResolutionScopes.empty())
         return nullptr;
 
-    return &*callStatementsWithNotPerformedOverloadResolutionScopes.end();
+    return &callStatementsWithNotPerformedOverloadResolutionScopes.back();
 }
 
 std::optional<syrec::AssignStatement::AssignOperation> CustomStatementVisitor::deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation) {
