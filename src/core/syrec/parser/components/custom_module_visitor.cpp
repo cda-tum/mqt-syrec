@@ -106,18 +106,17 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParam
     if (!context)
         return std::nullopt;
 
-    std::optional<utils::TemporaryVariableScope::ptr> activeTemporaryVariableScope = symbolTable->getActiveTemporaryScope();
-
     syrec::Variable::vec processedParameterInstances;
     processedParameterInstances.reserve(context->parameter().size());
+
+    const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
     for (const auto& antlrParameterContext: context->parameter()) {
         // Not recording declared parameters will lead to overload resolution reporting 'false' errors (or fails to emit them when the semantically or syntactically incorrect module is not recorded in the symbol table)
         // which is an acceptable behaviour in case that the user failed to provide a valid module declaration
         if (const std::optional<syrec::Variable::ptr>& generatedParameterInstance = visitParameterTyped(antlrParameterContext); generatedParameterInstance.has_value()) {
             processedParameterInstances.emplace_back(*generatedParameterInstance);
-
-            if (activeTemporaryVariableScope.has_value())
-                activeTemporaryVariableScope->get()->recordVariable(*generatedParameterInstance);
+            if (activeSymbolTableScope.has_value())
+                activeSymbolTableScope->get()->recordVariable(*generatedParameterInstance);
         }
     }
     return processedParameterInstances;
@@ -155,10 +154,13 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSigna
     syrec::Variable::vec processedLocalVariables;
     processedLocalVariables.reserve(context->signalDeclaration().size());
 
+    const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
     for (const auto& antlrVariableDeclarationToken: context->signalDeclaration()) {
         if (const std::optional<syrec::Variable::ptr>& generatedLocalVariableDeclaration = visitSignalDeclarationTyped(antlrVariableDeclarationToken); generatedLocalVariableDeclaration.has_value() && localVariableType.has_value()) {
             generatedLocalVariableDeclaration->get()->type = *localVariableType;
             processedLocalVariables.emplace_back(*generatedLocalVariableDeclaration);
+            if (activeSymbolTableScope.has_value())
+                activeSymbolTableScope->get()->recordVariable(*generatedLocalVariableDeclaration);
         }
     }
     return processedLocalVariables;

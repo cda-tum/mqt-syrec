@@ -36,9 +36,14 @@ namespace syrec {
 
         if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::Type::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
-            for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i)
-                concatenatedErrorMessageContainer << generatedErrorMessages.at(i)->stringify() << "\n";
-
+            for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i) {
+                concatenatedErrorMessageContainer << generatedErrorMessages.at(i)->stringify();
+                #if _WIN32
+                    concatenatedErrorMessageContainer << "\r\n";
+                #else 
+                    concatenatedErrorMessageContainer << "\n";
+                #endif
+            }
             concatenatedErrorMessageContainer << generatedErrorMessages.back()->stringify();
             if (error)
                 *error = concatenatedErrorMessageContainer.str();
