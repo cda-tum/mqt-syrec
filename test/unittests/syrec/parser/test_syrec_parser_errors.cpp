@@ -106,7 +106,7 @@ private:
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
-    recordSyntaxError(Message::Position(1, 4), "mismatched input 'main' expecting 'module'");
+    recordSyntaxError(Message::Position(1, 0), "mismatched input 'main' expecting 'module'");
     performTestExecution("main() skip");
 }
 
@@ -151,7 +151,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterDelimiterCausesError
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableDeclarationAfterModuleParameterDelimiterCausesError) {
-    recordSyntaxError(Message::Position(1, 25), "mismatched input ']' expecting {'in', 'out', 'inout'}");
+    recordSyntaxError(Message::Position(1, 25), "mismatched input ')' expecting {'in', 'out', 'inout'}");
     performTestExecution("module main(in a[2](16), ) skip");
 }
 
@@ -172,12 +172,12 @@ TEST_F(SyrecParserErrorTestsFixture, OverloadOfModuleNamedMainCausesError) {
 
 // Tests for production parameter
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableTypeCausesError) {
-    recordSyntaxError(Message::Position(1, 12), "mismatched input 'a' expected {'in', 'out', 'inout', ')'}");
+    recordSyntaxError(Message::Position(1, 12), "mismatched input 'a' expecting {'in', 'out', 'inout', ')'}");
     performTestExecution("module main(a[2](16)) skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableTypeCausesError) {
-    recordSyntaxError(Message::Position(1, 12), "mismatched input 'int' expected {'in', 'out', 'inout', ')'}");
+    recordSyntaxError(Message::Position(1, 12), "mismatched input 'int' expecting {'in', 'out', 'inout', ')'}");
     performTestExecution("module main(int a(16)) skip");
 }
 
@@ -207,7 +207,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionOpeningBr
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionOpeningBracketCausesError) {
-    recordSyntaxError(Message::Position(1, 16), "token recognition error at '{'");
+    recordSyntaxError(Message::Position(1, 16), "token recognition error at: '{'");
     recordSyntaxError(Message::Position(1, 17), "mismatched input '16' expecting ')'");
     performTestExecution("module main(in a{16](2)) skip");
 }
@@ -218,7 +218,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionClosingBr
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionClosingBracketCausesError) {
-    recordSyntaxError(Message::Position(1, 18), "token recognition error at '}'");
+    recordSyntaxError(Message::Position(1, 18), "token recognition error at: '}'");
     recordSyntaxError(Message::Position(1, 19), "missing ']' at ')'");
     performTestExecution("module main(in a[2}) skip");
 }
@@ -336,7 +336,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionOpeningBr
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionOpeningBracketInLocalModuleParameterDeclarationCausesError) {
     recordSyntaxError(Message::Position(1, 20), "token recognition error at: '{'");
-    recordSyntaxError(Message::Position(1, 21), "extraneous input ']' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    recordSyntaxError(Message::Position(1, 21), "extraneous input '2' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
     performTestExecution("module main() wire a{2] skip");
 }
 
@@ -405,7 +405,7 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidCallKeywordCausesError) {
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInCallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 45), "extraneous input '(' expecting IDENT");
-    recordSyntaxError(Message::Position(1, 47), "mismatched input ',' expecting '(");
+    recordSyntaxError(Message::Position(1, 47), "mismatched input ',' expecting '('");
     performTestExecution("module main(in a(4), in b(4), out c(4)) call (a, b, c)");
 }
 
@@ -416,7 +416,6 @@ TEST_F(SyrecParserErrorTestsFixture, ModuleIdentifierNotMatchingAnyDeclaredModul
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterOpeningBracket) {
     recordSyntaxError(Message::Position(1, 101), "mismatched input ',' expecting '('");
-    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 97), "adda");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call adda, b, c)");
 }
 
@@ -446,13 +445,13 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingUncallKeywordCausesError) {
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidUncallKeywordCausesError) {
-    recordSyntaxError(Message::Position(1, 95), "no viable alternative at input 'performCall add'");
+    recordSyntaxError(Message::Position(1, 104), "no viable alternative at input 'performCall add'");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) performCall add(a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInUncallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 47), "extraneous input '(' expecting IDENT");
-    recordSyntaxError(Message::Position(1, 49), "extraneous input ',' expecting '('");
+    recordSyntaxError(Message::Position(1, 49), "mismatched input ',' expecting '('");
     performTestExecution("module main(in a(4), in b(4), out c(4)) uncall (a, b, c)");
 }
 
@@ -511,12 +510,12 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBrack
 // Tests for production for-statement
 TEST_F(SyrecParserErrorTestsFixture, OmittingForStatementKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 31), "extraneous input '$' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
-    recordSyntaxError(Message::Position(1, 34), "no viable alternative at input 'i = '");
+    recordSyntaxError(Message::Position(1, 34), "no viable alternative at input 'i ='");
     performTestExecution("module main(in a(4), out b(4)) $i = 0 to 3 do b.$i ^= 1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidForStatementKeywordCausesError) {
-    recordSyntaxError(Message::Position(1, 31), "mismatched inputed 'do' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    recordSyntaxError(Message::Position(1, 31), "mismatched input 'do' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
     performTestExecution("module main(in a(4), out b(4)) do $i = 0 to 3 do b.$i ^= 1 rof");
 }
 
@@ -527,7 +526,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableIdentPrefixCausesError)
 
 // TODO: 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableInitialValueInitializationEqualSignCausesError) {
-    recordSyntaxError(Message::Position(1, 38), "mismatched input '0' expecting '='");
+    recordSyntaxError(Message::Position(1, 38), "no viable alternative at input '$i 0'");
     performTestExecution("module main(in a(4), out b(4)) for $i 0 to 3 do b.$i ^= 1 rof");
 }
 
@@ -577,7 +576,7 @@ TEST_F(SyrecParserErrorTestsFixture, NonNumericLoopVariableEndValueCausesError) 
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidForLoopStepSizeKeywordCausesError) {
-    recordSyntaxError(Message::Position(1, 37), "no viable alternative at '3 incr'");
+    recordSyntaxError(Message::Position(1, 37), "no viable alternative at input '3 incr'");
     performTestExecution("module main(in a(4), out b(4)) for 3 incr 1 do b.0 ^= 1 rof");
 }
 
@@ -607,12 +606,12 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidDoKeywordAfterLoopHeaderDefinitionCa
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyLoopBodyCausesError) {
-    recordSyntaxError(Message::Position(1, 48), "mismatched input 'rof' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    recordSyntaxError(Message::Position(1, 48), "mismatched input 'rof' expecting {'++=', '--=', '~=', 'call', 'uncall', 'for', 'if', 'skip', IDENT}");
     performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 do rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DuplicateDefinitionOfLoopVariableInNestedLoopCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 25), "$i");
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 53), "$i");
     performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 do for $i=1 to 3 do skip rof rof");
 }
 
@@ -652,8 +651,8 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingRofKeywordAfterLoopBodyCausesError)
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidRofKeywordAfterLoopBodyCausesError) {
-    recordSyntaxError(Message::Position(1, 52), "no viable alternative at input 'done'");
-    recordSyntaxError(Message::Position(1, 58), "missing 'rof' at '<EOF>'");
+    recordSyntaxError(Message::Position(1, 51), "no viable alternative at input 'done'");
+    recordSyntaxError(Message::Position(1, 57), "missing 'rof' at '<EOF>'");
     performTestExecution("module main(in a(4), out b(4)) for 3 step 1 do done; ++=b");
 }
 
@@ -667,6 +666,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingIfKeywordCausesError) {
 TEST_F(SyrecParserErrorTestsFixture, InvalidIfKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 24), "extraneous input '-' expecting {'!', '~', '$', '#', '(', IDENT, INT}");
     recordSyntaxError(Message::Position(1, 30), "mismatched input '(' expecting 'then'");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 25), "cond");
     performTestExecution("module main(out a(4)) if-cond (a > 2) then skip else skip fi (a > 2)");
 }
 
@@ -713,13 +713,14 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidElseKeywordAfterGuardConditionCauses
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingFiKeywordAfterGuardConditionCausesError) {
-    recordSyntaxError(Message::Position(1, 52), "mismatched input '<EOF' expecting 'fi'");
+    recordSyntaxError(Message::Position(1, 52), "mismatched input '<EOF>' expecting 'fi'");
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidFiKeywordAfterGuardConditionCausesError) {
     recordSyntaxError(Message::Position(1, 53), "missing 'fi' at 'done'");
     recordSyntaxError(Message::Position(1, 58), "extraneous input '(' expecting {<EOF>, 'module'}");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 53), "done");
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip done (a > 2)");
 }
 
@@ -740,7 +741,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfIfStatementInNonCon
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 62), "missing ']' expecting ')'");
+    recordSyntaxError(Message::Position(1, 62), "mismatched input ']' expecting ')'");
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi (a > 2]");
 }
 
@@ -793,13 +794,13 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableWithNotCompletelySpecif
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyTrueBranchInIfStatementCausesError) {
-    recordSyntaxError(Message::Position(1, 38), "extraneous input 'else' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    recordSyntaxError(Message::Position(1, 38), "extraneous input 'else' expecting {'++=', '--=', '~=', 'call', 'uncall', 'for', 'if', 'skip', IDENT}");
     recordSyntaxError(Message::Position(1, 48), "mismatched input 'fi' expecting 'else'");
     performTestExecution("module main(out a(4)) if (a > 2) then else skip fi (a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, EmptyFalseBranchInIfStatementCausesError) {
-    recordSyntaxError(Message::Position(1, 48), "extraneous input 'fi' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    recordSyntaxError(Message::Position(1, 48), "mismatched input 'fi' expecting {'++=', '--=', '~=', 'call', 'uncall', 'for', 'if', 'skip', IDENT}");
     performTestExecution("module main(out a(4)) if (a > 2) then skip else fi (a > 2)");
 }
 
@@ -814,19 +815,19 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInNotTakenFalseBranchWithConst
 }
 
 TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInGuardConditionSubexpressionThatCouldBeSkippedDueToShortCircuitEvaluationCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 20), "c");
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 91), "c");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 47), "c");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 92), "c");
     performTestExecution("module main(in a(4)) wire b(4) if ((2 > 1) || (c > a)) then ++= b else skip fi ((2 > 1) || (c > a))");
 }
 
 // Tests for production unary-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableInUnaryStatementCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 24), "b");
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 25), "b");
     performTestExecution("module main(in b(4)) ++= b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInUnaryStatementCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 17), "b");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 18), "b");
     performTestExecution("module main() ++= b");
 }
 
@@ -853,7 +854,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
 
 // Tests for production assign-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfAssignStatementCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 36), "b");
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 31), "a");
     performTestExecution("module main(in a(4), out b(4)) a += b");
 }
 
@@ -863,17 +864,17 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnLhsOfAssignState
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnRhsOfAssignStatementCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 36), "c");
-    performTestExecution("module main(in a(4), out b(4)) a += c");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 39), "c");
+    performTestExecution("module main(inout a(4), out b(4)) a += c");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownAssignOperationCausesError) {
-    recordSyntaxError(Message::Position(1, 22), "no viable alternative at input 'a :'");
+    recordSyntaxError(Message::Position(1, 24), "no viable alternative at input 'a :'");
     performTestExecution("module main(out b(4)) a := b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingEqualSignFromAssignOperationCausesError) {
-    recordSyntaxError(Message::Position(1, 22), "no viable alternative at input 'a +'");
+    recordSyntaxError(Message::Position(1, 24), "no viable alternative at input 'a +'");
     performTestExecution("module main(out b(4)) a + b");
 }
 
@@ -1003,47 +1004,47 @@ TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBei
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 1, 2);
     performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b.2:3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 1, 2);
     performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b.3:2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningNoBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 4);
     performTestExecution("module main(inout a(4), out b(4)) a.1:2 <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningNoBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 4);
     performTestExecution("module main(inout a(4), out b(4)) a.2:1 <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 46), 2, 1);
     performTestExecution("module main(inout a(4), out b(4)) a.2:3 <=> b.1");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 46), 2, 1);
     performTestExecution("module main(inout a(4), out b(4)) a.3:2 <=> b.1");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 3);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 46), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.0:1 <=> b.1:3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 3);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 46), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.0:1 <=> b.3:1");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 2, 3);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 46), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.1:0 <=> b.3:1");
 }
 
@@ -1144,34 +1145,34 @@ TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSi
 // TODO: Tests for truncation of values larger than the expected bitwidth
 // TODO: If short circuit evaluation of a binary expression can be performed, should semantic errors be reported? 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInBinaryExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 28), "");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 28), "a");
     performTestExecution("module main(out b(4)) b += (a - 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownBinaryOperationInBinaryExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 30), "no viable alternative at input '(a <=>'");
-    performTestExecution("module main(out b(4)) b += (a <=> 2)");
+    performTestExecution("module main(out b(4), in a(4)) b += (a <=> 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfBinaryExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 29), "extraneous input '+' expecting {<EOF>, 'module'}");
-    performTestExecution("module main(out b(4)) b += a + 2)");
+    recordSyntaxError(Message::Position(1, 38), "extraneous input '+' expecting {<EOF>, 'module'}");
+    performTestExecution("module main(out b(4), in a(4)) b += a + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfBinaryExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 27), "extraneous input '[' expecting {'!', '~', '$', '#', '(', IDENT, INT}");
-    recordSyntaxError(Message::Position(1, 30), "extraneous input '+' expecting {<EOF>, 'module'}");
-    performTestExecution("module main(out b(4)) b += [a + 2)");
+    recordSyntaxError(Message::Position(1, 36), "extraneous input '[' expecting {'!', '~', '$', '#', '(', IDENT, INT}");
+    recordSyntaxError(Message::Position(1, 39), "extraneous input '+' expecting {<EOF>, 'module'}");
+    performTestExecution("module main(out b(4), in a(4)) b += [a + 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfBinaryExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 33), "missing ')' at '<EOF>'");
-    performTestExecution("module main(out b(4)) b += (a + 2");
+    recordSyntaxError(Message::Position(1, 42), "missing ')' at '<EOF>'");
+    performTestExecution("module main(out b(4), in a(4)) b += (a + 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfBinaryExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 33), "mismatched input ']' expecting ')'");
-    performTestExecution("module main(out b(4)) b += (a + 2]");
+    recordSyntaxError(Message::Position(1, 42), "mismatched input ']' expecting ')'");
+    performTestExecution("module main(out b(4), in a(4)) b += (a + 2]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInLhsOperandOfBinaryExpressionCausesError) {
@@ -1237,19 +1238,20 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOperationInNumericExpressionC
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 44), "mismatched input '+' expecting ']'");
-    performTestExecution("module main(out a(4), out b[2](4)) ++= a[#a + 2)]");
+    recordSyntaxError(Message::Position(1, 31), "mismatched input '-' expecting ']'");
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 28), 4, 0, 1);
+    performTestExecution("module main(out a(4)) ++= a[#a - 4)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOpeningBracketInNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 41), "token recognition error at: '{'");
-    recordSyntaxError(Message::Position(1, 45), "mismatched input '+' expecting ']'");
-    performTestExecution("module main(out a(4), out b[2](4)) ++= a[{#a + 2)]");
+    recordSyntaxError(Message::Position(1, 31), "token recognition error at: '{'");
+    recordSyntaxError(Message::Position(1, 35), "mismatched input '-' expecting ']'");
+    performTestExecution("module main(out a[4](4)) ++= a[{#a - 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfNumericExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 48), "missing ')' at '<EOF>'");
-    performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a + 2");
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a - 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidClosingBracketInNumericExpressionCausesError) {
@@ -1283,21 +1285,23 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessC
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForAccessOnDimensionOfVariableCausesError) {
     recordSyntaxError(Message::Position(1, 31), "extraneous input ']' expecting {<EOF>, 'module'}");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 29), "a1");
     performTestExecution("module main(out a[2](4)) ++= a1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForAccessOnDimensionOfVariableCausesError) {
     recordSyntaxError(Message::Position(1, 30), "extraneous input '(' expecting {<EOF>, 'module'}");
+    buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 29));
     performTestExecution("module main(out a[2](4)) ++= a(1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 41), 2, 0, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 31), 2, 0, 2);
     performTestExecution("module main(out a[2](4)) ++= a[2].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionInNonConstantExpressionOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 41), 4, 0, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 31), 4, 0, 2);
     performTestExecution("module main(out a[2](4)) ++= a[#a].0");
 }
 
@@ -1377,3 +1381,7 @@ TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsDynamicExpressionAndOutOf
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 33), 5, 4);
     performTestExecution("module main(out a(4)) ++= a.0:(#a + 1)");
 }
+
+// TODO: Accessing bitwidth of unknown variable reports semantic error
+// TODO: Accessing of loop variable bitwidth not possible
+// TODO: Determining bitwidth of constant not possible
