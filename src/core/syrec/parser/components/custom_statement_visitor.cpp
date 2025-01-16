@@ -199,7 +199,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     if (ctx->statementList())
         generatedForStatement->statements = visitStatementListTyped(ctx->statementList()).value_or(syrec::Statement::vec());
 
-    if (!loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value())
+    if (loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value())
         activeSymbolTableScope->get()->removeVariable(*loopVariableIdentifier);
 
     return generatedForStatement->step && generatedForStatement->range.first && generatedForStatement->range.second ? std::make_optional(generatedForStatement) : std::nullopt;

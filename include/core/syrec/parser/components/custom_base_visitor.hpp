@@ -88,7 +88,7 @@ namespace syrecParser {
 
             const std::optional<unsigned int> accessedBitrangeStart = variableAccess.range->first->tryEvaluate({});
             const std::optional<unsigned int> accessedBitRangeEnd   = accessedBitrangeStart.has_value() ? variableAccess.range->second->tryEvaluate({}) : std::nullopt;
-            if (accessedBitRangeEnd.has_value())
+            if (!accessedBitRangeEnd.has_value())
                 return std::nullopt;
 
             return std::make_pair(*accessedBitrangeStart, *accessedBitRangeEnd);

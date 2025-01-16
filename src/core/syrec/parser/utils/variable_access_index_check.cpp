@@ -39,7 +39,9 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
 
         const std::optional<unsigned int> evaluatedAccessedValueOfDimension                           = accessedValueOfDimensionExprCasted->value->tryEvaluate({});
         validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = dimensionIdx < numDimensionsOfVariable && evaluatedAccessedValueOfDimension.has_value()
-            ? isIndexInRange(*evaluatedAccessedValueOfDimension, variableAccess.getVar()->dimensions.at(dimensionIdx))
+            && variableAccess.getVar()->dimensions.at(dimensionIdx)
+            // We are assuming zero-based indexing
+            ? isIndexInRange(*evaluatedAccessedValueOfDimension, variableAccess.getVar()->dimensions.at(dimensionIdx) - 1)
             : VariableAccessIndicesValidity::IndexValidationResult::Unknown;
 
         validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValue = evaluatedAccessedValueOfDimension;
