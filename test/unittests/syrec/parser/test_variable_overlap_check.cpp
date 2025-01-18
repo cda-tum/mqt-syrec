@@ -1,7 +1,7 @@
-#include "../../../../out/build/x64-Debug/_deps/mqt-core-src/extern/googletest/googlemock/include/gmock/gmock-matchers.h"
 #include "core/syrec/expression.hpp"
 #include <core/syrec/parser/utils/variable_overlap_check.hpp>
 
+#include "gmock/gmock-matchers.h"
 #include <gtest/gtest.h>
 
 #include <vector>
@@ -26,24 +26,44 @@ namespace {
         return std::make_shared<syrec::Variable>(syrec::Variable::Type::In, variableIdentifier, variableDimensions, variableBitwidth);
     }
 
-    void assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand, utils::VariableAccessOverlapCheckResult expectedVariableAccessOverlapCheckResult) {
+    void assertOverlapDataMatches(const std::optional<utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer>& expectedOverlapData, const std::optional<utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer>& actualOverlapData) {
+        if (!expectedOverlapData.has_value()) {
+            ASSERT_FALSE(actualOverlapData.has_value()) << "Expected that no overlap data is available";
+            return;
+        }
+
+        ASSERT_TRUE(actualOverlapData.has_value()) << "Expected that actual overlap data is available";
+        ASSERT_THAT(actualOverlapData->knownValueOfAccessedValuePerDimension, testing::ElementsAreArray(expectedOverlapData->knownValueOfAccessedValuePerDimension));
+        ASSERT_EQ(expectedOverlapData->optionalOverlappingBit, actualOverlapData->optionalOverlappingBit);
+    }
+
+    void assertEquivalenceBetweenVariableAccessOverlapOperands(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand, const utils::VariableAccessOverlapCheckResult& expectedVariableAccessOverlapCheckResult) {
         std::optional<utils::VariableAccessOverlapCheckResult> actualVariableAccessOverlapCheckResult;
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
         ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
-        ASSERT_EQ(expectedVariableAccessOverlapCheckResult, actualVariableAccessOverlapCheckResult.value());
-
-        // Operation must be symmetric (a OP b) = (b OP a)
-        ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
-        ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
-        ASSERT_EQ(expectedVariableAccessOverlapCheckResult, actualVariableAccessOverlapCheckResult.value());
+        ASSERT_EQ(expectedVariableAccessOverlapCheckResult.overlapState, actualVariableAccessOverlapCheckResult->overlapState);
+        ASSERT_NO_FATAL_FAILURE(assertOverlapDataMatches(expectedVariableAccessOverlapCheckResult.overlappingIndicesInformations, actualVariableAccessOverlapCheckResult->overlappingIndicesInformations));
     }
 
-    void assertSymetricVariableAccessOverlapResultCannotBeDetermined(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand) {
+    void assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand) {
+        std::optional<utils::VariableAccessOverlapCheckResult> actualVariableAccessOverlapCheckResult;
+        ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
+        ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
+        ASSERT_EQ(utils::VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping, actualVariableAccessOverlapCheckResult->overlapState);
+        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformations.has_value());
+
+        ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(rhsOperand, lhsOperand));
+        ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
+        ASSERT_EQ(utils::VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping, actualVariableAccessOverlapCheckResult->overlapState);
+        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformations.has_value());
+    }
+
+    void assertSymmetricVariableAccessOverlapResultCannotBeDetermined(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand) {
         std::optional<utils::VariableAccessOverlapCheckResult> actualVariableAccessOverlapCheckResult;
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
         ASSERT_FALSE(actualVariableAccessOverlapCheckResult.has_value());
         
-        // Operation must be symmetric (a OP b) = (b OP a)
+        // Operation must be symmmetric (a OP b) = (b OP a)
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
         ASSERT_FALSE(actualVariableAccessOverlapCheckResult.has_value());
     }
@@ -58,49 +78,93 @@ namespace {
     };
 
     struct VariableAccessDefinition {
-        std::vector<unsigned int>                            accessedValuePerDimension;
-        std::optional<std::pair<unsigned int, unsigned int>> accessedBitRange;
+        using BitrangeIndexDataVariant = std::variant<unsigned int, std::string>;
+
+        std::vector<unsigned int>                                        accessedValuePerDimension;
+        std::optional<std::pair<syrec::Number::ptr, syrec::Number::ptr>> accessedBitRange;
+
+        [[nodiscard]] static syrec::Number::ptr createNumberContainerForBitrangeIndexDataVariant(const BitrangeIndexDataVariant& bitRangeIndexData) {
+            return std::holds_alternative<unsigned int>(bitRangeIndexData)
+                ? createNumberContainerForConstantValue(std::get<unsigned int>(bitRangeIndexData))
+                : createNumberContainerForLoopVariableIdentifier(std::get<std::string>(bitRangeIndexData));
+        }
 
         explicit VariableAccessDefinition():
             accessedValuePerDimension({}), accessedBitRange(std::nullopt) {}
 
-        explicit VariableAccessDefinition(unsigned int accessedBit):
-            accessedValuePerDimension({}), accessedBitRange(std::make_pair(accessedBit, accessedBit)) {}
+        explicit VariableAccessDefinition(const BitrangeIndexDataVariant& accessedBit):
+            accessedValuePerDimension({}) {
+            const auto containerForAccessedBit = createNumberContainerForBitrangeIndexDataVariant(accessedBit);
+            accessedBitRange                   = std::make_pair(containerForAccessedBit, containerForAccessedBit);
+        }
 
-        explicit VariableAccessDefinition(std::pair<unsigned int, unsigned int> accessedBitRange):
-            accessedValuePerDimension({}), accessedBitRange(accessedBitRange) {}
+        explicit VariableAccessDefinition(const std::pair<BitrangeIndexDataVariant, BitrangeIndexDataVariant>& accessedBitRange):
+            accessedValuePerDimension({}) {
+            this->accessedBitRange = std::make_pair(createNumberContainerForBitrangeIndexDataVariant(accessedBitRange.first), createNumberContainerForBitrangeIndexDataVariant(accessedBitRange.second));
+        }
 
         explicit VariableAccessDefinition(const std::vector<unsigned int>& accessedValuePerDimension)
             : accessedValuePerDimension(accessedValuePerDimension), accessedBitRange(std::nullopt) {}
 
-        explicit VariableAccessDefinition(const std::vector<unsigned int>& accessedValuePerDimension, unsigned int accessedBit)
-            : accessedValuePerDimension(accessedValuePerDimension), accessedBitRange(std::make_pair(accessedBit, accessedBit)) {}
+        explicit VariableAccessDefinition(const std::vector<unsigned int>& accessedValuePerDimension, const BitrangeIndexDataVariant& accessedBit)
+            : accessedValuePerDimension(accessedValuePerDimension) {
+            const auto containerForAccessedBit = createNumberContainerForBitrangeIndexDataVariant(accessedBit);
+            accessedBitRange                   = std::make_pair(containerForAccessedBit, containerForAccessedBit);
+        }
 
-        explicit VariableAccessDefinition(const std::vector<unsigned int>& accessedValuePerDimension, std::pair<unsigned int, unsigned int> accessedBitRange)
-            : accessedValuePerDimension(accessedValuePerDimension), accessedBitRange(accessedBitRange) {}
+        explicit VariableAccessDefinition(const std::vector<unsigned int>& accessedValuePerDimension, const std::pair<BitrangeIndexDataVariant, BitrangeIndexDataVariant>& accessedBitRange)
+            : accessedValuePerDimension(accessedValuePerDimension) {
+            this->accessedBitRange = std::make_pair(createNumberContainerForBitrangeIndexDataVariant(accessedBitRange.first), createNumberContainerForBitrangeIndexDataVariant(accessedBitRange.second));
+        }
+    };
+
+    struct ExpectedSymmetricOverlapCheckResultData {
+        std::vector<unsigned int>   accessedValuePerDimension;
+        unsigned int overlappingBitForLhsOperand;
+        unsigned int overlappingBitForRhsOperand;
+
+        explicit ExpectedSymmetricOverlapCheckResultData(std::vector<unsigned int>&& accessedValuePerDimension, unsigned int overlappingBitForLhsOperand):
+            accessedValuePerDimension(std::move(accessedValuePerDimension)), overlappingBitForLhsOperand(overlappingBitForLhsOperand), overlappingBitForRhsOperand(overlappingBitForLhsOperand) {}
+
+        explicit ExpectedSymmetricOverlapCheckResultData(std::vector<unsigned int>&& accessedValuePerDimension, unsigned int overlappingBitForLhsOperand, unsigned int overlappingBitForRhsOperand):
+            accessedValuePerDimension(std::move(accessedValuePerDimension)), overlappingBitForLhsOperand(overlappingBitForLhsOperand), overlappingBitForRhsOperand(overlappingBitForRhsOperand) {}
+
     };
 
     struct OverlapTestData {
-        std::string              testName;
-        VariableDefinition       variableDefinition;
-        VariableAccessDefinition lVarAccessDefinition;
-        VariableAccessDefinition rVarAccessDefinition;
+        std::string                                                                         testName;
+        VariableDefinition                                                                  variableDefinition;
+        VariableAccessDefinition                                                            lVarAccessDefinition;
+        VariableAccessDefinition                                                            rVarAccessDefinition;
+        std::optional<ExpectedSymmetricOverlapCheckResultData>                              optionalExpectedOverlapData;
 
         explicit OverlapTestData(std::string&& testName, VariableDefinition&& variableDefinition, VariableAccessDefinition&& lVarAccessDefinition, VariableAccessDefinition&& rVarAccessDefinition):
             testName(std::move(testName)), variableDefinition(std::move(variableDefinition)), lVarAccessDefinition(std::move(lVarAccessDefinition)), rVarAccessDefinition(std::move(rVarAccessDefinition)) {}
+
+        explicit OverlapTestData(std::string&& testName, VariableDefinition&& variableDefinition, VariableAccessDefinition&& lVarAccessDefinition, VariableAccessDefinition&& rVarAccessDefinition, ExpectedSymmetricOverlapCheckResultData&& overlapData):
+            testName(std::move(testName)), variableDefinition(std::move(variableDefinition)), lVarAccessDefinition(std::move(lVarAccessDefinition)), rVarAccessDefinition(std::move(rVarAccessDefinition)), optionalExpectedOverlapData(overlapData) {}
     };
 
     class BaseOverlapInVariableAccessesTestFixture : public testing::TestWithParam<OverlapTestData> {
     public:
-        virtual utils::VariableAccessOverlapCheckResult getExpectedVariableAccessOverlapCheckResult() = 0;
+        virtual utils::VariableAccessOverlapCheckResult::OverlapState getExpectedVariableAccessOverlapCheckResult() = 0;
 
         void performTestExecution() {
-            const auto& [_, variableDefinition, lVarAccessDefinition, rVarAccessDefinition] = GetParam();
+            const auto& [_, variableDefinition, lVarAccessDefinition, rVarAccessDefinition, optionalExpectedOverlapData] = GetParam();
             const auto variableInstance                                                  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, variableDefinition.identifier, variableDefinition.dimensions, variableDefinition.bitwidth);
 
             const syrec::VariableAccess lVarAccessInstance = createVariableAccessFromDefinition(variableInstance, lVarAccessDefinition);
             const syrec::VariableAccess rVarAccessInstance = createVariableAccessFromDefinition(variableInstance, rVarAccessDefinition);
-            ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lVarAccessInstance, rVarAccessInstance, getExpectedVariableAccessOverlapCheckResult()));
+
+            auto expectedOverlapCheckResultUsingLhsOperandAsBase                           = utils::VariableAccessOverlapCheckResult(getExpectedVariableAccessOverlapCheckResult());
+            if (optionalExpectedOverlapData.has_value())
+                expectedOverlapCheckResultUsingLhsOperandAsBase.overlappingIndicesInformations = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForLhsOperand});
+            ASSERT_NO_FATAL_FAILURE(assertEquivalenceBetweenVariableAccessOverlapOperands(lVarAccessInstance, rVarAccessInstance, expectedOverlapCheckResultUsingLhsOperandAsBase));
+
+            auto expectedOverlapCheckResultUsingRhsOperandAsBase                           = utils::VariableAccessOverlapCheckResult(getExpectedVariableAccessOverlapCheckResult());
+            if (optionalExpectedOverlapData.has_value())
+                expectedOverlapCheckResultUsingRhsOperandAsBase.overlappingIndicesInformations = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForRhsOperand});
+            ASSERT_NO_FATAL_FAILURE(assertEquivalenceBetweenVariableAccessOverlapOperands(rVarAccessInstance, lVarAccessInstance, expectedOverlapCheckResultUsingRhsOperandAsBase));
         }
 
     protected:
@@ -112,8 +176,8 @@ namespace {
                 variableAccess.indexes.emplace_back( createExpressionForConstantValue(accessedValuePerDimension));
 
             if (variableAccessDefinition.accessedBitRange.has_value()) {
-                const auto accessedBitrangeStartContainer = createNumberContainerForConstantValue(variableAccessDefinition.accessedBitRange->first);
-                const auto accessedBitrangeEndContainer   = createNumberContainerForConstantValue(variableAccessDefinition.accessedBitRange->second);
+                const auto accessedBitrangeStartContainer = variableAccessDefinition.accessedBitRange->first;
+                const auto accessedBitrangeEndContainer   = variableAccessDefinition.accessedBitRange->second;
                 variableAccess.range                      = std::make_pair(accessedBitrangeStartContainer, accessedBitrangeEndContainer);
             }
             return variableAccess;
@@ -121,23 +185,22 @@ namespace {
     };
 
     class ExpectingOverlappingVariableAccessesTestFixture: public BaseOverlapInVariableAccessesTestFixture {
-        utils::VariableAccessOverlapCheckResult getExpectedVariableAccessOverlapCheckResult() override {
-            return utils::VariableAccessOverlapCheckResult::Overlapping;
+        utils::VariableAccessOverlapCheckResult::OverlapState getExpectedVariableAccessOverlapCheckResult() override {
+            return utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping;
         }
     };
 
     class ExpectingPotentiallyOverlappingVariableAccessesTestFixture: public BaseOverlapInVariableAccessesTestFixture {
-        utils::VariableAccessOverlapCheckResult getExpectedVariableAccessOverlapCheckResult() override {
-            return utils::VariableAccessOverlapCheckResult::MaybeOverlapping;
+        utils::VariableAccessOverlapCheckResult::OverlapState getExpectedVariableAccessOverlapCheckResult() override {
+            return utils::VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping;
         }
     };
 
     class ExpectingNotOverlappingVariableAccessesTestFixture: public BaseOverlapInVariableAccessesTestFixture {
-        utils::VariableAccessOverlapCheckResult getExpectedVariableAccessOverlapCheckResult() override {
-            return utils::VariableAccessOverlapCheckResult::NotOverlapping;
+        utils::VariableAccessOverlapCheckResult::OverlapState getExpectedVariableAccessOverlapCheckResult() override {
+            return utils::VariableAccessOverlapCheckResult::OverlapState::NotOverlapping;
         }
     };
-
 }
 
 TEST_P(ExpectingOverlappingVariableAccessesTestFixture, ExpectingOverlap) {
@@ -162,205 +225,429 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(),
-            VariableAccessDefinition()),
+            VariableAccessDefinition(),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 0)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(),
-            VariableAccessDefinition( 2)),
+            VariableAccessDefinition(2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(),
-            VariableAccessDefinition( std::make_pair(2, 14))),
+            VariableAccessDefinition(std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(),
+            VariableAccessDefinition(std::make_pair("$i", DEFAULT_VARIABLE_BITWIDTH - 1)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), DEFAULT_VARIABLE_BITWIDTH - 1)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(),
+            VariableAccessDefinition(std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2u)),
 
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(2),
-            VariableAccessDefinition()),
+            VariableAccessDefinition(),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(2),
-            VariableAccessDefinition( 2)),
+            VariableAccessDefinition(2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessStartEqualToBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(2),
-            VariableAccessDefinition( std::make_pair(2, 14))),
+            VariableAccessDefinition( std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessEndEqualToBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(14),
-            VariableAccessDefinition(std::make_pair(2, 14))),
+            VariableAccessDefinition(std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 14)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(5),
-            VariableAccessDefinition(std::make_pair(2, 14))),
+            VariableAccessDefinition(std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(2),
+            VariableAccessDefinition(std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(2),
+            VariableAccessDefinition(std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+
 
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition()),
+            VariableAccessDefinition(),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(5)),
+            VariableAccessDefinition(5),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccessStartEqualToBit_rAccess_NoDimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(2)),
+            VariableAccessDefinition(2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccessEndEqualToBit_rAccess_NoDimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(14)),
+            VariableAccessDefinition(14),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 14)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToEndBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToEndBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
 
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingFromTheLeft",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(std::make_pair(1, 3))),
+            VariableAccessDefinition(std::make_pair(1, 3)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingFromTheRight",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(std::make_pair(1, 14))),
+            VariableAccessDefinition(std::make_pair(1, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessBeingEqualToLeftOne",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(std::make_pair(2, 14))),
+            VariableAccessDefinition(std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 2)),
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessInLeftOne",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::make_pair(2, 14)),
-            VariableAccessDefinition(std::make_pair(5, 8))),
-
+            VariableAccessDefinition(std::make_pair(5, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeStartInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeStart",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair("$i", 5)),
+            VariableAccessDefinition(std::make_pair(5, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeStartInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair("$i", 8)),
+            VariableAccessDefinition(std::make_pair(8, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 8)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeStartInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeStartWithNonConstantEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair("$i", 5)),
+            VariableAccessDefinition(std::make_pair(5, "$j")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeStartInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeEndWithNonConstantStart",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair("$i", 8)),
+            VariableAccessDefinition(std::make_pair("$j", 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 8)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeEndInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeStart",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(5, "$i")),
+            VariableAccessDefinition(std::make_pair(5, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeEndInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(8, "$i")),
+            VariableAccessDefinition(std::make_pair(8, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 8)),
+        OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeEndInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeStartWithNonConstantEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::make_pair(5, "$i")),
+            VariableAccessDefinition(std::make_pair(5, "$j")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u}), 5)),
+        
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessNoBitRangeAccess_rAccess_DimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u})),
-            VariableAccessDefinition(std::vector({1u}))),
+            VariableAccessDefinition(std::vector({1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 0)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessNoBitRangeAccess_rAccess_DimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u})),
-            VariableAccessDefinition(std::vector({1u}), 2)),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessNoBitRangeAccess_rAccess_DimensionAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u})),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u})),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair("$i", DEFAULT_VARIABLE_BITWIDTH - 1)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH - 1)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u})),
+            VariableAccessDefinition(std::vector({1u}) , std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
 
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,2),
-            VariableAccessDefinition(std::vector({1u}))),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            VariableAccessDefinition(std::vector({1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,2),
-            VariableAccessDefinition(std::vector({1u}), 2)),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheLeft",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,2),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14))),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheRight",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u}), 2),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(0, 3))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(0, 3)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitRangeAccessEqualToBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u}), 2),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 2))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
 
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            VariableAccessDefinition(std::vector({1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}) ,2)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            VariableAccessDefinition(std::vector({1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheLeft",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
-            VariableAccessDefinition(std::vector({1u}) ,std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}) ,std::make_pair(0, 3))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(0, 3)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheRight",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(1, 14))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(1, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessEqualToLeftAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14))),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
         OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessInLeftOne",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({1u}), std::make_pair(2, 14)),
-            VariableAccessDefinition(std::vector({1u}), std::make_pair(5, 8))),
-
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(5, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 5)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToEndBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
+        OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToEndBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({1u}), std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({1u}), 2)),
 
         OverlapTestData("NDSignal_lAccess_NoBitRangeAccess_rAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u,1u})),
-            VariableAccessDefinition(std::vector({0u,1u}))),
+            VariableAccessDefinition(std::vector({0u,1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 0)),
         OverlapTestData("NDSignal_lAccess_NoBitRangeAccess_rAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u})),
-            VariableAccessDefinition(std::vector({0u, 1u}), 2)),
+            VariableAccessDefinition(std::vector({0u, 1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_NoBitRangeAccess_rAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u})),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u})),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair("$i", DEFAULT_VARIABLE_BITWIDTH - 1)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), DEFAULT_VARIABLE_BITWIDTH - 1)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u})),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
 
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}))),
+            VariableAccessDefinition(std::vector({0u, 1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), 2)),
+            VariableAccessDefinition(std::vector({0u, 1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitRangeAccessOverlappingBitFromTheLeft",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 8))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitRangeAccessWithStartEqualToBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 8))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitRangeAccessWithEndEqualToBit",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 2))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitRangeAccessEnclosingBitOfLAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 8))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 8)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitAccess_rAccessBitRangeAccessOverlappingBitFromTheRight",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), 2),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(8, 0))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(8, 0)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), 2),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValue",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), 2),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2u, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
 
         OverlapTestData("NDSignal_lAccess_BitRangeAccesss_rAccessNoBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
-            VariableAccessDefinition(std::vector({0u, 1u}))),
+            VariableAccessDefinition(std::vector({0u, 1u})),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessStartEqualToBit_rAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
-            VariableAccessDefinition(std::vector({0u, 1u}), 2)),
+            VariableAccessDefinition(std::vector({0u, 1u}), 2),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessEndEqualToBit_rAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
-            VariableAccessDefinition(std::vector({0u, 1u}), 5)),
+            VariableAccessDefinition(std::vector({0u, 1u}), 5),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessEnclosingBit_rAccessBitAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
-            VariableAccessDefinition(std::vector({0u, 1u}), 4)),
+            VariableAccessDefinition(std::vector({0u, 1u}), 4),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 4)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 4)),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccessWithLhsBitrangeStartLargerThanEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(4, 0)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 4, 2)),
+        OverlapTestData("NDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccessWithRhsBitrangeStartLargerThanEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 4)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(5, 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2, 4)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheRight_rAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(8, 0)),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5, 2)),
+        OverlapTestData("NDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheRight_rAccessBitRangeAccessWithRhsBitrangeStartLargerThanEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(8, 0)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(5, 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5, 5)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessEqualToOther_rAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5))),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
         OverlapTestData("NDSignal_lAccess_BitRangeAccessEnclosingOther_rAccessBitRangeAccess",
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(0, 8)),
-            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)))
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, 5)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_BitRangeAccessEnclosingOther_rAccessBitRangeAccess_BothBitrangesWithStartLargerThanEnd",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(8, 0)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(5, 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5, 5)),
+
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToEndBitOfLVarBitrange", 
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair("$i", 2)),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToStartBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2)),
+        OverlapTestData("NDSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantEndValueEqualToEndBitOfLVarBitrange",
+            VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
+            VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, "$i")),
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 2))
     }), [](const testing::TestParamInfo<ExpectingOverlappingVariableAccessesTestFixture::ParamType>& info) {
         return info.param.testName;
     });
@@ -629,7 +916,7 @@ TEST(VariableAccessOverlapTests, ReferenceVariableNotSetCorrectlyDetected) {
     auto rhsVariableAccess = syrec::VariableAccess();
     rhsVariableAccess.setVar(rOperandReferenceVariable);
     rhsVariableAccess.indexes = lhsVariableAccess.indexes;
-    ASSERT_NO_FATAL_FAILURE(assertSymetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableIdentifierDetectedCorrectly) {
@@ -647,7 +934,7 @@ TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableIdentifierDetectedC
     auto rhsVariableAccess = syrec::VariableAccess();
     rhsVariableAccess.setVar(rOperandReferenceVariable);
     rhsVariableAccess.indexes = lhsVariableAccess.indexes;
-    ASSERT_NO_FATAL_FAILURE(assertSymetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableBitwidthDetectedCorrectly) {
@@ -665,12 +952,12 @@ TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableBitwidthDetectedCor
     auto rhsVariableAccess = syrec::VariableAccess();
     rhsVariableAccess.setVar(rOperandReferenceVariable);
     rhsVariableAccess.indexes = lhsVariableAccess.indexes;
-    ASSERT_NO_FATAL_FAILURE(assertSymetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
 
     auto rOperandReferenceVariableWithSmallerBitwidth = std::make_shared<syrec::Variable>(*rOperandReferenceVariable);
     rOperandReferenceVariable->bitwidth               = lOperandReferenceVariable->bitwidth - 2;
     rhsVariableAccess.setVar(rOperandReferenceVariable);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableDimensionsDetectedCorrectly) {
@@ -699,7 +986,7 @@ TEST(VariableAccessOverlapTests, MissmatchInReferenceVariableDimensionsDetectedC
         for (std::size_t i = 0; i < numValuesPerDimensionOfRhsVariableAccess.size(); ++i)
             rhsVariableAccess.indexes.emplace_back(createExpressionForConstantValue(0));
 
-        ASSERT_NO_FATAL_FAILURE(assertSymetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
+        ASSERT_NO_FATAL_FAILURE(assertSymmetricVariableAccessOverlapResultCannotBeDetermined(lhsVariableAccess, rhsVariableAccess));
     }
 }
 
@@ -717,7 +1004,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForBitrangeStartValueResultsInPoten
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForBitrangeEndValueResultsInPotentialOverlapAndNoCrash) {
@@ -734,7 +1021,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForBitrangeEndValueResultsInPotenti
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForBothBitrangeStartAndAendResultsInPotentialOverlapAndNoCrash) {
@@ -751,7 +1038,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForBothBitrangeStartAndAendResultsI
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeStartValueResultsInPotentialOverlapAndNoCrash) {
@@ -768,10 +1055,11 @@ TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeStartValueResultsInP
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
-TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeEndValueResultsInPotentialOverlapAndNoCrash) {
+// Maybe overlapping
+TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeEndValueResultsOverlapsInPotentialOverlapAndNoCrash) {
     const std::vector<unsigned int> variableDimensions       = {1, 2};
     const auto                      accessedVariableInstance = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, variableDimensions, DEFAULT_VARIABLE_BITWIDTH);
     ASSERT_THAT(accessedVariableInstance, testing::NotNull());
@@ -785,7 +1073,7 @@ TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeEndValueResultsInPot
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, NonConstantValueForBothBitrangeStartAndAendResultsInPotentialOverlapAndNoCrash) {
@@ -802,7 +1090,7 @@ TEST(VariableAccessOverlapTests, NonConstantValueForBothBitrangeStartAndAendResu
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForAccessedValueOfDimensionResultsInPotentialOverlapAndNoCrash) {
@@ -818,7 +1106,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForAccessedValueOfDimensionResultsI
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0),  createNumberContainerForConstantValue(accessedVariableInstance->bitwidth - 1));
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, NonConstantValueForAccessedValueOfDimensionResultsInPotentialOverlapAndNoCrash) {
@@ -840,7 +1128,7 @@ TEST(VariableAccessOverlapTests, NonConstantValueForAccessedValueOfDimensionResu
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(5), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueInAccessedBitrangesOfBothOperandsResultsInPotentialOverlapAndNoCrash) {
@@ -857,15 +1145,15 @@ TEST(VariableAccessOverlapTests, InvalidValueInAccessedBitrangesOfBothOperandsRe
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range = std::make_pair(createNumberContainerForConstantValue(0), nullptr);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     lhsVariableAccess.range = std::make_pair(nullptr, createNumberContainerForConstantValue(accessedVariableInstance->bitwidth - 1));
     rhsVariableAccess.range = std::make_pair(nullptr, createNumberContainerForConstantValue(5));
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     lhsVariableAccess.range = std::make_pair(nullptr, nullptr);
     rhsVariableAccess.range = std::make_pair(nullptr, createNumberContainerForConstantValue(5));
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, NonConstantValueInAccessedBitrangesOfBothOperandsResultsInPotentialOverlapAndNoCrash) {
@@ -883,15 +1171,15 @@ TEST(VariableAccessOverlapTests, NonConstantValueInAccessedBitrangesOfBothOperan
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), containerForLoopVariable);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     lhsVariableAccess.range = std::make_pair(containerForLoopVariable, createNumberContainerForConstantValue(accessedVariableInstance->bitwidth - 1));
     rhsVariableAccess.range = std::make_pair(containerForLoopVariable, createNumberContainerForConstantValue(5));
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     lhsVariableAccess.range = std::make_pair(containerForLoopVariable, containerForLoopVariable);
     rhsVariableAccess.range = std::make_pair(containerForLoopVariable, createNumberContainerForConstantValue(5));
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForAccessedValueOfDimensionOfBothOperandsResultsInPotentialOverlapAndNoCrash) {
@@ -913,10 +1201,10 @@ TEST(VariableAccessOverlapTests, InvalidValueForAccessedValueOfDimensionOfBothOp
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), nullptr};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(5), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     rhsVariableAccess.indexes[0]         = nullptr;
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
 TEST(VariableAccessOverlapTests, NonConstantValueForAccessedValueOfDimensionOfBothOperandsResultsInPotentialOverlapAndNoCrash) {
@@ -938,9 +1226,9 @@ TEST(VariableAccessOverlapTests, NonConstantValueForAccessedValueOfDimensionOfBo
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), binaryExpressionDefiningAccessedValueOfFirstDimensionUsingFirstLoopVariable};
     rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(5), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 
     const auto exprForSecondLoopVariable = std::make_shared<syrec::NumericExpression>(createNumberContainerForLoopVariableIdentifier("$j"), 2);
     rhsVariableAccess.indexes[0]         = exprForSecondLoopVariable;
-    ASSERT_NO_FATAL_FAILURE(assertSymetricEquivalenceBetweenVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess, utils::VariableAccessOverlapCheckResult::MaybeOverlapping));
+    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
