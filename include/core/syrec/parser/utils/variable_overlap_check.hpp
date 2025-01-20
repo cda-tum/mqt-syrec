@@ -17,11 +17,13 @@ namespace utils {
          */
         struct OverlappingIndicesContainer {
             std::vector<unsigned int> knownValueOfAccessedValuePerDimension;
-            unsigned int              optionalOverlappingBit;
+            unsigned int              overlappingBit;
         };
 
         explicit VariableAccessOverlapCheckResult(const OverlapState overlapState):
             overlapState(overlapState) {}
+
+        [[nodiscard]] std::string stringifyOverlappingIndicesInformation() const;
 
         OverlapState                               overlapState;
         std::optional<OverlappingIndicesContainer> overlappingIndicesInformations;
