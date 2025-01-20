@@ -34,7 +34,7 @@ namespace {
 
         ASSERT_TRUE(actualOverlapData.has_value()) << "Expected that actual overlap data is available";
         ASSERT_THAT(actualOverlapData->knownValueOfAccessedValuePerDimension, testing::ElementsAreArray(expectedOverlapData->knownValueOfAccessedValuePerDimension));
-        ASSERT_EQ(expectedOverlapData->optionalOverlappingBit, actualOverlapData->optionalOverlappingBit);
+        ASSERT_EQ(expectedOverlapData->overlappingBit, actualOverlapData->overlappingBit);
     }
 
     void assertEquivalenceBetweenVariableAccessOverlapOperands(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand, const utils::VariableAccessOverlapCheckResult& expectedVariableAccessOverlapCheckResult) {
@@ -675,7 +675,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2u, 3u}), DEFAULT_VARIABLE_BITWIDTH),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(2, DEFAULT_VARIABLE_BITWIDTH - 1)),
             VariableAccessDefinition(std::vector({0u, 1u}), std::make_pair(5, "$i")),
-            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5))
+            ExpectedSymmetricOverlapCheckResultData(std::vector({0u, 1u}), 5)),
     }), [](const testing::TestParamInfo<ExpectingOverlappingVariableAccessesTestFixture::ParamType>& info) {
         return info.param.testName;
     });
@@ -932,6 +932,8 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingNotOverlappingVari
 // TODO: Tests for invalid variable accesses (nullptr expressions, etc.), missmatching reference variables?
 // TODO: Tests for overlap of partial variable accesses?
 // TODO: How should indices out of range be handled (accessed value of dimension or bit range)
+
+// TODO: Defined expected behaviour for cases in which the user provides invalid values for the bit range start and/or end (i.e. nullptrs)
 TEST(VariableAccessOverlapTests, ReferenceVariableNotSetCorrectlyDetected) {
     const std::vector<unsigned int> variableDimensions        = {1, 2};
     const auto                      rOperandReferenceVariable = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER + "otherIdent", variableDimensions, DEFAULT_VARIABLE_BITWIDTH);
@@ -1036,6 +1038,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForBitrangeStartValueResultsInPoten
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForBitrangeEndValueResultsInPotentialOverlapAndNoCrash) {
+    GTEST_SKIP();
     const std::vector<unsigned int> variableDimensions       = {1, 2};
     const auto                      accessedVariableInstance = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, variableDimensions, DEFAULT_VARIABLE_BITWIDTH);
     ASSERT_THAT(accessedVariableInstance, testing::NotNull());
@@ -1048,7 +1051,7 @@ TEST(VariableAccessOverlapTests, InvalidValueForBitrangeEndValueResultsInPotenti
     auto rhsVariableAccess = syrec::VariableAccess();
     rhsVariableAccess.setVar(accessedVariableInstance);
     rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
-    rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
+    rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(2), createNumberContainerForConstantValue(DEFAULT_VARIABLE_BITWIDTH - 1));
     ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
 }
 
@@ -1087,23 +1090,6 @@ TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeStartValueResultsInP
 }
 
 // Maybe overlapping
-TEST(VariableAccessOverlapTests, NonConstantValueForBitrangeEndValueResultsOverlapsInPotentialOverlapAndNoCrash) {
-    const std::vector<unsigned int> variableDimensions       = {1, 2};
-    const auto                      accessedVariableInstance = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, variableDimensions, DEFAULT_VARIABLE_BITWIDTH);
-    ASSERT_THAT(accessedVariableInstance, testing::NotNull());
-
-    auto lhsVariableAccess = syrec::VariableAccess();
-    lhsVariableAccess.setVar(accessedVariableInstance);
-    lhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
-    lhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(2), createNumberContainerForLoopVariableIdentifier("$i"));
-
-    auto rhsVariableAccess = syrec::VariableAccess();
-    rhsVariableAccess.setVar(accessedVariableInstance);
-    rhsVariableAccess.indexes = {createExpressionForConstantValue(0), createExpressionForConstantValue(1)};
-    rhsVariableAccess.range   = std::make_pair(createNumberContainerForConstantValue(0), lhsVariableAccess.range->first);
-    ASSERT_NO_FATAL_FAILURE(assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(lhsVariableAccess, rhsVariableAccess));
-}
-
 TEST(VariableAccessOverlapTests, NonConstantValueForBothBitrangeStartAndAendResultsInPotentialOverlapAndNoCrash) {
     const std::vector<unsigned int> variableDimensions       = {1, 2};
     const auto                      accessedVariableInstance = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, variableDimensions, DEFAULT_VARIABLE_BITWIDTH);

@@ -22,7 +22,8 @@ namespace syrecParser {
         SelfRecursionNotAllowed,
         ValueOverflowDueToNoImplicitTruncationPerformed,
         CannotCallMainModule,
-        ValueOfLoopVariableNotUsableInItsInitialValueDeclaration
+        ValueOfLoopVariableNotUsableInItsInitialValueDeclaration,
+        ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts,
     };
 
     /// Get the identifier associated with a given semantic error
@@ -52,6 +53,7 @@ namespace syrecParser {
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
             case SemanticError::CannotCallMainModule:
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
+            case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
                 return "TEST";
             default:
                 return "";
@@ -106,6 +108,8 @@ namespace syrecParser {
                 return "Cannot call 'main' module of SyReC program"; // TODO: Should we also print signature of 'main' module
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
                 return "Loop variable {:s} cannot be used in the definition of its initial value";
+            case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
+                return "Overlap with restricted variable parts (formatted as: dimension access [shown as tuples of the form (dimensionIdx, value of dimension)] | overlapping bit) = '{:s}' detected preventing the inversion of the current statement";
             default:
                 return "";
         }

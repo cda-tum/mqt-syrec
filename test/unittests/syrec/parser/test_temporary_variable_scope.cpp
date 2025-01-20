@@ -1,5 +1,4 @@
 #include "core/syrec/variable.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
 #include "gmock/gmock-matchers.h"

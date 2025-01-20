@@ -4,6 +4,7 @@
 #include "core/syrec/parser/utils/variable_access_index_check.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+#include <core/syrec/parser/utils/variable_overlap_check.hpp>
 
 // TODO: Truncation of values in expressions where a signal access is defined in a nested expression needs to be propagated to the 'past' operands
 
@@ -175,6 +176,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
 }
 
 // TODO: Substitution of loop variable values for compile time index checks
+// TODO: Signal overlap checks - add semantic errors for overlaps
 std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(TSyrecParser::SignalContext* context) {
     if (!context || !context->IDENT())
         return std::nullopt;
@@ -198,9 +200,16 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     const std::size_t                numUserAccessedDimensions                     = context->accessedDimensions.size();
     generatedVariableAccess->indexes                                               = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
 
-    for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i)
+    for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i) {
+        const bool existsOperandBitwidthSizeRestriction = optionalExpectedBitwidthForAnyProcessedEntity.has_value();
         if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(context->accessedDimensions.at(i)); exprDefiningAccessedValueOfDimension.has_value())
             generatedVariableAccess->indexes[i] = *exprDefiningAccessedValueOfDimension;
+
+        // Any generated bitwidth restriction generated during the processing of the expression defining the accessed value of the dimension needs to be cleared if the latter was processed to prevent
+        // the propagation of the restriction to the parsing process for the remaining components of the variable access
+        if (!existsOperandBitwidthSizeRestriction && optionalExpectedBitwidthForAnyProcessedEntity.has_value())
+            clearExpectedBitwidthForAnyProcessedEntity();
+    }
 
     if (!numUserAccessedDimensions) {
         if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1)
@@ -262,6 +271,18 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         }
     }
 
+    // Since the error reported when defining an overlapping variable access is reported at the position of the variable identifier, this check needs to be performed prior
+    // to the check for matching operand bitwidths (if no internal ordering of the reported errors is performed [which is currently the case])
+    if (const std::optional<utils::VariableAccessOverlapCheckResult>& overlapCheckResultWithRestrictedVariableParts = optionalRestrictionOnVariableAccesses.has_value() && *optionalRestrictionOnVariableAccesses ? utils::checkOverlapBetweenVariableAccesses(**optionalRestrictionOnVariableAccesses, *generatedVariableAccess) : std::nullopt;
+        overlapCheckResultWithRestrictedVariableParts.has_value() && overlapCheckResultWithRestrictedVariableParts->overlapState == utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping) {
+        if (!overlapCheckResultWithRestrictedVariableParts->overlappingIndicesInformations.has_value())
+            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Overlap with restricted variable parts detected but no further information about overlap available. This should not happen");
+        else
+            recordSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
+                    mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
+                    overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
+    }
+
     std::optional<unsigned int> accessedBitRangeStart;
     if (context->bitStart)
         accessedBitRangeStart = bitRangeStart.has_value() ? bitRangeStart->get()->tryEvaluate({}) : std::nullopt;
@@ -283,7 +304,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             setExpectedBitwidthForAnyProcessedEntity(userAccessedBitrangeLength);
         else if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity)
             recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(
-                mapTokenPositionToMessagePosition(context->bitStart ? *context->bitStart->getStart() : *context->IDENT()->getSymbol()), 
+                mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), 
                 *optionalExpectedBitwidthForAnyProcessedEntity, 
                 userAccessedBitrangeLength);
     }
@@ -299,15 +320,15 @@ void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
 }
 
 bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {
-    if (!notAccessiblePartsForFutureVariableAccesses->var 
+    if (!notAccessiblePartsForFutureVariableAccesses
+        || !notAccessiblePartsForFutureVariableAccesses->var 
         || notAccessiblePartsForFutureVariableAccesses->var->name.empty()
         || std::any_of(
         notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
         notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
         [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
             return !tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension).has_value();
-        }) 
-        || !tryDetermineAccessedBitrangeOfVariableAccess(*notAccessiblePartsForFutureVariableAccesses).has_value())
+        }))
         return false;
 
     optionalRestrictionOnVariableAccesses = notAccessiblePartsForFutureVariableAccesses;

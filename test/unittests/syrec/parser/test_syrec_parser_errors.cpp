@@ -1,106 +1,4 @@
-#include "core/syrec/program.hpp"
-#include "core/syrec/parser/utils/custom_error_mesages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
-#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
-#include "fmt/compile.h"
-
-#include "gmock/gmock-matchers.h"
-#include <gtest/gtest.h>
-
-using namespace syrecParser;
-
-class SyrecParserErrorTestsFixture: public testing::Test {
-public:
-    using MessagesContainer = std::vector<Message>;
-
-    template<SemanticError semanticError, typename... T>
-    void buildAndRecordExpectedSemanticError(Message::Position messagePosition, T&&... args) {
-        static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty());
-        static_assert(!getIdentifierForSemanticError<semanticError>().empty());
-
-        expectedErrorMessages.emplace_back(Message(
-            Message::Type::Error,
-            std::string(getIdentifierForSemanticError<semanticError>()),
-            messagePosition, 
-            fmt::format(FMT_STRING(getFormatForSemanticErrorMessage<semanticError>()), std::forward<T>(args)...)));
-    }
-
-    void recordSyntaxError(Message::Position messagePosition, const std::string& messageText) {
-        expectedErrorMessages.emplace_back(Message(Message::Type::Error, "SYNTAX", messagePosition, messageText));
-    }
-
-    void performTestExecution(const std::string& stringifiedSyrecProgramToProcess) const {
-        syrec::Program program;
-
-        std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-        // We needed to modifiy the syrec::Program interface to allow processing of programs from a string due to the missing cross platform support
-        // to create temporary or in-memory files (see mkstemp and fmemopen functions which are POSIX specific ones) without using the boost library.
-        // Using the tmpfile/tmpfile_s of the C++ standard library is also not viable for the creating of temporary files due to the missing ability
-        // to determine the path/filename of the generated file descriptor on all platforms.
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = program.readFromString(stringifiedSyrecProgramToProcess));
-        ASSERT_NO_FATAL_FAILURE(assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, expectedErrorMessages));
-    }
-
-protected:
-    MessagesContainer expectedErrorMessages;
-
-    static void assertStringificationOfParsedSyrecProgramIsSuccessful(const syrec::Program& syrecProgramToStringifiy, std::ostream& containerForStringifiedProgram) {
-        // TODO: Troubleshooting as to why the stringification of the SyReC program failed is currently not possible but should only happen if either the IR representation of
-        // the IR representation or of an internal error in the stringifier. Can we handle the former cases better?
-        utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(std::nullopt);
-        bool                                wasStringificationSuccessful;
-        ASSERT_NO_FATAL_FAILURE(wasStringificationSuccessful = syrecProgramStringifier.stringify(containerForStringifiedProgram, syrecProgramToStringifiy)) << "Error during stringification of SyReC program";
-        ASSERT_TRUE(wasStringificationSuccessful) << "Failed to stringify SyReC program";
-    }
-
-    static void assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(const std::string_view& aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, const MessagesContainer& expectedErrorsDetectedDuringProcessingOfSyrecProgram) {
-        std::vector<std::string_view> errorsDetectedDuringProcessingOfSyrecProgram;
-        // In the best case scenario, no further resizing of the container is necessary (i.e. the number of actually found errors is equal to the number of expected ones).
-        errorsDetectedDuringProcessingOfSyrecProgram.reserve(expectedErrorsDetectedDuringProcessingOfSyrecProgram.size());
-
-        std::size_t lastFoundPositionOfNewlineDelimiter = 0;
-        std::size_t currNewLineDelimiterPosition        = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
-        while (currNewLineDelimiterPosition != std::string::npos) {
-            if (const std::size_t lengthOfErrorMessage = currNewLineDelimiterPosition - lastFoundPositionOfNewlineDelimiter; lengthOfErrorMessage) {
-                const auto actualCurrErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfErrorMessage);
-                errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(actualCurrErrorMessage);
-            }
-
-            // On Windows system we assume that the newline is encoded as the '\r\n' character sequence while on all other system it should be equal to the '\n' character
-            lastFoundPositionOfNewlineDelimiter = currNewLineDelimiterPosition + 1;
-
-            #if _WIN32
-                ++lastFoundPositionOfNewlineDelimiter;
-            #endif
-
-            currNewLineDelimiterPosition = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
-        }
-
-        if (lastFoundPositionOfNewlineDelimiter < aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.size()) {
-            if (const std::size_t lengthOfLastErrorMessage = aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.size() - lastFoundPositionOfNewlineDelimiter; lengthOfLastErrorMessage)
-                errorsDetectedDuringProcessingOfSyrecProgram.emplace_back(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.substr(lastFoundPositionOfNewlineDelimiter, lengthOfLastErrorMessage));
-        }
-        ASSERT_NO_FATAL_FAILURE(assertExpectedAndActualErrorsMatch(expectedErrorsDetectedDuringProcessingOfSyrecProgram, errorsDetectedDuringProcessingOfSyrecProgram));
-    }
-
-    static void assertExpectedAndActualErrorsMatch(const MessagesContainer& expectedErrors, const std::vector<std::string_view>& actualErrorsInUnifiedFormat) {
-        // TODO: Find better solution ot print errors
-        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected " << expectedErrors.size() << " errors but " << actualErrorsInUnifiedFormat.size() << " were found";
-        for (size_t errorIdx = 0; errorIdx < expectedErrors.size(); ++errorIdx) {
-            ASSERT_EQ(expectedErrors.at(errorIdx).stringify(), actualErrorsInUnifiedFormat.at(errorIdx)) << "Error " << std::to_string(errorIdx) << ":\nExpected error: " << expectedErrors.at(errorIdx).stringify() << "\nActual Error: " << actualErrorsInUnifiedFormat.at(errorIdx);
-        }
-    }
-
-private:
-    [[nodiscard]] static std::size_t findNextNewlineDelimiterInString(const std::string_view& stringToSearchThrough, std::size_t searchStartPosition) {
-        #if _WIN32
-            return stringToSearchThrough.find_first_of("\r\n", searchStartPosition);
-        #else
-            return stringToSearchThrough.find_first_of('\n', searchStartPosition);
-        #endif
-    }
-};
-
+#include "utils/test_syrec_parser_errors_base.hpp"
 // TODO: Should we tests for non-integer numbers used in any signal declaration
 // TODO: Check whether swaps or assignments (both unary and binary ones) between N-d signals are possible
 
@@ -651,7 +549,7 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingRofKeywordAfterLoopBodyCausesError)
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidRofKeywordAfterLoopBodyCausesError) {
-    recordSyntaxError(Message::Position(1, 51), "no viable alternative at input 'done'");
+    recordSyntaxError(Message::Position(1, 51), "no viable alternative at input 'done;'");
     recordSyntaxError(Message::Position(1, 57), "missing 'rof' at '<EOF>'");
     performTestExecution("module main(in a(4), out b(4)) for 3 step 1 do done; ++=b");
 }
@@ -894,61 +792,6 @@ TEST_F(SyrecParserErrorTestsFixture, MissmatchInBitwidthsOfOperandsOfAssignmentC
     performTestExecution("module main(in a(4), out b(4)) a.1 += b.2:3");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitUsingOnlyConstantIndicesDefinedInAssignmentRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 42), "TODO");
-    performTestExecution("module main(inout a[2](4)) a[0].1 += (1 + a[0].1)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeUsingOnlyConstantIndicesDefinedInAssignmentRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 44), "TODO");
-    performTestExecution("module main(inout a[2](4)) a[0].1:3 += (1 + a[0].1:3)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeStartBeingConstantIndexDefinedInAssignmentRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 71), "TODO");
-    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].1:$i += (1 + a[0].1:$i)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeEndBeingConstantIndexDefinedInAssignmentRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 72), "TODO");
-    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].$i:#a += (1 + a[0].$i:#a)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeStartOfLatterOverlappingFormerOfAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 36), "TODO");
-    performTestExecution("module main(inout a(4)) a.0 += (1 + a.0:1)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeEndOfLatterOverlappingFormerOfAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 36), "TODO");
-    performTestExecution("module main(inout a(4)) a.0 += (1 + a.1:0)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeStartOfLatterOverlappingFormerOfAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 38), "TODO");
-    performTestExecution("module main(inout a(4)) a.0:1 += (1 + a.0)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeEndOfLatterOverlappingFormerOfAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 38), "TODO");
-    performTestExecution("module main(inout a(4)) a.1:0 += (1 + a.1)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnSameValueOfDimensionInAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 40), "TODO");
-    performTestExecution("module main(inout a[2](4)) a[0] += (1 + a[0])");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionNotExplicitlyDefinedInAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 34), "TODO");
-    performTestExecution("module main(inout a(4)) a += (1 + a)");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionExplicitlyDefinedInAssignmentCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 37), "TODO");
-    performTestExecution("module main(inout a(4)) a[0] += (1 + a[0])");
-}
-
 // Tests for production swap-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 31), "a");
@@ -1083,63 +926,8 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
     performTestExecution("module main(out b(4)) for $i = 0 to 3 do b <=> $i rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitUsingOnlyConstantIndicesDefinedInSwapRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 37));
-    performTestExecution("module main(inout a[2](4)) a[0].1 <=> a[0].1");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeUsingOnlyConstantIndicesDefinedInSwapRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 40));
-    performTestExecution("module main(inout a[2](4)) a[0].1:3 <=> a[0].1:3");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeStartBeingConstantIndexDefinedInSwapRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 67));
-    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].1:$i <=> a[0].1:$i");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnBitrangeWithBitrangeEndBeingConstantIndexDefinedInSwapRhsCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 68));
-    performTestExecution("module main(inout a[2](4)) for $i = 0 to 3 step 1 do a[0].$i:#a <=> a[0].$i:#a");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeStartOfLatterOverlappingFormerOfSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 32));
-    performTestExecution("module main(inout a(4)) a.0 <=> a.0:1");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnLhsAndBitrangeAccessOnRhsWithBitrangeEndOfLatterOverlappingFormerOfSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 32));
-    performTestExecution("module main(inout a(4)) a.0 <=> a.1:0");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeStartOfLatterOverlappingFormerOfSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 34));
-    performTestExecution("module main(inout a(4)) a.0:1 <=> a.0");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessBetweenBitAccessOnRhsAndBitrangeAccessOnLhsWithBitrangeEndOfLatterOverlappingFormerOfSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 34));
-    performTestExecution("module main(inout a(4)) a.1:0 <=> a.1");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOnSameValueOfDimensionOfSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 36));
-    performTestExecution("module main(inout a[2](4)) a[0] <=> a[0]");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionNotExplicitlyInSwapDefinedCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 30));
-    performTestExecution("module main(inout a(4)) a <=> a");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OverlappingVariableAccessOn1DVariableWithSingleValueAndAccessedDimensionExplicitlyDefinedInSwapCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 33));
-    performTestExecution("module main(inout a(4)) a[0] <=> a[0]");
-}
-
-
-// TODO: Test for overlapping signal accesses (using only constant indices or dynamic expressions with resolvable operands
+// TODO: Add tests for overlapping operands of swap operation (tests which were already defined for the assignment statement and can be copied).
+// The question is whether the whole set of tests need to be repeated for the swap statement?
 
 // Tests for production binary-expression
 // TODO: Tests for truncation of values larger than the expected bitwidth
@@ -1311,12 +1099,12 @@ TEST_F(SyrecParserErrorTestsFixture, AccessedDimensionOfVariableOutOfRangeCauses
 }
 
 TEST_F(SyrecParserErrorTestsFixture, None1DSizeOfVariableAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::TooFewDimensionsAccessed>(Message::Position(1, 29), 0, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 29));
     performTestExecution("module main(out a[2](4)) ++= a.0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, None1DAccessOnExpressionForValueOfDimensionCausesError) {
-    //buildAndRecordExpectedSemanticError<SemanticError::TODO>(Message::Position(1, 44), "TODO");
+    buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 44));
     performTestExecution("module main(out a[2](4), out b[2](2)) ++= a[b].0");
 }
 
