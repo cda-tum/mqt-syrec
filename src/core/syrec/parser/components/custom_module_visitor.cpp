@@ -50,11 +50,15 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
             if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::MultipleMatchesFound)
                 // TODO: Should we log the user provided parameter structure
                 recordSemanticError<SemanticError::NoModuleMatchingCallSignature>(semanticErrorPosition);
-            else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound) {
-                if (doVariableCollectionsMatch(scope.signatureOfModuleContainingCallStatement.parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
+            else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound
+                && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value()) {
+
+                if (scope.signatureOfModuleContainingCallStatement.moduleIdentifier == overloadResolutionResult.moduleMatchingSignature->get()->name 
+                    && doVariableCollectionsMatch(scope.signatureOfModuleContainingCallStatement.parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
                     recordSemanticError<SemanticError::SelfRecursionNotAllowed>(semanticErrorPosition);
                 // TODO: We should not have to test that the defined main module is defined but we for now leave this fail-safe check in.
-                else if (definedMainModule && doVariableCollectionsMatch(definedMainModule->parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
+                else if (definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name
+                    && doVariableCollectionsMatch(definedMainModule->parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
                     recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
             }
         }
@@ -88,15 +92,19 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecPa
     statementVisitorInstance->openNewScopeToRecordCallStatementsInModule(CustomStatementVisitor::NotOverloadResolutedCallStatementScope::DeclaredModuleSignature(generatedModule->name, generatedModule->parameters));
     generatedModule->statements = visitStatementListTyped(context->statementList()).value_or(syrec::Statement::vec());
 
-    if (moduleIdentifier.has_value() && *moduleIdentifier != "main") {
-        utils::BaseSymbolTable::ModuleOverloadResolutionResult moduleOverloadResolutionCall;
-        if (context->parameterList() && !context->parameterList()->parameter().empty())
-            moduleOverloadResolutionCall = symbolTable->getModulesMatchingSignature(*moduleIdentifier, generatedModule->parameters);
-        else
-            moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult({symbolTable->existsModuleForName(*moduleIdentifier) ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt});
+    if (moduleIdentifier.has_value()) {
+        if (*moduleIdentifier != "main") {
+            utils::BaseSymbolTable::ModuleOverloadResolutionResult moduleOverloadResolutionCall;
+            if (context->parameterList() && !context->parameterList()->parameter().empty())
+                moduleOverloadResolutionCall = symbolTable->getModulesMatchingSignature(*moduleIdentifier, generatedModule->parameters);
+            else
+                moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult({symbolTable->existsModuleForName(*moduleIdentifier) ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt});
 
-        if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound)
-            recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);
+            if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound)
+                recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);    
+        }
+        if (generatedModule)
+            symbolTable->insertModule(generatedModule);
     }
     symbolTable->closeTemporaryScope();
     return generatedModule;

@@ -32,6 +32,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped
         return visitSwapStatementTyped(ctx->swapStatement());
     if (ctx->skipStatement())
         return visitSkipStatementTyped(ctx->skipStatement());
+    // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
+    // not in the union of the FIRST sets of the potential alternatives.
     return std::nullopt;
 }
 
@@ -225,13 +227,13 @@ std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTy
 }
 
 std::optional<CustomStatementVisitor::LoopStepsizeDefinition> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const {
-    if (!ctx || ctx->number())
+    if (!ctx)
         return std::nullopt;
 
     if (ctx->OP_MINUS())
         recordSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(mapTokenPositionToMessagePosition(*ctx->OP_MINUS()->getSymbol()));
 
-    return LoopStepsizeDefinition({ctx->OP_MINUS() != nullptr,   expressionVisitorInstance->visitNumberTyped(ctx->number()).value_or(nullptr)});
+    return LoopStepsizeDefinition({ctx->OP_MINUS() != nullptr, expressionVisitorInstance->visitNumberTyped(ctx->number()).value_or(nullptr)});
 }
 
 void CustomStatementVisitor::recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const {

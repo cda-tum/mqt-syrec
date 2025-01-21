@@ -25,7 +25,9 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTy
     if (const auto expressionFromSignalContext = dynamic_cast<TSyrecParser::ExpressionFromSignalContext*>(context))
         return visitExpressionFromSignalTyped(expressionFromSignalContext);
 
-    recordCustomError(Message::Position(0, 0), "Unhandled expression context variant. This should not happen");
+    // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
+    // not in the union of the FIRST sets of the potential alternatives.
+    //recordCustomError(Message::Position(0, 0), "Unhandled expression context variant. This should not happen");
     return std::nullopt;
 }
 
@@ -111,7 +113,9 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(TSyr
     if (const auto& numberFromSignalWitdhContext = dynamic_cast<TSyrecParser::NumberFromSignalwidthContext*>(context))
         return visitNumberFromSignalwidthTyped(numberFromSignalWitdhContext);
 
-    recordCustomError(Message::Position(0, 0), "Unhandled number context variant. This should not happen");
+    // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
+    // not in the union of the FIRST sets of the potential alternatives.
+    //recordCustomError(Message::Position(0, 0), "Unhandled number context variant. This should not happen");
     return std::nullopt;
 }
 
@@ -150,7 +154,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
     const std::string loopVariableIdentifier = "$" + context->IDENT()->getText();
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingLoopVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(loopVariableIdentifier); matchingLoopVariableForIdentifier.has_value() && matchingLoopVariableForIdentifier->get()->isReferenceToLoopVariable()) {
         if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier)
-            recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), loopVariableIdentifier);
+            recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
         return std::make_shared<syrec::Number>(loopVariableIdentifier);
     }
     recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), loopVariableIdentifier);

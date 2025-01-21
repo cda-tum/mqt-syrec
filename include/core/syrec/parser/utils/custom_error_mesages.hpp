@@ -73,13 +73,13 @@ namespace syrecParser {
             case SemanticError::NoModuleMatchingIdentifier:
                 return "No module matching definied identifier {:s}";
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
-                return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values";
+                return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values. Please use zero-based indices.";
             case SemanticError::TooManyDimensionsAccessed:
                 return "Access on N dimensional signal must be correctly specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::TooFewDimensionsAccessed:
                 return "Access on N dimensional signal must be fully specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::IndexOfAccessedBitOutOfRange:
-                return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}";
+                return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}. Please use zero-based indices.";
             case SemanticError::DuplicateVariableDeclaration:
                 return "Duplicate variable declaration sharing same identifier {:s}";
             case SemanticError::DuplicateModuleDeclaration:
