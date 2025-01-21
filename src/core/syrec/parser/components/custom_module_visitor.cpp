@@ -203,16 +203,24 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
         }
     }
 
-    // TODO: Due do the signal bitwidth being an optional part of the signal declaration, the user somehow must supply a default variable bitwidth that should be assumed in that case (or let the parser assume some since the SyReC specification does not provide such a value)
-    unsigned int variableBitwidth = 0;
+    unsigned int variableBitwidth = defaultVariableBitwidth;
     if (context->signalWidthToken) {
         bool                              didIntegerConstantDeserializationFailToDueOverflow = false;
         const std::optional<unsigned int> parsedIntegerConstantFromAntlrToken                = deserializeConstantFromString(context->signalWidthToken->getText(), &didIntegerConstantDeserializationFailToDueOverflow);
         if (didIntegerConstantDeserializationFailToDueOverflow)
             recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*context->signalWidthToken), context->signalWidthToken->getText(), UINT_MAX);
 
-        if (parsedIntegerConstantFromAntlrToken.has_value())
+        if (parsedIntegerConstantFromAntlrToken.has_value()) {
             variableBitwidth = *parsedIntegerConstantFromAntlrToken;
+        }
+    }
+
+    // TODO: How should we report this error if neither the variable identifier nor the signal width were defined (can this happen?)
+    if (variableBitwidth > MAX_SUPPORTED_SIGNAL_BITWIDTH) {
+        if (context->signalWidthToken)
+            recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->signalWidthToken), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
+        else if (context->IDENT())
+            recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
     }
 
     // Add an implicit declaration if the user does not define the optional number of dimensions for a variable

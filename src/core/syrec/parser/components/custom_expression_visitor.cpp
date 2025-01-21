@@ -189,20 +189,25 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     if (!activeVariableScopeInSymbolTable)
         return std::nullopt;
 
-    const std::string&                                                          variableIdentifier            = context->IDENT()->getSymbol()->getText();
-    const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier);
-    if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value()) {
+    // If we are omitting the variable identifier in the production, a default token for the variable identifier is generated (its text states that the IDENT token is missing) and its
+    // 'error' message text used as the variables identifier and thus potentially reported in semantic erros. Since the lexer will already generate an identical syntax error, we assume that
+    // the actual variable identifier is empty in this error case.
+    const std::string& variableIdentifier = context->IDENT()->getTreeType() != antlr4::tree::ParseTreeType::ERROR
+        ? context->IDENT()->getSymbol()->getText()
+        : "";
+
+    const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = !variableIdentifier.empty()
+        ? activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier)
+        : std::nullopt;
+
+    if (!variableIdentifier.empty() && (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value())) {
         recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
         return std::nullopt;
     }
 
-    syrec::VariableAccess::ptr generatedVariableAccess = std::make_shared<syrec::VariableAccess>();
-    // TODO: Current shared_pointer to const T does not allow for assignment of variable to variable access
-    generatedVariableAccess->setVar(std::make_shared<syrec::Variable>(**matchingVariableForIdentifier->get()->getReadonlyVariableData()));
-
-    const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
-    const std::size_t                numUserAccessedDimensions                     = context->accessedDimensions.size();
-    generatedVariableAccess->indexes                                               = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
+    const std::size_t          numUserAccessedDimensions = context->accessedDimensions.size();
+    syrec::VariableAccess::ptr generatedVariableAccess   = std::make_shared<syrec::VariableAccess>();
+    generatedVariableAccess->indexes                     = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
 
     for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i) {
         const bool existsOperandBitwidthSizeRestriction = optionalExpectedBitwidthForAnyProcessedEntity.has_value();
@@ -215,32 +220,48 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             clearExpectedBitwidthForAnyProcessedEntity();
     }
 
-    if (!numUserAccessedDimensions) {
-        if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1)
-            generatedVariableAccess->indexes.emplace_back(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1));
-        else
-            recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
-    }
-    else if (numUserAccessedDimensions != declaredValuesPerDimensionOfReferenceVariable.size()) {
-        if (numUserAccessedDimensions > declaredValuesPerDimensionOfReferenceVariable.size())
-            recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
-        else
-            // Checking whether the dimension access of the variable was fully defined by the user prevents the propagation of non-1D signal values
-            recordSemanticError<SemanticError::TooFewDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
-    }
+    if (matchingVariableForIdentifier.has_value()) {
+        const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
 
-    if (const std::optional<utils::VariableAccessIndicesValidity> indexValidityOfUserDefinedAccessedValuesPerDimension = utils::validateVariableAccessIndices(*generatedVariableAccess); indexValidityOfUserDefinedAccessedValuesPerDimension.has_value() && !indexValidityOfUserDefinedAccessedValuesPerDimension->isValid()) {
-        const std::size_t numDimensionsToCheck = declaredValuesPerDimensionOfReferenceVariable.size();
-        for (std::size_t dimensionIdx = 0; dimensionIdx < numDimensionsToCheck; ++dimensionIdx) {
-            const utils::VariableAccessIndicesValidity::IndexValidationResult validityOfAccessedValueOfDimension = indexValidityOfUserDefinedAccessedValuesPerDimension->accessedValuePerDimensionValidity.at(dimensionIdx);
-            // TODO: We should not have to check whether the index validation result for the given index contains a value when an out of range access is reported.
-            if (validityOfAccessedValueOfDimension.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && validityOfAccessedValueOfDimension.indexValue.has_value())
-                recordSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(mapTokenPositionToMessagePosition(*context->accessedDimensions.at(dimensionIdx)->getStart()), validityOfAccessedValueOfDimension.indexValue.value(), dimensionIdx, declaredValuesPerDimensionOfReferenceVariable.at(dimensionIdx));
+        if (matchingVariableForIdentifier->get()->getReadonlyVariableData().has_value())
+            // Currently the shared_pointer instance returned by the symbol table for entry of the variable matching the current identifier cannot be assigned to the variable access
+            // data field since it expects a shared_pointer instance to a modifiable variable, thus we are forced to create a copy of the variable data from the symbol table. Future
+            // versions might change the variable field in the variable access to match the value returned by the symbol table (Reasoning: Why would the user modify the referenced variable data in the variable access
+            // when he can simply reassign the smart_pointer).
+            generatedVariableAccess->setVar(std::make_shared<syrec::Variable>(**matchingVariableForIdentifier->get()->getReadonlyVariableData()));
+        else
+            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Symbol table entry for variable with identifier " + variableIdentifier + " did not return variable data. This should not happen");
+
+        if (!numUserAccessedDimensions) {
+            if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1)
+                generatedVariableAccess->indexes.emplace_back(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1));
+            else
+                recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
+        } else if (numUserAccessedDimensions != declaredValuesPerDimensionOfReferenceVariable.size()) {
+            if (numUserAccessedDimensions > declaredValuesPerDimensionOfReferenceVariable.size())
+                recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
+            else
+                // Checking whether the dimension access of the variable was fully defined by the user prevents the propagation of non-1D signal values
+                recordSemanticError<SemanticError::TooFewDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
+        }
+
+        if (const std::optional<utils::VariableAccessIndicesValidity> indexValidityOfUserDefinedAccessedValuesPerDimension = utils::validateVariableAccessIndices(*generatedVariableAccess); indexValidityOfUserDefinedAccessedValuesPerDimension.has_value() && !indexValidityOfUserDefinedAccessedValuesPerDimension->isValid()) {
+            const std::size_t numDimensionsToCheck = declaredValuesPerDimensionOfReferenceVariable.size();
+            for (std::size_t dimensionIdx = 0; dimensionIdx < numDimensionsToCheck; ++dimensionIdx) {
+                const utils::VariableAccessIndicesValidity::IndexValidationResult validityOfAccessedValueOfDimension = indexValidityOfUserDefinedAccessedValuesPerDimension->accessedValuePerDimensionValidity.at(dimensionIdx);
+                // TODO: We should not have to check whether the index validation result for the given index contains a value when an out of range access is reported.
+                if (validityOfAccessedValueOfDimension.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && validityOfAccessedValueOfDimension.indexValue.has_value())
+                    recordSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(mapTokenPositionToMessagePosition(*context->accessedDimensions.at(dimensionIdx)->getStart()), validityOfAccessedValueOfDimension.indexValue.value(), dimensionIdx, declaredValuesPerDimensionOfReferenceVariable.at(dimensionIdx));
+            }
         }
     }
 
     const std::optional<syrec::Number::ptr> bitRangeStart = visitNumberTyped(context->bitStart);
     const std::optional<syrec::Number::ptr> bitRangeEnd   = visitNumberTyped(context->bitRangeEnd);
+
+    // Premature exit since index checks for both the defined dimension as well as bit range access depend on the information from the referenced variable.
+    if (!generatedVariableAccess->var)
+        return std::nullopt;
 
     if (bitRangeStart.has_value() || bitRangeEnd.has_value()) {
         if (bitRangeStart.has_value() && bitRangeEnd.has_value())

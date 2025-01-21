@@ -33,7 +33,7 @@ public:
         expectedErrorMessages.emplace_back(Message(Message::Type::Error, "SYNTAX", messagePosition, messageText));
     }
 
-    void performTestExecution(const std::string& stringifiedSyrecProgramToProcess) const {
+    void performTestExecution(const std::string& stringifiedSyrecProgramToProcess, const syrec::ReadProgramSettings& userProvidedParserConfiguration = syrec::ReadProgramSettings()) const {
         syrec::Program program;
 
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
@@ -41,7 +41,7 @@ public:
         // to create temporary or in-memory files (see mkstemp and fmemopen functions which are POSIX specific ones) without using the boost library.
         // Using the tmpfile/tmpfile_s of the C++ standard library is also not viable for the creating of temporary files due to the missing ability
         // to determine the path/filename of the generated file descriptor on all platforms.
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = program.readFromString(stringifiedSyrecProgramToProcess));
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = program.readFromString(stringifiedSyrecProgramToProcess, userProvidedParserConfiguration));
         ASSERT_NO_FATAL_FAILURE(assertExpectedErrorsAreDetectedDuringProcessingOfSyrecProgram(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, expectedErrorMessages));
     }
 
