@@ -203,6 +203,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation 
                 ? appendToStream(outputStream, " ") && stringify(outputStream, binaryExpression.binaryOperation) && appendToStream(outputStream, " ")
                 : stringify(outputStream, binaryExpression.binaryOperation))
+        && stringify(outputStream, *binaryExpression.rhs)
         && appendToStream(outputStream, ')');
 }
 
@@ -263,7 +264,18 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         return appendToStream(outputStream, std::to_string(number.evaluate({})));
     if (number.isLoopVariable())
         return appendToStream(outputStream, number.variableName());
+    if (number.isConstantExpression()) {
+        const std::optional<syrec::Number::ConstantExpression>& constantExpressionData = number.constantExpression();
+        if (!constantExpressionData.has_value())
+            return setStreamInFailedState(outputStream);
 
+        return constantExpressionData->lhsOperand && constantExpressionData->rhsOperand
+            && appendToStream(outputStream, '(') && stringify(outputStream, *constantExpressionData->lhsOperand)
+            && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation 
+                ? appendToStream(outputStream, " ") && stringify(outputStream, constantExpressionData->operation) && appendToStream(outputStream, " ")
+                : stringify(outputStream, constantExpressionData->operation))
+            && stringify(outputStream, *constantExpressionData->rhsOperand) && appendToStream(outputStream, ')');
+    }
     return false;
 }
 
@@ -462,6 +474,30 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, syrec::
     }
     return true;
 }
+
+bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, syrec::Number::ConstantExpression::Operation operation) const noexcept {
+    if (!outputStream.good())
+        return setStreamInFailedState(outputStream);
+
+    switch (operation) {
+        case syrec::Number::ConstantExpression::Operation::Addition:
+            outputStream << "+";
+            break;
+        case syrec::Number::ConstantExpression::Operation::Subtraction:
+            outputStream << "-";
+            break;
+        case syrec::Number::ConstantExpression::Operation::Multiplication:
+            outputStream << "*";
+            break;
+        case syrec::Number::ConstantExpression::Operation::Division:
+            outputStream << "/";
+            break;
+        default:
+            return setStreamInFailedState(outputStream);
+    }
+    return true;
+}
+
 
 bool BaseSyrecIrEntityStringifier::stringifySkipStatement(std::ostream& outputStream) const noexcept {
     if (!outputStream.good() || skipKeywordIdent.empty())

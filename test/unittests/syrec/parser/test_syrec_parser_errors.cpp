@@ -847,7 +847,7 @@ TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditi
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnAccessedValueOfDimensionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
-    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (a[2] > 2)");
+    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (a[1] > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnNumberOfAccessedDimensionsCausesError) {
@@ -1231,7 +1231,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInNumericExpressio
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOperationInNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 41), "mismatched input '<<' expecting {'+', '-', '*', '/'}");
+    recordSyntaxError(Message::Position(1, 45), "mismatched input '<<' expecting {'+', '-', '*', '/'}");
     performTestExecution("module main(out a(8), out b[2](2)) ++= a.(#b << 2)");
 }
 
@@ -1250,28 +1250,29 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOpeningBracketInNumericExpres
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfNumericExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 48), "missing ')' at '<EOF>'");
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 42), 4, 0, 4);
-    performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a - 2");
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 41), 6, 4);
+    performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a + 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidClosingBracketInNumericExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 48), "mismatched input ']' expecting ')'");
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 41), 6, 4);
     performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a + 2]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInNumericExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 40));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 46));
     performTestExecution("module main(out a(4), out b[2](4)) ++= a.(2 / 0)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInEvaluatedNumericExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 40));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 46));
     performTestExecution("module main(out a(4), out b[2](4)) ++= a.(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredLoopVariableInNumericExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 68), "$i");
-    performTestExecution("module main(out a(4), out b[2](4)) for $i = 0 to 3 step 1 do ++= a.(($i + 2) / 2) rof");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 70), "$j");
+    performTestExecution("module main(out a(4), out b[2](4)) for $i = 0 to 3 step 1 do ++= a.(($j + 2) / 2) rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, AccessingBitwidthOfUnknownVariableCausesError) {
@@ -1327,7 +1328,7 @@ TEST_F(SyrecParserErrorTestsFixture, NumberOfAccessedDimensionsOfVariableOutOfRa
 }
 
 TEST_F(SyrecParserErrorTestsFixture, NumberOfAccessedDimensionsOfVariableImplicitlyDeclaredAs1DVariableWithSingleValueOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 29), 2, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 26), 2, 1);
     performTestExecution("module main(out a(4)) ++= a[0][1].0");
 }
 
@@ -1375,17 +1376,17 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidBitrangEndSymbolCausesError) {
 
 // TODO: Division by zero error are tested in tests for production 'number', should we explicitly tests the same behaviour for every usage of the production in other productions?
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeStartValueExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 33));
     performTestExecution("module main(out a(4)) ++= a.(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeEndValueExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 33));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 35));
     performTestExecution("module main(out a(4)) ++= a.0:(2 / (#a - 4))");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicExpressionForAccessValueOfDimensionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 36));
     performTestExecution("module main(out a[2](4)) ++= a[(2 / (#a - 4))]");
 }
 
@@ -1406,12 +1407,12 @@ TEST_F(SyrecParserErrorTestsFixture, BitrangeStartAndEndValueIsConstantAndOutOfR
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeStartValueIsDynamicExpressionAndOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 31), 5, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), 5, 4);
     performTestExecution("module main(out a(4)) ++= a.(#a + 1):3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, BitrangeEndValueIsDynamicExpressionAndOutOfRangeCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 33), 5, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 30), 5, 4);
     performTestExecution("module main(out a(4)) ++= a.0:(#a + 1)");
 }
 

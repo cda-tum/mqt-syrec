@@ -86,6 +86,7 @@ namespace utils {
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::UnaryStatement::UnaryOperation operation) const noexcept;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::AssignStatement::AssignOperation operation) const noexcept;
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::ShiftExpression::ShiftOperation operation) const noexcept;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Number::ConstantExpression::Operation operation) const noexcept;
         [[maybe_unused]] virtual bool stringifySkipStatement(std::ostream& outputStream) const noexcept;
 
         [[maybe_unused]] static bool setStreamInFailedState(std::ostream& stream);

@@ -138,7 +138,29 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     if (!context)
         return std::nullopt;
 
-    recordCustomError(mapTokenPositionToMessagePosition(*context->start), "Compile time constant expressions are not supported");
+    const std::optional<syrec::Number::ptr>                           lhsOperand = visitNumberTyped(context->lhsOperand);
+    const std::optional<syrec::Number::ConstantExpression::Operation> operation  = context->op ? deserializeConstantExpressionOperationFromString(context->op->getText()) : std::nullopt;
+    const std::optional<syrec::Number::ptr>                           rhsOperand = visitNumberTyped(context->rhsOperand);
+
+    if (operation.has_value() && *operation == syrec::Number::ConstantExpression::Operation::Division) {
+        if (const std::optional<unsigned int> evaluationResultOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? lhsOperand->get()->tryEvaluate({}) : std::nullopt; 
+            evaluationResultOfLhsOperand.has_value() && !*evaluationResultOfLhsOperand) {
+            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->lhsOperand->getStart()));
+            return std::nullopt;
+        }
+        if (const std::optional<unsigned int> evaluationResultOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? rhsOperand->get()->tryEvaluate({}) : std::nullopt; 
+            evaluationResultOfRhsOperand.has_value() && !*evaluationResultOfRhsOperand) {
+            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->rhsOperand->getStart()));
+            return std::nullopt;
+        }
+    }
+
+    if (lhsOperand.has_value() && operation.has_value() && rhsOperand.has_value()) {
+        const auto constantExpression = syrec::Number::ConstantExpression(*lhsOperand, *operation, *rhsOperand);
+        if (const std::optional<unsigned int> evaluatedConstantExpressionValue = constantExpression.tryEvaluate({}); evaluatedConstantExpressionValue.has_value())
+            return std::make_shared<syrec::Number>(*evaluatedConstantExpressionValue);
+        return std::make_shared<syrec::Number>(constantExpression);
+    }
     return std::nullopt;
 }
 
@@ -415,5 +437,17 @@ std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::d
         return syrec::ShiftExpression::ShiftOperation::Left;
     if (stringifiedOperation == ">>")
         return syrec::ShiftExpression::ShiftOperation::Right;
+    return std::nullopt;
+}
+
+std::optional<syrec::Number::ConstantExpression::Operation> CustomExpressionVisitor::deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation) {
+    if (stringifiedOperation == "+")
+        return syrec::Number::ConstantExpression::Operation::Addition;
+    if (stringifiedOperation == "-")
+        return syrec::Number::ConstantExpression::Operation::Subtraction;
+    if (stringifiedOperation == "*")
+        return syrec::Number::ConstantExpression::Operation::Multiplication;
+    if (stringifiedOperation == "/")
+        return syrec::Number::ConstantExpression::Operation::Division;
     return std::nullopt;
 }
