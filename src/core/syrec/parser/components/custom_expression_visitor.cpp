@@ -161,7 +161,6 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
     return std::nullopt;
 }
 
-// TODO: Tests that bitwidth of loop variable cannot be fetched (results in syntax error)
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignalwidthTyped(TSyrecParser::NumberFromSignalwidthContext* context) const {
     if (!context || !context->IDENT())
         return std::nullopt;

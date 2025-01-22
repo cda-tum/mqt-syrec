@@ -19,7 +19,6 @@ namespace syrecParser {
         OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue,
         NegativeStepsizeValueNotAllowed,
         DuplicateMainModuleDefinition,
-        SelfRecursionNotAllowed,
         ValueOverflowDueToNoImplicitTruncationPerformed,
         CannotCallMainModule,
         ValueOfLoopVariableNotUsableInItsInitialValueDeclaration,
@@ -50,7 +49,6 @@ namespace syrecParser {
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
             case SemanticError::NegativeStepsizeValueNotAllowed:
             case SemanticError::DuplicateMainModuleDefinition:
-            case SemanticError::SelfRecursionNotAllowed:
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
             case SemanticError::CannotCallMainModule:
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
@@ -71,9 +69,9 @@ namespace syrecParser {
         // It seems that we cannot use named arguments in the format string due to them not being supported in combination with the compile time format string checks (https://github.com/fmtlib/fmt/blob/master/doc/api.md#named-arguments)
         switch (semanticError) {
             case SemanticError::NoVariableMatchingIdentifier:
-                return "No variable matching identifier {:s}";
+                return "No variable matching identifier '{:s}'";
             case SemanticError::NoModuleMatchingIdentifier:
-                return "No module matching definied identifier {:s}";
+                return "No module matching definied identifier '{:s}'";
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
                 return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values. Please use zero-based indices.";
             case SemanticError::TooManyDimensionsAccessed:
@@ -83,11 +81,11 @@ namespace syrecParser {
             case SemanticError::IndexOfAccessedBitOutOfRange:
                 return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}. Please use zero-based indices.";
             case SemanticError::DuplicateVariableDeclaration:
-                return "Duplicate variable declaration sharing same identifier {:s}";
+                return "Duplicate variable declaration sharing same identifier '{:s}'";
             case SemanticError::DuplicateModuleDeclaration:
-                return "Duplicate module declaration with identifier {:s} sharing same signature";
+                return "Duplicate module declaration with identifier '{:s}' sharing same signature";
             case SemanticError::AssignmentToReadonlyVariable:
-                return "No assignment to readonly variable {:s} possible";
+                return "No assignment to readonly variable '{:s}' possible";
             case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
                 return "Expression evaluation failed due to a division by zero";
             case SemanticError::IfGuardExpressionMissmatch:
@@ -102,8 +100,6 @@ namespace syrecParser {
                 return "Negative values for the step size of a 'for' loop are not allowed";
             case SemanticError::DuplicateMainModuleDefinition:
                 return "Module with identifier 'main' can only be defined once";
-            case SemanticError::SelfRecursionNotAllowed:
-                return "Self recursion is not allowed";
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
                 return "Implicit truncation of values is disabled at this point of the program thus value ({:s}) that was large than the maximum storable value of {:d} lead to an overflow";
             case SemanticError::CannotCallMainModule:

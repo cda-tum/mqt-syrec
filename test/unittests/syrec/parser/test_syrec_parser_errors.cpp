@@ -1,6 +1,10 @@
 #include "utils/test_syrec_parser_errors_base.hpp"
 // TODO: Should we tests for non-integer numbers used in any signal declaration
 // TODO: Check whether swaps or assignments (both unary and binary ones) between N-d signals are possible
+// TODO: Should semantic errors in not taken branches of if-statement be reported
+// TODO: Recursive module calls should be possible (it its the reponsibility of the user to prevent infinite loops)
+// TODO: The user can use a variable multiple times as a caller argument for a module call (synthesis of the statement should then detected an overlap between the operands of any statement that would prevent the inversion of the latter)
+// TODO: Should the user be able to perform recursive module calls even for the main module (defined either implicitly or explicitly, the latter is currently disallowed)
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
@@ -66,7 +70,30 @@ TEST_F(SyrecParserErrorTestsFixture, OverloadOfModuleNamedMainCausesError) {
     performTestExecution("module main(in a[2](16)) skip module main(out b[1](16)) skip");
 }
 
-// TODO: Tests for overload of main module (not using identifier 'main')
+TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleUsingSameInParameterTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 63), "add");
+    performTestExecution("module add(in a(4), in b(4), out res(4)) res ^= (a + b) module add(in lOp(4), in rOp(4), out res(4)) res += lOp; res += rOp");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleUsingSameOutParameterTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 58), "double");
+    performTestExecution("module double(in a(4), out res(4)) res ^= (a << 1) module double(in lOp(4), out res(4)) res += (lOp * 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleUsingSameInoutParameterTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 46), "add");
+    performTestExecution("module add(inout a(4), in b(4)) a += b module add(inout lOp(4), in rOp(4)) lOp ^= rOp");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleWithFirstModuleUsingOutParameterAndSecondModuleUsingInoutParameterTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 46), "add");
+    performTestExecution("module add(inout a(4), in b(4)) a += b module add(out lOp(4), in rOp(4)) lOp ^= rOp");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleWithFirstModuleUsingInoutParameterAndSecondModuleUsingOutParameterTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 44), "add");
+    performTestExecution("module add(out a(4), in b(4)) a += b module add(inout lOp(4), in rOp(4)) lOp ^= rOp");
+}
 
 // Tests for production parameter
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableTypeCausesError) {
@@ -366,21 +393,25 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterOpeningBracke
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidCallStatementParameterOpeningBracket) {
     recordSyntaxError(Message::Position(1, 100), "mismatched input '[' expecting '('");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterIdentifierCausesError) {
     recordSyntaxError(Message::Position(1, 101), "extraneous input ',' expecting IDENT");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, CallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 101), "d");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterDelimiterCausesError) {
     recordSyntaxError(Message::Position(1, 103), "extraneous input 'b' expecting {',', ')'}");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a b, c)");
 }
 
@@ -414,25 +445,28 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterOpeningBrac
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterOpeningBracket) {
     recordSyntaxError(Message::Position(1, 102), "mismatched input '[' expecting '('");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterIdentifierCausesError) {
     recordSyntaxError(Message::Position(1, 103), "extraneous input ',' expecting IDENT");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UncallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 103), "d");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterDelimiterCausesError) {
     recordSyntaxError(Message::Position(1, 105), "extraneous input 'b' expecting {',', ')'}");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a b, c)");
 }
 
-// TODO: Overload tests
 // TODO: Modifiable parameter overlap tests (i.e. module x(inout a(4), out b(4)) a <=> b ... module main() wire t(4) call x(t, t)
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterClosingBracket) {
     recordSyntaxError(Message::Position(1, 108), "extraneous input '<EOF>' expecting {',', ')'}");
@@ -454,6 +488,108 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBrack
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c]");
 }
 
+// TODO: Detection of one-level infinite recursion for call statements that are not defined in branches of if-statement (or in if-statements branches whos guard condition evaluates to a constant value)
+// TODO: Printing user caller signature in semantic error message
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 151));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(8), in b(8), out c(8)) c ^= (a + b) module main(in a(12), in b(8), out c(10)) call add(a, b, c)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableTypeMissmatchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 102));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in res(4)) wire tmp1(4), tmp2(4) call add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToNumberOfValuesForDimensionBeingSmallerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 109));
+    performTestExecution("module add(in a[2](4), in b(4), out c(4)) c ^= (a[0] + b) module main(out res(4)) wire tmp1(4), tmp2(4) call add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToNumberOfValuesForDimensionBeingLargerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 106));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(out res[2](4)) wire tmp1(4), tmp2(4) call add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToNumberOfDimensionsOfUserVariableSmallerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 115));
+    performTestExecution("module add(in a(4), in b[2][3](4), out c(4)) c ^= (a + b[0][1]) module main(out res(4)) wire tmp1(4), tmp2(4) call add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToNumberOfDimensionsOfUserVariableLargerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 167));
+    performTestExecution("module add(in a(4), in b[2](4), out c(4)) c ^= (a + b[0]) module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(out res[2](4)) wire tmp1(4), tmp2[2](4) call add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToTooManyUserDefinedParametersCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 134));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(4), out c(4)) c ^= a module main(in a(4), in b(4), out c(4)) call add(a, b, c, c)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToTooFewUserDefinedParametersCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 134));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(4), out c(4)) c ^= a module main(in a(4), in b(4), out c(4)) call add(a, b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOfImplicitlyDefinedMainModuleCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 53));
+    performTestExecution("module increment(out c(4)) wire one(4) ++= one; call add(c, one, c) module add(in a(4), in b(4), out c(4)) c ^= (a + b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionResolvesToOfImplicitlyDefinedMainModuleCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 53));
+    performTestExecution("module increment(out c(4)) wire one(4) ++= one; call add(c, one) module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(inout a(4), in b(4)) a += b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 153));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(8), in b(8), out c(8)) c ^= (a + b) module main(in a(12), in b(8), out c(10)) uncall add(a, b, c)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableTypeMissmatchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 104));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in res(4)) wire tmp1(4), tmp2(4) uncall add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToNumberOfValuesForDimensionBeingSmallerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 111));
+    performTestExecution("module add(in a[2](4), in b(4), out c(4)) c ^= (a[0] + b) module main(out res(4)) wire tmp1(4), tmp2(4) uncall add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToNumberOfValuesForDimensionBeingLargerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 108));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(out res[2](4)) wire tmp1(4), tmp2(4) uncall add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToNumberOfDimensionsOfUserVariableSmallerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 117));
+    performTestExecution("module add(in a(4), in b[2][3](4), out c(4)) c ^= (a + b[0][1]) module main(out res(4)) wire tmp1(4), tmp2(4) uncall add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToNumberOfDimensionsOfUserVariableLargerThanExpectedForParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 169));
+    performTestExecution("module add(in a(4), in b[2](4), out c(4)) c ^= (a + b[0]) module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(out res[2](4)) wire tmp1(4), tmp2[2](4) uncall add(tmp1, tmp2, res)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToTooManyUserDefinedParametersCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 136));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(4), out c(4)) c ^= a module main(in a(4), in b(4), out c(4)) uncall add(a, b, c, c)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToTooFewUserDefinedParametersCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 136));
+    performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(4), out c(4)) c ^= a module main(in a(4), in b(4), out c(4)) uncall add(a, b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOfImplicitlyDefinedMainModuleCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 55));
+    performTestExecution("module increment(out c(4)) wire one(4) ++= one; uncall add(c, one, c) module add(in a(4), in b(4), out c(4)) c ^= (a + b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionResolvesToOfImplicitlyDefinedMainModuleCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 55));
+    performTestExecution("module increment(out c(4)) wire one(4) ++= one; uncall add(c, one) module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(inout a(4), in b(4)) a += b");
+}
+
 // Tests for production for-statement
 TEST_F(SyrecParserErrorTestsFixture, OmittingForStatementKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 31), "extraneous input '$' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
@@ -471,7 +607,6 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableIdentPrefixCausesError)
     performTestExecution("module main(in a(4), out b(4)) for i = 0 to 3 do b.$i ^= 1 rof");
 }
 
-// TODO: 
 TEST_F(SyrecParserErrorTestsFixture, OmittingLoopVariableInitialValueInitializationEqualSignCausesError) {
     recordSyntaxError(Message::Position(1, 38), "no viable alternative at input '$i 0'");
     performTestExecution("module main(in a(4), out b(4)) for $i 0 to 3 do b.$i ^= 1 rof");
@@ -1037,7 +1172,6 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfBinaryExpressionCaus
     performTestExecution("module main(out b(4), in a(4)) b += (a + 2]");
 }
 
-// TODO: Fix semantic error for 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInLhsOperandOfBinaryExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 41));
     performTestExecution("module main(out a(4), out b[2](4)) a += (b + 2)");
@@ -1187,10 +1321,21 @@ TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueOfDimensionInNonConsta
     performTestExecution("module main(out a[2](4)) ++= a[#a].0");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, AccessedDimensionOfVariableOutOfRangeCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, NumberOfAccessedDimensionsOfVariableOutOfRangeCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 29), 2, 1);
     performTestExecution("module main(out a[2](4)) ++= a[0][1].0");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, NumberOfAccessedDimensionsOfVariableImplicitlyDeclaredAs1DVariableWithSingleValueOutOfRangeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 29), 2, 1);
+    performTestExecution("module main(out a(4)) ++= a[0][1].0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IndexForAccessedValueDimensionsOfVariableImplicitlyDeclaredAs1DVariableWithSingleValueOutOfRangeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 28), 2, 0, 1);
+    performTestExecution("module main(out a(4)) ++= a[2].0");
+}
+
 
 TEST_F(SyrecParserErrorTestsFixture, None1DSizeOfVariableAccessCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 29));

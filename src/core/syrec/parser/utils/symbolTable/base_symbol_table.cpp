@@ -83,20 +83,18 @@ std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeT
 
 // NON-PUBLIC FUNCTIONALITY
 utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments, bool validateCallerArguments) const {
-    // TODO: Should we validate the caller arguments or should it be the responsibility of the caller to provide valid arguments?
+    // TODO: The user should be able to use a variable as a caller argument multiple times in a module call/uncall. Other components then need to verify whether the
+    // reversibility of all statements in the module body is still possible when using the user provided values for the parameters. One could also check this here in the symbol table
+    // which would require a recursive check for any calls performed in initially called module.
     if (validateCallerArguments) {
-        bool                                    areCallerArgumentUsable = true;
-        std::set<std::string_view, std::less<>> callerArgumentsIdentifierLookup;
-
-        for (std::size_t i = 0; i < callerArguments.size() && areCallerArgumentUsable; ++i) {
-            const syrec::Variable::ptr& callerArgument = callerArguments.at(i);
-            areCallerArgumentUsable &= callerArgument && !callerArgument->name.empty() && !callerArgumentsIdentifierLookup.count(callerArgument->name);
-            if (areCallerArgumentUsable)
-                callerArgumentsIdentifierLookup.insert(callerArgument->name);
-        }
-
-        if (!areCallerArgumentUsable)
+        if (std::any_of(
+            callerArguments.cbegin(),
+            callerArguments.cend(),
+            [](const syrec::Variable::ptr& callerArgument) {
+                return !callerArgument || callerArgument->name.empty();
+        })) {
             return ModuleOverloadResolutionResult({ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid, std::nullopt});
+        }
     }
 
     syrec::Module::vec modulesMatchingIdentifier = getModulesByName(accessedModuleIdentifier);

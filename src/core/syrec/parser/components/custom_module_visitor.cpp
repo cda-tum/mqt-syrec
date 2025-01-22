@@ -13,22 +13,20 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
     if (!context)
         return std::nullopt;
 
-    syrec::Module::vec parsedUserDefinedModules;
-    parsedUserDefinedModules.reserve(context->module().size());
-
-    auto generatedProgram = std::make_shared<syrec::Program>();
-    for (const auto& antlrModuleContext: context->module())
-        if (const std::optional<syrec::Module::ptr>& parsedModule = visitModuleTyped(antlrModuleContext); parsedModule.has_value())
+    std::shared_ptr<const syrec::Module> lastProcessedUserDefinedModule = nullptr;
+    auto                                 generatedProgram = std::make_shared<syrec::Program>();
+    for (const auto& antlrModuleContext: context->module()) {
+        if (const std::optional<syrec::Module::ptr>& parsedModule = visitModuleTyped(antlrModuleContext); parsedModule.has_value()) {
             generatedProgram->addModule(*parsedModule);
+            lastProcessedUserDefinedModule = *parsedModule;
+        } else {
+            lastProcessedUserDefinedModule.reset();
+        }
+    }
 
-    std::shared_ptr<const syrec::Module> definedMainModule;
-    if (symbolTable->existsModuleForName("main"))
-        definedMainModule = symbolTable->getModulesByName("main").front();
-    else
-        definedMainModule = !parsedUserDefinedModules.empty() ? parsedUserDefinedModules.back() : nullptr;
-
-    if (!definedMainModule)
-        return std::nullopt;
+    const std::shared_ptr<const syrec::Module> definedMainModule = symbolTable->existsModuleForName("name")
+        ? symbolTable->getModulesByName("main").front()
+        : lastProcessedUserDefinedModule;
 
     // We are not requiring a C89 style def-before use for both call-/uncall statements, thus we need to perform overload resolution for any of these statements after the whole program was processed.
     const std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> callStatementsScopeForWhichOverloadResolutionShouldBePerformed = statementVisitorInstance->getCallStatementsWithNotPerformedOverloadResolution();
@@ -37,7 +35,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
             const utils::BaseSymbolTable::ModuleOverloadResolutionResult overloadResolutionResult = symbolTable->getModulesMatchingSignature(callStatementVariant.calledModuleIdentifier, callStatementVariant.symbolTableEntriesForCallerArguments);
             const auto                                                   semanticErrorPosition    = Message::Position(callStatementVariant.linePositionOfModuleIdentifier, callStatementVariant.columnPositionOfModuleIdentifier);
 
-            if (definedMainModule->name == "main" && definedMainModule->name == callStatementVariant.calledModuleIdentifier) {
+            if (definedMainModule && definedMainModule->name == "main" && definedMainModule->name == callStatementVariant.calledModuleIdentifier) {
                 recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
                 continue;
             }
@@ -47,20 +45,18 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
                 continue;
             }
 
-            if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::MultipleMatchesFound)
+            // Recursive module calls should be possible since we cannot determine for all cases whether such calls would lead to an infinite
+            // recursion depth without performing a symbol execution of the called modules statements. If no call/uncall statement is defined in the branch
+            // of an if-statement whose guard expression does not evaluate to a constant value, an infinite loop check could be performed (but will be skip in the
+            // current parser implementation)
+            if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound)
                 // TODO: Should we log the user provided parameter structure
                 recordSemanticError<SemanticError::NoModuleMatchingCallSignature>(semanticErrorPosition);
-            else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound
-                && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value()) {
-
-                if (scope.signatureOfModuleContainingCallStatement.moduleIdentifier == overloadResolutionResult.moduleMatchingSignature->get()->name 
-                    && doVariableCollectionsMatch(scope.signatureOfModuleContainingCallStatement.parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
-                    recordSemanticError<SemanticError::SelfRecursionNotAllowed>(semanticErrorPosition);
-                // TODO: We should not have to test that the defined main module is defined but we for now leave this fail-safe check in.
-                else if (definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name
-                    && doVariableCollectionsMatch(definedMainModule->parameters, callStatementVariant.symbolTableEntriesForCallerArguments))
-                    recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
-            }
+            else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound 
+                && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value() 
+                && definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name 
+                && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters))
+                recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
         }
     }
     return generatedProgram;
