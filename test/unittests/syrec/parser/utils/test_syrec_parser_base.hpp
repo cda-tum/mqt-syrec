@@ -26,11 +26,11 @@ class SyrecParserBaseTestsFixture : public testing::TestWithParam<TestFromJsonCo
 protected:
     struct TestFromJson {
         std::string stringifiedSyrecProgramToProcess;
-        std::string stringifedExpectedOptimizedSyrecProgram;
+        std::string stringifiedExpectedSyrecProgramContent;
     };
 
-    std::string jsonKeyInTestCaseDataForCircuit                       = "circuit";
-    std::string jsonKeyInTestCaseDataForExpectedOptimizedCircuit      = "optimizedCircuit";
+    std::string jsonKeyInTestCaseDataForCircuit                  = "inputCircuit";
+    std::string jsonKeyInTestCaseDataForExpectedCircuit          = "expectedCircuit";
 
     TestFromJson      loadedTestCaseData;
     syrec::Program    parserInstance;
@@ -50,9 +50,11 @@ protected:
         ASSERT_TRUE(testCaseDataJson.at(jsonKeyInTestCaseDataForCircuit).is_string()) << "Circuit to process must be defined as a string";
         loadedTestCaseData.stringifiedSyrecProgramToProcess = testCaseDataJson.at(jsonKeyInTestCaseDataForCircuit).get<std::string>();
 
-        if (testCaseDataJson.contains(jsonKeyInTestCaseDataForExpectedOptimizedCircuit)) {
-            ASSERT_TRUE(testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedOptimizedCircuit).is_string()) << "Expected optimized circuit must be defined as a string";
-            loadedTestCaseData.stringifedExpectedOptimizedSyrecProgram = testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedOptimizedCircuit).get<std::string>();
+        if (testCaseDataJson.contains(jsonKeyInTestCaseDataForExpectedCircuit)) {
+            ASSERT_TRUE(testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedCircuit).is_string()) << "Expected circuit processing result must be defined as a string";
+            loadedTestCaseData.stringifiedExpectedSyrecProgramContent = testCaseDataJson.at(jsonKeyInTestCaseDataForExpectedCircuit).get<std::string>();
+        } else {
+            loadedTestCaseData.stringifiedExpectedSyrecProgramContent = loadedTestCaseData.stringifiedSyrecProgramToProcess;
         }
     }
 
@@ -79,16 +81,13 @@ protected:
     // TODO: Processing of parser config from json
 
     virtual void performTestExecution() {
-        if (!loadedTestCaseData.stringifedExpectedOptimizedSyrecProgram.empty())
-            FAIL() << "Definition of expected optimized syrec program is not supported for now";
-
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
         ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess));
         ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.empty());
         
         std::ostringstream containerForStringifiedProgram;
         ASSERT_NO_FATAL_FAILURE(assertStringificationOfParsedSyrecProgramIsSuccessful(parserInstance, containerForStringifiedProgram));
-        ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedSyrecProgramToProcess) << "SyReC program processed by the parser needs to match the user defined input circuit";
+        ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedExpectedSyrecProgramContent) << "SyReC program processed by the parser needs to match the user defined input circuit";
     }
 };
 
