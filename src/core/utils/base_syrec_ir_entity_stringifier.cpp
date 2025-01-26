@@ -54,8 +54,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     stringificationSucessful &= !variable.name.empty() ? appendToStream(outputStream, variable.name) : false;
     stringificationSucessful &= !variable.dimensions.empty();
 
-    if ((variable.dimensions.size() == 1 && variable.dimensions.front() == 1 && !additionalFormattingOptions.omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue) 
-        || variable.dimensions.size() > 1) {
+    if (!(variable.dimensions.size() == 1 && variable.dimensions.front() == 1 && additionalFormattingOptions.omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue)) {
         for (const auto numValuesOfDimension: variable.dimensions)
             stringificationSucessful &= appendToStream(outputStream, "[" + std::to_string(numValuesOfDimension) + "]");
     }
@@ -232,7 +231,8 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation 
                 ? appendToStream(outputStream, " ") && stringify(outputStream, shiftExpression.shiftOperation) && appendToStream(outputStream, " ")
                 : stringify(outputStream, shiftExpression.shiftOperation))
-        && stringify(outputStream, *shiftExpression.rhs);
+        && stringify(outputStream, *shiftExpression.rhs)
+        && appendToStream(outputStream, ')');
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::VariableAccess& variableAccess) const {
