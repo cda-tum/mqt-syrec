@@ -9,9 +9,23 @@
 
 
 namespace syrec {
+    std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
+        std::string                      foundErrorWhileReadingFileContent;
+        if (const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent); readFileContent.has_value() && foundErrorWhileReadingFileContent.empty())
+            readProgramFromString(*readFileContent, settings, &foundErrorWhileReadingFileContent);   
+        return foundErrorWhileReadingFileContent;
+    }
+    
+    std::string Program::readFromString(const std::string_view& stringifiedProgram, const ReadProgramSettings settings) {
+        std::string foundErrorWhileReadingFileContent;
+        readProgramFromString(stringifiedProgram, settings, &foundErrorWhileReadingFileContent);
+        return foundErrorWhileReadingFileContent;
+    }
+
     bool Program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string* error) {
         if (const auto& concatenatedErrors = read(filename, settings); !concatenatedErrors.empty()) {
-            *error = concatenatedErrors;
+            if (error)
+                *error = concatenatedErrors;
             return false;
         }
         return true;
@@ -29,7 +43,7 @@ namespace syrec {
         lexer.addErrorListener(customErrorListener.get());
         antlrParser.addErrorListener(customErrorListener.get());
 
-        customVisitor->parseProgram(antlrParser.program());
+        const std::optional<std::shared_ptr<Program>> parsedSyrecProgram = customVisitor->parseProgram(antlrParser.program());
 
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());
@@ -49,23 +63,9 @@ namespace syrec {
                 *error = concatenatedErrorMessageContainer.str();
             return false;
         }
+        if (parsedSyrecProgram.has_value() && *parsedSyrecProgram)
+            modulesVec = parsedSyrecProgram->get()->modulesVec;
         return true;
-    }
-
-
-    std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
-        std::string foundErrorWhileReadingFileContent;
-        const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent);
-        if (foundErrorWhileReadingFileContent.empty())
-            readProgramFromString(*readFileContent, settings, &foundErrorWhileReadingFileContent);
-
-        return foundErrorWhileReadingFileContent;
-    }
-
-    std::string Program::readFromString(const std::string_view& stringifiedProgram, const ReadProgramSettings settings) {
-        std::string foundErrorWhileReadingFileContent;
-        readProgramFromString(stringifiedProgram, settings, &foundErrorWhileReadingFileContent);
-        return foundErrorWhileReadingFileContent;
     }
 
     std::optional<std::string> Program::tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors) {
