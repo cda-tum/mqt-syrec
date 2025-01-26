@@ -64,7 +64,12 @@ protected:
     static void assertStringificationOfParsedSyrecProgramIsSuccessful(const syrec::Program& syrecProgramToStringifiy, std::ostream& containerForStringifiedProgram) {
         // TODO: Troubleshooting as to why the stringification of the SyReC program failed is currently not possible but should only happen if either the IR representation of
         // the IR representation or of an internal error in the stringifier. Can we handle the former cases better?
-        utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(std::nullopt);
+
+        utils::BaseSyrecIrEntityStringifier::AdditionalFormattingOptions customFormattingOptions;
+        customFormattingOptions.optionalCustomIdentationCharacterSequence = "";
+        customFormattingOptions.optionalCustomNewlineCharacterSequence    = " ";
+
+        utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(customFormattingOptions);
         bool                                wasStringificationSuccessful;
         ASSERT_NO_FATAL_FAILURE(wasStringificationSuccessful = syrecProgramStringifier.stringify(containerForStringifiedProgram, syrecProgramToStringifiy)) << "Error during stringification of SyReC program";
         ASSERT_TRUE(wasStringificationSuccessful) << "Failed to stringify SyReC program";
@@ -78,7 +83,7 @@ protected:
             FAIL() << "Definition of expected optimized syrec program is not supported for now";
 
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.read(loadedTestCaseData.stringifiedSyrecProgramToProcess));
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess));
         ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.empty());
         
         std::ostringstream containerForStringifiedProgram;

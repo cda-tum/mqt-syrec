@@ -5,13 +5,16 @@ using namespace utils;
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Program& program) {
     resetInternals();
 
+    if (program.modules().empty())
+        return true;
+
     bool       stringificationSuccessful               = true;
     const auto iteratorToFirstModuleWithNewlinePostfix = program.modules().cbegin();
-    const auto iteratorToLastModuleWithNewlinePostfix  = program.modules().empty() ? program.modules().cbegin() : std::prev(program.modules().cend());
+    const auto iteratorToLastModuleWithNewlinePostfix  = std::prev(program.modules().cend());
     for (auto moduleIterator = iteratorToFirstModuleWithNewlinePostfix; stringificationSuccessful && moduleIterator != iteratorToLastModuleWithNewlinePostfix; ++moduleIterator)
         stringificationSuccessful = *moduleIterator && stringify(outputStream, **moduleIterator) && appendNewlineToStream(outputStream);
 
-    return stringificationSuccessful && (program.modules().size() > 1 ? program.modules().back() && stringify(outputStream, *program.modules().back()) : true);
+    return stringificationSuccessful && program.modules().back() && stringify(outputStream, *program.modules().back());
 }
 
 // START OF NON-PUBLIC INTERFACE
@@ -20,7 +23,7 @@ void BaseSyrecIrEntityStringifier::resetInternals() {
 }
 
 bool BaseSyrecIrEntityStringifier::incrementIdentationLevel() noexcept {
-    indentationSequence += indentIdent;
+    indentationSequence += additionalFormattingOptions.optionalCustomIdentationCharacterSequence.value_or(indentIdent);
     return true;
 }
 
@@ -31,12 +34,12 @@ bool BaseSyrecIrEntityStringifier::decrementIdentationLevel() noexcept {
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Module& programModule) {
-    return !programModule.name.empty() && programModule.statements.empty()
+    return !programModule.name.empty() && !programModule.statements.empty()
         && appendToStream(outputStream, moduleKeywordIdent + " " + programModule.name)
         && appendToStream(outputStream, '(')
         && stringify(outputStream, programModule.parameters, true)
         && appendToStream(outputStream, ')')
-        && appendNewlineToStream(outputStream)
+        && (!programModule.variables.empty() ? appendNewlineToStream(outputStream) : true)
         && incrementIdentationLevel()
         && stringify(outputStream, programModule.variables, !additionalFormattingOptions.omitVariableTypeSharedBySequenceOfLocalVariables)
         && stringify(outputStream, programModule.statements)
@@ -47,20 +50,20 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    bool stringificationSucessful = stringifyVariableType ? stringify(outputStream, variable.type) : true;
+    bool stringificationSucessful = stringifyVariableType ? stringify(outputStream, variable.type) && appendToStream(outputStream, ' ') : true;
     stringificationSucessful &= !variable.name.empty() ? appendToStream(outputStream, variable.name) : false;
+    stringificationSucessful &= !variable.dimensions.empty();
 
-    if (variable.dimensions.empty())
+    if ((variable.dimensions.size() == 1 && variable.dimensions.front() == 1 && !additionalFormattingOptions.omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue) 
+        || variable.dimensions.size() > 1) {
         for (const auto numValuesOfDimension: variable.dimensions)
             stringificationSucessful &= appendToStream(outputStream, "[" + std::to_string(numValuesOfDimension) + "]");
-    else
-        stringificationSucessful &= appendToStream(outputStream, "[" + std::to_string(1) + "]");
-
+    }
     return stringificationSucessful && appendToStream(outputStream, "(" + std::to_string(variable.bitwidth) + ")");
 }
 
-bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Statement& statement) const {
-    if (!outputStream.good())
+bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Statement::ptr& statement) {
+    if (!statement || !outputStream.good())
         return setStreamInFailedState(outputStream);
 
     if (!appendIdentationPaddingSequence(outputStream, indentationSequence))
@@ -76,19 +79,19 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     //
     if (typeid(statement) == typeid(syrec::SkipStatement))
         return stringifySkipStatement(outputStream);
-    if (const auto& stmtCastedAsAssignment = dynamic_cast<const syrec::AssignStatement*>(&statement); stmtCastedAsAssignment)
+    if (const auto& stmtCastedAsAssignment = dynamic_cast<const syrec::AssignStatement*>(&*statement); stmtCastedAsAssignment)
         return stringify(outputStream, *stmtCastedAsAssignment);
-    if (const auto& stmtCastedAsModuleCall = dynamic_cast<const syrec::CallStatement*>(&statement); stmtCastedAsModuleCall)
+    if (const auto& stmtCastedAsModuleCall = dynamic_cast<const syrec::CallStatement*>(&*statement); stmtCastedAsModuleCall)
         return stringify(outputStream, *stmtCastedAsModuleCall);
-    if (const auto& stmtCastedAsForStmt = dynamic_cast<const syrec::ForStatement*>(&statement); stmtCastedAsForStmt)
+    if (const auto& stmtCastedAsForStmt = dynamic_cast<const syrec::ForStatement*>(&*statement); stmtCastedAsForStmt)
         return stringify(outputStream, *stmtCastedAsForStmt);
-    if (const auto& stmtCastedAsIfStmt = dynamic_cast<const syrec::IfStatement*>(&statement); stmtCastedAsIfStmt)
+    if (const auto& stmtCastedAsIfStmt = dynamic_cast<const syrec::IfStatement*>(&*statement); stmtCastedAsIfStmt)
         return stringify(outputStream, *stmtCastedAsIfStmt);
-    if (const auto& stmtCastedAsSwapStmt = dynamic_cast<const syrec::SwapStatement*>(&statement); stmtCastedAsSwapStmt)
+    if (const auto& stmtCastedAsSwapStmt = dynamic_cast<const syrec::SwapStatement*>(&*statement); stmtCastedAsSwapStmt)
         return stringify(outputStream, *stmtCastedAsSwapStmt);
-    if (const auto& stmtCastedAsUnaryStmt = dynamic_cast<const syrec::UnaryStatement*>(&statement); stmtCastedAsUnaryStmt)
+    if (const auto& stmtCastedAsUnaryStmt = dynamic_cast<const syrec::UnaryStatement*>(&*statement); stmtCastedAsUnaryStmt)
         return stringify(outputStream, *stmtCastedAsUnaryStmt);
-    if (const auto& stmtCastedAsModuleUncall = dynamic_cast<const syrec::UncallStatement*>(&statement); stmtCastedAsModuleUncall)
+    if (const auto& stmtCastedAsModuleUncall = dynamic_cast<const syrec::UncallStatement*>(&*statement); stmtCastedAsModuleUncall)
         return stringify(outputStream, *stmtCastedAsModuleUncall);
 
     return false;
@@ -100,9 +103,8 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
 
     return assignStatement.lhs && assignStatement.rhs
         && stringify(outputStream, *assignStatement.lhs)
-        && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation
-            ? stringify(outputStream, assignStatement.assignOperation)
-            : appendToStream(outputStream, " ") && stringify(outputStream, assignStatement.assignOperation) && appendToStream(outputStream, " "))
+        && (additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation ? appendToStream(outputStream, " ") && stringify(outputStream, assignStatement.assignOperation) && appendToStream(outputStream, " ") 
+            : stringify(outputStream, assignStatement.assignOperation))
         && stringify(outputStream, *assignStatement.rhs);
 }
 
@@ -119,7 +121,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
 
     bool stringificationSuccessful = forStatement.range.first && forStatement.range.second && forStatement.step && appendToStream(outputStream, forKeywordIdent + " ");
     if (!forStatement.loopVariable.empty())
-        stringificationSuccessful &= appendIdentationPaddingSequence(outputStream, indentationSequence) && appendToStream(outputStream, forKeywordIdent)
+        stringificationSuccessful &= appendIdentationPaddingSequence(outputStream, indentationSequence) && appendToStream(outputStream, forStatement.loopVariable)
             && additionalFormattingOptions.useWhitespaceBetweenOperandsOfBinaryOperation
                 ? appendToStream(outputStream, " = ")
                 : appendToStream(outputStream, '=');
@@ -128,8 +130,8 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && stringify(outputStream, *forStatement.range.first) && appendToStream(outputStream, " " + toKeywordIdent + " ")
         && (forStatement.range.first != forStatement.range.second ? stringify(outputStream, *forStatement.range.second) : true)
         && appendToStream(outputStream, " " + stepKeywordIdent + " ")
-        && stringify(outputStream, *forStatement.step)
-        && appendNewlineToStream(outputStream) && incrementIdentationLevel()
+        && stringify(outputStream, *forStatement.step) && appendToStream(outputStream, " " + doKeywordIdent)
+        && incrementIdentationLevel()
         && stringify(outputStream, forStatement.statements)
         && appendNewlineToStream(outputStream) && decrementIdentationLevel()
         && appendIdentationPaddingSequence(outputStream, indentationSequence) && appendToStream(outputStream, rofKeywordIdent);
@@ -316,17 +318,19 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         return setStreamInFailedState(outputStream);
 
     if (statements.empty())
-        return true;
+        return false;
 
     bool        stringificationSuccessful          = true;
     const auto& firstStatementWithSemicolonPostfix = statements.cbegin();
-    const auto& lastStatementWithSemicolonPostfix  = std::prev(statements.cend(), 1 + statements.size() > 1);
+    //const auto& lastStatementWithSemicolonPostfix  = std::prev(statements.cend(), 1 + statements.size() > 1);
+    const auto& lastStatementWithSemicolonPostfix = std::prev(statements.cend());
     for (auto statementIterator = firstStatementWithSemicolonPostfix; stringificationSuccessful && statementIterator != lastStatementWithSemicolonPostfix; ++statementIterator)
-        stringificationSuccessful &= *statementIterator && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence)
-            &&  stringify(outputStream, **statementIterator) && appendToStream(outputStream, ';');
+        stringificationSuccessful &= *statementIterator
+            && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence)
+            && stringify(outputStream, *statementIterator) && appendToStream(outputStream, ';');
 
     stringificationSuccessful &= statements.back()
-        && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence) && stringify(outputStream, *statements.back());
+        && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence) && stringify(outputStream, statements.back());
 
     return stringificationSuccessful;
 }
@@ -507,6 +511,22 @@ bool BaseSyrecIrEntityStringifier::stringifySkipStatement(std::ostream& outputSt
     return true;
 }
 
+bool BaseSyrecIrEntityStringifier::appendNewlineToStream(std::ostream& outputStream) const {
+    if (!outputStream.good())
+        return setStreamInFailedState(outputStream);
+
+    if (additionalFormattingOptions.optionalCustomNewlineCharacterSequence.has_value())
+        outputStream << *additionalFormattingOptions.optionalCustomNewlineCharacterSequence;
+    else 
+        #if _WIN32
+            outputStream << "\r\n";
+        #else
+            outputStream << '\n';
+        #endif
+
+    return true;
+}
+
 bool BaseSyrecIrEntityStringifier::setStreamInFailedState(std::ostream& stream) {
     if (!stream.bad())
         stream.setstate(std::ios_base::failbit);
@@ -515,18 +535,6 @@ bool BaseSyrecIrEntityStringifier::setStreamInFailedState(std::ostream& stream) 
 
 bool BaseSyrecIrEntityStringifier::appendIdentationPaddingSequence(std::ostream& outputStream, const std::string& indentationSequence) {
     return appendToStream(outputStream, indentationSequence);
-}
-
-bool BaseSyrecIrEntityStringifier::appendNewlineToStream(std::ostream& outputStream) {
-    if (!outputStream.good())
-        return setStreamInFailedState(outputStream);
-
-    #if _WIN32 or _WIN64
-        outputStream << "\r\n";
-    #else
-        outputStream << '\n';
-    #endif
-        return true;
 }
 
 bool BaseSyrecIrEntityStringifier::appendToStream(std::ostream& outputStream, const std::string& characterSequence) {

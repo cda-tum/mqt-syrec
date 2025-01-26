@@ -11,7 +11,7 @@ std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListT
     statements.reserve(ctx->stmts.size());
 
     for (const auto& antlrStatementContext: ctx->stmts)
-        if (const std::optional<syrec::Statement::ptr> generatedStatement = visitStatementTyped(antlrStatementContext); generatedStatement.has_value() && !generatedStatement.value())
+        if (const std::optional<syrec::Statement::ptr> generatedStatement = visitStatementTyped(antlrStatementContext); generatedStatement.has_value() && generatedStatement.value())
             statements.emplace_back(*generatedStatement);
 
     return statements;
