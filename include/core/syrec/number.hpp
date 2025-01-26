@@ -42,8 +42,15 @@ namespace syrec {
                 const std::optional<unsigned int> rhsOperandEvaluated = rhsOperand ? rhsOperand->tryEvaluate(loopVariableValueLookup) : std::nullopt;
                 switch (operation) {
                     case Operation::Addition:
-                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
+                        if (lhsOperandEvaluated.has_value() && !*lhsOperandEvaluated)
+                            return rhsOperandEvaluated;
+                        if (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated)
+                            return lhsOperandEvaluated;
+                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value()? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
                     case Operation::Subtraction:
+                        if (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated)
+                            return lhsOperandEvaluated;
+
                         return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated - *rhsOperandEvaluated) : std::nullopt;
                     case Operation::Multiplication: {
                         if ((lhsOperandEvaluated.has_value() && !*lhsOperandEvaluated) || (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated))

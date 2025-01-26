@@ -138,28 +138,60 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     if (!context)
         return std::nullopt;
 
-    const std::optional<syrec::Number::ptr>                           lhsOperand = visitNumberTyped(context->lhsOperand);
+    std::optional<syrec::Number::ptr>                                 lhsOperand = visitNumberTyped(context->lhsOperand);
     const std::optional<syrec::Number::ConstantExpression::Operation> operation  = context->op ? deserializeConstantExpressionOperationFromString(context->op->getText()) : std::nullopt;
-    const std::optional<syrec::Number::ptr>                           rhsOperand = visitNumberTyped(context->rhsOperand);
+    std::optional<syrec::Number::ptr>                                 rhsOperand = visitNumberTyped(context->rhsOperand);
 
-    if (operation.has_value() && *operation == syrec::Number::ConstantExpression::Operation::Division) {
-        if (const std::optional<unsigned int> evaluationResultOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? lhsOperand->get()->tryEvaluate({}) : std::nullopt; 
-            evaluationResultOfLhsOperand.has_value() && !*evaluationResultOfLhsOperand) {
-            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->lhsOperand->getStart()));
-            return std::nullopt;
-        }
-        if (const std::optional<unsigned int> evaluationResultOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? rhsOperand->get()->tryEvaluate({}) : std::nullopt; 
-            evaluationResultOfRhsOperand.has_value() && !*evaluationResultOfRhsOperand) {
-            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->rhsOperand->getStart()));
-            return std::nullopt;
-        }
-    }
+    const std::optional<unsigned int> evaluationResultOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? lhsOperand->get()->tryEvaluate({}) : std::nullopt;
+    const std::optional<unsigned int> evaluationResultOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? rhsOperand->get()->tryEvaluate({}) : std::nullopt;
 
-    if (lhsOperand.has_value() && operation.has_value() && rhsOperand.has_value()) {
-        const auto constantExpression = syrec::Number::ConstantExpression(*lhsOperand, *operation, *rhsOperand);
-        if (const std::optional<unsigned int> evaluatedConstantExpressionValue = constantExpression.tryEvaluate({}); evaluatedConstantExpressionValue.has_value())
-            return std::make_shared<syrec::Number>(*evaluatedConstantExpressionValue);
-        return std::make_shared<syrec::Number>(constantExpression);
+    if (operation.has_value()) {
+        switch (*operation) {
+            case syrec::Number::ConstantExpression::Operation::Addition: {
+                if (evaluationResultOfLhsOperand.has_value() && !*evaluationResultOfLhsOperand)
+                    return rhsOperand;
+                if (evaluationResultOfRhsOperand.has_value() && !*evaluationResultOfRhsOperand)
+                    return lhsOperand;
+                break;
+            }
+            case syrec::Number::ConstantExpression::Operation::Subtraction: {
+                if (evaluationResultOfRhsOperand.has_value() && !*evaluationResultOfRhsOperand)
+                    return lhsOperand;
+                break;
+            }
+            case syrec::Number::ConstantExpression::Operation::Multiplication: {
+                if (evaluationResultOfLhsOperand.has_value() && *evaluationResultOfLhsOperand == 1)
+                    return rhsOperand;
+
+                if (evaluationResultOfRhsOperand.has_value() && *evaluationResultOfRhsOperand == 1)
+                    return lhsOperand;
+
+                break;
+            }
+            case syrec::Number::ConstantExpression::Operation::Division: {
+                if (evaluationResultOfLhsOperand.has_value()) {
+                    if (!*evaluationResultOfLhsOperand) {
+                        recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->lhsOperand->getStart()));
+                        return std::nullopt;        
+                    }
+                }
+                if (evaluationResultOfRhsOperand.has_value()) {
+                    if (!*evaluationResultOfRhsOperand) {
+                        recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->rhsOperand->getStart()));
+                        return std::nullopt;
+                    }
+                    if (*evaluationResultOfRhsOperand == 1)
+                        return lhsOperand;
+                }
+            }
+        }
+
+        if (lhsOperand.has_value() && rhsOperand.has_value()) {
+            const auto constantExpression = syrec::Number::ConstantExpression(*lhsOperand, *operation, *rhsOperand);
+            if (const std::optional<unsigned int> evaluatedConstantExpressionValue = constantExpression.tryEvaluate({}); evaluatedConstantExpressionValue.has_value())
+                return std::make_shared<syrec::Number>(*evaluatedConstantExpressionValue);
+            return std::make_shared<syrec::Number>(constantExpression);
+        }
     }
     return std::nullopt;
 }
