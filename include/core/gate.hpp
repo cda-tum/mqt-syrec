@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <any>
+#include <cstdint>
 #include <iostream>
 #include <set>
 #include <sstream>
