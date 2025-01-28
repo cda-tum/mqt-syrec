@@ -184,9 +184,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     const std::optional<syrec::Number::ptr> iterationRangeStartValue = expressionVisitorInstance->visitNumberTyped(ctx->startValue);
     expressionVisitorInstance->clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
 
-    const std::optional<syrec::Number::ptr>     iterationRangeEndValue           = expressionVisitorInstance->visitNumberTyped(ctx->endValue);
-    const std::optional<LoopStepsizeDefinition> iterationRangeStepSizeDefinition = visitLoopStepsizeDefinitionTyped(ctx->loopStepsizeDefinition());
-    const std::optional<syrec::Number::ptr>     iterationRangeStepsizeValue      = iterationRangeStepSizeDefinition.has_value() && iterationRangeStepSizeDefinition->stepsize? std::make_optional(iterationRangeStepSizeDefinition->stepsize) : std::nullopt;
+    const std::optional<syrec::Number::ptr> iterationRangeEndValue      = expressionVisitorInstance->visitNumberTyped(ctx->endValue);
+    const std::optional<syrec::Number::ptr> iterationRangeStepSizeValue = visitLoopStepsizeDefinitionTyped(ctx->loopStepsizeDefinition());
 
     auto generatedForStatement          = std::make_shared<syrec::ForStatement>();
     generatedForStatement->loopVariable = loopVariableIdentifier.value_or("");
@@ -196,9 +195,9 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     else if (iterationRangeEndValue.has_value())
         generatedForStatement->range = std::make_pair(std::make_shared<syrec::Number>(0), *iterationRangeEndValue);
 
-    generatedForStatement->step = iterationRangeStepsizeValue.value_or(std::make_shared<syrec::Number>(1));
+    generatedForStatement->step = iterationRangeStartValue.value_or(std::make_shared<syrec::Number>(1));
 
-    if (const std::optional<unsigned int> evaluatedValueOfStepsize = iterationRangeStepsizeValue.has_value() ? iterationRangeStepsizeValue.value()->tryEvaluate({}) : std::nullopt; 
+    if (const std::optional<unsigned int> evaluatedValueOfStepsize = iterationRangeStepSizeValue.has_value() ? iterationRangeStepSizeValue.value()->tryEvaluate({}) : std::nullopt; 
         ctx->endValue && evaluatedValueOfStepsize.has_value() && !*evaluatedValueOfStepsize 
         && generatedForStatement->range.first && generatedForStatement->range.second) {
         const std::optional<unsigned int> evaluatedValueOfIterationRangeStart = generatedForStatement->range.first->tryEvaluate({});
@@ -239,14 +238,25 @@ std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTy
     return loopVariableIdentifier;
 }
 
-std::optional<CustomStatementVisitor::LoopStepsizeDefinition> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const {
+std::optional<syrec::Number::ptr> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const {
     if (!ctx)
         return std::nullopt;
 
-    if (ctx->OP_MINUS())
-        recordSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(mapTokenPositionToMessagePosition(*ctx->OP_MINUS()->getSymbol()));
+    std::optional<syrec::Number::ptr> userDefinedStepsizeValue = expressionVisitorInstance->visitNumberTyped(ctx->number());
+    if (!userDefinedStepsizeValue.has_value() || !userDefinedStepsizeValue.value())
+        return std::nullopt;
 
-    return LoopStepsizeDefinition({ctx->OP_MINUS() != nullptr, expressionVisitorInstance->visitNumberTyped(ctx->number()).value_or(nullptr)});
+    if (ctx->OP_MINUS()) {
+        if (const std::optional<unsigned int> evaluatedValueForStepsize = userDefinedStepsizeValue.value()->tryEvaluate({}); evaluatedValueForStepsize.has_value())
+            return std::make_shared<syrec::Number>(-*evaluatedValueForStepsize);
+
+        // Since we cannot store an 'expression' of the form -(<Number>) in the IR representation, a constant expression (0 - <Number>) is used instead.
+        return std::make_shared<syrec::Number>(syrec::Number::ConstantExpression(
+                std::make_shared<syrec::Number>(0),
+                syrec::Number::ConstantExpression::Operation::Subtraction,
+                *userDefinedStepsizeValue));
+    }
+    return userDefinedStepsizeValue;
 }
 
 void CustomStatementVisitor::recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const {

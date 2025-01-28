@@ -5,7 +5,6 @@
 // TODO: Recursive module calls should be possible (it its the reponsibility of the user to prevent infinite loops)
 // TODO: The user can use a variable multiple times as a caller argument for a module call (synthesis of the statement should then detected an overlap between the operands of any statement that would prevent the inversion of the latter)
 // TODO: Should the user be able to perform recursive module calls even for the main module (defined either implicitly or explicitly, the latter is currently disallowed)
-// TODO: Allow step size of zero if start and end value are known and different from each other (otherwise we can make no assumptions)
 // TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
 // TODO: Allow user to define integer constant truncation either as XOR or OR
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
@@ -678,7 +677,6 @@ TEST_F(SyrecParserErrorTestsFixture, UsingNonMinusSymbolAfterStepKeywordCausesEr
 
 TEST_F(SyrecParserErrorTestsFixture, UsingMultipleMinusSymbolsAfterStepkeywordCausesError) {
     recordSyntaxError(Message::Position(1, 43), "extraneous input '-' expecting {'$', '#', '(', INT}");
-    buildAndRecordExpectedSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(Message::Position(1, 42));
     performTestExecution("module main(in a(4), out b(4)) for 3 step --1 do b.0 ^= 1 rof");
 }
 
@@ -741,16 +739,6 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidRofKeywordAfterLoopBodyCausesError) 
     recordSyntaxError(Message::Position(1, 51), "no viable alternative at input 'done;'");
     recordSyntaxError(Message::Position(1, 57), "missing 'rof' at '<EOF>'");
     performTestExecution("module main(in a(4), out b(4)) for 3 step 1 do done; ++=b");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, UsageOfNegativeValueInForLoopIterationNumberStepsizeWithNoLoopVariableInitializationCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(Message::Position(1, 42));
-    performTestExecution("module main(in a(4), out b(4)) for 3 step -1 do ++=b rof");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, UsageOfNegativeValueInForLoopIterationNumberStepsizeWithLoopVariableInitializationCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NegativeStepsizeValueNotAllowed>(Message::Position(1, 52));
-    performTestExecution("module main(in a(4), out b(4)) for $i = 0 to 3 step -1 do ++=b rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithConstantValuedStartAndEndCausesError) {

@@ -62,13 +62,8 @@ namespace syrecParser {
         std::unique_ptr<CustomExpressionVisitor>                   expressionVisitorInstance;
         std::vector<NotOverloadResolutedCallStatementScope>        callStatementsWithNotPerformedOverloadResolutionScopes;
 
-        struct LoopStepsizeDefinition {
-            bool               hasMinusPrefix;
-            syrec::Number::ptr stepsize;
-        };
-
-        [[nodiscard]] std::optional<std::string>            visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const;
-        [[nodiscard]] std::optional<LoopStepsizeDefinition> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const;
+        [[nodiscard]] std::optional<std::string>        visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const;
+        [[nodiscard]] std::optional<syrec::Number::ptr> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const;
 
         void                                                  recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
         [[nodiscard]] NotOverloadResolutedCallStatementScope* getActiveModuleScopeRecordingCallStatements();

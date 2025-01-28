@@ -17,7 +17,6 @@ namespace syrecParser {
         NoModuleMatchingCallSignature,
         ExpressionBitwidthMissmatches,
         OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue,
-        NegativeStepsizeValueNotAllowed,
         DuplicateMainModuleDefinition,
         ValueOverflowDueToNoImplicitTruncationPerformed,
         CannotCallMainModule,
@@ -48,7 +47,6 @@ namespace syrecParser {
             case SemanticError::NoModuleMatchingCallSignature:
             case SemanticError::ExpressionBitwidthMissmatches:
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
-            case SemanticError::NegativeStepsizeValueNotAllowed:
             case SemanticError::DuplicateMainModuleDefinition:
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
             case SemanticError::CannotCallMainModule:
@@ -98,8 +96,6 @@ namespace syrecParser {
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";
-            case SemanticError::NegativeStepsizeValueNotAllowed:
-                return "Negative values for the step size of a 'for' loop are not allowed";
             case SemanticError::DuplicateMainModuleDefinition:
                 return "Module with identifier 'main' can only be defined once";
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
