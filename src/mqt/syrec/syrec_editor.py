@@ -172,8 +172,8 @@ class SyReCEditor(QtWidgets.QWidget):
         )  # system-run
         self.stat_action = QtGui.QAction(QtGui.QIcon.fromTheme("applications-other"), "&Stats...", self.parent)
 
-        self.butonCostAware = QtWidgets.QRadioButton("Cost-aware synthesis", self)
-        self.butonCostAware.toggled.connect(self.item_selected)
+        self.buttonCostAware = QtWidgets.QRadioButton("Cost-aware synthesis", self)
+        self.buttonCostAware.toggled.connect(self.item_selected)
 
         self.buttonLineAware = QtWidgets.QRadioButton("Line-aware synthesis", self)
         self.buttonLineAware.setChecked(True)
@@ -197,8 +197,8 @@ class SyReCEditor(QtWidgets.QWidget):
         self.stat_action.setDisabled(True)
 
         # if first button is selected
-        if self.sender() == self.butonCostAware:
-            if self.butonCostAware.isChecked():
+        if self.sender() == self.buttonCostAware:
+            if self.buttonCostAware.isChecked():
                 self.cost_aware_synthesis = 1
                 self.line_aware_synthesis = 0
                 # making other check box to uncheck
@@ -215,12 +215,12 @@ class SyReCEditor(QtWidgets.QWidget):
                 self.cost_aware_synthesis = 0
                 self.line_aware_synthesis = 1
                 # making other check box to uncheck
-                self.butonCostAware.setChecked(False)
+                self.buttonCostAware.setChecked(False)
             else:
                 self.cost_aware_synthesis = 1
                 self.line_aware_synthesis = 0
                 # making other check box to uncheck
-                self.butonCostAware.setChecked(True)
+                self.buttonCostAware.setChecked(True)
 
     def write_editor_contents_to_file(self):
         data = QtCore.QFile("/tmp/out.src")  # noqa: S108
@@ -403,7 +403,7 @@ class SyReCEditor(QtWidgets.QWidget):
         self.show()
 
 
-class SyReCHighligher(QtGui.QSyntaxHighlighter):
+class SyReCHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, parent) -> None:
         QtGui.QSyntaxHighlighter.__init__(self, parent)
 
@@ -461,7 +461,7 @@ class QtSyReCEditor(SyReCEditor):
 
         self.widget: CodeEditor = CodeEditor(parent)
         self.widget.setFont(QtGui.QFont("Monospace", 10, QtGui.QFont.Weight.Normal))
-        self.widget.highlighter = SyReCHighligher(self.widget.document())
+        self.widget.highlighter = SyReCHighlighter(self.widget.document())
 
     def setText(self, text):  # noqa: N802
         self.widget.setPlainText(text)
@@ -616,7 +616,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.editor.parser_failed = self.logWidget.addMessage
         self.editor.build_failed = (
             lambda error_message: self.logWidget.addMessage(match.group(2))
-            if (match := re.search("In line (.*): (.*)", error_message))
+            if (match := re.search(r"In line (.*): (.*)", error_message))
             else self.logWidget.addMessage("No matching lines found in error message")
         )
 
@@ -628,7 +628,7 @@ class MainWindow(QtWidgets.QMainWindow):
         toolbar.addAction(self.editor.build_action)
         toolbar.addAction(self.editor.sim_action)
         toolbar.addAction(self.editor.stat_action)
-        toolbar.addWidget(self.editor.butonCostAware)
+        toolbar.addWidget(self.editor.buttonCostAware)
         toolbar.addWidget(self.editor.buttonLineAware)
 
 
