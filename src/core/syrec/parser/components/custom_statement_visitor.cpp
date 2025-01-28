@@ -186,15 +186,28 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
 
     const std::optional<syrec::Number::ptr>     iterationRangeEndValue           = expressionVisitorInstance->visitNumberTyped(ctx->endValue);
     const std::optional<LoopStepsizeDefinition> iterationRangeStepSizeDefinition = visitLoopStepsizeDefinitionTyped(ctx->loopStepsizeDefinition());
-    const std::optional<syrec::Number::ptr>     iterationRangeStepsizeValue      = iterationRangeStepSizeDefinition.has_value() ? std::make_optional(iterationRangeStepSizeDefinition->stepsize) : std::nullopt;
+    const std::optional<syrec::Number::ptr>     iterationRangeStepsizeValue      = iterationRangeStepSizeDefinition.has_value() && iterationRangeStepSizeDefinition->stepsize? std::make_optional(iterationRangeStepSizeDefinition->stepsize) : std::nullopt;
 
     auto generatedForStatement          = std::make_shared<syrec::ForStatement>();
     generatedForStatement->loopVariable = loopVariableIdentifier.value_or("");
 
     if (iterationRangeStartValue.has_value())
         generatedForStatement->range = ctx->endValue != nullptr ? std::make_pair(*iterationRangeStartValue, iterationRangeEndValue.value_or(nullptr)) : std::make_pair(*iterationRangeStartValue, *iterationRangeStartValue);
+    else if (iterationRangeEndValue.has_value())
+        generatedForStatement->range = std::make_pair(std::make_shared<syrec::Number>(0), *iterationRangeEndValue);
 
     generatedForStatement->step = iterationRangeStepsizeValue.value_or(std::make_shared<syrec::Number>(1));
+
+    if (const std::optional<unsigned int> evaluatedValueOfStepsize = iterationRangeStepsizeValue.has_value() ? iterationRangeStepsizeValue.value()->tryEvaluate({}) : std::nullopt; 
+        ctx->endValue && evaluatedValueOfStepsize.has_value() && !*evaluatedValueOfStepsize 
+        && generatedForStatement->range.first && generatedForStatement->range.second) {
+        const std::optional<unsigned int> evaluatedValueOfIterationRangeStart = generatedForStatement->range.first->tryEvaluate({});
+        const std::optional<unsigned int> evaluatedValueOfIterationRangeEnd   = evaluatedValueOfIterationRangeStart.has_value() ? generatedForStatement->range.second->tryEvaluate({}) : std::nullopt;
+        if (evaluatedValueOfIterationRangeStart.has_value() && evaluatedValueOfIterationRangeEnd.has_value() && *evaluatedValueOfIterationRangeStart != *evaluatedValueOfIterationRangeEnd)
+            recordSemanticError<SemanticError::InfiniteLoopDetected>(
+                Message::Position(mapTokenPositionToMessagePosition(*ctx->KEYWORD_FOR()->getSymbol())), 
+                *evaluatedValueOfIterationRangeStart, *evaluatedValueOfIterationRangeEnd, *evaluatedValueOfStepsize);
+    }
 
     // TODO: Does the parser prevent the execution of this function for loops with an empty statement body (due to the statement list production being required to consist of at least one statement) or do we need to check the validity of the statement body manually?
     // TODO: Make value range of loop variable available for index checks in expressions

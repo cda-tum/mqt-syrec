@@ -24,6 +24,7 @@ namespace syrecParser {
         ValueOfLoopVariableNotUsableInItsInitialValueDeclaration,
         ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts,
         DeclaredVariableBitwidthTooLarge,
+        InfiniteLoopDetected
     };
 
     /// Get the identifier associated with a given semantic error
@@ -54,6 +55,7 @@ namespace syrecParser {
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
             case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
             case SemanticError::DeclaredVariableBitwidthTooLarge:
+            case SemanticError::InfiniteLoopDetected:
                 return "TEST";
             default:
                 return "";
@@ -110,6 +112,8 @@ namespace syrecParser {
                 return "Overlap with restricted variable parts (formatted as: dimension access [shown as tuples of the form (dimensionIdx, value of dimension)] | overlapping bit) = '{:s}' detected preventing the inversion of the current statement";
             case SemanticError::DeclaredVariableBitwidthTooLarge:
                 return "Declared variable bitwidth {:d} exceeds the maximum supported variable bitwidth of {:d} bits";
+            case SemanticError::InfiniteLoopDetected:
+                return "Loop iterating from start value {:d} to {:d} with a stepsize of {:d} will perform an infinite number of iterations";
             default:
                 return "";
         }

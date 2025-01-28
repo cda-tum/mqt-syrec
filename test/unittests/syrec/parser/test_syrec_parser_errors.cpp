@@ -5,6 +5,10 @@
 // TODO: Recursive module calls should be possible (it its the reponsibility of the user to prevent infinite loops)
 // TODO: The user can use a variable multiple times as a caller argument for a module call (synthesis of the statement should then detected an overlap between the operands of any statement that would prevent the inversion of the latter)
 // TODO: Should the user be able to perform recursive module calls even for the main module (defined either implicitly or explicitly, the latter is currently disallowed)
+// TODO: Allow step size of zero if start and end value are known and different from each other (otherwise we can make no assumptions)
+// TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
+// TODO: Allow user to define integer constant truncation either as XOR or OR
+// TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
@@ -749,7 +753,85 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNegativeValueInForLoopIterationNumbe
     performTestExecution("module main(in a(4), out b(4)) for $i = 0 to 3 step -1 do ++=b rof");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithConstantValuedStartAndEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 14), 1, 3, 0);
+    performTestExecution("module main() for 1 to 3 step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithEvaluatedValueOfZeroWithConstantValuedStartAndEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 2, 0, 0);
+    performTestExecution("module main(in b(2)) for 2 to 0 step ((2 - 1) * 0) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithImplicitStartAndConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 14), 0, 2, 0);
+    performTestExecution("module main() for 2 step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithEvaluatedValueOfZeroWithImplicitStartAndEvaluatedValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 3, 0);
+    performTestExecution("module main(in b(2)) for (#b + 1) step (#b * 0) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithEvaluatedConstantValueForStartAndConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 2, 0);
+    performTestExecution("module main(in b(2)) for (#b - 2) to 2 step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithEvaluatedConstantValuesForStartAndEndValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 1, 0);
+    performTestExecution("module main(in b(2)) for (#b - 2) to (2 - 1) step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithConstantValueForStartAndEvaluatedConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 1, 3, 0);
+    performTestExecution("module main(in b(2)) for 1 to (#b + 1) step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithEvaluatedConstantValueOfZeroWithEvaluatedConstantValueForStartAndConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 2, 0);
+    performTestExecution("module main(in b(2)) for (#b - 2) to 2 step (2 - #b) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithEvaluatedConstantValueOfZeroWithEvaluatedConstantValuesForStartAndEndValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 1, 0);
+    performTestExecution("module main(in b(2)) for (#b - 2) to (2 - 1) step ((#b - 1) - 1) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithEvaluatedConstantValueOfZeroWithConstantValueForStartAndEvaluatedConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 1, 3, 0);
+    performTestExecution("module main(in b(2)) for 1 to (#b + 1) step ((#b + 10) * 0) do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithTruncatedNegativeEvaluatedConstantValueForStartAndConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), UINT_MAX, 1, 0);
+    performTestExecution("module main(in b(2)) for $i = (#b - 3) to 1 step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithConstantValueOfStartAndTruncatedNegativeEvaluatedConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, UINT_MAX, 0);
+    performTestExecution("module main(in b(2)) for $i = 0 to (#b - 3) step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithTruncatedNegativeEvaluatedConstantValueForStartAndEndValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), UINT_MAX - 1, UINT_MAX, 0);
+    performTestExecution("module main(in b(2)) for $i = (#b - 4) to (#b - 3) step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithTruncatedOverflowingEvaluatedConstantValueForStartAndConstantValueOfEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 1, 2, 0);
+    performTestExecution("module main(in b(2)) for $i = ((#b - 3) + 2) to 2 step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithImplicitConstantValueForStartAndTruncatedOverflowingEvaluatedConstantValueForEndCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 1, 0);
+    performTestExecution("module main(in b(2)) for ((#b - 3) + 2) step 0 do skip rof");
+}
+
 // TODO: Negative value for stepsize determined for number expression caught correctly
+// TODO: Negative stepsize values should only be explicitily be definable if the value is defined as an integer constant
+// because the current IR representation cannot store the minus sign for constant expressions (or we extend the constant expression in that case with an
+// additional constant expression of the form (X * (0 - 1)) since we cannot explicitly use the value -1 (due to values being stored as unsigned integers)
 
 // Tests for production if-statement
 TEST_F(SyrecParserErrorTestsFixture, OmittingIfKeywordCausesError) {
@@ -956,6 +1038,9 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 31));
     performTestExecution("module main(inout b[2](4)) ++= b");
 }
+
+// TODO: Overlapping index in accessed values per dimension not possible
+// TODO: Should accessed variable bitwidths between statement operands match (i.e. a.0:2 += (2 + b.0))
 
 // Tests for production assign-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfAssignStatementCausesError) {
@@ -1488,4 +1573,44 @@ TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeStartBitInBitrangeWithUn
 TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeEndBitInBitrangeWithUnknownStartBoundOfVariableWithExplicitlyDeclaredBitwidth) {
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 50), 5, 3);
     performTestExecution("module main(out a(3)) for $i = 0 to 3 do ++= a.$i:5 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitWithEvaluationOfValueLeadingToTruncationOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), UINT_MAX, 3);
+    performTestExecution("module main(out a(3)) ++= a.(#a - 4)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitWithEvaluationOfValueLeadingToOverflowOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), 4, 3);
+    performTestExecution("module main(out a(3)) ++= a.((#a - 4) + 5)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitrangeWithEvaluationOfStartValueLeadingToTruncationOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), UINT_MAX, 3);
+    performTestExecution("module main(out a(3)) ++= a.(#a - 4):2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitrangeWithEvaluationOfStartValueLeadingToOverflowOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 28), 4, 3);
+    performTestExecution("module main(out a(3)) ++= a.((#a - 4) + 5):2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitrangeWithEvaluationOfEndValueLeadingToTruncationOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 30), UINT_MAX, 3);
+    performTestExecution("module main(out a(3)) ++= a.1:(#a - 4)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeBitrangeWithEvaluationOfEndValueLeadingToOverflowOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 30), 4, 3);
+    performTestExecution("module main(out a(3)) ++= a.1:((#a - 4) + 5)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeValueOfDimensionWithEvaluationOfEndValueLeadingToTruncationOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 28), UINT_MAX, 0, 1);
+    performTestExecution("module main(out a(3)) ++= a[(#a - 4)]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeValueOfDimensionWithEvaluationOfEndValueLeadingToOverflowOfValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 28), 4, 0, 1);
+    performTestExecution("module main(out a(3)) ++= a[((#a - 4) + 5)]");
 }
