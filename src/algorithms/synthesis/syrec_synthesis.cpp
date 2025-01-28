@@ -6,9 +6,6 @@
 #include "core/utils/timer.hpp"
 
 #include <boost/dynamic_bitset.hpp>
-#include <cmath>
-#include <functional>
-#include <memory>
 #include <numeric>
 
 namespace syrec {
@@ -248,10 +245,10 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::onStatement(const ForStatement& statement) {
-        const auto& [nfrom, nto] = statement.range;
+        const auto& [nfrom, nTo] = statement.range;
 
         const unsigned     from         = nfrom ? nfrom->evaluate(loopMap) : 1U; // default value is 1u
-        const unsigned     to           = nto->evaluate(loopMap);
+        const unsigned     to           = nTo->evaluate(loopMap);
         const unsigned     step         = statement.step ? statement.step->evaluate(loopMap) : 1U; // default step is +1
         const std::string& loopVariable = statement.loopVariable;
 

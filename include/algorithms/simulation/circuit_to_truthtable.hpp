@@ -1,7 +1,7 @@
 #pragma once
 
-#include "QuantumComputation.hpp"
 #include "core/truthTable/truth_table.hpp"
+#include "ir/QuantumComputation.hpp"
 
 namespace syrec {
 
