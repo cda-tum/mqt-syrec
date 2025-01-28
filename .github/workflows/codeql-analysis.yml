@@ -45,23 +45,26 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Configure CMake
-        run: cmake -S . -B build
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
       - if: matrix.language == 'cpp'
         name: Build
-        run: cmake --build build --parallel 3
+        run: cmake --build build --parallel 4
 
+      # run CodeQL analysis without uploading results (to avoid false positives on third party code)
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           upload: False
           output: sarif-results
 
+      # filter out third party code from the results
       - name: filter-sarif
         uses: advanced-security/filter-sarif@main
         with:
           patterns: |
             -**/extern/**
+            -**/build/**
           input: sarif-results/${{ matrix.language }}.sarif
           output: sarif-results/${{ matrix.language }}.sarif
 
