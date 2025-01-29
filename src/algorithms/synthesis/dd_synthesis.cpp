@@ -207,7 +207,7 @@ namespace syrec {
         }
 
         // handle identity and skipped nodes
-        if (src.isIdentity() || src.p->v < pathLength-1) {
+        if (src.isIdentity() || src.p->v < pathLength - 1) {
             cube.emplace_back(false);
             pathSignature(src, pathLength - 1, sigVec, cube);
             cube.pop_back();
@@ -275,7 +275,7 @@ namespace syrec {
         // create operation and corresponding decision diagram
         qc->mcx(ctrl, targetBit);
         const auto opDD = dd::getDD(*qc->back(), *dd);
-        const auto tmp = dd->multiply(to, opDD);
+        const auto tmp  = dd->multiply(to, opDD);
         dd->incRef(tmp);
         dd->decRef(to);
         to = tmp;
