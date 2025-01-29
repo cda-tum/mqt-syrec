@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
-    def __init__(self, index, width, parent=None) -> None:
+class CircuitLineItem(QtWidgets.QGraphicsItemGroup):  # type: ignore[misc]
+    def __init__(self, index: int, width: int, parent: QtWidgets.QWidget | None = None) -> None:
         QtWidgets.QGraphicsItemGroup.__init__(self, parent)
 
         # Tool Tip
@@ -27,8 +27,8 @@ class CircuitLineItem(QtWidgets.QGraphicsItemGroup):
             x += e_width
 
 
-class GateItem(QtWidgets.QGraphicsItemGroup):
-    def __init__(self, g, index, circ, parent=None) -> None:
+class GateItem(QtWidgets.QGraphicsItemGroup):  # type: ignore[misc]
+    def __init__(self, g: syrec.gate, index: int, circ: syrec.circuit, parent: QtWidgets.QWidget | None = None) -> None:
         QtWidgets.QGraphicsItemGroup.__init__(self, parent)
         self.setFlag(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
@@ -64,8 +64,8 @@ class GateItem(QtWidgets.QGraphicsItemGroup):
             self.addToGroup(control)
 
 
-class CircuitView(QtWidgets.QGraphicsView):
-    def __init__(self, circ=None, parent=None) -> None:
+class CircuitView(QtWidgets.QGraphicsView):  # type: ignore[misc]
+    def __init__(self, circ: syrec.circuit | None = None, parent: QtWidgets.QWidget | None = None) -> None:
         QtWidgets.QGraphicsView.__init__(self, parent)
 
         # Scene
@@ -80,7 +80,7 @@ class CircuitView(QtWidgets.QGraphicsView):
         if circ is not None:
             self.load(circ)
 
-    def load(self, circ):
+    def load(self, circ: syrec.circuit) -> None:
         for item in self.scene().items():
             self.scene().removeItem(item)
 
@@ -109,7 +109,9 @@ class CircuitView(QtWidgets.QGraphicsView):
             gate_item.setPos(index * 30 + 15, 0)
             self.scene().addItem(gate_item)
 
-    def add_line_label(self, x, y, text, align, color):
+    def add_line_label(
+        self, x: int, y: int, text: str, align: QtCore.Qt.AlignmentFlag, color: bool
+    ) -> QtWidgets.QGraphicsTextItem | None:
         text_item = self.scene().addText(text)
         text_item.setPlainText(text)
 
@@ -132,7 +134,7 @@ class CircuitView(QtWidgets.QGraphicsView):
         return QtWidgets.QGraphicsView.wheelEvent(self, event)
 
 
-class SyReCEditor(QtWidgets.QWidget):
+class SyReCEditor(QtWidgets.QWidget):  # type: ignore[misc]
     widget: CodeEditor | None = None
     build_successful: Callable[[syrec.circuit], None] | None = None
     build_failed: Callable[[str], None] | None = None
@@ -142,13 +144,13 @@ class SyReCEditor(QtWidgets.QWidget):
     cost_aware_synthesis = 0
     line_aware_synthesis = 0
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__()
 
         self.parent = parent
         self.setup_actions()
 
-        self.filename = str
+        self.filename: str
 
         self.title = "SyReC Simulation"
         self.left = 0
@@ -164,7 +166,7 @@ class SyReCEditor(QtWidgets.QWidget):
         self.layout.addWidget(self.table)
         self.setLayout(self.layout)
 
-    def setup_actions(self):
+    def setup_actions(self) -> None:
         self.open_action = QtGui.QAction(QtGui.QIcon.fromTheme("document-open"), "&Open...", self.parent)
         self.build_action = QtGui.QAction(QtGui.QIcon.fromTheme("media-playback-start"), "&Build...", self.parent)
         self.sim_action = QtGui.QAction(
@@ -222,7 +224,7 @@ class SyReCEditor(QtWidgets.QWidget):
                 # making other check box to uncheck
                 self.buttonCostAware.setChecked(True)
 
-    def write_editor_contents_to_file(self):
+    def write_editor_contents_to_file(self) -> None:
         data = QtCore.QFile("/tmp/out.src")  # noqa: S108
         if data.open(QtCore.QFile.OpenModeFlag.WriteOnly | QtCore.QFile.OpenModeFlag.Truncate):
             out = QtCore.QTextStream(data)
@@ -232,15 +234,13 @@ class SyReCEditor(QtWidgets.QWidget):
 
         data.close()
 
-        return
-
-    def open_file(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(
+    def open_file(self) -> None:
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             parent=self.parent, caption="Open Specification", filter="SyReC specification (*.src)"
         )
         self.load(filename)
 
-    def load(self, filename):
+    def load(self, filename: str) -> None:
         if filename:
             self.filename = filename
 
@@ -249,7 +249,7 @@ class SyReCEditor(QtWidgets.QWidget):
                 ts = QtCore.QTextStream(f)
                 self.setText(ts.readAll())
 
-    def build(self):
+    def build(self) -> None:
         if self.before_build is not None:
             self.before_build()
 
@@ -291,7 +291,7 @@ class SyReCEditor(QtWidgets.QWidget):
         if self.build_successful is not None:
             self.build_successful(self.circ)
 
-    def stat(self):
+    def stat(self) -> None:
         gates = self.circ.num_gates
         lines = self.circ.lines
 
@@ -310,7 +310,7 @@ class SyReCEditor(QtWidgets.QWidget):
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         msg.exec()
 
-    def sim(self):
+    def sim(self) -> None:
         bit_mask = 0
         bit1_mask = 0
 
@@ -403,8 +403,8 @@ class SyReCEditor(QtWidgets.QWidget):
         self.show()
 
 
-class SyReCHighlighter(QtGui.QSyntaxHighlighter):
-    def __init__(self, parent) -> None:
+class SyReCHighlighter(QtGui.QSyntaxHighlighter):  # type: ignore[misc]
+    def __init__(self, parent: QtGui.QTextDocument) -> None:
         QtGui.QSyntaxHighlighter.__init__(self, parent)
 
         self.highlightingRules = []
@@ -470,19 +470,19 @@ class QtSyReCEditor(SyReCEditor):
         return self.widget.toPlainText()
 
 
-class LineNumberArea(QtWidgets.QWidget):
-    def __init__(self, editor) -> None:
+class LineNumberArea(QtWidgets.QWidget):  # type: ignore[misc]
+    def __init__(self, editor: CodeEditor) -> None:
         QtWidgets.QWidget.__init__(self, editor)
         self.codeEditor = editor
 
-    def sizeHint(self):  # noqa: N802
+    def sizeHint(self) -> QtCore.QSize:  # noqa: N802
         return QtCore.QSize(self.codeEditor.lineNumberAreaWidth(), 0)
 
-    def paintEvent(self, event):  # noqa: N802
+    def paintEvent(self, event: QtGui.QPaintEvent) -> None:  # noqa: N802
         self.codeEditor.lineNumberAreaPaintEvent(event)
 
 
-class CodeEditor(QtWidgets.QPlainTextEdit):
+class CodeEditor(QtWidgets.QPlainTextEdit):  # type: ignore[misc]
     def __init__(self, parent: Any | None = None) -> None:
         QtWidgets.QPlainTextEdit.__init__(self, parent)
 
@@ -495,12 +495,12 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
         self.updateLineNumberAreaWidth()
         self.highlightCurrentLine()
 
-    def load(self, filename):
+    def load(self, filename: str) -> None:
         if len(filename) > 0:
             with Path(filename).open(encoding="utf-8") as f:
                 self.setPlainText(f.read())
 
-    def lineNumberAreaPaintEvent(self, event):  # noqa: N802
+    def lineNumberAreaPaintEvent(self, event: QtGui.QPaintEvent) -> None:  # noqa: N802
         painter = QtGui.QPainter(self.lineNumberArea)
         painter.fillRect(event.rect(), QtGui.QColorConstants.LightGray)
 
@@ -527,25 +527,25 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             bottom = top + self.blockBoundingGeometry(block).height()
             block_number += 1
 
-    def lineNumberAreaWidth(self):  # noqa: N802
+    def lineNumberAreaWidth(self) -> int:  # noqa: N802
         digits = 1
         max_ = max(1, self.blockCount())
         while max_ >= 10:
             max_ /= 10
             digits += 1
 
-        return 3 + self.fontMetrics().horizontalAdvance("9") * digits
+        return cast("int", 3 + self.fontMetrics().horizontalAdvance("9") * digits)
 
-    def resizeEvent(self, event):  # noqa: N802
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:  # noqa: N802
         QtWidgets.QPlainTextEdit.resizeEvent(self, event)
 
         cr = self.contentsRect()
         self.lineNumberArea.setGeometry(QtCore.QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
 
-    def updateLineNumberAreaWidth(self):  # noqa: N802
+    def updateLineNumberAreaWidth(self) -> None:  # noqa: N802
         self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
 
-    def highlightCurrentLine(self):  # noqa: N802
+    def highlightCurrentLine(self) -> None:  # noqa: N802
         extra_selections = []
 
         if not self.isReadOnly():
@@ -561,7 +561,7 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
 
         self.setExtraSelections(extra_selections)
 
-    def updateLineNumberArea(self, rect, dy):  # noqa: N802
+    def updateLineNumberArea(self, rect: QtCore.QRect, dy: int) -> None:  # noqa: N802
         if dy != 0:
             self.lineNumberArea.scroll(0, dy)
         else:
@@ -571,20 +571,20 @@ class CodeEditor(QtWidgets.QPlainTextEdit):
             self.updateLineNumberAreaWidth()
 
 
-class LogWidget(QtWidgets.QTreeWidget):
-    def __init__(self, parent=None) -> None:
+class LogWidget(QtWidgets.QTreeWidget):  # type: ignore[misc]
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         QtWidgets.QTreeWidget.__init__(self, parent)
 
         self.setRootIsDecorated(False)
         self.setHeaderLabels(["Message"])
 
-    def addMessage(self, message):  # noqa: N802
+    def addMessage(self, message: str) -> None:  # noqa: N802
         item = QtWidgets.QTreeWidgetItem([message])
         self.addTopLevelItem(item)
 
 
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None) -> None:
+class MainWindow(QtWidgets.QMainWindow):  # type: ignore[misc]
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         QtWidgets.QWidget.__init__(self, parent)
 
         self.setWindowTitle("SyReC Editor")
@@ -638,7 +638,7 @@ def main() -> int:
     w = MainWindow()
     w.show()
 
-    return a.exec()
+    return cast("int", a.exec())
 
 
 if __name__ == "__main__":

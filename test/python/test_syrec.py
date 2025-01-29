@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -36,7 +37,7 @@ def data_cost_aware_simulation():
         return json.load(f)
 
 
-def test_parser(data_line_aware_synthesis) -> None:
+def test_parser(data_line_aware_synthesis: dict[str, Any]) -> None:
     for file_name in data_line_aware_synthesis:
         prog = syrec.program()
         error = prog.read(str(circuit_dir / (file_name + ".src")))
@@ -44,7 +45,7 @@ def test_parser(data_line_aware_synthesis) -> None:
         assert not error
 
 
-def test_synthesis_no_lines(data_line_aware_synthesis) -> None:
+def test_synthesis_no_lines(data_line_aware_synthesis: dict[str, Any]) -> None:
     for file_name in data_line_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -58,7 +59,7 @@ def test_synthesis_no_lines(data_line_aware_synthesis) -> None:
         assert data_line_aware_synthesis[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_synthesis_add_lines(data_cost_aware_synthesis) -> None:
+def test_synthesis_add_lines(data_cost_aware_synthesis: dict[str, Any]) -> None:
     for file_name in data_cost_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -72,7 +73,7 @@ def test_synthesis_add_lines(data_cost_aware_synthesis) -> None:
         assert data_cost_aware_synthesis[file_name]["transistor_costs"] == circ.transistor_cost()
 
 
-def test_simulation_no_lines(data_line_aware_simulation) -> None:
+def test_simulation_no_lines(data_line_aware_simulation: dict[str, Any]) -> None:
     for file_name in data_line_aware_simulation:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -92,7 +93,7 @@ def test_simulation_no_lines(data_line_aware_simulation) -> None:
         assert data_line_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
 
 
-def test_simulation_add_lines(data_cost_aware_simulation) -> None:
+def test_simulation_add_lines(data_cost_aware_simulation: dict[str, Any]) -> None:
     for file_name in data_cost_aware_simulation:
         circ = syrec.circuit()
         prog = syrec.program()
@@ -112,7 +113,7 @@ def test_simulation_add_lines(data_cost_aware_simulation) -> None:
         assert data_cost_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
 
 
-def test_no_lines_to_qasm(data_line_aware_synthesis) -> None:
+def test_no_lines_to_qasm(data_line_aware_synthesis: dict[str, Any]) -> None:
     for file_name in data_line_aware_synthesis:
         circ = syrec.circuit()
         prog = syrec.program()
