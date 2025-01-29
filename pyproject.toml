@@ -265,7 +265,7 @@ manylinux-s390x-image = "manylinux_2_28"
 
 [tool.cibuildwheel.linux]
 before-all = [
-    "curl -L -O https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz",
+    "curl -L -O https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz",
     "tar -xzf boost_1_*",
     "cd boost_1_*/",
     "./bootstrap.sh",
