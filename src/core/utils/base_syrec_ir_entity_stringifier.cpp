@@ -379,7 +379,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, syrec::
             outputStream << "/";
             break;
         case syrec::BinaryExpression::BinaryOperation::Equals:
-            outputStream << "==";
+            outputStream << "=";
             break;
         case syrec::BinaryExpression::BinaryOperation::Exor:
             outputStream << "^";

@@ -23,7 +23,8 @@ namespace syrecParser {
         ValueOfLoopVariableNotUsableInItsInitialValueDeclaration,
         ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts,
         DeclaredVariableBitwidthTooLarge,
-        InfiniteLoopDetected
+        InfiniteLoopDetected,
+        UnhandledOperationFromGrammarInParser
     };
 
     /// Get the identifier associated with a given semantic error
@@ -54,6 +55,7 @@ namespace syrecParser {
             case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
             case SemanticError::DeclaredVariableBitwidthTooLarge:
             case SemanticError::InfiniteLoopDetected:
+            case SemanticError::UnhandledOperationFromGrammarInParser:
                 return "TEST";
             default:
                 return "";
@@ -110,6 +112,8 @@ namespace syrecParser {
                 return "Declared variable bitwidth {:d} exceeds the maximum supported variable bitwidth of {:d} bits";
             case SemanticError::InfiniteLoopDetected:
                 return "Loop iterating from start value {:d} to {:d} with a stepsize of {:d} will perform an infinite number of iterations";
+            case SemanticError::UnhandledOperationFromGrammarInParser:
+                return "While the grammar accepted the operation '{:s}', the parser could not handle it! This is most likely an error in the latter.";
             default:
                 return "";
         }

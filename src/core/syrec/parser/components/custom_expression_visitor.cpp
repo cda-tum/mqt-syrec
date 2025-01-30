@@ -35,9 +35,13 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     if (!context)
         return std::nullopt;
 
-    const std::optional<syrec::Expression::ptr>                   lhsOperand              = visitExpressionTyped(context->lhsOperand);
+    const std::optional<syrec::Expression::ptr> lhsOperand = visitExpressionTyped(context->lhsOperand);
+    // TODO: Errors when no handling of binary operation is defined in parser while grammar accepts operation
     const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
-    const std::optional<syrec::Expression::ptr>                   rhsOperand              = visitExpressionTyped(context->rhsOperand);
+    if (context->binaryOperation && !mappedToBinaryOperation.has_value())
+        recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->binaryOperation), context->binaryOperation->getText());
+
+    const std::optional<syrec::Expression::ptr> rhsOperand = visitExpressionTyped(context->rhsOperand);
 
     if (!mappedToBinaryOperation.has_value())
         return std::nullopt;
@@ -61,7 +65,10 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
 
     std::optional<syrec::Expression::ptr>                       toBeShiftedOperand     = visitExpressionTyped(context->expression());
     const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
-    const std::optional<syrec::Number::ptr>                     shiftAmount            = visitNumberTyped(context->number());
+    if (context->shiftOperation && !mappedToShiftOperation.has_value())
+        recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->shiftOperation), context->shiftOperation->getText());
+
+    const std::optional<syrec::Number::ptr> shiftAmount = visitNumberTyped(context->number());
 
     if (!mappedToShiftOperation.has_value())
         return std::nullopt;
@@ -140,7 +147,10 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
 
     std::optional<syrec::Number::ptr>                                 lhsOperand = visitNumberTyped(context->lhsOperand);
     const std::optional<syrec::Number::ConstantExpression::Operation> operation  = context->op ? deserializeConstantExpressionOperationFromString(context->op->getText()) : std::nullopt;
-    std::optional<syrec::Number::ptr>                                 rhsOperand = visitNumberTyped(context->rhsOperand);
+    if (context->op && !operation.has_value())
+        recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->op), context->op->getText());
+
+    std::optional<syrec::Number::ptr> rhsOperand = visitNumberTyped(context->rhsOperand);
 
     const std::optional<unsigned int> evaluationResultOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? lhsOperand->get()->tryEvaluate({}) : std::nullopt;
     const std::optional<unsigned int> evaluationResultOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? rhsOperand->get()->tryEvaluate({}) : std::nullopt;
@@ -453,7 +463,7 @@ std::optional<syrec::BinaryExpression::BinaryOperation> CustomExpressionVisitor:
         return syrec::BinaryExpression::BinaryOperation::LessThan;
     if (stringifiedOperation == ">")
         return syrec::BinaryExpression::BinaryOperation::GreaterThan;
-    if (stringifiedOperation == "==")
+    if (stringifiedOperation == "=")
         return syrec::BinaryExpression::BinaryOperation::Equals;
     if (stringifiedOperation == "!=")
         return syrec::BinaryExpression::BinaryOperation::NotEquals;
