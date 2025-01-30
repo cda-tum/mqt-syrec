@@ -195,7 +195,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     else if (iterationRangeEndValue.has_value())
         generatedForStatement->range = std::make_pair(std::make_shared<syrec::Number>(0), *iterationRangeEndValue);
 
-    generatedForStatement->step = iterationRangeStartValue.value_or(std::make_shared<syrec::Number>(1));
+    generatedForStatement->step = iterationRangeStepSizeValue.value_or(std::make_shared<syrec::Number>(1));
 
     if (const std::optional<unsigned int> evaluatedValueOfStepsize = iterationRangeStepSizeValue.has_value() ? iterationRangeStepSizeValue.value()->tryEvaluate({}) : std::nullopt; 
         ctx->endValue && evaluatedValueOfStepsize.has_value() && !*evaluatedValueOfStepsize 
