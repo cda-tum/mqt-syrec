@@ -42,6 +42,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && (!programModule.variables.empty() ? appendNewlineToStream(outputStream) : true)
         && incrementIdentationLevel()
         && stringify(outputStream, programModule.variables, !additionalFormattingOptions.omitVariableTypeSharedBySequenceOfLocalVariables)
+        && appendNewlineToStream(outputStream)
         && stringify(outputStream, programModule.statements)
         && decrementIdentationLevel();
 }
@@ -130,7 +131,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && (forStatement.range.first != forStatement.range.second ? stringify(outputStream, *forStatement.range.second) : true)
         && appendToStream(outputStream, " " + stepKeywordIdent + " ")
         && stringify(outputStream, *forStatement.step) && appendToStream(outputStream, " " + doKeywordIdent)
-        && incrementIdentationLevel()
+        && appendNewlineToStream(outputStream) && incrementIdentationLevel()
         && stringify(outputStream, forStatement.statements)
         && appendNewlineToStream(outputStream) && decrementIdentationLevel()
         && appendIdentationPaddingSequence(outputStream, indentationSequence) && appendToStream(outputStream, rofKeywordIdent);
@@ -141,15 +142,15 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         return setStreamInFailedState(outputStream);
 
     return ifStatement.condition && ifStatement.fiCondition
-        && appendToStream(outputStream, ifKeywordIdent + " ") && stringify(outputStream, *ifStatement.condition)
+        && appendToStream(outputStream, ifKeywordIdent + " ") && stringify(outputStream, *ifStatement.condition) && appendToStream(outputStream, " " + thenKeywordIdent)
         && appendNewlineToStream(outputStream) && incrementIdentationLevel()
         && stringify(outputStream, ifStatement.thenStatements) && decrementIdentationLevel()
         && appendNewlineToStream(outputStream) && decrementIdentationLevel() && appendIdentationPaddingSequence(outputStream, indentationSequence)
         && appendToStream(outputStream, elseKeywordIdent)
         && appendNewlineToStream(outputStream) && incrementIdentationLevel() 
-        && stringify(outputStream, ifStatement.elseStatements) 
-        && appendIdentationPaddingSequence(outputStream, indentationSequence) && decrementIdentationLevel()
-        && stringify(outputStream, *ifStatement.fiCondition);
+        && stringify(outputStream, ifStatement.elseStatements)
+        && appendNewlineToStream(outputStream) && decrementIdentationLevel() && appendIdentationPaddingSequence(outputStream, indentationSequence)
+        && appendToStream(outputStream, fiKeywordIdent + " ") && stringify(outputStream, *ifStatement.fiCondition);
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::SwapStatement& swapStatement) const {
@@ -326,11 +327,12 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     const auto& lastStatementWithSemicolonPostfix = std::prev(statements.cend());
     for (auto statementIterator = firstStatementWithSemicolonPostfix; stringificationSuccessful && statementIterator != lastStatementWithSemicolonPostfix; ++statementIterator)
         stringificationSuccessful &= *statementIterator
-            && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence)
-            && stringify(outputStream, *statementIterator) && appendToStream(outputStream, ';');
+            && appendIdentationPaddingSequence(outputStream, indentationSequence)
+            && stringify(outputStream, *statementIterator) && appendToStream(outputStream, ';')
+            && appendNewlineToStream(outputStream);
 
     stringificationSuccessful &= statements.back()
-        && appendNewlineToStream(outputStream) && appendIdentationPaddingSequence(outputStream, indentationSequence) && stringify(outputStream, statements.back());
+        && appendIdentationPaddingSequence(outputStream, indentationSequence) && stringify(outputStream, statements.back());
 
     return stringificationSuccessful;
 }
