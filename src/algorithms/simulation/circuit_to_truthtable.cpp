@@ -1,6 +1,13 @@
 #include "algorithms/simulation/circuit_to_truthtable.hpp"
 
+#include "core/truthTable/truth_table.hpp"
+#include "dd/Package.hpp"
 #include "dd/Simulation.hpp"
+#include "ir/QuantumComputation.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <memory>
 
 namespace syrec {
 

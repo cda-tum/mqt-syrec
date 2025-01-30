@@ -1,5 +1,13 @@
 #include "core/truthTable/truth_table.hpp"
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <map>
+#include <utility>
+#include <vector>
+
 namespace syrec {
 
     auto TruthTable::Cube::completeCubes() const -> Vector {

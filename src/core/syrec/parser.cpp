@@ -1,9 +1,25 @@
 #include "core/syrec/parser.hpp"
 
-#include <fstream>
+#include "core/syrec/expression.hpp"
+#include "core/syrec/grammar.hpp"
+#include "core/syrec/module.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
+
+#include <algorithm>
+#include <boost/fusion/sequence/intrinsic/at.hpp>
+#include <boost/variant/detail/apply_visitor_unary.hpp>
+#include <boost/variant/recursive_wrapper.hpp>
+#include <cassert>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <set>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace syrec {
 
@@ -17,7 +33,7 @@ namespace syrec {
         }
 
         Number::ptr operator()(const boost::recursive_wrapper<ast_variable>& astVar) const {
-            Variable::ptr var = proc.findParameterOrVariable(astVar.get().name);
+            const auto var = proc.findParameterOrVariable(astVar.get().name);
             if (!var) {
                 context.errorMessage = "Unknown variable " + astVar.get().name;
                 return {};
@@ -35,9 +51,9 @@ namespace syrec {
         }
 
         Number::ptr operator()(const boost::recursive_wrapper<ast_number_expression>& astNe) const {
-            ast_number  astNo1 = astNe.get().operand1;
-            std::string astOp  = astNe.get().op;
-            ast_number  astNo2 = astNe.get().operand2;
+            const auto& astNo1 = astNe.get().operand1;
+            const auto& astOp  = astNe.get().op;
+            const auto& astNo2 = astNe.get().operand2;
 
             unsigned op = 0U;
             if (astOp == "+") {
@@ -74,20 +90,19 @@ namespace syrec {
                 op = NumericExpression::NotEquals;
             }
 
-            Number::ptr lhs = parseNumber(astNo1, proc, context);
+            const auto& lhs = parseNumber(astNo1, proc, context);
             if (!lhs) {
                 return {};
             }
 
-            Number::ptr rhs = parseNumber(astNo2, proc, context);
+            const auto& rhs = parseNumber(astNo2, proc, context);
             if (!rhs) {
                 return {};
             }
-            unsigned num = 0;
             if (lhs->isConstant() && rhs->isConstant()) {
-                unsigned lhsValue = lhs->evaluate(Number::loop_variable_mapping());
-                unsigned rhsValue = rhs->evaluate(Number::loop_variable_mapping());
-                unsigned numValue = 0;
+                const auto lhsValue = lhs->evaluate(Number::loop_variable_mapping());
+                const auto rhsValue = rhs->evaluate(Number::loop_variable_mapping());
+                unsigned   numValue = 0;
 
                 switch (op) {
                     case NumericExpression::Add: // +
@@ -171,12 +186,12 @@ namespace syrec {
 
                 return std::make_shared<Number>(numValue);
             }
-            return std::make_shared<Number>(num);
+            return std::make_shared<Number>(0);
         }
 
     private:
-        const Module&  proc;
-        ParserContext& context;
+        const Module&  proc;    // NOLINT(*-avoid-const-or-ref-data-members)
+        ParserContext& context; // NOLINT(*-avoid-const-or-ref-data-members)
     };
 
     Number::ptr parseNumber(const ast_number& astNum, const Module& proc, ParserContext& context) {
@@ -184,7 +199,7 @@ namespace syrec {
     }
 
     VariableAccess::ptr parseVariableAccess(const ast_variable& astVar, const Module& proc, ParserContext& context) {
-        Variable::ptr var = proc.findParameterOrVariable(astVar.name);
+        const auto& var = proc.findParameterOrVariable(astVar.name);
 
         if (!var) {
             context.errorMessage = "Unknown variable %s" + astVar.name;
@@ -196,16 +211,15 @@ namespace syrec {
 
         std::optional<std::pair<Number::ptr, Number::ptr>> varRange;
 
-        ast_range range = astVar.range;
-        if (range) {
-            Number::ptr first = parseNumber(boost::fusion::at_c<0>(*range), proc, context);
+        if (const auto& range = astVar.range) {
+            const auto& first = parseNumber(boost::fusion::at_c<0>(*range), proc, context);
             if (!first) {
                 return {};
             }
 
             // is in range?
             if (!first->isLoopVariable()) {
-                unsigned bound = first->evaluate(Number::loop_variable_mapping());
+                const auto bound = first->evaluate(Number::loop_variable_mapping());
                 if (bound >= var->bitwidth) {
                     context.errorMessage = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                     return {};
@@ -222,7 +236,7 @@ namespace syrec {
 
                 // is in range?
                 if (!second->isLoopVariable()) {
-                    unsigned bound = second->evaluate(Number::loop_variable_mapping());
+                    const auto bound = second->evaluate(Number::loop_variable_mapping());
                     if (bound >= var->bitwidth) {
                         context.errorMessage = "Bound " + std::to_string(bound) + " out of range in variable " + var->name + "(" + std::to_string(var->bitwidth) + ")";
                         return {};
@@ -243,7 +257,7 @@ namespace syrec {
 
         Expression::vec indexes;
         for (const ast_expression& astExp: astVar.indexes) {
-            Expression::ptr index = parseExpression(astExp, proc, var->bitwidth, context);
+            const auto index = parseExpression(astExp, proc, var->bitwidth, context);
             if (!index) {
                 return {};
             }
@@ -261,7 +275,7 @@ namespace syrec {
             context(context) {}
 
         Expression* operator()(const ast_number& astNum) const {
-            Number::ptr num = parseNumber(astNum, proc, context);
+            const auto num = parseNumber(astNum, proc, context);
             if (!num) {
                 return nullptr;
             }
@@ -269,7 +283,7 @@ namespace syrec {
         }
 
         Expression* operator()(const ast_variable& astVar) const {
-            VariableAccess::ptr access = parseVariableAccess(astVar, proc, context);
+            const auto access = parseVariableAccess(astVar, proc, context);
             if (!access) {
                 return nullptr;
             }
@@ -277,9 +291,9 @@ namespace syrec {
         }
 
         Expression* operator()(const ast_binary_expression& astExp) const {
-            ast_expression astExp1 = astExp.operand1;
-            std::string    astOp   = astExp.op;
-            ast_expression astExp2 = astExp.operand2;
+            const auto& astExp1 = astExp.operand1;
+            const auto& astOp   = astExp.op;
+            const auto& astExp2 = astExp.operand2;
 
             unsigned op = 0U;
             if (astOp == "+") {
@@ -318,12 +332,12 @@ namespace syrec {
                 op = BinaryExpression::GreaterEquals;
             }
 
-            Expression::ptr lhs = parseExpression(astExp1, proc, 0U, context);
+            const auto& lhs = parseExpression(astExp1, proc, 0U, context);
             if (!lhs) {
                 return nullptr;
             }
 
-            Expression::ptr rhs = parseExpression(astExp2, proc, lhs->bitwidth(), context);
+            const auto& rhs = parseExpression(astExp2, proc, lhs->bitwidth(), context);
             if (!rhs) {
                 return nullptr;
             }
@@ -332,9 +346,9 @@ namespace syrec {
         }
 
         Expression* operator()(const ast_shift_expression& astExp) const {
-            ast_expression astExp1 = astExp.operand1;
-            std::string    astOp   = astExp.op;
-            ast_number     astNum  = astExp.operand2;
+            const auto& astExp1 = astExp.operand1;
+            const auto& astOp   = astExp.op;
+            const auto& astNum  = astExp.operand2;
 
             unsigned op = 0U;
             if (astOp == "<<") {
@@ -343,21 +357,21 @@ namespace syrec {
                 op = ShiftExpression::Right;
             }
 
-            Expression::ptr lhs = parseExpression(astExp1, proc, bitwidth, context);
+            const auto& lhs = parseExpression(astExp1, proc, bitwidth, context);
             if (!lhs) {
                 return nullptr;
             }
 
-            Number::ptr rhs = parseNumber(astNum, proc, context);
+            const auto& rhs = parseNumber(astNum, proc, context);
             if (!rhs) {
                 return nullptr;
             }
 
             if (auto const* lhsNo = dynamic_cast<NumericExpression*>(lhs.get())) {
                 if (lhsNo->value->isConstant() && rhs->isConstant()) {
-                    unsigned value   = lhsNo->value->evaluate(Number::loop_variable_mapping());
-                    unsigned shftAmt = rhs->evaluate(Number::loop_variable_mapping());
-                    unsigned result  = 0;
+                    const auto& value   = lhsNo->value->evaluate(Number::loop_variable_mapping());
+                    const auto& shftAmt = rhs->evaluate(Number::loop_variable_mapping());
+                    unsigned    result  = 0;
 
                     switch (op) {
                         case ShiftExpression::Left: // <<
@@ -371,7 +385,7 @@ namespace syrec {
                         } break;
 
                         default:
-                            std::cerr << "Invalid operator in shift expression" << std::endl;
+                            std::cerr << "Invalid operator in shift expression\n";
                             assert(false);
                     }
                     return new NumericExpression(std::make_shared<Number>(result), lhs->bitwidth());
@@ -382,9 +396,9 @@ namespace syrec {
         }
 
     private:
-        const Module&  proc;
+        const Module&  proc; // NOLINT(*-avoid-const-or-ref-data-members)
         unsigned       bitwidth;
-        ParserContext& context;
+        ParserContext& context; // NOLINT(*-avoid-const-or-ref-data-members)
     };
 
     Expression::ptr parseExpression(const ast_expression& astExp, const Module& proc, unsigned bitwidth, ParserContext& context) {
@@ -398,20 +412,20 @@ namespace syrec {
             context(context) {}
 
         Statement::ptr operator()(const ast_swap_statement& astSwapStat) const {
-            const ast_variable& astVar1 = boost::fusion::at_c<0>(astSwapStat);
-            const ast_variable& astVar2 = boost::fusion::at_c<1>(astSwapStat);
+            const auto& astVar1 = boost::fusion::at_c<0>(astSwapStat);
+            const auto& astVar2 = boost::fusion::at_c<1>(astSwapStat);
 
-            VariableAccess::ptr va1 = parseVariableAccess(astVar1, proc, context);
+            const auto& va1 = parseVariableAccess(astVar1, proc, context);
             if (!va1) {
                 return nullptr;
             }
-            VariableAccess::ptr va2 = parseVariableAccess(astVar2, proc, context);
+            const auto& va2 = parseVariableAccess(astVar2, proc, context);
             if (!va2) {
                 return nullptr;
             }
 
             if (va1->bitwidth() != va2->bitwidth()) {
-                std::cerr << "Different bit-widths in <=> statement: " + va1->getVar()->name + " (" + std::to_string(va1->bitwidth()) + "), " + va2->getVar()->name + " (" + std::to_string(va2->bitwidth()) + ")" << std::endl;
+                std::cerr << "Different bit-widths in ↔ statement: " + va1->getVar()->name + " (" + std::to_string(va1->bitwidth()) + "), " + va2->getVar()->name + " (" + std::to_string(va2->bitwidth()) + ")\n";
                 assert(false);
                 return nullptr;
             }
@@ -420,10 +434,10 @@ namespace syrec {
         }
 
         Statement::ptr operator()(const ast_unary_statement& astUnaryStat) const {
-            const std::string&  astOp  = boost::fusion::at_c<0>(astUnaryStat);
-            const ast_variable& astVar = boost::fusion::at_c<1>(astUnaryStat);
+            const auto& astOp  = boost::fusion::at_c<0>(astUnaryStat);
+            const auto& astVar = boost::fusion::at_c<1>(astUnaryStat);
 
-            VariableAccess::ptr var = parseVariableAccess(astVar, proc, context);
+            const auto& var = parseVariableAccess(astVar, proc, context);
             if (!var) {
                 return nullptr;
             }
@@ -442,19 +456,25 @@ namespace syrec {
         }
 
         Statement::ptr operator()(const ast_assign_statement& astAssignStat) const {
-            const ast_variable&   astVar = boost::fusion::at_c<0>(astAssignStat);
-            char                  astOp  = boost::fusion::at_c<1>(astAssignStat);
-            const ast_expression& astExp = boost::fusion::at_c<2>(astAssignStat);
+            const auto& astVar = boost::fusion::at_c<0>(astAssignStat);
+            const auto& astOp  = boost::fusion::at_c<1>(astAssignStat);
+            const auto& astExp = boost::fusion::at_c<2>(astAssignStat);
 
-            VariableAccess::ptr lhs = parseVariableAccess(astVar, proc, context);
+            const auto& lhs = parseVariableAccess(astVar, proc, context);
             if (!lhs) {
                 return nullptr;
             }
 
-            unsigned op = astOp == '+' ? AssignStatement::Add :
-                                         (astOp == '-' ? AssignStatement::Subtract : AssignStatement::Exor);
+            unsigned op{};
+            if (astOp == '+') {
+                op = AssignStatement::Add;
+            } else if (astOp == '-') {
+                op = AssignStatement::Subtract;
+            } else {
+                op = AssignStatement::Exor;
+            }
 
-            Expression::ptr rhs = parseExpression(astExp, proc, lhs->bitwidth(), context);
+            const auto& rhs = parseExpression(astExp, proc, lhs->bitwidth(), context);
             if (!rhs) {
                 return nullptr;
             }
@@ -470,20 +490,20 @@ namespace syrec {
         Statement::ptr operator()(const ast_if_statement& astIfStat) const {
             auto ifStat = std::make_shared<IfStatement>();
 
-            Expression::ptr condition = parseExpression(astIfStat.condition, proc, 1U, context);
+            const auto& condition = parseExpression(astIfStat.condition, proc, 1U, context);
             if (!condition) {
                 return nullptr;
             }
             ifStat->setCondition(condition);
 
-            Expression::ptr fiCondition = parseExpression(astIfStat.fiCondition, proc, 1U, context);
+            const auto& fiCondition = parseExpression(astIfStat.fiCondition, proc, 1U, context);
             if (!fiCondition) {
                 return nullptr;
             }
             ifStat->setFiCondition(fiCondition);
 
             for (const ast_statement& astStat: astIfStat.ifStatement) {
-                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                const auto& stat = parseStatement(astStat, prog, proc, context);
                 if (!stat) {
                     return nullptr;
                 }
@@ -491,7 +511,7 @@ namespace syrec {
             }
 
             for (const ast_statement& astStat: astIfStat.elseStatement) {
-                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                const auto& stat = parseStatement(astStat, prog, proc, context);
                 if (!stat) {
                     return nullptr;
                 }
@@ -505,7 +525,7 @@ namespace syrec {
             auto forStat = std::make_shared<ForStatement>();
 
             Number::ptr from;
-            Number::ptr to = parseNumber(astForStat.to, proc, context);
+            const auto& to = parseNumber(astForStat.to, proc, context);
             if (!to) {
                 return nullptr;
             }
@@ -537,7 +557,7 @@ namespace syrec {
 
             // step
             for (const ast_statement& astStat: astForStat.doStatement) {
-                Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+                const auto& stat = parseStatement(astStat, prog, proc, context);
                 if (!stat) {
                     return nullptr;
                 }
@@ -553,8 +573,8 @@ namespace syrec {
         }
 
         Statement::ptr operator()(const ast_call_statement& astCallStat) const {
-            std::string procName  = boost::fusion::at_c<1>(astCallStat);
-            Module::ptr otherProc = prog.findModule(procName);
+            const auto& procName  = boost::fusion::at_c<1>(astCallStat);
+            const auto& otherProc = prog.findModule(procName);
 
             // found no module
             if (!static_cast<bool>(otherProc.get())) {
@@ -580,8 +600,8 @@ namespace syrec {
 
             // check whether bit-width fits
             for (unsigned i = 0; i < parameters.size(); ++i) {
-                Variable::ptr vOther    = otherProc->parameters.at(i);
-                Variable::ptr parameter = proc.findParameterOrVariable(parameters.at(i)); // must exist (see above)
+                const auto& vOther    = otherProc->parameters.at(i);
+                const auto& parameter = proc.findParameterOrVariable(parameters.at(i)); // must exist (see above)
 
                 if (vOther->bitwidth != parameter->bitwidth) {
                     context.errorMessage = std::to_string(i + 1) + ". parameter (" + parameters.at(i) + ") in (un)call of " + otherProc->name + " has bit-width of " + std::to_string(parameter->bitwidth) + ", but " + std::to_string(vOther->bitwidth) + " is required";
@@ -600,9 +620,9 @@ namespace syrec {
         }
 
     private:
-        const Program& prog;
-        const Module&  proc;
-        ParserContext& context;
+        const Program& prog;    // NOLINT(*-avoid-const-or-ref-data-members)
+        const Module&  proc;    // NOLINT(*-avoid-const-or-ref-data-members)
+        ParserContext& context; // NOLINT(*-avoid-const-or-ref-data-members)
     };
 
     Statement::ptr parseStatement(const ast_statement& astStat, const Program& prog, const Module& proc, ParserContext& context) {
@@ -647,7 +667,7 @@ namespace syrec {
             }
             variableNames.emplace(variableName);
 
-            unsigned type = parseVariableType(boost::fusion::at_c<0>(astParam));
+            const auto& type = parseVariableType(boost::fusion::at_c<0>(astParam));
             proc.addParameter(std::make_shared<Variable>(
                     type,
                     variableName,
@@ -656,7 +676,7 @@ namespace syrec {
         }
 
         for (const ast_statement& astStat: boost::fusion::at_c<3>(astProc)) {
-            Statement::ptr stat = parseStatement(astStat, prog, proc, context);
+            const auto& stat = parseStatement(astStat, prog, proc, context);
             if (!stat) {
                 return false;
             }
@@ -666,10 +686,10 @@ namespace syrec {
         return true;
     }
 
-    bool Program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error) {
+    bool Program::readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string& error) {
         ast_program astProg;
         if (!parseString(astProg, content)) {
-            *error = "PARSE_STRING_FAILED";
+            error = "PARSE_STRING_FAILED";
             return false;
         }
 
@@ -678,11 +698,9 @@ namespace syrec {
 
         // Modules
         for (const ast_module& astProc: astProg) {
-            Module::ptr proc(std::make_shared<Module>(boost::fusion::at_c<0>(astProc)));
+            const auto& proc(std::make_shared<Module>(boost::fusion::at_c<0>(astProc)));
             if (!parseModule(*proc, astProc, *this, context)) {
-                if (error != nullptr) {
-                    *error = "In line " + std::to_string(context.currentLineNumber) + ": " + context.errorMessage;
-                }
+                error = "In line " + std::to_string(context.currentLineNumber) + ": " + context.errorMessage;
                 return false;
             }
             addModule(proc);

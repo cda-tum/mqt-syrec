@@ -59,8 +59,8 @@ namespace syrec {
         *
         * @return true if parsing was successful, otherwise false
         */
-        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
-        bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string* error);
+        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string& error);
+        bool readProgramFromString(const std::string& content, const ReadProgramSettings& settings, std::string& error);
     };
 
 } // namespace syrec

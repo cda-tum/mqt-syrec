@@ -2,7 +2,7 @@
 
 namespace syrec {
 
-    bool Program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string* error) {
+    bool Program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string& error) {
         std::string content;
         std::string line;
 
@@ -17,8 +17,7 @@ namespace syrec {
     }
 
     std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
-        std::string errorMessage;
-        if (!(readFile(filename, settings, &errorMessage))) {
+        if (std::string errorMessage; !(readFile(filename, settings, errorMessage))) {
             return errorMessage;
         }
         return {};
