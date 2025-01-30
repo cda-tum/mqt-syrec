@@ -35,27 +35,42 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     if (!context)
         return std::nullopt;
 
-    const std::optional<syrec::Expression::ptr> lhsOperand = visitExpressionTyped(context->lhsOperand);
-    // TODO: Errors when no handling of binary operation is defined in parser while grammar accepts operation
+    std::optional<syrec::Expression::ptr> lhsOperand = visitExpressionTyped(context->lhsOperand);
     const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
     if (context->binaryOperation && !mappedToBinaryOperation.has_value())
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->binaryOperation), context->binaryOperation->getText());
 
-    const std::optional<syrec::Expression::ptr> rhsOperand = visitExpressionTyped(context->rhsOperand);
-
+    std::optional<syrec::Expression::ptr> rhsOperand = visitExpressionTyped(context->rhsOperand);
     if (!mappedToBinaryOperation.has_value())
         return std::nullopt;
 
     const std::optional<unsigned int> constantValueOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? tryGetConstantValueOfExpression(**lhsOperand) : std::nullopt;
     const std::optional<unsigned int> constantValueOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? tryGetConstantValueOfExpression(**rhsOperand) : std::nullopt;
 
-    if (*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Divide && ((constantValueOfLhsOperand.has_value() && !*constantValueOfLhsOperand) || (constantValueOfRhsOperand.has_value() && !*constantValueOfRhsOperand)))
+    if ((*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Divide || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Modulo || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::FracDivide) 
+        && constantValueOfRhsOperand.has_value() && !*constantValueOfRhsOperand) {
         recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*(context->lhsOperand ? context->lhsOperand->getStart() : context->rhsOperand->getStart())));
-    else if (constantValueOfLhsOperand.has_value() && constantValueOfRhsOperand.has_value()) {
+        return std::nullopt;
+    }
+
+    if (constantValueOfLhsOperand.has_value() && rhsOperand.has_value() && !constantValueOfRhsOperand.has_value()) {
+        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpression = trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(*constantValueOfLhsOperand, *mappedToBinaryOperation, *rhsOperand, true); simplifiedBinaryExpression.has_value())
+            return *simplifiedBinaryExpression;
+        if (utils::isOperandIdentityElementOfOperation(*constantValueOfLhsOperand, *mappedToBinaryOperation))
+            return rhsOperand;
+    }
+
+    if (constantValueOfRhsOperand.has_value() && lhsOperand.has_value() && !constantValueOfLhsOperand.has_value()) {
+        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpression = trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(*constantValueOfRhsOperand, *mappedToBinaryOperation, *lhsOperand, false); simplifiedBinaryExpression.has_value())
+            return *simplifiedBinaryExpression;
+        if (utils::isOperandIdentityElementOfOperation(*constantValueOfRhsOperand, *mappedToBinaryOperation))
+            return lhsOperand;
+    }
+
+    if (constantValueOfLhsOperand.has_value() && constantValueOfRhsOperand.has_value()) {
         if (const std::optional<unsigned int> evaluationResultOfExpr = utils::tryEvaluate(constantValueOfLhsOperand, *mappedToBinaryOperation, constantValueOfRhsOperand, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH)); evaluationResultOfExpr.has_value())
             return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(*evaluationResultOfExpr), optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
     }
-
     return lhsOperand.has_value() && rhsOperand.has_value() ? std::make_optional(std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand)) : std::nullopt;
 }
 
@@ -491,5 +506,50 @@ std::optional<syrec::Number::ConstantExpression::Operation> CustomExpressionVisi
         return syrec::Number::ConstantExpression::Operation::Multiplication;
     if (stringifiedOperation == "/")
         return syrec::Number::ConstantExpression::Operation::Division;
+    return std::nullopt;
+}
+
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(unsigned int knownOperandValue, syrec::BinaryExpression::BinaryOperation binaryOperation, const syrec::Expression::ptr& unknownOperandValue, bool isValueOfLhsOperandKnown) {
+    if (knownOperandValue > 1)
+        return std::nullopt;
+    if (knownOperandValue == 1) {
+        switch (binaryOperation) {
+            case syrec::BinaryExpression::BinaryOperation::Multiply:
+            case syrec::BinaryExpression::BinaryOperation::LogicalAnd:
+            case syrec::BinaryExpression::BinaryOperation::FracDivide:
+                return unknownOperandValue;
+            case syrec::BinaryExpression::BinaryOperation::Modulo:
+                return isValueOfLhsOperandKnown ? std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(1), 1) : unknownOperandValue;
+            case syrec::BinaryExpression::BinaryOperation::LogicalOr:
+            case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
+                return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(1), 1);
+            case syrec::BinaryExpression::BinaryOperation::Divide:
+                return !isValueOfLhsOperandKnown ? std::make_optional(unknownOperandValue) : std::nullopt;
+            default:
+                return std::nullopt;
+        }
+    }
+
+    // Known operand value is zero at this point
+    switch (binaryOperation)
+    {
+        case syrec::BinaryExpression::BinaryOperation::LogicalAnd:
+        case syrec::BinaryExpression::BinaryOperation::BitwiseAnd:
+        case syrec::BinaryExpression::BinaryOperation::Multiply:
+            return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1);
+        case syrec::BinaryExpression::BinaryOperation::LogicalOr:
+        case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
+        case syrec::BinaryExpression::BinaryOperation::Add:
+        case syrec::BinaryExpression::BinaryOperation::Subtract:
+        case syrec::BinaryExpression::BinaryOperation::Exor:
+            return unknownOperandValue;
+        case syrec::BinaryExpression::BinaryOperation::Divide:
+        case syrec::BinaryExpression::BinaryOperation::FracDivide:
+            return isValueOfLhsOperandKnown ? std::make_optional(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1)) : std::nullopt;
+        case syrec::BinaryExpression::BinaryOperation::Modulo:
+            return isValueOfLhsOperandKnown ? std::make_optional(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1)) : std::nullopt;
+        default:
+            break;
+    }
     return std::nullopt;
 }

@@ -41,9 +41,10 @@ namespace syrecParser {
         std::optional<syrec::VariableAccess::ptr> optionalRestrictionOnVariableAccesses;
         std::optional<std::string_view>           optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
 
-        [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation>     deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
-        [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>       deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
-        [[nodiscard]] static std::optional<syrec::Number::ConstantExpression::Operation> deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation>         deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>           deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static std::optional<syrec::Number::ConstantExpression::Operation>     deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static std::optional<syrec::Expression::ptr>                           trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(unsigned int knownOperandValue, syrec::BinaryExpression::BinaryOperation binaryOperation, const syrec::Expression::ptr& unknownOperandValue, bool isValueOfLhsOperandKnown);
     };
 } // namespace syrecParser
 #endif

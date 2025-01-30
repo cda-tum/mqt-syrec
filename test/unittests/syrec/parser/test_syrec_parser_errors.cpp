@@ -1255,6 +1255,26 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
     performTestExecution("module main(out a(4), out b[2](4)) a += (2 - b)");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInModuloOperationWithConstantValueDivisiorCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    performTestExecution("module main(out a(4), out b[2](4)) a += (2 % 0)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInModuloOperationWithConstantExpressionDivisiorCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    performTestExecution("module main(out a(4), out b[2](4)) a += (2 % (#b - 4))");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInUpperBitMultiplicationOperationWithConstantValueDivisiorCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    performTestExecution("module main(out a(4), out b[2](4)) a += (2 *> 0)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInUpperBitMultiplicationOperationWithConstantExpressionDivisiorCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 41));
+    performTestExecution("module main(out a(4), out b[2](4)) a += (2 *> (#b - 4))");
+}
+
 // TODO: Tests for nested expressions
 
 // Tests for production unary-expression

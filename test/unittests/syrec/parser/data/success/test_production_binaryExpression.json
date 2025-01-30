@@ -1,0 +1,240 @@
+{
+  "usageOfAdditionOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a + b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] + b[0])"
+  },
+  "usageOfSubtractionOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a - b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] - b[0])"
+  },
+  "usageOfMultiplicationOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a * b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] * b[0])"
+  },
+  "usageOfDivisionOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a / b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] / b[0])"
+  },
+  "usageOfModuloOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a % b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] % b[0])"
+  },
+  "usageOfXorOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a ^ b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] ^ b[0])"
+  },
+  "usageOfUpperbitMultiplicationOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a *> b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] *> b[0])"
+  },
+  "usageOfLogicalAndOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a && b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] && b[0])"
+  },
+  "usageOfLogicalOrOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a || b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] || b[0])"
+  },
+  "usageOfBitwiseAndOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a & b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] & b[0])"
+  },
+  "usageOfBitwiseOrOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a | b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] | b[0])"
+  },
+  "usageOfLessThanOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a < b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] < b[0])"
+  },
+  "usageOfGreaterThanOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a < b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] < b[0])"
+  },
+  "usageOfEqualOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a = b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] = b[0])"
+  },
+  "usageOfNotEqualOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a != b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] != b[0])"
+  },
+  "usageOfLessOrEqualOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a <= b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] <= b[0])"
+  },
+  "usageOfGreaterOrEqualOperation": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a >= b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] >= b[0])"
+  },
+  "usageOfNestedExpressionAsLhsOperand": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += ((a * 2) < b)",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += ((a[0] * 2) < b[0])"
+  },
+  "usageOfNestedExpressionAsRhsOperand": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += (a < (b << 1))",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += (a[0] < (b[0] << 1))"
+  },
+  "usageOfNestedExpressionsForBothOperands": {
+    "inputCircuit": "module main(in a(4), in b(4), out res(4)) res += ((a != b) < (2 - b))",
+    "expectedCircuit": "module main(in a(4), in b(4), out res(4)) res[0] += ((a[0] != b[0]) < (2 - b[0]))"
+  },
+  "usageOfIntegerConstantAsLhsOperand": {
+    "inputCircuit": "module main(in b(4), out res(4)) res += (1 < b)",
+    "expectedCircuit": "module main(in b(4), out res(4)) res[0] += (1 < b[0])"
+  },
+  "usageOfIntegerConstantAsRhsOperand": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a < 1)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += (a[0] < 1)"
+  },
+
+  "simplificationOfAdditionOperationWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((1 - 1) + a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfAdditionOperationWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a + (1 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfSubtractionOperationWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a - (1 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfMultiplicationWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((1 - 1) * a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfMultiplicationWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a * (1 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfMultiplicationWhenLhsOperandEvaluatesToOne": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 3) * a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfMultiplicationWhenRhsOperandEvaluatesToOne": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a * (#a - 3))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfDivisionWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 4) / a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfModuloOperationWhenRhsOperandEvaluatesToOne": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a % (#a - 3))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfModuloOperationWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 4) % a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfLogicalAndOperandWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (0 && a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfLogicalAndOperandWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a && 0)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfLogicalOrOperandWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (0 || a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfLogicalOrOperandWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a || 0)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfBitwiseAndOperandWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (0 & a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfBitwiseAndOperandWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a & 0)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "simplificationOfBitwiseOrOperandWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (0 | a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfBitwiseOrOperandWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a | 0)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+
+  "evaluationOfAdditionWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a + (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 5"
+  },
+  "evaluationOfSubtractionWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a - (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 3"
+  },
+  "evaluationOfMultiplicationWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a * (2 + 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 12"
+  },
+  "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultSmallerThanMaximumPossibleVariableValue": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a *> (2 + 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultLargerThanMaximumPossibleVariableValue": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((1 - 2) *> #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 3"
+  },
+  "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultEqualToMaximumPossibleVariableValue": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((((1 - 2) >> 2) + 1) *> #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultEqualToMaximumPossibleValue": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (((1 - 2) + 0) *> ((1 - 2) + 0))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 4294967294"
+  },
+  "evaluationOfDivisionWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a / ((2 - 1) + 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 2"
+  },
+  "evaluationOfModuloWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a % 3)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1"
+  },
+  "evaluationOfLogicalAndWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a && (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1"
+  },
+  "evaluationOfLogicalOrWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a || (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1"
+  },
+  "evaluationOfBitwiseAndWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a & (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "evaluationOfBitwiseOrWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a | (2 - 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 5"
+  },
+  "evaluationOfLessThanWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a < (2 - 1)); res += (2 < #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0; res[0] += 1"
+  },
+  "evaluationOfGreaterThanWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a > (2 - 1)); res += (2 > #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1; res[0] += 0"
+  },
+  "evaluationOfEqualWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a = (2 - 1)); res += (4 = #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0; res[0] += 1"
+  },
+  "evaluationOfNotEqualWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a != (2 - 1)); res += (#a != 4)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1; res[0] += 0"
+  },
+  "evaluationOfLessOrEqualWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a <= (2 - 1)); res += ((2 - 1) <= #a); res += (#a <= #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0; res[0] += 1; res[0] += 1"
+  },
+  "evaluationOfGreaterOrEqualWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a >= (2 - 1)); res += ((2 - 1) <= #a); res += (#a >= #a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1; res[0] += 1; res[0] += 1"
+  }
+}
