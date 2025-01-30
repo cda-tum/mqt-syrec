@@ -128,35 +128,43 @@
     "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 4) % a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfLogicalAndOperandWhenLhsOperandEvaluatesToZero": {
+  "simplificationOfLogicalAndOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (0 && a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfLogicalAndOperandWhenRhsOperandEvaluatesToZero": {
+  "simplificationOfLogicalAndOperationWhenRhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a && 0)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfLogicalOrOperandWhenLhsOperandEvaluatesToZero": {
+  "simplificationOfBitwiseXorOperationWhenLhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (0 ^ a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfBitwiseXorOperationWhenRhsOperandEvaluatesToZero": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a ^ 0)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfLogicalOrOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (0 || a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
-  "simplificationOfLogicalOrOperandWhenRhsOperandEvaluatesToZero": {
+  "simplificationOfLogicalOrOperationWhenRhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a || 0)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
-  "simplificationOfBitwiseAndOperandWhenLhsOperandEvaluatesToZero": {
+  "simplificationOfBitwiseAndOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (0 & a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfBitwiseAndOperandWhenRhsOperandEvaluatesToZero": {
+  "simplificationOfBitwiseAndOperationWhenRhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a & 0)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfBitwiseOrOperandWhenLhsOperandEvaluatesToZero": {
+  "simplificationOfBitwiseOrOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (0 | a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
-  "simplificationOfBitwiseOrOperandWhenRhsOperandEvaluatesToZero": {
+  "simplificationOfBitwiseOrOperationWhenRhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a | 0)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
@@ -212,6 +220,10 @@
   "evaluationOfBitwiseOrWithOperandsEvaluatingToIntegerConstants": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (#a | (2 - 1))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 5"
+  },
+  "evaluationOfBitwiseXorWithOperandsEvaluatingToIntegerConstants": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (#a ^ (2 + 1))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 7"
   },
   "evaluationOfLessThanWithOperandsEvaluatingToIntegerConstants": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (#a < (2 - 1)); res += (2 < #a)",

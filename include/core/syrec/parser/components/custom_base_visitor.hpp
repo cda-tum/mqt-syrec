@@ -50,6 +50,7 @@ namespace syrecParser {
         std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
         std::shared_ptr<utils::BaseSymbolTable>  symbolTable;
         static constexpr unsigned int            DEFAULT_EXPRESSION_BITWIDTH = 32;
+        static constexpr unsigned int            MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
             return Message::Position(token.getLine(), token.getCharPositionInLine());

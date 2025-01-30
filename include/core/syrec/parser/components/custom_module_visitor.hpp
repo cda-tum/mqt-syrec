@@ -17,8 +17,7 @@ namespace syrecParser {
         [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context) const; 
 
     protected:
-        static constexpr unsigned int MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
-        unsigned int                  defaultVariableBitwidth;
+        unsigned int defaultVariableBitwidth;
 
         std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
         [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context) const;

@@ -5,7 +5,6 @@
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 #include <core/syrec/parser/utils/variable_overlap_check.hpp>
-
 // TODO: Truncation of values in expressions where a signal access is defined in a nested expression needs to be propagated to the 'past' operands
 
 using namespace syrecParser;
@@ -84,7 +83,6 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->shiftOperation), context->shiftOperation->getText());
 
     const std::optional<syrec::Number::ptr> shiftAmount = visitNumberTyped(context->number());
-
     if (!mappedToShiftOperation.has_value())
         return std::nullopt;
 
@@ -94,12 +92,13 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     if (constantValueOfShiftAmount.has_value()) {
         if (!*constantValueOfShiftAmount)
             return toBeShiftedOperand.has_value() ? std::make_optional(*toBeShiftedOperand) : std::nullopt;
+        if (*constantValueOfShiftAmount >= MAX_SUPPORTED_SIGNAL_BITWIDTH)
+            return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), optionalExpectedBitwidthForAnyProcessedEntity.value_or(1));
         if (constantValueOfToBeShiftedOperand.has_value()) {
             if (const std::optional<unsigned int> evaluationResultOfShiftOperation = utils::tryEvaluate(constantValueOfToBeShiftedOperand, *mappedToShiftOperation, constantValueOfShiftAmount, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH)); evaluationResultOfShiftOperation.has_value())
                 return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(*evaluationResultOfShiftOperation), optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
         }
     }
-
     return toBeShiftedOperand.has_value() && shiftAmount.has_value() ? std::make_optional(std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount)) : std::nullopt;
 }
 
