@@ -1,9 +1,6 @@
 #include "utils/test_syrec_parser_base.hpp"
 #include "utils/test_syrec_parser_utils.hpp"
 
-// TODO: Do not allow a step size of zero if start and end value are known and different from each other (if both values do not evaluate to a constant, no assumption can be made [add tests in success cases])
-// TODO: Add success cases for negative step size values that were defined as constant, constant expressions evaluating to a value and constant expressions not evaluating to a constant
-
 using namespace syrecParserTestUtils;
 
 namespace {
