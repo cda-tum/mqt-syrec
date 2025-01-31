@@ -1,5 +1,21 @@
 #include "core/io/pla_parser.hpp"
 
+#include "core/truthTable/truth_table.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <istream>
+#include <regex>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 namespace syrec {
 
     void parsePla(TruthTable& tt, std::istream& in) {
@@ -134,7 +150,7 @@ namespace syrec {
         is.open(filename.c_str(), std::ifstream::in);
 
         if (!is.good()) {
-            std::cerr << "Cannot open " + filename << std::endl;
+            std::cerr << "Cannot open " + filename << '\n';
             return false;
         }
 

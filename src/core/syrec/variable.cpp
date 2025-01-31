@@ -1,11 +1,13 @@
 #include "core/syrec/variable.hpp"
 
-#include "core/syrec/expression.hpp"
+#include "core/syrec/number.hpp"
 
 #include <cassert>
+#include <cstdlib>
 #include <optional>
-#include <tuple>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace syrec {
 
@@ -32,9 +34,7 @@ namespace syrec {
 
     unsigned VariableAccess::bitwidth() const {
         if (range) {
-            Number::ptr first;
-            Number::ptr second;
-            std::tie(first, second) = *range;
+            auto [first, second] = *range;
 
             /* if both variables are loop variables but have the same name,
            then the bit-width is 1, otherwise we cannot determine it now. */
@@ -45,8 +45,8 @@ namespace syrec {
                 assert(false);
             }
 
-            Number::loop_variable_mapping map; // empty map
-            return static_cast<unsigned>(abs(static_cast<int>(first->evaluate(map) - second->evaluate(map)))) + 1U;
+            Number::loop_variable_mapping const map; // empty map
+            return static_cast<unsigned>(std::abs(static_cast<int>(first->evaluate(map) - second->evaluate(map)))) + 1U;
         }
         return var->bitwidth;
     }

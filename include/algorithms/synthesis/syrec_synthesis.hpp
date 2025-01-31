@@ -4,13 +4,22 @@
 #include "core/gate.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/expression.hpp"
+#include "core/syrec/module.hpp"
+#include "core/syrec/number.hpp"
 #include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 
-#include <algorithm>
 #include <boost/graph/adjacency_list.hpp>
-#include <cmath>
+#include <boost/graph/graph_selectors.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/pending/property.hpp>
+#include <map>
 #include <memory>
 #include <stack>
+#include <string>
+#include <vector>
 
 namespace syrec::internal {
     struct NodeProperties {
@@ -129,8 +138,8 @@ namespace syrec {
 
         CctManager cctMan;
 
-        void addVariable(Circuit& circ, const std::vector<unsigned>& dimensions, const Variable::ptr& var, constant constant, bool garbage, const std::string& arraystr);
-        void getVariables(const VariableAccess::ptr& var, std::vector<unsigned>& lines);
+        static void addVariable(Circuit& circ, const std::vector<unsigned>& dimensions, const Variable::ptr& var, constant constant, bool garbage, const std::string& arraystr);
+        void        getVariables(const VariableAccess::ptr& var, std::vector<unsigned>& lines);
 
         unsigned getConstantLine(bool value);
         void     getConstantLines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
@@ -138,7 +147,7 @@ namespace syrec {
         static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
 
         std::stack<Statement::ptr>    stmts;
-        Circuit&                      circ;
+        Circuit&                      circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
         Number::loop_variable_mapping loopMap;
         std::stack<Module::ptr>       modules;
 

@@ -1,5 +1,16 @@
 #include "algorithms/optimization/esop_minimization.hpp"
 
+#include "core/truthTable/truth_table.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 namespace minbool {
 
     void ImplicantTable::fill(const std::vector<MinTerm>& minterms) {
@@ -108,7 +119,7 @@ namespace minbool {
                 }
             }
         }
-        // Transpose columns => rows
+        // Transpose columns → rows
         std::unordered_map<MinTerm, std::vector<std::uint64_t>> rows;
         for (auto& [first, second]: columns) {
             for (auto const& term: second) {
@@ -223,13 +234,13 @@ namespace minbool {
         chart.fill(primes);
 
         std::vector<MinTerm> solution;
-        do {
+        while (chart.size() > 0) {
             bool change = chart.removeEssentials(solution);
             change      = change || chart.simplify();
             if (!change && chart.size() > 0) {
                 chart.removeHeuristic(solution);
             }
-        } while (chart.size() > 0);
+        }
 
         assert(checkSolution(solution, onValues, n));
 

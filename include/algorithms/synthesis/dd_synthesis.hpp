@@ -1,11 +1,14 @@
 #pragma once
 
-#include "QuantumComputation.hpp"
-#include "algorithms/optimization/esop_minimization.hpp"
-#include "algorithms/synthesis/encoding.hpp"
+#include "Definitions.hpp"
 #include "core/truthTable/truth_table.hpp"
+#include "dd/Node.hpp"
+#include "dd/Package.hpp"
+#include "ir/QuantumComputation.hpp"
+#include "ir/operations/Control.hpp"
 
-#include <chrono>
+#include <cstddef>
+#include <memory>
 
 namespace syrec {
 
@@ -60,17 +63,17 @@ namespace syrec {
         std::size_t r           = 0U;
         bool        garbageFlag = false;
 
-        auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) const -> void;
-        auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void;
+        static auto pathFromSrcDst(dd::mEdge const& src, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec) -> void;
+        static auto pathFromSrcDst(dd::mEdge const& src, size_t level, dd::mNode* const& dst, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) -> void;
 
-        [[nodiscard]] auto finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) const -> TruthTable::Cube::Set;
+        [[nodiscard]] static auto finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> TruthTable::Cube::Set;
 
-        auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec) const -> void;
-        auto pathSignature(dd::mEdge const& src, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) const -> void;
+        static auto pathSignature(dd::mEdge const& src, size_t pathLength, TruthTable::Cube::Set& sigVec) -> void;
+        static auto pathSignature(dd::mEdge const& src, size_t pathLength, TruthTable::Cube::Set& sigVec, TruthTable::Cube& cube) -> void;
 
         static auto completeUniCubes(TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set& uniqueCubeVec) -> void;
 
-        auto applyOperation(std::size_t totalBits, qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, std::unique_ptr<dd::Package<>>& dd) -> void;
+        auto applyOperation(qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, const std::unique_ptr<dd::Package<>>& dd) -> void;
 
         static auto controlRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;
         static auto controlNonRoot(dd::mEdge const& current, qc::Controls& ctrl, TruthTable::Cube const& ctrlCube) -> void;

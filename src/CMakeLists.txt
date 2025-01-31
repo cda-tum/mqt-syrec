@@ -1,61 +1,31 @@
-# add MQT::Core target
-set(BUILD_MQT_CORE_TESTS
-    OFF
-    CACHE BOOL "Build MQT Core tests")
-add_subdirectory("${PROJECT_SOURCE_DIR}/extern/mqt-core" "extern/mqt-core" EXCLUDE_FROM_ALL)
+if(NOT TARGET MQT::SyReC)
+  # collect headers and source files
+  file(GLOB_RECURSE SYREC_HEADERS ${MQT_SYREC_INCLUDE_BUILD_DIR}/*.hpp)
+  file(GLOB_RECURSE SYREC_SOURCES **.cpp)
+  list(FILTER SYREC_SOURCES EXCLUDE REGEX ".*/python/.*$")
 
-add_library(
-  ${PROJECT_NAME}
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_synthesis.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_cost_aware_synthesis.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/syrec_line_aware_synthesis.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/simple_simulation.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/simulation/circuit_to_truthtable.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/dd_synthesis.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/synthesis/encoding.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/algorithms/optimization/esop_minimization.cpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/optimization/esop_minimization.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/simulation/simple_simulation.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/simulation/circuit_to_truthtable.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/syrec_synthesis.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/syrec_cost_aware_synthesis.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/syrec_line_aware_synthesis.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/dd_synthesis.hpp
-  ${PROJECT_SOURCE_DIR}/include/algorithms/synthesis/encoding.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/program.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/variable.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/core/io/pla_parser.cpp
-  ${PROJECT_SOURCE_DIR}/include/core/gate.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/circuit.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/expression.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/grammar.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/module.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/number.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/program.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/statement.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/variable.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/utils/timer.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/io/pla_parser.hpp)
+  # add SyReC Package library
+  add_library(${PROJECT_NAME} ${SYREC_HEADERS} ${SYREC_SOURCES})
 
-# set include directories
-target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include
-                                                  ${PROJECT_BINARY_DIR}/include)
+  # set include directories
+  target_include_directories(${PROJECT_NAME}
+                             PUBLIC $<BUILD_INTERFACE:${MQT_SYREC_INCLUDE_BUILD_DIR}>)
 
-# link to the MQT::qfr DD library
-target_link_libraries(${PROJECT_NAME} PUBLIC MQT::CoreDD)
+  # link to the MQT::Core libraries
+  target_link_libraries(
+    ${PROJECT_NAME}
+    PUBLIC MQT::CoreDD
+    PRIVATE MQT::ProjectWarnings MQT::ProjectOptions)
 
-# add header-only part of the Boost library
-set(BOOST_USE_MULTITHREADED ON)
-set(BOOST_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.71 REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+  # add header-only part of the Boost library
+  set(BOOST_USE_MULTITHREADED ON)
+  set(BOOST_USE_STATIC_RUNTIME OFF)
+  find_package(Boost 1.71 REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 
-# add MQT alias
-add_library(MQT::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+  # add MQT alias
+  add_library(MQT::SyReC ALIAS ${PROJECT_NAME})
+endif()
 
 if(BUILD_MQT_SYREC_BINDINGS)
   add_subdirectory(python)

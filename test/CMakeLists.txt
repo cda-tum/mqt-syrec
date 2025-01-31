@@ -1,41 +1,21 @@
-if(NOT TARGET gtest OR NOT TARGET gmock)
-  # Prevent overriding the parent project's compiler/linker settings on Windows
-  set(gtest_force_shared_crt # cmake-lint: disable=C0103
-      ON
-      CACHE BOOL "" FORCE)
-  add_subdirectory("${PROJECT_SOURCE_DIR}/extern/mqt-core/extern/googletest"
-                   "extern/mqt-core/extern/googletest" EXCLUDE_FROM_ALL)
-  set_target_properties(gtest gtest_main gmock gmock_main PROPERTIES FOLDER extern)
-endif()
+# collect all test files
+file(GLOB_RECURSE TEST_FILES "*.cpp")
 
-package_add_test(
-  ${PROJECT_NAME}_test
-  ${PROJECT_NAME}
-  unittests/test_parser.cpp
-  unittests/test_line_aware_synthesis.cpp
-  unittests/test_line_aware_simulation.cpp
-  unittests/test_cost_aware_synthesis.cpp
-  unittests/test_cost_aware_simulation.cpp
-  unittests/test_tt_to_dd.cpp
-  unittests/test_extend_tt.cpp
-  unittests/test_huffman.cpp
-  unittests/test_pla_parser.cpp
-  unittests/test_dd_synthesis.cpp
-  unittests/test_dd_synthesis_dc.cpp)
+# add test executable
+package_add_test(mqt-syrec-test MQT::SyReC ${TEST_FILES})
 
 add_custom_command(
-  TARGET ${PROJECT_NAME}_test
+  TARGET mqt-syrec-test
   POST_BUILD
-  COMMAND
-    ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/${PROJECT_NAME}_test
-    ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_test
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:mqt-syrec-test>/mqt-syrec-test
+          ${CMAKE_BINARY_DIR}/mqt-syrec-test
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits
-          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
-  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/circuits
+          $<TARGET_FILE_DIR:mqt-syrec-test>/circuits
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:mqt-syrec-test>/circuits
           ${CMAKE_BINARY_DIR}/circuits
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/configs
-          $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
-  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}_test>/configs
+          $<TARGET_FILE_DIR:mqt-syrec-test>/configs
+  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:mqt-syrec-test>/configs
           ${CMAKE_BINARY_DIR}/configs
-  COMMENT "Copying circuits and creating symlinks for ${PROJECT_NAME}_test"
+  COMMENT "Copying circuits and creating symlinks for mqt-syrec-test"
   VERBATIM)

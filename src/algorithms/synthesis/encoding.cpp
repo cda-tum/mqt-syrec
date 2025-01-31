@@ -1,5 +1,17 @@
 #include "algorithms/synthesis/encoding.hpp"
 
+#include "core/truthTable/truth_table.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <queue>
+#include <stack>
+#include <utility>
+#include <vector>
+
 namespace syrec {
 
     template<class T>
@@ -9,7 +21,7 @@ namespace syrec {
             if (it == outputFreq.end()) {
                 outputFreq.emplace(output, 1U);
             } else {
-                it->second++;
+                ++it->second;
             }
         }
     }

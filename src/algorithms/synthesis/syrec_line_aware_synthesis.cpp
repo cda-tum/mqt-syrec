@@ -1,5 +1,17 @@
 #include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 
+#include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <algorithm>
+#include <boost/graph/detail/adjacency_list.hpp>
+#include <boost/graph/properties.hpp>
+#include <vector>
+
 namespace syrec {
     /// checking the entire statement
     bool LineAwareSynthesis::fullStatement(const Statement::ptr& statement) {
@@ -15,11 +27,8 @@ namespace syrec {
 
     bool LineAwareSynthesis::fullStatement(const AssignStatement& statement) {
         std::vector<unsigned> d;
-        std::vector<unsigned> dd;
         std::vector<unsigned> statLhs;
-        std::vector<unsigned> comp;
         std::vector<unsigned> ddd;
-        std::vector<unsigned> lines;
         getVariables(statement.lhs, statLhs);
 
         opRhsLhsExpression(statement.rhs, d);
@@ -32,6 +41,7 @@ namespace syrec {
         /// Only when the rhs input signals are repeated (since the results are stored in the rhs)
 
         if (checkRepeats()) {
+            std::vector<unsigned> dd;
             flow(statement.rhs, dd);
 
             if (expOpVector.size() == 1) {
@@ -64,6 +74,7 @@ namespace syrec {
                 }
 
             } else {
+                std::vector<unsigned> lines;
                 if (expLhsVector.at(0) == expRhsVector.at(0)) {
                     if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
                         /// cancel out the signals
@@ -108,7 +119,7 @@ namespace syrec {
 
                 for (unsigned i = 1; i <= expOpVector.size() - 1; i++) {
                     /// when both rhs and lhs exist
-                    if ((expLhsVector.at(i) != comp) && (expRhsVector.at(i) != comp)) {
+                    if ((!expLhsVector.at(i).empty()) && (!expRhsVector.at(i).empty())) {
                         if (expLhsVector.at(i) == expRhsVector.at(i)) {
                             if (expOpVector.at(i) == 1 || expOpVector.at(i) == 2) {
                                 /// cancel out the signals
@@ -131,7 +142,7 @@ namespace syrec {
                     }
 
                     /// when only lhs exists o rhs exists
-                    else if (((expLhsVector.at(i) == comp) && (expRhsVector.at(i) != comp)) || ((expLhsVector.at(i) != comp) && (expRhsVector.at(i) == comp))) {
+                    else if (((expLhsVector.at(i).empty()) && !(expRhsVector.at(i).empty())) || ((!expLhsVector.at(i).empty()) && (expRhsVector.at(i).empty()))) {
                         expEvaluate(lines, statAssignOp.at(j), expRhsVector.at(i), statLhs);
 
                         j = j + 1;
@@ -193,7 +204,6 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
-        std::vector<unsigned> lines;
         if (statOp == expOp) {
             if (expOp == 1) {
                 expressionSingleOp(1, expLhs, expRhs);
@@ -203,6 +213,7 @@ namespace syrec {
                 expressionSingleOp(statOp, statLhs, expRhs);
             }
         } else {
+            std::vector<unsigned> lines;
             subFlag = true;
             expEvaluate(lines, expOp, expLhs, statLhs);
             subFlag = false;
@@ -322,23 +333,23 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
-        for (unsigned int lh: lhs) {
-            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(lh);
+        for (const auto lh: lhs) {
+            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(lh);
         }
 
         increase(rhs, lhs);
 
-        for (unsigned int lh: lhs) {
-            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(lh);
+        for (const auto lh: lhs) {
+            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(lh);
         }
 
         for (unsigned i = 0U; i < lhs.size(); ++i) {
-            (*(get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)).appendNot(rhs.at(i));
+            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(rhs.at(i));
         }
         return true;
     }
 
-    bool LineAwareSynthesis::expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAwareSynthesis::expressionSingleOp(const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
             case BinaryExpression::Add: // +
                 increase(expRhs, expLhs);
@@ -359,7 +370,7 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAwareSynthesis::expressionOpInverse(const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
             case BinaryExpression::Add: // +
                 decrease(expRhs, expLhs);

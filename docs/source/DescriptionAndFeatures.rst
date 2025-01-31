@@ -8,7 +8,7 @@ The *SyReC Synthesizer* :cite:p:`adarsh2022syrecSynthesizer` allows users to aut
    :alt: SyReC Adder program along with the provided GUI.
    :align: center
 
-This Adder computes the sum of the inputs x1 and x2 and stores the result in the output signal x0. By clicking on the |PlayButtton| button, the tool automatically synthesizes the corresponding circuit. To this end, two complementary synthesis schemes
+This Adder computes the sum of the inputs x1 and x2 and stores the result in the output signal x0. By clicking on the |PlayButton| button, the tool automatically synthesizes the corresponding circuit. To this end, two complementary synthesis schemes
 are available:
 
     1. *Cost-aware synthesis*:
@@ -27,13 +27,13 @@ are available:
        :alt: Adder circuit resulting from cost-aware synthesis.
        :align: center
 
-Furthermore, the tool allows to simulate the resulting circuit (By clicking on the |SimButtton| button) as well as to determine the its gate costs (By clicking on the |CostButtton| button).
+Furthermore, the tool allows to simulate the resulting circuit (By clicking on the |SimButton| button) as well as to determine the its gate costs (By clicking on the |CostButton| button).
 
-.. |PlayButtton| image:: images/build.svg
+.. |PlayButton| image:: images/build.svg
    :width: 30
 
-.. |SimButtton| image:: images/sim.png
+.. |SimButton| image:: images/sim.png
    :width: 30
 
-.. |CostButtton| image:: images/stat.svg
+.. |CostButton| image:: images/stat.svg
    :width: 30

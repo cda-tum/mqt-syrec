@@ -1,7 +1,7 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
-#include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
-#include "dd/FunctionalityConstruction.hpp"
+#include "dd/Operations.hpp"
+#include "ir/operations/StandardOperation.hpp"
 
 #include "gtest/gtest.h"
 
@@ -22,9 +22,7 @@ TEST_F(TruthTableDD, Ident2Bit) {
     EXPECT_EQ(tt.nOutputs(), 2U);
 
     const auto ttDD = buildDD(tt, dd);
-    EXPECT_TRUE(ttDD.p != nullptr);
-
-    EXPECT_TRUE(ttDD == dd->makeIdent(2U));
+    EXPECT_TRUE(ttDD.isIdentity());
 }
 
 TEST_F(TruthTableDD, CNOT) {
@@ -37,8 +35,8 @@ TEST_F(TruthTableDD, CNOT) {
     EXPECT_TRUE(ttDD.p != nullptr);
 
     // CNOT with target q0 and control q1
-    const auto cnot = qc::StandardOperation(2U, 1_pc, 0, qc::X);
-    EXPECT_TRUE(ttDD == dd::getDD(&cnot, dd));
+    const auto cnot = qc::StandardOperation(1_pc, 0, qc::X);
+    EXPECT_TRUE(ttDD == dd::getDD(cnot, *dd));
 }
 
 TEST_F(TruthTableDD, SWAP) {
@@ -51,8 +49,8 @@ TEST_F(TruthTableDD, SWAP) {
     EXPECT_TRUE(ttDD.p != nullptr);
 
     // SWAP with q0 and q1
-    const auto swap = qc::StandardOperation(2U, {0, 1}, qc::SWAP);
-    EXPECT_TRUE(ttDD == dd::getDD(&swap, dd));
+    const auto swap = qc::StandardOperation({0, 1}, qc::SWAP);
+    EXPECT_TRUE(ttDD == dd::getDD(swap, *dd));
 }
 
 TEST_F(TruthTableDD, Toffoli) {
@@ -65,6 +63,6 @@ TEST_F(TruthTableDD, Toffoli) {
     EXPECT_TRUE(ttDD.p != nullptr);
 
     // Toffoli with target q0, control q1 and control q2
-    const auto toffoli = qc::StandardOperation(3U, {1_pc, 2_pc}, 0, qc::X);
-    EXPECT_TRUE(ttDD == dd::getDD(&toffoli, dd));
+    const auto toffoli = qc::StandardOperation({1_pc, 2_pc}, 0, qc::X);
+    EXPECT_TRUE(ttDD == dd::getDD(toffoli, *dd));
 }
