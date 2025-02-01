@@ -69,29 +69,32 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     if (!appendIdentationPaddingSequence(outputStream, indentationSequence))
         return false;
 
+    const auto& statementInstancePointer = statement.get();
+    // Since a syrec::SkipStatement is defined using an 'using syrec::SkipStatement = syrec::Statement' declaration,
+    // no dynamic_cast<> check can be performed to determine whether the statement instance is a skip statement. Thus, we must
+    // compare the typeid to perform said check.
+    if (const auto& statementInstance = *statementInstancePointer; typeid(statementInstance) == typeid(syrec::SkipStatement))
+        return stringifySkipStatement(outputStream);
+
     // Conflicting information regarding the correct implementation of a down case to handle a polymorphic class have been found
     // ranging from the visitor pattern, the usage of dynamic_cast<> as well as custom RTTI implementations.
     // The Cpp guidelines "recommend" the usage of dynamic_cast<> when traversal of the class hierarchy is required at runtime (https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rh-dynamic_cast)
     // An alternative approach utilizing std::visit could be in the form of: https://quuxplusone.github.io/blog/2020/09/29/oop-visit/
     // OR: https://www.oreilly.com/library/view/c-software-design/9781098113155/ch04.html (utilizing std::visit which in turn requires ownership of the object and thus seems no usable with the current function signature).
     // 16.12.2024: We currently follow the Cpp guidelines but further research needs to be done on whether a better performing solution can be found or whether the overhead incurred by the dynamic_cast<> is acceptable.
-    //
-    //
-    if (typeid(statement) == typeid(syrec::SkipStatement))
-        return stringifySkipStatement(outputStream);
-    if (const auto& stmtCastedAsAssignment = dynamic_cast<const syrec::AssignStatement*>(&*statement); stmtCastedAsAssignment)
+    if (const auto& stmtCastedAsAssignment = dynamic_cast<const syrec::AssignStatement*>(statementInstancePointer); stmtCastedAsAssignment)
         return stringify(outputStream, *stmtCastedAsAssignment);
-    if (const auto& stmtCastedAsModuleCall = dynamic_cast<const syrec::CallStatement*>(&*statement); stmtCastedAsModuleCall)
+    if (const auto& stmtCastedAsModuleCall = dynamic_cast<const syrec::CallStatement*>(statementInstancePointer); stmtCastedAsModuleCall)
         return stringify(outputStream, *stmtCastedAsModuleCall);
-    if (const auto& stmtCastedAsForStmt = dynamic_cast<const syrec::ForStatement*>(&*statement); stmtCastedAsForStmt)
+    if (const auto& stmtCastedAsForStmt = dynamic_cast<const syrec::ForStatement*>(statementInstancePointer); stmtCastedAsForStmt)
         return stringify(outputStream, *stmtCastedAsForStmt);
-    if (const auto& stmtCastedAsIfStmt = dynamic_cast<const syrec::IfStatement*>(&*statement); stmtCastedAsIfStmt)
+    if (const auto& stmtCastedAsIfStmt = dynamic_cast<const syrec::IfStatement*>(statementInstancePointer); stmtCastedAsIfStmt)
         return stringify(outputStream, *stmtCastedAsIfStmt);
-    if (const auto& stmtCastedAsSwapStmt = dynamic_cast<const syrec::SwapStatement*>(&*statement); stmtCastedAsSwapStmt)
+    if (const auto& stmtCastedAsSwapStmt = dynamic_cast<const syrec::SwapStatement*>(statementInstancePointer); stmtCastedAsSwapStmt)
         return stringify(outputStream, *stmtCastedAsSwapStmt);
-    if (const auto& stmtCastedAsUnaryStmt = dynamic_cast<const syrec::UnaryStatement*>(&*statement); stmtCastedAsUnaryStmt)
+    if (const auto& stmtCastedAsUnaryStmt = dynamic_cast<const syrec::UnaryStatement*>(statementInstancePointer); stmtCastedAsUnaryStmt)
         return stringify(outputStream, *stmtCastedAsUnaryStmt);
-    if (const auto& stmtCastedAsModuleUncall = dynamic_cast<const syrec::UncallStatement*>(&*statement); stmtCastedAsModuleUncall)
+    if (const auto& stmtCastedAsModuleUncall = dynamic_cast<const syrec::UncallStatement*>(statementInstancePointer); stmtCastedAsModuleUncall)
         return stringify(outputStream, *stmtCastedAsModuleUncall);
 
     return false;

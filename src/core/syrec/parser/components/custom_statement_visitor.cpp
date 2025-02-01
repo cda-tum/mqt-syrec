@@ -64,6 +64,9 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatement
     if (assignedToVariable.has_value())
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignedToVariable->get()->var, *ctx->signal()->start);
 
+    expressionVisitorInstance->clearRestrictionOnVariableAccesses();
+    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
+
     const std::optional<syrec::UnaryStatement::UnaryOperation> assignmentOperation = deserializeUnaryAssignmentOperationFromString(ctx->unaryOp->getText());
     return assignedToVariable.has_value() && assignmentOperation.has_value() ? std::make_optional(std::make_shared<syrec::UnaryStatement>(*assignmentOperation, *assignedToVariable)) : std::nullopt;
 }
@@ -150,9 +153,13 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
 
     auto generatedIfStatement = std::make_shared<syrec::IfStatement>();
     generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(ctx->guardCondition).value_or(nullptr));
+    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
+
     generatedIfStatement->thenStatements = visitStatementListTyped(ctx->trueBranchStmts).value_or(syrec::Statement::vec());
     generatedIfStatement->elseStatements = visitStatementListTyped(ctx->falseBranchStmts).value_or(syrec::Statement::vec());
+
     generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(ctx->matchingGuardExpression).value_or(nullptr));
+    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     if (generatedIfStatement->condition && generatedIfStatement->fiCondition) {
         std::ostringstream stringifiedGuardConditionContainer;

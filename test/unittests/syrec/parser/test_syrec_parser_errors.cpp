@@ -1325,6 +1325,7 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInNumericExpressio
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOperationInNumericExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 45), "mismatched input '<<' expecting {'+', '-', '*', '/'}");
+    buildAndRecordExpectedSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(Message::Position(1, 45), "<<");
     performTestExecution("module main(out a(8), out b[2](2)) ++= a.(#b << 2)");
 }
 
