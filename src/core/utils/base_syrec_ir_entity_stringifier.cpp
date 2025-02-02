@@ -12,7 +12,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     const auto iteratorToFirstModuleWithNewlinePostfix = program.modules().cbegin();
     const auto iteratorToLastModuleWithNewlinePostfix  = std::prev(program.modules().cend());
     for (auto moduleIterator = iteratorToFirstModuleWithNewlinePostfix; stringificationSuccessful && moduleIterator != iteratorToLastModuleWithNewlinePostfix; ++moduleIterator)
-        stringificationSuccessful = *moduleIterator && stringify(outputStream, **moduleIterator) && appendNewlineToStream(outputStream);
+        stringificationSuccessful &= *moduleIterator && stringify(outputStream, **moduleIterator) && appendNewlineToStream(outputStream);
 
     return stringificationSuccessful && program.modules().back() && stringify(outputStream, *program.modules().back());
 }
@@ -116,7 +116,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
 
-    return callStatement.target && stringifyModuleCallVariant(outputStream, uncallKeywordIdent, *callStatement.target, callStatement.parameters);
+    return callStatement.target && stringifyModuleCallVariant(outputStream, callKeywordIdent, *callStatement.target, callStatement.parameters);
 }
 
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::ForStatement& forStatement) {

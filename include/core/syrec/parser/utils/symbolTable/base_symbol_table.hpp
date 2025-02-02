@@ -17,7 +17,7 @@ namespace utils {
                 NoMatchFound
             };
             Result                                              resolutionResult;
-            std::optional<std::shared_ptr<const syrec::Module>> moduleMatchingSignature;
+            std::optional<std::shared_ptr<syrec::Module>> moduleMatchingSignature;
         };
 
         [[maybe_unused]] bool            insertModule(const syrec::Module::ptr& module);

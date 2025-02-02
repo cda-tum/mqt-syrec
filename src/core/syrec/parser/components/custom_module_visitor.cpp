@@ -49,14 +49,25 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
             // recursion depth without performing a symbol execution of the called modules statements. If no call/uncall statement is defined in the branch
             // of an if-statement whose guard expression does not evaluate to a constant value, an infinite loop check could be performed (but will be skip in the
             // current parser implementation)
-            if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound)
+            if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound) {
                 // TODO: Should we log the user provided parameter structure
                 recordSemanticError<SemanticError::NoModuleMatchingCallSignature>(semanticErrorPosition);
+            }
             else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound 
                 && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value() 
                 && definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name 
-                && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters))
-                recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
+                && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters)) {
+                recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);   
+            } else {
+                if (std::holds_alternative<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance)) {
+                    const auto& callStatementInstance = std::get<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance);
+                    callStatementInstance->target     = overloadResolutionResult.moduleMatchingSignature.value();
+                } else if (std::holds_alternative<std::shared_ptr<syrec::UncallStatement>>(callStatementVariant.callStatementVariantInstance)) {
+                    const auto& uncallStatementInstance = std::get<std::shared_ptr<syrec::UncallStatement>>(callStatementVariant.callStatementVariantInstance);
+                    uncallStatementInstance->target     = overloadResolutionResult.moduleMatchingSignature.value();
+                }
+            }
+                
         }
     }
     return generatedProgram;

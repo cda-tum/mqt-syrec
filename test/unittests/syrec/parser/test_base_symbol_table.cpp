@@ -11,7 +11,6 @@ using namespace utils;
 
 // TODO: Check whether the current tests for every function of the symbol table need to be extended to also consider modules with multiple parameters
 namespace {
-    using ReadOnlyModulePointer                               = std::shared_ptr<const syrec::Module>;
     constexpr unsigned int          DEFAULT_BITWIDTH          = 16;
     const std::vector<unsigned int> DEFAULT_SIGNAL_DIMENSIONS = {2, 3};
 
@@ -131,7 +130,7 @@ namespace {
         }
     }
 
-    [[nodiscard]] BaseSymbolTable::ModuleOverloadResolutionResult createModuleOverloadResolutionResultForSingleMatch(const ReadOnlyModulePointer& expectedSingleMatch) {
+    [[nodiscard]] BaseSymbolTable::ModuleOverloadResolutionResult createModuleOverloadResolutionResultForSingleMatch(const syrec::Module::ptr& expectedSingleMatch) {
         return BaseSymbolTable::ModuleOverloadResolutionResult({BaseSymbolTable::ModuleOverloadResolutionResult::SingleMatchFound, expectedSingleMatch});
     }
 
