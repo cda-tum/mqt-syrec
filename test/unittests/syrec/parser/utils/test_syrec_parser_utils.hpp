@@ -85,7 +85,9 @@ namespace syrecParserTestUtils {
 
         std::vector<std::string> foundTestCases;
         std::size_t              testCaseIndexInFile = 0;
-        foundTestCases.reserve(std::distance(parsedJson.items().begin(), parsedJson.items().end()));
+        // According to the nlohman json documentation (https://json.nlohmann.me/features/iterators/#iteration-order-for-objects), iterating over values using the provided iterator will order the values according to std::less<> by default.
+        // Thus no random access iterator is used => the std::distance call should be positive in all cases (thus we can take the absolute value of returned iter_diff_t)
+        foundTestCases.reserve(static_cast<std::size_t>(std::distance(parsedJson.items().begin(), parsedJson.items().end())));
 
         for (const auto& topLevelJsonObjectKeysIteratable: parsedJson.items()) {
             const std::string& testCaseName = topLevelJsonObjectKeysIteratable.key();
