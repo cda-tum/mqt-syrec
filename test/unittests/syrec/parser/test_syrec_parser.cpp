@@ -13,15 +13,13 @@ namespace {
     constexpr auto PRODUCTION_UNCALL_STATEMENT_FILE_NAME = "test_production_uncallStatement.json";
     constexpr auto PRODUCTION_FOR_STATEMENT_FILE_NAME    = "test_production_forStatement.json";
     constexpr auto PRODUCTION_IF_STATEMENT_FILE_NAME     = "test_production_ifStatement.json";
-    constexpr auto PRODUCTION_SKIP_STATEMENT_FILE_NAME   = "test_production_skipStatement.json";
-    constexpr auto PRODUCTION_STATEMENT_LIST_FILE_NAME   = "test_production_statementList.json";
     constexpr auto PRODUCTION_SWAP_STATEMENT_FILE_NAME   = "test_production_swapStatement.json";
     constexpr auto PRODUCTION_UNARY_STATEMENT_FILE_NAME  = "test_production_unaryStatement.json";
 
-    constexpr auto PRODUCTION_EXPRESSION_FILE_NAME        = "test_production_expression.json";
     constexpr auto PRODUCTION_BINARY_EXPRESSION_FILE_NAME = "test_production_binaryExpression.json";
     constexpr auto PRODUCTION_SHIFT_EXPRESSION_FILE_NAME  = "test_production_shiftExpression.json";
-    constexpr auto PRODUCTION_UNARY_EXPRESSION_FILE_NAME  = "test_production_unaryExpression.json";
+    // Since the IR currently does not support such expressions, no tests can be executed for it!
+    //constexpr auto PRODUCTION_UNARY_EXPRESSION_FILE_NAME  = "test_production_unaryExpression.json";
     constexpr auto PRODUCTION_SIGNAL_FILE_NAME            = "test_production_signal.json";
     constexpr auto PRODUCTION_NUMBER_FILE_NAME            = "test_production_number.json";
 
@@ -48,15 +46,13 @@ INSTANTIATE_TEST_SUITE_P(
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_UNCALL_STATEMENT_FILE_NAME, "production_uncallStatement"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_FOR_STATEMENT_FILE_NAME, "production_forStatement"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_IF_STATEMENT_FILE_NAME, "production_ifStatement"}),
-            FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_SKIP_STATEMENT_FILE_NAME, "production_skipStatement"}),
-            FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_STATEMENT_LIST_FILE_NAME, "production_statementList"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_SWAP_STATEMENT_FILE_NAME, "production_swapStatement"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_UNARY_STATEMENT_FILE_NAME, "production_unaryStatement"}),
                     
-            FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_EXPRESSION_FILE_NAME, "production_expression"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_BINARY_EXPRESSION_FILE_NAME, "production_binaryExpression"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_SHIFT_EXPRESSION_FILE_NAME, "production_shiftExpression"}),
-            FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_UNARY_EXPRESSION_FILE_NAME, "production_unaryExpression"}),
+            // Since the IR currently does not support such expressions, no tests can be executed for it!
+            //FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_UNARY_EXPRESSION_FILE_NAME, "production_unaryExpression"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_SIGNAL_FILE_NAME, "production_signal"}),
             FilenameAndTestNamePrefix({PATH_TO_SUCCESS_CASES, PRODUCTION_NUMBER_FILE_NAME, "production_number"})
             })),

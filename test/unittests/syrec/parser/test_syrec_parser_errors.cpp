@@ -1,13 +1,16 @@
 #include "utils/test_syrec_parser_errors_base.hpp"
 // TODO: Should we tests for non-integer numbers used in any signal declaration
 // TODO: Check whether swaps or assignments (both unary and binary ones) between N-d signals are possible
-// TODO: Should semantic errors in not taken branches of if-statement be reported
+// TODO: Should semantic errors in not taken branches of if-statement be reported (C++ compiler tests online reported semantic errors in skipable branch [might not be true if specific optimizations are enabled]) [https://godbolt.org/z/nM419obo4]
 // TODO: Recursive module calls should be possible (it its the reponsibility of the user to prevent infinite loops)
 // TODO: The user can use a variable multiple times as a caller argument for a module call (synthesis of the statement should then detected an overlap between the operands of any statement that would prevent the inversion of the latter)
 // TODO: Should the user be able to perform recursive module calls even for the main module (defined either implicitly or explicitly, the latter is currently disallowed)
 // TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
 // TODO: Allow user to define integer constant truncation either as XOR or OR
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
+// TODO: Add error tests that rhs operand of swap statement is not access on lhs of swap statement or either operand access overlapping parts in the index definition
+
+
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
@@ -992,6 +995,16 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInGuardConditionSubexpressionT
 TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInClosingGuardConditionReportedWhenGuardConditionWasWithoutError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 63), "b");
     performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (b[0] > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInStatementOfSkipableTrueBranchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 54), "b");
+    performTestExecution("module main(inout a(4), in b(2)) if (#a < 2) then ++= b else ++= a fi (#a < 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInStatementOfSkipableFalseBranchCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 65), "b");
+    performTestExecution("module main(inout a(4), in b(2)) if (#a > 2) then ++= a else ++= b fi (#a > 2)");
 }
 
 // Tests for production unary-statement

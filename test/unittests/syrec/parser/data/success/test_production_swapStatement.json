@@ -1,0 +1,225 @@
+{
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingImplicitDimensionAccessAndRhsOperandUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a <=> b",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingExplicitDimensionAccessAndRhsOperandUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a[0] <=> b",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingExplicitDimensionAccessAndRhsOperandUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingImplicitDimensionAccessAndRhsOperandUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a <=> b[0]",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandUsingValueOfDimensionOfNDSignal": {
+    "inputCircuit": "module main(inout a(4), out b[2][3](4)) a <=> b[0][1]",
+    "expectedCircuit": "module main(inout a(4), out b[2][3](4)) a[0] <=> b[0][1]"
+  },
+  "swapOf1DSignalWithSingleValueWithLhsOperandUsingExplicitDimensionAccessWithRhsOperandUsingValueOfDimensionOfNDSignal": {
+    "inputCircuit": "module main(inout a(4), out b[2][3](4)) a[0] <=> b[0][1]",
+    "expectedCircuit": "module main(inout a(4), out b[2][3](4)) a[0] <=> b[0][1]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValueWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandUsingValueOfDimensionOfNDSignal": {
+    "inputCircuit": "module main(inout a[1](4), out b[2][3](4)) a <=> b[0][1]",
+    "expectedCircuit": "module main(inout a(4), out b[2][3](4)) a[0] <=> b[0][1]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValueWithLhsOperandUsingExplicitDimensionAccessWithRhsOperandUsingValueOfDimensionOfNDSignal": {
+    "inputCircuit": "module main(inout a[1](4), out b[2][3](4)) a[0] <=> b[0][1]",
+    "expectedCircuit": "module main(inout a(4), out b[2][3](4)) a[0] <=> b[0][1]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValueWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandWith1DSignalWithImplictlyDeclaredSingleValueUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b(4)) b <=> a[0]",
+    "expectedCircuit": "module main(inout a(4), out b(4)) b[0] <=> a[0]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValueWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandWith1DSignalWithImplictlyDeclaredSingleValueUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b(4)) b <=> a",
+    "expectedCircuit": "module main(inout a(4), out b(4)) b[0] <=> a[0]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValuesWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b[1](4)) a <=> b",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValuesWithLhsOperandUsingImplicitDimensionAccessWithRhsOperandUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b[1](4)) a <=> b[0]",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValuesWithLhsOperandUsingExplicitDimensionAccessWithRhsOperandUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b[1](4)) a[0] <=> b",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+  "swapOf1DSignalWithExplicitlyDeclaredSingleValuesWithLhsOperandUsingExplicitDimensionAccessWithRhsOperandUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[1](4), out b[1](4)) a[0] <=> b[0]",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0] <=> b[0]"
+  },
+
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitAddressedWithConstantIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a.0 <=> b.0",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0].0 <=> b[0].0"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitAddressedWithConstantExpressionEvaluatingToConstantIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a.0 <=> b.(#a - 2)",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0].0 <=> b[0].2"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitAddressedWithConstantExpressionNotEvaluatingToConstantIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].$i <=> b[0].($i - 1) rof",
+    "expectedCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].$i <=> b[0].($i - 1) rof"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantIndicesAccessingSameIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a.0 <=> b.1:1",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0].0 <=> b[0].1:1"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantIndexForStartAndConstantExpressionForEndAddressingSameIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a.0 <=> b.1:((#a - 4) + 1)",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0].0 <=> b[0].1:1"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantExpressionForStartAndConstantExpressionForEndAddressingSameIndexOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) a.0 <=> b.((#b / 2) - 1):((#a - 4) + 1)",
+    "expectedCircuit": "module main(inout a(4), out b(4)) a[0].0 <=> b[0].1:1"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantExpressionWithUnknownValueForStartAndConstantIndexForEndOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 do a.0 <=> b.($i + 1):((#a - 4) + 1) rof",
+    "expectedCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].0 <=> b[0].($i + 1):1 rof"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantExpressionWithUnknownValueForStartAndConstantExpressionForEndOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 do a.0 <=> b[0].($i + 1):((#a - 4) + 1) rof",
+    "expectedCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].0 <=> b[0].($i + 1):1 rof"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantExpressionWithUnknownValueForStartAndConstantExpressionWithUnknownValueForEndOf1DSignalUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 do a.0 <=> b.($i + 1):(($i - 4) + 1) rof",
+    "expectedCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].0 <=> b[0].($i + 1):(($i - 4) + 1) rof"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeingBitrangeWithConstantExpressionWithUnknownValueForStartAndConstantExpressionWithUnknownValueForEndOf1DSignalUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 do a.0 <=> b[0].($i + 1):(($i - 4) + 1) rof",
+    "expectedCircuit": "module main(inout a(4), out b(4)) for $i = 0 to 3 step 1 do a[0].0 <=> b[0].($i + 1):(($i - 4) + 1) rof"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0]"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b[0]",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0]"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccessAndBitAccess": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b.0",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0].0"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccessAndBitAccess": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b[0].0",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0].0"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccessAndBitrangeAccessAddressingSameValue": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b.0:0",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0].0:0"
+  },
+  "swapWithLhsOperandBeingBitAddressedWithConstantIndexOf1DSignalAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccessAndBitrangeAccessAddressingSameValue": {
+    "inputCircuit": "module main(inout a(4), out b(1)) a.0 <=> b[0].0:0",
+    "expectedCircuit": "module main(inout a(4), out b(1)) a[0].0 <=> b[0].0:0"
+  },
+
+
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0]"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b[0]",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0]"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccessAndBitAccess": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b.0",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0].0"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccessAndBitAccess": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b[0].0",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0].0"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingImplicitDimensionAccessAndBitrangeAccessAddressingSameValue": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b.0:0",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0].0:0"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthAndRhsOperandBeing1DSignalWithSingleBitlengthUsingExplicitDimensionAccessAndBitrangeAccessAddressingSameValue": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a <=> b[0].0:0",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0] <=> b[0].0:0"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthUsingBitAccessUsingImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(1), out b(1)) a.0 <=> b[0].0",
+    "expectedCircuit": "module main(inout a(1), out b(1)) a[0].0 <=> b[0].0"
+  },
+  "swapWithLhsBeing1DSignalWithSingleBitlengthUsingBitAccessUsingExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a(1), out b(4)) a[0].0 <=> b[0].0",
+    "expectedCircuit": "module main(inout a(1), out b(4)) a[0].0 <=> b[0].0"
+  },
+
+  "swapWithBothOperandsAccessingSameSignalWithWholeSignalOfDifferentValueOfDimension": {
+    "inputCircuit": "module main(inout a[2][3](4)) a[0][1] <=> a[0][2]"
+  },
+  "swapWithBothOperandsAccessingSameSignalWithDifferentBitOfSameValueOfDimension": {
+    "inputCircuit": "module main(inout a[2][3](4)) a[0][1].0 <=> a[0][1].1"
+  },
+  "swapWithBothOperandsAccessingSameSignalWithDifferentBitrangeOfSameValueOfDimension": {
+    "inputCircuit": "module main(inout a[2][3](4)) a[0][1].0:1 <=> a[0][1].2:3"
+  },
+  "swapWithBothOperandsAccessingSameSignalWithSameBitrangeOfDifferentValueOfDimension": {
+    "inputCircuit": "module main(inout a[2][3](4)) a[0][2].0:1 <=> a[1][2].0:1"
+  },
+  "swapWithBothOperandsAccessingSameSignalWithSameBitrangeOfSameValueOfDimensionWithLhsOperandUsingConstantExpressionForBitrangeBounds": {
+    "inputCircuit": "module main(inout a[2][3](4)) for $i = 0 to 3 step 1 do a[0][2].(($i / 2) + 1):($i + 1) <=> a[0][2].0:1 rof"
+  },
+  "swapWithLhsOperandBeingNDSignalWithRhsOperandBeing1DSignalWithImplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1] <=> b",
+    "expectedCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1] <=> b[0]"
+  },
+  "swapWithLhsOperandBeingNDSignalWithRhsOperandBeing1DSignalWithExplicitDimensionAccess": {
+    "inputCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1] <=> b",
+    "expectedCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1] <=> b[0]"
+  },
+  "swapWithLhsOperandBeingNDSignalWithRhsOperandBeing1DSignalWithBothOperandsAccessingBit": {
+    "inputCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1].2 <=> b.1",
+    "expectedCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1].2 <=> b[0].1"
+  },
+  "swapWithLhsOperandBeingNDSignalWithRhsOperandBeing1DSignalWithBothOperandsAccessingBitrange": {
+    "inputCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1].2:3 <=> b.1:0",
+    "expectedCircuit": "module main(inout a[2][3](4), out b(4)) a[0][1].2:3 <=> b[0].1:0"
+  },
+
+  "swapWithLhsOperandBeingNDSignalWithLhsOperandAccessingValueOfDimensionUsingConstantExpressionWithUnknownValueAndRhsOperandAddressingOtherSignal": {
+    "inputCircuit": "module main(inout a[2](4), out b(2)) for $i = 0 to 3 step 1 do a[($i + 1)].1:2 <=> b rof",
+    "expectedCircuit": "module main(inout a[2](4), out b(2)) for $i = 0 to 3 step 1 do a[($i + 1)].1:2 <=> b[0] rof"
+  },
+  "swapWithLhsOperandBeingModuleParameterOfTypeOut": {
+    "inputCircuit": "module main(out a(4), inout b[2](4)) a <=> b[0]",
+    "expectedCircuit": "module main(out a(4), inout b[2](4)) a[0] <=> b[0]"
+  },
+  "swapWithLhsOperandBeingModuleParameterOfTypeInout": {
+    "inputCircuit": "module main(out a(4), inout b[2](4)) b[1] <=> a[0]",
+    "expectedCircuit": "module main(out a(4), inout b[2](4)) b[1] <=> a[0]"
+  },
+  "swapWithLhsOperandBeingLocalVariableOfTypeWire": {
+    "inputCircuit": "module main(out a(4)) wire b[2](4) b[1] <=> a[0]",
+    "expectedCircuit": "module main(out a(4)) wire b[2](4) b[1] <=> a[0]"
+  },
+  "swapWithRhsOperandBeingModuleParameterOfTypeOut": {
+    "inputCircuit": "module main(inout a(4), out b[2](4)) a <=> b[0]",
+    "expectedCircuit": "module main(inout a(4), out b[2](4)) a[0] <=> b[0]"
+  },
+  "swapWithRhsOperandBeingLocalVariableOfTypeWire": {
+    "inputCircuit": "module main(inout a(4)) wire b[2](4) a <=> b[1]",
+    "expectedCircuit": "module main(inout a(4)) wire b[2](4) a[0] <=> b[1]"
+  },
+  "swapWithBothOperandsOfVariableTypeInout": {
+    "inputCircuit": "module main(inout a(4), inout b[2](4)) a <=> b[1]",
+    "expectedCircuit": "module main(inout a(4), inout b[2](4)) a[0] <=> b[1]"
+  },
+  "swapWithBothOperandsOfVariableTypeOut": {
+    "inputCircuit": "module main(out a(4), out b[2](4)) a <=> b[1]",
+    "expectedCircuit": "module main(out a(4), out b[2](4)) a[0] <=> b[1]"
+  },
+  "swapWithBothOperandsOfVariableTypeWire": {
+    "inputCircuit": "module main() wire a(4), b[2](4) a <=> b[1]",
+    "expectedCircuit": "module main() wire a(4), b[2](4) a[0] <=> b[1]"
+  }
+}
