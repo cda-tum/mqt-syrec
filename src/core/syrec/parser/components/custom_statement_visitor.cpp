@@ -1,7 +1,140 @@
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
-#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
 
 using namespace syrecParser;
+
+// We currently have no other choice than to split the function header and its implementation into two separate but same anonymous namespace
+// if we are planning to use said function before its implementation was provided in an anonymous namespace.
+namespace {
+    std::optional<bool> doExpressionsMatch(const syrec::Expression::ptr& lExpr, const syrec::Expression::ptr& rExpr);
+}
+
+namespace {
+    std::optional<bool> doVariableInstancesMatch(const syrec::Variable::ptr& lVar, const syrec::Variable::ptr& rVar) {
+        if (lVar == nullptr ^ rVar == nullptr)
+            return false;
+        if (!lVar)
+            return std::nullopt;
+
+        return lVar->name == rVar->name && lVar->type == rVar->type && lVar->bitwidth == rVar->bitwidth && lVar->dimensions.size() == rVar->dimensions.size() && std::equal(lVar->dimensions.cbegin(), lVar->dimensions.cend(), rVar->dimensions.cbegin(), rVar->dimensions.cend());
+    }
+
+    std::optional<bool> doExpressionComponentsMatch(const syrec::Number::ptr& lNumber, const syrec::Number::ptr& rNumber) {
+        if (lNumber == nullptr ^ rNumber == nullptr)
+            return false;
+        if (!lNumber)
+            return std::nullopt;
+
+        if (lNumber->isConstant())
+            return rNumber->isConstant() && lNumber->evaluate({}) == rNumber->evaluate({});
+        if (lNumber->isLoopVariable())
+            return rNumber->isLoopVariable() && lNumber->variableName() == rNumber->variableName();
+        if (lNumber->isConstantExpression()) {
+            const std::optional<syrec::Number::ConstantExpression>& lConstantExpression = lNumber->constantExpression();
+            const std::optional<syrec::Number::ConstantExpression>& rConstantExpression = rNumber->constantExpression();
+            if (lConstantExpression.has_value() != rConstantExpression.has_value())
+                return false;
+            if (!lConstantExpression.has_value())
+                return std::nullopt;
+
+            const std::optional<bool> doesLhsOperandMatch = doExpressionComponentsMatch(lConstantExpression->lhsOperand, rConstantExpression->lhsOperand);
+            if (doesLhsOperandMatch.value_or(false)) {
+                if (lConstantExpression->operation != rConstantExpression->operation)
+                    return false;
+                return doExpressionComponentsMatch(lConstantExpression->rhsOperand, rConstantExpression->rhsOperand);
+            }
+            return doesLhsOperandMatch;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<bool> doExpressionComponentsMatch(const syrec::VariableAccess::ptr& lVarAccess, const syrec::VariableAccess::ptr& rVarAccess) {
+        if (lVarAccess == nullptr ^ rVarAccess == nullptr)
+            return false;
+        if (!lVarAccess)
+            return std::nullopt;
+
+        std::optional<bool> containerForMatchResult = doVariableInstancesMatch(lVarAccess->var, rVarAccess->var);
+        if (containerForMatchResult.value_or(false)) {
+            if (lVarAccess->range.has_value() == rVarAccess->range.has_value()) {
+                if (lVarAccess->range.has_value()) {
+                    containerForMatchResult = doExpressionComponentsMatch(lVarAccess->range->first, rVarAccess->range->first);
+                    if (containerForMatchResult.value_or(false)) {
+                        containerForMatchResult = doExpressionComponentsMatch(lVarAccess->range->second, rVarAccess->range->second);
+                    }
+                }
+            } else {
+                containerForMatchResult.reset();
+            }
+
+            if (containerForMatchResult.value_or(false)) {
+                if (lVarAccess->indexes.size() != rVarAccess->indexes.size())
+                    return false;
+
+                for (std::size_t i = 0; i < lVarAccess->indexes.size() && containerForMatchResult.value_or(false); ++i) {
+                    containerForMatchResult = doExpressionsMatch(lVarAccess->indexes.at(i), rVarAccess->indexes.at(i));
+                }
+            }
+        }
+        return containerForMatchResult;
+    }
+
+    std::optional<bool> doExpressionsMatch(const syrec::BinaryExpression& lExpr, const syrec::BinaryExpression& rExpr) {
+        const std::optional<bool> doLhsOperandsMatch = doExpressionsMatch(lExpr.lhs, rExpr.lhs);
+        if (doLhsOperandsMatch.value_or(false)) {
+            if (lExpr.binaryOperation != rExpr.binaryOperation)
+                return false;
+            return doExpressionsMatch(lExpr.rhs, rExpr.rhs);
+        }
+        return doLhsOperandsMatch;
+    }
+
+    std::optional<bool> doExpressionsMatch(const syrec::ShiftExpression& lExpr, const syrec::ShiftExpression& rExpr) {
+        const std::optional<bool> doShiftedExpressionsMatch = doExpressionsMatch(lExpr.lhs, rExpr.lhs);
+        if (doShiftedExpressionsMatch.value_or(false)) {
+            if (lExpr.shiftOperation != rExpr.shiftOperation)
+                return false;
+            return doExpressionComponentsMatch(lExpr.rhs, rExpr.rhs);
+        }
+        return doShiftedExpressionsMatch;
+    }
+
+    std::optional<bool> doExpressionsMatch(const syrec::NumericExpression& lExpr, const syrec::NumericExpression& rExpr) {
+        return doExpressionComponentsMatch(lExpr.value, rExpr.value);
+    }
+
+    std::optional<bool> doExpressionsMatch(const syrec::VariableExpression& lExpr, const syrec::VariableExpression& rExpr) {
+        return doExpressionComponentsMatch(lExpr.var, rExpr.var);
+    }
+
+    std::optional<bool> doExpressionsMatch(const syrec::Expression::ptr& lExpr, const syrec::Expression::ptr& rExpr) {
+        if (lExpr == nullptr ^ rExpr == nullptr)
+            return false;
+        if (!lExpr)
+            return std::nullopt;
+
+        bool matcherForExprTypeDefined = true;
+        if (const auto& lExprAsBinaryOne = dynamic_cast<const syrec::BinaryExpression*>(&*lExpr)) {
+            if (const auto& rExprAsBinaryOne = dynamic_cast<const syrec::BinaryExpression*>(&*rExpr); lExprAsBinaryOne && rExprAsBinaryOne) {
+                return doExpressionsMatch(*lExprAsBinaryOne, *rExprAsBinaryOne);
+            }
+        } else if (const auto& lExprAsShiftOne = dynamic_cast<const syrec::ShiftExpression*>(&*lExpr)) {
+            if (const auto& rExprAsShiftOne = dynamic_cast<const syrec::ShiftExpression*>(&*rExpr); lExprAsShiftOne && rExprAsShiftOne) {
+                return doExpressionsMatch(*lExprAsShiftOne, *rExprAsShiftOne);
+            }
+        } else if (const auto& lExprAsVarExpr = dynamic_cast<const syrec::VariableExpression*>(&*lExpr)) {
+            if (const auto& rExprAsVarExpr = dynamic_cast<const syrec::VariableExpression*>(&*rExpr); lExprAsVarExpr && rExprAsVarExpr) {
+                return doExpressionsMatch(*lExprAsVarExpr, *rExprAsVarExpr);
+            }
+        } else if (const auto& lExprAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&*lExpr)) {
+            if (const auto& rExprAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&*rExpr); lExprAsNumericOne && rExprAsNumericOne) {
+                return doExpressionsMatch(*lExprAsNumericOne, *rExprAsNumericOne);
+            }
+        } else {
+            matcherForExprTypeDefined = false;
+        }
+        return !matcherForExprTypeDefined ? std::nullopt : std::make_optional(false);
+    }
+} // namespace
 
 std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListTyped(const TSyrecParser::StatementListContext* ctx) {
     if (!ctx)
@@ -161,16 +294,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(ctx->matchingGuardExpression).value_or(nullptr));
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
-    if (generatedIfStatement->condition && generatedIfStatement->fiCondition) {
-        std::ostringstream stringifiedGuardConditionContainer;
-        std::ostringstream stringifiedClosingGuardConditionContainer;
-        // TODO: Should we use a single instance stored as a class member or can we create a new instance for every IfStatement
-        auto expressionStringifier = utils::BaseSyrecIrEntityStringifier(std::nullopt);
-        // TODO: Replace with expressions which requires that the stringification functionality for expressions needs to be public (could also involve making the stringification of statements to be public)
-        if (expressionStringifier.stringify(stringifiedGuardConditionContainer, syrec::Program()) && expressionStringifier.stringify(stringifiedClosingGuardConditionContainer, syrec::Program()) && stringifiedGuardConditionContainer.str() != stringifiedClosingGuardConditionContainer.str()) {
-            recordSemanticError<SemanticError::IfGuardExpressionMissmatch>(mapTokenPositionToMessagePosition(*ctx->guardCondition->getStart()));
-        }
-    }
+    if (const std::optional<bool> doConditionsMatch = generatedIfStatement->condition && generatedIfStatement->fiCondition ? doExpressionsMatch(generatedIfStatement->condition, generatedIfStatement->fiCondition) : std::nullopt; doConditionsMatch.has_value() && !*doConditionsMatch)
+        recordSemanticError<SemanticError::IfGuardExpressionMissmatch>(mapTokenPositionToMessagePosition(*ctx->guardCondition->getStart()));
 
     // TODO: Similarily to the processing of a for statement we need to determine how the parser processes empty statements list provided by the user (will this visitor function be called or not)?
     return generatedIfStatement;

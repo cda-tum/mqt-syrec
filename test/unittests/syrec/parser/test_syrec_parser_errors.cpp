@@ -10,7 +10,7 @@
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
 // TODO: Add error tests that rhs operand of swap statement is not access on lhs of swap statement or either operand access overlapping parts in the index definition
 
-
+// TODO: Are cases of calls with parameter dimension missmatches checked?
 
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
@@ -914,37 +914,37 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfIfStatementInNonCons
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnBitwidthCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 58));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
     performTestExecution("module main(out a(4)) if (a.0 > 2) then skip else skip fi (a.1:2 > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnAccessedValueOfDimensionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
     performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (a[1] > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnNumberOfAccessedDimensionsCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 65));
-    performTestExecution("module main(out a[2][3](4)) if (a[0] > 2) then skip else skip fi (a[1][0] > 2)");
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 31));
+    performTestExecution("module main(out a[2][3](4)) if (a[0][1] > 2) then skip else skip fi (a[1][0] > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnOperandOrderCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
     performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (2 < a[1])");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnTypeOfExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
     performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi ((a[0] << 2) > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnConstantValuesCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 70));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 38));
     performTestExecution("module main(out a[2](4), out b(2)) if (#a > 2) then skip else skip fi (#b > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionUsingLoopVariablesCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 96));
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 64));
     performTestExecution("module main(out a[2](4), out b(2)) for $i = 0 to 2 step 1 do if ($i > 2) then skip else skip fi ($i << 2) rof");
 }
 
