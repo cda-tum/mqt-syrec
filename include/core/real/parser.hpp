@@ -19,7 +19,7 @@ namespace syrec {
         explicit RealParser(qc::QuantumComputation& circ):
             qc(&circ) {}
 
-        qc::QuantumComputation* qc;
+        qc::QuantumComputation* qc{};
         size_t                  nqubits{0};
         size_t                  nclassics{0};
 

@@ -11,7 +11,6 @@
 #include <initializer_list>
 #include <iomanip>
 #include <ios>
-#include <memory>
 #include <optional>
 #include <sstream>
 #include <stdexcept>

@@ -21,6 +21,8 @@
 #include <optional>
 #include <regex>
 #include <set>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -476,12 +478,6 @@ namespace syrec {
                         }
 
                         qc->setLogicalQubitAncillary(ancillaryQubit);
-
-                        // Since the call to setLogicalQubitAncillary does not actually
-                        // transfer the qubit from the data qubit register into the ancillary
-                        // register we will 'manually' perform this transfer.
-                        const std::string associatedVariableNameForQubitRegister =
-                                qc->getQubitRegister(ancillaryQubit).getName();
                     } else if (constantValuePerIo != '-') {
                         throw std::runtime_error("[real parser] l:" + std::to_string(line) +
                                                  " msg: Invalid value in '.constants' header: '" +
