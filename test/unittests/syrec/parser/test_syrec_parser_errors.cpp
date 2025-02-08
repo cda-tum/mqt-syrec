@@ -1125,7 +1125,6 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInGuardConditionSubexpressionT
     performTestExecution("module main(in a(4)) wire b(4) if ((2 > 1) || (c > a)) then ++= b else skip fi ((2 > 1) || (c > a))");
 }
 
-// TODO: Guard expression missmatch semantic error
 TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInClosingGuardConditionReportedWhenGuardConditionWasWithoutError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 63), "b");
     performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (b[0] > 2)");
@@ -1141,13 +1140,43 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInStatementOfSkipableFalseBran
     performTestExecution("module main(inout a(4), in b(2)) if (#a > 2) then ++= a else ++= b fi (#a > 2)");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetInExpressionNotResetByUnknownBitwidthOfFutureOperandAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1,79), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 127), 1, 2);
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 3 step 1 do if (a.0 > (b.0:$i + a.1:2)) then skip else skip fi (a.0 > (b.0:$i + a.1:2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetInExpressionNotResetByConstantExpressionAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 72), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 122), 1, 2);
+    performTestExecution("module main(inout a(4)) for $i = 0 to 3 step 1 do if (a.0 > (($i + 2) + a.1:2)) then skip else skip fi (a.0 > (($i + 2) + a.1:2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetInExpressionDespiteIndexForAccessedValueOfDimensionHavingUnknownValueAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 72), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 122), 1, 2);
+    performTestExecution("module main(inout a[4](4)) for $i = 0 to 3 step 1 do if (a[$i].0 > (2 + a[0].1:2)) then skip else skip fi (a[$i].0 > (2 + a[0].1:2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetInShiftExpressionOnlyResetAfterFullEnclosingExpressionWasProcessedAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 57), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 109), 1, 2);
+    performTestExecution("module main(inout a(4), in b(2)) if ((a.0 << 1) > (b.0 + a.1:2)) then skip else skip fi ((a.0 << 1) > (b.0 + a.1:2))");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, VariableAccessWithUnknownAccessedBitwidthDoNotBlockFutureOperandBitwidthRestrictions) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 87), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 143), 1, 2);
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 3 step 1 do if ((a.0:$i - b.0) + (b.1 + a.1:2)) then skip else skip fi ((a.0:$i - b.0) + (b.1 + a.1:2)) rof");
+}
+
 // Tests for production unary-statement
-TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableInUnaryStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableAsAssignedToVariableInUnaryStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 25), "b");
     performTestExecution("module main(in b(4)) ++= b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInUnaryStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableAsAssignedToVariableInUnaryStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 18), "b");
     performTestExecution("module main() ++= b");
 }
@@ -1157,19 +1186,19 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfUnknownUnaryAssignmentOperationInUna
     performTestExecution("module main(out b(4)) *= b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionInUnaryStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionAsAssignedToVariableInUnaryStatementCausesError) {
     recordSyntaxError(Message::Position(1, 28), "extraneous input '(' expecting IDENT");
     recordSyntaxError(Message::Position(1, 31), "extraneous input '-' expecting {<EOF>, 'module'}");
     performTestExecution("module main(inout b(4)) ++= (b - 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableInUnaryAssignmentCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsAssignedToVariableInUnaryAssignmentCausesError) {
     recordSyntaxError(Message::Position(1, 51), "extraneous input '$' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 52), "i");
     performTestExecution("module main(in b(4)) for $i = 0 to 3 step 1 do ++= $i rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessInUnaryAssignmentCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAccessAsAssignedToVariableInUnaryAssignmentCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 31));
     performTestExecution("module main(inout b[2](4)) ++= b");
 }
@@ -1217,6 +1246,31 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInBitwidthsOfOperandsOfAssignmentCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 2);
     performTestExecution("module main(inout a(4), out b(4)) a.1 += b.2:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetByAssignmentLhsNotResetByUnknownBitwidthOfFutureOperandAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 69), 1, 2);
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do a.0 += (b.0:$i + a.1:2) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetByAssignmentLhsNotResetByConstantExpressionAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 69), 1, 2);
+    performTestExecution("module main(inout a(4)) for $i = 0 to 3 step 1 do a.0 += (($i + 2) + a.1:2) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetByAssignmentLhsSetDespiteIndexForAccessedValueOfDimensionHavingUnknownValueAndCausesErrorOnOperandBitwidthMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 69), 1, 2);
+    performTestExecution("module main(inout a[4](4)) for $i = 0 to 3 step 1 do a[$i].0 += (2 + a[0].1:2) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, VariableAccessWithUnknownAccessedBitrangeWidthOnAssignmentLhsDoesNotBlockFutureOperandBitwidthRestrictions) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 86), 2, 1);
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 3 step 1 do a.0:$i += ((b.0:1 << 2) + (b.1 + a.1:2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, VariableAccessWithUnknownAccessedBitOnAssignmentLhsDoesNotBlockFutureOperandBitwidthRestrictions) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 84), 2, 1);
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 3 step 1 do a.$i += ((b.0:1 << 2) + (b.1 + a.1:2)) rof");
 }
 
 // Tests for production swap-statement
