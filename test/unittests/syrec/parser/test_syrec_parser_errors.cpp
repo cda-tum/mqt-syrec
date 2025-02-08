@@ -894,12 +894,14 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidFiKeywordAfterGuardConditionCausesEr
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 58), "extraneous input '>' expecting {<EOF>, 'module'}");
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi a > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 56), "token recognition error at: '{'");
     recordSyntaxError(Message::Position(1, 59), "extraneous input '>' expecting {<EOF>, 'module'}");
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi {a > 2)");
 }
 
@@ -913,48 +915,180 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketOfIfStatementInNonCons
     performTestExecution("module main(out a(4)) if (a > 2) then skip else skip fi (a > 2]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnBitwidthCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
-    performTestExecution("module main(out a(4)) if (a.0 > 2) then skip else skip fi (a.1:2 > 2)");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInConstantValueOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[4](4)) if (a[0] > 2) then ++= a[0] else --= a[0] fi (a[1] > 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnAccessedValueOfDimensionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
-    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (a[1] > 2)");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInConstantExpressionValueOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[4](4)) if (a[(#a - 2)] > 2) then ++= a[0] else --= a[0] fi (a[(#a - 1)] > 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnNumberOfAccessedDimensionsCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 31));
-    performTestExecution("module main(out a[2][3](4)) if (a[0][1] > 2) then skip else skip fi (a[1][0] > 2)");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToOperandsMissmatchInConstantExpressionValueOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[4](4)) if (a[(#a - 2)] > 2) then ++= a[0] else --= a[0] fi (a[(#a - 1)] > 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnOperandOrderCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
-    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi (2 < a[1])");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToOperationMissmatchInConstantExpressionValueOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[4](4)) if (a[(#a / 2)] > 2) then ++= a[0] else --= a[0] fi (a[(#a - 1)] > 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnTypeOfExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 28));
-    performTestExecution("module main(out a[2](4)) if (a[0] > 2) then skip else skip fi ((a[0] << 2) > 2)");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentLoopVariablesUsedInAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 82));
+    performTestExecution("module main(inout a[4](4)) for $i = 0 to 3 step 1 do for $j = 0 to 2 step 1 do if a[$i] then ++= a[0] else --= a[0] fi a[$j] rof rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionBasedOnConstantValuesCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 38));
-    performTestExecution("module main(out a[2](4), out b(2)) if (#a > 2) then skip else skip fi (#b > 2)");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInShiftExpressionOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(inout a[4](4), in b(2)) if a[(b << 2)] then ++= a[0] else --= a[0] fi a[(b >> 3)]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchBetweenGuardAndClosingGuardConditionUsingLoopVariablesCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 64));
-    performTestExecution("module main(out a[2](4), out b(2)) for $i = 0 to 2 step 1 do if ($i > 2) then skip else skip fi ($i << 2) rof");
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToOperationMissmatchInShiftExpressionOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 51));
+    performTestExecution("module main(inout a[4](4), in b(2), inout c(2)) if a[(b >> 2)] then ++= a[0] else --= a[0] fi a[(c >> 2)]");
 }
 
-// TODO: Should numeric expressions that evaluate to the same value but are defined using a different structure be considered as usable in the guard/closing-guard condition of the if statement?
-// TODO: Should omitting of the accessed value of a 1-D signal in the guard condition while the closing guard condition explicitly defined the accessed value of the dimension be causing an error?
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInBinaryExpressionOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(inout a[1](4), in b(4)) if (a > b) then ++= a[0] else --= a[0] fi (b > a)");
+}
 
-// TODO: Guard expression missmatch semantic error
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToOperationMissmatchInBinaryExpressionOfAccessedValueOfDimension) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(inout a[1](4), in b(4)) if (a > b) then ++= a[0] else --= a[0] fi (a < b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchWithNoExplicitBitrangeAccessInGuardAndBitAccessInClosingGuardCondition) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[1](4)) if (a > 2) then ++= a[0] else --= a[0] fi (a.0 > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchWithNoExplicitBitrangeAccessInGuardAndBitrangeAccessInClosingGuardCondition) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[1](4)) if (a > 2) then ++= a[0] else --= a[0] fi (a.0:2 > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitBeingAccessedUsingConstantIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in b[1](2)) if b[0].1 then skip else skip fi b[0].0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitBeingAccessedUsingConstantExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](3)) for $i = 0 to 2 step 1 do if b[0].($i + 1) then skip else skip fi b[0].($i - 1) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantIndices) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in b[1](5)) if b[0].1:3 then skip else skip fi b[0].2:4");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantIndicesWithBitrangeStartMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in b[1](5)) if b[0].1:3 then skip else skip fi b[0].2:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantIndicesWithBitrangeEndMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in b[1](5)) if b[0].1:3 then skip else skip fi b[0].1:4");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantValueForBitrangeStartAndConstantExpressionForEndWithBitrangeStartMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].0:($i + 1) then skip else skip fi b[0].1:($i + 1) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantValueForBitrangeStartAndConstantExpressionForEndWithBitrangeEndMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].0:($i + 1) then skip else skip fi b[0].0:($i + 2) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantExpressionForBitrangeStartAndConstantValueForEndWithBitrangeStartMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].($i + 1):4 then skip else skip fi b[0].($i + 2):4 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantExpressionForBitrangeStartAndConstantValueForEndWithBitrangeEndMissmatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].($i + 1):3 then skip else skip fi b[0].($i + 1):4 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantExpressionForBitrangeStartAndConstantExpressionForEndWithBitrangeStartMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].($i + 1):(#b - 3) then skip else skip fi b[0].($i + 2):(#b - 3) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentBitrangeBeingAccessedUsingConstantExpressionForBitrangeStartAndConstantExpressionForEndWithBitrangeEndMissmatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 53));
+    performTestExecution("module main(in b[1](5)) for $i = 0 to 4 step 1 do if b[0].($i + 1):(#b - 3) then skip else skip fi b[0].($i + 2):(#b - 1) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperandsOfBinaryExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(in a[2](4), in b[1](4)) if (a[0] > 2) then skip else skip fi (b[0] > 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToSwappedOperandsOfBinaryExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in a[2](4)) if (a[0] > 2) then skip else skip fi (2 > a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperationOfBinaryExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 27));
+    performTestExecution("module main(in a[2](4)) if (a[0] > a[1]) then skip else skip fi (a[0] < a[1])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperandsOfShiftExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(in a[2](4), in b[1](4)) if (a[0] >> 2) then skip else skip fi (b[0] >> 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperationsOfShiftExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 39));
+    performTestExecution("module main(in a[2](4), in b[1](4)) if (a[0] >> 2) then skip else skip fi (b[0] << 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperandsOfNumericExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 43));
+    performTestExecution("module main() for $i = 0 to 3 step 1 do if ($i + 2) then skip else skip fi (2 + $i) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInOperationsOfNumericExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 43));
+    performTestExecution("module main() for $i = 0 to 3 step 1 do if ($i + 2) then skip else skip fi (1 - ($i + $i)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInGuardConditionBeingSimplifiedCorrectlyDetected) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[2](4)) if ((a[0] + 2) * 0) then ++= a[0] else --= a[0] fi (a[1] + 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchInClosingGuardConditionBeingSimplifiedCorrectlyDetected) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[2](4)) if (a[0] + 2) then ++= a[0] else --= a[0] fi ((a[1] + 2) * 0)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToDifferentExpressionTypesBeingUsed) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[2](4)) if (a[0] + 2) then ++= a[0] else --= a[0] fi (a[1] << 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToImplicitAndExplicitDimensionAccessOn1DVariable) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[1](4)) if (a + 2) then ++= a[0] else --= a[0] fi (a[0] << 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToExplicitAndImplicitDimensionAccessOn1DVariable) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 30));
+    performTestExecution("module main(inout a[1](4)) if (a[0] + 2) then ++= a[0] else --= a[0] fi (a << 2)");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInGuardExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::TooFewDimensionsAccessed>(Message::Position(1, 32), 1, 2);
     buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 66), 3, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 31));
     performTestExecution("module main(out a[2][1](4)) if (a[0] > 2) then skip else skip fi (a[0][0][1] > 2)");
 }
 

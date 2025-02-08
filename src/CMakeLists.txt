@@ -69,9 +69,12 @@ target_sources(${MQT_SYREC_PARSER_TARGET}
 
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/base_symbol_table.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/symbolTable/temporary_variable_scope.cpp
-		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/syrec_operation_utils.hpp
+		
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/if_statement_expression_components_recorder.hpp
+		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/if_statement_expression_components_recorder.cpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/parser_messages_container.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/parser_messages_container.cpp
+		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/syrec_operation_utils.hpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/variable_assignability_check.hpp
 		${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/utils/variable_access_index_check.cpp
 		${CMAKE_SOURCE_DIR}/include/core/syrec/parser/utils/variable_access_index_check.hpp

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "TSyrecParser.h"
+#include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 
 #include <core/syrec/expression.hpp>
 #include <core/syrec/parser/components/custom_base_visitor.hpp>
@@ -36,10 +37,16 @@ namespace syrecParser {
         void setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
         void clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
 
+        void setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
+        void clearIfStatementExpressionComponentsRecorder();
+
     protected:
-        std::optional<unsigned int>               optionalExpectedBitwidthForAnyProcessedEntity;
-        std::optional<syrec::VariableAccess::ptr> optionalRestrictionOnVariableAccesses;
-        std::optional<std::string_view>           optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
+        std::optional<unsigned int>                                                    optionalExpectedBitwidthForAnyProcessedEntity;
+        std::optional<syrec::VariableAccess::ptr>                                      optionalRestrictionOnVariableAccesses;
+        std::optional<std::string_view>                                                optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
+        std::optional<utils::IfStatementExpressionComponentsRecorder::ptr>             optionalIfStatementExpressionComponentsRecorder;
+
+        void recordExpressionComponent(const utils::IfStatementExpressionComponentsRecorder::ExpressionComponent& expressionComponent) const;
 
         [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation>         deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>           deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);

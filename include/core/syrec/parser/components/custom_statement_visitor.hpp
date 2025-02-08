@@ -3,7 +3,6 @@
 #pragma once
 
 #include "core/syrec/variable.hpp"
-
 #include <core/syrec/statement.hpp>
 #include <core/syrec/parser/components/custom_expression_visitor.hpp>
 
@@ -59,8 +58,8 @@ namespace syrecParser {
         void                                                              openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature);
 
     protected:
-        std::unique_ptr<CustomExpressionVisitor>                   expressionVisitorInstance;
-        std::vector<NotOverloadResolutedCallStatementScope>        callStatementsWithNotPerformedOverloadResolutionScopes;
+        std::unique_ptr<CustomExpressionVisitor>                        expressionVisitorInstance;
+        std::vector<NotOverloadResolutedCallStatementScope>             callStatementsWithNotPerformedOverloadResolutionScopes;
 
         [[nodiscard]] std::optional<std::string>        visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* ctx) const;
         [[nodiscard]] std::optional<syrec::Number::ptr> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* ctx) const;

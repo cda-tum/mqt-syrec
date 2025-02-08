@@ -34,12 +34,17 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     if (!context)
         return std::nullopt;
 
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
     std::optional<syrec::Expression::ptr> lhsOperand = visitExpressionTyped(context->lhsOperand);
     const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
     if (context->binaryOperation && !mappedToBinaryOperation.has_value())
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->binaryOperation), context->binaryOperation->getText());
 
+    if (mappedToBinaryOperation.has_value())
+        recordExpressionComponent(*mappedToBinaryOperation);
+
     std::optional<syrec::Expression::ptr> rhsOperand = visitExpressionTyped(context->rhsOperand);
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Closing);
     if (!mappedToBinaryOperation.has_value())
         return std::nullopt;
 
@@ -77,12 +82,18 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     if (!context)
         return std::nullopt;
 
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
     std::optional<syrec::Expression::ptr>                       toBeShiftedOperand     = visitExpressionTyped(context->expression());
     const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
     if (context->shiftOperation && !mappedToShiftOperation.has_value())
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->shiftOperation), context->shiftOperation->getText());
 
+    if (mappedToShiftOperation.has_value()) {
+        recordExpressionComponent(*mappedToShiftOperation);
+    }
+
     const std::optional<syrec::Number::ptr> shiftAmount = visitNumberTyped(context->number());
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Closing);
     if (!mappedToShiftOperation.has_value())
         return std::nullopt;
 
@@ -148,8 +159,12 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConsta
         return std::nullopt;
 
     if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), nullptr); constantValue.has_value()) {
-        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value())
-            return std::make_shared<syrec::Number>(utils::truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity));
+        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
+            const auto truncatedConstantValue = utils::truncateConstantValueToExpectedBitwidth(*constantValue, *optionalExpectedBitwidthForAnyProcessedEntity);
+            recordExpressionComponent(truncatedConstantValue);
+            return std::make_shared<syrec::Number>(truncatedConstantValue);   
+        }
+        recordExpressionComponent(*constantValue);
         return std::make_shared<syrec::Number>(*constantValue);
     }
     return std::nullopt;
@@ -159,12 +174,32 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     if (!context)
         return std::nullopt;
 
-    std::optional<syrec::Number::ptr>                                 lhsOperand = visitNumberTyped(context->lhsOperand);
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
+    std::optional<syrec::Number::ptr> lhsOperand = visitNumberTyped(context->lhsOperand);
+    
     const std::optional<syrec::Number::ConstantExpression::Operation> operation  = context->op ? deserializeConstantExpressionOperationFromString(context->op->getText()) : std::nullopt;
     if (context->op && !operation.has_value())
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->op), context->op->getText());
 
+    if (operation.has_value()) {
+        switch (*operation) {
+            case syrec::Number::ConstantExpression::Operation::Addition:
+                recordExpressionComponent(syrec::BinaryExpression::BinaryOperation::Add);
+                break;
+            case syrec::Number::ConstantExpression::Operation::Subtraction:
+                recordExpressionComponent(syrec::BinaryExpression::BinaryOperation::Subtract);
+                break;
+            case syrec::Number::ConstantExpression::Operation::Multiplication:
+                recordExpressionComponent(syrec::BinaryExpression::BinaryOperation::Multiply);
+                break;
+            case syrec::Number::ConstantExpression::Operation::Division:
+                recordExpressionComponent(syrec::BinaryExpression::BinaryOperation::Divide);
+                break;
+        }
+    }
+
     std::optional<syrec::Number::ptr> rhsOperand = visitNumberTyped(context->rhsOperand);
+    recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Closing);
 
     const std::optional<unsigned int> evaluationResultOfLhsOperand = lhsOperand.has_value() && *lhsOperand ? lhsOperand->get()->tryEvaluate({}) : std::nullopt;
     const std::optional<unsigned int> evaluationResultOfRhsOperand = rhsOperand.has_value() && *rhsOperand ? rhsOperand->get()->tryEvaluate({}) : std::nullopt;
@@ -230,6 +265,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
         return std::nullopt;
 
     const std::string loopVariableIdentifier = "$" + context->IDENT()->getText();
+    recordExpressionComponent(loopVariableIdentifier);
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingLoopVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(loopVariableIdentifier); matchingLoopVariableForIdentifier.has_value() && matchingLoopVariableForIdentifier->get()->isReferenceToLoopVariable()) {
         if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier)
             recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
@@ -248,6 +284,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
         return std::nullopt;
 
     const std::string& variableIdentifier = context->IDENT()->getSymbol()->getText();
+    recordExpressionComponent(context->SIGNAL_WIDTH_PREFIX()->getSymbol()->getText() + variableIdentifier);
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier); matchingVariableForIdentifier.has_value()) {
         return optionalExpectedBitwidthForAnyProcessedEntity.has_value() && matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth().has_value() ? std::make_shared<syrec::Number>(utils::truncateConstantValueToExpectedBitwidth(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth(), *optionalExpectedBitwidthForAnyProcessedEntity)) : std::make_shared<syrec::Number>(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth());
     }
@@ -280,6 +317,14 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     if (!variableIdentifier.empty() && (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value())) {
         recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
         return std::nullopt;
+    }
+
+    // We do not want to explicitly record the components of the dimension and bit range access again in the expression components recorder
+    // since they are already stored when the generated variable access is recorded
+    std::optional<utils::IfStatementExpressionComponentsRecorder::OperationMode> backupOfCurrentExpressionComponentsRecorderMode;
+    if (optionalIfStatementExpressionComponentsRecorder.has_value()) {
+        backupOfCurrentExpressionComponentsRecorderMode = optionalIfStatementExpressionComponentsRecorder->get()->getCurrentOperationMode();
+        optionalIfStatementExpressionComponentsRecorder->get()->switchMode(utils::IfStatementExpressionComponentsRecorder::OperationMode::Ignoring);   
     }
 
     const std::size_t          numUserAccessedDimensions = context->accessedDimensions.size();
@@ -373,6 +418,21 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         }
     }
 
+    if (optionalIfStatementExpressionComponentsRecorder.has_value() && backupOfCurrentExpressionComponentsRecorderMode.has_value()) {
+        optionalIfStatementExpressionComponentsRecorder->get()->switchMode(*backupOfCurrentExpressionComponentsRecorderMode);
+        // To be able to compare variable accesses on 1D signals in the expressions of the if statement guard conditions, we need a way to distinguish
+        // between the otherwise semantically equivalent variable accesses in which the dimension access is defined implicitly/explicitly (which only works for 1D signals with a single declared value).
+        // Thus, variable accesses on 1D signals declared with an implicit dimension access will be recorded with as having an empty dimension access (the implicitly added access on the value of the dimension is removed).
+        if (generatedVariableAccess->var->dimensions.size() == 1 && generatedVariableAccess->var->dimensions.front() == 1 && context->accessedDimensions.empty()) {
+            const auto variableAccessWithImplicitDimensionAccessRemoved = std::make_shared<syrec::VariableAccess>(*generatedVariableAccess);
+            variableAccessWithImplicitDimensionAccessRemoved->indexes.clear();
+            recordExpressionComponent(variableAccessWithImplicitDimensionAccessRemoved);
+        }
+        else {
+            recordExpressionComponent(generatedVariableAccess);    
+        }
+    }
+
     // Since the error reported when defining an overlapping variable access is reported at the position of the variable identifier, this check needs to be performed prior
     // to the check for matching operand bitwidths (if no internal ordering of the reported errors is performed [which is currently the case])
     if (const std::optional<utils::VariableAccessOverlapCheckResult>& overlapCheckResultWithRestrictedVariableParts = optionalRestrictionOnVariableAccesses.has_value() && *optionalRestrictionOnVariableAccesses ? utils::checkOverlapBetweenVariableAccesses(**optionalRestrictionOnVariableAccesses, *generatedVariableAccess) : std::nullopt;
@@ -449,7 +509,23 @@ void CustomExpressionVisitor::clearRestrictionOnLoopVariablesUsableInFutureLoopV
     optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.reset();
 }
 
+void CustomExpressionVisitor::setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder) {
+    if (!ifStatementExpressionComponentsRecorder)
+        return;
+    optionalIfStatementExpressionComponentsRecorder = ifStatementExpressionComponentsRecorder;
+}
+
+void CustomExpressionVisitor::clearIfStatementExpressionComponentsRecorder() {
+    optionalIfStatementExpressionComponentsRecorder.reset();
+}
+
 // START OF NON-PUBLIC FUNCTIONALITY
+void CustomExpressionVisitor::recordExpressionComponent(const utils::IfStatementExpressionComponentsRecorder::ExpressionComponent& expressionComponent) const {
+    if (!optionalIfStatementExpressionComponentsRecorder.has_value() || !*optionalIfStatementExpressionComponentsRecorder)
+        return;
+    optionalIfStatementExpressionComponentsRecorder->get()->recordExpressionComponent(expressionComponent);
+}
+
 std::optional<syrec::BinaryExpression::BinaryOperation> CustomExpressionVisitor::deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation) {
     if (stringifiedOperation == "+")
         return syrec::BinaryExpression::BinaryOperation::Add;
