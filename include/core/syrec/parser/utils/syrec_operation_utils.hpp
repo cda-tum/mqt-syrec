@@ -4,13 +4,24 @@
 #include <core/syrec/expression.hpp>
 
 namespace utils {
-    [[nodiscard]] inline unsigned int truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth) {
-        /*if (!expectedResultBitwidth)
+    enum class IntegerConstantTruncationOperation {
+        Modulo,
+        BitwiseAnd
+    };
+
+    [[nodiscard]] inline unsigned int truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth, IntegerConstantTruncationOperation integerConstantTruncationOperation) {
+        if (!expectedResultBitwidth)
             return 0;
 
-        return expectedResultBitwidth < 32 && valueToTruncate > (1 << expectedResultBitwidth)
-            ? valueToTruncate % (1 << expectedResultBitwidth)
-            : valueToTruncate;*/
+        if (expectedResultBitwidth >= 32 || valueToTruncate < 1 << expectedResultBitwidth)
+            return valueToTruncate;
+
+        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd)
+            // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
+            return valueToTruncate & (1 << expectedResultBitwidth) - 1;
+        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo)
+            return valueToTruncate % (1 << expectedResultBitwidth);
+
         return valueToTruncate;
     }
 
@@ -32,10 +43,7 @@ namespace utils {
         }    
     }
 
-    [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> lOperand, syrec::BinaryExpression::BinaryOperation binaryOperation, const std::optional<unsigned int> rOperand, unsigned int bitwidthOfResult) {
-        if (!bitwidthOfResult)
-            return std::nullopt;
-
+    [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> lOperand, syrec::BinaryExpression::BinaryOperation binaryOperation, const std::optional<unsigned int> rOperand) {
         std::optional<unsigned int> evaluationResult;
         if (lOperand.has_value() && rOperand.has_value()) {
             const unsigned int constantValueOfLOperand = *lOperand;
@@ -114,22 +122,19 @@ namespace utils {
             evaluationResult = rOperand;
         else if (rOperand.has_value() && isOperandIdentityElementOfOperation(*rOperand, binaryOperation))
             evaluationResult = lOperand;
-        return evaluationResult.has_value() ? std::make_optional(truncateConstantValueToExpectedBitwidth(*evaluationResult, bitwidthOfResult)) : std::nullopt;
+        return evaluationResult;
     }
 
-    [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> toBeShiftedValue, syrec::ShiftExpression::ShiftOperation shiftOperation, const std::optional<unsigned int> shiftAmount, unsigned int bitwidthOfResult) {
-        if (!bitwidthOfResult)
-            return std::nullopt;
-
+    [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> toBeShiftedValue, syrec::ShiftExpression::ShiftOperation shiftOperation, const std::optional<unsigned int> shiftAmount) {
         if (shiftAmount.has_value() && !*shiftAmount)
-            return toBeShiftedValue.has_value() ? std::make_optional(truncateConstantValueToExpectedBitwidth(*toBeShiftedValue, bitwidthOfResult)) : std::nullopt;
+            return toBeShiftedValue;
         if (toBeShiftedValue.has_value() && shiftAmount.has_value()) {
             if (!*toBeShiftedValue)
                 return 0;
 
             return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left
-                ? truncateConstantValueToExpectedBitwidth(*toBeShiftedValue << *toBeShiftedValue, bitwidthOfResult)
-                : truncateConstantValueToExpectedBitwidth(*toBeShiftedValue >> *toBeShiftedValue, bitwidthOfResult);   
+                ? *toBeShiftedValue << *toBeShiftedValue
+                : *toBeShiftedValue >> *toBeShiftedValue;   
         }
         return std::nullopt;
     }

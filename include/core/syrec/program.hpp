@@ -3,14 +3,18 @@
 #pragma once
 
 #include "core/syrec/module.hpp"
+#include "parser/utils/syrec_operation_utils.hpp"
+
 #include <vector>
 
 namespace syrec {
-
     struct ReadProgramSettings {
-        explicit ReadProgramSettings(unsigned bitwidth = 32U):
-            defaultBitwidth(bitwidth) {}
+        
+        explicit ReadProgramSettings(unsigned bitwidth = 32U, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::BitwiseAnd):
+            defaultBitwidth(bitwidth), integerConstantTruncationOperation(integerConstantTruncationOperation) {}
+
         unsigned defaultBitwidth;
+        utils::IntegerConstantTruncationOperation integerConstantTruncationOperation;
     };
 
     class Program {

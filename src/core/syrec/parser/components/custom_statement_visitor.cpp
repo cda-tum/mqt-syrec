@@ -49,6 +49,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
     }
     const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation  = ctx->assignmentOp ? deserializeAssignmentOperationFromString(ctx->assignmentOp->getText()) : std::nullopt;
     const std::optional<syrec::Expression::ptr>                  assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(ctx->expression());
+
+    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && assignmentRhsOperand.has_value() && *assignmentRhsOperand) {
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(**assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+    }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
@@ -155,6 +159,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     auto ifStatementExpressionComponentsComparer = std::make_shared<utils::IfStatementExpressionComponentsRecorder>();
     expressionVisitorInstance->setIfStatementExpressionComponentsRecorder(ifStatementExpressionComponentsComparer);
     generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(ctx->guardCondition).value_or(nullptr));
+
+    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition) {
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+    }
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     generatedIfStatement->thenStatements = visitStatementListTyped(ctx->trueBranchStmts).value_or(syrec::Statement::vec());
@@ -162,6 +170,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
 
     ifStatementExpressionComponentsComparer->switchMode(utils::IfStatementExpressionComponentsRecorder::OperationMode::Comparing);
     generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(ctx->matchingGuardExpression).value_or(nullptr));
+
+    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition) {
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+    }
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     if (generatedIfStatement->condition && generatedIfStatement->fiCondition && !ifStatementExpressionComponentsComparer->recordedMatchingExpressionComponents().value_or(true))

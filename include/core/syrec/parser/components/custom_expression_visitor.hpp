@@ -11,8 +11,8 @@
 namespace syrecParser {
     class CustomExpressionVisitor: protected CustomBaseVisitor {
     public:
-        CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance):
-            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance) {}
+        CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation):
+            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, integerConstantTruncationOperation) {}
 
         [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionTyped(TSyrecParser::ExpressionContext* context);
         [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const;
@@ -39,6 +39,9 @@ namespace syrecParser {
 
         void setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
         void clearIfStatementExpressionComponentsRecorder();
+
+        [[nodiscard]] std::optional<unsigned int> getCurrentExpectedBitwidthForAnyProcessedEntity() const;
+        static void                               truncateConstantValuesInAnyBinaryExpression(syrec::Expression& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation);
 
     protected:
         std::optional<unsigned int>                                                    optionalExpectedBitwidthForAnyProcessedEntity;

@@ -38,7 +38,7 @@ namespace syrec {
         syrecParser::TSyrecParser antlrParser(&tokens);
 
         auto       parserMessageGenerator = std::make_shared<syrecParser::ParserMessagesContainer>();
-        const auto customVisitor          = std::make_unique<syrecParser::CustomModuleVisitor>(parserMessageGenerator, settings);
+        const auto customVisitor          = std::make_unique<syrecParser::CustomModuleVisitor>(parserMessageGenerator, settings, settings.integerConstantTruncationOperation);
         const auto customErrorListener    = std::make_unique<syrecParser::CustomErrorListener>(parserMessageGenerator);
         lexer.addErrorListener(customErrorListener.get());
         antlrParser.addErrorListener(customErrorListener.get());

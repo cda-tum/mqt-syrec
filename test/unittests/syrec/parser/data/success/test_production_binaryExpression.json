@@ -195,7 +195,7 @@
   },
   "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultEqualToMaximumPossibleValue": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (((1 - 2) + 0) *> ((1 - 2) + 0))",
-    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 4294967294"
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 14"
   },
   "evaluationOfDivisionWithOperandsEvaluatingToIntegerConstants": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (#a / ((2 - 1) + 1))",

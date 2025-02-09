@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Token.h"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 
 #include <core/syrec/parser/utils/custom_error_mesages.hpp>
 #include <core/syrec/parser/utils/parser_messages_container.hpp>
@@ -43,14 +44,15 @@ namespace syrecParser {
      */
     class CustomBaseVisitor {
     public:
-        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance):
-            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance) {}
+        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation):
+            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance), integerConstantTruncationOperation(integerConstantTruncationOperation) {}
 
     protected:
-        std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
-        std::shared_ptr<utils::BaseSymbolTable>  symbolTable;
-        static constexpr unsigned int            DEFAULT_EXPRESSION_BITWIDTH = 32;
-        static constexpr unsigned int            MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
+        std::shared_ptr<ParserMessagesContainer>  sharedGeneratedMessageContainerInstance;
+        std::shared_ptr<utils::BaseSymbolTable>   symbolTable;
+        static constexpr unsigned int             DEFAULT_EXPRESSION_BITWIDTH   = 32;
+        static constexpr unsigned int             MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
+        utils::IntegerConstantTruncationOperation integerConstantTruncationOperation;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
             return Message::Position(token.getLine(), token.getCharPositionInLine());
