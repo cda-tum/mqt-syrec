@@ -113,5 +113,38 @@
   "accessingBitrangeOfNDSignal": {
     "inputCircuit": "module main(inout a[2][3](4)) a[0][1].(#a - 1):2 += a[1][2].1:0",
     "expectedCircuit": "module main(inout a[2][3](4)) a[0][1].3:2 += a[1][2].1:0"
+  },
+
+  "operandBitwidthSizeRestrictionOnlyLocalToCurrentlyProcessedDimensionOf1DSignal": {
+    "inputCircuit": "module main(inout a[2](4), in b(2), in c(4)) a[(b + 2)] += c",
+    "expectedCircuit": "module main(inout a[2](4), in b(2), in c(4)) a[(b[0] + 2)] += c[0]"
+  },
+  "operandBitwidthSizeRestrictionOnlyLocalToCurrentlyProcessedDimensionOfNDSignal": {
+    "inputCircuit": "module main(inout a[2][4](4), in b(2), in c(4)) a[(b + 2)][(c - 1)] += c",
+    "expectedCircuit": "module main(inout a[2][4](4), in b(2), in c(4)) a[(b[0] + 2)][(c[0] - 1)] += c[0]"
+  },
+  "operandBitwidthSizeRestrictionFromDimensionAccessNotAppliedToOuterVariableAccessDefinitionAccessingBit": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b.0:2 + 2)].0",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].0:2 + 2)].0"
+  },
+  "operandBitwidthSizeRestrictionFromDimensionAccessNotAppliedToOuterVariableAccessDefinitionAccessingWholeSignalBitwidth": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b.0:2 + 2)]",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].0:2 + 2)]"
+  },
+  "operandBitwidthSizeRestrictionFromDimensionAccessNotAppliedToOuterVariableAccessDefinitionAccessingSmallerBitrange": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b.0:2 + 2)].1:2",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].0:2 + 2)].1:2"
+  },
+  "operandBitwidthSizeRestrictionFromDimensionAccessNotAppliedToOuterVariableAccessDefinitionAccessingEquallyLargeBitrange": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b.0:2 + 2)].1:3",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].0:2 + 2)].1:3"
+  },
+  "operandBitwidthSizeRestrictionFromDimensionAccessNotAppliedToOuterVariableAccessDefinitionAccessingLargerBitrange": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b.1:2 + 2)].0:2",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].1:2 + 2)].0:2"
+  },
+  "operandBitwidthSizeRestrictionFromShiftEpressionOfDimensionAccessNotAppliedToOuterVariableAccess": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) ++= a[((b.1 << 2) + 2)].0:2",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) ++= a[(b[0].1 << 2)].0:2"
   }
 }
