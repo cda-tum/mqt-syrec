@@ -20,7 +20,7 @@ namespace utils {
             // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
             return valueToTruncate & (1 << expectedResultBitwidth) - 1;
         if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo)
-            return valueToTruncate % (1 << expectedResultBitwidth);
+            return valueToTruncate % ((1 << expectedResultBitwidth) - 1);
 
         return valueToTruncate;
     }
@@ -133,8 +133,8 @@ namespace utils {
                 return 0;
 
             return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left
-                ? *toBeShiftedValue << *toBeShiftedValue
-                : *toBeShiftedValue >> *toBeShiftedValue;   
+                ? *toBeShiftedValue << *shiftAmount
+                : *toBeShiftedValue >> *shiftAmount;   
         }
         return std::nullopt;
     }
