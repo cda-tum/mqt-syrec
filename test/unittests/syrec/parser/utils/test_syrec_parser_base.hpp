@@ -29,11 +29,15 @@ protected:
         std::string stringifiedExpectedSyrecProgramContent;
     };
 
-    std::string jsonKeyInTestCaseDataForCircuit                  = "inputCircuit";
-    std::string jsonKeyInTestCaseDataForExpectedCircuit          = "expectedCircuit";
+    std::string jsonKeyInTestCaseDataForCircuit                              = "inputCircuit";
+    std::string jsonKeyInTestCaseDataForExpectedCircuit                      = "expectedCircuit";
+    std::string jsonKeyInTestCaseDataForParserConfiguration                  = "parserConfig";
+    std::string jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig  = "defaultBitwidth";
+    std::string jsonKeyInTestCaseDataForConstantValueTrunctionOperation      = "constValTruncationOp";
 
-    TestFromJson      loadedTestCaseData;
-    syrec::Program    parserInstance;
+    TestFromJson                              loadedTestCaseData;
+    syrec::Program                            parserInstance;
+    std::optional<syrec::ReadProgramSettings> userDefinedParserConfiguration;
 
     void SetUp() override {
         const TestFromJsonConfig& testParameterData = GetParam();
@@ -56,6 +60,10 @@ protected:
         } else {
             loadedTestCaseData.stringifiedExpectedSyrecProgramContent = loadedTestCaseData.stringifiedSyrecProgramToProcess;
         }
+
+        if (testCaseDataJson.contains(jsonKeyInTestCaseDataForParserConfiguration)) {
+            ASSERT_NO_FATAL_FAILURE(loadUserDefinedParserConfigurationFromJson(testCaseDataJson.at(jsonKeyInTestCaseDataForParserConfiguration)));   
+        }
     }
 
     static void assertKeyInJsonObjectExists(const json& jsonObject, const std::string& key) {
@@ -77,16 +85,34 @@ protected:
         ASSERT_TRUE(wasStringificationSuccessful) << "Failed to stringify SyReC program";
     }
 
-    // TODO: Stringification function to compare generated optimized circuit with user provided version
-    // TODO: Processing of parser config from json
+    void loadUserDefinedParserConfigurationFromJson(const json& jsonObject) {
+        userDefinedParserConfiguration = syrec::ReadProgramSettings();
+        ASSERT_TRUE(jsonObject.is_object()) << "User defined parser configuration needs to be defined as a json object";
+        if (jsonObject.contains(jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig)) {
+            ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig).is_number_unsigned()) << "User defined default variable bitwidth needs to be defined as an unsigned integer";
+            userDefinedParserConfiguration->defaultBitwidth = jsonObject.at(jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig).get<unsigned int>();
+        }
+        if (jsonObject.contains(jsonKeyInTestCaseDataForConstantValueTrunctionOperation)) {
+            ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).is_string());
+            const auto& stringifiedTruncationOperation = jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).get<std::string>();
+            if (stringifiedTruncationOperation == "modulo")
+                userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::Modulo;
+            else if (stringifiedTruncationOperation == "bitwiseAnd")
+                userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::BitwiseAnd;
+            else
+                FAIL() << "No mapping for user defined integer constant value truncation operation '" << stringifiedTruncationOperation << "' defined";
+        }
+    }
 
+    // TODO: Stringification function to compare generated optimized circuit with user provided version
     virtual void performTestExecution() {
         std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess));
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess, userDefinedParserConfiguration.value_or(syrec::ReadProgramSettings())));
         ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.empty());
         
         std::ostringstream containerForStringifiedProgram;
         ASSERT_NO_FATAL_FAILURE(assertStringificationOfParsedSyrecProgramIsSuccessful(parserInstance, containerForStringifiedProgram));
+        // TODO: One might also check whether the expected circuit is actually a well-formed syrec circuit.
         ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedExpectedSyrecProgramContent) << "SyReC program processed by the parser needs to match the user defined input circuit";
     }
 };

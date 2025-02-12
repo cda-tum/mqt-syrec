@@ -122,7 +122,7 @@
   },
   "simplificationOfModuloOperationWhenRhsOperandEvaluatesToOne": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a % (#a - 3))",
-    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
   "simplificationOfModuloOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 4) % a)",
@@ -190,7 +190,7 @@
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 3"
   },
   "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultEqualToMaximumPossibleVariableValue": {
-    "inputCircuit": "module main(in a(4), out res(4)) res += ((((1 - 2) >> 2) + 1) *> #a)",
+    "inputCircuit": "module main(in a(4), out res(4)) res += (((1 - 2) >> 2) *> #a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
   "evaluationOfMultiplicationHighWithOperandsEvaluatingToIntegerConstantsAndMultiplicationResultEqualToMaximumPossibleValue": {

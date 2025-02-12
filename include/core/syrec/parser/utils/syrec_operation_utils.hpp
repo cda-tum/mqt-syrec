@@ -13,14 +13,15 @@ namespace utils {
         if (!expectedResultBitwidth)
             return 0;
 
-        if (expectedResultBitwidth >= 32 || valueToTruncate < 1 << expectedResultBitwidth)
+        const unsigned int maxValueStorableInExpectedResultBitwidth = (1 << expectedResultBitwidth) - 1;
+        if (expectedResultBitwidth >= 32 || valueToTruncate < maxValueStorableInExpectedResultBitwidth)
             return valueToTruncate;
 
         if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd)
             // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
-            return valueToTruncate & (1 << expectedResultBitwidth) - 1;
+            return valueToTruncate & maxValueStorableInExpectedResultBitwidth;
         if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo)
-            return valueToTruncate % ((1 << expectedResultBitwidth) - 1);
+            return valueToTruncate % maxValueStorableInExpectedResultBitwidth;
 
         return valueToTruncate;
     }

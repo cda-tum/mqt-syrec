@@ -41,7 +41,7 @@ namespace syrecParser {
         void clearIfStatementExpressionComponentsRecorder();
 
         [[nodiscard]] std::optional<unsigned int> getCurrentExpectedBitwidthForAnyProcessedEntity() const;
-        [[maybe_unused]] static bool              truncateConstantValuesInAnyBinaryExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation);
+        [[maybe_unused]] static bool              truncateConstantValuesInAnyBinaryExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
 
     protected:
         std::optional<unsigned int>                                        optionalExpectedBitwidthForAnyProcessedEntity;
@@ -55,6 +55,8 @@ namespace syrecParser {
         [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>       deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::Number::ConstantExpression::Operation> deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(unsigned int knownOperandValue, syrec::BinaryExpression::BinaryOperation binaryOperation, const syrec::Expression::ptr& unknownOperandValue, bool isValueOfLhsOperandKnown);
+        [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyShiftExpression(const syrec::ShiftExpression& shiftExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression);
+        [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpression(const syrec::BinaryExpression& binaryExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression, bool* detectedDivisionByZero);
     };
 } // namespace syrecParser
 #endif

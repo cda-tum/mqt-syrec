@@ -1244,6 +1244,18 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInEvaluatedVariableAcce
     performTestExecution("module main(inout b[2](4)) ++= b");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloAndOperationInDimensionAccessOfUnaryAssignment) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 42));
+    performTestExecution("module main(inout a[2](4), in b(2)) ++= a[((b + 6) / 3)]", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInDimensionAccessOfUnaryAssignment) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 42));
+    performTestExecution("module main(inout a[2](4), in b(2)) ++= a[((b + 6) / 4)]", customParserConfig);
+}
+
 // TODO: Overlapping index in accessed values per dimension not possible
 // TODO: Should accessed variable bitwidths between statement operands match (i.e. a.0:2 += (2 + b.0))
 
@@ -1338,6 +1350,18 @@ TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionFromDimensionAcce
 TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionFromDimensionAccessOnLhsOfAssignmentDoesNotPropagateIfEnclosingVariableAccessOfLhsDoesNotSetRestriction) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1,88), 4, 2);
     performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 1 do a[(b + 2)].0:$i += ((a[0] + 2) + b) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInRhsOfAssignment) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1,42));
+    performTestExecution("module main(inout a(4), in b(2)) a.0:1 += ((b + 6) / 3)", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInRhsOfAssignment) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 42));
+    performTestExecution("module main(inout a(4), in b(2)) a.0:1 += ((b + 6) / 4)", customParserConfig);
 }
 
 // Tests for production swap-statement
@@ -1563,6 +1587,34 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInUpperBitMultiplicationOpera
     performTestExecution("module main(out a(4), out b[2](4)) a += (2 *> (#b - 4))");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInLhsOfBinaryExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if ((b.$i:1 / 3) + a.0) then ++= a.0:1 else skip fi ((b.$i:1 / 3) + a.0) rof", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInRhsOfBinaryExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 3)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 3)) rof", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInLhsOfBinaryExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if ((b.$i:1 / 4) + a.0) then ++= a.0:1 else skip fi ((b.$i:1 / 4) + a.0) rof", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInRhsOfBinaryExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 4)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 4)) rof", customParserConfig);
+}
+
 // TODO: Tests for nested expressions
 
 // Tests for production unary-expression
@@ -1603,6 +1655,20 @@ TEST_F(SyrecParserErrorTestsFixture, NonNumericExpressionInRhsOperandOfShiftExpr
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableUsedAsLhsOperandOfShiftOperationCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 42));
     performTestExecution("module main(out a(4), out b[2](4)) a += ((b >> #a) + 2)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInLhsOfShiftExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 113));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (((b.$i:1 / 7) + a.0:2) << 2) then ++= a.0:1 else skip fi (((b.$i:1 / 7) + a.0:2) << 2) rof", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInLhsOfShiftExpression) {
+    const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 113));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (((b.$i:1 / 8) + a.0:2) << 2) then ++= a.0:1 else skip fi (((b.$i:1 / 8) + a.0:2) << 2) rof", customParserConfig);
 }
 
 // Tests for production number

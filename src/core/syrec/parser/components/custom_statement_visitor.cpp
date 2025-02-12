@@ -51,7 +51,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
     std::optional<syrec::Expression::ptr>                        assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(ctx->expression());
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && assignmentRhsOperand.has_value() && *assignmentRhsOperand) {
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+        bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        if (detectedDivisionByZeroDuringTruncationOfConstantValues)
+            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->expression()->getStart()));
     }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
@@ -161,7 +164,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(ctx->guardCondition).value_or(nullptr));
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition) {
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+        bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        if (detectedDivisionByZeroDuringTruncationOfConstantValues)
+            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->guardCondition->getStart()));
     }
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
@@ -172,7 +178,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(ctx->matchingGuardExpression).value_or(nullptr));
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition) {
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation);
+        bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        if (detectedDivisionByZeroDuringTruncationOfConstantValues)
+            recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->matchingGuardExpression->getStart()));
     }
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 

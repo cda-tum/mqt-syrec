@@ -17,11 +17,11 @@
   },
   "usageOfIntegerConstantAsToBeShiftedExprUsingLeftShiftOperation": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (1 << 2)",
-    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 2"
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 4"
   },
   "usageOfIntegerConstantAsToBeShiftedExprUsingRightShiftOperation": {
-    "inputCircuit": "module main(in a(4), out res(4)) res += (2 >> 2)",
-    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+    "inputCircuit": "module main(in a(4), out res(4)) res += (5 >> 2)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 1"
   },
 
   "simplificationOfLeftShiftOperationWithShiftAmountEqualToZero": {

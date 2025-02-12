@@ -28,8 +28,8 @@
     "expectedCircuit": "module main(inout a(4), in b(4)) a[0] += (b[0] / (2 + b[0]))"
   },
   "usageOfShiftExpressionOnRhsOfAssignment": {
-    "inputCircuit": "module main(inout a(4), in b(4)) a += (b << (2 + #b))",
-    "expectedCircuit": "module main(inout a(4), in b(4)) a[0] += (b[0] << 6)"
+    "inputCircuit": "module main(inout a(4), in b(4)) a += (b << (1 + (#b - 2)))",
+    "expectedCircuit": "module main(inout a(4), in b(4)) a[0] += (b[0] << 3)"
   },
   "assignmentToVariableOfTypeInout": {
     "inputCircuit": "module main(inout a(4)) a += 1",
@@ -106,8 +106,12 @@
     "expectedCircuit": "module main(inout a[2](4)) a[1] += 1"
   },
   "assignmentToValueOfDimensionWithIndexSpecifiedAsBinaryExpression": {
-    "inputCircuit": "module main(inout a(4), in b(2)) a[(b << 2)] += 1",
-    "expectedCircuit": "module main(inout a(4), in b(2)) a[(b[0] << 2)] += 1"
+    "inputCircuit": "module main(inout a(4), in b(2)) a[(b * 2)] += 1",
+    "expectedCircuit": "module main(inout a(4), in b(2)) a[(b[0] * 2)] += 1"
+  },
+  "assignmentToValueOfDimensionWithIndexSpecifiedAsShiftExpression": {
+    "inputCircuit": "module main(inout a(4), in b(3)) a[(b << 2)] += 1",
+    "expectedCircuit": "module main(inout a(4), in b(3)) a[(b[0] << 2)] += 1"
   },
 
   "assignmentWithLhsOperandBeing1DSignalWithImplicitDimensionAccessAndRhsOperandBeing1DSignalWithExplicitDimensionAccess": {
