@@ -15,12 +15,18 @@ namespace utils {
             Closing
         };
 
+        enum class VariableAccessComponent {
+            BitrangeStart,
+            BitrangeEnd,
+            DimensionAccessExpressionStart,
+            DimensionAccessExpressionEnd
+        };
+
         enum class OperationMode {
             Recording,
-            Comparing,
-            Ignoring
+            Comparing
         };
-        using ExpressionComponent = std::variant<std::string, syrec::VariableAccess::ptr, unsigned int, syrec::BinaryExpression::BinaryOperation, syrec::ShiftExpression::ShiftOperation, ExpressionBracketKind>;
+        using ExpressionComponent = std::variant<std::string, unsigned int, syrec::BinaryExpression::BinaryOperation, syrec::ShiftExpression::ShiftOperation, ExpressionBracketKind, VariableAccessComponent>;
 
         IfStatementExpressionComponentsRecorder():
             operationMode(OperationMode::Recording), indexForComparisonOfExpressionComponents(0) {}

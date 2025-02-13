@@ -292,17 +292,12 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         ? activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier)
         : std::nullopt;
 
-    if (!variableIdentifier.empty() && (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value())) {
-        recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
-        return std::nullopt;
-    }
-
-    // We do not want to explicitly record the components of the dimension and bit range access again in the expression components recorder
-    // since they are already stored when the generated variable access is recorded
-    std::optional<utils::IfStatementExpressionComponentsRecorder::OperationMode> backupOfCurrentExpressionComponentsRecorderMode;
-    if (optionalIfStatementExpressionComponentsRecorder.has_value()) {
-        backupOfCurrentExpressionComponentsRecorderMode = optionalIfStatementExpressionComponentsRecorder->get()->getCurrentOperationMode();
-        optionalIfStatementExpressionComponentsRecorder->get()->switchMode(utils::IfStatementExpressionComponentsRecorder::OperationMode::Ignoring);   
+    if (!variableIdentifier.empty()) {
+        recordExpressionComponent(variableIdentifier);
+        if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value()) {
+            recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
+            return std::nullopt;   
+        }
     }
 
     const std::size_t          numUserAccessedDimensions = context->accessedDimensions.size();
@@ -316,9 +311,13 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     // TODO: Due to the implemented simplifications for expressions with one/more constant valued operands, the expressions recorded in the container for the comparison of the guard conditions
     // of an if-statement will contain the simplified expressions and not the original ones, leading to false negative results.
     for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i) {
+        // Due to the implemented optimization/simplifications of expression (i.e. an expression multiplied with 0 can be replaced with the latter), we need to record the components of the user defined
+        // variable access in their unoptimized 'form' which are available during the processing of said components by the parser.
+        recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::DimensionAccessExpressionStart);
         if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(context->accessedDimensions.at(i)); exprDefiningAccessedValueOfDimension.has_value())
             generatedVariableAccess->indexes[i] = *exprDefiningAccessedValueOfDimension;
 
+        recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::DimensionAccessExpressionEnd);
         // Any generated bitwidth restriction generated during the processing of the expression defining the accessed value of the dimension needs to be cleared if the latter was processed to prevent
         // the propagation of the restriction to the parsing process for the remaining components of the variable access
         if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
@@ -373,7 +372,12 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         }
     }
 
+    if (context->bitStart)
+        recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::BitrangeStart);
     const std::optional<syrec::Number::ptr> bitRangeStart = visitNumberTyped(context->bitStart);
+
+    if (context->bitRangeEnd)
+        recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::BitrangeEnd);
     const std::optional<syrec::Number::ptr> bitRangeEnd   = visitNumberTyped(context->bitRangeEnd);
 
     // Premature exit since index checks for both the defined dimension as well as bit range access depend on the information from the referenced variable.
@@ -410,21 +414,6 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
                     accessedBitIndexValidity->indexValue.value(),
                     generatedVariableAccess->var->bitwidth);
             }
-        }
-    }
-
-    if (optionalIfStatementExpressionComponentsRecorder.has_value() && backupOfCurrentExpressionComponentsRecorderMode.has_value()) {
-        optionalIfStatementExpressionComponentsRecorder->get()->switchMode(*backupOfCurrentExpressionComponentsRecorderMode);
-        // To be able to compare variable accesses on 1D signals in the expressions of the if statement guard conditions, we need a way to distinguish
-        // between the otherwise semantically equivalent variable accesses in which the dimension access is defined implicitly/explicitly (which only works for 1D signals with a single declared value).
-        // Thus, variable accesses on 1D signals declared with an implicit dimension access will be recorded with as having an empty dimension access (the implicitly added access on the value of the dimension is removed).
-        if (generatedVariableAccess->var->dimensions.size() == 1 && generatedVariableAccess->var->dimensions.front() == 1 && context->accessedDimensions.empty()) {
-            const auto variableAccessWithImplicitDimensionAccessRemoved = std::make_shared<syrec::VariableAccess>(*generatedVariableAccess);
-            variableAccessWithImplicitDimensionAccessRemoved->indexes.clear();
-            recordExpressionComponent(variableAccessWithImplicitDimensionAccessRemoved);
-        }
-        else {
-            recordExpressionComponent(generatedVariableAccess);    
         }
     }
 

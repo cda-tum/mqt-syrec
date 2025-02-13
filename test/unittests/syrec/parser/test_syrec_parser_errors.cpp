@@ -1085,6 +1085,41 @@ TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDueToExp
     performTestExecution("module main(inout a[1](4)) if (a[0] + 2) then ++= a[0] else --= a[0] fi (a << 2)");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsWhereSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 55));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 do if (((($i + b) - a.0:$i) * (#b - 2)) << 3) then ++= a else skip fi (((($i + b) - a.1:$i) * (#b - 2)) << 3) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsWhereSimplifiedByOneConstantOperandBeingOptimizedAway) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 55));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 do if (((($i + b) - a.0:$i) * (#b - 1)) << 3) then ++= a else skip fi (((($i + b) - a.1:$i) * (#b - 1)) << 3) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsInDimensionAccessOfVariableAccessWereSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 65));
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to (#a - 1) do if a[((#b - 2) * (a[0].0:$i + b))] then ++= a[1] else skip fi a[((#b - 2) * (a[0].1:$i + b))] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsInDimensionAccessOfVariableAccessWereSimplifiedByOneConstantOperandBeingOptimizedAway) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 65));
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to (#a - 1) do if a[((#b - 1) * (a[0].0:$i + b))] then ++= a[0] else skip fi a[((#b - 2) * (a[0].1:$i + b))] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsInAccessedBitrangeStartOfVariableAccessWereSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 step 1 do if a.((#b - 2) * (($i + 1) * 2)) then ++= a else skip fi a.((#b - 2) * ($i * 2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsInAccessedBitrangeEndOfVariableAccessWereSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 step 1 do if a.$i:((#b - 2) * (($i + 1) * 2)) then ++= a else skip fi a.$i:((#b - 2) * ($i * 2)) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMissmatchDetectedEvenWhenExpressionsInAccessedBitrangeStartAndEndOfVariableAccessWereSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 62));
+    performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 step 1 do if a.(#a * (#b - 2)):((#b - 2) * (($i + 1) * 2)) then ++= a else skip fi a.(#b * (#b - 2)):((#b - 2) * ($i * 2)) rof");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInGuardExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::TooFewDimensionsAccessed>(Message::Position(1, 32), 1, 2);
     buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 66), 3, 2);
