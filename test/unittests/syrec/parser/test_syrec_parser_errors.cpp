@@ -3,8 +3,6 @@
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
 // TODO: Add error tests that rhs operand of swap statement is not access on lhs of swap statement or either operand access overlapping parts in the index definition
 
-// TODO: Are cases of calls with parameter dimension missmatches checked?
-
 // Tests for production module
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 0), "mismatched input 'main' expecting 'module'");
@@ -1851,7 +1849,6 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidBitrangEndSymbolCausesError) {
     performTestExecution("module main(out a[2](4)) ++= a[0].0.0");
 }
 
-// TODO: Division by zero error are tested in tests for production 'number', should we explicitly tests the same behaviour for every usage of the production in other productions?
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInDynamicBitrangeStartValueExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 33));
     performTestExecution("module main(out a(4)) ++= a.(2 / (#a - 4))");

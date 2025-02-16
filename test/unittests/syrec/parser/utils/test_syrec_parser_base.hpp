@@ -104,15 +104,18 @@ protected:
         }
     }
 
-    // TODO: Stringification function to compare generated optimized circuit with user provided version
     virtual void performTestExecution() {
-        std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess, userDefinedParserConfiguration.value_or(syrec::ReadProgramSettings())));
-        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram.empty());
-        
+        const syrec::ReadProgramSettings& parserConfiguration = userDefinedParserConfiguration.value_or(syrec::ReadProgramSettings());
+        std::string aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram;
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess, parserConfiguration));
+        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the given SyReC program";
+
+        std::string aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram;
+        ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedExpectedSyrecProgramContent, parserConfiguration));
+        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the stringified version of the given SyReC program expected to be generated when stringifying the IR of the parser";
+
         std::ostringstream containerForStringifiedProgram;
         ASSERT_NO_FATAL_FAILURE(assertStringificationOfParsedSyrecProgramIsSuccessful(parserInstance, containerForStringifiedProgram));
-        // TODO: One might also check whether the expected circuit is actually a well-formed syrec circuit.
         ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedExpectedSyrecProgramContent) << "SyReC program processed by the parser needs to match the user defined input circuit";
     }
 };

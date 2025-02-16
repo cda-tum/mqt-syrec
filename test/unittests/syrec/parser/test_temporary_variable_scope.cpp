@@ -111,26 +111,15 @@ namespace {
     void assertFetchedEntriesFromSymbolTableMatchExpectedOnes(const std::vector<ExpectedSymbolTableEntry>& expectedEntries, const std::vector<ExpectedSymbolTableEntry>& actualEntries) {
         ASSERT_EQ(expectedEntries.size(), actualEntries.size());
         ASSERT_TRUE(std::all_of(expectedEntries.cbegin(), expectedEntries.cend(), [](const ExpectedSymbolTableEntry& entry) { return entry != nullptr; }));
-        ASSERT_TRUE(std::all_of(expectedEntries.cbegin(), expectedEntries.cend(), [](const ExpectedSymbolTableEntry& entry) { return entry != nullptr; }));
-        // TODO: For now this call does not use the provided == operator, maybe we should define a custom MATCHER_P(...) instead. But how can the matcher be passed to the UnorderedElementsAreArray(...) call?
-        //ASSERT_THAT(actualEntries, testing::UnorderedElementsAreArray(expectedEntries));
-
-        // TODO: Rework this solution which is easy to read but a nightmare to determine which element was not found (since only the return value of the std::all_of(...) predicate is compared)
-        ASSERT_TRUE(std::all_of(
-                expectedEntries.cbegin(),
-                expectedEntries.cend(),
-                [&actualEntries](const ExpectedSymbolTableEntry& expected) {
-                    return std::any_of(
-                            actualEntries.cbegin(),
-                            actualEntries.cend(),
-                            [&expected](const ExpectedSymbolTableEntry& actualEntry) {
-                                return expected == actualEntry;
-                            });
-                }));
-
-        //    ASSERT_THAT(expected, testing::NotNull());
-        //    ASSERT_THAT(actual, testing::NotNull());
-        //    ASSERT_NO_FATAL_FAILURE(assertFetchedEntryFromSymbolTableMatchesExpectedOne(expected, actual));
+        ASSERT_TRUE(std::all_of(actualEntries.cbegin(), actualEntries.cend(), [](const ExpectedSymbolTableEntry& entry) { return entry != nullptr; }));
+        
+        for (const auto& expectedEntry : expectedEntries) {
+            ASSERT_TRUE(std::any_of(
+                    actualEntries.cbegin(), actualEntries.cend(),
+                    [&expectedEntry](const ExpectedSymbolTableEntry& actualEntry) {
+                        return expectedEntry == actualEntry;
+                    })) << "No matching entry found for entity with variable identifier" << expectedEntry->getVariableIdentifier();
+        }
     }
 
     void assertInsertionOfNVariableInstanceOfTypeIsSuccessful(TemporaryVariableScope& variableScope, syrec::Variable::Type variableType, const std::size_t numInstancesToCreate, const std::string& variableIdentifierPrefix, syrec::Variable::vec* containerForCreatedInstances) {

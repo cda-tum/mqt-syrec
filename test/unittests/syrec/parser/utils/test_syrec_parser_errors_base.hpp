@@ -88,8 +88,8 @@ protected:
     }
 
     static void assertExpectedAndActualErrorsMatch(const MessagesContainer& expectedErrors, const std::vector<std::string_view>& actualErrorsInUnifiedFormat) {
-        // TODO: Find better solution ot print errors
-        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected " << expectedErrors.size() << " errors but " << actualErrorsInUnifiedFormat.size() << " were found";
+        ASSERT_EQ(expectedErrors.size(), actualErrorsInUnifiedFormat.size()) << "Expected errors:\n" << stringifiyCollectionOfMessages(expectedErrors) << "Actual errors:\n" << stringifiyCollectionOfMessages(actualErrorsInUnifiedFormat);
+
         for (size_t errorIdx = 0; errorIdx < expectedErrors.size(); ++errorIdx) {
             ASSERT_EQ(expectedErrors.at(errorIdx).stringify(), actualErrorsInUnifiedFormat.at(errorIdx)) << "Error " << std::to_string(errorIdx) << ":\nExpected error: " << expectedErrors.at(errorIdx).stringify() << "\nActual Error: " << actualErrorsInUnifiedFormat.at(errorIdx);
         }
@@ -108,6 +108,22 @@ private:
         #else
             return stringToSearchThrough.find_first_of('\n', searchStartPosition);
         #endif
+    }
+
+    [[nodiscard]] static testing::Message stringifiyCollectionOfMessages(const MessagesContainer& messagesContainer) {
+        testing::Message stringifiedMessagesContainer;
+
+        for (const auto& message: messagesContainer)
+            stringifiedMessagesContainer << message.stringify() << '\n';
+        return stringifiedMessagesContainer;
+    }
+
+    [[nodiscard]] static testing::Message stringifiyCollectionOfMessages(const std::vector<std::string_view>& messagesContainer) {
+        testing::Message stringifiedMessagesContainer;
+
+        for (const auto& message: messagesContainer)
+            stringifiedMessagesContainer << message << '\n';
+        return stringifiedMessagesContainer;
     }
 };
 #endif
