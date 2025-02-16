@@ -101,7 +101,6 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpress
 }
 
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const {
-    // TODO: Bitwidth of expression
     if (const auto& generatedNumberContainer = context ? visitNumberTyped(context->number()) : std::nullopt; generatedNumberContainer.has_value())
         return std::make_shared<syrec::NumericExpression>(*generatedNumberContainer, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
     return std::nullopt;
@@ -133,9 +132,9 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(TSyr
 }
 
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConstantTyped(TSyrecParser::NumberFromConstantContext* context) const {
-    // TODO: Check these assumptions
     // Production should only be called if the token contains only numeric characters and thus deserialization should only fail if an overflow occurs.
-    // Leading and trailing whitespace should also be trimmed from the token text by the parser.
+    // Leading and trailing whitespace should also be trimmed from the token text by the parser. If the text of the token contains non-numeric characters,
+    // the deserialization will not throw an exception.
     if (!context || !context->INT())
         return std::nullopt;
 
@@ -231,7 +230,6 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     return std::nullopt;
 }
 
-// TODO: Check that loop variable and 'normal' variable can share same identfier since the former is distinguished by the loop variable prefix '$'
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVariableTyped(TSyrecParser::NumberFromLoopVariableContext* context) const {
     if (!context || !context->IDENT())
         return std::nullopt;
@@ -271,7 +269,6 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
     return std::nullopt;
 }
 
-// TODO: Substitution of loop variable values for compile time index checks
 // TODO: Signal overlap checks - add semantic errors for overlaps
 std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(TSyrecParser::SignalContext* context) {
     if (!context || !context->IDENT())
@@ -308,8 +305,6 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     if (!context->accessedDimensions.empty())
         clearExpectedBitwidthForAnyProcessedEntity();
 
-    // TODO: Due to the implemented simplifications for expressions with one/more constant valued operands, the expressions recorded in the container for the comparison of the guard conditions
-    // of an if-statement will contain the simplified expressions and not the original ones, leading to false negative results.
     for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i) {
         // Due to the implemented optimization/simplifications of expression (i.e. an expression multiplied with 0 can be replaced with the latter), we need to record the components of the user defined
         // variable access in their unoptimized 'form' which are available during the processing of said components by the parser.
@@ -365,7 +360,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             const std::size_t numDimensionsToCheck = declaredValuesPerDimensionOfReferenceVariable.size();
             for (std::size_t dimensionIdx = 0; dimensionIdx < numDimensionsToCheck; ++dimensionIdx) {
                 const utils::VariableAccessIndicesValidity::IndexValidationResult validityOfAccessedValueOfDimension = indexValidityOfUserDefinedAccessedValuesPerDimension->accessedValuePerDimensionValidity.at(dimensionIdx);
-                // TODO: We should not have to check whether the index validation result for the given index contains a value when an out of range access is reported.
+                // We should not have to check whether the index validation result for the given index contains a value when an out of range access is reported except for an error in the implementation of the overlap check.
                 if (validityOfAccessedValueOfDimension.indexValidity == utils::VariableAccessIndicesValidity::IndexValidationResult::OutOfRange && validityOfAccessedValueOfDimension.indexValue.has_value())
                     recordSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(mapTokenPositionToMessagePosition(*context->accessedDimensions.at(dimensionIdx)->getStart()), validityOfAccessedValueOfDimension.indexValue.value(), dimensionIdx, declaredValuesPerDimensionOfReferenceVariable.at(dimensionIdx));
             }

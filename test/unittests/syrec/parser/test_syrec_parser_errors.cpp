@@ -1,12 +1,5 @@
 #include "utils/test_syrec_parser_errors_base.hpp"
-// TODO: Should we tests for non-integer numbers used in any signal declaration
-// TODO: Check whether swaps or assignments (both unary and binary ones) between N-d signals are possible
-// TODO: Should semantic errors in not taken branches of if-statement be reported (C++ compiler tests online reported semantic errors in skipable branch [might not be true if specific optimizations are enabled]) [https://godbolt.org/z/nM419obo4]
-// TODO: Recursive module calls should be possible (it its the reponsibility of the user to prevent infinite loops)
-// TODO: The user can use a variable multiple times as a caller argument for a module call (synthesis of the statement should then detected an overlap between the operands of any statement that would prevent the inversion of the latter)
-// TODO: Should the user be able to perform recursive module calls even for the main module (defined either implicitly or explicitly, the latter is currently disallowed)
 // TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
-// TODO: Allow user to define integer constant truncation either as XOR or OR
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
 // TODO: Add error tests that rhs operand of swap statement is not access on lhs of swap statement or either operand access overlapping parts in the index definition
 
@@ -68,9 +61,6 @@ TEST_F(SyrecParserErrorTestsFixture, EmptyModuleBodyCausesError) {
     performTestExecution("module main(in a[2](16))");
 }
 
-// TODO: According to the specification, an overload of the top level module not named 'main' is possible
-// TODO: The specification also does not disallow the definition of an overload of the module named 'main' but specifies that the user can define a top-level module with the special identifier 'main'
-// see section 2.1
 TEST_F(SyrecParserErrorTestsFixture, OverloadOfModuleNamedMainCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::DuplicateMainModuleDefinition>(Message::Position(1, 37));
     performTestExecution("module main(in a[2](16)) skip module main(out b[1](16)) skip");
@@ -473,7 +463,13 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterDelimiterCa
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a b, c)");
 }
 
-// TODO: Modifiable parameter overlap tests (i.e. module x(inout a(4), out b(4)) a <=> b ... module main() wire t(4) call x(t, t)
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsCallStatementParameterCausesError) {
+    recordSyntaxError(Message::Position(1, 73), "extraneous input '$' expecting IDENT");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 74), "i");
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 68));
+    performTestExecution("module incr(inout a(4)) ++= a module main() for $i = 0 to 3 do call incr($i) rof");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterClosingBracket) {
     recordSyntaxError(Message::Position(1, 108), "extraneous input '<EOF>' expecting {',', ')'}");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a, b, c");
@@ -494,7 +490,6 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBrack
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c]");
 }
 
-// TODO: Detection of one-level infinite recursion for call statements that are not defined in branches of if-statement (or in if-statements branches whos guard condition evaluates to a constant value)
 // TODO: Printing user caller signature in semantic error message
 TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 151));
@@ -818,11 +813,6 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithI
     buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 1, 0);
     performTestExecution("module main(in b(2)) for ((#b - 3) + 2) step 0 do skip rof");
 }
-
-// TODO: Negative value for stepsize determined for number expression caught correctly
-// TODO: Negative stepsize values should only be explicitily be definable if the value is defined as an integer constant
-// because the current IR representation cannot store the minus sign for constant expressions (or we extend the constant expression in that case with an
-// additional constant expression of the form (X * (0 - 1)) since we cannot explicitly use the value -1 (due to values being stored as unsigned integers)
 
 // Tests for production if-statement
 TEST_F(SyrecParserErrorTestsFixture, OmittingIfKeywordCausesError) {
@@ -1292,7 +1282,6 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfCons
 }
 
 // TODO: Overlapping index in accessed values per dimension not possible
-// TODO: Should accessed variable bitwidths between statement operands match (i.e. a.0:2 += (2 + b.0))
 
 // Tests for production assign-statement
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfAssignStatementCausesError) {
@@ -1650,8 +1639,6 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfCons
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 4)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 4)) rof", customParserConfig);
 }
 
-// TODO: Tests for nested expressions
-
 // Tests for production unary-expression
 // TODO: Add tests when IR supports unary expressions
 
@@ -1775,9 +1762,6 @@ TEST_F(SyrecParserErrorTestsFixture, AccessingBitwidthOfConstantCausesError) {
 }
 
 // Tests for production signal
-// TODO: Tests for indices out of range and division by zero errors in dynamic expressions (i.e. loop variables evaluated at compile time)
-// TODO: Tests for truncation of values larger than the expected bitwidth
-// TODO: Tests for out of range indices for variable with no explicit dimension and bitwidth declaration
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessCausesError) {
     recordSyntaxError(Message::Position(1, 26), "missing IDENT at '.'");
     performTestExecution("module main(out a(4)) ++= .0");

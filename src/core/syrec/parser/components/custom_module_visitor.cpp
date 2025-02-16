@@ -32,6 +32,9 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
     const std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> callStatementsScopeForWhichOverloadResolutionShouldBePerformed = statementVisitorInstance->getCallStatementsWithNotPerformedOverloadResolution();
     for (const auto& scope: callStatementsScopeForWhichOverloadResolutionShouldBePerformed) {
         for (const CustomStatementVisitor::NotOverloadResolutedCallStatementScope::CallStatementData& callStatementVariant: scope.callStatementsToPerformOverloadResolutionOn) {
+            // The current module overload resolution algorithm uses the variable type to determine whether the user provided argument is assignable to the formal module parameter, thus a variable of type 'in' is not assignable
+            // to a variable of type 'out'/'inout'. If one could prove that the called module will not perform an assignment to the variable that is declared as modifiable, the previously mentioned assignment could be valid but
+            // is currently not used in the implementation of the symbol table.
             const utils::BaseSymbolTable::ModuleOverloadResolutionResult overloadResolutionResult = symbolTable->getModulesMatchingSignature(callStatementVariant.calledModuleIdentifier, callStatementVariant.symbolTableEntriesForCallerArguments);
             const auto                                                   semanticErrorPosition    = Message::Position(callStatementVariant.linePositionOfModuleIdentifier, callStatementVariant.columnPositionOfModuleIdentifier);
 
@@ -47,7 +50,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
 
             // Recursive module calls should be possible since we cannot determine for all cases whether such calls would lead to an infinite
             // recursion depth without performing a symbol execution of the called modules statements. If no call/uncall statement is defined in the branch
-            // of an if-statement whose guard expression does not evaluate to a constant value, an infinite loop check could be performed (but will be skip in the
+            // of an if-statement whose guard expression does not evaluate to a constant value, an infinite loop check could be performed (but is not performed in the
             // current parser implementation)
             if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound) {
                 // TODO: Should we log the user provided parameter structure
@@ -57,6 +60,8 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
                 && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value() 
                 && definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name 
                 && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters)) {
+                // Recursive module calls are allowed except for either the explicitly or implicitly defined 'main' module of a SyReC program. The parser will not check whether a recursive
+                // call will lead to an infinite recursion since this would require a formal execution of the program and the reponsibility to prevent such calls is placed on the user.
                 recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);   
             } else {
                 if (std::holds_alternative<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance)) {
@@ -73,10 +78,6 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
     return generatedProgram;
 }
 
-// TODO: Add tests for this behaviour
-// TODO: Cannot call module with identifier 'main' if such a module was defined (cannot be determined here)
-// TODO: Cannot call main module last defined in syrec module (cannot be determined here)
-// TODO: Cannot perform recursive call to itself
 std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecParser::ModuleContext* context) const {
     if (!context)
         return std::nullopt;
@@ -84,6 +85,9 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecPa
     std::optional<std::string> moduleIdentifier;
     if (context->IDENT()) {
         moduleIdentifier = context->IDENT()->getText();
+        // According to the SyReC specification (https://revlib.org/doc/docu/revlib_2_0_1.pdf section 2.1): "The top-module of a program is defined by the special identifier main.".
+        // Due to this restriction, the otherwise allowed overload of SyReC modules is disabled for modules declared with the identifier 'main' and will report a semantic error in case of a duplicate definition of
+        // such a 'main' module.
         if (moduleIdentifier == "main" && symbolTable->existsModuleForName(*moduleIdentifier))
             recordSemanticError<SemanticError::DuplicateMainModuleDefinition>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
     }
@@ -222,7 +226,9 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
         }
     }
 
-    // TODO: How should we report this error if neither the variable identifier nor the signal width were defined (can this happen?)
+    // If the defined variable bitwidth is larger than the maximum supported one, we report the error at the user defined bitwidth (if such a value was defined)
+    // otherwise, if the value was taken from the configuration of the parser, the error is reported at the signal identifier. If none of the two tokens, the declared bitwidth or variable identifier,
+    // are available (a special case that should occur where rarely) which should only be the case when an invalid signal declaration was defined by the user that failed to defined either of the two tokens, no error is reported.
     if (variableBitwidth > MAX_SUPPORTED_SIGNAL_BITWIDTH) {
         if (context->signalWidthToken)
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->signalWidthToken), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);

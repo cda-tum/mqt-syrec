@@ -30,10 +30,6 @@ namespace utils {
         [[nodiscard]] bool isValid() const;
     };
 
-    // TODO: What about evaluation of expressions (handling unknown loop variables, division by zero => should index validity be considered as unknown?)
-    // TODO: Providing valid variable accesses could also be the reponsibility of the caller?
-    // TODO: Offer overload with evaluation of expressions?
-
     /**
      * @brief   Determine whether the defined indices of the variable access are within range of the dimensions of the accessed variable.
      * @details Note that no expressions are evaluated and no loop variable value lookup is performed, both cases will lead to the validity of the index to be considered as unknown. <br>

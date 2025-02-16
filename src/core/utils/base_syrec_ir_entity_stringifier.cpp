@@ -56,6 +56,8 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     stringificationSucessful &= !variable.name.empty() ? appendToStream(outputStream, variable.name) : false;
     stringificationSucessful &= !variable.dimensions.empty();
 
+    // While the user can configure whether the dimensions of a 1D signal with a single value are stringified, the user has no other option to force override this settings in a SyReC program
+    // which will cause a uniform stringification of 1D signal declarations with a single value in a uniform way regardless of how the where defined in the SyReC program.
     if (!(variable.dimensions.size() == 1 && variable.dimensions.front() == 1 && additionalFormattingOptions.omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue)) {
         for (const auto numValuesOfDimension: variable.dimensions)
             stringificationSucessful &= appendToStream(outputStream, "[" + std::to_string(numValuesOfDimension) + "]");

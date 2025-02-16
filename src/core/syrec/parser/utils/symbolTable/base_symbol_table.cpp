@@ -83,9 +83,6 @@ std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeT
 
 // NON-PUBLIC FUNCTIONALITY
 utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments, bool validateCallerArguments) const {
-    // TODO: The user should be able to use a variable as a caller argument multiple times in a module call/uncall. Other components then need to verify whether the
-    // reversibility of all statements in the module body is still possible when using the user provided values for the parameters. One could also check this here in the symbol table
-    // which would require a recursive check for any calls performed in initially called module.
     if (validateCallerArguments) {
         if (std::any_of(
             callerArguments.cbegin(),

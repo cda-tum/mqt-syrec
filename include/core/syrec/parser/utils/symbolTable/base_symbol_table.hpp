@@ -5,7 +5,6 @@
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
-// TODO: Validation of entities during insert?
 namespace utils {
     class BaseSymbolTable {
     public:
@@ -16,16 +15,13 @@ namespace utils {
                 MultipleMatchesFound,
                 NoMatchFound
             };
-            Result                                              resolutionResult;
+            Result                                        resolutionResult;
             std::optional<std::shared_ptr<syrec::Module>> moduleMatchingSignature;
         };
 
-        [[maybe_unused]] bool            insertModule(const syrec::Module::ptr& module);
-        [[nodiscard]] syrec::Module::vec getModulesByName(const std::string_view& accessedModuleIdentifier) const;
-        [[nodiscard]] bool               existsModuleForName(const std::string_view& accessedModuleIdentifier) const;
-        // TODO: Should we allow variable type assignments that are not valid based on their semantics if we can prove that no assignment is performed (i.e. assignment of variable of type 'in' to type 'out')
-        // TODO: Should module overload resolution be an optional feature and the lookup be performed using exact variable type matching?
-        // TODO: Change signature to use std::vector of const variable pointers
+        [[maybe_unused]] bool                        insertModule(const syrec::Module::ptr& module);
+        [[nodiscard]] syrec::Module::vec             getModulesByName(const std::string_view& accessedModuleIdentifier) const;
+        [[nodiscard]] bool                           existsModuleForName(const std::string_view& accessedModuleIdentifier) const;
         [[nodiscard]] ModuleOverloadResolutionResult getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments) const;
 
         [[nodiscard]] std::optional<TemporaryVariableScope::ptr>    getActiveTemporaryScope() const;
@@ -52,5 +48,4 @@ namespace utils {
         [[nodiscard]] static bool doVariableStructuresMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) noexcept;
     };
 } // namespace utils
-
 #endif
