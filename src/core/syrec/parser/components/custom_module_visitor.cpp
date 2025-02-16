@@ -63,7 +63,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
                 // Recursive module calls are allowed except for either the explicitly or implicitly defined 'main' module of a SyReC program. The parser will not check whether a recursive
                 // call will lead to an infinite recursion since this would require a formal execution of the program and the reponsibility to prevent such calls is placed on the user.
                 recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);   
-            } else {
+            } else if (overloadResolutionResult.moduleMatchingSignature.has_value()) {
                 if (std::holds_alternative<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance)) {
                     const auto& callStatementInstance = std::get<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance);
                     callStatementInstance->target     = overloadResolutionResult.moduleMatchingSignature.value();
@@ -71,8 +71,9 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
                     const auto& uncallStatementInstance = std::get<std::shared_ptr<syrec::UncallStatement>>(callStatementVariant.callStatementVariantInstance);
                     uncallStatementInstance->target     = overloadResolutionResult.moduleMatchingSignature.value();
                 }
+            } else {
+                recordCustomError(semanticErrorPosition, "Failed to determine target module for call/uncall statement");   
             }
-                
         }
     }
     return generatedProgram;

@@ -358,7 +358,6 @@ TEST_F(SyrecParserErrorTestsFixture, LocalVariableBitwidthTakenFromUserConfigura
 }
 
 // Tests for production call-statement
-// TODO: All call statements should be repeated with the uncall keyword
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 95), "no viable alternative at input 'add('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) add(a, b, c)");
@@ -490,7 +489,6 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBrack
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c]");
 }
 
-// TODO: Printing user caller signature in semantic error message
 TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 151));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(8), in b(8), out c(8)) c ^= (a + b) module main(in a(12), in b(8), out c(10)) call add(a, b, c)");
@@ -1548,8 +1546,6 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
 // The question is whether the whole set of tests need to be repeated for the swap statement?
 
 // Tests for production binary-expression
-// TODO: Tests for truncation of values larger than the expected bitwidth
-// TODO: If short circuit evaluation of a binary expression can be performed, should semantic errors be reported? 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInBinaryExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 28), "a");
     performTestExecution("module main(out b(4)) b += (a - 2)");
@@ -1639,11 +1635,20 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfCons
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 4)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 4)) rof", customParserConfig);
 }
 
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInLhsOperandOfBinaryExpressionReportedEvenIfExpressionCouldBeSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 33), "b");
+    performTestExecution("module main(inout a(2)) a.0 += ((b.1 + 1) * (#a - 2))");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInRhsOperandOfBinaryExpressionReportedEvenIfExpressionCouldBeSimplified) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 44), "b");
+    performTestExecution("module main(inout a(2)) a.0 += ((#a - 2) * (b.1 + 1))");
+}
+
 // Tests for production unary-expression
 // TODO: Add tests when IR supports unary expressions
 
 // Tests for production shift-expression
-// TODO: Tests for truncation of values larger than the expected bitwidth
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInLhsOperandOfShiftExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 42), "c");
     performTestExecution("module main(out a(4), out b[2](4)) a += ((c << 2) + 2)");
@@ -1691,6 +1696,11 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfCons
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 113));
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (((b.$i:1 / 8) + a.0:2) << 2) then ++= a.0:1 else skip fi (((b.$i:1 / 8) + a.0:2) << 2) rof", customParserConfig);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInToBeShiftedExpressionReportedEvenIfShiftAmountWouldAllowSimplificationOfExpression) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 32), "b");
+    performTestExecution("module main(inout a(2)) a.0 += (b.1 << 2)");
 }
 
 // Tests for production number

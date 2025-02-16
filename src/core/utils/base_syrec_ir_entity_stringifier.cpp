@@ -47,7 +47,6 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
         && decrementIdentationLevel();
 }
 
-// TODO: Stringification will always omit the declared number of dimensions if a 1D variable with a single value is declared (we might want to explicitly specify the value if it was explicitly defined by the user)
 bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const syrec::Variable& variable, bool stringifyVariableType) const {
     if (!outputStream.good())
         return setStreamInFailedState(outputStream);
