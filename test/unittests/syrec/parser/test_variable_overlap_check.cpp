@@ -215,11 +215,6 @@ TEST_P(ExpectingNotOverlappingVariableAccessesTestFixture, ExpectingNoOverlap) {
     ASSERT_NO_FATAL_FAILURE(performTestExecution());
 }
 
-/* TODO: Parser should simplify variable declarations of the form 'in a[1][1][1]' to 'in a[1]', while the dimensions in a variable access are only allowed to be omitted in signals of the form a[1]
- * TODO: Should stringifier output signal of the form 'in a[1]' as 'in a[1]' or 'in a' (could also be configured via option).
- * TODO: How should out of range signal accesses be handled
- */
-
 INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariableAccessesTestFixture,
     testing::ValuesIn({
         OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessNoBitRangeAccess",
@@ -929,11 +924,6 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingNotOverlappingVari
         return info.param.testName;
     });
 
-// TODO: Tests for invalid variable accesses (nullptr expressions, etc.), missmatching reference variables?
-// TODO: Tests for overlap of partial variable accesses?
-// TODO: How should indices out of range be handled (accessed value of dimension or bit range)
-
-// TODO: Defined expected behaviour for cases in which the user provides invalid values for the bit range start and/or end (i.e. nullptrs)
 TEST(VariableAccessOverlapTests, ReferenceVariableNotSetCorrectlyDetected) {
     const std::vector<unsigned int> variableDimensions        = {1, 2};
     const auto                      rOperandReferenceVariable = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER + "otherIdent", variableDimensions, DEFAULT_VARIABLE_BITWIDTH);

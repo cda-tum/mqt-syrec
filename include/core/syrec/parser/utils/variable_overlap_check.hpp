@@ -35,9 +35,11 @@ namespace utils {
      * - The variable identifiers match
      * - The accessed values per dimension match
      * - The accessed bit ranges overlap <br>
-     * Note: Expressions defined in either the bitrange or accessed values per dimension are not evaluated and in case of that such an expression was defined
-     * for any of the accessed values of any dimension will result in a potential overlap being reported. If both indices of the explicitly accessed bitrange of
-     * any of the two variable accesses cannot be determined, a potential overlap will be reported. 
+     * Note: Expressions defined in either the bitrange or accessed value per dimension are not evaluated and will result in a potential overlap being reported if such an expression is detected for any of the accessed value of any dimension. <br>
+     * In case that all indices in the dimension access evaluate to a constant value, the result will depend on the overlap between the accessed bit ranges. <br>
+     * If one or both indices of the explicitly accessed bitrange of any of the two variable accesses cannot be determined (i.e. are not constant values) a potential overlap will be reported. <br>
+     * Invalid values for either any accessed value of a dimension or component of the accessed bit range are treated in the same way as non-constant values (i.e. will result in a potential overlap [see description above]) while out of range indices
+     * are not treated differently than 'valid' indices.
      *
      * @param lVariableAccess The first operand of the binary overlap operation
      * @param rVariableAccess The second operand of the binary overlap operation
