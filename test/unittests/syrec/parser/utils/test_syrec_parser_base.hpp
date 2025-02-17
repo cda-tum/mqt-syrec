@@ -29,11 +29,12 @@ protected:
         std::string stringifiedExpectedSyrecProgramContent;
     };
 
-    std::string jsonKeyInTestCaseDataForCircuit                              = "inputCircuit";
-    std::string jsonKeyInTestCaseDataForExpectedCircuit                      = "expectedCircuit";
-    std::string jsonKeyInTestCaseDataForParserConfiguration                  = "parserConfig";
-    std::string jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig  = "defaultBitwidth";
-    std::string jsonKeyInTestCaseDataForConstantValueTrunctionOperation      = "constValTruncationOp";
+    std::string jsonKeyInTestCaseDataForCircuit                                                                           = "inputCircuit";
+    std::string jsonKeyInTestCaseDataForExpectedCircuit                                                                   = "expectedCircuit";
+    std::string jsonKeyInTestCaseDataForParserConfiguration                                                               = "parserConfig";
+    std::string jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig                                               = "defaultBitwidth";
+    std::string jsonKeyInTestCaseDataForConstantValueTrunctionOperation                                                   = "constValTruncationOp";
+    std::string jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment = "allowOverlappingAccessOnAssignedToSignalParts";
 
     TestFromJson                              loadedTestCaseData;
     syrec::Program                            parserInstance;
@@ -101,6 +102,11 @@ protected:
                 userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::BitwiseAnd;
             else
                 FAIL() << "No mapping for user defined integer constant value truncation operation '" << stringifiedTruncationOperation << "' defined";
+        }
+
+        if (jsonObject.contains(jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment)) {
+            ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment).is_boolean());
+            userDefinedParserConfiguration->allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess = jsonObject.at(jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment).get<bool>();
         }
     }
 
