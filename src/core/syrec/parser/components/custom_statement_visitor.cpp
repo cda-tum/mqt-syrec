@@ -52,7 +52,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && assignmentRhsOperand.has_value() && *assignmentRhsOperand) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues)
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->expression()->getStart()));
     }
@@ -88,10 +88,21 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
         if (const auto& accessedBitrangeOfLhsOperand = swapLhsOperand.value()->var ? tryDetermineAccessedBitrangeOfVariableAccess(**swapLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value())
             expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
     }
+    
     const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(ctx->rhsOperand);
-    if (swapRhsOperand.has_value())
+    if (swapRhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *ctx->rhsOperand->getStart());
-
+        if (!parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess && areAllIndicesOfVaribleAccessConstants(**swapRhsOperand)) {
+            // A semantic error genereated during the processing of the lhs or rhs operand of the swap statement should not prevent the check for the usage of overlapping variable accesses in the dimension access of the operand
+            // on the lhs. To prevent the duplicate generation of the already found semantic errors on the lhs, a filter for the semantic error of interest will be temporarily set. An identical check for the usage of the variable
+            // of the lhs in any dimension access on the rhs is already performed during the processing of the latter.
+            sharedGeneratedMessageContainerInstance->setFilterForToBeRecordedMessages(std::string(getIdentifierForSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>()));
+            expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapRhsOperand);
+            // Future versions of the parser might implement a more efficient version of this check instead of simply reusing the visitor function as the same logic (i.e. duplicate allocations, etc.) is executed twice.
+            expressionVisitorInstance->visitSignalTyped(ctx->lhsOperand);
+            sharedGeneratedMessageContainerInstance->clearFilterForToBeRecordedMessages();
+        }
+    }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
@@ -177,7 +188,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues)
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->guardCondition->getStart()));
     }
@@ -193,7 +204,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
 
     if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues)
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*ctx->matchingGuardExpression->getStart()));
     }
@@ -324,4 +335,11 @@ std::optional<syrec::UnaryStatement::UnaryOperation> CustomStatementVisitor::des
     if (stringifiedUnaryAssignmentOperation == "~=")
         return syrec::UnaryStatement::UnaryOperation::Invert;
     return std::nullopt;
+}
+
+bool CustomStatementVisitor::areAllIndicesOfVaribleAccessConstants(const syrec::VariableAccess& variableAccess) {
+    return std::all_of(variableAccess.indexes.cbegin(), variableAccess.indexes.cend(),
+        [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
+                return exprDefiningAccessedValueOfDimension && tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension);
+            }) && tryDetermineAccessedBitrangeOfVariableAccess(variableAccess).has_value();
 }

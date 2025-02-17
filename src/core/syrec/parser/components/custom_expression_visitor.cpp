@@ -302,8 +302,12 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     generatedVariableAccess->indexes                     = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
 
     const std::optional<unsigned int> backupOfPriorExpectedBitwidthSizeForOperands = optionalExpectedBitwidthForAnyProcessedEntity;
-    if (!context->accessedDimensions.empty())
+    std::optional<bool>               backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed;
+    if (!context->accessedDimensions.empty()) {
         clearExpectedBitwidthForAnyProcessedEntity();
+        backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed = isCurrentlyProcessingDimensionAccessOfVariableAccess();
+        markStartOfProcessingOfDimensionAccessOfVariableAccess();
+    }
 
     for (std::size_t i = 0; i < context->accessedDimensions.size(); ++i) {
         // Due to the implemented optimization/simplifications of expression (i.e. an expression multiplied with 0 can be replaced with the latter), we need to record the components of the user defined
@@ -320,7 +324,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             // truncation of constant values in any binary expression that is part of E can use the set bitlength of any variable access (since we are assuming that the user defined a well formed expression [i.e. the accessed bitrange of any variable access operands
             // has the same length]).
             bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-            truncateConstantValuesInAnyBinaryExpression(generatedVariableAccess->indexes[i], *optionalExpectedBitwidthForAnyProcessedEntity, integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+            truncateConstantValuesInAnyBinaryExpression(generatedVariableAccess->indexes[i], *optionalExpectedBitwidthForAnyProcessedEntity, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
             if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
                 recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->accessedDimensions.at(i)->getStart()));
             }
@@ -330,6 +334,9 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
 
     if (backupOfPriorExpectedBitwidthSizeForOperands.has_value())
         setExpectedBitwidthForAnyProcessedEntity(*backupOfPriorExpectedBitwidthSizeForOperands);
+
+    if (backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed.has_value() && !*backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed)
+        markEndOfProcessingOfDimensionAccessOfVariableAccess();       
 
     if (matchingVariableForIdentifier.has_value()) {
         const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
@@ -414,14 +421,24 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
 
     // Since the error reported when defining an overlapping variable access is reported at the position of the variable identifier, this check needs to be performed prior
     // to the check for matching operand bitwidths (if no internal ordering of the reported errors is performed [which is currently the case])
-    if (const std::optional<utils::VariableAccessOverlapCheckResult>& overlapCheckResultWithRestrictedVariableParts = optionalRestrictionOnVariableAccesses.has_value() && *optionalRestrictionOnVariableAccesses ? utils::checkOverlapBetweenVariableAccesses(**optionalRestrictionOnVariableAccesses, *generatedVariableAccess) : std::nullopt;
+    if (const std::optional<utils::VariableAccessOverlapCheckResult>& overlapCheckResultWithRestrictedVariableParts = optionalRestrictionOnVariableAccesses.has_value() && *optionalRestrictionOnVariableAccesses 
+            && (!isCurrentlyProcessingDimensionAccessOfVariableAccess() || !parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess)
+            ? utils::checkOverlapBetweenVariableAccesses(**optionalRestrictionOnVariableAccesses, *generatedVariableAccess)
+            : std::nullopt;
         overlapCheckResultWithRestrictedVariableParts.has_value() && overlapCheckResultWithRestrictedVariableParts->overlapState == utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping) {
         if (!overlapCheckResultWithRestrictedVariableParts->overlappingIndicesInformations.has_value())
             recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Overlap with restricted variable parts detected but no further information about overlap available. This should not happen");
-        else
-            recordSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
-                    mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
-                    overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
+        else {
+            if (isCurrentlyProcessingDimensionAccessOfVariableAccess()) {
+                recordSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+                        mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
+                        overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
+            } else {
+                recordSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
+                        mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
+                        overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
+            }
+        }
     }
 
     std::optional<unsigned int> accessedBitRangeStart;
@@ -466,6 +483,7 @@ void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
 }
 
 bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {
+    clearRestrictionOnVariableAccesses();
     if (!notAccessiblePartsForFutureVariableAccesses
         || !notAccessiblePartsForFutureVariableAccesses->var 
         || notAccessiblePartsForFutureVariableAccesses->var->name.empty()
@@ -536,6 +554,18 @@ bool CustomExpressionVisitor::truncateConstantValuesInAnyBinaryExpression(syrec:
         }
     }
     return wasOriginalExprModified;
+}
+
+void CustomExpressionVisitor::markStartOfProcessingOfDimensionAccessOfVariableAccess() {
+    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = true;
+}
+
+void CustomExpressionVisitor::markEndOfProcessingOfDimensionAccessOfVariableAccess() {
+    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = false;
+}
+
+bool CustomExpressionVisitor::isCurrentlyProcessingDimensionAccessOfVariableAccess() const {
+    return isCurrentlyProcessingDimensionAccessOfVariableAccessFlag;
 }
 
 // START OF NON-PUBLIC FUNCTIONALITY

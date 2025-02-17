@@ -22,6 +22,7 @@ namespace syrecParser {
         CannotCallMainModule,
         ValueOfLoopVariableNotUsableInItsInitialValueDeclaration,
         ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts,
+        SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts,
         DeclaredVariableBitwidthTooLarge,
         InfiniteLoopDetected,
         UnhandledOperationFromGrammarInParser
@@ -35,28 +36,51 @@ namespace syrecParser {
         // Note: This function can only be implemented as a constexpr if the semantic error is provided as a template argument and not as a function parameter.
         switch (semanticError) {
             case SemanticError::NoVariableMatchingIdentifier:
+                return "SEM01";
             case SemanticError::NoModuleMatchingIdentifier:
+                return "SEM02";
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
+                return "SEM03";
             case SemanticError::TooManyDimensionsAccessed:
+                return "SEM04";
             case SemanticError::TooFewDimensionsAccessed:
+                return "SEM05";
             case SemanticError::IndexOfAccessedBitOutOfRange:
+                return "SEM06";
             case SemanticError::DuplicateVariableDeclaration:
+                return "SEM07";
             case SemanticError::DuplicateModuleDeclaration:
+                return "SEM08";
             case SemanticError::AssignmentToReadonlyVariable:
+                return "SEM09";
             case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
+                return "SEM10";
             case SemanticError::IfGuardExpressionMissmatch:
+                return "SEM11";
             case SemanticError::NoModuleMatchingCallSignature:
+                return "SEM12";
             case SemanticError::ExpressionBitwidthMissmatches:
+                return "SEM13";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
+                return "SEM14";
             case SemanticError::DuplicateMainModuleDefinition:
+                return "SEM15";
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
+                return "SEM16";
             case SemanticError::CannotCallMainModule:
+                return "SEM17";
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
+                return "SEM18";
             case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
+                return "SEM19";
+            case SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts:
+                return "SEM20";
             case SemanticError::DeclaredVariableBitwidthTooLarge:
+                return "SEM21";
             case SemanticError::InfiniteLoopDetected:
+                return "SEM22";
             case SemanticError::UnhandledOperationFromGrammarInParser:
-                return "TEST";
+                return "SEM23";
             default:
                 return "";
         }
@@ -108,6 +132,8 @@ namespace syrecParser {
                 return "Loop variable {:s} cannot be used in the definition of its initial value";
             case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
                 return "Overlap with restricted variable parts (formatted as: dimension access [shown as tuples of the form (dimensionIdx, value of dimension)] | overlapping bit) = '{:s}' detected preventing the inversion of the current statement";
+            case SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts:
+                return "Overlap with restricted variable parts (formatted as: dimension access [shown as tuples of the form (dimensionIdx, value of dimension)] | overlapping bit) = '{:s}' detected potentially preventing the synthesis of the current expression";
             case SemanticError::DeclaredVariableBitwidthTooLarge:
                 return "Declared variable bitwidth {:d} exceeds the maximum supported variable bitwidth of {:d} bits";
             case SemanticError::InfiniteLoopDetected:

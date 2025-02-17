@@ -44,15 +44,15 @@ namespace syrecParser {
      */
     class CustomBaseVisitor {
     public:
-        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation):
-            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance), integerConstantTruncationOperation(integerConstantTruncationOperation) {}
+        CustomBaseVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedGeneratedMessageContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
+            sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance), parserConfiguration(parserConfiguration) {}
 
     protected:
         std::shared_ptr<ParserMessagesContainer>  sharedGeneratedMessageContainerInstance;
         std::shared_ptr<utils::BaseSymbolTable>   symbolTable;
         static constexpr unsigned int             DEFAULT_EXPRESSION_BITWIDTH   = 32;
         static constexpr unsigned int             MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
-        utils::IntegerConstantTruncationOperation integerConstantTruncationOperation;
+        syrec::ReadProgramSettings                parserConfiguration;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
             return Message::Position(token.getLine(), token.getCharPositionInLine());

@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -23,10 +24,10 @@ namespace syrecParser {
             Warning
         };
 
-        Type                     type;
-        std::string              id;
-        Position                 position;
-        std::string              message;
+        Type        type;
+        std::string id;
+        Position    position;
+        std::string message;
 
         Message(Type type, std::string id, const Position position, std::string message):
             type(type), id(std::move(id)), position(position), message(std::move(message)) {}
@@ -46,9 +47,12 @@ namespace syrecParser {
 
         void                                    recordMessage(std::unique_ptr<Message> message);
         [[nodiscard]] std::vector<Message::ptr> getMessagesOfType(Message::Type messageType) const;
+        [[maybe_unused]] bool                   setFilterForToBeRecordedMessages(const std::string& messageIdToPassFilter);
+        void                                    clearFilterForToBeRecordedMessages();
 
     protected:
         std::unordered_map<Message::Type, std::vector<Message::ptr>> messagesPerType;
+        std::optional<std::string>                                   temporaryFilterForToBeRecordedMessages;
     };
 } // namespace syrecParser
 #endif

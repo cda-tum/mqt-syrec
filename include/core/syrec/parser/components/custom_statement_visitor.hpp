@@ -40,9 +40,9 @@ namespace syrecParser {
                 signatureOfModuleContainingCallStatement(std::move(signatureOfModuleContainingCallStatement)) {}
         };
 
-        CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation):
-            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, integerConstantTruncationOperation),
-            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance, sharedSymbolTableInstance, integerConstantTruncationOperation)) {}
+        CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
+            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration),
+            expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration)) {}
  
         [[nodiscard]] std::optional<syrec::Statement::vec>        visitStatementListTyped(const TSyrecParser::StatementListContext* ctx);
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(TSyrecParser::StatementContext* ctx);
@@ -69,6 +69,7 @@ namespace syrecParser {
 
         [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
         [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
+        [[nodiscard]] static bool                                                   areAllIndicesOfVaribleAccessConstants(const syrec::VariableAccess& variableAccess);
         [[nodiscard]] static bool                                                   doesVariableTypeAllowAssignment(const syrec::Variable::Type variableType) noexcept {
             return variableType == syrec::Variable::Type::Inout || variableType == syrec::Variable::Type::Out || variableType == syrec::Variable::Type::Wire;
         }

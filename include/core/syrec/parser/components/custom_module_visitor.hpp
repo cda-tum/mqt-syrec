@@ -9,10 +9,10 @@
 namespace syrecParser {
     class CustomModuleVisitor: protected CustomBaseVisitor {
     public:
-        CustomModuleVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const syrec::ReadProgramSettings& userProvidedParserSettings, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation):
-            CustomBaseVisitor(sharedMessagesContainerInstance, std::make_shared<utils::BaseSymbolTable>(), integerConstantTruncationOperation),
+        CustomModuleVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const syrec::ReadProgramSettings& userProvidedParserSettings):
+            CustomBaseVisitor(sharedMessagesContainerInstance, std::make_shared<utils::BaseSymbolTable>(), userProvidedParserSettings),
             defaultVariableBitwidth(userProvidedParserSettings.defaultBitwidth),
-            statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedGeneratedMessageContainerInstance, this->symbolTable, integerConstantTruncationOperation)) {}
+            statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedGeneratedMessageContainerInstance, this->symbolTable, userProvidedParserSettings)) {}
 
         [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context) const; 
 
