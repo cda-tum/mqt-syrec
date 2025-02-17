@@ -4,6 +4,12 @@
 
 using namespace utils;
 
+namespace {
+    std::pair<unsigned int, unsigned int> determineBitrangeConstantIndexPairOrderedAscendingly(unsigned int bitrangeStartIndexValue, unsigned int bitrangeEndIndexValue) {
+        return bitrangeStartIndexValue <= bitrangeEndIndexValue ? std::make_pair(bitrangeStartIndexValue, bitrangeEndIndexValue) : std::make_pair(bitrangeEndIndexValue, bitrangeStartIndexValue);
+    }
+}
+
 std::optional<unsigned int> tryEvaluateNumber(const syrec::Number::ptr& numberToEvaluate) {
     return numberToEvaluate && numberToEvaluate->isConstant() ? numberToEvaluate->tryEvaluate({}) : std::nullopt;
 }
@@ -87,48 +93,43 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
 
     std::optional<unsigned int> overlappingBit;
-    // Handle lVar bitrange with only one known index value
+    // Either the bitrange start or end index of the lhs variable access has a constant value
     if (evaluatedLVarBitRangeStart.has_value() != evaluatedLVarBitRangeEnd.has_value()) {
-        const unsigned int lVarKnownBitIndex = evaluatedLVarBitRangeStart.has_value() ? *evaluatedLVarBitRangeStart : *evaluatedLVarBitRangeEnd;
-        // Check for overlap of lVar index with rVar bitrange with only one known index
+        const auto lVarKnownBitIndexValue = evaluatedLVarBitRangeStart.has_value() ? *evaluatedLVarBitRangeStart : *evaluatedLVarBitRangeEnd;
+        // Either the bitrange start or end index of the rhs variable access has a constant value
         if (evaluatedRVarBitRangeStart.has_value() != evaluatedRVarBitRangeEnd.has_value()) {
-            const unsigned int rVarKnownBitIndex = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
-            if (lVarKnownBitIndex == rVarKnownBitIndex)
-                overlappingBit = lVarKnownBitIndex;
-        } else {
-            const std::pair<unsigned int, unsigned int> orderedBitrangeOfRVar = *evaluatedRVarBitRangeStart <= *evaluatedRVarBitRangeEnd
-                ? std::make_pair(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd)
-                : std::make_pair(*evaluatedRVarBitRangeEnd, *evaluatedRVarBitRangeStart);
-
-            if (orderedBitrangeOfRVar.first <= lVarKnownBitIndex && lVarKnownBitIndex <= orderedBitrangeOfRVar.second)
-                overlappingBit = lVarKnownBitIndex;
+            const auto rVarKnonwBitIndexValue = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
+            if (lVarKnownBitIndexValue == rVarKnonwBitIndexValue)
+                overlappingBit = lVarKnownBitIndexValue;
+        } else if (evaluatedRVarBitRangeStart.has_value()) {
+            // Both bitrange start and end index of the rhs variable access have a constant value
+            const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfRVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd);
+            if (orderedIndicesOfBitrangeAccessOfRVar.first <= lVarKnownBitIndexValue && lVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfRVar.second)
+                overlappingBit = lVarKnownBitIndexValue;
         }
-    } else {
-        // Handle lVar bitrange overlap check with rVar bit range with only one known index value
+    } else if (evaluatedLVarBitRangeStart.has_value()) {
+        // Either the bitrange start or end index of the rhs variable access has a constant value
         if (evaluatedRVarBitRangeStart.has_value() != evaluatedRVarBitRangeEnd.has_value()) {
-            const unsigned int rVarKnownBitIndex = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
-            if (*evaluatedLVarBitRangeStart >= rVarKnownBitIndex || rVarKnownBitIndex <= *evaluatedLVarBitRangeEnd)
-                overlappingBit = rVarKnownBitIndex;
-        } else {
-            // Handle bit range intersections between variable accesses with known values for both the bitrange start and end index.
-            // To support both bit range variants (I. start > end && II. end < start) we reorder both variants to the I. variant for easier handling.
-            const std::pair<unsigned int, unsigned int> orderedBitrangeOfLVar = *evaluatedLVarBitRangeStart <= *evaluatedLVarBitRangeEnd
-                ? std::make_pair(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd)
-                : std::make_pair(*evaluatedLVarBitRangeEnd, *evaluatedLVarBitRangeStart);
+            const auto rVarKnownBitIndexValue = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
+            const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfLVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
+            if (orderedIndicesOfBitrangeAccessOfLVar.first <= rVarKnownBitIndexValue && rVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfLVar.second)
+                overlappingBit = rVarKnownBitIndexValue;
+        } else if (evaluatedRVarBitRangeStart.has_value()) {
+            // The indices of the accessed bitrange in both operands have a constant value
+            const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfRVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd);
+            const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfLVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
 
-            const std::pair<unsigned int, unsigned int> orderedBitrangeOfRVar = *evaluatedRVarBitRangeStart <= *evaluatedRVarBitRangeEnd
-                ? std::make_pair(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd)
-                : std::make_pair(*evaluatedRVarBitRangeEnd, *evaluatedRVarBitRangeStart);
-
-            if ((orderedBitrangeOfLVar.first < orderedBitrangeOfRVar.first && orderedBitrangeOfLVar.second < orderedBitrangeOfRVar.first) 
-                || (orderedBitrangeOfLVar.first > orderedBitrangeOfRVar.first && orderedBitrangeOfLVar.first > orderedBitrangeOfRVar.second))
+            if ((orderedIndicesOfBitrangeAccessOfLVar.first < orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.second < orderedIndicesOfBitrangeAccessOfRVar.first) || (orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.second))
                 return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::NotOverlapping);
 
-            const std::pair<unsigned int, unsigned int> accessedBitRangeOfLVar = std::make_pair(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
-            if (accessedBitRangeOfLVar.first > accessedBitRangeOfLVar.second)
-                overlappingBit = orderedBitrangeOfRVar.second <= accessedBitRangeOfLVar.first ? orderedBitrangeOfRVar.second : accessedBitRangeOfLVar.first;
-            else
-                overlappingBit = orderedBitrangeOfRVar.first >= accessedBitRangeOfLVar.first ? orderedBitrangeOfRVar.first : accessedBitRangeOfLVar.first;
+            const std::pair<unsigned int, unsigned int> accessedBitRangeOfLVar    = std::make_pair(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
+            if (accessedBitRangeOfLVar.first < accessedBitRangeOfLVar.second) {
+                overlappingBit = accessedBitRangeOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.first ? accessedBitRangeOfLVar.first : orderedIndicesOfBitrangeAccessOfRVar.first;
+            } else if (accessedBitRangeOfLVar.first > accessedBitRangeOfLVar.second) {
+                overlappingBit = accessedBitRangeOfLVar.first < orderedIndicesOfBitrangeAccessOfRVar.second ? accessedBitRangeOfLVar.first : orderedIndicesOfBitrangeAccessOfRVar.second;
+            } else {
+                overlappingBit = accessedBitRangeOfLVar.first;
+            }
         }
     }
 

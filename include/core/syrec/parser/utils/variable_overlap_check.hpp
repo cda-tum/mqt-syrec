@@ -37,13 +37,13 @@ namespace utils {
      * - The accessed bit ranges overlap <br>
      * Note: Expressions defined in either the bitrange or accessed value per dimension are not evaluated and will result in a potential overlap being reported if such an expression is detected for any of the accessed value of any dimension. <br>
      * In case that all indices in the dimension access evaluate to a constant value, the result will depend on the overlap between the accessed bit ranges. <br>
-     * If one or both indices of the explicitly accessed bitrange of any of the two variable accesses cannot be determined (i.e. are not constant values) a potential overlap will be reported. <br>
-     * Invalid values for either any accessed value of a dimension or component of the accessed bit range are treated in the same way as non-constant values (i.e. will result in a potential overlap [see description above]) while out of range indices
-     * are not treated differently than 'valid' indices.
+     * If both indicies of the explicitly accessed bitrange of either of the two varaible access are not constants, a potential overlap will be reported. <br>
+     * Invalid values for either any of the expressions defining the accessed value per dimension of for any component of the bitrange is treated in the same way as non-constant values (i.e. resulting in a potential overlap [see description above]) while out of range constant value indices
+     * are treated identical to 'valid' indices.
      *
      * @param lVariableAccess The first operand of the binary overlap operation
      * @param rVariableAccess The second operand of the binary overlap operation
-     * @return A container storing the overlap state of the two variable access with additional overlap information in case of an overlap at a known position in either the accessed values of the dimensions or implicitly/explicity accessed bit range, std::nullopt if the dimensions or bitwidths of the reference variable did not match.
+     * @return In case that either a potential or definitive overlap was detected, a container holding information about the type of overlap and additional information about the overlapping indices (in case of a definitive overlap) from the point of the lhs variable access, otherwise std::nullopt is returned. <br>
      */
     [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess);
 }
