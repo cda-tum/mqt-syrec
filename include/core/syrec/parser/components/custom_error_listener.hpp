@@ -2,8 +2,8 @@
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_ERROR_LISTENER_HPP
 #pragma once
 
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "BaseErrorListener.h"
-#include <core/syrec/parser/utils/parser_messages_container.hpp>
 
 namespace syrecParser {
     class CustomErrorListener: public antlr4::BaseErrorListener {

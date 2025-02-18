@@ -1,5 +1,6 @@
 #ifndef CORE_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
 #define CORE_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
+#pragma once
 
 #include "core/syrec/program.hpp"
 

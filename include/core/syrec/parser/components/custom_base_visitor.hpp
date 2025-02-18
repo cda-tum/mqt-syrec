@@ -2,12 +2,11 @@
 #define CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
 #pragma once
 
-#include "Token.h"
-#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
-
-#include <core/syrec/parser/utils/custom_error_mesages.hpp>
-#include <core/syrec/parser/utils/parser_messages_container.hpp>
+#include "core/syrec/parser/utils/custom_error_mesages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+
+#include "Token.h"
 
 #include <fmt/core.h>
 #include <optional>

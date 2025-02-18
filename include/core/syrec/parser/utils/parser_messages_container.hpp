@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
 #define CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
+#pragma once
 
 #include <memory>
 #include <vector>

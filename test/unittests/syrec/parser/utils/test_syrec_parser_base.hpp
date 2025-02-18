@@ -3,6 +3,7 @@
 #pragma once
 
 #include "core/syrec/program.hpp"
+#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
 
 #include <string>
 #include <fstream>
@@ -10,7 +11,6 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include <core/utils/base_syrec_ir_entity_stringifier.hpp>
 
 using json = nlohmann::json;
 

@@ -1,5 +1,5 @@
 #include "core/syrec/expression.hpp"
-#include <core/syrec/parser/utils/variable_access_index_check.hpp>
+#include "core/syrec/parser/utils/variable_access_index_check.hpp"
 
 #include <algorithm>
 

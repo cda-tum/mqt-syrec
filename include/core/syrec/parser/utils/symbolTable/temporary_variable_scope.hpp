@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_TEMPORARY_VARIABLE_SCOPE_HPP
 #define CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_TEMPORARY_VARIABLE_SCOPE_HPP
+#pragma once
 
 #include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"

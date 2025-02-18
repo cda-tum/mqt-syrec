@@ -2,12 +2,14 @@
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_EXPRESSION_VISITOR_HPP
 #pragma once
 
-#include "TSyrecParser.h"
+
 #include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 
-#include <core/syrec/expression.hpp>
-#include <core/syrec/parser/components/custom_base_visitor.hpp>
+#include "core/syrec/expression.hpp"
+#include "core/syrec/parser/components/custom_base_visitor.hpp"
+
+#include "TSyrecParser.h"
 
 namespace syrecParser {
     class CustomExpressionVisitor: protected CustomBaseVisitor {

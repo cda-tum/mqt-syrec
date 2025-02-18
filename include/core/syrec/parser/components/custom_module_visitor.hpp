@@ -2,9 +2,9 @@
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_MODULE_VISITOR_HPP
 #pragma once
 
-#include <core/syrec/program.hpp>
-#include <core/syrec/parser/components/custom_base_visitor.hpp>
-#include <core/syrec/parser/components/custom_statement_visitor.hpp>
+#include "core/syrec/program.hpp"
+#include "core/syrec/parser/components/custom_base_visitor.hpp"
+#include "core/syrec/parser/components/custom_statement_visitor.hpp"
 
 namespace syrecParser {
     class CustomModuleVisitor: protected CustomBaseVisitor {

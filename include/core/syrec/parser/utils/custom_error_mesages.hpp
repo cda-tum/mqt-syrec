@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_UTILS_CUSTOM_ERROR_MESSAGES_HPP
 #define CORE_SYREC_PARSER_UTILS_CUSTOM_ERROR_MESSAGES_HPP
+#pragma once
 
 namespace syrecParser {
     enum class SemanticError : unsigned int {

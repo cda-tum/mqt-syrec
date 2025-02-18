@@ -1,7 +1,8 @@
 #ifndef CORE_SYREC_PARSER_UTILS_SYREC_OPERATION_UTILS_HPP
 #define CORE_SYREC_PARSER_UTILS_SYREC_OPERATION_UTILS_HPP
+#pragma once
 
-#include <core/syrec/expression.hpp>
+#include "core/syrec/expression.hpp"
 
 namespace utils {
     enum class IntegerConstantTruncationOperation {

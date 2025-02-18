@@ -1,9 +1,8 @@
-#include <algorithm>
-#include <set>
-
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/variable_assignability_check.hpp"
+
+#include <algorithm>
 
 bool utils::BaseSymbolTable::insertModule(const syrec::Module::ptr& module) {
     if (!module || module->name.empty() 

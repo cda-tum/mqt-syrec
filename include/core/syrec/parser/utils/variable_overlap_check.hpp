@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_UTILS_VARIABLE_OVERLAP_CHECK_HPP
 #define CORE_SYREC_PARSER_UTILS_VARIABLE_OVERLAP_CHECK_HPP
+#pragma once
 
 #include <core/syrec/variable.hpp>
 #include <vector>

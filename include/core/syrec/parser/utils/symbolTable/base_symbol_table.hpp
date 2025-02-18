@@ -1,5 +1,6 @@
 #ifndef CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_BASE_SYMBOLTABLE_HPP
 #define CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_BASE_SYMBOLTABLE_HPP
+#pragma once
 
 #include "core/syrec/module.hpp"
 #include "core/syrec/variable.hpp"

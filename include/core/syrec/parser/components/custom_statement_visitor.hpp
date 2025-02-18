@@ -3,8 +3,8 @@
 #pragma once
 
 #include "core/syrec/variable.hpp"
-#include <core/syrec/statement.hpp>
-#include <core/syrec/parser/components/custom_expression_visitor.hpp>
+#include "core/syrec/statement.hpp"
+#include "core/syrec/parser/components/custom_expression_visitor.hpp"
 
 namespace syrecParser {
     class CustomStatementVisitor: protected CustomBaseVisitor {

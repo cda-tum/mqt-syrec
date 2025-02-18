@@ -1,7 +1,8 @@
 #ifndef CORE_SYREC_PARSER_UTILS_VARIABLE_ACCESS_INDEX_CHECK_HPP
 #define CORE_SYREC_PARSER_UTILS_VARIABLE_ACCESS_INDEX_CHECK_HPP
+#pragma once
 
-#include <core/syrec/variable.hpp>
+#include "core/syrec/variable.hpp"
 
 #include <optional>
 
