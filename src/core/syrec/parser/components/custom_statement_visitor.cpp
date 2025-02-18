@@ -92,7 +92,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
     const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(ctx->rhsOperand);
     if (swapRhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *ctx->rhsOperand->getStart());
-        if (!parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess && areAllIndicesOfVaribleAccessConstants(**swapRhsOperand)) {
+        if (!parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {
             // A semantic error genereated during the processing of the lhs or rhs operand of the swap statement should not prevent the check for the usage of overlapping variable accesses in the dimension access of the operand
             // on the lhs. To prevent the duplicate generation of the already found semantic errors on the lhs, a filter for the semantic error of interest will be temporarily set. An identical check for the usage of the variable
             // of the lhs in any dimension access on the rhs is already performed during the processing of the latter.
@@ -335,11 +335,4 @@ std::optional<syrec::UnaryStatement::UnaryOperation> CustomStatementVisitor::des
     if (stringifiedUnaryAssignmentOperation == "~=")
         return syrec::UnaryStatement::UnaryOperation::Invert;
     return std::nullopt;
-}
-
-bool CustomStatementVisitor::areAllIndicesOfVaribleAccessConstants(const syrec::VariableAccess& variableAccess) {
-    return std::all_of(variableAccess.indexes.cbegin(), variableAccess.indexes.cend(),
-        [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
-                return exprDefiningAccessedValueOfDimension && tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension);
-            }) && tryDetermineAccessedBitrangeOfVariableAccess(variableAccess).has_value();
 }

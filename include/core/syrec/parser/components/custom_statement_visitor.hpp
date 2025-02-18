@@ -69,7 +69,6 @@ namespace syrecParser {
 
         [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
         [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
-        [[nodiscard]] static bool                                                   areAllIndicesOfVaribleAccessConstants(const syrec::VariableAccess& variableAccess);
         [[nodiscard]] static bool                                                   doesVariableTypeAllowAssignment(const syrec::Variable::Type variableType) noexcept {
             return variableType == syrec::Variable::Type::Inout || variableType == syrec::Variable::Type::Out || variableType == syrec::Variable::Type::Wire;
         }
