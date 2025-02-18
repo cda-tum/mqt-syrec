@@ -901,154 +901,154 @@
   },
 
 
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfinout b(UsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].0]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[0][2][1].$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].1:2]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[0][2][1].1:$i] rof",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithUnknownIndiciesValuesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithUnknownIndicesValuesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[0][2][1].($i - 1):$i] rof",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[0][2][1].0]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[0][2][1].2]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].1 <=> b[a[0][2][1].2:0]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].3 <=> b[a[0][2][1].2:0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitEnclosedByBitrangeWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitEnclosedByBitrangeWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1].1]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitOutsideOfBitrangeWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitOutsideOfBitrangeWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1].3]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1]]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
     }
   },
 
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentWithAccessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementWithAccessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][2][1]]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][2][1].0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][2][1].$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][2][1].1:2]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][2][1].1:$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithUnknownIndiciesValuesAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithUnknownIndicesValuesAndLhsAccessingFullbitwidthWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][2][1].($i - 1):$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[1][2][1].0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[1][2][1].2]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].1 <=> b[a[1][2][1].2:0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].3 <=> b[a[1][2][1].2:0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitEnclosedByBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitEnclosedByBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][2][1].1]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitOutsideOfBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitOutsideOfBitrangeWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][2][1].3]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnSomeOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSomeOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][2][1]]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnSomeOverlappingValuesOfDimensionsWithRhsOperandAccessingUnknownValueOfDimension": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSomeOverlappingValuesOfDimensionsWithRhsOperandAccessingUnknownValueOfDimension": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) for $i = 0 to 3 step 1 do a[0][2][1].2:0 <=> b[a[1][($i + 1)][1]] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnSomeOverlappingValuesOfDimensionsWithLhsOperandAccessingUnknownValueOfDimension": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSomeOverlappingValuesOfDimensionsWithLhsOperandAccessingUnknownValueOfDimension": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) for $i = 0 to 3 step 1 do a[0][($i + 1)][1].2:0 <=> b[a[1][2][1]] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnSomeOverlappingValuesOfDimensionsWithBothOperandsAccessingUnknownValueOfDimension": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSomeOverlappingValuesOfDimensionsWithBothOperandsAccessingUnknownValueOfDimension": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) for $i = 0 to 3 step 1 do a[0][($i + 1)][1].2:0 <=> b[a[(1 - $i)][2][1]] rof"
   },
 
 
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentWithAccessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementWithAccessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][1][1]]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][1][1].0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithUnknownValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][1][1].$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[1][1][1].1:2]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][1][1].1:$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithUnknownIndiciesValuesAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithUnknownIndicesValuesAndLhsAccessingFullbitwidthWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[1][1][1].($i - 1):$i] rof"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[1][1][1].0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsNotOverlappingWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[1][1][1].2]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].1 <=> b[a[1][1][1].2:0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitNotInBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].3 <=> b[a[1][1][1].2:0]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitEnclosedByBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitEnclosedByBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][1][1].1]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitOutsideOfBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitOutsideOfBitrangeWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][1][1].3]"
   },
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndiciesWithAcessOnNoOverlappingValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[1][1][1]]"
   },
 

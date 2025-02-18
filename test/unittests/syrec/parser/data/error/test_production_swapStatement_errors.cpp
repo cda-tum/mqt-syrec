@@ -1,9 +1,6 @@
 #include "test_syrec_parser_errors_base.hpp"
 
-// TODO: Add tests for overlapping operands of swap operation (tests which were already defined for the assignment statement and can be copied).
-// The question is whether the whole set of tests need to be repeated for the swap statement?
-
-//// TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
+// TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 31), "a");
@@ -37,7 +34,6 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionOnRhsOfSwapStatementCauses
     performTestExecution("module main(inout a(4), out b(4)) a <=> (b - 2)");
 }
 
-// TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitAccessCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 40), 4, 1);
     performTestExecution("module main(inout a(4), out b(4)) a <=> b.1");
@@ -123,12 +119,12 @@ TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBei
     performTestExecution("module main(inout a(4), out b(4)) for $i = 0 to 3 do a <=> b.$i rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVaribleAccessOfLhsSwapOperandCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVariableAccessOfLhsSwapOperandCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 37));
     performTestExecution("module main(inout a[2](4), out b(4)) a <=> b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVaribleAccessOfRhsSwapOperandCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, Non1DSignalInEvaluatedVariableAccessOfRhsSwapOperandCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 43));
     performTestExecution("module main(inout a(4), out b[2](4)) a <=> b");
 }
@@ -158,4 +154,570 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
     recordSyntaxError(Message::Position(1, 47), "extraneous input '$' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 48), "i");
     performTestExecution("module main(out b(4)) for $i = 0 to 3 do b <=> $i rof");
+}
+
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a[0] <=> b[a[0]]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndexValue) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a[0] <=> b[a[0].1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingImplicitDimensionAccessOfLhsOfSwapStatementInDimensionAccessOfVariableAccesOfRhsUsingImplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 44), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a <=> b[a]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingImplicitDimensionAccessOfLhsOfSwapStatementInDimensionAccessOfVariableAccesOfRhsUsingExplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 44), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a <=> b[a[0]]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingExplicitDimensionAccessOfLhsOfSwapStatementInDimensionAccessOfVariableAccesOfRhsUsingImplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a[0] <=> b[a]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeUsingConstantIndices) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) a[0] <=> b[a[0].1:2]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantValueStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 66), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0] <=> b[a[0].1:($i + 1)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantValueEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 66), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0] <=> b[a[0].($i + 1):1] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 49), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) a[0].2 <=> b[a[0]]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndexValueAndBitIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 49), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) a[0].2 <=> b[a[0].2]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesWithBitEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 49), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) a[0].2 <=> b[a[0].0:3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesWithBitIndexEqualToBitrangeStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 49), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) a[0].2 <=> b[a[0].2:3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesWithBitIndexEqualToBitrangeEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 49), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) a[0].3 <=> b[a[0].2:3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].1:3 <=> b[a]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].1:3 <=> b[a.2]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndexEqualToBitrangeStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].1:3 <=> b[a.1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndexEqualToBitrangeEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].1:3 <=> b[a.3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitrangeEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(2)) a[0].2:3 <=> b[a.1:4]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndRhsBitrangeEnclosedByLhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) a[0].1:4 <=> b[a.2:3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitrangeOverlapping) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) a[0].1:4 <=> b[a.0:3]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitrangesBeingEqual) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 51), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) a[0].1:4 <=> b[a.4:1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantStartIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 70), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do a[0].1:4 <=> b[a[0].2:($i + 1)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantStartIndexEqualToBitrangeBounds) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 70), generateVariableAccessOverlappingIndicesDataContainer({0}, 4).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do a[0].4:1 <=> b[a[0].4:($i + 1)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantEndIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 70), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do a[0].1:4 <=> b[a[0].($i + 1):2] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantEndIndexEqualToBitrangeBounds) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 70), generateVariableAccessOverlappingIndicesDataContainer({0}, 4).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do a[0].1:4 <=> b[a[0].($i + 1):4] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].2:$i <=> b[a[0]] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].2:$i <=> b[a[0].2] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].2:$i <=> b[a[0].0:3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitEqualToStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].3:$i <=> b[a[0].0:3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantStartIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].3:$i <=> b[a[0].3:(1 - $i)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantEndIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].3:$i <=> b[a[0].(1 - $i):3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:2 <=> b[a[0]] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitWithConstantIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:2 <=> b[a[0].2] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:2 <=> b[a[0].0:3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantIndicesAndLhsBitEqualToStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:3 <=> b[a[0].0:3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantStartIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:3 <=> b[a[0].3:(1 - $i)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingBitrangeWithConstantEndIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 71), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do a[0].$i:3 <=> b[a[0].(1 - $i):3] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementWithAccessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 62), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1]]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 62), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 62), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].1:2]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 88), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[0][2][1].1:$i] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 64), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[0][2][1].0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 64), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].1 <=> b[a[0][2][1].2:0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitEnclosedByBitrangeWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 66), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1].1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 66), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1]]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessignLhsOperandInBinaryExpressionInDimensionAccessOfRhsOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 56), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].0:2 <=> b[(2 + a[0].1:2)]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessingLhsOperandInShiftExpressionInDimensionAccessOfRhsOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 52), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) a[0].0:2 <=> b[(a[0].1:3 << 2)]");
+}
+
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a[0]] <=> a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndexValue) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a[0].1] <=> a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingImplicitDimensionAccessOfRhsOfSwapStatementInDimensionAccessOfVariableAccesOfLhsUsingImplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a] <=> a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingImplicitDimensionAccessOfRhsOfSwapStatementInDimensionAccessOfVariableAccesOfLhsUsingExplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a[0]] <=> a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthUsingExplicitDimensionAccessOfRhsOfSwapStatementInDimensionAccessOfVariableAccesOfLhsUsingImplicitDimensionAccess) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a] <=> a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeUsingConstantIndices) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) b[a[0].1:2] <=> a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantValueStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].1:($i + 1)] <=> a[0] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantValueEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].($i + 1):1] <=> a[0] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) b[a[0]] <=> a[0].2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndexValueAndBitIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) b[a[0].2] <=> a[0].2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesWithBitEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) b[a[0].0:3] <=> a[0].2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesWithBitIndexEqualToBitrangeStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) b[a[0].2:3] <=> a[0].2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitUsingConstantIndexValueOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesWithBitIndexEqualToBitrangeEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(1)) b[a[0].2:3] <=> a[0].3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[a] <=> a[0].1:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[a.2] <=> a[0].1:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndexEqualToBitrangeStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[a.1] <=> a[0].1:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndexEqualToBitrangeEndIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[a.3] <=> a[0].1:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitrangeEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(2)) b[a.1:4] <=> a[0].2:3");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndRhsBitrangeEnclosedByLhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) b[a.2:3] <=> a[0].1:4");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitrangeOverlapping) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) b[a.0:3] <=> a[0].1:4");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitrangesBeingEqual) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 38), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) b[a.4:1] <=> a[0].1:4");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantStartIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do b[a[0].2:($i + 1)] <=> a[0].1:4 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantStartIndexEqualToBitrangeBounds) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 4).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do b[a[0].4:($i + 1)] <=> a[0].4:1 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantEndIndexEnclosedByBitrange) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do b[a[0].($i + 1):2] <=> a[0].1:4 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantIndicesOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantEndIndexEqualToBitrangeBounds) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 4).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(6), inout b(4)) for $i = 0 to 3 do b[a[0].($i + 1):4] <=> a[0].1:4 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0]] <=> a[0].2:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].2] <=> a[0].2:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].0:3] <=> a[0].2:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitEqualToStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].0:3] <=> a[0].3:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantStartIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].3:(1 - $i)] <=> a[0].3:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForStartIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantEndIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].(1 - $i):3] <=> a[0].3:$i rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0]] <=> a[0].$i:2 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitWithConstantIndicesMatching) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].2] <=> a[0].$i:2 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitEnclosedByRhsOne) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].0:3] <=> a[0].$i:2 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantIndicesAndLhsBitEqualToStartIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].0:3] <=> a[0].$i:3 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantStartIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].3:(1 - $i)] <=> a[0].$i:3 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToBitrangeUsingConstantValueForEndIndexOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingBitrangeWithConstantEndIndexEqualToLhsIndex) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 57), generateVariableAccessOverlappingIndicesDataContainer({0}, 3).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(4)) for $i = 3 to 0 do b[a[0].(1 - $i):3] <=> a[0].$i:3 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementWithAccessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1]] <=> a[0][2][1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitaccessWithConstantValueAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1].1] <=> a[0][2][1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1].1:2] <=> a[0][2][1]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 73), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do b[a[0][2][1].1:$i] <=> a[0][2][1] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitAccessWithConstantValueAndRhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(1)) b[a[0][2][1].0] <=> a[0][2][1].0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndRhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(1)) b[a[0][2][1].2:0] <=> a[0][2][1].1");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitAccessWithConstantValuesAndRhsAccessingBitrangeUsingConstantIndicesWithAccessedBitEnclosedByBitrangeWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(3)) b[a[0][2][1].1] <=> a[0][2][1].2:0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingFullbitwidthAndRhsAccessingBitrangeUsingConstantIndicesWithAcessOnSameValuesOfDimensions) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 2).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a[2][4][3](6), inout b(3)) b[a[0][2][1]] <=> a[0][2][1].2:0");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessignRhsOperandInBinaryExpressionInDimensionAccessOfLhsOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 43), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[(2 + a[0].1:2)] <=> a[0].0:2");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, accessingRhsOperandInShiftExpressionInDimensionAccessOfLhsOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
+            Message::Position(1, 39), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
+    performTestExecution("module main(inout a(4), inout b(3)) b[(a[0].1:3 << 2)] <=> a[0].0:2");
 }
