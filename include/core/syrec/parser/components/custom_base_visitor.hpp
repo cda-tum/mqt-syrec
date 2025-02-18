@@ -2,14 +2,22 @@
 #define CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
 #pragma once
 
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/custom_error_mesages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
 #include "Token.h"
 
-#include <fmt/core.h>
+#include <fmt/format.h>
+#include <cerrno>
+#include <cstdlib>
+#include <memory>
 #include <optional>
+#include <string>
+#include <utility>
 
 namespace syrecParser {
     /**
@@ -47,10 +55,11 @@ namespace syrecParser {
             sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance), parserConfiguration(parserConfiguration) {}
 
     protected:
-        std::shared_ptr<ParserMessagesContainer>  sharedGeneratedMessageContainerInstance;
-        std::shared_ptr<utils::BaseSymbolTable>   symbolTable;
         static constexpr unsigned int             DEFAULT_EXPRESSION_BITWIDTH   = 32;
         static constexpr unsigned int             MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
+
+        std::shared_ptr<ParserMessagesContainer>  sharedGeneratedMessageContainerInstance;
+        std::shared_ptr<utils::BaseSymbolTable>   symbolTable;
         syrec::ReadProgramSettings                parserConfiguration;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
@@ -66,32 +75,38 @@ namespace syrecParser {
             // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
             const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastCharacterInString, 10);
             // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
-            if (didDeserializationFailDueToOverflow && errno == ERANGE)
+            if (didDeserializationFailDueToOverflow != nullptr && errno == ERANGE) {
                 *didDeserializationFailDueToOverflow = true;
+            }
 
-            if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || *pointerToLastCharacterInString)
+            if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || pointerToLastCharacterInString != nullptr) {
                 return std::nullopt;
+            }
 
             return constantValue;
         }
 
         [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOfExpression(const syrec::Expression& expression) {
-            if (const auto& expressionAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&expression); expressionAsNumericOne && expressionAsNumericOne->value && expressionAsNumericOne->value)
+            if (const auto& expressionAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&expression); expressionAsNumericOne != nullptr && expressionAsNumericOne->value && expressionAsNumericOne->value) {
                 return expressionAsNumericOne->value->tryEvaluate({});
+            }
             return std::nullopt;
         }
 
         [[nodiscard]] static std::optional<std::pair<unsigned int, unsigned int>> tryDetermineAccessedBitrangeOfVariableAccess(const syrec::VariableAccess& variableAccess) {
-            if (!variableAccess.range.has_value())
+            if (!variableAccess.range.has_value()) {
                 return std::make_pair(0, variableAccess.bitwidth() - 1);
+            }
 
-            if (!variableAccess.range->first || !variableAccess.range->second)
+            if (!variableAccess.range->first || !variableAccess.range->second) {
                 return std::nullopt;
+            }
 
             const std::optional<unsigned int> accessedBitrangeStart = variableAccess.range->first->tryEvaluate({});
             const std::optional<unsigned int> accessedBitRangeEnd   = accessedBitrangeStart.has_value() ? variableAccess.range->second->tryEvaluate({}) : std::nullopt;
-            if (!accessedBitRangeEnd.has_value())
+            if (!accessedBitRangeEnd.has_value()) {
                 return std::nullopt;
+            }
 
             return std::make_pair(*accessedBitrangeStart, *accessedBitRangeEnd);
         }
@@ -104,8 +119,9 @@ namespace syrecParser {
 
         template<SemanticError semanticError, typename... T>
         void recordSemanticError(Message::Position messagePosition, T&&... args) const {
-            if (!sharedGeneratedMessageContainerInstance)
+            if (!sharedGeneratedMessageContainerInstance) {
                 return;
+            }
 
             static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty(), "No format for message of semantic error found!");
             static_assert(!getIdentifierForSemanticError<semanticError>().empty(), "No identifiers for semantic error found!");
@@ -117,8 +133,9 @@ namespace syrecParser {
 
         template<SemanticError semanticError>
         void recordSemanticError(Message::Position messagePosition) const {
-            if (!sharedGeneratedMessageContainerInstance)
+            if (!sharedGeneratedMessageContainerInstance) {
                 return;
+            }
 
             static_assert(!getFormatForSemanticErrorMessage<semanticError>().empty(), "No format for message of semantic error found!");
             static_assert(!getIdentifierForSemanticError<semanticError>().empty(), "No identifiers for semantic error found!");
@@ -132,6 +149,5 @@ namespace syrecParser {
             sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, "UNKNOWN", messagePosition, errorMessage));
         }
     };
-}
-
+} // namespace syrecParser
 #endif

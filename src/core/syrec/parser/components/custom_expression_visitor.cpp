@@ -269,7 +269,6 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
     return std::nullopt;
 }
 
-// TODO: Signal overlap checks - add semantic errors for overlaps
 std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(TSyrecParser::SignalContext* context) {
     if (!context || !context->IDENT())
         return std::nullopt;
@@ -482,23 +481,6 @@ void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
     optionalExpectedBitwidthForAnyProcessedEntity.reset();
 }
 
-bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {
-    clearRestrictionOnVariableAccesses();
-    if (!notAccessiblePartsForFutureVariableAccesses
-        || !notAccessiblePartsForFutureVariableAccesses->var 
-        || notAccessiblePartsForFutureVariableAccesses->var->name.empty()
-        || std::any_of(
-        notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
-        notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
-        [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
-            return !tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension).has_value();
-        }))
-        return false;
-
-    optionalRestrictionOnVariableAccesses = notAccessiblePartsForFutureVariableAccesses;
-    return true;
-}
-
 void CustomExpressionVisitor::clearRestrictionOnVariableAccesses() {
     optionalRestrictionOnVariableAccesses.reset();
 }
@@ -521,6 +503,29 @@ void CustomExpressionVisitor::clearIfStatementExpressionComponentsRecorder() {
     optionalIfStatementExpressionComponentsRecorder.reset();
 }
 
+void CustomExpressionVisitor::markStartOfProcessingOfDimensionAccessOfVariableAccess() {
+    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = true;
+}
+
+void CustomExpressionVisitor::markEndOfProcessingOfDimensionAccessOfVariableAccess() {
+    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = false;
+}
+
+bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {
+    clearRestrictionOnVariableAccesses();
+    if (!notAccessiblePartsForFutureVariableAccesses || !notAccessiblePartsForFutureVariableAccesses->var || notAccessiblePartsForFutureVariableAccesses->var->name.empty() || std::any_of(notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
+            return !tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension).has_value();
+        }))
+        return false;
+
+    optionalRestrictionOnVariableAccesses = notAccessiblePartsForFutureVariableAccesses;
+    return true;
+}
+
+bool CustomExpressionVisitor::isCurrentlyProcessingDimensionAccessOfVariableAccess() const {
+    return isCurrentlyProcessingDimensionAccessOfVariableAccessFlag;
+}
+
 std::optional<unsigned int> CustomExpressionVisitor::getCurrentExpectedBitwidthForAnyProcessedEntity() const {
     return optionalExpectedBitwidthForAnyProcessedEntity;
 }
@@ -533,7 +538,7 @@ bool CustomExpressionVisitor::truncateConstantValuesInAnyBinaryExpression(syrec:
     if (auto exprAsBinaryExpr = dynamic_cast<syrec::BinaryExpression*>(&*expression); exprAsBinaryExpr) {
         bool wasLhsExprModified = exprAsBinaryExpr->lhs ? truncateConstantValuesInAnyBinaryExpression(exprAsBinaryExpr->lhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
         bool wasRhsExprModified = exprAsBinaryExpr->rhs ? truncateConstantValuesInAnyBinaryExpression(exprAsBinaryExpr->rhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
-        
+
         if (wasLhsExprModified || wasRhsExprModified) {
             if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(*exprAsBinaryExpr, expectedBitwidthOfOperandsInExpression, detectedDivisionByZero)) {
                 expression = *simplifiedBinaryExpr;
@@ -554,18 +559,6 @@ bool CustomExpressionVisitor::truncateConstantValuesInAnyBinaryExpression(syrec:
         }
     }
     return wasOriginalExprModified;
-}
-
-void CustomExpressionVisitor::markStartOfProcessingOfDimensionAccessOfVariableAccess() {
-    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = true;
-}
-
-void CustomExpressionVisitor::markEndOfProcessingOfDimensionAccessOfVariableAccess() {
-    isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = false;
-}
-
-bool CustomExpressionVisitor::isCurrentlyProcessingDimensionAccessOfVariableAccess() const {
-    return isCurrentlyProcessingDimensionAccessOfVariableAccessFlag;
 }
 
 // START OF NON-PUBLIC FUNCTIONALITY

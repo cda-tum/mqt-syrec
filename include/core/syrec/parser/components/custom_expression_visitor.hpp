@@ -2,28 +2,34 @@
 #define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_EXPRESSION_VISITOR_HPP
 #pragma once
 
-
-#include "core/syrec/program.hpp"
-#include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
-
 #include "core/syrec/expression.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/components/custom_base_visitor.hpp"
+#include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
 #include "TSyrecParser.h"
+
+#include <memory>
+#include <optional>
+#include <string_view>
 
 namespace syrecParser {
     class CustomExpressionVisitor: protected CustomBaseVisitor {
     public:
         CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
-            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration), isCurrentlyProcessingDimensionAccessOfVariableAccessFlag(false) {}
+            CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration) {}
 
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionTyped(TSyrecParser::ExpressionContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitExpressionFromSignalTyped(TSyrecParser::ExpressionFromSignalContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr> visitShiftExpressionTyped(TSyrecParser::ShiftExpressionContext* context);
-
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionTyped(TSyrecParser::ExpressionContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const;
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromSignalTyped(TSyrecParser::ExpressionFromSignalContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context) const;
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitShiftExpressionTyped(TSyrecParser::ShiftExpressionContext* context);
         [[maybe_unused]] std::optional<syrec::VariableAccess::ptr> visitSignalTyped(TSyrecParser::SignalContext* context);
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberTyped(TSyrecParser::NumberContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromConstantTyped(TSyrecParser::NumberFromConstantContext* context) const;
@@ -31,31 +37,26 @@ namespace syrecParser {
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromExpressionTyped(const TSyrecParser::NumberFromExpressionContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(TSyrecParser::NumberFromLoopVariableContext* context) const;
 
-        void setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
-        void clearExpectedBitwidthForAnyProcessedEntity();
-
-        [[maybe_unused]] bool setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
-        void                  clearRestrictionOnVariableAccesses();
-
-        void setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
-        void clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
-
-        void setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
-        void clearIfStatementExpressionComponentsRecorder();
-
+        void                                      setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
+        void                                      clearExpectedBitwidthForAnyProcessedEntity();
+        void                                      clearRestrictionOnVariableAccesses();
+        void                                      setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
+        void                                      clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
+        void                                      setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
+        void                                      clearIfStatementExpressionComponentsRecorder();
+        void                                      markStartOfProcessingOfDimensionAccessOfVariableAccess();
+        void                                      markEndOfProcessingOfDimensionAccessOfVariableAccess();
+        [[maybe_unused]] bool                     setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
+        [[nodiscard]] bool                        isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
         [[nodiscard]] std::optional<unsigned int> getCurrentExpectedBitwidthForAnyProcessedEntity() const;
         [[maybe_unused]] static bool              truncateConstantValuesInAnyBinaryExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
-
-        void               markStartOfProcessingOfDimensionAccessOfVariableAccess();
-        void               markEndOfProcessingOfDimensionAccessOfVariableAccess();
-        [[nodiscard]] bool isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
 
     protected:
         std::optional<unsigned int>                                        optionalExpectedBitwidthForAnyProcessedEntity;
         std::optional<syrec::VariableAccess::ptr>                          optionalRestrictionOnVariableAccesses;
         std::optional<std::string_view>                                    optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
         std::optional<utils::IfStatementExpressionComponentsRecorder::ptr> optionalIfStatementExpressionComponentsRecorder;
-        bool                                                               isCurrentlyProcessingDimensionAccessOfVariableAccessFlag;
+        bool                                                               isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = false;
 
         void recordExpressionComponent(const utils::IfStatementExpressionComponentsRecorder::ExpressionComponent& expressionComponent) const;
 
