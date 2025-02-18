@@ -339,5 +339,11 @@
   },
   "accessOnValueOfDimensionUsingIndexWithUnknownValueInDimensionAccessOfAssignedToSignalUsingBitrangeAccessWithUnknownBitrangeBoundsValue": {
     "inputCircuit": "module main(inout a(4)) for $i = 0 to 3 step 1 do ++= a[a[$i]].($i * 2):($i + 1) rof"
+  },
+  "accessOnAssignedToVariableInBinaryExpressionOfDimensionAccess": {
+    "inputCircuit": "module main(inout a[2](4)) ++= a[(a[1].2 + a[0].1)]"
+  },
+  "accessOnAssignedToVariableInShiftExpressionOfDimensionAccess": {
+    "inputCircuit": "module main(inout a[2](4)) --= a[((a[1].1:2 + a[0].2:1) << 1)]"
   }
 }
