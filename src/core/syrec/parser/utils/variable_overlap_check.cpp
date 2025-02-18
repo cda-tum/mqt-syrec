@@ -1,6 +1,5 @@
 #include "core/syrec/expression.hpp"
-
-#include <core/syrec/parser/utils/variable_overlap_check.hpp>
+#include "core/syrec/parser/utils/variable_overlap_check.hpp"
 
 using namespace utils;
 
@@ -66,6 +65,9 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         const std::optional<unsigned int> accessedValueInLVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInLVar);
         const std::optional<unsigned int> accessedValueInRVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInRVar);
 
+        // If one were to assume that all indices provided in the two variable accesses are within range of the formal bounds of the accessed variable, an index with an non-constant value
+        // could be assumed to be overlapping for a dimension that has only one value. However, we do not assume in-range indices and thus can only report a potential overlap. The same reasoning
+        // can be applied for non-constant indices of the accessed bitrange for a variable with defined bitwidth of 1.
         if (!accessedValueInLVar.has_value() || !accessedValueInRVar.has_value())
             return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
 
