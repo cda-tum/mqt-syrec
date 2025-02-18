@@ -1,5 +1,6 @@
-#ifndef UNITTESTS_SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
-#define UNITTESTS_SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
+#ifndef SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
+#define SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
+#pragma once
 
 #include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/custom_error_mesages.hpp"
@@ -12,6 +13,10 @@
 #include <gtest/gtest.h>
 
 using namespace syrecParser;
+
+// TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
+// TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
+
 
 class SyrecParserErrorTestsFixture: public testing::Test {
 public:

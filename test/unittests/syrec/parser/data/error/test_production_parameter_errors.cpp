@@ -1,0 +1,113 @@
+#include "test_syrec_parser_errors_base.hpp"
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingVariableTypeCausesError) {
+    recordSyntaxError(Message::Position(1, 12), "mismatched input 'a' expecting {'in', 'out', 'inout', ')'}");
+    performTestExecution("module main(a[2](16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidVariableTypeCausesError) {
+    recordSyntaxError(Message::Position(1, 12), "mismatched input 'int' expecting {'in', 'out', 'inout', ')'}");
+    performTestExecution("module main(int a(16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInModuleParameterDeclarationCausesError) {
+    recordSyntaxError(Message::Position(1, 15), "missing IDENT at '('");
+    performTestExecution("module main(in (16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierSharingSameVariableTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 25), "a");
+    performTestExecution("module main(in a(16), in a(8)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierUsingDifferentVariableTypeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 26), "a");
+    performTestExecution("module main(in a(16), out a(16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInModuleParameterIdentifierCausesError) {
+    recordSyntaxError(Message::Position(1, 16), "mismatched input '-' expecting ')'");
+    performTestExecution("module main(in a-t(16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionOpeningBracketCausesError) {
+    recordSyntaxError(Message::Position(1, 18), "mismatched input ']' expecting ')'");
+    performTestExecution("module main(in a16](16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionOpeningBracketCausesError) {
+    recordSyntaxError(Message::Position(1, 16), "token recognition error at: '{'");
+    recordSyntaxError(Message::Position(1, 17), "mismatched input '16' expecting ')'");
+    performTestExecution("module main(in a{16](2)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingVariableValuesForDimensionClosingBracketCausesError) {
+    recordSyntaxError(Message::Position(1, 18), "missing ']' at ')'");
+    performTestExecution("module main(in a[2) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidVariableValuesForDimensionClosingBracketCausesError) {
+    recordSyntaxError(Message::Position(1, 18), "token recognition error at: '}'");
+    recordSyntaxError(Message::Position(1, 19), "missing ']' at ')'");
+    performTestExecution("module main(in a[2}) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, NoneNumericValueForNumberOfValuesForDimensionCausesError) {
+    recordSyntaxError(Message::Position(1, 17), "mismatched input 'test' expecting INT");
+    recordSyntaxError(Message::Position(1, 25), "extraneous input ')' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    performTestExecution("module main(in a[test](2)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingValueForNumberOfValuesForDimensionCausesError) {
+    recordSyntaxError(Message::Position(1, 17), "missing INT at ']'");
+    performTestExecution("module main(in a[]) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForModuleParameterBitwidthDeclarationCausesError) {
+    recordSyntaxError(Message::Position(1, 19), "extraneous input ')' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    performTestExecution("module main(in a16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForModuleParameterBitwidthDeclarationCausesError) {
+    recordSyntaxError(Message::Position(1, 16), "token recognition error at: '{'");
+    recordSyntaxError(Message::Position(1, 17), "extraneous input '16' expecting ')'");
+    recordSyntaxError(Message::Position(1, 20), "extraneous input ')' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    performTestExecution("module main(in a{16)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketForModuleParameterBitwidthDeclarationCausesError) {
+    recordSyntaxError(Message::Position(1, 21), "missing ')' at 'skip'");
+    performTestExecution("module main(in a(16) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, InvalidClosingBracketForModuleParameterBitwidthDeclarationCausesError) {
+    recordSyntaxError(Message::Position(1, 19), "token recognition error at: '}'");
+    recordSyntaxError(Message::Position(1, 22), "missing ')' at 'skip'");
+    performTestExecution("module main(in a(16}) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OmittingModuleParameterBitwidthWithBracketsDefinedCausesError) {
+    recordSyntaxError(Message::Position(1, 17), "missing INT at ')'");
+    performTestExecution("module main(in a()) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, NoneNumericModuleParameterBitwidthCausesError) {
+    recordSyntaxError(Message::Position(1, 19), "mismatched input '-' expecting ')'");
+    recordSyntaxError(Message::Position(1, 22), "extraneous input ')' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
+    performTestExecution("module main(in a(2 -3)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredParameterBitwidthLongerThanMaximumSupportedValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(Message::Position(1, 17), 33, 32);
+    buildAndRecordExpectedSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(Message::Position(1, 40), 45, 32);
+    performTestExecution("module main(in a(33), inout b(2), out c(45)) skip");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ParameterBitwidthTakenFromUserConfigLongerThanMaximumSupportedValueCausesError) {
+    constexpr unsigned int defaultSignalBitwidth           = 33;
+    const auto             userProvidedParserConfiguration = syrec::ReadProgramSettings(defaultSignalBitwidth);
+
+    buildAndRecordExpectedSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(Message::Position(1, 15), defaultSignalBitwidth, 32);
+    buildAndRecordExpectedSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(Message::Position(1, 34), defaultSignalBitwidth, 32);
+    performTestExecution("module main(in a, inout b(2), out c) skip", userProvidedParserConfiguration);
+}

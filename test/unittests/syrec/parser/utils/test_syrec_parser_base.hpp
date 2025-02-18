@@ -1,5 +1,6 @@
-#ifndef TEST_SYREC_PARSER_BASE_HPP
-#define TEST_SYREC_PARSER_BASE_HPP
+#ifndef SYREC_PARSER_UTILS_TEST_SYREC_PARSER_BASE_HPP
+#define SYREC_PARSER_UTILS_TEST_SYREC_PARSER_BASE_HPP
+#pragma once
 
 #include "core/syrec/program.hpp"
 

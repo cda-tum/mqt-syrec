@@ -14,15 +14,30 @@ add_executable(${MQT_SYREC_TESTS_TARGET}
   unittests/test_dd_synthesis.cpp
   unittests/test_dd_synthesis_dc.cpp
 
+  unittests/syrec/parser/data/error/test_production_assignStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_binaryExpression_errors.cpp
+  unittests/syrec/parser/data/error/test_production_callStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_forStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_ifStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_module_errors.cpp
+  unittests/syrec/parser/data/error/test_production_number_errors.cpp
+  unittests/syrec/parser/data/error/test_production_parameter_errors.cpp
+  unittests/syrec/parser/data/error/test_production_shiftExpression_errors.cpp
+  unittests/syrec/parser/data/error/test_production_signalList_errors.cpp
+  unittests/syrec/parser/data/error/test_production_signal_errors.cpp
+  unittests/syrec/parser/data/error/test_production_swapStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_unaryStatement_errors.cpp
+  unittests/syrec/parser/data/error/test_production_uncallStatement_errors.cpp
+
   unittests/syrec/parser/test_base_symbol_table.cpp
   unittests/syrec/parser/test_syrec_parser.cpp
-  unittests/syrec/parser/test_syrec_parser_errors.cpp
   unittests/syrec/parser/test_syrec_parser_module_overload_resolution.cpp
   unittests/syrec/parser/test_syrec_parser_variable_overlap_errors.cpp
   unittests/syrec/parser/test_temporary_variable_scope.cpp
   unittests/syrec/parser/test_variable_access_index_validity.cpp
-  unittests/syrec/parser/test_variable_overlap_check.cpp 
-  )
+  unittests/syrec/parser/test_variable_overlap_check.cpp)
+
+target_include_directories(${MQT_SYREC_TESTS_TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/utils)
 
 # link the Google test infrastructure and a default main function to the test executable.
 target_link_libraries(${MQT_SYREC_TESTS_TARGET} PRIVATE ${MQT_SYREC_TARGET} gmock gtest_main)
