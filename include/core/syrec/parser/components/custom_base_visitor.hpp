@@ -67,22 +67,21 @@ namespace syrec_parser {
         }
 
         [[nodiscard]] static std::optional<unsigned int> deserializeConstantFromString(const std::string& stringifiedConstantValue, bool* didDeserializationFailDueToOverflow) {
-            char* pointerToLastCharacterInString = nullptr;
+            char* pointerToLastNonNumericCharacterInString = nullptr;
             // Need to reset errno to not reuse already set values
             errno = 0;
 
             // Using this conversion method for any user provided constant value forces the maximum possible value of a constant that can be specified
             // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
-            const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastCharacterInString, 10);
+            const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastNonNumericCharacterInString, 10);
             // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
             if (didDeserializationFailDueToOverflow != nullptr && errno == ERANGE) {
                 *didDeserializationFailDueToOverflow = true;
             }
 
-            if (stringifiedConstantValue.c_str() == pointerToLastCharacterInString || errno == ERANGE || pointerToLastCharacterInString != nullptr) {
+            if (stringifiedConstantValue.c_str() == pointerToLastNonNumericCharacterInString || errno == ERANGE || (pointerToLastNonNumericCharacterInString != nullptr && *pointerToLastNonNumericCharacterInString != 0)) {
                 return std::nullopt;
             }
-
             return constantValue;
         }
 
@@ -107,7 +106,6 @@ namespace syrec_parser {
             if (!accessedBitRangeEnd.has_value()) {
                 return std::nullopt;
             }
-
             return std::make_pair(*accessedBitrangeStart, *accessedBitRangeEnd);
         }
 

@@ -901,7 +901,7 @@
   },
 
 
-  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfinout b(UsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
+  "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].0]",
     "parserConfig": {
       "allowOverlappingAccessOnAssignedToSignalParts": true
