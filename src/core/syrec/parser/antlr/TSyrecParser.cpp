@@ -8,7 +8,7 @@
 
 
 using namespace antlrcpp;
-using namespace syrecParser;
+using namespace syrec_parser;
 
 using namespace antlr4;
 

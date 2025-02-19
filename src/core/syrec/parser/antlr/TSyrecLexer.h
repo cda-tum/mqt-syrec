@@ -7,7 +7,7 @@
 #include "antlr4-runtime.h"
 
 
-namespace syrecParser {
+namespace syrec_parser {
 
 
 class  TSyrecLexer : public antlr4::Lexer {
@@ -64,4 +64,4 @@ private:
 
 };
 
-}  // namespace syrecParser
+}  // namespace syrec_parser

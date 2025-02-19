@@ -6,7 +6,7 @@
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(TSyrecParser::ExpressionContext* context) {
     if (!context)

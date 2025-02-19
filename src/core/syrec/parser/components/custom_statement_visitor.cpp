@@ -1,6 +1,6 @@
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListTyped(const TSyrecParser::StatementListContext* ctx) {
     if (!ctx)

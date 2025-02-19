@@ -8,7 +8,7 @@
 #include "TSyrecParser.h"
 
 
-namespace syrecParser {
+namespace syrec_parser {
 
 /**
  * This class defines an abstract visitor for a parse tree
@@ -83,4 +83,4 @@ public:
 
 };
 
-}  // namespace syrecParser
+}  // namespace syrec_parser

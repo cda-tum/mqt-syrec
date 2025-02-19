@@ -2,7 +2,9 @@
 #define CORE_SYREC_PARSER_UTILS_CUSTOM_ERROR_MESSAGES_HPP
 #pragma once
 
-namespace syrecParser {
+#include <string_view>
+
+namespace syrec_parser {
     enum class SemanticError : unsigned int {
         NoVariableMatchingIdentifier,
         NoModuleMatchingIdentifier,
@@ -145,5 +147,5 @@ namespace syrecParser {
                 return "";
         }
     }
-}
+} // namespace syrec_parser
 #endif

@@ -33,13 +33,13 @@ namespace syrec {
 
     bool Program::readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string* error) {
         antlr4::ANTLRInputStream  input(content);
-        syrecParser::TSyrecLexer  lexer(&input);
+        syrec_parser::TSyrecLexer  lexer(&input);
         antlr4::CommonTokenStream tokens(&lexer);
-        syrecParser::TSyrecParser antlrParser(&tokens);
+        syrec_parser::TSyrecParser antlrParser(&tokens);
 
-        auto       parserMessageGenerator = std::make_shared<syrecParser::ParserMessagesContainer>();
-        const auto customVisitor          = std::make_unique<syrecParser::CustomModuleVisitor>(parserMessageGenerator, settings);
-        const auto customErrorListener    = std::make_unique<syrecParser::CustomErrorListener>(parserMessageGenerator);
+        auto       parserMessageGenerator = std::make_shared<syrec_parser::ParserMessagesContainer>();
+        const auto customVisitor          = std::make_unique<syrec_parser::CustomModuleVisitor>(parserMessageGenerator, settings);
+        const auto customErrorListener    = std::make_unique<syrec_parser::CustomErrorListener>(parserMessageGenerator);
         lexer.addErrorListener(customErrorListener.get());
         antlrParser.addErrorListener(customErrorListener.get());
 
@@ -48,7 +48,7 @@ namespace syrec {
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());
 
-        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrecParser::Message::Type::Error); !generatedErrorMessages.empty()) {
+        if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrec_parser::Message::Type::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
             for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i) {
                 concatenatedErrorMessageContainer << generatedErrorMessages.at(i)->stringify();

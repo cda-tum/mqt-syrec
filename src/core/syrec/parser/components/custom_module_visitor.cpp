@@ -2,7 +2,7 @@
 #include "core/syrec/parser/components/custom_module_visitor.hpp"
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::parseProgram(TSyrecParser::ProgramContext* context) const {
     return visitProgramTyped(context);

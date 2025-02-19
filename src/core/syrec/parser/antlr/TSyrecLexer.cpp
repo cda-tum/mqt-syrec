@@ -7,7 +7,7 @@
 
 using namespace antlr4;
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 
 using namespace antlr4;

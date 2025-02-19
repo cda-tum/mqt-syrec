@@ -1,38 +1,40 @@
-#ifndef CORE_SYREC_PARSER_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
-#define CORE_SYREC_PARSER_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
+#ifndef CORE_SYREC_PARSER_UTILS_BASE_SYREC_IR_ENTITY_STRINGIFIER_HPP
+#define CORE_SYREC_PARSER_UTILS_BASE_SYREC_IR_ENTITY_STRINGIFIER_HPP
 #pragma once
 
+#include "core/syrec/expression.hpp"
+#include "core/syrec/module.hpp"
+#include "core/syrec/number.hpp"
 #include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 
+#include <cstddef>
 #include <optional>
+#include <ostream>
 #include <string>
+#include <vector>
 
 namespace utils {
     class BaseSyrecIrEntityStringifier {
     public:
         struct AdditionalFormattingOptions {
-            bool                       useWhitespaceBetweenOperandsOfBinaryOperation;
-            bool                       useWhitespaceAfterAfterModuleParameterDeclaration;
-            bool                       useWhitespaceAfterCallStatementArgumentDefinition;
-            bool                       omitVariableTypeSharedBySequenceOfLocalVariables;
-            bool                       omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue;
-            std::size_t                defaultSignalBitwidth;
+            bool                       useWhitespaceBetweenOperandsOfBinaryOperation = true;
+            bool                       useWhitespaceAfterAfterModuleParameterDeclaration = true;
+            bool                       useWhitespaceAfterCallStatementArgumentDefinition = true;
+            bool                       omitVariableTypeSharedBySequenceOfLocalVariables = true;
+            bool                       omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue = true;
+            std::size_t                defaultSignalBitwidth = 16;
             std::optional<std::string> optionalCustomNewlineCharacterSequence;
             std::optional<std::string> optionalCustomIdentationCharacterSequence;
 
             AdditionalFormattingOptions():
-                useWhitespaceBetweenOperandsOfBinaryOperation(true),
-                useWhitespaceAfterAfterModuleParameterDeclaration(true),
-                useWhitespaceAfterCallStatementArgumentDefinition(true),
-                omitVariableTypeSharedBySequenceOfLocalVariables(true),
-                omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue(true),
-                defaultSignalBitwidth(16),
                 optionalCustomNewlineCharacterSequence(std::nullopt),
                 optionalCustomIdentationCharacterSequence(std::nullopt) {}
         };
 
         virtual ~BaseSyrecIrEntityStringifier() = default;
-        BaseSyrecIrEntityStringifier(const std::optional<AdditionalFormattingOptions>& additionalFormattingOptions)
+        explicit BaseSyrecIrEntityStringifier(const std::optional<AdditionalFormattingOptions>& additionalFormattingOptions)
             : additionalFormattingOptions(additionalFormattingOptions.value_or(AdditionalFormattingOptions())) {}
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Program& program);

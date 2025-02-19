@@ -13,7 +13,7 @@
 #include <string>
 #include <utility>
 
-namespace syrecParser {
+namespace syrec_parser {
     class CustomErrorListener: public antlr4::BaseErrorListener {
     public:
         explicit CustomErrorListener(std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance):
@@ -25,5 +25,5 @@ namespace syrecParser {
         protected:
         std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance;
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif

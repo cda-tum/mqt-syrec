@@ -18,7 +18,7 @@
 #include <optional>
 #include <string_view>
 
-namespace syrecParser {
+namespace syrec_parser {
     class CustomExpressionVisitor: protected CustomBaseVisitor {
     public:
         CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
@@ -67,5 +67,5 @@ namespace syrecParser {
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyShiftExpression(const syrec::ShiftExpression& shiftExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpression(const syrec::BinaryExpression& binaryExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression, bool* detectedDivisionByZero);
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif

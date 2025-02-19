@@ -23,7 +23,7 @@
 #include <vector>
 #include <utility>
 
-namespace syrecParser {
+namespace syrec_parser {
     class CustomStatementVisitor: protected CustomBaseVisitor {
     public:
         struct NotOverloadResolutedCallStatementScope {
@@ -90,5 +90,5 @@ namespace syrecParser {
             return variableType == syrec::Variable::Type::Inout || variableType == syrec::Variable::Type::Out || variableType == syrec::Variable::Type::Wire;
         }
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif

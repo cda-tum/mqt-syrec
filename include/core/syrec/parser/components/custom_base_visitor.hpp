@@ -5,7 +5,7 @@
 #include "core/syrec/expression.hpp"
 #include "core/syrec/program.hpp"
 #include "core/syrec/variable.hpp"
-#include "core/syrec/parser/utils/custom_error_mesages.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
@@ -19,7 +19,7 @@
 #include <string>
 #include <utility>
 
-namespace syrecParser {
+namespace syrec_parser {
     /**
      * The base class containing data structure and utility functions required in more specialized visitors.
      *
@@ -149,5 +149,5 @@ namespace syrecParser {
             sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, "UNKNOWN", messagePosition, errorMessage));
         }
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif

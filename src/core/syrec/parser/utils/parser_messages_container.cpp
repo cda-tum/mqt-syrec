@@ -1,6 +1,6 @@
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 void ParserMessagesContainer::recordMessage(std::unique_ptr<Message> message) {
     if (message->type != Message::Type::Error || (temporaryFilterForToBeRecordedMessages.has_value() && temporaryFilterForToBeRecordedMessages.value() != message->id))

@@ -17,7 +17,7 @@
 #include <optional>
 #include <vector>
 
-namespace syrecParser {
+namespace syrec_parser {
     class CustomModuleVisitor: protected CustomBaseVisitor {
     public:
         CustomModuleVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const syrec::ReadProgramSettings& userProvidedParserSettings):
@@ -42,5 +42,5 @@ namespace syrecParser {
         [[nodiscard]] static bool doVariablesMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable);
         [[nodiscard]] static bool doVariableCollectionsMatch(const syrec::Variable::vec& lVariableCollection, const syrec::Variable::vec& rVariableCollection);
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "core/syrec/program.hpp"
-#include "core/syrec/parser/utils/custom_error_mesages.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
 #include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
@@ -12,7 +12,7 @@
 #include "gmock/gmock-matchers.h"
 #include <gtest/gtest.h>
 
-using namespace syrecParser;
+using namespace syrec_parser;
 
 // TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
 // TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 

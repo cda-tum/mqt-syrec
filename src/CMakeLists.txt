@@ -45,9 +45,10 @@ add_library(
   ${PROJECT_SOURCE_DIR}/include/core/gate.hpp
   ${PROJECT_SOURCE_DIR}/include/core/circuit.hpp
   ${PROJECT_SOURCE_DIR}/include/core/syrec/program.hpp
+  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp
+  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/custom_error_messages.hpp
   ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/symbolTable/base_symbol_table.hpp
   ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp
-  ${PROJECT_SOURCE_DIR}/include/core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp
   ${PROJECT_SOURCE_DIR}/include/core/utils/timer.hpp
   ${PROJECT_SOURCE_DIR}/include/core/truthTable/truth_table.hpp
   ${PROJECT_SOURCE_DIR}/include/core/io/pla_parser.hpp)

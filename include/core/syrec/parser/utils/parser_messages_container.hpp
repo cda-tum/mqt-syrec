@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace syrecParser {
+namespace syrec_parser {
     struct Message {
         using ptr = std::shared_ptr<Message>;
         struct Position {
@@ -55,5 +55,5 @@ namespace syrecParser {
         std::unordered_map<Message::Type, std::vector<Message::ptr>> messagesPerType;
         std::optional<std::string>                                   temporaryFilterForToBeRecordedMessages;
     };
-} // namespace syrecParser
+} // namespace syrec_parser
 #endif
