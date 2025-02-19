@@ -627,7 +627,7 @@ bool BaseSyrecIrEntityStringifier::stringifyModuleCallVariant(std::ostream& outp
 
     bool        stringificationSuccessful      = appendToStream(outputStream, moduleCallVariantKeyword + " " + callTarget.name + "(");
     const auto& firstParameterWithCommaPostfix = callerArguments.cbegin();
-    const auto& lastParameterWithCommaPostfix  = std::prev(callerArguments.cend(), 1 + static_cast<int>(callerArguments.size() > 1));
+    const auto& lastParameterWithCommaPostfix  = std::prev(callerArguments.cend());
 
     for (auto parameterIterator = firstParameterWithCommaPostfix; parameterIterator != lastParameterWithCommaPostfix && stringificationSuccessful; ++parameterIterator) {
         stringificationSuccessful &= !parameterIterator->empty() && appendToStream(outputStream, *parameterIterator + ", ");
