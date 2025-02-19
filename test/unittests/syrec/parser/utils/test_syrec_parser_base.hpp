@@ -3,7 +3,7 @@
 #pragma once
 
 #include "core/syrec/program.hpp"
-#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
+#include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
 
 #include <string>
 #include <fstream>

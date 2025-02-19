@@ -6,7 +6,7 @@
 #include "core/syrec/parser/utils/custom_error_mesages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
-#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
+#include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
 #include "fmt/compile.h"
 
 #include "gmock/gmock-matchers.h"

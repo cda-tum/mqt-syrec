@@ -1,4 +1,4 @@
-#include "core/utils/base_syrec_ir_entity_stringifier.hpp"
+#include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
 
 using namespace utils;
 

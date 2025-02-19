@@ -1,5 +1,5 @@
-#ifndef CORE_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
-#define CORE_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
+#ifndef CORE_SYREC_PARSER_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
+#define CORE_SYREC_PARSER_UTILS_IR_ENTITY_DUMP_EXTENSIONS_HPP
 #pragma once
 
 #include "core/syrec/program.hpp"
@@ -103,5 +103,5 @@ namespace utils {
         [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, char character);
         [[nodiscard]] static bool    stringifyModuleCallVariant(std::ostream& outputStream, const std::string& moduleCallVariantKeyword, const syrec::Module& callTarget, const std::vector<std::string>& callerArguments);
     };
-} // namespace syrec
+} // namespace utils
 #endif
