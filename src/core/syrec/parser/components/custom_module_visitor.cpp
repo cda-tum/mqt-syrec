@@ -1,6 +1,25 @@
-#include "core/syrec/module.hpp"
-#include "core/syrec/parser/components/custom_module_visitor.hpp"
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
+
+#include "core/syrec/module.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
+#include "core/syrec/parser/components/custom_module_visitor.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
+
+#include "TSyrecParser.h"
+#include "Token.h"
+
+#include <algorithm>
+#include <climits>
+#include <memory>
+#include <optional>
+#include <string>
+#include <variant>
+#include <vector>
 
 using namespace syrec_parser;
 
@@ -10,8 +29,9 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::parseProgram
 
 // START OF NON-PUBLIC FUNCTIONALITY
 std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgramTyped(TSyrecParser::ProgramContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     std::shared_ptr<const syrec::Module> lastProcessedUserDefinedModule = nullptr;
     auto                                 generatedProgram = std::make_shared<syrec::Program>();
@@ -80,26 +100,30 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
 }
 
 std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecParser::ModuleContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     std::optional<std::string> moduleIdentifier;
-    if (context->IDENT()) {
+    if (context->IDENT() != nullptr) {
         moduleIdentifier = context->IDENT()->getText();
         // According to the SyReC specification (https://revlib.org/doc/docu/revlib_2_0_1.pdf section 2.1): "The top-module of a program is defined by the special identifier main.".
         // Due to this restriction, the otherwise allowed overload of SyReC modules is disabled for modules declared with the identifier 'main' and will report a semantic error in case of a duplicate definition of
         // such a 'main' module.
-        if (moduleIdentifier == "main" && symbolTable->existsModuleForName(*moduleIdentifier))
+        if (moduleIdentifier == "main" && symbolTable->existsModuleForName(*moduleIdentifier)) {
             recordSemanticError<SemanticError::DuplicateMainModuleDefinition>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
+        }
     }
 
     auto generatedModule = std::make_shared<syrec::Module>(moduleIdentifier.value_or(""));
     symbolTable->openTemporaryScope();
     generatedModule->parameters = visitParameterListTyped(context->parameterList()).value_or(syrec::Variable::vec());
 
-    for (const auto& antlrLocalVariableContexts: context->signalList())
-        if (const std::optional<std::vector<syrec::Variable::ptr>> localVariableDefinitions = visitSignalListTyped(antlrLocalVariableContexts); localVariableDefinitions.has_value())
+    for (const auto& antlrLocalVariableContexts: context->signalList()) {
+        if (const std::optional<std::vector<syrec::Variable::ptr>> localVariableDefinitions = visitSignalListTyped(antlrLocalVariableContexts); localVariableDefinitions.has_value()) {
             generatedModule->variables.insert(generatedModule->variables.end(), localVariableDefinitions->cbegin(), localVariableDefinitions->cend());
+        }
+    }
 
     statementVisitorInstance->openNewScopeToRecordCallStatementsInModule(CustomStatementVisitor::NotOverloadResolutedCallStatementScope::DeclaredModuleSignature(generatedModule->name, generatedModule->parameters));
     generatedModule->statements = visitStatementListTyped(context->statementList()).value_or(syrec::Statement::vec());
@@ -107,26 +131,29 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecPa
     if (moduleIdentifier.has_value()) {
         if (*moduleIdentifier != "main") {
             auto moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
-            if (context->parameterList() && !context->parameterList()->parameter().empty())
+            if (context->parameterList() != nullptr && !context->parameterList()->parameter().empty()) {
                 moduleOverloadResolutionCall = symbolTable->getModulesMatchingSignature(*moduleIdentifier, generatedModule->parameters);
-            else
+            } else {
                 moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(symbolTable->existsModuleForName(*moduleIdentifier) 
                     ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound
                     : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
-
-            if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound)
-                recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);    
+            }
+            if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound) {
+                recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);
+            }
         }
-        if (generatedModule)
+        if (generatedModule != nullptr) {
             symbolTable->insertModule(generatedModule);
+        }
     }
     symbolTable->closeTemporaryScope();
     return generatedModule;
 }
 
 std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParameterListTyped(TSyrecParser::ParameterListContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     syrec::Variable::vec processedParameterInstances;
     processedParameterInstances.reserve(context->parameter().size());
@@ -137,24 +164,27 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParam
         // which is an acceptable behaviour in case that the user failed to provide a valid module declaration
         if (const std::optional<syrec::Variable::ptr>& generatedParameterInstance = visitParameterTyped(antlrParameterContext); generatedParameterInstance.has_value()) {
             processedParameterInstances.emplace_back(*generatedParameterInstance);
-            if (activeSymbolTableScope.has_value())
+            if (activeSymbolTableScope.has_value()) {
                 activeSymbolTableScope->get()->recordVariable(*generatedParameterInstance);
+            }
         }
     }
     return processedParameterInstances;
 }
 
 std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(TSyrecParser::ParameterContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     std::optional<syrec::Variable::Type> parameterVariableType;
-    if (context->VAR_TYPE_IN())
+    if (context->VAR_TYPE_IN() != nullptr) {
         parameterVariableType = syrec::Variable::Type::In;
-    else if (context->VAR_TYPE_INOUT())
+    } else if (context->VAR_TYPE_INOUT() != nullptr) {
         parameterVariableType = syrec::Variable::Type::Inout;
-    else if (context->VAR_TYPE_OUT())
+    } else if (context->VAR_TYPE_OUT() != nullptr) {
         parameterVariableType = syrec::Variable::Type::Out;
+    }
 
     if (const std::optional<syrec::Variable::ptr>& generatedParameterInstance = visitSignalDeclarationTyped(context->signalDeclaration()); generatedParameterInstance.has_value() && parameterVariableType.has_value()) {
         generatedParameterInstance->get()->type = *parameterVariableType;
@@ -164,14 +194,16 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(TSy
 }
 
 std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSignalListTyped(TSyrecParser::SignalListContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     std::optional<syrec::Variable::Type> localVariableType;
-    if (context->VAR_TYPE_STATE())
+    if (context->VAR_TYPE_STATE() != nullptr) {
         localVariableType = syrec::Variable::Type::State;
-    if (context->VAR_TYPE_WIRE())
+    } else if (context->VAR_TYPE_WIRE() != nullptr) {
         localVariableType = syrec::Variable::Type::Wire;
+    }
 
     syrec::Variable::vec processedLocalVariables;
     processedLocalVariables.reserve(context->signalDeclaration().size());
@@ -181,28 +213,32 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSigna
         if (const std::optional<syrec::Variable::ptr>& generatedLocalVariableDeclaration = visitSignalDeclarationTyped(antlrVariableDeclarationToken); generatedLocalVariableDeclaration.has_value() && localVariableType.has_value()) {
             generatedLocalVariableDeclaration->get()->type = *localVariableType;
             processedLocalVariables.emplace_back(*generatedLocalVariableDeclaration);
-            if (activeSymbolTableScope.has_value())
+            if (activeSymbolTableScope.has_value()) {
                 activeSymbolTableScope->get()->recordVariable(*generatedLocalVariableDeclaration);
+            }
         }
     }
     return processedLocalVariables;
 }
 
 std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
-    const std::optional<std::string>                        variableIdentifier     = context->IDENT() ? std::make_optional(context->IDENT()->getText()) : std::nullopt;
-    if (variableIdentifier.has_value() && activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->existsVariableForName(*variableIdentifier))
+    const std::optional<std::string>                        variableIdentifier     = context->IDENT() != nullptr ? std::make_optional(context->IDENT()->getText()) : std::nullopt;
+    if (variableIdentifier.has_value() && activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->existsVariableForName(*variableIdentifier)) {
         recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *variableIdentifier);
+    }
 
     std::vector<unsigned int> declaredNumberOfValuesPerDimension;
     declaredNumberOfValuesPerDimension.reserve(context->dimensionTokens.size());
 
     for (const auto& antlrTokenForDeclaredNumberOfValuesOfDimension: context->dimensionTokens) {
-        if (!antlrTokenForDeclaredNumberOfValuesOfDimension)
+        if (antlrTokenForDeclaredNumberOfValuesOfDimension == nullptr) {
             continue;
+        }
 
         bool                              didIntegerConstantDeserializationFailToDueOverflow = false;
         const std::optional<unsigned int> parsedIntegerConstantFromAntlrToken                = deserializeConstantFromString(antlrTokenForDeclaredNumberOfValuesOfDimension->getText(), &didIntegerConstantDeserializationFailToDueOverflow);
@@ -218,11 +254,12 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
     }
 
     unsigned int variableBitwidth = defaultVariableBitwidth;
-    if (context->signalWidthToken) {
+    if (context->signalWidthToken != nullptr) {
         bool                              didIntegerConstantDeserializationFailToDueOverflow = false;
         const std::optional<unsigned int> parsedIntegerConstantFromAntlrToken                = deserializeConstantFromString(context->signalWidthToken->getText(), &didIntegerConstantDeserializationFailToDueOverflow);
-        if (didIntegerConstantDeserializationFailToDueOverflow)
+        if (didIntegerConstantDeserializationFailToDueOverflow) {
             recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*context->signalWidthToken), context->signalWidthToken->getText(), UINT_MAX);
+        }
 
         if (parsedIntegerConstantFromAntlrToken.has_value()) {
             variableBitwidth = *parsedIntegerConstantFromAntlrToken;
@@ -233,32 +270,37 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
     // otherwise, if the value was taken from the configuration of the parser, the error is reported at the signal identifier. If none of the two tokens, the declared bitwidth or variable identifier,
     // are available (a special case that should occur where rarely) which should only be the case when an invalid signal declaration was defined by the user that failed to defined either of the two tokens, no error is reported.
     if (variableBitwidth > MAX_SUPPORTED_SIGNAL_BITWIDTH) {
-        if (context->signalWidthToken)
+        if (context->signalWidthToken != nullptr) {
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->signalWidthToken), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
-        else if (context->IDENT())
+        } else if (context->IDENT() != nullptr) {
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
+        }
     }
 
     // Add an implicit declaration if the user does not define the optional number of dimensions for a variable
-    if (context->dimensionTokens.empty())
+    if (context->dimensionTokens.empty()) {
         declaredNumberOfValuesPerDimension.emplace_back(1);
+    }
 
-    if (variableIdentifier.has_value() && !declaredNumberOfValuesPerDimension.empty())
+    if (variableIdentifier.has_value() && !declaredNumberOfValuesPerDimension.empty()) {
         return std::make_shared<syrec::Variable>(syrec::Variable::Type::In, *variableIdentifier, declaredNumberOfValuesPerDimension, variableBitwidth);
+    }
     return std::nullopt;
 }
 
 std::optional<std::vector<syrec::Statement::ptr>> CustomModuleVisitor::visitStatementListTyped(const TSyrecParser::StatementListContext* context) const {
-    if (!context)
+    if (context == nullptr) {
         return std::nullopt;
+    }
 
     syrec::Statement::vec processedStatementList;
     processedStatementList.reserve(context->stmts.size());
 
-    for (const auto& antlrContextForStmt: context->stmts)
-        if (const std::optional<syrec::Statement::ptr> generatedStmtInstance = statementVisitorInstance->visitStatementTyped(antlrContextForStmt); generatedStmtInstance.has_value())
+    for (const auto& antlrContextForStmt: context->stmts) {
+        if (const std::optional<syrec::Statement::ptr> generatedStmtInstance = statementVisitorInstance->visitStatementTyped(antlrContextForStmt); generatedStmtInstance.has_value()) {
             processedStatementList.emplace_back(*generatedStmtInstance);
-
+        }
+    }
     return processedStatementList;
 }
 
