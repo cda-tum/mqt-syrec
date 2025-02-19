@@ -4,7 +4,7 @@
 
 #include "core/syrec/variable.hpp"
 
-namespace variableAssignability {
+namespace variable_assignability_check {
     // TODO: For now we do not now how the should handle variables of type 'state'
     [[nodiscard]] constexpr static bool doesModuleParameterTypeAllowAssignmentFromVariableType(syrec::Variable::Type assignedToVariableType, syrec::Variable::Type assignedFromVariableType) {
         switch (assignedToVariableType) {
@@ -17,5 +17,5 @@ namespace variableAssignability {
                 return false;
         }
     }
-}
+} // namespace variable_assignability_check
 #endif

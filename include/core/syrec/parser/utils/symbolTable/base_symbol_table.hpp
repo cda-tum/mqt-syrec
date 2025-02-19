@@ -6,6 +6,14 @@
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
+#include <functional>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
 namespace utils {
     class BaseSymbolTable {
     public:
@@ -16,6 +24,10 @@ namespace utils {
                 MultipleMatchesFound,
                 NoMatchFound
             };
+
+            explicit ModuleOverloadResolutionResult(Result resolutionResult, const std::optional<std::shared_ptr<syrec::Module>>& moduleMatchingSignature):
+                resolutionResult(resolutionResult), moduleMatchingSignature(moduleMatchingSignature) {}
+
             Result                                        resolutionResult;
             std::optional<std::shared_ptr<syrec::Module>> moduleMatchingSignature;
         };

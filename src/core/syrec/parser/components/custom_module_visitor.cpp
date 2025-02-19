@@ -106,11 +106,13 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecPa
 
     if (moduleIdentifier.has_value()) {
         if (*moduleIdentifier != "main") {
-            utils::BaseSymbolTable::ModuleOverloadResolutionResult moduleOverloadResolutionCall;
+            auto moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
             if (context->parameterList() && !context->parameterList()->parameter().empty())
                 moduleOverloadResolutionCall = symbolTable->getModulesMatchingSignature(*moduleIdentifier, generatedModule->parameters);
             else
-                moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult({symbolTable->existsModuleForName(*moduleIdentifier) ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt});
+                moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(symbolTable->existsModuleForName(*moduleIdentifier) 
+                    ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound
+                    : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
 
             if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound)
                 recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);    

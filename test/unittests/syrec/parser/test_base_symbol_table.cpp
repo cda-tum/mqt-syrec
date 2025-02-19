@@ -1,11 +1,10 @@
-#include <algorithm>
-
 #include "core/syrec/module.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/variable.hpp"
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include <algorithm>
 
 using namespace utils;
 
@@ -131,15 +130,15 @@ namespace {
     }
 
     [[nodiscard]] BaseSymbolTable::ModuleOverloadResolutionResult createModuleOverloadResolutionResultForSingleMatch(const syrec::Module::ptr& expectedSingleMatch) {
-        return BaseSymbolTable::ModuleOverloadResolutionResult({BaseSymbolTable::ModuleOverloadResolutionResult::SingleMatchFound, expectedSingleMatch});
+        return BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::SingleMatchFound, expectedSingleMatch);
     }
 
     [[nodiscard]] BaseSymbolTable::ModuleOverloadResolutionResult createModuleOverloadResolutionResultForNoMatch() {
-        return BaseSymbolTable::ModuleOverloadResolutionResult({BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt});
+        return BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     }
 
     [[nodiscard]] BaseSymbolTable::ModuleOverloadResolutionResult createModuleOverloadResultionResultForInvalidCallerArguments() {
-        return BaseSymbolTable::ModuleOverloadResolutionResult({BaseSymbolTable::ModuleOverloadResolutionResult::CallerArgumentsInvalid, std::nullopt});
+        return BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::CallerArgumentsInvalid, std::nullopt);
     }
 } // namespace
 
@@ -154,10 +153,10 @@ TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbigu
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     const auto                                      callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", defaultSignalDimensions, defaultSignalBitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     // Variable type ambiguity using same variable identifier detected
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionDoesNotCompleteSuccessfully(symbolTable, firstModule));
@@ -165,8 +164,8 @@ TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbigu
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     // Variable type ambiguity cannot be resolved by simply changing the variable identifier
     const auto secondModuleParameter = std::make_shared<syrec::Variable>(secondModuleParameterType, "paramTwo", defaultSignalDimensions, defaultSignalBitwidth);
@@ -178,8 +177,8 @@ TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbigu
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 }
 
 TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbiguityIsNotTriggeredIfModuleIdentifiersDiffer) {
@@ -193,10 +192,10 @@ TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbigu
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     const auto                                      callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", defaultSignalDimensions, defaultSignalBitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto secondModule = std::make_shared<syrec::Module>("moduleTwo");
     secondModule->parameters.emplace_back(firstModuleParameter);
@@ -209,11 +208,11 @@ TEST_P(VariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbigu
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(secondModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(secondModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(secondModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 }
 
 TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, NoVariableTypeAmbiguityDuringModuleInsertion) {
@@ -227,13 +226,13 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, NoVariableTypeAm
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     const auto                                      callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", defaultSignalDimensions, defaultSignalBitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto secondModuleParameter = std::make_shared<syrec::Variable>(secondModuleParameterType, "paramTwo", defaultSignalDimensions, defaultSignalBitwidth);
-    const auto secondModule = std::make_shared<syrec::Module>("moduleTwo");
+    const auto secondModule          = std::make_shared<syrec::Module>("moduleTwo");
     secondModule->parameters.emplace_back(secondModuleParameter);
     secondModule->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModule));
@@ -244,11 +243,11 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, NoVariableTypeAm
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(secondModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(secondModule->name, {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(secondModule->name, {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 }
 
 TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbiguityForSingleParameterDoesNotPreventModuleInsertion) {
@@ -263,9 +262,9 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
     const auto                                      firstCallerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", defaultSignalDimensions, defaultSignalBitwidth);
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto secondModuleParameterOne = std::make_shared<syrec::Variable>(firstModuleParameterType, "mTwoParamOne", defaultSignalDimensions, defaultSignalBitwidth);
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mTwoParamTwo", std::vector<unsigned>({3, 2}), defaultSignalBitwidth - 1);
@@ -279,14 +278,14 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {secondCallerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {secondCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 }
 
 TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbiguityResolvedByDifferentSignalBitwidth) {
@@ -301,10 +300,10 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     const auto                                      callerArgumentWithDefaultBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", firstModuleParameter->dimensions, firstModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto secondModuleParameter = std::make_shared<syrec::Variable>(secondModuleParameterType, "paramTwo", defaultSignalDimensions, defaultSignalBitwidth - 1);
     const auto secondModule          = std::make_shared<syrec::Module>(moduleIdentifier);
@@ -315,12 +314,12 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto callerArgumentWithSmallerBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgTwo", secondModuleParameter->dimensions, secondModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithSmallerBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithSmallerBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     const auto thirdModuleParameter = std::make_shared<syrec::Variable>(secondModuleParameterType, "paramThree", defaultSignalDimensions, defaultSignalBitwidth + 1);
     const auto thirdModule          = std::make_shared<syrec::Module>(moduleIdentifier);
@@ -331,15 +330,15 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule, thirdModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithSmallerBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithSmallerBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     const auto callerArgumentWithLargerBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgThree", thirdModuleParameter->dimensions, thirdModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLargerBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLargerBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), modulesMatchingSignature));
 }
 
 TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbiguityResolvedByDifferentNumberOfValuesForDimensionOfSignal) {
@@ -354,10 +353,10 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     const auto                                      callerArgumentWithDefaultBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", firstModuleParameter->dimensions, firstModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     std::vector<unsigned int> signalDimensionsWithLessValuesForDimension = defaultSignalDimensions;
     --signalDimensionsWithLessValuesForDimension[0];
@@ -371,12 +370,12 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto callerArgumentWithLessValuesForDimensions = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgTwo", secondModuleParameter->dimensions, secondModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessValuesForDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessValuesForDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     std::vector<unsigned int> signalDimensionsWithMoreValuesForDimension = defaultSignalDimensions;
     --signalDimensionsWithMoreValuesForDimension[0];
@@ -390,15 +389,15 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule, thirdModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessValuesForDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessValuesForDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     const auto callerArgumentWithMoreValuesForDimensions = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgThree", thirdModuleParameter->dimensions, thirdModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithMoreValuesForDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithMoreValuesForDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), modulesMatchingSignature));
 }
 
 TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbiguityResolvedByDifferentNumberOfDimensionOfSignal) {
@@ -413,10 +412,10 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
-    const auto                                      callerArgumentWithDefaultBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", firstModuleParameter->dimensions, firstModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    auto       modulesMatchingSignature          = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    const auto callerArgumentWithDefaultBitwidth = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", firstModuleParameter->dimensions, firstModuleParameter->bitwidth);
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     std::vector<unsigned int> signalDimensionsWithLessDimensions = defaultSignalDimensions;
     signalDimensionsWithLessDimensions.pop_back();
@@ -430,12 +429,12 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto callerArgumentWithLessDimensions = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgTwo", secondModuleParameter->dimensions, secondModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     std::vector<unsigned int> signalDimensionsWithMoreDimensions = defaultSignalDimensions;
     signalDimensionsWithMoreDimensions.emplace_back(1);
@@ -449,15 +448,15 @@ TEST_P(NoVariableTypeAmbiguityDuringModuleInsertionTestFixture, VariableTypeAmbi
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule, thirdModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithDefaultBitwidth}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 
     const auto callerArgumentWithMoreDimensions = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgThree", thirdModuleParameter->dimensions, thirdModuleParameter->bitwidth);
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithMoreDimensions}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithMoreDimensions}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(thirdModule), modulesMatchingSignature));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -468,8 +467,7 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_pair(syrec::Variable::Type::Out, syrec::Variable::Type::Inout),
                 std::make_pair(syrec::Variable::Type::Out, syrec::Variable::Type::Out),
                 std::make_pair(syrec::Variable::Type::Inout, syrec::Variable::Type::Inout),
-                std::make_pair(syrec::Variable::Type::Inout, syrec::Variable::Type::Out))
-        );
+                std::make_pair(syrec::Variable::Type::Inout, syrec::Variable::Type::Out)));
 
 INSTANTIATE_TEST_SUITE_P(
         NoVariableTypeAmbiguity,
@@ -481,8 +479,8 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_pair(syrec::Variable::Type::Inout, syrec::Variable::Type::In)));
 
 TEST_P(VariableTypeAssignabilityDuringOverloadResolution, VariableTypeAssignabilityDuringOverloadResolutionWhenSearchingForModulesUsingSignature) {
-    const auto moduleParameter = std::make_shared<syrec::Variable>(variableTypeAssignabilityLookup.variableType, "moduleParamOne", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto moduleWithOneParameter          = std::make_shared<syrec::Module>("moduleOne");
+    const auto moduleParameter        = std::make_shared<syrec::Variable>(variableTypeAssignabilityLookup.variableType, "moduleParamOne", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto moduleWithOneParameter = std::make_shared<syrec::Module>("moduleOne");
     moduleWithOneParameter->parameters.emplace_back(moduleParameter);
     moduleWithOneParameter->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, moduleWithOneParameter));
@@ -498,21 +496,21 @@ TEST_P(VariableTypeAssignabilityDuringOverloadResolution, VariableTypeAssignabil
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleWithOneParameter->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({moduleWithOneParameter, moduleWithACompatibleAndIncompatibleParameter}, modulesMatchingName));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {moduleParameter}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), moduleMatchingSignature));
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {moduleParameter}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
 
     auto firstCallerArg = std::make_shared<syrec::Variable>(moduleParameter->type, "callerArg", moduleParameter->dimensions, moduleParameter->bitwidth);
-    for (const syrec::Variable::Type assignableVariableTypeForModuleParameter : variableTypeAssignabilityLookup.assignableVariableTypes) {
+    for (const syrec::Variable::Type assignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.assignableVariableTypes) {
         firstCallerArg->type = assignableVariableTypeForModuleParameter;
-        ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
-        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), moduleMatchingSignature));
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
     }
 
-    for (const syrec::Variable::Type notAssignableVariableTypeForModuleParameter : variableTypeAssignabilityLookup.notAssignableVariableTypes) {
+    for (const syrec::Variable::Type notAssignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.notAssignableVariableTypes) {
         firstCallerArg->type = notAssignableVariableTypeForModuleParameter;
-        ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
-        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), moduleMatchingSignature));
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
     }
 }
 
@@ -567,14 +565,14 @@ TEST(BaseSymbolTableTests, InsertModuleSharingSignatureWithExistingOneHavingDiff
 
     const auto callerParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerParamOne", moduleParameter->dimensions, moduleParameter->bitwidth);
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModuleIdentifier, {callerParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModuleDefinition), modulesMatchingSignature));
 
     const std::string secondModuleIdentifier = "moduleTwo";
     const auto        secondModuleDefinition = std::make_shared<syrec::Module>(secondModuleIdentifier);
-    secondModuleDefinition->parameters = firstModuleDefinition->parameters;
-    secondModuleDefinition->statements = firstModuleDefinition->statements;
+    secondModuleDefinition->parameters       = firstModuleDefinition->parameters;
+    secondModuleDefinition->statements       = firstModuleDefinition->statements;
     ASSERT_TRUE(symbolTable.insertModule(secondModuleDefinition));
 
     // Check existing valid module definition was left unchanged
@@ -597,14 +595,14 @@ TEST(BaseSymbolTableTests, InsertOverloadedModuleHavingAdditionalParameterThanEx
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
 
-    const std::string      moduleIdentifier   = "moduleOne";
-    const auto             firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
-    auto                   firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
-    firstModuleToInsert->statements                = createStatementBodyContainingSingleSkipStmt();
+    const std::string moduleIdentifier        = "moduleOne";
+    const auto        firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
+    auto              firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
+    firstModuleToInsert->statements           = createStatementBodyContainingSingleSkipStmt();
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
-    auto                 secondModuleParameterOne = firstModuleParameterOne;
+    auto secondModuleParameterOne  = firstModuleParameterOne;
     secondModuleParameterOne->name = "mTwoParamOne";
 
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "mTwoParamTwo", std::vector<unsigned>(2, 2), DEFAULT_BITWIDTH);
@@ -617,10 +615,10 @@ TEST(BaseSymbolTableTests, InsertOverloadedModuleHavingAdditionalParameterThanEx
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleIdentifier));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch(modulesMatchingName, {firstModuleToInsert, secondModuleToInsert}));
 
-    auto firstCallerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", secondModuleParameterOne->dimensions, secondModuleParameterOne->bitwidth);
+    auto firstCallerArgument  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", secondModuleParameterOne->dimensions, secondModuleParameterOne->bitwidth);
     auto secondCallerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgTwo", secondModuleParameterTwo->dimensions, secondModuleParameterTwo->bitwidth);
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {secondCallerArgument}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 
@@ -639,12 +637,12 @@ TEST(BaseSymbolTableTests, ExistsModuleForNameWithNoModulesExisting) {
 TEST(BaseSymbolTableTests, ExistsModuleForName) {
     BaseSymbolTable symbolTable;
 
-    const auto firstModule = std::make_shared<syrec::Module>("firstModule");
+    const auto firstModule  = std::make_shared<syrec::Module>("firstModule");
     firstModule->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModule));
 
     const auto moduleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "paramOne", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto secondModule = std::make_shared<syrec::Module>(firstModule->name);
+    const auto secondModule    = std::make_shared<syrec::Module>(firstModule->name);
     secondModule->parameters.emplace_back(moduleParameter);
     secondModule->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModule));
@@ -694,7 +692,7 @@ TEST(BaseSymbolTableTests, GetModulesByNameWithNoExistingModules) {
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({}, modulesMatchingName));
 }
 
- TEST(BaseSymbolTableTests, GetModulesByNameUsingIdentifierHavingNoMatchesWithModuleIdentifiers) {
+TEST(BaseSymbolTableTests, GetModulesByNameUsingIdentifierHavingNoMatchesWithModuleIdentifiers) {
     BaseSymbolTable             symbolTable;
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
@@ -707,9 +705,9 @@ TEST(BaseSymbolTableTests, GetModulesByNameWithNoExistingModules) {
     firstModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
-    const std::string secondModuleIdentifier    = "moduleTwo";
+    const std::string secondModuleIdentifier   = "moduleTwo";
     const auto        secondModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "mOneParamTwo", defaultVariableDimensions, DEFAULT_BITWIDTH);
-    auto              secondModuleToInsert      = std::make_shared<syrec::Module>(secondModuleIdentifier);
+    auto              secondModuleToInsert     = std::make_shared<syrec::Module>(secondModuleIdentifier);
     secondModuleToInsert->parameters.emplace_back(secondModuleParameterOne);
     secondModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleToInsert));
@@ -735,10 +733,10 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentBitwidth
     BaseSymbolTable             symbolTable;
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
-    
-    const std::string      moduleIdentifier        = "moduleOne";
-    const auto             firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>({2}), DEFAULT_BITWIDTH);
-    auto                   firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
+
+    const std::string moduleIdentifier        = "moduleOne";
+    const auto        firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>({2}), DEFAULT_BITWIDTH);
+    auto              firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     firstModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
@@ -750,10 +748,10 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentBitwidth
     secondModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleToInsert));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     // Overload resolution for known module identifier and caller arguments not matching any module
     const auto callerArgumentWithABitwidthSmallerThanAnyModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgOne", firstModuleParameterOne->dimensions, firstModuleParameterOne->bitwidth - 2);
-    const auto callerArgumentWithABitwidthLargerThanAnyModuleParameter   = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgTwo", secondModuleParameterTwo->dimensions, secondModuleParameterTwo->bitwidth + 2);
+    const auto callerArgumentWithABitwidthLargerThanAnyModuleParameter  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgTwo", secondModuleParameterTwo->dimensions, secondModuleParameterTwo->bitwidth + 2);
 
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithABitwidthSmallerThanAnyModuleParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
@@ -781,12 +779,12 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentNumberOf
     BaseSymbolTable             symbolTable;
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
-    
-    const std::string      moduleIdentifier        = "moduleOne";
-    const auto             firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>({2, 1}), DEFAULT_BITWIDTH);
-    auto                   firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
+
+    const std::string moduleIdentifier        = "moduleOne";
+    const auto        firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>({2, 1}), DEFAULT_BITWIDTH);
+    auto              firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
-    firstModuleToInsert->statements                = createStatementBodyContainingSingleSkipStmt();
+    firstModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mTwoParamOne", std::vector<unsigned>({1, 2, 3}), DEFAULT_BITWIDTH);
@@ -796,10 +794,10 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentNumberOf
     secondModuleToInsert->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleToInsert));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     // Overload resolution for known module identifier and caller arguments not matching any module
     const auto callerArgumentWithLessDimensionsThanAnyModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgOne", std::vector<unsigned>({1}), DEFAULT_BITWIDTH);
-    const auto callerArgumentWithMoreDimensionsThanAnyModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgTwo", std::vector<unsigned>({1,2,3,4}), DEFAULT_BITWIDTH);
+    const auto callerArgumentWithMoreDimensionsThanAnyModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "callerArgTwo", std::vector<unsigned>({1, 2, 3, 4}), DEFAULT_BITWIDTH);
 
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {callerArgumentWithLessDimensionsThanAnyModuleParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
@@ -828,16 +826,16 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentNumberOf
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
 
-    const std::string      moduleIdentifier        = "moduleOne";
-    const auto             firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
-    auto                   firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
-    firstModuleToInsert->statements                = createStatementBodyContainingSingleSkipStmt();
+    const std::string moduleIdentifier        = "moduleOne";
+    const auto        firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
+    auto              firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
+    firstModuleToInsert->statements           = createStatementBodyContainingSingleSkipStmt();
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
-    const std::string                    callerArgumentIdentifier                                              = "callerArgumentOne";
-    const auto                           callerArgumentWithNumberOfValuesOfDimensionSmallerThanModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, callerArgumentIdentifier, std::vector(1, firstModuleParameterOne->dimensions.front() - 1), DEFAULT_BITWIDTH);
+    auto              modulesMatchingSignature                                              = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    const std::string callerArgumentIdentifier                                              = "callerArgumentOne";
+    const auto        callerArgumentWithNumberOfValuesOfDimensionSmallerThanModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, callerArgumentIdentifier, std::vector(1, firstModuleParameterOne->dimensions.front() - 1), DEFAULT_BITWIDTH);
 
     const auto callerArgumentWithNumberOfValuesOfDimensionLargerThanModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, callerArgumentIdentifier, std::vector(1, firstModuleParameterOne->dimensions.front() + 1), DEFAULT_BITWIDTH);
     auto       secondModuleParameterOne                                             = firstModuleParameterOne;
@@ -883,11 +881,11 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithNumberOfCallerArgument
     BaseSymbolTable             symbolTable;
     TemporaryVariableScope::ptr activeSymbolTableScope;
     ASSERT_NO_FATAL_FAILURE(openNewScopeAndAssertSuccessfulCreation(symbolTable, activeSymbolTableScope));
-    
-    const std::string      moduleIdentifier        = "moduleOne";
-    const auto             firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
-    auto                   firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
-    firstModuleToInsert->statements                = createStatementBodyContainingSingleSkipStmt();
+
+    const std::string moduleIdentifier        = "moduleOne";
+    const auto        firstModuleParameterOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "mOneParamOne", std::vector<unsigned>(1, 2), DEFAULT_BITWIDTH);
+    auto              firstModuleToInsert     = std::make_shared<syrec::Module>(moduleIdentifier);
+    firstModuleToInsert->statements           = createStatementBodyContainingSingleSkipStmt();
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
@@ -909,7 +907,7 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithNumberOfCallerArgument
     auto thirdCallerArgument  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgThree", std::vector<unsigned>(1, 1), DEFAULT_BITWIDTH);
 
     // Overload resolution for known module identifier and caller arguments not matching any module
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleIdentifier, {}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 
@@ -937,7 +935,7 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithNumberOfCallerArgument
 
 TEST(BaseSymbolTableTests, InsertModuleWithEmptyIdentifierCreatesNoSymTableEntry) {
     BaseSymbolTable symbolTable;
-    const auto moduleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "paramOne", std::vector<unsigned>({1}), DEFAULT_BITWIDTH);
+    const auto      moduleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "paramOne", std::vector<unsigned>({1}), DEFAULT_BITWIDTH);
 
     const std::string validModuleIdentifier = "testModule";
     const auto        validModuleDefinition = std::make_shared<syrec::Module>(validModuleIdentifier);
@@ -951,11 +949,11 @@ TEST(BaseSymbolTableTests, InsertModuleWithEmptyIdentifierCreatesNoSymTableEntry
 
     const auto callerParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerParamOne", moduleParameter->dimensions, moduleParameter->bitwidth);
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(validModuleIdentifier, {callerParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(validModuleDefinition), modulesMatchingSignature));
 
-    const auto invalidModuleDefinition = std::make_shared<syrec::Module>("");
+    const auto invalidModuleDefinition  = std::make_shared<syrec::Module>("");
     invalidModuleDefinition->parameters = {moduleParameter};
     invalidModuleDefinition->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_FALSE(symbolTable.insertModule(invalidModuleDefinition));
@@ -971,7 +969,7 @@ TEST(BaseSymbolTableTests, InsertModuleWithEmptyIdentifierCreatesNoSymTableEntry
 TEST(BaseSymbolTableTests, InsertModuleWhosSignatureMatchesExistingOneDoesNotCreateDuplicateSymTableEntry) {
     BaseSymbolTable symbolTable;
 
-    const auto      moduleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "paramOne", std::vector<unsigned>({1}), DEFAULT_BITWIDTH);
+    const auto moduleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "paramOne", std::vector<unsigned>({1}), DEFAULT_BITWIDTH);
 
     const std::string validModuleIdentifier = "testModule";
     const auto        validModuleDefinition = std::make_shared<syrec::Module>(validModuleIdentifier);
@@ -985,7 +983,7 @@ TEST(BaseSymbolTableTests, InsertModuleWhosSignatureMatchesExistingOneDoesNotCre
 
     const auto callerParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerParamOne", moduleParameter->dimensions, moduleParameter->bitwidth);
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(validModuleIdentifier, {callerParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(validModuleDefinition), modulesMatchingSignature));
 
@@ -1018,7 +1016,7 @@ TEST(BaseSymbolTableTests, InsertModuleUsingNullptrDoesNotSucceedButDoesNotCrash
 
     const auto callerParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerParamOne", moduleParameter->dimensions, moduleParameter->bitwidth);
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(validModuleIdentifier, {callerParameter}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(validModuleDefinition), modulesMatchingSignature));
 
@@ -1087,8 +1085,8 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureUsingEmptyModuleIdent
     secondModuleDefinition->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleDefinition));
 
-    const auto callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", moduleInParameter->dimensions, moduleInParameter->bitwidth);
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    const auto callerArgument           = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", moduleInParameter->dimensions, moduleInParameter->bitwidth);
+    auto       modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature("", {callerArgument}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 }
@@ -1108,8 +1106,8 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureUsingModuleIdentifier
     secondModuleDefinition->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleDefinition));
 
-    const auto                           callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", moduleInParameter->dimensions, moduleInParameter->bitwidth);
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    const auto callerArgument           = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArg", moduleInParameter->dimensions, moduleInParameter->bitwidth);
+    auto       modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature("anotherModuleIdentifier", {callerArgument}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 }
@@ -1129,7 +1127,7 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureUsingInvalidCallerArg
     secondModuleDefinition->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleDefinition));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature("anotherModuleIdentifier", {nullptr}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResultionResultForInvalidCallerArguments(), modulesMatchingSignature));
 
@@ -1154,7 +1152,7 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureWithoutParametersDoes
     secondModuleDefinition->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, secondModuleDefinition));
 
-    BaseSymbolTable::ModuleOverloadResolutionResult modulesMatchingSignature;
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
     ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModuleDefinition->name, {}));
     ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 }
@@ -1175,9 +1173,9 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureMatchingMultipleModul
 
     const auto                                      firstCallerArgument  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgOne", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
     const auto                                      secondCallerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "callerArgTwo", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
     const auto firstParameterOfSecondModule  = std::make_shared<syrec::Variable>(secondParameterOfFirstModule->type, "mTwoParamOne", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
     const auto secondParameterOfSecondModule = std::make_shared<syrec::Variable>(firstParameterOfFirstModule->type, "mTwoParamTwo", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
@@ -1189,23 +1187,23 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureMatchingMultipleModul
     ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(firstModule->name));
     ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({firstModule, secondModule}, modulesMatchingName));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstCallerArgument, secondCallerArgument}));
 
-    const auto overloadResultMatchingMultipleModules = BaseSymbolTable::ModuleOverloadResolutionResult({BaseSymbolTable::ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt});
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(overloadResultMatchingMultipleModules, moduleMatchingSignature));
+    const auto overloadResultMatchingMultipleModules = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt);
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(overloadResultMatchingMultipleModules, modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstParameterOfFirstModule, secondParameterOfFirstModule}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstParameterOfFirstModule, secondParameterOfFirstModule}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(firstModule), modulesMatchingSignature));
 
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstParameterOfSecondModule, secondParameterOfSecondModule}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), moduleMatchingSignature));
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(firstModule->name, {firstParameterOfSecondModule, secondParameterOfSecondModule}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(secondModule), modulesMatchingSignature));
 }
 
 TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureWithNoExistingModules) {
     BaseSymbolTable symbolTable;
 
-    const auto         callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "callerArg", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
-    BaseSymbolTable::ModuleOverloadResolutionResult moduleMatchingSignature;
-    ASSERT_NO_FATAL_FAILURE(moduleMatchingSignature = symbolTable.getModulesMatchingSignature("moduleName", {callerArgument}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), moduleMatchingSignature));
+    const auto                                      callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "callerArg", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
+    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature("moduleName", {callerArgument}));
+    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
 }

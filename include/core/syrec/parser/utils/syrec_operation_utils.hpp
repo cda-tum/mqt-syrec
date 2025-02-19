@@ -4,6 +4,9 @@
 
 #include "core/syrec/expression.hpp"
 
+#include <cstdint>
+#include <optional>
+
 namespace utils {
     enum class IntegerConstantTruncationOperation {
         Modulo,
@@ -11,19 +14,22 @@ namespace utils {
     };
 
     [[nodiscard]] inline unsigned int truncateConstantValueToExpectedBitwidth(unsigned int valueToTruncate, unsigned int expectedResultBitwidth, IntegerConstantTruncationOperation integerConstantTruncationOperation) {
-        if (!expectedResultBitwidth)
+        if (expectedResultBitwidth == 0) {
             return 0;
+        }
 
         const unsigned int maxValueStorableInExpectedResultBitwidth = (1 << expectedResultBitwidth) - 1;
-        if (expectedResultBitwidth >= 32 || valueToTruncate < maxValueStorableInExpectedResultBitwidth)
+        if (expectedResultBitwidth >= 32 || valueToTruncate < maxValueStorableInExpectedResultBitwidth) {
             return valueToTruncate;
+        }
 
-        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd)
+        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd) {
             // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
             return valueToTruncate & maxValueStorableInExpectedResultBitwidth;
-        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo)
+        }
+        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo) {
             return valueToTruncate % maxValueStorableInExpectedResultBitwidth;
-
+        }
         return valueToTruncate;
     }
 
@@ -34,7 +40,7 @@ namespace utils {
             case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
             case syrec::BinaryExpression::BinaryOperation::LogicalOr:
             case syrec::BinaryExpression::BinaryOperation::Subtract:
-                return !operandValue;
+                return operandValue == 0;
             case syrec::BinaryExpression::BinaryOperation::Divide:
             case syrec::BinaryExpression::BinaryOperation::Multiply:
             case syrec::BinaryExpression::BinaryOperation::Modulo:
@@ -61,25 +67,29 @@ namespace utils {
                     evaluationResult = constantValueOfLOperand * constantValueOfROperand;
                     break;
                 case syrec::BinaryExpression::BinaryOperation::Divide:
-                    if (!constantValueOfROperand)
+                    if (constantValueOfROperand == 0) {
                         return std::nullopt;
+                    }
 
                     evaluationResult = constantValueOfLOperand / constantValueOfROperand;
                     break;
                 case syrec::BinaryExpression::BinaryOperation::FracDivide:
-                    if (!constantValueOfROperand)
+                    if (constantValueOfROperand == 0) {
                         return std::nullopt;
+                    }
 
                     // The sizeof the unsigned int type does not necessarily need to be equal to 32 bits (https://en.cppreference.com/w/cpp/language/types), thus a case distinction is needed to calculate the correct value
                     // based on the actual size of the data type.
-                    if constexpr (sizeof(unsigned int) == 2)
-                        evaluationResult = (static_cast<unsigned long>(constantValueOfLOperand) * static_cast<unsigned long>(constantValueOfROperand)) >> 16;
-                    else
-                        evaluationResult = (static_cast<unsigned long long>(constantValueOfLOperand) * static_cast<unsigned long long>(constantValueOfROperand)) >> 32;
+                    if constexpr (sizeof(unsigned int) == 2) {
+                        evaluationResult = (static_cast<uint32_t>(constantValueOfLOperand) * static_cast<uint32_t>(constantValueOfROperand)) >> 16;
+                    } else {
+                        evaluationResult = (static_cast<uint64_t>(constantValueOfLOperand) * static_cast<uint64_t>(constantValueOfROperand)) >> 32;
+                    }
                     break;
                 case syrec::BinaryExpression::BinaryOperation::Modulo:
-                    if (!constantValueOfROperand)
+                    if (constantValueOfROperand == 0) {
                         return std::nullopt;
+                    }
 
                     evaluationResult = constantValueOfLOperand % constantValueOfROperand;
                     break;
@@ -119,20 +129,22 @@ namespace utils {
                 default:
                     break;
             }
-        }
-        else if (lOperand.has_value() && isOperandIdentityElementOfOperation(*lOperand, binaryOperation))
+        } else if (lOperand.has_value() && isOperandIdentityElementOfOperation(*lOperand, binaryOperation)) {
             evaluationResult = rOperand;
-        else if (rOperand.has_value() && isOperandIdentityElementOfOperation(*rOperand, binaryOperation))
+        } else if (rOperand.has_value() && isOperandIdentityElementOfOperation(*rOperand, binaryOperation)) {
             evaluationResult = lOperand;
+        }
         return evaluationResult;
     }
 
     [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> toBeShiftedValue, syrec::ShiftExpression::ShiftOperation shiftOperation, const std::optional<unsigned int> shiftAmount) {
-        if (shiftAmount.has_value() && !*shiftAmount)
+        if (shiftAmount.has_value() && *shiftAmount == 0) {
             return toBeShiftedValue;
+        }
         if (toBeShiftedValue.has_value() && shiftAmount.has_value()) {
-            if (!*toBeShiftedValue)
+            if (*toBeShiftedValue == 0) {
                 return 0;
+            }
 
             return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left
                 ? *toBeShiftedValue << *shiftAmount

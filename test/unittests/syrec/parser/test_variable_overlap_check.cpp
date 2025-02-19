@@ -42,7 +42,7 @@ namespace {
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
         ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
         ASSERT_EQ(expectedVariableAccessOverlapCheckResult.overlapState, actualVariableAccessOverlapCheckResult->overlapState);
-        ASSERT_NO_FATAL_FAILURE(assertOverlapDataMatches(expectedVariableAccessOverlapCheckResult.overlappingIndicesInformations, actualVariableAccessOverlapCheckResult->overlappingIndicesInformations));
+        ASSERT_NO_FATAL_FAILURE(assertOverlapDataMatches(expectedVariableAccessOverlapCheckResult.overlappingIndicesInformation, actualVariableAccessOverlapCheckResult->overlappingIndicesInformation));
     }
 
     void assertSymmetricEquivalenceBetweenPotentiallyVariableAccessOverlapOperands(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand) {
@@ -50,12 +50,12 @@ namespace {
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(lhsOperand, rhsOperand));
         ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
         ASSERT_EQ(utils::VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping, actualVariableAccessOverlapCheckResult->overlapState);
-        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformations.has_value());
+        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformation.has_value());
 
         ASSERT_NO_FATAL_FAILURE(actualVariableAccessOverlapCheckResult = utils::checkOverlapBetweenVariableAccesses(rhsOperand, lhsOperand));
         ASSERT_TRUE(actualVariableAccessOverlapCheckResult.has_value());
         ASSERT_EQ(utils::VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping, actualVariableAccessOverlapCheckResult->overlapState);
-        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformations.has_value());
+        ASSERT_FALSE(actualVariableAccessOverlapCheckResult->overlappingIndicesInformation.has_value());
     }
 
     void assertSymmetricVariableAccessOverlapResultCannotBeDetermined(const syrec::VariableAccess& lhsOperand, const syrec::VariableAccess& rhsOperand) {
@@ -158,12 +158,12 @@ namespace {
 
             auto expectedOverlapCheckResultUsingLhsOperandAsBase                           = utils::VariableAccessOverlapCheckResult(getExpectedVariableAccessOverlapCheckResult());
             if (optionalExpectedOverlapData.has_value())
-                expectedOverlapCheckResultUsingLhsOperandAsBase.overlappingIndicesInformations = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForLhsOperand});
+                expectedOverlapCheckResultUsingLhsOperandAsBase.overlappingIndicesInformation = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForLhsOperand});
             ASSERT_NO_FATAL_FAILURE(assertEquivalenceBetweenVariableAccessOverlapOperands(lVarAccessInstance, rVarAccessInstance, expectedOverlapCheckResultUsingLhsOperandAsBase));
 
             auto expectedOverlapCheckResultUsingRhsOperandAsBase                           = utils::VariableAccessOverlapCheckResult(getExpectedVariableAccessOverlapCheckResult());
             if (optionalExpectedOverlapData.has_value())
-                expectedOverlapCheckResultUsingRhsOperandAsBase.overlappingIndicesInformations = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForRhsOperand});
+                expectedOverlapCheckResultUsingRhsOperandAsBase.overlappingIndicesInformation = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({optionalExpectedOverlapData->accessedValuePerDimension, optionalExpectedOverlapData->overlappingBitForRhsOperand});
             ASSERT_NO_FATAL_FAILURE(assertEquivalenceBetweenVariableAccessOverlapOperands(rVarAccessInstance, lVarAccessInstance, expectedOverlapCheckResultUsingRhsOperandAsBase));
         }
 

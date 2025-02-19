@@ -42,25 +42,32 @@ namespace syrec {
                 const std::optional<unsigned int> rhsOperandEvaluated = rhsOperand ? rhsOperand->tryEvaluate(loopVariableValueLookup) : std::nullopt;
                 switch (operation) {
                     case Operation::Addition:
-                        if (lhsOperandEvaluated.has_value() && !*lhsOperandEvaluated)
+                        if (lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) {
                             return rhsOperandEvaluated;
-                        if (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated)
+                        }
+                        if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
                             return lhsOperandEvaluated;
+                        }
                         return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value()? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
                     case Operation::Subtraction:
-                        if (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated)
+                        if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
                             return lhsOperandEvaluated;
-
+                        }
                         return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated - *rhsOperandEvaluated) : std::nullopt;
                     case Operation::Multiplication: {
-                        if ((lhsOperandEvaluated.has_value() && !*lhsOperandEvaluated) || (rhsOperandEvaluated.has_value() && !*rhsOperandEvaluated))
+                        if ((lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) || (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0)) {
                             return 0;
+                        }
                         return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated * *rhsOperandEvaluated) : std::nullopt;
                     }
                     case Operation::Division:
-                        return lhsOperandEvaluated.has_value() && *lhsOperandEvaluated && rhsOperandEvaluated.has_value() && *rhsOperandEvaluated
-                            ? std::make_optional(*lhsOperandEvaluated / *rhsOperandEvaluated)
-                            : std::nullopt;
+                        if (!lhsOperandEvaluated.has_value() || (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0)) {
+                            return std::nullopt;
+                        }
+                        if (lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) {
+                            return 0;
+                        }
+                        return rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated / *rhsOperandEvaluated) : std::nullopt; 
                 }
                 return std::nullopt;
             }
@@ -112,12 +119,15 @@ namespace syrec {
         }
 
         [[nodiscard]] std::optional<unsigned> tryEvaluate(const LoopVariableMapping& loopVariableValueLookup) const {
-            if (isConstant())
+            if (isConstant()) {
                 return std::get<unsigned>(numberVar);
-            if (isLoopVariable() && loopVariableValueLookup.count(std::get<std::string>(numberVar)) > 0)
+            }
+            if (isLoopVariable() && loopVariableValueLookup.count(std::get<std::string>(numberVar)) > 0) {
                 return loopVariableValueLookup.at(std::get<std::string>(numberVar));
-            if (isConstantExpression())
+            }
+            if (isConstantExpression()) {
                 return std::get<ConstantExpression>(numberVar).tryEvaluate(loopVariableValueLookup);
+            }
             return std::nullopt;
         }
 

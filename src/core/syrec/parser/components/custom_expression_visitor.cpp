@@ -425,7 +425,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             ? utils::checkOverlapBetweenVariableAccesses(**optionalRestrictionOnVariableAccesses, *generatedVariableAccess)
             : std::nullopt;
         overlapCheckResultWithRestrictedVariableParts.has_value() && overlapCheckResultWithRestrictedVariableParts->overlapState == utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping) {
-        if (!overlapCheckResultWithRestrictedVariableParts->overlappingIndicesInformations.has_value())
+        if (!overlapCheckResultWithRestrictedVariableParts->overlappingIndicesInformation.has_value())
             recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Overlap with restricted variable parts detected but no further information about overlap available. This should not happen");
         else {
             if (isCurrentlyProcessingDimensionAccessOfVariableAccess()) {

@@ -3,9 +3,13 @@
 #pragma once
 
 #include "core/syrec/expression.hpp"
-#include "core/syrec/variable.hpp"
 
+#include <cstddef>
+#include <memory>
+#include <optional>
+#include <string>
 #include <variant>
+#include <vector>
 
 namespace utils {
     class IfStatementExpressionComponentsRecorder {
@@ -29,18 +33,15 @@ namespace utils {
         };
         using ExpressionComponent = std::variant<std::string, unsigned int, syrec::BinaryExpression::BinaryOperation, syrec::ShiftExpression::ShiftOperation, ExpressionBracketKind, VariableAccessComponent>;
 
-        IfStatementExpressionComponentsRecorder():
-            operationMode(OperationMode::Recording), indexForComparisonOfExpressionComponents(0) {}
-
         void                              recordExpressionComponent(const ExpressionComponent& expressionComponent);
         void                              switchMode(OperationMode newOperationMode);
         [[nodiscard]] std::optional<bool> recordedMatchingExpressionComponents() const;
         [[nodiscard]] OperationMode       getCurrentOperationMode() const;
 
     protected:
-        OperationMode                    operationMode;
+        OperationMode                    operationMode = OperationMode::Recording;
         std::vector<ExpressionComponent> expressionComponents;
-        std::size_t                      indexForComparisonOfExpressionComponents;
+        std::size_t                      indexForComparisonOfExpressionComponents = 0;
         std::optional<bool>              aggregateOfComparisonResultsOfExpressionComponents;
     };
 } // namespace utils

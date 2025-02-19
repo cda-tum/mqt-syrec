@@ -3,6 +3,9 @@
 #pragma once
 
 #include <core/syrec/variable.hpp>
+
+#include <optional>
+#include <string>
 #include <vector>
 
 namespace utils {
@@ -27,7 +30,7 @@ namespace utils {
         [[nodiscard]] std::string stringifyOverlappingIndicesInformation() const;
 
         OverlapState                               overlapState;
-        std::optional<OverlappingIndicesContainer> overlappingIndicesInformations;
+        std::optional<OverlappingIndicesContainer> overlappingIndicesInformation;
     };
 
     /**
@@ -47,5 +50,5 @@ namespace utils {
      * @return In case that either a potential or definitive overlap was detected, a container holding information about the type of overlap and additional information about the overlapping indices (in case of a definitive overlap) from the point of the lhs variable access, otherwise std::nullopt is returned. <br>
      */
     [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess);
-}
+} // namespace utils
 #endif

@@ -5,7 +5,15 @@
 #include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"
 
+#include <functional>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
 #include <unordered_set>
+#include <variant>
+#include <vector>
 
 namespace utils {
     class TemporaryVariableScope {
@@ -44,5 +52,5 @@ namespace utils {
         // To be able to perform heterogeneous lookup using std::string_view in a STL set/dictionary container in C++17 only std::map and std::set can be used. C++20 supports this functionality also for the unordered STL container variants.
         std::map<std::string, ScopeEntry::ptr, std::less<>> signalIdentifierLookup;
     };
-}
+} //namespace utils
 #endif

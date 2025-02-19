@@ -28,9 +28,9 @@ bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec
 
 std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInformation() const {
     std::string stringificationBuffer;
-    for (std::size_t dimensionIdx = 0; dimensionIdx < overlappingIndicesInformations->knownValueOfAccessedValuePerDimension.size(); ++dimensionIdx)
-        stringificationBuffer += "(" + std::to_string(dimensionIdx) + "," + std::to_string(overlappingIndicesInformations->knownValueOfAccessedValuePerDimension.at(dimensionIdx)) + ")";   
-    stringificationBuffer += "| " + std::to_string(overlappingIndicesInformations->overlappingBit);
+    for (std::size_t dimensionIdx = 0; dimensionIdx < overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.size(); ++dimensionIdx)
+        stringificationBuffer += "(" + std::to_string(dimensionIdx) + "," + std::to_string(overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.at(dimensionIdx)) + ")";   
+    stringificationBuffer += "| " + std::to_string(overlappingIndicesInformation->overlappingBit);
     return stringificationBuffer;
 }
 
@@ -139,6 +139,6 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
 
     auto overlapCheckResultContainer                           = VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::Overlapping);
-    overlapCheckResultContainer.overlappingIndicesInformations = VariableAccessOverlapCheckResult::OverlappingIndicesContainer({constantIndicesOfAccessedValuesPerDimension, *overlappingBit});
+    overlapCheckResultContainer.overlappingIndicesInformation = VariableAccessOverlapCheckResult::OverlappingIndicesContainer({constantIndicesOfAccessedValuesPerDimension, *overlappingBit});
     return overlapCheckResultContainer;
 }

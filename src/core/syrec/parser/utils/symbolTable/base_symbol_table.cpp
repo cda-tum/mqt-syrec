@@ -89,7 +89,7 @@ utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::g
             [](const syrec::Variable::ptr& callerArgument) {
                 return !callerArgument || callerArgument->name.empty();
         })) {
-            return ModuleOverloadResolutionResult({ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid, std::nullopt});
+            return ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid, std::nullopt);
         }
     }
 
@@ -106,18 +106,18 @@ utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::g
                                 callerArguments.cbegin(),
                                 callerArguments.cend(),
                                 [](const syrec::Variable::ptr& moduleParameter, const syrec::Variable::ptr& callerArgument) {
-                                        return variableAssignability::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type)
+                                        return variable_assignability_check::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type)
                                             && doVariableStructuresMatch(*moduleParameter, *callerArgument);
                         });
                     }),
             modulesMatchingIdentifier.end());
 
     if (modulesMatchingIdentifier.empty())
-        return ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt};
+        return ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
 
     return modulesMatchingIdentifier.size() == 1
-        ? ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front()}
-        : ModuleOverloadResolutionResult{ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt};
+        ? ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front())
+        : ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt);
 }
 
 bool utils::BaseSymbolTable::doVariableStructuresMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) noexcept {

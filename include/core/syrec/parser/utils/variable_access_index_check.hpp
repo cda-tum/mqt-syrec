@@ -5,6 +5,7 @@
 #include "core/syrec/variable.hpp"
 
 #include <optional>
+#include <vector>
 
 namespace utils {
     struct VariableAccessIndicesValidity {
@@ -39,5 +40,5 @@ namespace utils {
      * @return The validity of the indices defined in the accessed values per dimension and bitrange.
      */
     [[nodiscard]] std::optional<VariableAccessIndicesValidity> validateVariableAccessIndices(const syrec::VariableAccess& variableAccess);
-}
+} //namespace utils
 #endif

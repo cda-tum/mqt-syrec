@@ -102,7 +102,7 @@ protected:
 
     [[nodiscard]] static utils::VariableAccessOverlapCheckResult generateVariableAccessOverlappingIndicesDataContainer(const std::initializer_list<unsigned int>& accessedValuePerOverlappingDimension, unsigned int overlappingBit) {
         auto resultContainer                           = utils::VariableAccessOverlapCheckResult(utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping);
-        resultContainer.overlappingIndicesInformations = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({accessedValuePerOverlappingDimension, overlappingBit});
+        resultContainer.overlappingIndicesInformation = utils::VariableAccessOverlapCheckResult::OverlappingIndicesContainer({accessedValuePerOverlappingDimension, overlappingBit});
         return resultContainer;
     }
 
