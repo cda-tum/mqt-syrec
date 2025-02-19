@@ -1,5 +1,7 @@
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 
+#include <optional>
+
 using namespace utils;
 
 void IfStatementExpressionComponentsRecorder::recordExpressionComponent(const ExpressionComponent& expressionComponent) {
@@ -12,8 +14,9 @@ void IfStatementExpressionComponentsRecorder::recordExpressionComponent(const Ex
         return;
     }
 
-    if (aggregateOfComparisonResultsOfExpressionComponents.has_value() && !aggregateOfComparisonResultsOfExpressionComponents.value())
+    if (aggregateOfComparisonResultsOfExpressionComponents.has_value() && !aggregateOfComparisonResultsOfExpressionComponents.value()) {
         return;
+    }
 
     if (indexForComparisonOfExpressionComponents < expressionComponents.size()) {
         const ExpressionComponent& expectedExpressionComponentAtIndex = expressionComponents.at(indexForComparisonOfExpressionComponents++);

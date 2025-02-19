@@ -1,5 +1,16 @@
-#include "core/syrec/expression.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
+
+#include "core/syrec/expression.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/variable.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 using namespace utils;
 
@@ -14,9 +25,9 @@ std::optional<unsigned int> tryEvaluateNumber(const syrec::Number::ptr& numberTo
 }
 
 std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr& expression) {
-    if (const auto& numericExprOfContainerToEvaluate = std::dynamic_pointer_cast<syrec::NumericExpression>(expression); numericExprOfContainerToEvaluate)
+    if (const auto& numericExprOfContainerToEvaluate = std::dynamic_pointer_cast<syrec::NumericExpression>(expression); numericExprOfContainerToEvaluate != nullptr) {
         return tryEvaluateNumber(numericExprOfContainerToEvaluate->value);
-
+    }
     return std::nullopt;
 }
 
@@ -28,8 +39,9 @@ bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec
 
 std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInformation() const {
     std::string stringificationBuffer;
-    for (std::size_t dimensionIdx = 0; dimensionIdx < overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.size(); ++dimensionIdx)
-        stringificationBuffer += "(" + std::to_string(dimensionIdx) + "," + std::to_string(overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.at(dimensionIdx)) + ")";   
+    for (std::size_t dimensionIdx = 0; dimensionIdx < overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.size(); ++dimensionIdx) {
+        stringificationBuffer += "(" + std::to_string(dimensionIdx) + "," + std::to_string(overlappingIndicesInformation->knownValueOfAccessedValuePerDimension.at(dimensionIdx)) + ")";
+    }
     stringificationBuffer += "| " + std::to_string(overlappingIndicesInformation->overlappingBit);
     return stringificationBuffer;
 }
@@ -40,8 +52,9 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
     // II.  Why does the getVar(...) call access this smart pointer instance instead of simply returning syrec::VariableAccess var member?
     const syrec::Variable::ptr& lVarPtr = lVariableAccess.var;
     const syrec::Variable::ptr& rVarPtr = rVariableAccess.var;
-    if (!lVarPtr || !rVarPtr || !doReferenceVariablesMatch(*lVarPtr, *rVarPtr))
+    if (lVarPtr == nullptr || rVarPtr == nullptr || !doReferenceVariablesMatch(*lVarPtr, *rVarPtr)) {
         return std::nullopt;
+    }
 
     const syrec::Variable& lVar = *lVarPtr;
     const syrec::Variable& rVar = *rVarPtr;
@@ -51,16 +64,18 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         std::min(rVar.dimensions.size(), rVariableAccess.indexes.size())
     );
     std::vector<unsigned int> constantIndicesOfAccessedValuesPerDimension;
-    if (!numDimensionsToCheck)
+    if (numDimensionsToCheck == 0) {
         constantIndicesOfAccessedValuesPerDimension.emplace_back(0);
-    else
+    } else {
         constantIndicesOfAccessedValuesPerDimension.reserve(numDimensionsToCheck);
+    }
 
     for (std::size_t i = 0; i < numDimensionsToCheck; ++i) {
         const auto& exprDefiningAccessedValueOfDimensionInLVar = lVariableAccess.indexes.at(i);
         const auto& exprDefiningAccessedValueOfDimensionInRVar = rVariableAccess.indexes.at(i);
-        if (!exprDefiningAccessedValueOfDimensionInLVar || !exprDefiningAccessedValueOfDimensionInRVar)
+        if (exprDefiningAccessedValueOfDimensionInLVar == nullptr || exprDefiningAccessedValueOfDimensionInRVar == nullptr) {
             return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
+        }
 
         const std::optional<unsigned int> accessedValueInLVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInLVar);
         const std::optional<unsigned int> accessedValueInRVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInRVar);
@@ -68,11 +83,12 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         // If one were to assume that all indices provided in the two variable accesses are within range of the formal bounds of the accessed variable, an index with an non-constant value
         // could be assumed to be overlapping for a dimension that has only one value. However, we do not assume in-range indices and thus can only report a potential overlap. The same reasoning
         // can be applied for non-constant indices of the accessed bitrange for a variable with defined bitwidth of 1.
-        if (!accessedValueInLVar.has_value() || !accessedValueInRVar.has_value())
+        if (!accessedValueInLVar.has_value() || !accessedValueInRVar.has_value()) {
             return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
-
-        if (accessedValueInLVar.value() != accessedValueInRVar.value())
+        }
+        if (accessedValueInLVar.value() != accessedValueInRVar.value()) {
             return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::NotOverlapping);
+        }
         constantIndicesOfAccessedValuesPerDimension.emplace_back(accessedValueInLVar.value());
     }
 
@@ -91,8 +107,9 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         evaluatedRVarBitRangeEnd   = rVariableAccess.range->first == rVariableAccess.range->second ? evaluatedRVarBitRangeStart : tryEvaluateNumber(rVariableAccess.range->second);
     }
 
-    if ((!evaluatedLVarBitRangeStart.has_value() && !evaluatedLVarBitRangeEnd.has_value()) || (!evaluatedRVarBitRangeStart.has_value() && !evaluatedRVarBitRangeEnd.has_value()))
+    if ((!evaluatedLVarBitRangeStart.has_value() && !evaluatedLVarBitRangeEnd.has_value()) || (!evaluatedRVarBitRangeStart.has_value() && !evaluatedRVarBitRangeEnd.has_value())) {
         return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
+    }
 
     std::optional<unsigned int> overlappingBit;
     // Either the bitrange start or end index of the lhs variable access has a constant value
@@ -101,28 +118,33 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         // Either the bitrange start or end index of the rhs variable access has a constant value
         if (evaluatedRVarBitRangeStart.has_value() != evaluatedRVarBitRangeEnd.has_value()) {
             const auto rVarKnonwBitIndexValue = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
-            if (lVarKnownBitIndexValue == rVarKnonwBitIndexValue)
+            if (lVarKnownBitIndexValue == rVarKnonwBitIndexValue) {
                 overlappingBit = lVarKnownBitIndexValue;
+            }
         } else if (evaluatedRVarBitRangeStart.has_value()) {
             // Both bitrange start and end index of the rhs variable access have a constant value
             const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfRVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd);
-            if (orderedIndicesOfBitrangeAccessOfRVar.first <= lVarKnownBitIndexValue && lVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfRVar.second)
+            if (orderedIndicesOfBitrangeAccessOfRVar.first <= lVarKnownBitIndexValue && lVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfRVar.second) {
                 overlappingBit = lVarKnownBitIndexValue;
+            }
         }
     } else if (evaluatedLVarBitRangeStart.has_value()) {
         // Either the bitrange start or end index of the rhs variable access has a constant value
         if (evaluatedRVarBitRangeStart.has_value() != evaluatedRVarBitRangeEnd.has_value()) {
             const auto rVarKnownBitIndexValue = evaluatedRVarBitRangeStart.has_value() ? *evaluatedRVarBitRangeStart : *evaluatedRVarBitRangeEnd;
             const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfLVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
-            if (orderedIndicesOfBitrangeAccessOfLVar.first <= rVarKnownBitIndexValue && rVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfLVar.second)
+            if (orderedIndicesOfBitrangeAccessOfLVar.first <= rVarKnownBitIndexValue && rVarKnownBitIndexValue <= orderedIndicesOfBitrangeAccessOfLVar.second) {
                 overlappingBit = rVarKnownBitIndexValue;
+            }
         } else if (evaluatedRVarBitRangeStart.has_value()) {
             // The indices of the accessed bitrange in both operands have a constant value
             const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfRVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedRVarBitRangeStart, *evaluatedRVarBitRangeEnd);
             const std::pair<unsigned int, unsigned int> orderedIndicesOfBitrangeAccessOfLVar = determineBitrangeConstantIndexPairOrderedAscendingly(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
 
-            if ((orderedIndicesOfBitrangeAccessOfLVar.first < orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.second < orderedIndicesOfBitrangeAccessOfRVar.first) || (orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.second))
+            if ((orderedIndicesOfBitrangeAccessOfLVar.first < orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.second < orderedIndicesOfBitrangeAccessOfRVar.first) 
+                || (orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.first && orderedIndicesOfBitrangeAccessOfLVar.first > orderedIndicesOfBitrangeAccessOfRVar.second)) {
                 return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::NotOverlapping);
+            }
 
             const std::pair<unsigned int, unsigned int> accessedBitRangeOfLVar    = std::make_pair(*evaluatedLVarBitRangeStart, *evaluatedLVarBitRangeEnd);
             if (accessedBitRangeOfLVar.first < accessedBitRangeOfLVar.second) {
@@ -135,8 +157,9 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
         }
     }
 
-    if (!overlappingBit.has_value())
+    if (!overlappingBit.has_value()) {
         return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
+    }
 
     auto overlapCheckResultContainer                           = VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::Overlapping);
     overlapCheckResultContainer.overlappingIndicesInformation = VariableAccessOverlapCheckResult::OverlappingIndicesContainer({constantIndicesOfAccessedValuesPerDimension, *overlappingBit});

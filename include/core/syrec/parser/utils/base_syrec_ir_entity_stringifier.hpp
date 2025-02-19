@@ -67,7 +67,7 @@ namespace utils {
         AdditionalFormattingOptions additionalFormattingOptions;
 
         virtual void resetInternals();
-        [[maybe_unused]] bool incrementIdentationLevel() noexcept;
+        [[maybe_unused]] bool incrementIdentationLevel();
         [[maybe_unused]] bool decrementIdentationLevel() noexcept;
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Module& programModule);
@@ -90,13 +90,13 @@ namespace utils {
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable::vec& variables, bool stringifyVariableTypeForEveryEntry);
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Statement::vec& statements);
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Variable::Type variableType) const noexcept;
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::BinaryExpression::BinaryOperation operation) const noexcept;
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::UnaryStatement::UnaryOperation operation) const noexcept;
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::AssignStatement::AssignOperation operation) const noexcept;
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::ShiftExpression::ShiftOperation operation) const noexcept;
-        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Number::ConstantExpression::Operation operation) const noexcept;
-        [[maybe_unused]] virtual bool stringifySkipStatement(std::ostream& outputStream) const noexcept;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Variable::Type variableType) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::BinaryExpression::BinaryOperation operation) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::UnaryStatement::UnaryOperation operation) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::AssignStatement::AssignOperation operation) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::ShiftExpression::ShiftOperation operation) const;
+        [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, syrec::Number::ConstantExpression::Operation operation) const;
+        [[maybe_unused]] virtual bool stringifySkipStatement(std::ostream& outputStream) const;
 
         [[nodiscard]] bool           appendNewlineToStream(std::ostream& outputStream) const;
         [[maybe_unused]] static bool setStreamInFailedState(std::ostream& stream);

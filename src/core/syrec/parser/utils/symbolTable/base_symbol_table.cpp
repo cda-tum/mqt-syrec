@@ -1,17 +1,19 @@
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+
+#include "core/syrec/module.hpp"
+#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/variable_assignability_check.hpp"
+#include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <optional>
+#include <string_view>
 
 bool utils::BaseSymbolTable::insertModule(const syrec::Module::ptr& module) {
-    if (!module || module->name.empty() 
-        || !std::all_of(
-            module->parameters.cbegin(),
-            module->parameters.cend(),
-            [](const syrec::Variable::ptr& moduleParameter) { return moduleParameter && !moduleParameter->name.empty(); })
-        )
+    if (module == nullptr || module->name.empty() || !std::all_of(module->parameters.cbegin(), module->parameters.cend(), [](const syrec::Variable::ptr& moduleParameter) { return moduleParameter && !moduleParameter->name.empty(); })) {
         return false;
+    }
 
     // Check whether the insertion of the module will not create any ambiguity for any future module overload resolution attempts.
     // I.e. Two modules sharing the same identifier, number of parameters (n) and structure for each of their defined parameters can only exist,
@@ -40,18 +42,18 @@ bool utils::BaseSymbolTable::insertModule(const syrec::Module::ptr& module) {
         return false;
     }
 
-    if (declaredModules.find(module->name) == declaredModules.end())
+    if (declaredModules.find(module->name) == declaredModules.end()) {
         declaredModules.insert({module->name, syrec::Module::vec()});
-
+    }
     declaredModules.at(module->name).emplace_back(module);
     return true;
 }
 
 syrec::Module::vec utils::BaseSymbolTable::getModulesByName(const std::string_view& accessedModuleIdentifier) const {
     auto modulesMatchingIdentifier = declaredModules.find(accessedModuleIdentifier);
-    if (modulesMatchingIdentifier == declaredModules.end())
+    if (modulesMatchingIdentifier == declaredModules.end()) {
         return {};
-
+    }
     return modulesMatchingIdentifier->second;
 }
 
@@ -73,9 +75,9 @@ utils::TemporaryVariableScope::ptr utils::BaseSymbolTable::openTemporaryScope() 
 }
 
 std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeTemporaryScope() {
-    if (temporaryVariableScopes.empty())
+    if (temporaryVariableScopes.empty()) {
         return std::nullopt;
-
+    }
     temporaryVariableScopes.pop_back();
     return getActiveTemporaryScope();
 }
@@ -112,8 +114,9 @@ utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::g
                     }),
             modulesMatchingIdentifier.end());
 
-    if (modulesMatchingIdentifier.empty())
+    if (modulesMatchingIdentifier.empty()) {
         return ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
+    }
 
     return modulesMatchingIdentifier.size() == 1
         ? ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front())
