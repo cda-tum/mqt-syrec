@@ -296,7 +296,7 @@ public:
   public:
     antlr4::Token *moduleIdent = nullptr;
     antlr4::Token *identToken = nullptr;
-    std::vector<antlr4::Token *> calleeArguments;
+    std::vector<antlr4::Token *> callerArguments;
     CallStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *OPEN_RBRACKET();

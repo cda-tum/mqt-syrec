@@ -65,7 +65,7 @@ statement:
 	| skipStatement	
 	;
 
-callStatement: ( OP_CALL | OP_UNCALL ) moduleIdent=IDENT OPEN_RBRACKET calleeArguments+=IDENT ( PARAMETER_DELIMITER calleeArguments+=IDENT )* CLOSE_RBRACKET ;
+callStatement: ( OP_CALL | OP_UNCALL ) moduleIdent=IDENT OPEN_RBRACKET callerArguments+=IDENT ( PARAMETER_DELIMITER callerArguments+=IDENT )* CLOSE_RBRACKET ;
 
 loopVariableDefinition: LOOP_VARIABLE_PREFIX variableIdent=IDENT OP_EQUAL ;
 loopStepsizeDefinition: KEYWORD_STEP OP_MINUS? number ;

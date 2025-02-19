@@ -1211,7 +1211,7 @@ TSyrecParser::CallStatementContext* TSyrecParser::callStatement() {
     match(TSyrecParser::OPEN_RBRACKET);
     setState(135);
     antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken = match(TSyrecParser::IDENT);
-    antlrcpp::downCast<CallStatementContext *>(_localctx)->calleeArguments.push_back(antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken);
+    antlrcpp::downCast<CallStatementContext *>(_localctx)->callerArguments.push_back(antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken);
     setState(140);
     _errHandler->sync(this);
     _la = _input->LA(1);
@@ -1220,7 +1220,7 @@ TSyrecParser::CallStatementContext* TSyrecParser::callStatement() {
       match(TSyrecParser::PARAMETER_DELIMITER);
       setState(137);
       antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken = match(TSyrecParser::IDENT);
-      antlrcpp::downCast<CallStatementContext *>(_localctx)->calleeArguments.push_back(antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken);
+      antlrcpp::downCast<CallStatementContext *>(_localctx)->callerArguments.push_back(antlrcpp::downCast<CallStatementContext *>(_localctx)->identToken);
       setState(142);
       _errHandler->sync(this);
       _la = _input->LA(1);
