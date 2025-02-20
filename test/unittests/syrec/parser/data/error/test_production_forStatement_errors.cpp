@@ -1,5 +1,14 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+#include <climits>
+
+using namespace syrec_parser_error_tests;
+
 TEST_F(SyrecParserErrorTestsFixture, OmittingForStatementKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 31), "extraneous input '$' expecting {'++=', '--=', '~=', 'call', 'uncall', 'wire', 'state', 'for', 'if', 'skip', IDENT}");
     recordSyntaxError(Message::Position(1, 34), "no viable alternative at input 'i ='");

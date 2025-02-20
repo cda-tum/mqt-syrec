@@ -1,5 +1,14 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/program.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+
+using namespace syrec_parser_error_tests;
+
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInLhsOperandOfShiftExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 42), "c");
     performTestExecution("module main(out a(4), out b[2](4)) a += ((c << 2) + 2)");

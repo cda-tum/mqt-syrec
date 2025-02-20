@@ -1,5 +1,13 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/program.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+using namespace syrec_parser_error_tests;
+
 TEST_F(SyrecParserErrorTestsFixture, OmittingLocalModuleParameterTypeInDeclarationCausesError) {
     recordSyntaxError(Message::Position(1, 15), "no viable alternative at input 'a('");
     performTestExecution("module main() a(16) skip");

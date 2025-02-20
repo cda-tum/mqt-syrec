@@ -1,10 +1,19 @@
 #include "core/syrec/module.hpp"
-#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
+#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
-#include "gmock/gmock-matchers.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
+
 #include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 using namespace utils;
 
@@ -25,7 +34,7 @@ namespace {
             firstModuleParameterType(std::get<0>(GetParam())), secondModuleParameterType(std::get<1>(GetParam())),
             defaultSignalBitwidth(DEFAULT_BITWIDTH), defaultSignalDimensions(DEFAULT_SIGNAL_DIMENSIONS) {}
 
-        VariableTypeAmbiguityDuringModuleInsertionTestFixture(const std::pair<syrec::Variable::Type, syrec::Variable::Type>& moduleParameterData):
+        explicit VariableTypeAmbiguityDuringModuleInsertionTestFixture(const std::pair<syrec::Variable::Type, syrec::Variable::Type>& moduleParameterData):
             firstModuleParameterType(moduleParameterData.first), secondModuleParameterType(moduleParameterData.second),
             defaultSignalBitwidth(DEFAULT_BITWIDTH), defaultSignalDimensions(DEFAULT_SIGNAL_DIMENSIONS) {}
     };
@@ -112,10 +121,11 @@ namespace {
 
     void assertModuleMatchingSignatureMatchesExpectedOne(const BaseSymbolTable::ModuleOverloadResolutionResult& expectedModuleMatchingSignature, const BaseSymbolTable::ModuleOverloadResolutionResult& actualModuleMatchingSignature) {
         ASSERT_EQ(expectedModuleMatchingSignature.resolutionResult, actualModuleMatchingSignature.resolutionResult);
-        if (expectedModuleMatchingSignature.moduleMatchingSignature.has_value())
+        if (expectedModuleMatchingSignature.moduleMatchingSignature.has_value()) {
             ASSERT_EQ(expectedModuleMatchingSignature.moduleMatchingSignature.value(), actualModuleMatchingSignature.moduleMatchingSignature.value());
-        else
+        } else {
             ASSERT_FALSE(actualModuleMatchingSignature.moduleMatchingSignature.has_value());
+        }
     }
 
     void assertModuleCollectionsMatch(const syrec::Module::vec& expected, const syrec::Module::vec& actual) {
@@ -602,7 +612,7 @@ TEST(BaseSymbolTableTests, InsertOverloadedModuleHavingAdditionalParameterThanEx
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
-    auto secondModuleParameterOne  = firstModuleParameterOne;
+    const auto& secondModuleParameterOne  = std::make_shared<syrec::Variable>(*firstModuleParameterOne);
     secondModuleParameterOne->name = "mTwoParamOne";
 
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "mTwoParamTwo", std::vector<unsigned>(2, 2), DEFAULT_BITWIDTH);
@@ -684,7 +694,7 @@ TEST(BaseSymbolTableTests, ExistsModuleForNameUsingNonExistingModuleIdentifier) 
 
 // Error cases tests
 TEST(BaseSymbolTableTests, GetModulesByNameWithNoExistingModules) {
-    BaseSymbolTable symbolTable;
+    const BaseSymbolTable symbolTable;
 
     const auto         callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "callerArg", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
     syrec::Module::vec modulesMatchingName;
@@ -838,7 +848,7 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithCallerArgumentNumberOf
     const auto        callerArgumentWithNumberOfValuesOfDimensionSmallerThanModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, callerArgumentIdentifier, std::vector(1, firstModuleParameterOne->dimensions.front() - 1), DEFAULT_BITWIDTH);
 
     const auto callerArgumentWithNumberOfValuesOfDimensionLargerThanModuleParameter = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, callerArgumentIdentifier, std::vector(1, firstModuleParameterOne->dimensions.front() + 1), DEFAULT_BITWIDTH);
-    auto       secondModuleParameterOne                                             = firstModuleParameterOne;
+    auto       secondModuleParameterOne                                             = std::make_shared<syrec::Variable>(*firstModuleParameterOne);
     secondModuleParameterOne->name                                                  = "mTwoParamOne";
 
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "mTwoParamTwo", callerArgumentWithNumberOfValuesOfDimensionLargerThanModuleParameter->dimensions, DEFAULT_BITWIDTH);
@@ -889,7 +899,7 @@ TEST(BaseSymbolTableTests, GetModulesMatchingSignatureWithNumberOfCallerArgument
     firstModuleToInsert->parameters.emplace_back(firstModuleParameterOne);
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, firstModuleToInsert));
 
-    auto secondModuleParameterOne  = firstModuleParameterOne;
+    auto secondModuleParameterOne  = std::make_shared<syrec::Variable>(*firstModuleParameterOne);
     secondModuleParameterOne->name = "mTwoParamOne";
 
     const auto secondModuleParameterTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "mTwoParamTwo", std::vector<unsigned>(2, 2), DEFAULT_BITWIDTH);
@@ -1200,7 +1210,7 @@ TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureMatchingMultipleModul
 }
 
 TEST(BaseSymbolTableTests, FetchModulesUsingCallerSignatureWithNoExistingModules) {
-    BaseSymbolTable symbolTable;
+    const BaseSymbolTable symbolTable;
 
     const auto                                      callerArgument = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "callerArg", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
     auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);

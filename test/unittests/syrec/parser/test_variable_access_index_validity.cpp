@@ -1,7 +1,17 @@
 #include "core/syrec/expression.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/variable.hpp"
 #include <core/syrec/parser/utils/variable_access_index_check.hpp>
 
 #include <gtest/gtest.h>
+
+#include <cstddef>
+#include <initializer_list>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+#include <utility>
 
 using namespace utils;
 
@@ -25,9 +35,9 @@ namespace {
         VariableAccessIndicesValidity result;
         result.accessedValuePerDimensionValidity.reserve(expectedValidityPerDimension.size());
 
-        for (const auto& expectedValidityOfDimension: expectedValidityPerDimension)
+        for (const auto& expectedValidityOfDimension: expectedValidityPerDimension) {
             result.accessedValuePerDimensionValidity.emplace_back(expectedValidityOfDimension);
-
+        }
         result.bitRangeAccessValidity = expectedBitrangeValidity;
         return result;
     }
@@ -47,27 +57,30 @@ namespace {
     void assertIndexValidiationResultsMatch(const VariableAccessIndicesValidity::IndexValidationResult& expected, const VariableAccessIndicesValidity::IndexValidationResult& actual) {
         ASSERT_EQ(expected.indexValidity, actual.indexValidity);
         ASSERT_EQ(expected.indexValue.has_value(), actual.indexValue.has_value());
-        if (expected.indexValue.has_value())
+        if (expected.indexValue.has_value()) {
             ASSERT_EQ(expected.indexValue.value(), actual.indexValue.value());
+        }
     }
 
     void assertValidationResultsMatch(const std::optional<VariableAccessIndicesValidity>& expectedValidationResult, const std::optional<VariableAccessIndicesValidity>& actualValidationResult) {
         ASSERT_EQ(expectedValidationResult.has_value(), actualValidationResult.has_value());
-        if (!expectedValidationResult.has_value())
+        if (!expectedValidationResult.has_value()) {
             return;
+        }
 
         ASSERT_EQ(expectedValidationResult->isValid(), actualValidationResult->isValid());
         const auto& expectedIndexValidityPerValueOfDimension = expectedValidationResult->accessedValuePerDimensionValidity;
         const auto& actualIndexValidityPerValueOfDimension = actualValidationResult->accessedValuePerDimensionValidity;
         ASSERT_EQ(expectedIndexValidityPerValueOfDimension.size(), actualIndexValidityPerValueOfDimension.size());
 
-        for (std::size_t i = 0; i < expectedIndexValidityPerValueOfDimension.size(); ++i)
+        for (std::size_t i = 0; i < expectedIndexValidityPerValueOfDimension.size(); ++i) {
             ASSERT_NO_FATAL_FAILURE(assertIndexValidiationResultsMatch(expectedIndexValidityPerValueOfDimension.at(i), actualIndexValidityPerValueOfDimension.at(i)));
+        }
 
         ASSERT_EQ(expectedValidationResult->bitRangeAccessValidity.has_value(), actualValidationResult->bitRangeAccessValidity.has_value());
-        if (!expectedValidationResult->bitRangeAccessValidity.has_value())
+        if (!expectedValidationResult->bitRangeAccessValidity.has_value()) {
             return;
-
+        }
         const auto& expectedBitRangeValidity = expectedValidationResult->bitRangeAccessValidity.value();
         const auto& actualBitRangeValidity = actualValidationResult->bitRangeAccessValidity.value();
 
@@ -87,17 +100,17 @@ namespace {
     };
 
     struct VariableAccessTestData {
-        const std::string  testCaseName;
+        std::string        testCaseName;
         VariableDefinition variableDefinition;
         VariableAccessData variableAccessData;
 
-        VariableAccessTestData(const std::string& testCaseName, VariableDefinition&& variableDefinition, VariableAccessData&& variableAccessData):
-            testCaseName(testCaseName), variableDefinition(std::move(variableDefinition)), variableAccessData(std::move(variableAccessData)) {}
+        VariableAccessTestData(std::string testCaseName, VariableDefinition&& variableDefinition, VariableAccessData&& variableAccessData):
+            testCaseName(std::move(testCaseName)), variableDefinition(std::move(variableDefinition)), variableAccessData(std::move(variableAccessData)) {}
     };
 
     class VariableAccessSuccessTestFixture : public testing::TestWithParam<VariableAccessTestData> {
     };
-};
+} // namespace
 
 TEST_P(VariableAccessSuccessTestFixture, SuccessCase) {
     const VariableDefinition& variableDefinition = GetParam().variableDefinition;
@@ -108,8 +121,9 @@ TEST_P(VariableAccessSuccessTestFixture, SuccessCase) {
     variableAccess.var          = variableInstance;
 
     variableAccess.indexes.reserve(variableAccessData.accessedValueOfDimension.size());
-    for (const auto accessedValueOfDimension: variableAccessData.accessedValueOfDimension)
+    for (const auto accessedValueOfDimension: variableAccessData.accessedValueOfDimension) {
         variableAccess.indexes.emplace_back(createExprForAccessOnValueOfDimensionUsingConstantValue(accessedValueOfDimension));
+    }
 
     if (variableAccessData.accessedBitRange.has_value()) {
         const auto [bitRangeStart,bitRangeEnd] = variableAccessData.accessedBitRange.value();
@@ -126,12 +140,13 @@ TEST_P(VariableAccessSuccessTestFixture, SuccessCase) {
     ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
 
     auto expectedValidationResult = VariableAccessIndicesValidity();
-    for (const auto accessedValueOfDimension: variableAccessData.accessedValueOfDimension)
-        expectedValidationResult.accessedValuePerDimensionValidity.emplace_back(VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Ok, accessedValueOfDimension));
+    for (const auto accessedValueOfDimension: variableAccessData.accessedValueOfDimension) {
+        expectedValidationResult.accessedValuePerDimensionValidity.emplace_back(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Ok, accessedValueOfDimension);
+    }
 
-    if (variableAccessData.accessedBitRange.has_value())
+    if (variableAccessData.accessedBitRange.has_value()) {
         expectedValidationResult.bitRangeAccessValidity = VariableAccessIndicesValidity::BitRangeValidityResult({createValidIndexValidationResult(variableAccessData.accessedBitRange->first), createValidIndexValidationResult(variableAccessData.accessedBitRange->second)});
-
+    }
     ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
 }
 
@@ -155,11 +170,11 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessIndexValidityTests, VariableAccessSuccess
         }),
         VariableAccessTestData({"AccessOnBitWithinRangeOk",
             VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0}, std::make_pair(4u, 4u)})
+            VariableAccessData({{0}, std::make_pair(4U, 4U)})
         }),
         VariableAccessTestData({"AccessOnBitWithinRangeAtStartOfSignalOk",
             VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0},  std::make_pair(0u,0u)})
+            VariableAccessData({{0},  std::make_pair(0,0)})
         }),
         VariableAccessTestData({"AccessOnBitWithinRangeAtEndOfSignalOk",
             VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1}, DEFAULT_SIGNAL_BITWIDTH}),
@@ -265,7 +280,7 @@ TEST(VariableAccessIndexValidityTests, AccessOnValueOfDimensionDefinedViaExpress
 
 TEST(VariableAccessIndexValidityTests, AccessedValueOfDimensionOutOfRangeIsNotValid) {
     const std::vector<unsigned int> numberOfValuesPerDimension = {1, 2, 3};
-    const auto                      variableInstance            = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, numberOfValuesPerDimension, DEFAULT_SIGNAL_BITWIDTH);
+    const auto                      variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, numberOfValuesPerDimension, DEFAULT_SIGNAL_BITWIDTH);
     const std::vector               outOfRangeValuePerDimension  = {
         numberOfValuesPerDimension.at(0) + 1,
         numberOfValuesPerDimension.at(1) + 10,

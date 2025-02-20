@@ -4,13 +4,18 @@
 
 #include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+
+#include <gtest/gtest.h>
+#include <nlohmann/json.hpp>
 
 #include <string>
 #include <fstream>
-
-#include <fmt/core.h>
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
+#include <ios>
+#include <optional>
+#include <ostream>
+#include <sstream>
+#include <utility>
 
 using json = nlohmann::json;
 
@@ -19,8 +24,8 @@ struct TestFromJsonConfig {
     std::string keyOfTestInJsonFile;
     std::string testCaseName;
 
-    explicit TestFromJsonConfig(const std::string& nameOfJsonFile, const std::string& keyOfTestInJsonFile, const std::string& testCaseName):
-        nameOfJsonFile(nameOfJsonFile), keyOfTestInJsonFile(keyOfTestInJsonFile), testCaseName(testCaseName) {}
+    explicit TestFromJsonConfig(std::string nameOfJsonFile, std::string keyOfTestInJsonFile, std::string testCaseName):
+        nameOfJsonFile(std::move(nameOfJsonFile)), keyOfTestInJsonFile(std::move(keyOfTestInJsonFile)), testCaseName(std::move(testCaseName)) {}
 };
 
 class SyrecParserBaseTestsFixture : public testing::TestWithParam<TestFromJsonConfig> {
@@ -82,7 +87,7 @@ protected:
         customFormattingOptions.optionalCustomNewlineCharacterSequence    = " ";
 
         utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(customFormattingOptions);
-        bool                                wasStringificationSuccessful;
+        bool                                wasStringificationSuccessful = false;
         ASSERT_NO_FATAL_FAILURE(wasStringificationSuccessful = syrecProgramStringifier.stringify(containerForStringifiedProgram, syrecProgramToStringifiy)) << "Error during stringification of SyReC program";
         ASSERT_TRUE(wasStringificationSuccessful) << "Failed to stringify SyReC program";
     }
@@ -97,12 +102,13 @@ protected:
         if (jsonObject.contains(jsonKeyInTestCaseDataForConstantValueTrunctionOperation)) {
             ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).is_string());
             const auto& stringifiedTruncationOperation = jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).get<std::string>();
-            if (stringifiedTruncationOperation == "modulo")
+            if (stringifiedTruncationOperation == "modulo") {
                 userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::Modulo;
-            else if (stringifiedTruncationOperation == "bitwiseAnd")
+            } else if (stringifiedTruncationOperation == "bitwiseAnd") {
                 userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::BitwiseAnd;
-            else
+            } else {
                 FAIL() << "No mapping for user defined integer constant value truncation operation '" << stringifiedTruncationOperation << "' defined";
+            }
         }
 
         if (jsonObject.contains(jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment)) {

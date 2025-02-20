@@ -1,8 +1,21 @@
+#include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 
-#include "gmock/gmock-matchers.h"
+#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
+
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 using namespace utils;
 
@@ -30,9 +43,9 @@ namespace {
         bool variableInsertionResult = false;
         if (std::holds_alternative<syrec::Number::ptr>(variableVariant)) {
             const auto& loopVariable = std::get<syrec::Number::ptr>(variableVariant);
-            if (loopVariable)
+            if (loopVariable) {
                 ASSERT_TRUE(loopVariable->isLoopVariable());
-
+            }
             ASSERT_NO_FATAL_FAILURE(variableInsertionResult = temporaryVariableScope.recordLoopVariable(loopVariable));
         } else {
             ASSERT_NO_FATAL_FAILURE(variableInsertionResult = temporaryVariableScope.recordVariable(std::get<syrec::Variable::ptr>(variableVariant)));
@@ -50,8 +63,9 @@ namespace {
 
     void assertFetchedEntryFromSymbolTableMatchesExpectedOne(const std::optional<ExpectedSymbolTableEntry>& expectedEntry, const std::optional<ExpectedSymbolTableEntry>& actualEntry) {
         ASSERT_EQ(expectedEntry.has_value(), actualEntry.has_value());
-        if (!expectedEntry.has_value())
+        if (!expectedEntry.has_value()) {
             return;
+        }
 
         const TemporaryVariableScope::ScopeEntry& expectedEntryRef = **expectedEntry;
         const TemporaryVariableScope::ScopeEntry& actualEntryRef   = **actualEntry;
@@ -85,27 +99,31 @@ namespace {
     }
 
     bool operator==(const ExpectedSymbolTableEntry& lOperand, const ExpectedSymbolTableEntry& rOperand) {
-        if (lOperand == nullptr)
+        if (lOperand == nullptr) {
             return rOperand == nullptr;
-
-        if (lOperand->getVariableIdentifier() != rOperand->getVariableIdentifier() || lOperand->isReferenceToLoopVariable() != rOperand->isReferenceToLoopVariable())
+        }
+ 
+        if (lOperand->getVariableIdentifier() != rOperand->getVariableIdentifier() || lOperand->isReferenceToLoopVariable() != rOperand->isReferenceToLoopVariable()) {
             return false;
+        }
 
         if (lOperand->isReferenceToLoopVariable()) {
-            if (rOperand->getReadonlyVariableData().has_value() || !rOperand->getReadOnlyLoopVariableData().has_value())
+            if (rOperand->getReadonlyVariableData().has_value() || !rOperand->getReadOnlyLoopVariableData().has_value()) {
                 return false;
-
+            }
             const std::shared_ptr<const syrec::Number> loopVariableData = rOperand->getReadOnlyLoopVariableData().value();
-            return loopVariableData && loopVariableData->isLoopVariable() && lOperand->getVariableIdentifier() == loopVariableData->variableName() && !rOperand->getDeclaredVariableBitwidth().has_value() && rOperand->getDeclaredVariableDimensions().size() == 1 && rOperand->getDeclaredVariableDimensions().front() == 1;
+            return loopVariableData && loopVariableData->isLoopVariable() && lOperand->getVariableIdentifier() == loopVariableData->variableName()
+                && !rOperand->getDeclaredVariableBitwidth().has_value() && rOperand->getDeclaredVariableDimensions().size() == 1 && rOperand->getDeclaredVariableDimensions().front() == 1;
         }
-        if (!lOperand->getReadonlyVariableData().has_value() || lOperand->getReadonlyVariableData().value() == nullptr || rOperand->getReadOnlyLoopVariableData().has_value() || !rOperand->getReadonlyVariableData().has_value())
+        if (!lOperand->getReadonlyVariableData().has_value() || lOperand->getReadonlyVariableData().value() == nullptr || rOperand->getReadOnlyLoopVariableData().has_value() || !rOperand->getReadonlyVariableData().has_value()) {
             return false;
+        }
 
         const std::shared_ptr<const syrec::Variable> expectedVariableData = lOperand->getReadonlyVariableData().value();
         const std::shared_ptr<const syrec::Variable> actualVariableData   = rOperand->getReadonlyVariableData().value();
         return actualVariableData && expectedVariableData->type == actualVariableData->type && expectedVariableData->bitwidth == actualVariableData->bitwidth && expectedVariableData->name == actualVariableData->name && std::equal(expectedVariableData->dimensions.cbegin(), expectedVariableData->dimensions.cend(), actualVariableData->dimensions.cbegin(), actualVariableData->dimensions.cend(), [](const unsigned int expectedNumberOfValuesOfDimension, const unsigned int actualNumberOfValuesOfDimension) {
-                   return expectedNumberOfValuesOfDimension == actualNumberOfValuesOfDimension;
-               });
+            return expectedNumberOfValuesOfDimension == actualNumberOfValuesOfDimension;
+        });
     }
 
     void assertFetchedEntriesFromSymbolTableMatchExpectedOnes(const std::vector<ExpectedSymbolTableEntry>& expectedEntries, const std::vector<ExpectedSymbolTableEntry>& actualEntries) {
@@ -125,20 +143,23 @@ namespace {
     void assertInsertionOfNVariableInstanceOfTypeIsSuccessful(TemporaryVariableScope& variableScope, syrec::Variable::Type variableType, const std::size_t numInstancesToCreate, const std::string& variableIdentifierPrefix, syrec::Variable::vec* containerForCreatedInstances) {
         ASSERT_GT(numInstancesToCreate, 0);
 
-        if (containerForCreatedInstances && containerForCreatedInstances->empty())
+        if (containerForCreatedInstances != nullptr && containerForCreatedInstances->empty()) {
             containerForCreatedInstances->reserve(numInstancesToCreate);
+        }
 
         for (std::size_t i = 0; i < numInstancesToCreate; ++i) {
             const auto variableInstance = std::make_shared<syrec::Variable>(variableType, variableIdentifierPrefix + "varIdent" + std::to_string(i), DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
             ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(variableScope, variableInstance));
-            if (containerForCreatedInstances)
+            if (containerForCreatedInstances != nullptr) {
                 containerForCreatedInstances->emplace_back(variableInstance);
+            }
         }
     }
 
     [[nodiscard]] ExpectedSymbolTableEntry createExpectedSymbolTableEntryFrom(const std::variant<syrec::Variable::ptr, syrec::Number::ptr>& variableInstanceVariant) {
-        if (std::holds_alternative<syrec::Variable::ptr>(variableInstanceVariant))
+        if (std::holds_alternative<syrec::Variable::ptr>(variableInstanceVariant)) {
             return std::make_shared<TemporaryVariableScope::ScopeEntry>(std::get<syrec::Variable::ptr>(variableInstanceVariant));
+        }
 
         return std::make_shared<TemporaryVariableScope::ScopeEntry>(std::get<syrec::Number::ptr>(variableInstanceVariant));
     }
@@ -147,14 +168,14 @@ namespace {
         std::optional<TemporaryVariableScope::ScopeEntry::readOnylPtr> actualVariableEntryFromSymbolTable;
         std::optional<TemporaryVariableScope::ScopeEntry::readOnylPtr> expectedVariableEntryFromSymbolTable;
         if (std::holds_alternative<syrec::Number::ptr>(expectedVariableVariant)) {
-            const syrec::Number::ptr& expectedVariableNumberContainer = std::get<syrec::Number::ptr>(expectedVariableVariant);
+            const auto& expectedVariableNumberContainer = std::get<syrec::Number::ptr>(expectedVariableVariant);
             ASSERT_THAT(expectedVariableNumberContainer, testing::NotNull());
             ASSERT_TRUE(expectedVariableNumberContainer->isLoopVariable());
             ASSERT_NO_FATAL_FAILURE(actualVariableEntryFromSymbolTable = variableScope.getVariableByName(expectedVariableNumberContainer->variableName()));
             expectedVariableEntryFromSymbolTable = createExpectedSymbolTableEntryFrom(expectedVariableNumberContainer);
         }
         else {
-            const syrec::Variable::ptr& expectedVariableContainer = std::get<syrec::Variable::ptr>(expectedVariableVariant);
+            const auto& expectedVariableContainer = std::get<syrec::Variable::ptr>(expectedVariableVariant);
             ASSERT_THAT(expectedVariableContainer, testing::NotNull());
             ASSERT_NO_FATAL_FAILURE(actualVariableEntryFromSymbolTable = variableScope.getVariableByName(expectedVariableContainer->name));
             expectedVariableEntryFromSymbolTable = createExpectedSymbolTableEntryFrom(expectedVariableContainer);
@@ -196,10 +217,10 @@ namespace {
     [[nodiscard]] std::vector<syrec::Variable::Type> getCollectionOfVariableTypes() {
         return {syrec::Variable::Type::In, syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::Wire, syrec::Variable::Type::State};
     }
-}
+} // namespace
 
 TEST_P(SingleVariableTypeTestFixture, InsertionOfVariableOfType) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
 
     const auto        variableInstance = std::make_shared<syrec::Variable>(variableTypeUnderTest, "variableIdent", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
@@ -208,7 +229,7 @@ TEST_P(SingleVariableTypeTestFixture, InsertionOfVariableOfType) {
 }
 
 TEST_P(SingleVariableTypeTestFixture, SearchForVariableUsingIdentifier) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -230,15 +251,15 @@ TEST_P(SingleVariableTypeTestFixture, SearchForVariableUsingIdentifier) {
     ASSERT_NO_FATAL_FAILURE(actualSymbolTableEntriesForVariablesNotMatchingType = variableScope->getVariablesMatchingType({otherVariableType}));
     ASSERT_NO_FATAL_FAILURE(assertFetchedEntriesFromSymbolTableMatchExpectedOnes(expectedSymbolTableEntriesForVariablesNotMatchingType, actualSymbolTableEntriesForVariablesNotMatchingType));
 
-    const syrec::Variable::ptr              variableInstanceOfInterest                 = createdVariableInstancesMatchingType.at(numVariableEntriesMatchingType - 3);
-    std::optional<ExpectedSymbolTableEntry> expectedSymbolTableEntryMatchingIdentifier = createExpectedSymbolTableEntryFrom(variableInstanceOfInterest);
-    std::optional<ExpectedSymbolTableEntry> actualSymbolTableEntryMatchingIdentifier;
+    const syrec::Variable::ptr                    variableInstanceOfInterest                 = createdVariableInstancesMatchingType.at(numVariableEntriesMatchingType - 3);
+    const std::optional<ExpectedSymbolTableEntry> expectedSymbolTableEntryMatchingIdentifier = createExpectedSymbolTableEntryFrom(variableInstanceOfInterest);
+    std::optional<ExpectedSymbolTableEntry>       actualSymbolTableEntryMatchingIdentifier;
     ASSERT_NO_FATAL_FAILURE(actualSymbolTableEntryMatchingIdentifier = variableScope->getVariableByName(variableInstanceOfInterest->name));
     ASSERT_NO_FATAL_FAILURE(assertFetchedEntryFromSymbolTableMatchesExpectedOne(expectedSymbolTableEntryMatchingIdentifier, actualSymbolTableEntryMatchingIdentifier));
 }
 
 TEST_P(SingleVariableTypeTestFixture, SearchForVariablesOfSingleType) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -253,7 +274,7 @@ TEST_P(SingleVariableTypeTestFixture, SearchForVariablesOfSingleType) {
 }
 
 TEST_P(SingleVariableTypeTestFixture, RemoveModuleParameter) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -293,7 +314,7 @@ TEST_P(SingleVariableTypeTestFixture, RemoveModuleParameter) {
 }
 
 TEST_P(SingleVariableTypeTestFixture, ExistsVariableForIdentifier) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -322,7 +343,7 @@ INSTANTIATE_TEST_SUITE_P(
                 std::make_pair(syrec::Variable::Type::State, syrec::Variable::Type::Out)));
 
 TEST(TemporaryVariableScopeTests, InsertLoopVariable) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
 
     const std::string loopVariableIdent    = "$loopVariableIdent";
@@ -332,7 +353,7 @@ TEST(TemporaryVariableScopeTests, InsertLoopVariable) {
 }
 
 TEST(TemporaryVariableScopeTests, SearchForVariableUsingIdentifierWithNoMatchingSymbolTableEntry) {
-    BaseSymbolTable symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -345,7 +366,7 @@ TEST(TemporaryVariableScopeTests, SearchForVariableUsingIdentifierWithNoMatching
 
 // Mix parameter as well as local variable types
 TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithOnlySomeHavingMatches) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -380,7 +401,7 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithOnlySome
 }
 
 TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithNoMatches) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -397,7 +418,7 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithNoMatche
 }
 
 TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWillNotMatchLoopVariables) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -428,16 +449,16 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWillNotMatch
     ASSERT_NO_FATAL_FAILURE(assertFetchedEntriesFromSymbolTableMatchExpectedOnes(createdExpectedSymbolTableEntriesFrom({nonLoopVariableTwo}), actualSymbolTableEntriesMatchingType));
 
     for (const syrec::Variable::Type variableType: getCollectionOfVariableTypes()) {
-        if (variableType == nonLoopVariableOne->type || variableType == nonLoopVariableTwo->type)
+        if (variableType == nonLoopVariableOne->type || variableType == nonLoopVariableTwo->type) {
             continue;
-
+        }
         ASSERT_NO_FATAL_FAILURE(actualSymbolTableEntriesMatchingType = variableScope->getVariablesMatchingType({variableType}));
         ASSERT_NO_FATAL_FAILURE(assertFetchedEntriesFromSymbolTableMatchExpectedOnes(createdExpectedSymbolTableEntriesFrom({}), actualSymbolTableEntriesMatchingType));
     }
 }
 
 TEST(TemporaryVariableScopeTests, SearchForVariableUsingLoopVariableIdentifierDoesNotWork) {
-    BaseSymbolTable symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -452,7 +473,7 @@ TEST(TemporaryVariableScopeTests, SearchForVariableUsingLoopVariableIdentifierDo
 }
 
 TEST(TemporaryVariableScopeTests, SearchForLoopVariableUsingVariableIdentifierDoesNotWork) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -472,7 +493,7 @@ TEST(TemporaryVariableScopeTests, SearchForLoopVariableUsingVariableIdentifierDo
 }
 
 TEST(TemporaryVariableScopeTests, RemoveLoopVariable) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -503,7 +524,7 @@ TEST(TemporaryVariableScopeTests, RemoveLoopVariable) {
 }
 
 TEST(TemporaryVariableScopeTests, RemoveVariableInEmptySymbolTable) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -513,7 +534,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableInEmptySymbolTable) {
 }
 
 TEST(TemporaryVariableScopeTests, RemoveVariableUsingIdentifierHavingNoMatch) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -540,7 +561,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingIdentifierHavingNoMatch) {
 }
 
 TEST(TemporaryVariableScopeTests, RemoveVariableUsingLoopVariableIdentifierDoesNotWork) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -570,7 +591,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingLoopVariableIdentifierDoesN
 }
 
 TEST(TemporaryVariableScopeTests, RemoveLoopVariableUsingVariableIdentifierDoesNotWork) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -600,7 +621,7 @@ TEST(TemporaryVariableScopeTests, RemoveLoopVariableUsingVariableIdentifierDoesN
 }
 
 TEST(TemporaryVariableScopeTests, ExistsVariableForIdentifierHavingNoMatch) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -619,7 +640,7 @@ TEST(TemporaryVariableScopeTests, ExistsVariableForIdentifierHavingNoMatch) {
 }
 
 TEST(TemporaryVariableScopeTests, ExistsVariableForIdentifierInEmptySymbolTable) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -629,7 +650,7 @@ TEST(TemporaryVariableScopeTests, ExistsVariableForIdentifierInEmptySymbolTable)
 }
 
 TEST(TemporaryVariableScopeTests, ExistsVariableUsingLoopVariableIdentifierReturnsFalse) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -645,7 +666,7 @@ TEST(TemporaryVariableScopeTests, ExistsVariableUsingLoopVariableIdentifierRetur
 }
 
 TEST(TemporaryVariableScopeTests, ExistsLoopVariableUsingVariableIdentifierReturnsFalse) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -664,7 +685,7 @@ TEST(TemporaryVariableScopeTests, ExistsLoopVariableUsingVariableIdentifierRetur
 
 // Error cases
 TEST(TemporaryVariableScopeTests, InsertionOfInvalidLoopVariableEntryNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -680,7 +701,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfInvalidLoopVariableEntryNotPossible
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfLoopVariableWithEmptyIdentifierNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -689,7 +710,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfLoopVariableWithEmptyIdentifierNotP
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, loopVariable));
 
-    const std::string  emptyLoopVariableIdentifier  = "";
+    const std::string  emptyLoopVariableIdentifier;
     syrec::Number::ptr invalidLoopVariableContainer = std::make_shared<syrec::Number>(emptyLoopVariableIdentifier);
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsNotSuccessful(*variableScope, invalidLoopVariableContainer));
 
@@ -697,7 +718,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfLoopVariableWithEmptyIdentifierNotP
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfDuplicateLoopVariableNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -711,7 +732,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfDuplicateLoopVariableNotPossible) {
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfLoopVariableWithoutRequiredNamePrefixNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -731,7 +752,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfLoopVariableWithoutRequiredNamePref
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfDuplicateVariableNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -755,7 +776,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfDuplicateVariableNotPossible) {
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfInvalidVariableEntryNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -776,7 +797,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfInvalidVariableEntryNotPossible) {
 }
 
 TEST(TemporaryVariableScopeTests, InsertionOfVariableEntryWithEmptyIdentifierNotPossible) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -797,7 +818,7 @@ TEST(TemporaryVariableScopeTests, InsertionOfVariableEntryWithEmptyIdentifierNot
 }
 
 TEST(TemporaryVariableScopeTests, SearchForVariableUsingEmptyIdentifier) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -819,7 +840,7 @@ TEST(TemporaryVariableScopeTests, SearchForVariableUsingEmptyIdentifier) {
 }
 
 TEST(TemporaryVariableScopeTests, InsertNonLoopVariableNumberContainer) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -834,7 +855,7 @@ TEST(TemporaryVariableScopeTests, InsertNonLoopVariableNumberContainer) {
 }
 
 TEST(TemporaryVariableScopeTests, SearchForEmptyCollectionOfVariableTypes) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -856,7 +877,7 @@ TEST(TemporaryVariableScopeTests, SearchForEmptyCollectionOfVariableTypes) {
 }
 
 TEST(TemporaryVariableScopeTests, SearchForCollectionOfVariableTypesInEmptySymbolTable) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -866,7 +887,7 @@ TEST(TemporaryVariableScopeTests, SearchForCollectionOfVariableTypesInEmptySymbo
 }
 
 TEST(TemporaryVariableScopeTests, RemoveVariableUsingEmptyIdentifier) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
@@ -880,7 +901,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingEmptyIdentifier) {
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, secondVariable));
 
     bool wasVariableRemovalSuccessful = false;
-    ASSERT_NO_FATAL_FAILURE(variableScope->removeVariable(""));
+    ASSERT_NO_FATAL_FAILURE(wasVariableRemovalSuccessful = variableScope->removeVariable(""));
     ASSERT_FALSE(wasVariableRemovalSuccessful);
 
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, firstVariable));
@@ -888,7 +909,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingEmptyIdentifier) {
 }
 
 TEST(TemporaryVariableScopeTests, ExistsVariableForEmptyIdentifier) {
-    BaseSymbolTable             symbolTable;
+    const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 

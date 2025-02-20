@@ -1,7 +1,9 @@
 #include "utils/test_syrec_parser_base.hpp"
 #include "utils/test_syrec_parser_utils.hpp"
 
-using namespace syrecParserTestUtils;
+#include <gtest/gtest.h>
+
+using namespace syrec_parser_test_utils;
 
 namespace {
     constexpr auto PATH_TO_SUCCESS_CASES = "./unittests/syrec/parser/data/success";
@@ -29,7 +31,7 @@ namespace {
             return SyrecParserBaseTestsFixture::SetUp();
         }
     };
-}
+} // namespace
 
 TEST_P(SyrecParserSuccessCasesTestFixture, SyrecParserSuccessCases) {
     ASSERT_NO_FATAL_FAILURE(performTestExecution());

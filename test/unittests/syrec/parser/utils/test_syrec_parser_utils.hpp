@@ -2,9 +2,25 @@
 #define SYREC_PARSER_UTILS_TEST_SYREC_PARSER_UTILS_HPP
 #pragma once
 
+#include "test_syrec_parser_base.hpp"
+#include <nlohmann/json.hpp>
+
+#include <algorithm>
+#include <cctype>
+#include <cstddef>
+#include <fstream>
+#include <functional>
+#include <initializer_list>
+#include <ios>
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
 using json = nlohmann::json;
 
-namespace syrecParserTestUtils {
+namespace syrec_parser_test_utils {
     constexpr auto TEST_NAME_NOT_ALLOWED_CHARACTER       = '-';
     constexpr auto TEST_NAME_COMPONENT_DELIMITER_SYMBOL  = '_';
     constexpr auto GTEST_IGNORE_PREFIX                   = "DISABLED";
@@ -13,21 +29,24 @@ namespace syrecParserTestUtils {
     constexpr auto ERROR_REASON_FAILED_TO_LOAD_FROM_FILE = "DISABLED_FAILED_TO_LOAD_TEST_DATA_FROM_FILE";
 
     struct FilenameAndTestNamePrefix {
-        std::string relativePath;
-        std::string filename;
-        std::string namePrefixForTestsLoadedFromFile;
+        std::string relativePathToTestDataFolder;
+        std::string nameOfFileContainingTestData;
+        std::string testnamePrefixForTestsLoadedFromFile;
+
+        FilenameAndTestNamePrefix(std::string relativePathToTestDataFolder, std::string nameOfFileContainingTestData, std::string testnamePrefixForTestsLoadedFromFile):
+            relativePathToTestDataFolder(std::move(relativePathToTestDataFolder)), nameOfFileContainingTestData(std::move(nameOfFileContainingTestData)), testnamePrefixForTestsLoadedFromFile(std::move(testnamePrefixForTestsLoadedFromFile)) {}
 
         size_t operator()(const FilenameAndTestNamePrefix& entityToHash) const {
             // For now we use an often referred to implementation: https://stackoverflow.com/a/2595226 that is sufficient for our use case
-            std::hash<std::string> hasher;
-            std::size_t            seed = 0;
-            seed ^= hasher(entityToHash.relativePath) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            seed ^= hasher(entityToHash.filename) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            constexpr std::hash<std::string> hasher{};
+            std::size_t                      seed = 0;
+            seed ^= hasher(entityToHash.relativePathToTestDataFolder) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            seed ^= hasher(entityToHash.nameOfFileContainingTestData) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
             return seed;
         }
 
         bool operator==(const FilenameAndTestNamePrefix& other) const {
-            return relativePath == other.relativePath && filename == other.filename;
+            return relativePathToTestDataFolder == other.relativePathToTestDataFolder && nameOfFileContainingTestData == other.nameOfFileContainingTestData;
         }
     };
 
@@ -40,7 +59,7 @@ namespace syrecParserTestUtils {
                 stringToCheck.cbegin(),
                 stringToCheck.cend(),
                 [](const char characterToCheck) {
-                    return std::isalnum(characterToCheck) || characterToCheck == TEST_NAME_COMPONENT_DELIMITER_SYMBOL;
+                    return std::isalnum(characterToCheck) != 0 || characterToCheck == TEST_NAME_COMPONENT_DELIMITER_SYMBOL;
                 });
     }
 
@@ -54,13 +73,16 @@ namespace syrecParserTestUtils {
     }
 
     inline std::string replaceInvalidCharactersInTestCaseName(const std::string& testCaseName) {
-        if (testCaseName.find_first_of(TEST_NAME_NOT_ALLOWED_CHARACTER) == std::string::npos)
+        if (testCaseName.find_first_of(TEST_NAME_NOT_ALLOWED_CHARACTER) == std::string::npos) {
             return testCaseName;
+        }
 
         std::string transformedTestCaseName         = testCaseName;
         const auto  replacementForInvalidCharacters = std::to_string(TEST_NAME_COMPONENT_DELIMITER_SYMBOL);
-        for (std::size_t indexOfNextInvalidCharacter = 0; (indexOfNextInvalidCharacter = testCaseName.find_first_of(TEST_NAME_NOT_ALLOWED_CHARACTER, indexOfNextInvalidCharacter) != std::string::npos); indexOfNextInvalidCharacter += testCaseName.size())
+        for (std::size_t indexOfNextInvalidCharacter = testCaseName.find_first_of(TEST_NAME_NOT_ALLOWED_CHARACTER, 0); indexOfNextInvalidCharacter != std::string::npos; indexOfNextInvalidCharacter += testCaseName.size()) {
             transformedTestCaseName.replace(indexOfNextInvalidCharacter, 1, replacementForInvalidCharacters);
+            indexOfNextInvalidCharacter = testCaseName.find_first_of(TEST_NAME_NOT_ALLOWED_CHARACTER, indexOfNextInvalidCharacter);
+        }
         return transformedTestCaseName;
     }
 
@@ -73,8 +95,9 @@ namespace syrecParserTestUtils {
 
     inline std::vector<std::string> loadTestCaseNamesFromFile(const std::string& relativePathToFile, const std::string& inputFileName, const std::string& testCaseNamePrefix) {
         std::ifstream inputFileStream(relativePathToFile + "/" + inputFileName, std::ios_base::in);
-        if (!inputFileStream.good())
+        if (!inputFileStream.good()) {
             return {concatinateStrings(ERROR_REASON_FAILED_TO_LOAD_FROM_FILE, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
+        }
 
         const auto parsedJson = json::parse(inputFileStream, nullptr, false);
         if (parsedJson.is_discarded()) {
@@ -92,13 +115,20 @@ namespace syrecParserTestUtils {
 
         for (const auto& topLevelJsonObjectKeysIteratable: parsedJson.items()) {
             const std::string& testCaseName = topLevelJsonObjectKeysIteratable.key();
-            if (testCaseName.empty())
+            if (testCaseName.empty()) {
                 continue;
+            }
 
-            if (doesStringContainOnlyAsciiCharactersOrUnderscores(testCaseName))
+            if (doesStringContainOnlyAsciiCharactersOrUnderscores(testCaseName)) {
                 foundTestCases.emplace_back(testCaseName);
-            else 
-                foundTestCases.emplace_back(concatinateStrings(ERROR_REASON_JSON_DATA_INVALID, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName), std::string(GTEST_IGNORE_PREFIX), "Test", std::to_string(testCaseIndexInFile), "ContainedNonConformingCharactersInName", testCaseNamePrefix}));
+            } else {
+                foundTestCases.emplace_back(concatinateStrings(
+                    ERROR_REASON_JSON_DATA_INVALID, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {
+                        extractFilenameWithoutFileExtension(inputFileName),
+                        std::string(GTEST_IGNORE_PREFIX),
+                        "Test", std::to_string(testCaseIndexInFile), "ContainedNonConformingCharactersInName", testCaseNamePrefix})
+                );
+            }
 
             ++testCaseIndexInFile;
         }
@@ -108,15 +138,17 @@ namespace syrecParserTestUtils {
     inline std::vector<TestFromJsonConfig> loadTestCaseNamesFromFiles(const std::vector<FilenameAndTestNamePrefix>& inputFileNamesData) {
         std::vector<TestFromJsonConfig> loadedTestCases;
         for (const auto& inputFileNameData : inputFileNamesData) {
-            if (inputFileNameData.filename.empty())
+            if (inputFileNameData.nameOfFileContainingTestData.empty()) {
                 continue;
+            }
 
-            const std::vector<std::string> loadedTestCaseNamesFromFile = !inputFileNameData.filename.empty()
-                ? loadTestCaseNamesFromFile(inputFileNameData.relativePath, inputFileNameData.filename, inputFileNameData.namePrefixForTestsLoadedFromFile)
+            const std::vector<std::string> loadedTestCaseNamesFromFile = !inputFileNameData.nameOfFileContainingTestData.empty()
+                ? loadTestCaseNamesFromFile(inputFileNameData.relativePathToTestDataFolder, inputFileNameData.nameOfFileContainingTestData, inputFileNameData.testnamePrefixForTestsLoadedFromFile)
                 : std::vector<std::string>();
 
-            if (loadedTestCaseNamesFromFile.empty())
+            if (loadedTestCaseNamesFromFile.empty()) {
                 continue;
+            }
 
             if (loadedTestCaseNamesFromFile.size() == 1 && loadedTestCaseNamesFromFile.front().find_first_of(GTEST_IGNORE_PREFIX) == 0) {
                 loadedTestCases.emplace_back(loadedTestCaseNamesFromFile.front(),"", replaceInvalidCharactersInTestCaseName(loadedTestCaseNamesFromFile.front()));
@@ -129,14 +161,14 @@ namespace syrecParserTestUtils {
                     std::back_inserter(loadedTestCases),
                     [&inputFileNameData](const std::string& keyOfTestCaseInJsonFile) {
                         return TestFromJsonConfig(
-                            inputFileNameData.relativePath + "/" + inputFileNameData.filename,
+                            inputFileNameData.relativePathToTestDataFolder + "/" + inputFileNameData.nameOfFileContainingTestData,
                             keyOfTestCaseInJsonFile,
-                                replaceInvalidCharactersInTestCaseName(!inputFileNameData.namePrefixForTestsLoadedFromFile.empty() 
-                                    ? concatinateStrings(inputFileNameData.namePrefixForTestsLoadedFromFile, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {keyOfTestCaseInJsonFile})
+                                replaceInvalidCharactersInTestCaseName(!inputFileNameData.testnamePrefixForTestsLoadedFromFile.empty() 
+                                    ? concatinateStrings(inputFileNameData.testnamePrefixForTestsLoadedFromFile, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {keyOfTestCaseInJsonFile})
                                     : keyOfTestCaseInJsonFile));
                     });
         }
         return loadedTestCases;
     }
-}
+} //namespace syrec_parser_test_utils
 #endif

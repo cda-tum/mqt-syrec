@@ -1,5 +1,12 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+using namespace syrec_parser_error_tests;
+
 // TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {

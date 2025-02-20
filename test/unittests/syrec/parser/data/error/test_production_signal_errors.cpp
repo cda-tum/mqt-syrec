@@ -1,5 +1,15 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/program.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+#include <climits>
+
+using namespace syrec_parser_error_tests;
+
 TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessCausesError) {
     recordSyntaxError(Message::Position(1, 26), "missing IDENT at '.'");
     performTestExecution("module main(out a(4)) ++= .0");

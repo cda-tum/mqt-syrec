@@ -1,4 +1,10 @@
 #include "utils/test_syrec_parser_errors_base.hpp"
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+#include <gtest/gtest.h>
+
+using namespace syrec_parser_error_tests;
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithSingleValueWithLhsOperandWithoutDimensionAndNoBitrangeAccessAndRhsOperandWithoutDimensionAndNoBitRangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
@@ -635,7 +641,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithoutBitrangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 35), 1, 4);
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1]");
 }
@@ -643,14 +649,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1].2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesOverlappingBitFromTheLeft) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 35), 1, 4);
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1].0:3");
 }
@@ -658,7 +664,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesOverlappingBitFromTheRight) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 35), 1, 3);
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1].3:1");
 }
@@ -666,7 +672,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesWithStartIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 35), 1, 2);
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1].3:2");
 }
@@ -674,7 +680,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesWithEndIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 35),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 35), 1, 2);
     performTestExecution("module main(out b[2](4)) b[1].2 += b[1].1:2");
 }
@@ -682,21 +688,21 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithStartIndexUnknownAndEndIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 61),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2](4)) for $i = 0 to 3 step 1 do b[1].2 += b[1].$i:2 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithLhsWithBitAccessAndRhsWithBitrangeAccessWithEndIndexUnknownAndStartIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 61),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2](4)) for $i = 0 to 3 step 1 do b[1].2 += b[1].2:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithKnownValuesAndRhsWithoutBitrangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 37),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 3).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 37), 2, 4);
     performTestExecution("module main(out b[2](4)) b[1].3:2 += b[1]");
 }
@@ -704,7 +710,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeOverlappingBitFromTheLeft) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 37),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 37), 3, 1);
     performTestExecution("module main(out b[2](4)) b[1].0:2 += b[1].1");
 }
@@ -712,7 +718,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithKnownValuesAndRhsWithoutBitrangeAccessOverlappingBitFromTheRight) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 37),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 37), 4, 1);
     performTestExecution("module main(out b[2](4)) b[1].3:0 += b[1].1");
 }
@@ -720,7 +726,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeStartEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 37),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 37), 3, 1);
     performTestExecution("module main(out b[2](4)) b[1].3:1 += b[1].1");
 }
@@ -728,7 +734,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeEndEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 37),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 3).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 37), 3, 1);
     performTestExecution("module main(out b[2](4)) b[1].1:3 += b[1].3");
 }
@@ -736,14 +742,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitAccessWithBitrangeEndEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 57),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2](4)) for $i = 0 to 3 do b[1].$i:3 += b[1].3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSignalWithMultipleValuesWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitAccessWithBitrangeStartEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 57),
-            generateVariableAccessOverlappingIndicesDataContainer({1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2](4)) for $i = 0 to 3 do b[1].3:$i += b[1].3 rof");
 }
 
@@ -908,14 +914,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentFor1DSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithoutBitrangeAccessAndRhsWithoutBitrangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 39),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 0).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 0).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) b[0][1] += b[0][1]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithoutBitrangeAccessAndRhsWithBitAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 39),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 39), 4, 1);
     performTestExecution("module main(out b[2][3](4)) b[0][1] += b[0][1].2");
 }
@@ -923,7 +929,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithoutBitrangeAccessAndRhsWithBitrangeAccessWithKnownIndicesValues) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 39),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 39), 4, 2);
     performTestExecution("module main(out b[2][3](4)) b[0][1] += b[0][1].2:3");
 }
@@ -931,21 +937,21 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithoutBitrangeAccessAndRhsWithBitrangeAccessWithStartIndexUnknown) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 65),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 step 1 do b[0][1] += b[0][1].$i:3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithoutBitrangeAccessAndRhsWithBitrangeAccessWithEndIndexUnknown) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 65),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 step 1 do b[0][1] += b[0][1].1:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithoutBitrangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 4);
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2]");
 }
@@ -953,14 +959,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2].2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesOverlappingBitFromTheLeft) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 4);
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2].0:3");
 }
@@ -968,7 +974,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesOverlappingBitFromTheRight) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 3);
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2].3:1");
 }
@@ -976,7 +982,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesWithStartIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 2);
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2].3:2");
 }
@@ -984,7 +990,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithKnownIndicesValuesWithEndIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 41),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 41), 1, 2);
     performTestExecution("module main(out b[2][3](4)) b[1][2].2 += b[1][2].1:2");
 }
@@ -992,21 +998,21 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithStartIndexUnknownAndEndIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 67),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 step 1 do b[1][2].2 += b[1][2].$i:2 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithLhsWithBitAccessAndRhsWithBitrangeAccessWithEndIndexUnknownAndStartIndexEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 67),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 step 1 do b[1][2].2 += b[1][2].2:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithoutBitrangeAccess) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 3).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 2, 4);
     performTestExecution("module main(out b[2][3](4)) b[1][2].3:2 += b[1][2]");
 }
@@ -1014,7 +1020,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeOverlappingBitFromTheLeft) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 3, 1);
     performTestExecution("module main(out b[2][3](4)) b[1][2].0:2 += b[1][2].1");
 }
@@ -1022,7 +1028,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithoutBitrangeAccessOverlappingBitFromTheRight) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 4, 1);
     performTestExecution("module main(out b[2][3](4)) b[1][2].3:0 += b[1][2].1");
 }
@@ -1030,7 +1036,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeStartEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 3, 1);
     performTestExecution("module main(out b[2][3](4)) b[1][2].3:1 += b[1][2].1");
 }
@@ -1038,7 +1044,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeEndEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 3).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 3, 1);
     performTestExecution("module main(out b[2][3](4)) b[1][2].1:3 += b[1][2].3");
 }
@@ -1046,21 +1052,21 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitAccessWithBitrangeEndEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[1][2].$i:3 += b[1][2].3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitAccessWithBitrangeStartEqualToBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({1u, 2u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({1U, 2U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[1][2].3:$i += b[1][2].3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitAccessWithBitrangeEnclosingBit) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 3, 1);
     performTestExecution("module main(out b[2][3](4)) b[0][1].0:2 += b[0][1].1");
 }
@@ -1068,14 +1074,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessMatchingExactly) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 0).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 0).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) b[0][1].0:2 += b[0][1].2:0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithLhsBitrangeEnclosingRhs) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 4, 2);
     performTestExecution("module main(out b[2][3](4)) b[0][1].0:3 += b[0][1].1:2");
 }
@@ -1083,7 +1089,7 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithRhsBitrangeEnclosingLhs) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 2, 4);
     performTestExecution("module main(out b[2][3](4)) b[0][1].2:1 += b[0][1].0:3");
 }
@@ -1091,14 +1097,14 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithLhsOverlappingRhsFromTheLeft) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) b[0][1].2:0 += b[0][1].1:3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithLhsOverlappingRhsFromTheRight) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 43),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 43), 3, 2);
     performTestExecution("module main(out b[2][3](4)) b[0][1].1:3 += b[0][1].1:0");
 }
@@ -1106,111 +1112,111 @@ TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSigna
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithStartIndexUnknownAndEndEnclosedByLhsBitrange) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].$i:2 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithEndIndexUnknownAndStartEnclosedByLhsBitrange) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].2:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithStartIndexUnknownAndEndEqualByLhsBitrangeStart) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].$i:1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithStartIndexUnknownAndEndEqualByLhsBitrangeEnd) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].$i:3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithEndIndexUnknownAndStartEqualByLhsBitrangeStart) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].1:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithKnownValuesAndRhsWithBitrangeAccessWithEndIndexUnknownAndStartEqualByLhsBitrangeEnd) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:3 += b[0][1].3:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsEndEnclosedByLhsBitrange) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].$i:2 += b[0][1].0:3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsEndEqualToRhsStart) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].$i:2 += b[0][1].2:3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsEndEqualToRhsEnd) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].$i:2 += b[0][1].0:2 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsStartEnclosedByLhsBitrange) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:$i += b[0][1].0:3 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsStartEqualToRhsStart) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:$i += b[0][1].1:2 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitrangeAccessWithKnownValuesAndLhsStartEqualToRhsEnd) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].1:$i += b[0][1].3:1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitrangeAccessStartIndexUnknownWithEndIndicesMatching) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 1).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].$i:1 += b[0][1].$i:1 rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitrangeAccessEndIndexUnknownWithStartIndicesMatching) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 3).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 3).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].3:$i += b[0][1].3:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithStartIndexUnknownAndRhsWithBitrangeAccessEndIndexUnknownWithKnownIndicesValuesMatching) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].$i:2 += b[0][1].2:$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, VariableAccessOverlapInAssignmentForNDSignalWithBitrangeAccessWithEndIndexUnknownAndRhsWithBitrangeAccessStartIndexUnknownWithKnownIndicesValuesMatching) {
     buildAndRecordExpectedSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 63),
-            generateVariableAccessOverlappingIndicesDataContainer({0, 1u}, 2).stringifyOverlappingIndicesInformation());
+            generateVariableAccessOverlappingIndicesDataContainer({0, 1U}, 2).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(out b[2][3](4)) for $i = 0 to 3 do b[0][1].2:$i += b[0][1].$i:2 rof");
 }

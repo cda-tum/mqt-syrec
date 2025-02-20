@@ -1,5 +1,12 @@
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <gtest/gtest.h>
+
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+
+using namespace syrec_parser_error_tests;
+
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 95), "no viable alternative at input 'add('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) add(a, b, c)");
