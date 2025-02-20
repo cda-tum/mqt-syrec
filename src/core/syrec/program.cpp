@@ -1,4 +1,5 @@
 #include "ANTLRInputStream.h"
+#include "CommonTokenStream.h"
 #include "TSyrecParser.h"
 #include "TSyrecLexer.h"
 #include "core/syrec/parser/components/custom_error_listener.hpp"
