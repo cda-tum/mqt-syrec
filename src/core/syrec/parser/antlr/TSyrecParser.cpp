@@ -265,6 +265,9 @@ TSyrecParser::NumberFromSignalwidthContext::NumberFromSignalwidthContext(NumberC
 }
 
 std::any TSyrecParser::NumberFromSignalwidthContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitNumberFromSignalwidth(this);
     }
@@ -285,6 +288,9 @@ TSyrecParser::NumberFromLoopVariableContext::NumberFromLoopVariableContext(Numbe
 }
 
 std::any TSyrecParser::NumberFromLoopVariableContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitNumberFromLoopVariable(this);
     }
@@ -293,7 +299,7 @@ std::any TSyrecParser::NumberFromLoopVariableContext::accept(tree::ParseTreeVisi
 //----------------- NumberFromConstantContext ------------------------------------------------------------------
 
 tree::TerminalNode* TSyrecParser::NumberFromConstantContext::INT() const {
-    return getToken(TSyrecParser::INT, 0);
+    return getToken(TSyrecParser::INT, 0); 
 }
 
 TSyrecParser::NumberFromConstantContext::NumberFromConstantContext(NumberContext* ctx) {
@@ -301,6 +307,8 @@ TSyrecParser::NumberFromConstantContext::NumberFromConstantContext(NumberContext
 }
 
 std::any TSyrecParser::NumberFromConstantContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitNumberFromConstant(this);
@@ -346,6 +354,8 @@ TSyrecParser::NumberFromExpressionContext::NumberFromExpressionContext(NumberCon
 }
 
 std::any TSyrecParser::NumberFromExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitNumberFromExpression(this);
@@ -453,6 +463,8 @@ size_t TSyrecParser::ProgramContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ProgramContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitProgram(this);
@@ -537,6 +549,8 @@ size_t TSyrecParser::ModuleContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ModuleContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitModule(this);
@@ -621,6 +635,8 @@ size_t TSyrecParser::ParameterListContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ParameterListContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitParameterList(this);
@@ -690,6 +706,8 @@ size_t TSyrecParser::ParameterContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ParameterContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitParameter(this);
@@ -763,6 +781,8 @@ size_t TSyrecParser::SignalListContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::SignalListContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitSignalList(this);
@@ -860,6 +880,8 @@ size_t TSyrecParser::SignalDeclarationContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::SignalDeclarationContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitSignalDeclaration(this);
@@ -944,6 +966,8 @@ size_t TSyrecParser::StatementListContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::StatementListContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitStatementList(this);
@@ -1027,6 +1051,8 @@ size_t TSyrecParser::StatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::StatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitStatement(this);
@@ -1145,6 +1171,8 @@ size_t TSyrecParser::CallStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::CallStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitCallStatement(this);
@@ -1226,6 +1254,8 @@ size_t TSyrecParser::LoopVariableDefinitionContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::LoopVariableDefinitionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitLoopVariableDefinition(this);
@@ -1283,6 +1313,8 @@ size_t TSyrecParser::LoopStepsizeDefinitionContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::LoopStepsizeDefinitionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitLoopStepsizeDefinition(this);
@@ -1368,6 +1400,8 @@ size_t TSyrecParser::ForStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ForStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitForStatement(this);
@@ -1484,6 +1518,8 @@ size_t TSyrecParser::IfStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::IfStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitIfStatement(this);
@@ -1555,6 +1591,8 @@ size_t TSyrecParser::UnaryStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::UnaryStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitUnaryStatement(this);
@@ -1625,6 +1663,8 @@ size_t TSyrecParser::AssignStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::AssignStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitAssignStatement(this);
@@ -1689,6 +1729,8 @@ size_t TSyrecParser::SwapStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::SwapStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitSwapStatement(this);
@@ -1738,6 +1780,8 @@ size_t TSyrecParser::SkipStatementContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::SkipStatementContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitSkipStatement(this);
@@ -1823,6 +1867,8 @@ size_t TSyrecParser::SignalContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::SignalContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
     assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitSignal(this);
@@ -1913,6 +1959,9 @@ TSyrecParser::ExpressionFromSignalContext::ExpressionFromSignalContext(Expressio
 }
 
 std::any TSyrecParser::ExpressionFromSignalContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitExpressionFromSignal(this);
     }
@@ -1945,6 +1994,9 @@ TSyrecParser::ExpressionFromNumberContext::ExpressionFromNumberContext(Expressio
 }
 
 std::any TSyrecParser::ExpressionFromNumberContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitExpressionFromNumber(this);
     }
@@ -1961,6 +2013,9 @@ TSyrecParser::ExpressionFromUnaryExpressionContext::ExpressionFromUnaryExpressio
 }
 
 std::any TSyrecParser::ExpressionFromUnaryExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitExpressionFromUnaryExpression(this);
     }
@@ -1977,6 +2032,9 @@ TSyrecParser::ExpressionFromShiftExpressionContext::ExpressionFromShiftExpressio
 }
 
 std::any TSyrecParser::ExpressionFromShiftExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitExpressionFromShiftExpression(this);
     }
@@ -2143,6 +2201,9 @@ size_t TSyrecParser::BinaryExpressionContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::BinaryExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitBinaryExpression(this);
     }
@@ -2210,6 +2271,9 @@ size_t TSyrecParser::UnaryExpressionContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::UnaryExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitUnaryExpression(this);
     }
@@ -2283,6 +2347,9 @@ size_t TSyrecParser::ShiftExpressionContext::getRuleIndex() const {
 }
 
 std::any TSyrecParser::ShiftExpressionContext::accept(tree::ParseTreeVisitor* visitor) {
+    // Since the base function is defined in a file of the ANTLR runtime, we cannot change its signature to accept a reference instead of a pointer
+    // and thus need to assert that a correct parameter was passed.
+    assert(visitor != nullptr);
     if (auto* parserVisitor = dynamic_cast<TSyrecParserVisitor*>(visitor); parserVisitor != nullptr) {
         return parserVisitor->visitShiftExpression(this);
     }
