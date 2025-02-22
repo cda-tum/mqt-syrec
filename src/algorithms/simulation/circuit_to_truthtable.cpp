@@ -1,6 +1,13 @@
 #include "algorithms/simulation/circuit_to_truthtable.hpp"
 
+#include "core/truthTable/truth_table.hpp"
+#include "dd/Package.hpp"
 #include "dd/Simulation.hpp"
+#include "ir/QuantumComputation.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <memory>
 
 namespace syrec {
 
@@ -37,7 +44,7 @@ namespace syrec {
             }
 
             auto const inEdge    = dd->makeBasisState(nBits, boolCube);
-            const auto out       = dd::simulate(&qc, inEdge, dd, 1);
+            const auto out       = dd::sample(qc, inEdge, *dd, 1);
             const auto outString = out.begin()->first;
 
             tt.try_emplace(inCube, TruthTable::Cube::fromString(outString));

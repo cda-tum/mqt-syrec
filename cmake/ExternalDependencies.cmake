@@ -3,10 +3,39 @@
 include(FetchContent)
 set(FETCH_PACKAGES "")
 
+if(BUILD_MQT_SYREC_BINDINGS)
+  # Manually detect the installed mqt-core package.
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -m mqt.core --cmake_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE mqt-core_DIR
+    ERROR_QUIET)
+
+  # Add the detected directory to the CMake prefix path.
+  if(mqt-core_DIR)
+    list(APPEND CMAKE_PREFIX_PATH "${mqt-core_DIR}")
+    message(STATUS "Found mqt-core package: ${mqt-core_DIR}")
+  endif()
+
+  if(NOT SKBUILD)
+    # Manually detect the installed pybind11 package.
+    execute_process(
+      COMMAND "${Python_EXECUTABLE}" -m pybind11 --cmakedir
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE pybind11_DIR)
+
+    # Add the detected directory to the CMake prefix path.
+    list(APPEND CMAKE_PREFIX_PATH "${pybind11_DIR}")
+  endif()
+
+  # add pybind11 library
+  find_package(pybind11 2.13.6 CONFIG REQUIRED)
+endif()
+
 # cmake-format: off
-set(MQT_CORE_VERSION 2.2.2
+set(MQT_CORE_VERSION 3.0.0
     CACHE STRING "MQT Core version")
-set(MQT_CORE_REV "78d5c87b7aaafe8edb28167f76ebd1debe11c51b"
+set(MQT_CORE_REV "be654c753e98e9062d796143dd3a591366370b2d"
     CACHE STRING "MQT Core identifier (tag, branch or commit hash)")
 set(MQT_CORE_REPO_OWNER "cda-tum"
 	CACHE STRING "MQT Core repository owner (change when using a fork)")
@@ -66,7 +95,7 @@ else()
             GIT_REPOSITORY https://github.com/fmtlib/fmt.git
         )
         list(APPEND FETCH_PACKAGES fmt)
-    endif()
+  endif()
 endif()
 
 # Make all declared dependencies available.

@@ -13,26 +13,22 @@ namespace syrec {
     std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
         std::string                      foundErrorWhileReadingFileContent;
         if (const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent); readFileContent.has_value() && foundErrorWhileReadingFileContent.empty())
-            readProgramFromString(*readFileContent, settings, &foundErrorWhileReadingFileContent);   
+            readProgramFromString(*readFileContent, settings, foundErrorWhileReadingFileContent);   
         return foundErrorWhileReadingFileContent;
     }
     
     std::string Program::readFromString(const std::string_view& stringifiedProgram, const ReadProgramSettings settings) {
         std::string foundErrorWhileReadingFileContent;
-        readProgramFromString(stringifiedProgram, settings, &foundErrorWhileReadingFileContent);
+        readProgramFromString(stringifiedProgram, settings, foundErrorWhileReadingFileContent);
         return foundErrorWhileReadingFileContent;
     }
 
-    bool Program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string* error) {
-        if (const auto& concatenatedErrors = read(filename, settings); !concatenatedErrors.empty()) {
-            if (error)
-                *error = concatenatedErrors;
-            return false;
-        }
-        return true;
+    bool Program::readFile(const std::string& filename, const ReadProgramSettings settings, std::string& error) {
+        error = read(filename, settings);
+        return error.empty();
     }
 
-    bool Program::readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string* error) {
+    bool Program::readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string& error) {
         antlr4::ANTLRInputStream  input(content);
         syrec_parser::TSyrecLexer  lexer(&input);
         antlr4::CommonTokenStream tokens(&lexer);
@@ -60,8 +56,7 @@ namespace syrec {
                 #endif
             }
             concatenatedErrorMessageContainer << generatedErrorMessages.back()->stringify();
-            if (error)
-                *error = concatenatedErrorMessageContainer.str();
+            error = concatenatedErrorMessageContainer.str();
             return false;
         }
         if (parsedSyrecProgram.has_value() && *parsedSyrecProgram)

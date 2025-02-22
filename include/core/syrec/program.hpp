@@ -2,9 +2,14 @@
 #define CORE_SYREC_PROGRAM_HPP
 #pragma once
 
+#include "core/syrec/expression.hpp"
 #include "core/syrec/module.hpp"
+#include "core/syrec/number.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 #include "parser/utils/syrec_operation_utils.hpp"
 
+#include <fstream>
 #include <vector>
 
 namespace syrec {
@@ -33,7 +38,7 @@ namespace syrec {
          * II.     module main(inout a[2](4)) for $i = 0 to 1 do a[$i] += a[0] rof  <br>
          * III.    module main(inout a[2](4)) for $i = 0 to 1 do a[0] += a[$i] rof
          */
-        bool                                      allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess;
+        bool allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess;
     };
 
     class Program {
@@ -78,8 +83,8 @@ namespace syrec {
         *
         * @return true if parsing was successful, otherwise false
         */
-        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string* error = nullptr);
-        bool readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string* error = nullptr);
+        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string& error);
+        bool readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string&);
         [[nodiscard]] static std::optional<std::string> tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors);
     };
 

@@ -28,10 +28,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16
+        uses: pypa/cibuildwheel@v2.22
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-ubuntu-latest-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-ubuntu-latest-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_macos_wheels:
@@ -44,11 +44,13 @@ jobs:
           fetch-depth: 0
       - name: Install boost
         run: brew install boost
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16
+        uses: pypa/cibuildwheel@v2.22
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-macos-latest-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-macos-latest-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_windows_wheels:
@@ -61,18 +63,20 @@ jobs:
           fetch-depth: 0
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Install boost
-        uses: MarkusJx/install-boost@v2.4.4
+        uses: MarkusJx/install-boost@v2.5.0
         id: install-boost
         with:
           boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16
+        uses: pypa/cibuildwheel@v2.22
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-windows-latest-${{ strategy.job-index }}
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-windows-latest-${{ strategy.job-index }}
           path: wheelhouse/*.whl
 
   build_sdist:
@@ -85,13 +89,19 @@ jobs:
           fetch-depth: 0
       - name: Install boost
         run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
+      # set up uv for faster Python package management
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+      # build the source distribution
       - name: Build SDist
-        run: pipx run build --sdist
+        run: uv build --sdist
+      # check the metadata of the source distribution
       - name: Check metadata
-        run: pipx run twine check dist/*
+        run: uvx twine check dist/*
+      # upload the source distribution as an artifact (adds a `dev-` prefix for PRs)
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-sdist
+          name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-sdist
           path: dist/*.tar.gz
 
   upload_pypi:
@@ -107,8 +117,10 @@ jobs:
     name: 🚀 Deploy to PyPI
     environment:
       name: pypi
-      url: https://pypi.org/p/mqt.qmap
+      url: https://pypi.org/p/mqt.syrec
     permissions:
+      attestations: write
+      contents: read
       id-token: write
     steps:
       - uses: actions/download-artifact@v4
@@ -116,4 +128,8 @@ jobs:
           pattern: cibw-*
           path: dist
           merge-multiple: true
+      - name: Generate artifact attestation for sdist and wheel(s)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: "dist/*"
       - uses: pypa/gh-action-pypi-publish@release/v1

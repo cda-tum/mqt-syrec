@@ -1,18 +1,19 @@
 FormatStyle: file
 
 Checks: |
-  clang-diagnostic-*,
-  clang-analyzer-*,
-  boost-*,
   bugprone-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-unchecked-optional-access,
   clang-analyzer-*,
+  -clang-analyzer-core.NullDereference,
+  clang-diagnostic-*,
   cppcoreguidelines-*,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-special-member-functions,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
   google-*,
   -google-readability-todo,
   -google-build-using-namespace,

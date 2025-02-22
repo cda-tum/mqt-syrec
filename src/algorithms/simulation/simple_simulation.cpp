@@ -1,7 +1,13 @@
 #include "algorithms/simulation/simple_simulation.hpp"
 
+#include "core/circuit.hpp"
 #include "core/gate.hpp"
+#include "core/properties.hpp"
 #include "core/utils/timer.hpp"
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <cstddef>
+#include <iostream>
 
 namespace syrec {
 
@@ -23,12 +29,12 @@ namespace syrec {
 
             if (cMask.none() || ((input & cMask) == cMask)) {
                 // get both positions and values
-                auto        it = g.targets.begin();
-                std::size_t t1 = *it++;
-                std::size_t t2 = *it;
+                auto              it = g.targets.begin();
+                const std::size_t t1 = *it++;
+                const std::size_t t2 = *it;
 
-                bool t1v = input.test(t1);
-                bool t2v = input.test(t2);
+                const bool t1v = input.test(t1);
+                const bool t2v = input.test(t2);
 
                 // only swap when different
                 if (t1v != t2v) {
@@ -37,7 +43,7 @@ namespace syrec {
                 }
             }
         } else {
-            std::cerr << "Unknown gate: Simulation error" << std::endl;
+            std::cerr << "Unknown gate: Simulation error\n";
         }
     }
 
@@ -46,7 +52,7 @@ namespace syrec {
         Timer<PropertiesTimer> t;
 
         if (statistics) {
-            PropertiesTimer rt(statistics);
+            const PropertiesTimer rt(statistics);
             t.start(rt);
         }
 

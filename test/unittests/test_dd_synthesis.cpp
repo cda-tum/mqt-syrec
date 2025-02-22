@@ -1,9 +1,10 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
-#include "algorithms/synthesis/encoding.hpp"
 #include "core/io/pla_parser.hpp"
 #include "dd/FunctionalityConstruction.hpp"
 
-#include "gtest/gtest.h"
+#include <algorithm>
+#include <gtest/gtest.h>
+#include <iostream>
 
 using namespace dd::literals;
 using namespace syrec;
@@ -62,7 +63,7 @@ TEST_P(TestDDSynth, GenericDDSynthesisTest) {
     DDSynthesizer synthesizer{};
 
     const auto  qc   = synthesizer.synthesize(ttDD, dd);
-    const auto& qcDD = dd::buildFunctionality(qc.get(), dd);
+    const auto& qcDD = dd::buildFunctionality(*qc, *dd);
     EXPECT_TRUE(ttDD == qcDD);
 
     std::cout << synthesizer.numGate() << "\n";
