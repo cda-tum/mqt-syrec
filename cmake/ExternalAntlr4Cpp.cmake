@@ -16,24 +16,25 @@ set(ANTLR4_INCLUDE_DIRS ${ANTLR4_ROOT}/runtime/Cpp/runtime/src)
 set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
 set(ANTLR4_TAG "master"
     CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)")
-set(ANTLR_BUILD_CPP_TESTS Off)
+set(ANTLR4_CPP_LANG_VERSION 17)
 
 # Ensure that the include dir already exists at configure time (to avoid cmake erroring
 # on non-existent include dirs)
 file(MAKE_DIRECTORY "${ANTLR4_INCLUDE_DIRS}")
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio.*")
-  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/dist/$(Configuration))
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime/$(Configuration))
 elseif(${CMAKE_GENERATOR} MATCHES "Xcode.*")
-  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/dist/$(CONFIGURATION))
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime/$(CONFIGURATION))
 else()
-  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/dist)
+  set(ANTLR4_OUTPUT_DIR ${ANTLR4_ROOT}/runtime/Cpp/runtime)
 endif()
 
 message(STATUS "ANTLR will use CMake generator: ${CMAKE_GENERATOR}")
 message(STATUS "ANLTR libraries output directory was defined based on compiler id: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "ANLTR libraries will use output directory: ${ANTLR4_OUTPUT_DIR}")
 message(STATUS "ANTLR will be compiled using compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "ANTLR will be built using C++ language version: ${ANTLR4_CPP_LANG_VERSION}")
 
 if(NOT DEFINED ANTLR4_WITH_STATIC_CRT)
   if (MSVC OR WIN32)
@@ -96,7 +97,8 @@ else()
           --target)
 endif()
 
-ExternalProject_Add(
+if(DEFINED CMAKE_CXX_COMPILER AND DEFINED CMAKE_C_COMPILER)
+    ExternalProject_Add(
       antlr4_runtime
       PREFIX antlr4_runtime
       GIT_PROGRESS 0
@@ -109,16 +111,42 @@ ExternalProject_Add(
       SOURCE_DIR ${ANTLR4_ROOT}
       SOURCE_SUBDIR runtime/Cpp
       CMAKE_ARGS
-          # -DCMAKE_CXX_STANDARD:STRING=17 # if desired, compile the runtime with a different C++ standard
-         -DCMAKE_CXX_STANDARD:STRING=${CMAKE_CXX_STANDARD} # alternatively, compile the runtime with the same C++ standard as the outer project
+         -DCMAKE_CXX_STANDARD:STRING=${ANTLR4_CPP_LANG_VERSION} # if desired, compile the runtime with a different C++ standard
          -DCMAKE_C_COMPILER:STRING=${CMAKE_C_COMPILER} # omitting this parameter will cause ANTLR to be compiled with MSVC compiler when generated/built with visual studio instead of another compiler (i.e. clang)
          -DCMAKE_CXX_COMPILER:STRING=${CMAKE_CXX_COMPILER} # omitting this parameter will cause ANTLR to be compiled with MSVC compiler when generated/built with visual studio instead of another compiler (i.e. clang)
+         -DANTLR_BUILD_CPP_TESTS:BOOL=OFF
+         -DWITH_DEMO:BOOL=OFF
       CMAKE_CACHE_ARGS
           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
           -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
           -DDISABLE_WARNINGS:BOOL=ON 
       INSTALL_COMMAND ""
       EXCLUDE_FROM_ALL 1)
+else()
+    ExternalProject_Add(
+      antlr4_runtime
+      PREFIX antlr4_runtime
+      GIT_PROGRESS 0
+      GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
+      GIT_SHALLOW 1
+      GIT_TAG ${ANTLR4_TAG}
+      DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+      BUILD_COMMAND ""
+      BUILD_IN_SOURCE 1
+      SOURCE_DIR ${ANTLR4_ROOT}
+      SOURCE_SUBDIR runtime/Cpp
+      CMAKE_ARGS
+         -DCMAKE_CXX_STANDARD:STRING=${ANTLR4_CPP_LANG_VERSION} # if desired, compile the runtime with a different C++ standard
+         -DANTLR_BUILD_CPP_TESTS:BOOL=OFF
+         -DWITH_DEMO:BOOL=OFF
+      CMAKE_CACHE_ARGS
+          -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+          -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
+          -DDISABLE_WARNINGS:BOOL=ON 
+      INSTALL_COMMAND ""
+      EXCLUDE_FROM_ALL 1)
+endif()
+
       
 # Separate build step as rarely people want both
 set(ANTLR4_BUILD_DIR ${ANTLR4_ROOT})

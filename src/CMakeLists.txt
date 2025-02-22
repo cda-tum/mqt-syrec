@@ -3,9 +3,8 @@ if(NOT TARGET MQT::SyReC)
   file(GLOB_RECURSE SYREC_HEADERS ${MQT_SYREC_INCLUDE_BUILD_DIR}/*.hpp)
   file(GLOB_RECURSE SYREC_SOURCES **.cpp)
   list(FILTER SYREC_SOURCES EXCLUDE REGEX ".*/python/.*$")
-  
-  # TODO: Split library into IR and parser target
-  # add SyReC Package library
+   
+  # TODO: Split library into IR and parser target and SyReC Package library (recheck .clang-tidy and .clang-format checks)
   add_library(${PROJECT_NAME} ${SYREC_HEADERS} ${SYREC_SOURCES})
   target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 
