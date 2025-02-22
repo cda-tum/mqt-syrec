@@ -62,14 +62,14 @@ namespace syrec_parser {
             expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration)) {}
  
         [[nodiscard]] std::optional<syrec::Statement::vec>        visitStatementListTyped(const TSyrecParser::StatementListContext* context);
-        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(TSyrecParser::StatementContext* context);
-        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitCallStatementTyped(TSyrecParser::CallStatementContext* context);
-        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitForStatementTyped(TSyrecParser::ForStatementContext* context);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(const TSyrecParser::StatementContext* context);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitCallStatementTyped(const TSyrecParser::CallStatementContext* context);
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitForStatementTyped(const TSyrecParser::ForStatementContext* context);
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitIfStatementTyped(const TSyrecParser::IfStatementContext* context);
-        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* context) const;
-        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitAssignStatementTyped(TSyrecParser::AssignStatementContext* context) const;
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitUnaryStatementTyped(const TSyrecParser::UnaryStatementContext* context) const;
+        [[nodiscard]] std::optional<syrec::Statement::ptr>        visitAssignStatementTyped(const TSyrecParser::AssignStatementContext* context) const;
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitSwapStatementTyped(const TSyrecParser::SwapStatementContext* context) const;
-        [[nodiscard]] static std::optional<syrec::Statement::ptr> visitSkipStatementTyped(TSyrecParser::SkipStatementContext* context);
+        [[nodiscard]] static std::optional<syrec::Statement::ptr> visitSkipStatementTyped(const TSyrecParser::SkipStatementContext* context);
 
         [[nodiscard]] std::vector<NotOverloadResolutedCallStatementScope> getCallStatementsWithNotPerformedOverloadResolution() const;
         void                                                              openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature);
@@ -78,8 +78,8 @@ namespace syrec_parser {
         std::unique_ptr<CustomExpressionVisitor>                        expressionVisitorInstance;
         std::vector<NotOverloadResolutedCallStatementScope>             callStatementsWithNotPerformedOverloadResolutionScopes;
 
-        [[nodiscard]] std::optional<std::string>        visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* context) const;
-        [[nodiscard]] std::optional<syrec::Number::ptr> visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* context) const;
+        [[nodiscard]] std::optional<std::string>        visitLoopVariableDefinitionTyped(const TSyrecParser::LoopVariableDefinitionContext* context) const;
+        [[nodiscard]] std::optional<syrec::Number::ptr> visitLoopStepsizeDefinitionTyped(const TSyrecParser::LoopStepsizeDefinitionContext* context) const;
 
         void                                                  recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
         [[nodiscard]] NotOverloadResolutedCallStatementScope* getActiveModuleScopeRecordingCallStatements();

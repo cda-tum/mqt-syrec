@@ -23,12 +23,12 @@
 
 using namespace syrec_parser;
 
-std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::parseProgram(TSyrecParser::ProgramContext* context) const {
+std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::parseProgram(const TSyrecParser::ProgramContext* context) const {
     return visitProgramTyped(context);
 }
 
 // START OF NON-PUBLIC FUNCTIONALITY
-std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgramTyped(TSyrecParser::ProgramContext* context) const {
+std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgramTyped(const TSyrecParser::ProgramContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -99,7 +99,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
     return generatedProgram;
 }
 
-std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecParser::ModuleContext* context) const {
+std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(const TSyrecParser::ModuleContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -150,7 +150,7 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(TSyrecPa
     return generatedModule;
 }
 
-std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParameterListTyped(TSyrecParser::ParameterListContext* context) const {
+std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParameterListTyped(const TSyrecParser::ParameterListContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -172,7 +172,7 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitParam
     return processedParameterInstances;
 }
 
-std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(TSyrecParser::ParameterContext* context) const {
+std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(const TSyrecParser::ParameterContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -193,12 +193,13 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(TSy
     return std::nullopt;
 }
 
-std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSignalListTyped(TSyrecParser::SignalListContext* context) const {
+std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSignalListTyped(const TSyrecParser::SignalListContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
 
     std::optional<syrec::Variable::Type> localVariableType;
+    // TODO: Do we currently handle variables of type state correctly (i.e. we do not know whether assignments to state variables are allowed due to no mentioning of the semantics for variables of this type in the SyReC specification])
     if (context->VAR_TYPE_STATE() != nullptr) {
         localVariableType = syrec::Variable::Type::State;
     } else if (context->VAR_TYPE_WIRE() != nullptr) {
@@ -221,7 +222,7 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSigna
     return processedLocalVariables;
 }
 
-std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context) const {
+std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationTyped(const TSyrecParser::SignalDeclarationContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }

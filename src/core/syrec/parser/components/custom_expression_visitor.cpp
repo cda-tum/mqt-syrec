@@ -23,24 +23,24 @@
 
 using namespace syrec_parser;
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(TSyrecParser::ExpressionContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(const TSyrecParser::ExpressionContext* context) {
     if (context == nullptr) {
         return std::nullopt;
     }
 
-    if (auto* const binaryExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromBinaryExpressionContext*>(context); binaryExpressionContext != nullptr) {
+    if (auto* const binaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromBinaryExpressionContext*>(context); binaryExpressionContext != nullptr) {
         return visitBinaryExpressionTyped(binaryExpressionContext->binaryExpression());
     }
-    if (auto* const shiftExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromShiftExpressionContext*>(context); shiftExpressionContext != nullptr) {
+    if (auto* const shiftExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromShiftExpressionContext*>(context); shiftExpressionContext != nullptr) {
         return visitShiftExpressionTyped(shiftExpressionContext->shiftExpression());
     }
-    if (auto* const unaryExpressionContext = dynamic_cast<TSyrecParser::ExpressionFromUnaryExpressionContext*>(context); unaryExpressionContext != nullptr) {
+    if (auto* const unaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromUnaryExpressionContext*>(context); unaryExpressionContext != nullptr) {
         return visitUnaryExpressionTyped(unaryExpressionContext->unaryExpression());
     }
-    if (auto* const expressionFromNumberContext = dynamic_cast<TSyrecParser::ExpressionFromNumberContext*>(context); expressionFromNumberContext != nullptr) {
+    if (auto* const expressionFromNumberContext = dynamic_cast<const TSyrecParser::ExpressionFromNumberContext*>(context); expressionFromNumberContext != nullptr) {
         return visitExpressionFromNumberTyped(expressionFromNumberContext);
     }
-    if (auto* const expressionFromSignalContext = dynamic_cast<TSyrecParser::ExpressionFromSignalContext*>(context); expressionFromSignalContext != nullptr) {
+    if (auto* const expressionFromSignalContext = dynamic_cast<const TSyrecParser::ExpressionFromSignalContext*>(context); expressionFromSignalContext != nullptr) {
         return visitExpressionFromSignalTyped(expressionFromSignalContext);
     }
 
@@ -90,7 +90,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpressionTyped(TSyrecParser::ShiftExpressionContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context) {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -130,35 +130,35 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpress
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(const TSyrecParser::ExpressionFromNumberContext* context) const {
     if (const auto& generatedNumberContainer = context != nullptr ? visitNumberTyped(context->number()) : std::nullopt; generatedNumberContainer.has_value()) {
         return std::make_shared<syrec::NumericExpression>(*generatedNumberContainer, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
     }
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromSignalTyped(TSyrecParser::ExpressionFromSignalContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context) {
     if (const auto& generatedSignalContainer = context != nullptr ? visitSignalTyped(context->signal()) : std::nullopt; generatedSignalContainer.has_value()) {
         return std::make_shared<syrec::VariableExpression>(*generatedSignalContainer);
     }
     return std::nullopt;
 }
 
-std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(TSyrecParser::NumberContext* context) const {
+std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(const TSyrecParser::NumberContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
 
-    if (auto* const numberFromConstantContext = dynamic_cast<TSyrecParser::NumberFromConstantContext*>(context); numberFromConstantContext != nullptr) {
+    if (auto* const numberFromConstantContext = dynamic_cast<const TSyrecParser::NumberFromConstantContext*>(context); numberFromConstantContext != nullptr) {
         return visitNumberFromConstantTyped(numberFromConstantContext);
     }
-    if (auto* const numberFromExpressionContext = dynamic_cast<TSyrecParser::NumberFromExpressionContext*>(context); numberFromExpressionContext != nullptr) {
+    if (auto* const numberFromExpressionContext = dynamic_cast<const TSyrecParser::NumberFromExpressionContext*>(context); numberFromExpressionContext != nullptr) {
         return visitNumberFromExpressionTyped(numberFromExpressionContext);
     }
-    if (auto* const numberFromLoopVariableContext = dynamic_cast<TSyrecParser::NumberFromLoopVariableContext*>(context); numberFromLoopVariableContext != nullptr) {
+    if (auto* const numberFromLoopVariableContext = dynamic_cast<const TSyrecParser::NumberFromLoopVariableContext*>(context); numberFromLoopVariableContext != nullptr) {
         return visitNumberFromLoopVariableTyped(numberFromLoopVariableContext);
     }
-    if (auto* const numberFromSignalWidthContext = dynamic_cast<TSyrecParser::NumberFromSignalwidthContext*>(context); numberFromSignalWidthContext != nullptr) {
+    if (auto* const numberFromSignalWidthContext = dynamic_cast<const TSyrecParser::NumberFromSignalwidthContext*>(context); numberFromSignalWidthContext != nullptr) {
         return visitNumberFromSignalwidthTyped(numberFromSignalWidthContext);
     }
     // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
@@ -167,7 +167,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(TSyr
     return std::nullopt;
 }
 
-std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConstantTyped(TSyrecParser::NumberFromConstantContext* context) const {
+std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConstantTyped(const TSyrecParser::NumberFromConstantContext* context) const {
     // Production should only be called if the token contains only numeric characters and thus deserialization should only fail if an overflow occurs.
     // Leading and trailing whitespace should also be trimmed from the token text by the parser. If the text of the token contains non-numeric characters,
     // the deserialization will not throw an exception.
@@ -275,7 +275,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     return std::nullopt;
 }
 
-std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVariableTyped(TSyrecParser::NumberFromLoopVariableContext* context) const {
+std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
     }
@@ -297,7 +297,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
     return std::nullopt;
 }
 
-std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignalwidthTyped(TSyrecParser::NumberFromSignalwidthContext* context) const {
+std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignalwidthTyped(const TSyrecParser::NumberFromSignalwidthContext* context) const {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
     }
@@ -319,7 +319,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
     return std::nullopt;
 }
 
-std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(TSyrecParser::SignalContext* context) {
+std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(const TSyrecParser::SignalContext* context) {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
     }

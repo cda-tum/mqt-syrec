@@ -24,18 +24,18 @@ namespace syrec_parser {
         CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
             CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration) {}
 
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionTyped(TSyrecParser::ExpressionContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromNumberTyped(TSyrecParser::ExpressionFromNumberContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromSignalTyped(TSyrecParser::ExpressionFromSignalContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionTyped(const TSyrecParser::ExpressionContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromNumberTyped(const TSyrecParser::ExpressionFromNumberContext* context) const;
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context);
         [[nodiscard]] std::optional<syrec::Expression::ptr>        visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context);
         [[nodiscard]] std::optional<syrec::Expression::ptr>        visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitShiftExpressionTyped(TSyrecParser::ShiftExpressionContext* context);
-        [[maybe_unused]] std::optional<syrec::VariableAccess::ptr> visitSignalTyped(TSyrecParser::SignalContext* context);
-        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberTyped(TSyrecParser::NumberContext* context) const;
-        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromConstantTyped(TSyrecParser::NumberFromConstantContext* context) const;
-        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromSignalwidthTyped(TSyrecParser::NumberFromSignalwidthContext* context) const;
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context);
+        [[maybe_unused]] std::optional<syrec::VariableAccess::ptr> visitSignalTyped(const TSyrecParser::SignalContext* context);
+        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberTyped(const TSyrecParser::NumberContext* context) const;
+        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromConstantTyped(const TSyrecParser::NumberFromConstantContext* context) const;
+        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromSignalwidthTyped(const TSyrecParser::NumberFromSignalwidthContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromExpressionTyped(const TSyrecParser::NumberFromExpressionContext* context) const;
-        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(TSyrecParser::NumberFromLoopVariableContext* context) const;
+        [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const;
 
         void                                      setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
         void                                      clearExpectedBitwidthForAnyProcessedEntity();

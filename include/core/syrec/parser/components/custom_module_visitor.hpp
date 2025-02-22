@@ -25,18 +25,18 @@ namespace syrec_parser {
             defaultVariableBitwidth(userProvidedParserSettings.defaultBitwidth),
             statementVisitorInstance(std::make_unique<CustomStatementVisitor>(sharedGeneratedMessageContainerInstance, this->symbolTable, userProvidedParserSettings)) {}
 
-        [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(TSyrecParser::ProgramContext* context) const; 
+        [[maybe_unused]] std::optional<std::shared_ptr<syrec::Program>> parseProgram(const TSyrecParser::ProgramContext* context) const; 
 
     protected:
         unsigned int defaultVariableBitwidth;
 
         std::unique_ptr<CustomStatementVisitor> statementVisitorInstance;
-        [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(TSyrecParser::ProgramContext* context) const;
-        [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(TSyrecParser::ModuleContext* context) const;
-        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(TSyrecParser::ParameterListContext* context) const;
-        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(TSyrecParser::ParameterContext* context) const;
-        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitSignalListTyped(TSyrecParser::SignalListContext* context) const;
-        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(TSyrecParser::SignalDeclarationContext* context) const;
+        [[nodiscard]] std::optional<std::shared_ptr<syrec::Program>>    visitProgramTyped(const TSyrecParser::ProgramContext* context) const;
+        [[nodiscard]] std::optional<syrec::Module::ptr>                 visitModuleTyped(const TSyrecParser::ModuleContext* context) const;
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitParameterListTyped(const TSyrecParser::ParameterListContext* context) const;
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitParameterTyped(const TSyrecParser::ParameterContext* context) const;
+        [[nodiscard]] std::optional<std::vector<syrec::Variable::ptr>>  visitSignalListTyped(const TSyrecParser::SignalListContext* context) const;
+        [[nodiscard]] std::optional<syrec::Variable::ptr>               visitSignalDeclarationTyped(const TSyrecParser::SignalDeclarationContext* context) const;
         [[nodiscard]] std::optional<std::vector<syrec::Statement::ptr>> visitStatementListTyped(const TSyrecParser::StatementListContext* context) const;
 
         [[nodiscard]] static bool doVariablesMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable);

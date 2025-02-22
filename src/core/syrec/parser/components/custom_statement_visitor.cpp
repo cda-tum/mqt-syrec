@@ -37,7 +37,7 @@ std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListT
     return statements;
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped(TSyrecParser::StatementContext* context) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped(const TSyrecParser::StatementContext* context) {
     if (context->callStatement() != nullptr) {
         return visitCallStatementTyped(context->callStatement());
     }
@@ -64,7 +64,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped
     return std::nullopt;
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatementTyped(TSyrecParser::AssignStatementContext* context) const {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatementTyped(const TSyrecParser::AssignStatementContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -92,7 +92,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
     return assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value() ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(TSyrecParser::UnaryStatementContext* context) const {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(const TSyrecParser::UnaryStatementContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -143,11 +143,11 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
     return swapLhsOperand.has_value() && swapRhsOperand.has_value() ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand)) : std::nullopt;
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSkipStatementTyped([[maybe_unused]] TSyrecParser::SkipStatementContext* context) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSkipStatementTyped([[maybe_unused]] const TSyrecParser::SkipStatementContext* context) {
     return std::make_shared<syrec::SkipStatement>();
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementTyped(TSyrecParser::CallStatementContext* context) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementTyped(const TSyrecParser::CallStatementContext* context) {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -261,7 +261,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     return generatedIfStatement;
 }
 
-std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTyped(TSyrecParser::ForStatementContext* context) {
+std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTyped(const TSyrecParser::ForStatementContext* context) {
     if (context == nullptr) {
         return std::nullopt;
     }
@@ -323,7 +323,7 @@ void CustomStatementVisitor::openNewScopeToRecordCallStatementsInModule(const No
 }
 
 // START OF NON-PUBLIC FUNCTIONALITY
-std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(TSyrecParser::LoopVariableDefinitionContext* context) const {
+std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTyped(const TSyrecParser::LoopVariableDefinitionContext* context) const {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
     }
@@ -335,7 +335,7 @@ std::optional<std::string> CustomStatementVisitor::visitLoopVariableDefinitionTy
     return loopVariableIdentifier;
 }
 
-std::optional<syrec::Number::ptr> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(TSyrecParser::LoopStepsizeDefinitionContext* context) const {
+std::optional<syrec::Number::ptr> CustomStatementVisitor::visitLoopStepsizeDefinitionTyped(const TSyrecParser::LoopStepsizeDefinitionContext* context) const {
     if (context == nullptr) {
         return std::nullopt;
     }
