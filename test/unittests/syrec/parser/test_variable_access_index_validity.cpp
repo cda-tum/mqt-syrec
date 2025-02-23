@@ -343,24 +343,22 @@ TEST(VariableAccessIndexValidityTests, AccessedValueOfDimensionOutOfRangeWithVal
 TEST(VariableAccessIndexValidityTests, AccessedValueForMultipleDimensionsOutOfRangeIsNotValid) {
     const std::vector<unsigned int> numberOfValuesPerDimension = {1, 2, 3};
     const auto                      variableInstance            = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, numberOfValuesPerDimension, DEFAULT_SIGNAL_BITWIDTH);
-    const std::vector               outOfRangeValuePerDimension = {
-        numberOfValuesPerDimension.at(0) + 1,
-        numberOfValuesPerDimension.at(1) + 10,
-        numberOfValuesPerDimension.at(2) + 3
-    };
+    const unsigned int              outOfRangeValueForFirstDimension = numberOfValuesPerDimension.front();
+    const unsigned int              validIndexForIntermediateDimension = numberOfValuesPerDimension.at(1) - 1;
+    const unsigned int              outOfRangeValueForLastDimension  = numberOfValuesPerDimension.back() + 1;
 
     auto variableAccess       = syrec::VariableAccess();
     variableAccess.var        = variableInstance;
     variableAccess.indexes    = syrec::Expression::vec(numberOfValuesPerDimension.size(), nullptr);
-    variableAccess.indexes[0] = createExprForAccessOnValueOfDimensionUsingConstantValue(outOfRangeValuePerDimension.front());
-    variableAccess.indexes[1] = createExprForAccessOnValueOfDimensionUsingConstantValue(numberOfValuesPerDimension[1]);
-    variableAccess.indexes[2] = createExprForAccessOnValueOfDimensionUsingConstantValue(outOfRangeValuePerDimension.back());
+    variableAccess.indexes[0] = createExprForAccessOnValueOfDimensionUsingConstantValue(outOfRangeValueForFirstDimension);
+    variableAccess.indexes[1] = createExprForAccessOnValueOfDimensionUsingConstantValue(validIndexForIntermediateDimension);
+    variableAccess.indexes[2] = createExprForAccessOnValueOfDimensionUsingConstantValue(outOfRangeValueForLastDimension);
 
-    VariableAccessIndicesValidity                expectedValidationResult = buildExpectedResult({
-        createOutOfRangeIndexValidationResult(outOfRangeValuePerDimension.front()),
-        createValidIndexValidationResult(numberOfValuesPerDimension.at(1)),
-        createOutOfRangeIndexValidationResult(outOfRangeValuePerDimension.back())
-    },std::nullopt);
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult({
+        createOutOfRangeIndexValidationResult(outOfRangeValueForFirstDimension),
+        createValidIndexValidationResult(validIndexForIntermediateDimension),
+        createOutOfRangeIndexValidationResult(outOfRangeValueForLastDimension)},
+        std::nullopt);
 
     std::optional<VariableAccessIndicesValidity> actualValidationResult;
     ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));

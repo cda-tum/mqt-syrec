@@ -1041,7 +1041,6 @@ TEST(VariableAccessOverlapTests, InvalidValueForBitrangeStartValueResultsInPoten
 }
 
 TEST(VariableAccessOverlapTests, InvalidValueForBitrangeEndValueResultsInPotentialOverlapAndNoCrash) {
-    GTEST_SKIP();
     const std::vector<unsigned int> variableDimensions       = {1U, 2U};
     const auto                      accessedVariableInstance = createVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, variableDimensions, DEFAULT_VARIABLE_BITWIDTH);
     ASSERT_THAT(accessedVariableInstance, testing::NotNull());
