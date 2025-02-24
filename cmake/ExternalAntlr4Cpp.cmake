@@ -120,6 +120,7 @@ if(DEFINED CMAKE_CXX_COMPILER AND DEFINED CMAKE_C_COMPILER)
           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
           -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
           -DDISABLE_WARNINGS:BOOL=ON 
+	  -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
       INSTALL_COMMAND ""
       EXCLUDE_FROM_ALL 1)
 else()
@@ -143,6 +144,7 @@ else()
           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
           -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
           -DDISABLE_WARNINGS:BOOL=ON 
+	  -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
       INSTALL_COMMAND ""
       EXCLUDE_FROM_ALL 1)
 endif()
@@ -155,28 +157,8 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
   set(ANTLR4_BUILD_DIR ${ANTLR4_ROOT}/runtime/Cpp)
 endif()
 
-ExternalProject_Add_Step(
-    antlr4_runtime
-    build_static
-    COMMAND ${ANTLR4_BUILD_COMMAND} antlr4_static
-    # Depend on target instead of step (a custom command)
-    # to avoid running dependent steps concurrently
-    DEPENDS antlr4_runtime
-    BYPRODUCTS ${ANTLR4_STATIC_LIBRARIES}
-    EXCLUDE_FROM_MAIN 1
-    WORKING_DIRECTORY ${ANTLR4_BUILD_DIR})
-ExternalProject_Add_StepTargets(antlr4_runtime build_static)
-
-add_library(antlr4_static STATIC IMPORTED)
-add_dependencies(antlr4_static antlr4_runtime-build_static)
-set_target_properties(antlr4_static PROPERTIES
-                      IMPORTED_LOCATION ${ANTLR4_STATIC_LIBRARIES})
-target_include_directories(antlr4_static
-    INTERFACE
-        ${ANTLR4_INCLUDE_DIRS}
-)
-
-ExternalProject_Add_Step(
+if (BUILD_SHARED_LIBS)
+  ExternalProject_Add_Step(
     antlr4_runtime
     build_shared
     COMMAND ${ANTLR4_BUILD_COMMAND} antlr4_shared
@@ -186,18 +168,40 @@ ExternalProject_Add_Step(
     BYPRODUCTS ${ANTLR4_SHARED_LIBRARIES} ${ANTLR4_RUNTIME_LIBRARIES}
     EXCLUDE_FROM_MAIN 1
     WORKING_DIRECTORY ${ANTLR4_BUILD_DIR})
-ExternalProject_Add_StepTargets(antlr4_runtime build_shared)
+  ExternalProject_Add_StepTargets(antlr4_runtime build_shared)
 
-add_library(antlr4_shared SHARED IMPORTED)
-add_dependencies(antlr4_shared antlr4_runtime-build_shared)
-set_target_properties(antlr4_shared PROPERTIES
-                      IMPORTED_LOCATION ${ANTLR4_RUNTIME_LIBRARIES})
-target_include_directories(antlr4_shared
-    INTERFACE
-        ${ANTLR4_INCLUDE_DIRS}
-)
-
-if(ANTLR4_SHARED_LIBRARIES)
+  add_library(antlr4_shared SHARED IMPORTED)
+  add_dependencies(antlr4_shared antlr4_runtime-build_shared)
   set_target_properties(antlr4_shared PROPERTIES
-                        IMPORTED_IMPLIB ${ANTLR4_SHARED_LIBRARIES})
+                      IMPORTED_LOCATION ${ANTLR4_RUNTIME_LIBRARIES})
+  target_include_directories(antlr4_shared
+      INTERFACE
+          ${ANTLR4_INCLUDE_DIRS}
+  )
+
+  if(ANTLR4_SHARED_LIBRARIES)
+    set_target_properties(antlr4_shared PROPERTIES
+                          IMPORTED_IMPLIB ${ANTLR4_SHARED_LIBRARIES})
+  endif()
+else()
+  ExternalProject_Add_Step(
+    antlr4_runtime
+    build_static
+    COMMAND ${ANTLR4_BUILD_COMMAND} antlr4_static
+    # Depend on target instead of step (a custom command)
+    # to avoid running dependent steps concurrently
+    DEPENDS antlr4_runtime
+    BYPRODUCTS ${ANTLR4_STATIC_LIBRARIES}
+    EXCLUDE_FROM_MAIN 1
+    WORKING_DIRECTORY ${ANTLR4_BUILD_DIR})
+  ExternalProject_Add_StepTargets(antlr4_runtime build_static)
+
+  add_library(antlr4_static STATIC IMPORTED)
+  add_dependencies(antlr4_static antlr4_runtime-build_static)
+  set_target_properties(antlr4_static PROPERTIES
+                      IMPORTED_LOCATION ${ANTLR4_STATIC_LIBRARIES})
+  target_include_directories(antlr4_static
+      INTERFACE
+          ${ANTLR4_INCLUDE_DIRS}
+  )
 endif()
