@@ -54,14 +54,23 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("get_string", py::overload_cast<const std::string&>(&Properties::get<std::string>, py::const_))
             .def("get_double", py::overload_cast<const std::string&>(&Properties::get<double>, py::const_));
 
+    py::enum_<utils::IntegerConstantTruncationOperation>(m, "integer_constant_truncation_operation")
+            .value("modulo", utils::IntegerConstantTruncationOperation::Modulo, "Use the modulo operation for the truncation of constant values")
+            .value("bitwise_and", utils::IntegerConstantTruncationOperation::BitwiseAnd, "Use the bitwise AND operation for the truncation of constant values")
+            .export_values();
+
     py::class_<ReadProgramSettings>(m, "read_program_settings")
             .def(py::init<>(), "Constructs ReadProgramSettings object.")
-            .def_readwrite("default_bitwidth", &ReadProgramSettings::defaultBitwidth);
+            .def_readwrite("default_bitwidth", &ReadProgramSettings::defaultBitwidth, "Defines the default variable bitwidth used by the SyReC parser for variables whos bitwidth specification was omitted")
+            .def_readwrite("integer_constant_truncation_operation", &ReadProgramSettings::integerConstantTruncationOperation, "Defines the operation used by the SyReC parser for the truncation of constant values. For further details see the SyReC semantics.")
+            .def_readwrite("allow_access_on_assigned_to_variable_parts_in_dimension_access_of_variableAccess", &ReadProgramSettings::allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess, "Defines whether acces on the assigned to signal parts is allowed in a variable access in any operand of the assignment. For further details see the SyReC semantics.");
 
     py::class_<Program>(m, "program")
             .def(py::init<>(), "Constructs SyReC program object.")
             .def("add_module", &Program::addModule)
-            .def("read", &Program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.");
+            .def("read", &Program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.")
+            .def("read_from_string", &Program::readFromString, "stringifiedProgram"_a, "settings"_a = ReadProgramSettings{}, "Process an already stringified SyReC program.");
+
 
     py::class_<boost::dynamic_bitset<>>(m, "bitset")
             .def(py::init<>(), "Constructs bitset object of size zero.")
