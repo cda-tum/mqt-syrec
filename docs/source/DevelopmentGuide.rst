@@ -189,6 +189,35 @@ Furthermore, they provide a command to automatically format your code according 
 
     where :code:`<FILE>` is the file you want to analyze and :code:`<PATH_TO_INCLUDE_DIRECTORY>` is the path to the :code:`include` directory of the project.
 
+
+Modifications to the SyReC ANTLR grammar
+----------------------------------------
+
+The lexer and parser for the SyReC grammar (specified in the TSyrecLexer.g4 and TSyrecParser.g4 located in :code:`src/core/syrec/parser/antlr/grammar`) were generated using the parser generator `ANTLR <https://github.com/antlr/antlr4>`_ with the generated header files are located in :code:`include/core/syrec/parser/antlr`
+while the source files of the implementation are found in :code:`src/core/syrec/parser/antlr`. During the build process the required ANTLR4 runtime is built automatically using CMake.
+
+| One could also trigger the conversion process of the ANTLR .g4 via `CMake <https://github.com/antlr/antlr4/tree/dev/runtime/Cpp/cmake>`_ but this would require an existing Java SE installation on the system performing the build, thus this step needs to be triggered manually whenever changes to the SyReC grammar are needed.
+
+| We will showcase how to perform this conversion step manually via the command line on a Windows system and assume that a Java SE installation exists (and was correctly added to the PATH environment variable):
+
+1. Download the `ANTLR java binary <https://www.antlr.org/download.html>`_.
+2. Assuming that the .jar file of the previous step is located in the same folder as the ANTLR .g4 grammar files, execute the following command:
+
+  .. code-block:: console
+
+    $ java -jar antlr.jar -Dlanguage=Cpp -package <NAMESPACE_NAME_FOR_GEN_FILES> -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
+
+  Which will generate some files with only the following being relevant: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*, *TSyrecBaseVisitor.h*
+
+3. Copy the generated files to the corresponding folders to the correct location in the project:
+
+  - Header files: :code:`include/core/syrec/parser/antlr`
+  - Source files: :code:`src/core/syrec/parser/antlr`.
+
+  .. note::
+    The generated files using the ANTLR java binary will violate a lot of the defined .clang-tidy rules and its is recommended to use a diff tool to copy the portions of the generated files that have been updated to
+    the already existing ones and then fix the remaining .clang-tidy violations.
+
 Working on the Python module
 ############################
 
