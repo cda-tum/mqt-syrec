@@ -1,16 +1,28 @@
 SyReC language semantics
 ========================
-The basic semantics of the SyReC language were defined in :cite:p:`wille2016syrec` and :footcite:p:`wille2008revlib` but are extended in the implemented SyReC parser with a detailed description provided on this page.
-We will start by defining the semantics for a SyReC program and its defined modules and are assuming that all entities of the SyReC program are defined in the processed .syrec file.
+The original paper introducing the SyReC language :cite:p:`wille2016syrec` defined the syntax of the language as well as first semantic properties (which were also defined in the RevLib project :footcite:p:`wille2008revlib`). For the remainder of this page we will assume that the reader has read the relevant sections in both documents. The aim of this document is to provide a detailed description of the SyReC semantics due to the reference documents being vague or failing to define the expected behaviour for certain scenarios. 
 
-Modules
--------
-- The SyReC specification :footcite:p:`wille2008revlib` (v2.0.1, section 2.1) states that in a well-formed SyReC program, the entry point of the program is either explicitly defined by a module with an identifier 'main' or implicitly chosen as the last defined module of the program.
+.. note:: 
+  Note that the assumptions made in this document are only valid for this project.
 
- Additionally, the SyReC parser supports module overloading, i.e. the definition of modules sharing the same identifier while the structure of the parameters differ, for all modules with an identifier different than 'main'. The signature of two modules (module identifier + parameters) :math:`m_1` and :math:`m_2` is considered to be equal if the following conditions hold:
-    - The identifier of the modules match
-    - The number of parameters is equal (assumed to be equal to an arbitary but fixed value n)
-    - For each parameter at the same index :math:`i: 0 \leq i < n` in the sequence of formal parameters of both modules the following holds:
+We will start by defining the semantics of the highest level entity of a SyReC program, a *Module*, and work our way down to the lowest/basic elements of the language:
+
+Module
+------
+- The RevLib project (v2.0.1, section 2.1) states that the entry point of a well-formed SyReC program is either defined explicitly by a module with an identifier *main* or implicitly chosen as the last defined module of the program.
+
+- Omitting the specification of the dimensionality of any variable (i.e. the number of dimensions and the number of values per dimension) will cause the variable to be considered as a 1D signal storing a single value thus the next two declarations are equivalent: *module main(inout a(4)) ...* and *module main(inout a[1](4) ...)*).
+- The value of every variable with bitwidth :math:`b` is assumed to be an unsigned integer and thus must be in the range :math:`[0, 2^b]`.
+- The maximum supported bitwidth of any variable is equal to 32
+- Omitting the bitwidth of a variable will lead to the assumption that is bitwidth is equal to a :doc:`configurable default value <library/Settings>`
+- The identifiers of the parameters and variables of a module must be unique in the latter.
+- Module overloading (i.e. the definition of a module sharing its identifier with another module while the structure [variable type, dimensionality and bitwidth] of their parameters do not match) is supported for all modules whos identifier is not equal to *main*. Thus, overloading the implicit defined main module of a SyReC program is possible.
+
+ | The module signatures (module identifier + parameters) of two modules :math:`m_1` and :math:`m_2` are considered to be equal if:
+
+   - The module identifiers match
+   - Both modules define the same number of parameters :math:`n`
+   - For each parameter :math:`i: 0 \leq i < n` in the sequence of the formal parameters of both modules the following holds:
         - The type of parameter :math:`p_i` of module :math:`m_1` allows for an assignment of the parameter at the same position in the formal parameter list of module :math:`m_2` with the following table listing the assignability between the different SyReC variable types:
             +-----------------------------------------------+-------+---------+-------+--------+---------+
             |                                               | **Assigned from variable type**            |
@@ -34,38 +46,43 @@ Modules
         - The number of values for each of the defined dimensions match
         - The bitwidth of the parameters match 
 
- An error will be reported by the SyReC parser if a duplicate module declaration is detected.
+ Two equal module signatures will result in a semantic error being reported.
 
-- If one omits to specify the dimensionality of a module parameter or variable then it is assumed to consist of only a single dimension storing a single value (*module main(inout a(4)) ...* is equivalent to *module main(inout a[1](4) ...)*)
-- If one omits the bitwidth of a module parameter or variable then a :doc:`configurable <library/Settings>` default value is assumed by the parser.
-- The variable and parameter names inside of a module must be unique in the latter.
-- The maximum supported variable bitwidth is 32.
+- The maximum number of values storable in a dimension is equal to :math:`2^32`
+- A variable can have at most :math:`2^32` dimensions
 
 Statements
 ----------
 Assignments
 ^^^^^^^^^^^
-- To guarantee the reversibility of any assignment, the assigned to variable parts cannot be accessed on the "other" (right hand side of an non-unary assignment or left/right side of a variable swap) of the assignment. While this restriction is applied to all variable accesses on the "other" side of the assignment, the restriction does not apply to variable accesses defined in the dimension access of any variable access. Additionally, the parser can only detect an overlap between two variable (:math:`l_{varA}` and :math:`r_{varA}`) accesses if the following conditions hold (note loop variables in the following checks are not evaluated to their current value):
-    - The identifier of the accessed variables match
-    - Assuming that :math:`l_{varA}` defined the indices :math:`l_{dimIdxs} = \{l_1, l_2, \dots, l_n\}` in its dimension access while :math:`r_{varA}` accessed the indices :math:`r_{dimIdxs} = \{r_1, r_2, \dots, r_n\}`, an overlap in the :math:`i`-th dimension is detected iff:
-        - Both :math:`l_i` and :math:`r_i` evluated to a constant at compile time and :math:`l_i == r_i`
-        - An overlap was detected for all indices :math:`j` at positions :math:`0 < j < i` in the dimension accesses
-        - Note that only :math:`min(len(l_{dimIdxs}), len(r_{dimIdxs}))` are checked
-    - If an overlap in the dimension access was detected, the accessed bitrange of :math:`l_{varA}` represented by the pair (:math:`l_{bitS}`, :math:`l_{bitE}`) and of :math:`r_{varA}` represented by (:math:`r_{bitS}`, :math:`r_{bitE}`) are checked with an overlap being detected iff:
+- To guarantee the reversibility of any assignment, the assigned to variable parts cannot be accessed on the "other" (right hand side of an non-unary assignment or left/right side of a variable swap) of the assignment. While this restriction is applied to all VariableAccesses on the "other" side of the assignment, the restriction does not apply to VariableAccess defined in the dimension access of any VariableAccess. The parser can only detect an overlap between two VariableAccesses :math:`l_{varA}` and :math:`r_{varA}` if the following conditions hold (note loop variables in the following checks are not evaluated to their current value):
+ 
+  .. note::
+   Loop variables are not evaluated to their current value in the following checks
+
+  - The identifier of the accessed variables match
+  - Assuming that :math:`l_{varA}` defined the indices :math:`l_{dimIdxs} = \{l_1, l_2, \dots, l_n\}` in its dimension access while :math:`r_{varA}` accessed the indices :math:`r_{dimIdxs} = \{r_1, r_2, \dots, r_n\}`, an overlap in the :math:`i`-th dimension is detected iff:
+        - Both :math:`l_i` and :math:`r_i` evluate to a constant at compile time and :math:`l_i = r_i`
+        - An overlap was detected for all indices :math:`j` at positions :math:`0 < j < i` in the sequence of indices of the dimension accesses
+
+          .. note::
+           Note that only :math:`min(len(l_{dimIdxs}), len(r_{dimIdxs}))` indices of the dimension accesses are checked
+  - If an overlap in the dimension access was detected, the accessed bitranges of :math:`l_{varA}` (represented by the pair (:math:`l_{bitS}`, :math:`l_{bitE}`)) and of :math:`r_{varA}` (represented by (:math:`r_{bitS}`, :math:`r_{bitE}`)) are checked for an overlap using the following conditions:
         - All indices of both bitranges evaluated to constants and an overlap between the two ranges is detected.
-        - One bit of each variable access evaluated to a constant and their values match.
-        - One bit of one variable access evalauted to a constant while both indices of the accessed bit range in the other variable access evalauted to constant, an overlap is reported if the bit range with known bounds overlaps the bit whos value is known.
+        - A bit of each variable access evaluated to a constant and their values match.
+        - A bit of one variable access evaluated to a constant while both indices of the accessed bit range in the bitrange of the other VariableAccess evaluated to constants, an overlap is reported if the bit range with known bounds overlaps said bit.
     
-  Note: Out of range index values are not treated differently than values that are in range.
-- While an access on the assigned to variable parts is not allowed in certain parts of the assignment as describe above, the handling of overlaps with the assigned to variable parts in the dimension access of a variable access (as shown in the example below) needs to configured in the SyReC parser by the user
+    .. note::
+     Out of range index values are not treated differently than values that are in range.
+
+- While an access on the assigned to variable parts is not allowed in certain parts of an assignment, as describe above, the handling of overlaps with the assigned to variable parts in the dimension access of a VariableAccess (as shown in the example below) needs special consideration:
 
   .. code-block:: text
 
     module main(inout a(4), in b[3](2))
         a[0].1:2 += b[(a[0].0:2 + 2)]
 
-  The reversibility of the assignment shown in the example depends on whether the expression in the dimension access on the right hand side of the assignment can be synthesized in a reversible way which might depend on the uses synthesizer. By default, the SyReC parser will assume
-  that such variable accesses are not allowed but can be enabled via a :doc:`flag <library/Settings>` in the parser configuration. The now described restrictions also applies to both sides of a SwapStatement
+  The reversibility of the assignment depends on whether the expression in the dimension access on the right hand side of the assignment can be synthesized without leading to an assignment in which a qubit is assigned to itself (i.e. *a[0].1 += a[0].1*). Thus, the user must specify in the :doc:`parser configuration <library/Settings>` whether such accesses are allowed. By default they are assumed to not be allowed. The same restrictions also apply to both sides of a SwapStatement with the validity of the SwapStatements in the example below depending on the used parser configuration.
     
   .. code-block:: text
 
@@ -73,13 +90,44 @@ Assignments
         b[(a[0].0:2 + 2)] <=> a[0].1:2;
         a[0].1:2 <=> b[(a[0].0:2 + 2)]
 
+.. note::
+ The overlap checks in many cases require that the indices evaluate to constant values at compile time (and will not evaluate the whole value range of loop variables) and in all other cases will not report an overlap. However, if the parser does not report an overlap does not mean that no overlap exists as shown in the following example:
+
+ .. code-block:: text
+
+   module main(inout a(4))
+    for $i = 0 to (#a - 1) do
+     a.0 += (a.$i + 2)
+    rof
+
+ The parser will not report an overlap in the assignment due to the index of the acessed bit in the VariableAccess on the right hand side of the assignment not evaluating to a constant at compile time. However, the first iteration of the loop will generated an assignment of the form (*a.0 += (a.0 + 2)*) which cannot be reversed. We recommend to also implement overlap checks in any component using the generated IR representation of the SyReC program that could evaluate the value range of the loop variables (i.e.  the logic synthesis process).
+
 Call-/UncallStatements
 ^^^^^^^^^^^^^^^^^^^^^^
-- Call- and UncallStatements can reference a module for which no matching module signature was processed by the parser at the current position in the SyReC program.
-- The SyReC language inherits the following semantics for the Call/UncallStatements from its predecessor language Janus :footcite:p:`yokoyama2007janus`, CallStatements will perform a sequential execution of the called module starting from the first statement in the module body while an UncallStatement will execute the statements in the called module starting from the last statement backwards.
-- Recursive module call are allowed by the SyReC parser and it is the responsibility of the developer of the SyReC program to prevent an infinite recursion. However, calls to the either explicitly or implicitly defined main mdoule of the current SyReC program are not allowed.
-- While the SyReC parser allows the user to use a variable multiple times as an argument for a module call/uncall, for now it is the responsibility of the user to prevent non-reversible assignments in the called module due to an access on the assigned to variable parts with an invalid access shown in the following example
- 
+- The current implementation does not require that the module referenced by a Call/UncallStatement was already processed at the current position of the Call/UncallStatement in the SyReC program
+- A CallStatement will execute the referenced module starting from the first statement in its module body and ending after the last one was execute while an UncallStatement will perform an execution in the reverse direction with both semantics being inherited from the predecessor language of SyReC (see Janus :footcite:p:`yokoyama2007janus`).
+- Recursive module calls are allowed but it is the responbility of the developer of the SyReC program to prevent an infinite recursion. However, calls to the implicitly or explicitly defined main module of the SyReC program are not allowed.
+
+ .. note::
+  Recursive calls to overloads of the implicitly defined main module are possible as long as the last module of the SyReC program is not called.
+
+  .. code-block:: text
+
+   module add(in a(4), in b(4), out c(4))
+    c += (a + b)
+
+   // Implicitly defined main module
+   module add(in a(8), in b(8), out c(8))
+    wire tmp_1(4), tmp_2(4), wire tmp_3(4)
+
+    tmp_1 ^= a.0:3;
+    tmp_2 ^= b.0:3;
+    call add(tmp_1, tmp_2, tmp_3); // Call OK -> module add(in a(4), ...) called
+    c.0:4 ^= tmp_3;
+    call add(a, b, c) // Call NOK -> implicit main module called
+
+- While the SyReC parser allows a variable be used multiple times as an caller argument in a Call/UncallStatement, it its for now the responsibility of the user to prevent non-reversible assignments in the called module. An example for such an invalid access is shown in the following example:
+
   .. code-block:: text
 
     module swap(inout left(4), inout right(4))
@@ -92,7 +140,9 @@ Call-/UncallStatements
 
 ForStatement
 ^^^^^^^^^^^^
-- The initial value of a loop variable can be used in the initialization of the iteration ranges 'end' and 'stepsize' value
+- While the SyReC grammar does not require the keyword *do* prior to the body of a ForStatement, the examples shown in both documents use such a keyword. Thus, we assume that this is a typo in the grammar and the *do* keyword is required.
+
+- The initial value of a loop variable can be used in the initialization of the iteration ranges 'end' and 'stepsize' value as shown in the following example
 
   .. code-block:: text
 
@@ -101,10 +151,7 @@ ForStatement
             ... 
         rof
 
-  which is equivalent to 
-
-  .. code-block:: text
-
+    // Is equivalent to
     module main(...) 
         for $i = 0 to 1 step 2 do 
             ... 
@@ -119,9 +166,9 @@ ForStatement
             a.0:1 += (i + $i)
         rof
 
-- Due to the requirement that the number of iterations performed by a ForStatement is known at compile time, assignments to loop variables are forbidden.
-- If the step size of a ForStatement is not defined it is assumed to equal to 1.
-- If the optional second iteration range component in a ForStatement is not defined, it is assumed to be equal to 0
+- Due to the requirement that the number of iterations performed by a ForStatement is known at compile time, assignments to loop variables are forbidden
+- If the step size of a ForStatement is not defined, it is assumed to equal to 1
+- If the optional second component of the iteration range in a ForStatement is not defined, it is assumed to be equal to 0
 
   .. code-block:: text
 
@@ -130,18 +177,17 @@ ForStatement
             --= a
         rof
 
-  is equivalent to
-
-  .. code-block:: text
-
+   // Is equivalent to
     module main(inout a(4))
         for (#a - 1) to 0 step 1 do 
             --= a
         rof
 
+- Due to the assumption that all variable values can be represented by unsigned integer values, negative stepsize values are converted to its unsigned value using the C++17 value conversion semantics (see `chapter 7.8 <https://open-std.org/JTC1/SC22/WG21/docs/standards>`_). The same conversion is applied to all negative values determined at compile time.
+
 IfStatement
 ^^^^^^^^^^^
-- The guard condition and its matching counterpart called the closing guard condition (defined in the fi component of the IfStatement) need to match exactly (i.e. an evaluation of the closing guard condition to the same expression as the guard condition is not considered as equal if the former did contain additional symbols). An example for such a missmatch is the following
+- The components of an IfStatement will be refered to as *if <GUARD_CONDITION> then <TRUE_BRANCH> else <FALSE_BRANCH> fi <CLOSING_GUARD_CONDITION*. To be able to identify the matching  guard condition for a closing guard condition, the expressions used to define both of these components need to consist of the same character and can thus not evaluate to the same value. An example for an IfStatement violating this rule is the following:
 
   .. code-block:: text
 
@@ -152,39 +198,60 @@ IfStatement
             skip
         // Despite the simplified closing guard condition evaluating to the same 
         // expression as the guard condition, the two expressions are not 
-        // considered as equal due to the additional symbol on the un-
-        // optimized version of the closing guard condition
+        // considered as equal due to the difference in the substrings '2' and '#b'
+        // between the two expressions
         fi ((a.0:1 + b) * #b)
+
+- Semantic errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification
+- Semantic errors in branches for which the parser can determine at compile time that they will not be executed are reported
+
+SwapStatement
+^^^^^^^^^^^^^
+- Both operands of the swap operation must have the same bitwidth
+- Whether the access on the assigned to variable parts in the dimension access of any VariableAccess on the opposite side of the SwapStatement is allowed depends on configured value of the corresponding flag in the parser configuration (see :doc:`flag <library/Settings>`)
+- Assignments to the same variable parts between the two sides of the SwapStatement are not allowed and a semantic error is reported if the parser can detect such an overlap
 
 VariableAccess
 --------------
 - All indices defined in the dimension or bit/bitrange access of a variable access are zero based.
-- The dimension access can be omitted for variables with a single dimension containing only a single value (i.e. module main(inout a(4)) ++= a).
-- Checking whether the value of an index of a variable access is within range of the defined bounds of the referenced variable is only performed if the value of the index evaluates to a constant at compile time.
-- The expected operand bitwidth for the operands of an expression defined in the dimension access is set based on the data of the expression and not inherited from the expression enclosing the variable access and reset after the expression of the dimension access was processed. Assuming that the expression of the first accessed dimension of the variable access on the right hand side of the assignment is processed
+- The dimension access can be omitted for variables with a single dimension containing only a single value (i.e. *module main(inout a(4)) ++= a*).
+- If the accessed bit/bitrange is omitted an access on the full bitwidth of the referenced variable is assumed.
+-  If the value of an index in either the dimension or bit/bitrange access evaluates to a constant at compile time, a validation of whether it is within the defined bounds of the accessed variable is performed and an error reports in case of an out-of-range value.
+- Each expression defining the accessed value of the dimension will use an expected operand bitwidth for its operands that is only valid until the expression was processed. Any outside expected operand bitwidth is ignored (i.e. set in the parent expression of the currently processed VariableAccess). Assuming that the expression of the first accessed dimension of the variable access on the right hand side of the assignment in the following example is processed
 
   .. code-block:: text
 
     module main(inout a[2](4), in c[2][3](4), in b(2))
       a[0].1:2 += c[(b.0 + 2)][a[1]].0:1
 
-  The expected operand bitwidth set via the variable access on the left hand side of the assignment has a length of 2 which is satisfied by the variable access on the right hand side while the expected operand bitwidth of the operands in the expression of the first dimension of the variable c is expected to have a length of 1 while for the second dimension is must have a length of 4.
-- If the accessed bit/bitrange is omitted an access on the full bitwidth of the referenced variable is assumed.
-- The SyReC parser supports bitrange accesses where the start index is larger than the end or vice versa (while equal indicies are also supported)
+  The expected operand bitwidth set by the VariableAccess on the left hand side of the assignment has a length of 2 which is satisfied by the variable access on the right hand side.
+  However, the expected operand bitwidth of the operands in the expression of the first dimension of the VariableAccess on *c* has a value of 1 while for the second dimension it is equal to 4.
+
+- The SyReC parser does not require that the start index of a bit range access is larger or equal than the end index and thus supports the following index combinations:
 
   .. code-block:: text
 
     module main(inout a(4))
         ++= a.0:2;
-        --= a.2:0
+        --= a.2:0;
+        ++= a.0:0
+
+- The number of indices defined in the dimension access component in a VariableAccess must be equal to the number of dimensions of the referenced variable. An example for a valid and invalid DimensionAccesses is shown below:
+
+  .. code-block:: text
+
+   module main(inout a[2][4](4), inout b(2))
+     ++= a[0][1]; // OK
+     --= b;       // OK
+     ++= a[0]     // NOK: Number of accessed dimension does not match number of dimensions of variable 'a'
 
 Expressions
 -----------
-- Currently UnaryExpressions are not supported by the SyReC parser.
+- **Currently UnaryExpressions are not supported!**.
 - Expressions with constant operands are evaluated at compile time.
-- Arithmetic and logical simplifications are applied at compile time by default (i.e. a simplification of the expression (a + b) * 0 to 0).
-- All operands of an expression must have the same bitwidth (excluding constant integers which are truncated to the expected bitwidth using the :doc:`configured truncation operation <library/Settings>`), with the parser using the first bitrange with known bounds as the reference bitwidth (if such an access exists in the operands) while a bit access with an unknown value for its index will cause the expected operand bitwidth to be set to 0 if the latter does not already have a value. 
-- All integer constant values are truncated to the expected operand bitwidth if the latter exists for the expression otherwise the values are left unchanged. However, integer constant values defined in the shift amount component of a ShiftExpression are not truncated since the modify the left hand side of the ShiftExpression and "build" the result instead of being an operand to the result itself. 
+- Arithmetic and logical simplifications are applied at compile time by default (i.e. will result in a simplification of the expression ((a + b) * 0) to 0).
+- All operands of an expression must have the same bitwidth (excluding constant integers that are truncated to the expected bitwidth using the :doc:`configured truncation operation <library/Settings>`), with the parser using the first bitrange with known bounds as the reference bitwidth (if such an access exists in the operands). Any bit access will set the expected operand bitwidth to 1 if the value is not already set.
+- All integer constant values are truncated to the expected operand bitwidth, if the latter exists for the expression, otherwise the values are left unchanged. However, integer constant values defined in the shift amount component of a ShiftExpression are not truncated since the modify the left hand side of the ShiftExpression and "build" the result instead of being an operand of the overall expression. 
  
   The following code example will showcase a few examples and assumes that constant integer values are truncated using the modulo operation
 
@@ -221,6 +288,20 @@ Expressions
             // Remaining expression 2 << 1 evaluated to 4 => 4 MOD 2 = 0
             a[0].1:2 += 0           
         rof
+
+  Note that for expressions with constant value operands the integer truncation is only applied after the expression was evaluated with an example being shown below in which we assume that the truncation is performed using the modulo operation:
+
+  .. code-block:: text
+
+    module main(inout a(4))
+     a.0:1 += (2 + (#a + 3))
+
+    // Is equivalent to 
+    module main(inout a(4))
+     a.0:1 += 1 // 9 MOD 2 = 1
+
+- Expressions with constant integer operands are evaluated using the C++ semantics for unsigned integers.
+
 
 .. rubric:: References
 .. footbibliography::
