@@ -28,7 +28,8 @@ namespace syrec_parser {
         SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts,
         DeclaredVariableBitwidthTooLarge,
         InfiniteLoopDetected,
-        UnhandledOperationFromGrammarInParser
+        UnhandledOperationFromGrammarInParser,
+        UserDefinedIntegerConstantReadFromStringTooLarge
     };
 
     /// Get the identifier associated with a given semantic error
@@ -84,6 +85,8 @@ namespace syrec_parser {
                 return "SEM22";
             case SemanticError::UnhandledOperationFromGrammarInParser:
                 return "SEM23";
+            case SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge:
+                return "SEM24";
             default:
                 return "";
         }
@@ -143,6 +146,8 @@ namespace syrec_parser {
                 return "Loop iterating from start value {:d} to {:d} with a stepsize of {:d} will perform an infinite number of iterations";
             case SemanticError::UnhandledOperationFromGrammarInParser:
                 return "While the grammar accepted the operation '{:s}', the parser could not handle it! This is most likely an error in the latter.";
+            case SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge:
+                return "User defined integer '{:s}' was too large to be converted to an unsigned integer, the largest explicitly definable integer constant value is 2^32.";
             default:
                 return "";
         }

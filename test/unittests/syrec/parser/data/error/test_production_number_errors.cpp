@@ -73,3 +73,8 @@ TEST_F(SyrecParserErrorTestsFixture, AccessingBitwidthOfConstantCausesError) {
     recordSyntaxError(Message::Position(1, 31), "mismatched input '5' expecting IDENT");
     performTestExecution("module main(out a[1](4)) a += #5");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, UserDefinedIntegerConstantDefinedInProgramTooLargeToBeConvertedToUnsignedIntegerCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge>(Message::Position(1, 27), "34359738368");
+    performTestExecution("module main(out a(4)) a += 34359738368");
+}

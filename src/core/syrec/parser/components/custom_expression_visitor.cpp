@@ -175,9 +175,14 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConsta
         return std::nullopt;
     }
 
-    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), nullptr); constantValue.has_value()) {
+    bool didSerializationOfIntegerFromStringFailDueToValueOverflow = false;
+    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), &didSerializationOfIntegerFromStringFailDueToValueOverflow); constantValue.has_value() && !didSerializationOfIntegerFromStringFailDueToValueOverflow) {
         recordExpressionComponent(*constantValue);
         return std::make_shared<syrec::Number>(*constantValue);
+    }
+
+    if (didSerializationOfIntegerFromStringFailDueToValueOverflow) {
+        recordSemanticError<SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge>(mapTokenPositionToMessagePosition(*context->INT()->getSymbol()), context->INT()->getText());
     }
     return std::nullopt;
 }
