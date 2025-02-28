@@ -85,11 +85,15 @@ namespace syrec_parser {
             return constantValue;
         }
 
-        [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOfExpression(const syrec::Expression& expression) {
+        [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOf(const syrec::Expression& expression) {
             if (const auto& expressionAsNumericOne = dynamic_cast<const syrec::NumericExpression*>(&expression); expressionAsNumericOne != nullptr && expressionAsNumericOne->value && expressionAsNumericOne->value) {
-                return expressionAsNumericOne->value->tryEvaluate({});
+                return tryGetConstantValueOf(*expressionAsNumericOne->value);
             }
             return std::nullopt;
+        }
+
+        [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOf(const syrec::Number& number) {
+            return number.isConstant() ? number.tryEvaluate({}) : std::nullopt;
         }
 
         [[nodiscard]] static std::optional<std::pair<unsigned int, unsigned int>> tryDetermineAccessedBitrangeOfVariableAccess(const syrec::VariableAccess& variableAccess) {

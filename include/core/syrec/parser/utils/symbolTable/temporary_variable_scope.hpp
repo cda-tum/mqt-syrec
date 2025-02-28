@@ -47,10 +47,12 @@ namespace utils {
         [[maybe_unused]] bool                                recordVariable(const syrec::Variable::ptr& signal);
         [[maybe_unused]] bool                                recordLoopVariable(const syrec::Number::ptr& loopVariable);
         [[maybe_unused]] bool                                removeVariable(const std::string_view& signalIdentifier);
-
+        [[maybe_unused]] bool                                updateValueOfLoopVariable(const std::string_view& loopVariableIdentifier, const std::optional<unsigned int>& newValue);
+        [[nodiscard]] std::optional<unsigned int>            getValueOfLoopVariable(const std::string_view& loopVariableIdentifier);
     protected:
         // To be able to perform heterogeneous lookup using std::string_view in a STL set/dictionary container in C++17 only std::map and std::set can be used. C++20 supports this functionality also for the unordered STL container variants.
         std::map<std::string, ScopeEntry::ptr, std::less<>> signalIdentifierLookup;
+        std::map<std::string, unsigned int, std::less<>>    knownLoopVariableValues;
     };
 } //namespace utils
 #endif

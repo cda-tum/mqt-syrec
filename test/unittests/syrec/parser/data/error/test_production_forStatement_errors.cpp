@@ -115,6 +115,16 @@ TEST_F(SyrecParserErrorTestsFixture, DuplicateDefinitionOfLoopVariableInNestedLo
     performTestExecution("module main(in a(4), out b(4)) for $i=0 to 3 do for $i=1 to 3 do skip rof rof");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableOutsideOfLoopBodyCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 67), "$i");
+    performTestExecution("module main(inout a(4)) for $i = 0 to 3 step 1 do ++= a rof; --= a.$i");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableOfNestedLoopOutsideOfLoopBodyInParentLoopCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 86), "$i");
+    performTestExecution("module main(inout a(4)) for 3 step 1 do for $i = 0 to (#a - 1) do ++= a.$i rof; --= a.$i rof");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNonNumericExpressionInLoopVariableInitializationCausesError) {
     recordSyntaxError(Message::Position(1, 41), "mismatched input 'b' expecting {'$', '#', '(', INT}");
     performTestExecution("module main(in a(4), out b(4)) for $i = (b - 2) to 3 step 1 do skip rof");
@@ -229,4 +239,20 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithT
 TEST_F(SyrecParserErrorTestsFixture, UsageOfStepsizeWithConstantValueOfZeroWithImplicitConstantValueForStartAndTruncatedOverflowingEvaluatedConstantValueForEndCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::InfiniteLoopDetected>(Message::Position(1, 21), 0, 1, 0);
     performTestExecution("module main(in b(2)) for ((#b - 3) + 2) step 0 do skip rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IndexOutOfRangeErrorInDimensionAccessOfVariableAccessDetectedByPropagationOfLoopVariableInLoopPerformingSingleIterationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 64), 2, 0, 2);
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 2 to 4 step 3 do a[$i].0:1 += b rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IndexOutOfRangeErrorInBitrangeAccessOfVariableAccessDetectedByPropagationOfLoopVariableInLoopPerformingSingleIterationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 69), 4, 4);
+    performTestExecution("module main(inout a[2](4), in b(5)) for $i = 2 to 4 step 3 do a[1].0:($i + 2) += b rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInNestedLoopTriggeredByPropagationOfLoopVariableInLoopPerformingSingleIterationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 76));
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 96), 4, 4);
+    performTestExecution("module main(inout a[2](4), in b(5)) for $i = 2 to 4 step 3 do for 0 to (4 / ($i - 2)) do a[1].0:($i + 2) += b rof rof");
 }

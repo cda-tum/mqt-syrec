@@ -276,32 +276,48 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     }
 
     const std::optional<syrec::Number::ptr> iterationRangeStartValue = expressionVisitorInstance->visitNumberTyped(context->startValue);
+    std::optional<unsigned int>             valueOfIterationRangeStart = iterationRangeStartValue.has_value() && *iterationRangeStartValue != nullptr ? tryGetConstantValueOf(**iterationRangeStartValue) : std::nullopt;
     expressionVisitorInstance->clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
 
-    const std::optional<syrec::Number::ptr> iterationRangeEndValue      = expressionVisitorInstance->visitNumberTyped(context->endValue);
-    const std::optional<syrec::Number::ptr> iterationRangeStepSizeValue = visitLoopStepsizeDefinitionTyped(context->loopStepsizeDefinition());
+    if (loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value()) {
+        activeSymbolTableScope->get()->updateValueOfLoopVariable(*loopVariableIdentifier, valueOfIterationRangeStart);
+    }
 
-    auto generatedForStatement          = std::make_shared<syrec::ForStatement>();
-    generatedForStatement->loopVariable = loopVariableIdentifier.value_or("");
+    const std::optional<syrec::Number::ptr> iterationRangeEndValue      = expressionVisitorInstance->visitNumberTyped(context->endValue);
+    const std::optional<unsigned int>       valueOfIterationRangeEnd = iterationRangeEndValue.has_value() && *iterationRangeEndValue != nullptr ? tryGetConstantValueOf(**iterationRangeEndValue) : std::nullopt;
+
+    const syrec::Number::ptr iterationRangeStepSizeValue = visitLoopStepsizeDefinitionTyped(context->loopStepsizeDefinition()).value_or(std::make_shared<syrec::Number>(1));
+    auto                     generatedForStatement       = std::make_shared<syrec::ForStatement>();
+    generatedForStatement->loopVariable                  = loopVariableIdentifier.value_or("");
 
     if (iterationRangeStartValue.has_value()) {
         generatedForStatement->range = context->endValue != nullptr ? std::make_pair(*iterationRangeStartValue, iterationRangeEndValue.value_or(nullptr)) : std::make_pair(*iterationRangeStartValue, *iterationRangeStartValue);
     } else if (iterationRangeEndValue.has_value()) {
         generatedForStatement->range = std::make_pair(std::make_shared<syrec::Number>(0), *iterationRangeEndValue);
+        valueOfIterationRangeStart   = 0;
     }
 
-    generatedForStatement->step = iterationRangeStepSizeValue.value_or(std::make_shared<syrec::Number>(1));
-
-    if (const std::optional<unsigned int> evaluatedValueOfStepsize = iterationRangeStepSizeValue.has_value() ? iterationRangeStepSizeValue.value()->tryEvaluate({}) : std::nullopt; 
-        context->endValue != nullptr && evaluatedValueOfStepsize.has_value() && *evaluatedValueOfStepsize == 0 
-        && generatedForStatement->range.first != nullptr && generatedForStatement->range.second != nullptr) {
-        const std::optional<unsigned int> evaluatedValueOfIterationRangeStart = generatedForStatement->range.first->tryEvaluate({});
-        const std::optional<unsigned int> evaluatedValueOfIterationRangeEnd   = evaluatedValueOfIterationRangeStart.has_value() ? generatedForStatement->range.second->tryEvaluate({}) : std::nullopt;
-        if (evaluatedValueOfIterationRangeStart.has_value() && evaluatedValueOfIterationRangeEnd.has_value() && *evaluatedValueOfIterationRangeStart != *evaluatedValueOfIterationRangeEnd) {
+    generatedForStatement->step                                     = iterationRangeStepSizeValue;
+    const std::optional<unsigned int> valueOfIterationRangeStepSize = iterationRangeStepSizeValue != nullptr ? tryGetConstantValueOf(*iterationRangeStepSizeValue) : std::nullopt;
+    bool                              shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = true;
+    if (valueOfIterationRangeStepSize.has_value() && valueOfIterationRangeStart.has_value() && valueOfIterationRangeEnd.has_value()) {
+        if (*valueOfIterationRangeStepSize == 0 && *valueOfIterationRangeStart != *valueOfIterationRangeEnd) {
             recordSemanticError<SemanticError::InfiniteLoopDetected>(
                     mapTokenPositionToMessagePosition(*context->KEYWORD_FOR()->getSymbol()),
-                    *evaluatedValueOfIterationRangeStart, *evaluatedValueOfIterationRangeEnd, *evaluatedValueOfStepsize);
+                    *valueOfIterationRangeStart, *valueOfIterationRangeEnd, *valueOfIterationRangeStepSize);
         }
+        // If the loop performs no or more than one iteration the value of its loop variable should not be available for the processing of the loop bodies statements
+        if (*valueOfIterationRangeStart == *valueOfIterationRangeEnd) {
+            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = true;
+        } else {
+            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart < *valueOfIterationRangeEnd
+                ? *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd
+                : *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
+        }
+    }
+
+    if (activeSymbolTableScope.has_value() && loopVariableIdentifier.has_value() && shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody) {
+        activeSymbolTableScope->get()->updateValueOfLoopVariable(*loopVariableIdentifier, std::nullopt);
     }
 
     // An empty loop body statement list definition results in a syntax error and thus does not need to be checked again here.

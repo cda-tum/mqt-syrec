@@ -54,7 +54,7 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInEvaluatedNumericExpressionC
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredLoopVariableInNumericExpressionCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 70), "$j");
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 69), "$j");
     performTestExecution("module main(out a(4), out b[2](4)) for $i = 0 to 3 step 1 do ++= a.(($j + 2) / 2) rof");
 }
 

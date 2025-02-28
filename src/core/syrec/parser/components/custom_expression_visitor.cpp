@@ -72,7 +72,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
         return std::nullopt;
     }
 
-    const std::optional<unsigned int> constantValueOfRhsOperand = rhsOperand.has_value() && *rhsOperand != nullptr ? tryGetConstantValueOfExpression(**rhsOperand) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfRhsOperand = rhsOperand.has_value() && *rhsOperand != nullptr ? tryGetConstantValueOf(**rhsOperand) : std::nullopt;
     if ((*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Divide || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Modulo || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::FracDivide) 
         && constantValueOfRhsOperand.has_value() && *constantValueOfRhsOperand == 0) {
         recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*(context->lhsOperand != nullptr ? context->lhsOperand->getStart() : context->rhsOperand->getStart())));
@@ -296,9 +296,17 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
         if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier) {
             recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
         }
+
+        if (const std::optional<unsigned int> valueOfLoopVariable = activeVariableScopeInSymbolTable->get()->getValueOfLoopVariable(loopVariableIdentifier); valueOfLoopVariable.has_value()) {
+            return std::make_shared<syrec::Number>(*valueOfLoopVariable);
+        }
         return std::make_shared<syrec::Number>(loopVariableIdentifier);
     }
-    recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), loopVariableIdentifier);
+
+    if (context->LOOP_VARIABLE_PREFIX() != nullptr) {
+        // It would not make sense to report at the position of the loop variable prefix '$' that the loop variable '$<LOOP_VAR>' was not declared the loop variable prefix did not exist.
+        recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
+    }
     return std::nullopt;
 }
 
@@ -589,7 +597,7 @@ bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::Vari
     if (notAccessiblePartsForFutureVariableAccesses == nullptr || notAccessiblePartsForFutureVariableAccesses->var ==nullptr || notAccessiblePartsForFutureVariableAccesses->var->name.empty() 
         || std::any_of(notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), notAccessiblePartsForFutureVariableAccesses->indexes.cbegin(), 
             [](const syrec::Expression::ptr& exprDefiningAccessedValueOfDimension) {
-                return !tryGetConstantValueOfExpression(*exprDefiningAccessedValueOfDimension).has_value();
+                return !tryGetConstantValueOf(*exprDefiningAccessedValueOfDimension).has_value();
         })) {
         return false;
     }
@@ -778,7 +786,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyShiftE
     syrec::Expression::ptr   toBeShiftedOperand = shiftExpr.lhs;
     const syrec::Number::ptr shiftAmount        = shiftExpr.rhs;
 
-    const std::optional<unsigned int> constantValueOfToBeShiftedOperand = toBeShiftedOperand != nullptr ? tryGetConstantValueOfExpression(*toBeShiftedOperand) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfToBeShiftedOperand = toBeShiftedOperand != nullptr ? tryGetConstantValueOf(*toBeShiftedOperand) : std::nullopt;
     const std::optional<unsigned int> constantValueOfShiftAmount        = shiftAmount != nullptr ? shiftAmount->tryEvaluate({}) : std::nullopt;
     if (!constantValueOfShiftAmount.has_value()) {
         return std::nullopt;
@@ -802,8 +810,8 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyShiftE
 }
 
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyBinaryExpression(const syrec::BinaryExpression& binaryExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression, bool* detectedDivisionByZero) {
-    const std::optional<unsigned int> constantValueOfLhsOperand = binaryExpr.lhs != nullptr ? tryGetConstantValueOfExpression(*binaryExpr.lhs) : std::nullopt;
-    const std::optional<unsigned int> constantValueOfRhsOperand = binaryExpr.rhs != nullptr ? tryGetConstantValueOfExpression(*binaryExpr.rhs) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfLhsOperand = binaryExpr.lhs != nullptr ? tryGetConstantValueOf(*binaryExpr.lhs) : std::nullopt;
+    const std::optional<unsigned int> constantValueOfRhsOperand = binaryExpr.rhs != nullptr ? tryGetConstantValueOf(*binaryExpr.rhs) : std::nullopt;
     if (detectedDivisionByZero != nullptr) {
         *detectedDivisionByZero = (binaryExpr.binaryOperation == syrec::BinaryExpression::BinaryOperation::Divide || binaryExpr.binaryOperation == syrec::BinaryExpression::BinaryOperation::FracDivide)
             && constantValueOfRhsOperand.has_value() && *constantValueOfRhsOperand == 0;

@@ -60,7 +60,7 @@ namespace syrec_parser {
         CustomStatementVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
             CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration),
             expressionVisitorInstance(std::make_unique<CustomExpressionVisitor>(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration)) {}
- 
+
         [[nodiscard]] std::optional<syrec::Statement::vec>        visitStatementListTyped(const TSyrecParser::StatementListContext* context);
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitStatementTyped(const TSyrecParser::StatementContext* context);
         [[nodiscard]] std::optional<syrec::Statement::ptr>        visitCallStatementTyped(const TSyrecParser::CallStatementContext* context);
@@ -75,8 +75,8 @@ namespace syrec_parser {
         void                                                              openNewScopeToRecordCallStatementsInModule(const NotOverloadResolutedCallStatementScope::DeclaredModuleSignature& enclosingModuleSignature);
 
     protected:
-        std::unique_ptr<CustomExpressionVisitor>                        expressionVisitorInstance;
-        std::vector<NotOverloadResolutedCallStatementScope>             callStatementsWithNotPerformedOverloadResolutionScopes;
+        std::unique_ptr<CustomExpressionVisitor>            expressionVisitorInstance;
+        std::vector<NotOverloadResolutedCallStatementScope> callStatementsWithNotPerformedOverloadResolutionScopes;
 
         [[nodiscard]] std::optional<std::string>        visitLoopVariableDefinitionTyped(const TSyrecParser::LoopVariableDefinitionContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr> visitLoopStepsizeDefinitionTyped(const TSyrecParser::LoopStepsizeDefinitionContext* context) const;

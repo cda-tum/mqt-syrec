@@ -108,5 +108,35 @@ bool utils::TemporaryVariableScope::removeVariable(const std::string_view& signa
         return false;
     }
     signalIdentifierLookup.erase(scopeEntryMatchingSignalIdentifier);
+    if (const auto& entryForVariableInKnownLoopVariableValueLookup = knownLoopVariableValues.find(signalIdentifier); entryForVariableInKnownLoopVariableValueLookup != knownLoopVariableValues.end()) {
+        knownLoopVariableValues.erase(entryForVariableInKnownLoopVariableValueLookup);
+    }
     return true;
+}
+
+bool utils::TemporaryVariableScope::updateValueOfLoopVariable(const std::string_view& loopVariableIdentifier, const std::optional<unsigned int>& newValue) {
+    if (signalIdentifierLookup.count(loopVariableIdentifier) == 0) {
+        return false;
+    }
+
+    if (newValue.has_value()) {
+        knownLoopVariableValues.insert_or_assign(std::string(loopVariableIdentifier), *newValue);
+        return true;
+    }
+    if (const auto& entryForLoopVariable = knownLoopVariableValues.find(loopVariableIdentifier); entryForLoopVariable != knownLoopVariableValues.end()) {
+        knownLoopVariableValues.erase(entryForLoopVariable);
+        return true;
+    }
+    return false;
+}
+
+std::optional<unsigned> utils::TemporaryVariableScope::getValueOfLoopVariable(const std::string_view& loopVariableIdentifier) {
+    if (signalIdentifierLookup.count(loopVariableIdentifier) == 0 || knownLoopVariableValues.count(loopVariableIdentifier) == 0) {
+        return std::nullopt;
+    }
+
+    if (const auto& entryForLoopVariable = knownLoopVariableValues.find(loopVariableIdentifier); entryForLoopVariable != knownLoopVariableValues.end()) {
+        return knownLoopVariableValues.find(loopVariableIdentifier)->second;
+    }
+    return std::nullopt;
 }

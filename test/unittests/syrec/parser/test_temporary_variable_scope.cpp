@@ -1,13 +1,12 @@
 #include "core/syrec/number.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
-
-#include <gmock/gmock-matchers.h>
-#include <gtest/gtest.h>
+#include "core/syrec/variable.hpp"
 
 #include <algorithm>
 #include <cstddef>
+#include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -25,7 +24,7 @@ namespace {
     constexpr unsigned int          DEFAULT_BITWIDTH            = 16;
     const std::vector<unsigned int> DEFAULT_VARIABLE_DIMENSIONS = {2, 1};
 
-    class SingleVariableTypeTestFixture : public testing::TestWithParam<std::pair<syrec::Variable::Type, syrec::Variable::Type>> {
+    class SingleVariableTypeTestFixture: public testing::TestWithParam<std::pair<syrec::Variable::Type, syrec::Variable::Type>> {
     protected:
         syrec::Variable::Type variableTypeUnderTest;
         syrec::Variable::Type otherVariableType;
@@ -59,6 +58,19 @@ namespace {
 
     void assertVariableInsertionResultIsNotSuccessful(TemporaryVariableScope& temporaryVariableScope, const std::variant<syrec::Number::ptr, syrec::Variable::ptr>& variableVariant) {
         ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultMatchesExpectedOne(temporaryVariableScope, variableVariant, false));
+    }
+
+    void assertLoopVariableInsertionAndValueInitializationSucceeds(TemporaryVariableScope& temporaryVariableScope, const syrec::Number::ptr& loopVariableData, const unsigned int expectedInitialValueOfLoopVariable) {
+        assertVariableInsertionResultIsSuccessful(temporaryVariableScope, loopVariableData);
+
+        bool didUpdateOfExistingLoopVariableSucceed = false;
+        ASSERT_NO_FATAL_FAILURE(didUpdateOfExistingLoopVariableSucceed = temporaryVariableScope.updateValueOfLoopVariable(loopVariableData->variableName(), expectedInitialValueOfLoopVariable));
+        ASSERT_TRUE(didUpdateOfExistingLoopVariableSucceed);
+
+        std::optional<unsigned int> fetchedValueOfLoopVariable;
+        ASSERT_NO_FATAL_FAILURE(fetchedValueOfLoopVariable = temporaryVariableScope.getValueOfLoopVariable(loopVariableData->variableName()));
+        ASSERT_TRUE(fetchedValueOfLoopVariable.has_value());
+        ASSERT_EQ(expectedInitialValueOfLoopVariable, *fetchedValueOfLoopVariable);
     }
 
     void assertFetchedEntryFromSymbolTableMatchesExpectedOne(const std::optional<ExpectedSymbolTableEntry>& expectedEntry, const std::optional<ExpectedSymbolTableEntry>& actualEntry) {
@@ -102,7 +114,7 @@ namespace {
         if (lOperand == nullptr) {
             return rOperand == nullptr;
         }
- 
+
         if (lOperand->getVariableIdentifier() != rOperand->getVariableIdentifier() || lOperand->isReferenceToLoopVariable() != rOperand->isReferenceToLoopVariable()) {
             return false;
         }
@@ -112,8 +124,7 @@ namespace {
                 return false;
             }
             const std::shared_ptr<const syrec::Number> loopVariableData = rOperand->getReadOnlyLoopVariableData().value();
-            return loopVariableData && loopVariableData->isLoopVariable() && lOperand->getVariableIdentifier() == loopVariableData->variableName()
-                && !rOperand->getDeclaredVariableBitwidth().has_value() && rOperand->getDeclaredVariableDimensions().size() == 1 && rOperand->getDeclaredVariableDimensions().front() == 1;
+            return loopVariableData && loopVariableData->isLoopVariable() && lOperand->getVariableIdentifier() == loopVariableData->variableName() && !rOperand->getDeclaredVariableBitwidth().has_value() && rOperand->getDeclaredVariableDimensions().size() == 1 && rOperand->getDeclaredVariableDimensions().front() == 1;
         }
         if (!lOperand->getReadonlyVariableData().has_value() || lOperand->getReadonlyVariableData().value() == nullptr || rOperand->getReadOnlyLoopVariableData().has_value() || !rOperand->getReadonlyVariableData().has_value()) {
             return false;
@@ -122,21 +133,22 @@ namespace {
         const std::shared_ptr<const syrec::Variable> expectedVariableData = lOperand->getReadonlyVariableData().value();
         const std::shared_ptr<const syrec::Variable> actualVariableData   = rOperand->getReadonlyVariableData().value();
         return actualVariableData && expectedVariableData->type == actualVariableData->type && expectedVariableData->bitwidth == actualVariableData->bitwidth && expectedVariableData->name == actualVariableData->name && std::equal(expectedVariableData->dimensions.cbegin(), expectedVariableData->dimensions.cend(), actualVariableData->dimensions.cbegin(), actualVariableData->dimensions.cend(), [](const unsigned int expectedNumberOfValuesOfDimension, const unsigned int actualNumberOfValuesOfDimension) {
-            return expectedNumberOfValuesOfDimension == actualNumberOfValuesOfDimension;
-        });
+                   return expectedNumberOfValuesOfDimension == actualNumberOfValuesOfDimension;
+               });
     }
 
     void assertFetchedEntriesFromSymbolTableMatchExpectedOnes(const std::vector<ExpectedSymbolTableEntry>& expectedEntries, const std::vector<ExpectedSymbolTableEntry>& actualEntries) {
         ASSERT_EQ(expectedEntries.size(), actualEntries.size());
         ASSERT_TRUE(std::all_of(expectedEntries.cbegin(), expectedEntries.cend(), [](const ExpectedSymbolTableEntry& entry) { return entry != nullptr; }));
         ASSERT_TRUE(std::all_of(actualEntries.cbegin(), actualEntries.cend(), [](const ExpectedSymbolTableEntry& entry) { return entry != nullptr; }));
-        
-        for (const auto& expectedEntry : expectedEntries) {
+
+        for (const auto& expectedEntry: expectedEntries) {
             ASSERT_TRUE(std::any_of(
                     actualEntries.cbegin(), actualEntries.cend(),
                     [&expectedEntry](const ExpectedSymbolTableEntry& actualEntry) {
                         return expectedEntry == actualEntry;
-                    })) << "No matching entry found for entity with variable identifier" << expectedEntry->getVariableIdentifier();
+                    }))
+                    << "No matching entry found for entity with variable identifier" << expectedEntry->getVariableIdentifier();
         }
     }
 
@@ -173,18 +185,15 @@ namespace {
             ASSERT_TRUE(expectedVariableNumberContainer->isLoopVariable());
             ASSERT_NO_FATAL_FAILURE(actualVariableEntryFromSymbolTable = variableScope.getVariableByName(expectedVariableNumberContainer->variableName()));
             expectedVariableEntryFromSymbolTable = createExpectedSymbolTableEntryFrom(expectedVariableNumberContainer);
-        }
-        else {
+        } else {
             const auto& expectedVariableContainer = std::get<syrec::Variable::ptr>(expectedVariableVariant);
             ASSERT_THAT(expectedVariableContainer, testing::NotNull());
             ASSERT_NO_FATAL_FAILURE(actualVariableEntryFromSymbolTable = variableScope.getVariableByName(expectedVariableContainer->name));
             expectedVariableEntryFromSymbolTable = createExpectedSymbolTableEntryFrom(expectedVariableContainer);
-            
         }
         ASSERT_NO_FATAL_FAILURE(assertFetchedEntryFromSymbolTableMatchesExpectedOne(expectedVariableEntryFromSymbolTable, actualVariableEntryFromSymbolTable));
     }
 
-    
     [[nodiscard]] std::vector<ExpectedSymbolTableEntry> createdExpectedSymbolTableEntriesFrom(const std::vector<syrec::Variable::ptr>& variableInstances) {
         std::vector<ExpectedSymbolTableEntry> resultContainer;
         std::transform(
@@ -223,7 +232,7 @@ TEST_P(SingleVariableTypeTestFixture, InsertionOfVariableOfType) {
     const BaseSymbolTable       symbolTable;
     TemporaryVariableScope::ptr variableScope;
 
-    const auto        variableInstance = std::make_shared<syrec::Variable>(variableTypeUnderTest, "variableIdent", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto variableInstance = std::make_shared<syrec::Variable>(variableTypeUnderTest, "variableIdent", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, variableInstance));
 }
@@ -370,14 +379,14 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithOnlySome
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
-    syrec::Variable::vec variableInstancesOfTypeIn;
-    syrec::Variable::vec variableInstancesOfTypeWire;
+    syrec::Variable::vec  variableInstancesOfTypeIn;
+    syrec::Variable::vec  variableInstancesOfTypeWire;
     constexpr std::size_t numVariableEntriesPerType = 4;
 
     ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, syrec::Variable::Type::In, numVariableEntriesPerType, stringifyVariableType(syrec::Variable::Type::In), &variableInstancesOfTypeIn));
-    ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, syrec::Variable::Type::Wire, numVariableEntriesPerType, stringifyVariableType(syrec::Variable::Type::Wire), &variableInstancesOfTypeWire));    
-    for (const auto variableTypesNotOfInterest : {syrec::Variable::Type::Inout, syrec::Variable::Type::State}) {
-        ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, variableTypesNotOfInterest, numVariableEntriesPerType, stringifyVariableType(variableTypesNotOfInterest), nullptr));    
+    ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, syrec::Variable::Type::Wire, numVariableEntriesPerType, stringifyVariableType(syrec::Variable::Type::Wire), &variableInstancesOfTypeWire));
+    for (const auto variableTypesNotOfInterest: {syrec::Variable::Type::Inout, syrec::Variable::Type::State}) {
+        ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, variableTypesNotOfInterest, numVariableEntriesPerType, stringifyVariableType(variableTypesNotOfInterest), nullptr));
     }
 
     std::vector<ExpectedSymbolTableEntry> expectedSymbolTableEntriesMatchingTypes;
@@ -405,15 +414,15 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWithNoMatche
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
-    for (const syrec::Variable::Type variableType : {syrec::Variable::Type::In, syrec::Variable::Type::Wire}) {
+    for (const syrec::Variable::Type variableType: {syrec::Variable::Type::In, syrec::Variable::Type::Wire}) {
         constexpr std::size_t numVariablesPerType = 4;
-        ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, variableType, numVariablesPerType, stringifyVariableType(variableType), nullptr));    
+        ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, variableType, numVariablesPerType, stringifyVariableType(variableType), nullptr));
     }
 
     std::vector<ExpectedSymbolTableEntry> actualSymbolTableEntriesMatchingTypes;
-    for (const syrec::Variable::Type variableType : {syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::State }) {
+    for (const syrec::Variable::Type variableType: {syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::State}) {
         ASSERT_NO_FATAL_FAILURE(actualSymbolTableEntriesMatchingTypes = variableScope->getVariablesMatchingType({variableType}));
-        ASSERT_NO_FATAL_FAILURE(assertFetchedEntriesFromSymbolTableMatchExpectedOnes({}, actualSymbolTableEntriesMatchingTypes));   
+        ASSERT_NO_FATAL_FAILURE(assertFetchedEntriesFromSymbolTableMatchExpectedOnes({}, actualSymbolTableEntriesMatchingTypes));
     }
 }
 
@@ -428,8 +437,8 @@ TEST(TemporaryVariableScopeTests, SearchForVariablesOfDifferentTypesWillNotMatch
     const std::string secondLoopVariableIdentifier = "$loopVarTwo";
     const auto        secondLoopVariable           = std::make_shared<syrec::Number>(secondLoopVariableIdentifier);
 
-    const auto        nonLoopVariableOne          = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto        nonLoopVariableTwo          = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto nonLoopVariableOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto nonLoopVariableTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
 
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, firstLoopVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, secondLoopVariable));
@@ -546,7 +555,7 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingIdentifierHavingNoMatch) {
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, nonLoopVariableOne));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, nonLoopVariableTwo));
-    
+
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, loopVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, nonLoopVariableOne));
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, nonLoopVariableTwo));
@@ -654,8 +663,8 @@ TEST(TemporaryVariableScopeTests, ExistsVariableUsingLoopVariableIdentifierRetur
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
-    const auto        nonLoopVariableOne     = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto        nonLoopVariableTwo     = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto nonLoopVariableOne = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto nonLoopVariableTwo = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
 
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, nonLoopVariableOne));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, nonLoopVariableTwo));
@@ -672,8 +681,8 @@ TEST(TemporaryVariableScopeTests, ExistsLoopVariableUsingVariableIdentifierRetur
 
     const std::string loopVariableOneIdentifierWithoutPrefix = "loopVarOne";
     const std::string loopVariableTwoIdentifierWithoutPrefix = "loopVarTwo";
-    const auto        loopVariableOne           = std::make_shared<syrec::Number>("$" + loopVariableOneIdentifierWithoutPrefix);
-    const auto        loopVariableTwo           = std::make_shared<syrec::Number>("$" + loopVariableTwoIdentifierWithoutPrefix);
+    const auto        loopVariableOne                        = std::make_shared<syrec::Number>("$" + loopVariableOneIdentifierWithoutPrefix);
+    const auto        loopVariableTwo                        = std::make_shared<syrec::Number>("$" + loopVariableTwoIdentifierWithoutPrefix);
 
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariableOne));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariableTwo));
@@ -756,9 +765,9 @@ TEST(TemporaryVariableScopeTests, InsertionOfDuplicateVariableNotPossible) {
     TemporaryVariableScope::ptr variableScope;
     ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
 
-    const auto firstVariable = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto firstVariable  = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
     const auto secondVariable = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto thirdVariable = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varThree", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
+    const auto thirdVariable  = std::make_shared<syrec::Variable>(syrec::Variable::Type::Wire, "varThree", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
 
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, firstVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, secondVariable));
@@ -893,10 +902,10 @@ TEST(TemporaryVariableScopeTests, RemoveVariableUsingEmptyIdentifier) {
 
     const auto firstVariable  = std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "varOne", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
     const auto secondVariable = std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "varTwo", DEFAULT_VARIABLE_DIMENSIONS, DEFAULT_BITWIDTH);
-    
+
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, firstVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, secondVariable));
-    
+
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, firstVariable));
     ASSERT_NO_FATAL_FAILURE(assertVariableExistanceByNameFromSymbolTable(*variableScope, secondVariable));
 
@@ -925,4 +934,188 @@ TEST(TemporaryVariableScopeTests, ExistsVariableForEmptyIdentifier) {
     std::optional<ExpectedSymbolTableEntry> actualSymbolTableEntryMatchingEmptyIdentifier;
     ASSERT_NO_FATAL_FAILURE(actualSymbolTableEntryMatchingEmptyIdentifier = variableScope->getVariableByName(""));
     ASSERT_FALSE(actualSymbolTableEntryMatchingEmptyIdentifier.has_value());
+}
+
+TEST(TemporaryVariableScopeTests, FetchValueOfNotExistingLoopVariable) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string loopVariableIdentifier = "$i";
+    const auto        loopVariable           = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariable));
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable("$j"));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+}
+
+TEST(TemporaryVariableScopeTests, UpdateValueOfNotExistingLoopVariable) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier               = "$i";
+    const auto             loopVariable                         = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForExistingLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForExistingLoopVariable));
+
+    const std::string      notExistingLoopVariableIdentifier      = "$j";
+    constexpr unsigned int proposedValueOfNotExistingLoopVariable = 3;
+
+    bool didUpdateOfLoopVariableValueSucceed = false;
+    ASSERT_NO_FATAL_FAILURE(didUpdateOfLoopVariableValueSucceed = variableScope->updateValueOfLoopVariable(notExistingLoopVariableIdentifier, proposedValueOfNotExistingLoopVariable));
+    ASSERT_FALSE(didUpdateOfLoopVariableValueSucceed);
+
+    // Invalid update of loop variable should not modify the value of any other loop variable
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_TRUE(fetchedValueForLoopVariable.has_value());
+    ASSERT_EQ(expectedValueForExistingLoopVariable, *fetchedValueForLoopVariable);
+}
+
+TEST(TemporaryVariableScopeTests, FetchValueOfLoopVariableAfterRemovalOfVariableNotPossible) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier       = "$i";
+    const auto             loopVariable                 = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForLoopVariable));
+
+    bool didRemovalOfLoopVariableSucceed = false;
+    ASSERT_NO_FATAL_FAILURE(didRemovalOfLoopVariableSucceed = variableScope->removeVariable(loopVariableIdentifier));
+    ASSERT_TRUE(didRemovalOfLoopVariableSucceed);
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+
+    bool existsLoopVariableForIdentifier = false;
+    ASSERT_NO_FATAL_FAILURE(existsLoopVariableForIdentifier = variableScope->existsVariableForName(loopVariableIdentifier));
+    ASSERT_FALSE(existsLoopVariableForIdentifier);
+}
+
+TEST(TemporaryVariableScopeTests, UpdateValueOfLoopVariableAfterRemovalOfVariableNotPossible) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier       = "$i";
+    const auto             loopVariable                 = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForLoopVariable));
+
+    bool didRemovalOfLoopVariableSucceed = false;
+    ASSERT_NO_FATAL_FAILURE(didRemovalOfLoopVariableSucceed = variableScope->removeVariable(loopVariableIdentifier));
+    ASSERT_TRUE(didRemovalOfLoopVariableSucceed);
+
+    bool didUpdateOfLoopVariableValueSucceed = false;
+    ASSERT_NO_FATAL_FAILURE(didUpdateOfLoopVariableValueSucceed = variableScope->updateValueOfLoopVariable(loopVariableIdentifier, expectedValueForLoopVariable + 1));
+    ASSERT_FALSE(didUpdateOfLoopVariableValueSucceed);
+
+    // A failed loop variable value update should not cause the creation of a loop variable entry in the temporary variable scope
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+
+    bool existsLoopVariableForIdentifier = false;
+    ASSERT_NO_FATAL_FAILURE(existsLoopVariableForIdentifier = variableScope->existsVariableForName(loopVariableIdentifier));
+    ASSERT_FALSE(existsLoopVariableForIdentifier);
+}
+
+TEST(TemporaryVariableScopeTests, FetchValueOfLoopVariableAfterValueUpdate) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier       = "$i";
+    const auto             loopVariable                 = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForLoopVariable));
+
+    const std::string      otherLoopVariableIdentifier       = "$j";
+    const auto             otherLoopVariable                 = std::make_shared<syrec::Number>(otherLoopVariableIdentifier);
+    constexpr unsigned int expectedValueForOtherLoopVariable = 5;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, otherLoopVariable, expectedValueForOtherLoopVariable));
+
+    constexpr unsigned int expectedNewValueForLoopVariable     = 1;
+    bool                   didUpdateOfLoopVariableValueSucceed = false;
+    ASSERT_NO_FATAL_FAILURE(didUpdateOfLoopVariableValueSucceed = variableScope->updateValueOfLoopVariable(loopVariableIdentifier, expectedNewValueForLoopVariable));
+    ASSERT_TRUE(didUpdateOfLoopVariableValueSucceed);
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_TRUE(fetchedValueForLoopVariable.has_value());
+    ASSERT_EQ(expectedNewValueForLoopVariable, *fetchedValueForLoopVariable);
+
+    fetchedValueForLoopVariable.reset();
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(otherLoopVariableIdentifier));
+    ASSERT_TRUE(fetchedValueForLoopVariable.has_value());
+    ASSERT_EQ(expectedValueForOtherLoopVariable, *fetchedValueForLoopVariable);
+}
+
+TEST(TemporaryVariableScopeTests, FetchValueOfLoopVariableWhosValueWasNotSet) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string loopVariableIdentifier = "$i";
+    const auto        loopVariable           = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    ASSERT_NO_FATAL_FAILURE(assertVariableInsertionResultIsSuccessful(*variableScope, loopVariable));
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+}
+
+TEST(TemporaryVariableScopeTests, ResettingValueOfLoopVariableDoesNotRemoveItFromTheVariableScope) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier       = "$i";
+    const auto             loopVariable                 = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForLoopVariable));
+
+    bool wasResetOfLoopVariableValuePossible = false;
+    ASSERT_NO_FATAL_FAILURE(wasResetOfLoopVariableValuePossible = variableScope->updateValueOfLoopVariable(loopVariableIdentifier, std::nullopt));
+    ASSERT_TRUE(wasResetOfLoopVariableValuePossible);
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+
+    bool existsLoopVariableInVariableScopeAfterValueReset = false;
+    ASSERT_NO_FATAL_FAILURE(existsLoopVariableInVariableScopeAfterValueReset = variableScope->existsVariableForName(loopVariableIdentifier));
+    ASSERT_TRUE(existsLoopVariableInVariableScopeAfterValueReset);
+}
+
+TEST(TemporaryVariableScopeTests, UpdatingValueOfLoopVariableWhosValueWasPreviouslyReset) {
+    const BaseSymbolTable       symbolTable;
+    TemporaryVariableScope::ptr variableScope;
+    ASSERT_NO_FATAL_FAILURE(assertCreationOfTemporaryVariableScopeSuccedds(symbolTable, variableScope));
+
+    const std::string      loopVariableIdentifier       = "$i";
+    const auto             loopVariable                 = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    constexpr unsigned int expectedValueForLoopVariable = 3;
+    ASSERT_NO_FATAL_FAILURE(assertLoopVariableInsertionAndValueInitializationSucceeds(*variableScope, loopVariable, expectedValueForLoopVariable));
+
+    bool wasResetOfLoopVariableValuePossible = false;
+    ASSERT_NO_FATAL_FAILURE(wasResetOfLoopVariableValuePossible = variableScope->updateValueOfLoopVariable(loopVariableIdentifier, std::nullopt));
+    ASSERT_TRUE(wasResetOfLoopVariableValuePossible);
+
+    std::optional<unsigned int> fetchedValueForLoopVariable;
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_FALSE(fetchedValueForLoopVariable.has_value());
+
+    constexpr unsigned int newValueForLoopVariable = 5;
+    ASSERT_NO_FATAL_FAILURE(wasResetOfLoopVariableValuePossible = variableScope->updateValueOfLoopVariable(loopVariableIdentifier, newValueForLoopVariable));
+    ASSERT_TRUE(wasResetOfLoopVariableValuePossible);
+
+    ASSERT_NO_FATAL_FAILURE(fetchedValueForLoopVariable = variableScope->getValueOfLoopVariable(loopVariableIdentifier));
+    ASSERT_TRUE(fetchedValueForLoopVariable.has_value());
+    ASSERT_EQ(newValueForLoopVariable, *fetchedValueForLoopVariable);
 }
