@@ -75,6 +75,6 @@ TEST_F(SyrecParserErrorTestsFixture, AccessingBitwidthOfConstantCausesError) {
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UserDefinedIntegerConstantDefinedInProgramTooLargeToBeConvertedToUnsignedIntegerCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge>(Message::Position(1, 27), "34359738368");
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(Message::Position(1, 27), "34359738368", UINT_MAX);
     performTestExecution("module main(out a(4)) a += 34359738368");
 }

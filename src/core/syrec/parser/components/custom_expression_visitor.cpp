@@ -182,7 +182,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConsta
     }
 
     if (didSerializationOfIntegerFromStringFailDueToValueOverflow) {
-        recordSemanticError<SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge>(mapTokenPositionToMessagePosition(*context->INT()->getSymbol()), context->INT()->getText());
+        recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*context->INT()->getSymbol()), context->INT()->getText(), UINT_MAX);
     }
     return std::nullopt;
 }

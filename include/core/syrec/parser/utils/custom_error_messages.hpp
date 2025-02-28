@@ -29,7 +29,8 @@ namespace syrec_parser {
         DeclaredVariableBitwidthTooLarge,
         InfiniteLoopDetected,
         UnhandledOperationFromGrammarInParser,
-        UserDefinedIntegerConstantReadFromStringTooLarge
+        VariableBitwidthEqualToZero,
+        NumberOfValuesOfDimensionEqualToZero
     };
 
     /// Get the identifier associated with a given semantic error
@@ -85,8 +86,10 @@ namespace syrec_parser {
                 return "SEM22";
             case SemanticError::UnhandledOperationFromGrammarInParser:
                 return "SEM23";
-            case SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge:
-                return "SEM24";
+            case SemanticError::VariableBitwidthEqualToZero:
+                return "SEM25";
+            case SemanticError::NumberOfValuesOfDimensionEqualToZero:
+                return "SEM26";
             default:
                 return "";
         }
@@ -105,13 +108,13 @@ namespace syrec_parser {
             case SemanticError::NoModuleMatchingIdentifier:
                 return "No module matching definied identifier '{:s}'";
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
-                return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values. Please use zero-based indices.";
+                return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values. Please use zero-based indices";
             case SemanticError::TooManyDimensionsAccessed:
                 return "Access on N dimensional signal must be correctly specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::TooFewDimensionsAccessed:
                 return "Access on N dimensional signal must be fully specified, user specified access on {:d} dimensions while the accessed variable was declared with having {:d} dimensions";
             case SemanticError::IndexOfAccessedBitOutOfRange:
-                return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}. Please use zero-based indices.";
+                return "Accessed bit {:d} was out of range, accessed variable was declared with a bitrange of {:d}. Please use zero-based indices";
             case SemanticError::DuplicateVariableDeclaration:
                 return "Duplicate variable declaration sharing same identifier '{:s}'";
             case SemanticError::DuplicateModuleDeclaration:
@@ -145,9 +148,11 @@ namespace syrec_parser {
             case SemanticError::InfiniteLoopDetected:
                 return "Loop iterating from start value {:d} to {:d} with a stepsize of {:d} will perform an infinite number of iterations";
             case SemanticError::UnhandledOperationFromGrammarInParser:
-                return "While the grammar accepted the operation '{:s}', the parser could not handle it! This is most likely an error in the latter.";
-            case SemanticError::UserDefinedIntegerConstantReadFromStringTooLarge:
-                return "User defined integer '{:s}' was too large to be converted to an unsigned integer, the largest explicitly definable integer constant value is 2^32.";
+                return "While the grammar accepted the operation '{:s}', the parser could not handle it! This is most likely an error in the latter";
+            case SemanticError::VariableBitwidthEqualToZero:
+                return "Variable bitwidth must be larger than zero";
+            case SemanticError::NumberOfValuesOfDimensionEqualToZero:
+                return "Number of values of dimension {:d} must be larger than zero";
             default:
                 return "";
         }

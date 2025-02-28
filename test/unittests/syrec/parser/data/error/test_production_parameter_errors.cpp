@@ -119,3 +119,45 @@ TEST_F(SyrecParserErrorTestsFixture, ParameterBitwidthTakenFromUserConfigLongerT
     buildAndRecordExpectedSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(Message::Position(1, 34), defaultSignalBitwidth, 32);
     performTestExecution("module main(in a, inout b(2), out c) skip", userProvidedParserConfiguration);
 }
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleParameterDeclarationWithExplicitlyDefinedBitwidthOfZeroNotPossible) {
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 29));
+    performTestExecution("module main(inout a(4), in b(0)) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleLocalVariableDeclarationWithExplicitlyDefinedBitwidthOfZeroNotPossible) {
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 31));
+    performTestExecution("module main(inout a(4)) wire b(0) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleParameterDeclarationWithImplicitlyDefinedBitwidthOfZeroNotPossible) {
+    constexpr unsigned int defaultSignalBitwidth           = 0;
+    const auto             userProvidedParserConfiguration = syrec::ReadProgramSettings(defaultSignalBitwidth);
+
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 29));
+    performTestExecution("module main(inout a(4), in b(0)) ++= a", userProvidedParserConfiguration);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleLocalVariableDeclarationWithImplicitlyDefinedBitwidthOfZeroNotPossible) {
+    constexpr unsigned int defaultSignalBitwidth           = 0;
+    const auto             userProvidedParserConfiguration = syrec::ReadProgramSettings(defaultSignalBitwidth);
+
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 31));
+    performTestExecution("module main(inout a(4)) wire b(0) ++= a", userProvidedParserConfiguration);
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleParameterDeclarationWithExplicitlyDefinedNumberOfValuesForDimensionEqualToZeroNotPossible) {
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 20), 0);
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 26), 2);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 39), 1, 0, 0);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 45), 0, 2, 0);
+    performTestExecution("module main(inout a[0][2][0](4)) ++= a[1][1][0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleLocalVariableDeclarationWithExplicitlyDefinedNumberOfValuesForDimensionEqualToZeroNotPossible) {
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 28), 0);
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 34), 2);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 46), 1, 0, 0);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 52), 0, 2, 0);
+    performTestExecution("module main(in b(2)) wire a[0][2][0](4) ++= a[1][1][0]");
+}

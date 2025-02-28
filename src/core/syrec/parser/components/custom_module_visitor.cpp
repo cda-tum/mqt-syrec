@@ -236,7 +236,8 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
     std::vector<unsigned int> declaredNumberOfValuesPerDimension;
     declaredNumberOfValuesPerDimension.reserve(context->dimensionTokens.size());
 
-    for (const auto& antlrTokenForDeclaredNumberOfValuesOfDimension: context->dimensionTokens) {
+    for (std::size_t i = 0; i < context->dimensionTokens.size(); ++i) {
+        const auto& antlrTokenForDeclaredNumberOfValuesOfDimension = context->dimensionTokens.at(i);
         if (antlrTokenForDeclaredNumberOfValuesOfDimension == nullptr) {
             continue;
         }
@@ -248,6 +249,9 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
             if (didIntegerConstantDeserializationFailToDueOverflow) {
                 recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*antlrTokenForDeclaredNumberOfValuesOfDimension), antlrTokenForDeclaredNumberOfValuesOfDimension->getText(), UINT_MAX);
                 declaredNumberOfValuesPerDimension.emplace_back(UINT_MAX);
+            } else if (*parsedIntegerConstantFromAntlrToken == 0) {
+                recordSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(mapTokenPositionToMessagePosition(*antlrTokenForDeclaredNumberOfValuesOfDimension), i);
+                declaredNumberOfValuesPerDimension.emplace_back(0);
             } else {
                 declaredNumberOfValuesPerDimension.emplace_back(*parsedIntegerConstantFromAntlrToken);
             }
@@ -275,6 +279,12 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->signalWidthToken), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
         } else if (context->IDENT() != nullptr) {
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
+        }
+    } else if (variableBitwidth == 0) {
+        if (context->signalWidthToken != nullptr) {
+            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->signalWidthToken));    
+        } else {
+            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));    
         }
     }
 
