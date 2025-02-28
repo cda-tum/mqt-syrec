@@ -506,3 +506,104 @@ TEST(VariableAccessIndexValidityTests, BitrangeStartOutOfRangeWithStartLargerTha
     ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
     ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
 }
+
+TEST(VariableAccessIndexValidityTests, BitrangeStartEqualToSignalBitwidthOutOfRangeIfValueOfEndIndexIsUnknown) {
+    constexpr unsigned int variableBitwidth = DEFAULT_SIGNAL_BITWIDTH;
+    const auto             variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, {1}, variableBitwidth);
+    auto                   variableAccess   = syrec::VariableAccess();
+
+    constexpr unsigned int bitRangeStartBit = variableBitwidth;
+    variableAccess.var                      = variableInstance;
+    variableAccess.indexes                  = {createExprForAccessOnValueOfDimensionUsingConstantValue(0)};
+
+    const std::string loopVariableIdentifier              = "$j";
+    const auto        containerForUnknownBitrangeEndIndex = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    variableAccess.range                                  = std::make_pair(createContainerForBitrangeAccessComponent(bitRangeStartBit), containerForUnknownBitrangeEndIndex);
+
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult(
+            {createValidIndexValidationResult(0)},
+            VariableAccessIndicesValidity::BitRangeValidityResult({createOutOfRangeIndexValidationResult(bitRangeStartBit), createUnknownIndexValidationResult(std::nullopt)}));
+    std::optional<VariableAccessIndicesValidity> actualValidationResult;
+    ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
+}
+
+TEST(VariableAccessIndexValidityTests, BitrangeEndEqualToSignalBitwidthOutOfRangeIfValueOfStartIndexIsUnknown) {
+    constexpr unsigned int variableBitwidth = DEFAULT_SIGNAL_BITWIDTH;
+    const auto             variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, {1}, variableBitwidth);
+    auto                   variableAccess   = syrec::VariableAccess();
+
+    constexpr unsigned int bitRangeStartEnd = variableBitwidth;
+    variableAccess.var                      = variableInstance;
+    variableAccess.indexes                  = {createExprForAccessOnValueOfDimensionUsingConstantValue(0)};
+
+    const std::string loopVariableIdentifier                = "$j";
+    const auto        containerForUnknownBitrangeStartIndex = std::make_shared<syrec::Number>(loopVariableIdentifier);
+    variableAccess.range                                    = std::make_pair(containerForUnknownBitrangeStartIndex, createContainerForBitrangeAccessComponent(bitRangeStartEnd));
+
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult(
+            {createValidIndexValidationResult(0)},
+            VariableAccessIndicesValidity::BitRangeValidityResult({createUnknownIndexValidationResult(std::nullopt), createOutOfRangeIndexValidationResult(bitRangeStartEnd)}));
+    std::optional<VariableAccessIndicesValidity> actualValidationResult;
+    ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
+}
+
+TEST(VariableAccessIndexValidityTests, BitrangeStartEqualToSignalBitwidthOutOfRangeIfValueOfEndIndexIsKnown) {
+    constexpr unsigned int variableBitwidth = DEFAULT_SIGNAL_BITWIDTH;
+    const auto             variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, {1}, variableBitwidth);
+    auto                   variableAccess   = syrec::VariableAccess();
+
+    constexpr unsigned int bitRangeStartBit = variableBitwidth;
+    constexpr unsigned int bitRangeEndBit   = 2;
+    variableAccess.var                      = variableInstance;
+    variableAccess.indexes                  = {createExprForAccessOnValueOfDimensionUsingConstantValue(0)};
+    variableAccess.range                    = std::make_pair(createContainerForBitrangeAccessComponent(bitRangeStartBit), createContainerForBitrangeAccessComponent(bitRangeEndBit));
+
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult(
+            {createValidIndexValidationResult(0)},
+            VariableAccessIndicesValidity::BitRangeValidityResult({createOutOfRangeIndexValidationResult(bitRangeStartBit), createValidIndexValidationResult(bitRangeEndBit)}));
+    std::optional<VariableAccessIndicesValidity> actualValidationResult;
+    ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
+}
+
+TEST(VariableAccessIndexValidityTests, BitIndexValueEqualToSignalBitwidthIsOutOfRange) {
+    constexpr unsigned int variableBitwidth = DEFAULT_SIGNAL_BITWIDTH;
+    const auto             variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, {1}, variableBitwidth);
+    auto                   variableAccess   = syrec::VariableAccess();
+
+    constexpr unsigned int accessedBitIndex = variableBitwidth;
+    variableAccess.var                      = variableInstance;
+    variableAccess.indexes                  = {createExprForAccessOnValueOfDimensionUsingConstantValue(0)};
+
+    const auto containerForAccessedBitIndex = createContainerForBitrangeAccessComponent(accessedBitIndex);
+    variableAccess.range                    = std::make_pair(containerForAccessedBitIndex, containerForAccessedBitIndex);
+
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult(
+            {createValidIndexValidationResult(0)},
+            VariableAccessIndicesValidity::BitRangeValidityResult({createOutOfRangeIndexValidationResult(accessedBitIndex), createOutOfRangeIndexValidationResult(accessedBitIndex)}));
+    std::optional<VariableAccessIndicesValidity> actualValidationResult;
+    ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
+}
+
+TEST(VariableAccessIndexValidityTests, AccessedValueOfDimensionEqualToNumberOfValuesOfDimensionIsOutOfRange) {
+    constexpr unsigned int variableBitwidth = DEFAULT_SIGNAL_BITWIDTH;
+    const auto             variableInstance = generateVariableInstance(DEFAULT_VARIABLE_IDENTIFIER, {2}, variableBitwidth);
+    auto                   variableAccess   = syrec::VariableAccess();
+
+    constexpr unsigned int accessedBitIndex = 1;
+    variableAccess.var                      = variableInstance;
+    variableAccess.indexes                  = {createExprForAccessOnValueOfDimensionUsingConstantValue(2)};
+
+    const auto containerForAccessedBitIndex = createContainerForBitrangeAccessComponent(accessedBitIndex);
+    variableAccess.range                    = std::make_pair(containerForAccessedBitIndex, containerForAccessedBitIndex);
+
+    VariableAccessIndicesValidity expectedValidationResult = buildExpectedResult(
+            {createOutOfRangeIndexValidationResult(2)},
+            VariableAccessIndicesValidity::BitRangeValidityResult({createValidIndexValidationResult(accessedBitIndex), createValidIndexValidationResult(accessedBitIndex)}));
+    std::optional<VariableAccessIndicesValidity> actualValidationResult;
+    ASSERT_NO_FATAL_FAILURE(actualValidationResult = validateVariableAccessIndices(variableAccess));
+    ASSERT_NO_FATAL_FAILURE(assertValidationResultsMatch(expectedValidationResult, actualValidationResult));
+}

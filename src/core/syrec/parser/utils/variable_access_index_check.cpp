@@ -47,13 +47,17 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
             continue;
         }
 
-        const std::optional<unsigned int> evaluatedAccessedValueOfDimension                           = accessedValueOfDimensionExprCasted->value->tryEvaluate({});
-        validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = dimensionIdx < numDimensionsOfVariable && evaluatedAccessedValueOfDimension.has_value()
-            && variableAccess.getVar()->dimensions.at(dimensionIdx) != 0
-            // We are assuming zero-based indexing
-            ? isIndexInRange(*evaluatedAccessedValueOfDimension, variableAccess.getVar()->dimensions.at(dimensionIdx) - 1)
-            : VariableAccessIndicesValidity::IndexValidationResult::Unknown;
-
+        const std::optional<unsigned int> evaluatedAccessedValueOfDimension = accessedValueOfDimensionExprCasted->value->tryEvaluate({});
+        if (dimensionIdx < numDimensionsOfVariable && evaluatedAccessedValueOfDimension.has_value()) {
+            if (variableAccess.getVar()->dimensions.at(dimensionIdx) == 0) {
+                validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+            } else {
+                // We are assuming zero-based indexing
+                validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = isIndexInRange(*evaluatedAccessedValueOfDimension, variableAccess.getVar()->dimensions.at(dimensionIdx) - 1);
+            }
+        } else {
+            validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::Unknown;
+        }
         validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValue = evaluatedAccessedValueOfDimension;
     }
 
@@ -67,13 +71,23 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
     const syrec::Number::ptr& bitRangeStart = variableAccess.range->first;
     const syrec::Number::ptr& bitRangeEnd   = variableAccess.range->second;
     if (const std::optional<unsigned int> evaluatedBitRangeStart = bitRangeStart != nullptr && bitRangeStart->isConstant() ? bitRangeStart->tryEvaluate({}) : std::nullopt; evaluatedBitRangeStart.has_value()) {
-        bitRangeStartValidity.indexValidity = isIndexInRange(*evaluatedBitRangeStart, variableAccess.getVar()->bitwidth);
-        bitRangeStartValidity.indexValue    = evaluatedBitRangeStart;
+        if (variableAccess.getVar()->bitwidth == 0) {
+            bitRangeStartValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+        } else {
+            // We are assuming zero-based indexing
+            bitRangeStartValidity.indexValidity = isIndexInRange(*evaluatedBitRangeStart, variableAccess.getVar()->bitwidth - 1);
+        }
+        bitRangeStartValidity.indexValue = evaluatedBitRangeStart;
     }
 
     if (const std::optional<unsigned int> evaluatedBitRangeEnd = bitRangeEnd != nullptr && bitRangeEnd->isConstant() ? bitRangeEnd->tryEvaluate({}) : std::nullopt; evaluatedBitRangeEnd.has_value()) {
-        bitRangeEndValidity.indexValidity = isIndexInRange(*evaluatedBitRangeEnd, variableAccess.getVar()->bitwidth);
-        bitRangeEndValidity.indexValue    = evaluatedBitRangeEnd;
+        if (variableAccess.getVar()->bitwidth == 0) {
+            bitRangeEndValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+        } else {
+            // We are assuming zero-based indexing
+            bitRangeEndValidity.indexValidity = isIndexInRange(*evaluatedBitRangeEnd, variableAccess.getVar()->bitwidth - 1);
+        }
+        bitRangeEndValidity.indexValue = evaluatedBitRangeEnd;
     }
     validityOfVariableAccessIndices.bitRangeAccessValidity = VariableAccessIndicesValidity::BitRangeValidityResult({bitRangeStartValidity, bitRangeEndValidity});
     return validityOfVariableAccessIndices;
