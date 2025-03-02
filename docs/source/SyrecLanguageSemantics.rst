@@ -50,6 +50,8 @@ Module
 
 - The maximum number of values storable in a dimension is equal to :math:`2^32`
 - A variable can have at most :math:`2^32` dimensions
+- The bitwidth of a variable must be larger than zero
+- The number of values for any dimension of a variable must be larger than zero
 
 Statements
 ----------
@@ -184,6 +186,25 @@ ForStatement
         rof
 
 - Due to the assumption that all variable values can be represented by unsigned integer values, negative step size values are converted to their unsigned value using the C++17 value conversion semantics (see `chapter 7.8 <https://open-std.org/JTC1/SC22/WG21/docs/standards>`_). The same conversion is applied to all negative values determined at compile time.
+- Semantic/Syntax errors in the statements of the body of a loop performing no iterations are reported due to the parser not implementing the dead code elimination technique
+- The following example will showcase how the iteration range of a SyReC loop is evaluated and could be rewritten as a C loop:
+
+  .. code-block:: text
+
+   module main(inout a(32))
+     for $i = 0 to 5 step 2 do 
+       ++= a
+     rof
+
+   // Is equivalent to the C loop
+    unsigned int a = ...;
+    for unsigned int i = 0; i <= 5; i += 2 {
+      ++= a
+    }
+
+  The values of the loop variable *$i* would thus be equal to :math:`0, 2, 4`
+
+- The value of the step size of a ForStatement cannot be defined or evaluate to 0 since this would cause an infinite loop.
 
 IfStatement
 ^^^^^^^^^^^
@@ -202,8 +223,8 @@ IfStatement
         // between the two expressions
         fi ((a.0:1 + b) * #b)
 
-- Semantic errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification
-- Semantic errors in branches for which the parser can determine at compile time that they will not be executed are reported
+- Semantic/Syntax errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification
+- Semantic/Syntax errors in the not executed branch of an IfStatement are reported due to the parser not implementing the dead code elimination optimization technique
 
 SwapStatement
 ^^^^^^^^^^^^^
@@ -249,7 +270,15 @@ Expressions
 -----------
 - **Currently UnaryExpressions are not supported!**.
 - Expressions with constant operands are evaluated at compile time.
-- Arithmetic and logical simplifications are applied at compile time by default (i.e., will result in a simplification of the expression ((a + b) * 0) to 0).
+- Arithmetic and logical simplifications are applied at compile time by default (i.e., will result in a simplification of the expression ((a + b) * 0) to 0). However, semantic/syntax errors in the operands of even the simplified subexpressions are reported with the following code sample showcasing an example:
+
+  .. code-block:: text
+
+   module main(inout a[2](4))
+     a[0] += ((a[2] + 2) * (#a - 4))
+
+  While the right-hand side expression of the assignment is simplified to the integer constant *0*, the semantic error causes by the out-of-range index access in the variable access *a[2]* will still be reported.
+
 - All operands of an expression must have the same bitwidth (excluding constant integers that are truncated to the expected bitwidth using the :doc:`configured truncation operation <library/Settings>`), with the parser using the first bitrange with known bounds as the reference bitwidth (if such an access exists in the operands). Any bit access will set the expected operand bitwidth to 1 if the value is not already set.
 - All integer constant values are truncated to the expected operand bitwidth, if the latter exists for the expression; otherwise, the values are left unchanged. However, integer constant values defined in the shift amount component of a ShiftExpression are not truncated since they modify the left-hand side of the ShiftExpression and "build" the result instead of being an operand of the overall expression. 
  

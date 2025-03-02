@@ -256,3 +256,13 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInNestedLoopTriggeredByPropaga
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 96), 4, 4);
     performTestExecution("module main(inout a[2](4), in b(5)) for $i = 2 to 4 step 3 do for 0 to (4 / ($i - 2)) do a[1].0:($i + 2) += b rof rof");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, StartAndEndValueOfLoopEvaluatingToSameIntegerConstantWillCauseASingleLoopIterationIfStepSizeEvaluatesToNonZeroInteger) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 49), 5, 4);
+    performTestExecution("module main(inout a(4)) for 2 to 2 step 5 do a.0:5 += 2 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, StartAndEndValueOfLoopEvaluatingToSameIntegerConstantWillCauseASingleLoopIterationIfStepSizeEvaluatesToNoneConstantInteger) {
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 75), 5, 4);
+    performTestExecution("module main(inout a(4)) for $j = 0 to 2 do for 2 to 2 step (#a - 1) do a.0:5 += 2 rof rof");
+}

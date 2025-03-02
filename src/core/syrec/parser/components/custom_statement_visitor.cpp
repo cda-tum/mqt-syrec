@@ -239,7 +239,9 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     // Similarily to the handling of the statement list production in the ForStatement, an empty statement list should already report a syntax error and thus an explicit handling
-    // of an empty statement at this point is not necessary.
+    // of an empty statement at this point is not necessary. Additionally, currently the parser does not implement the dead code elimination optimization technique which would allow
+    // the parser to remove the statements of the not executed branch, if one can determine the value of the guard condition at compile time, thus semantic errors are reported regardless
+    // of the value of the guard condition.
     generatedIfStatement->thenStatements = visitStatementListTyped(context->trueBranchStmts).value_or(syrec::Statement::vec());
     generatedIfStatement->elseStatements = visitStatementListTyped(context->falseBranchStmts).value_or(syrec::Statement::vec());
 
@@ -301,29 +303,29 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
     const std::optional<unsigned int> valueOfIterationRangeStepSize = iterationRangeStepSizeValue != nullptr ? tryGetConstantValueOf(*iterationRangeStepSizeValue) : std::nullopt;
     bool                              shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = true;
     if (valueOfIterationRangeStepSize.has_value() && valueOfIterationRangeStart.has_value() && valueOfIterationRangeEnd.has_value()) {
-        if (*valueOfIterationRangeStepSize == 0 && *valueOfIterationRangeStart != *valueOfIterationRangeEnd) {
+        if (*valueOfIterationRangeStepSize == 0) {
             recordSemanticError<SemanticError::InfiniteLoopDetected>(
                     mapTokenPositionToMessagePosition(*context->KEYWORD_FOR()->getSymbol()),
                     *valueOfIterationRangeStart, *valueOfIterationRangeEnd, *valueOfIterationRangeStepSize);
         }
-        // If the loop performs no or more than one iteration the value of its loop variable should not be available for the processing of the loop bodies statements
-        if (*valueOfIterationRangeStart == *valueOfIterationRangeEnd) {
-            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = true;
-        } else {
-            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart < *valueOfIterationRangeEnd
-                ? *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd
-                : *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
-        }
+        
+        // The declared initial value of a loop variable should only be propagated to the statements of its loop body if the number of iterations performed by the loop is equal to one.
+        // Due to the used overflow semantics for unsigned integer causing a wrap-around at the borders of the value range and due to the assumption that the iteration range values are located in the
+        // interval from [start, end] instead of [start, end), a loop cannot perform no iterations.
+        shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart < *valueOfIterationRangeEnd
+            ? *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd
+            : *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
     }
 
     if (activeSymbolTableScope.has_value() && loopVariableIdentifier.has_value() && shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody) {
         activeSymbolTableScope->get()->updateValueOfLoopVariable(*loopVariableIdentifier, std::nullopt);
     }
 
-    // An empty loop body statement list definition results in a syntax error and thus does not need to be checked again here.
-    if (context->statementList() != nullptr) {
-        generatedForStatement->statements = visitStatementListTyped(context->statementList()).value_or(syrec::Statement::vec());
-    }
+    // An empty loop body statement list definition results in a syntax error and thus does not need to be checked again here. Additionally, due to the
+    // parser not implementing the dead code elimination optimization technique, semantic errors will also be created for the statements of the body of a loop
+    // that does not perform any iterations.
+    generatedForStatement->statements = visitStatementListTyped(context->statementList()).value_or(syrec::Statement::vec());
+
     if (loopVariableIdentifier.has_value() && activeSymbolTableScope.has_value()) {
         activeSymbolTableScope->get()->removeVariable(*loopVariableIdentifier);
     }

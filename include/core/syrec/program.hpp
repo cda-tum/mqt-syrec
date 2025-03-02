@@ -15,8 +15,9 @@
 namespace syrec {
     struct ReadProgramSettings {
         explicit ReadProgramSettings(unsigned bitwidth = 32U, utils::IntegerConstantTruncationOperation integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::BitwiseAnd,
-            bool allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess = false):
-            defaultBitwidth(bitwidth), integerConstantTruncationOperation(integerConstantTruncationOperation), allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess(allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {}
+                                     bool allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess = false):
+            defaultBitwidth(bitwidth), integerConstantTruncationOperation(integerConstantTruncationOperation),
+            allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess(allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {}
 
         /**
          * @brief Defines the default variable bitwidth used by the SyReC parser for variables whos bitwidth specification was omitted.
@@ -58,7 +59,6 @@ namespace syrec {
          * III.    module main(inout a[2](4)) for $i = 0 to 1 do a[0] += a[$i] rof
          */
         bool allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess;
-
     };
 
     class Program {
