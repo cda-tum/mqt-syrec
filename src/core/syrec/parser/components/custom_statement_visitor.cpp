@@ -172,8 +172,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementT
         // will not cause the SyReC program to be detected as well formed.
         callerArgumentVariableIdentifiers.emplace_back(antlrCallerArgumentToken->getText());
         if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingSymbolTableEntryForCallerArgument = activeSymbolTableScope->get()->getVariableByName(antlrCallerArgumentToken->getText()); matchingSymbolTableEntryForCallerArgument.has_value()) {
-            if (matchingSymbolTableEntryForCallerArgument->get()->getReadonlyVariableData().has_value()) {
-                symbolTableEntryPerCallerArgument.emplace_back(std::make_shared<syrec::Variable>(**matchingSymbolTableEntryForCallerArgument->get()->getReadonlyVariableData()));
+            if (matchingSymbolTableEntryForCallerArgument->get()->getVariableData().has_value()) {
+                symbolTableEntryPerCallerArgument.emplace_back(std::make_shared<syrec::Variable>(**matchingSymbolTableEntryForCallerArgument->get()->getVariableData()));
             }
         } else {
             recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*antlrCallerArgumentToken), antlrCallerArgumentToken->getText());

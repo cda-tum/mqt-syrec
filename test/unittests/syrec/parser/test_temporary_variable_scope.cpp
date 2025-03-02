@@ -85,10 +85,10 @@ namespace {
         ASSERT_EQ(expectedEntryRef.isReferenceToLoopVariable(), actualEntryRef.isReferenceToLoopVariable());
 
         if (expectedEntryRef.isReferenceToLoopVariable()) {
-            ASSERT_FALSE(actualEntryRef.getReadonlyVariableData().has_value());
-            ASSERT_TRUE(actualEntryRef.getReadOnlyLoopVariableData().has_value());
+            ASSERT_FALSE(actualEntryRef.getVariableData().has_value());
+            ASSERT_TRUE(actualEntryRef.getLoopVariableData().has_value());
 
-            const std::shared_ptr<const syrec::Number> loopVariableData = actualEntryRef.getReadOnlyLoopVariableData().value();
+            const std::shared_ptr<const syrec::Number> loopVariableData = actualEntryRef.getLoopVariableData().value();
             ASSERT_THAT(loopVariableData, testing::NotNull());
             ASSERT_TRUE(loopVariableData->isLoopVariable());
             ASSERT_EQ(expectedEntryRef.getVariableIdentifier(), loopVariableData->variableName());
@@ -98,12 +98,12 @@ namespace {
         } else {
             ASSERT_EQ(expectedEntryRef.getDeclaredVariableBitwidth(), actualEntryRef.getDeclaredVariableBitwidth());
             ASSERT_THAT(actualEntryRef.getDeclaredVariableDimensions(), testing::ElementsAreArray(expectedEntryRef.getDeclaredVariableDimensions()));
-            ASSERT_FALSE(actualEntryRef.getReadOnlyLoopVariableData().has_value());
-            ASSERT_TRUE(actualEntryRef.getReadonlyVariableData().has_value());
+            ASSERT_FALSE(actualEntryRef.getLoopVariableData().has_value());
+            ASSERT_TRUE(actualEntryRef.getVariableData().has_value());
 
-            const std::shared_ptr<const syrec::Variable> variableData = actualEntryRef.getReadonlyVariableData().value();
+            const std::shared_ptr<const syrec::Variable> variableData = actualEntryRef.getVariableData().value();
             ASSERT_THAT(variableData, testing::NotNull());
-            ASSERT_EQ(expectedEntryRef.getReadonlyVariableData()->get()->type, variableData->type);
+            ASSERT_EQ(expectedEntryRef.getVariableData()->get()->type, variableData->type);
             ASSERT_EQ(expectedEntryRef.getVariableIdentifier(), variableData->name);
             ASSERT_EQ(expectedEntryRef.getDeclaredVariableBitwidth(), variableData->bitwidth);
             ASSERT_THAT(variableData->dimensions, testing::ElementsAreArray(expectedEntryRef.getDeclaredVariableDimensions()));
@@ -120,18 +120,18 @@ namespace {
         }
 
         if (lOperand->isReferenceToLoopVariable()) {
-            if (rOperand->getReadonlyVariableData().has_value() || !rOperand->getReadOnlyLoopVariableData().has_value()) {
+            if (rOperand->getVariableData().has_value() || !rOperand->getLoopVariableData().has_value()) {
                 return false;
             }
-            const std::shared_ptr<const syrec::Number> loopVariableData = rOperand->getReadOnlyLoopVariableData().value();
+            const std::shared_ptr<const syrec::Number> loopVariableData = rOperand->getLoopVariableData().value();
             return loopVariableData && loopVariableData->isLoopVariable() && lOperand->getVariableIdentifier() == loopVariableData->variableName() && !rOperand->getDeclaredVariableBitwidth().has_value() && rOperand->getDeclaredVariableDimensions().size() == 1 && rOperand->getDeclaredVariableDimensions().front() == 1;
         }
-        if (!lOperand->getReadonlyVariableData().has_value() || lOperand->getReadonlyVariableData().value() == nullptr || rOperand->getReadOnlyLoopVariableData().has_value() || !rOperand->getReadonlyVariableData().has_value()) {
+        if (!lOperand->getVariableData().has_value() || lOperand->getVariableData().value() == nullptr || rOperand->getLoopVariableData().has_value() || !rOperand->getVariableData().has_value()) {
             return false;
         }
 
-        const std::shared_ptr<const syrec::Variable> expectedVariableData = lOperand->getReadonlyVariableData().value();
-        const std::shared_ptr<const syrec::Variable> actualVariableData   = rOperand->getReadonlyVariableData().value();
+        const std::shared_ptr<const syrec::Variable> expectedVariableData = lOperand->getVariableData().value();
+        const std::shared_ptr<const syrec::Variable> actualVariableData   = rOperand->getVariableData().value();
         return actualVariableData && expectedVariableData->type == actualVariableData->type && expectedVariableData->bitwidth == actualVariableData->bitwidth && expectedVariableData->name == actualVariableData->name && std::equal(expectedVariableData->dimensions.cbegin(), expectedVariableData->dimensions.cend(), actualVariableData->dimensions.cbegin(), actualVariableData->dimensions.cend(), [](const unsigned int expectedNumberOfValuesOfDimension, const unsigned int actualNumberOfValuesOfDimension) {
                    return expectedNumberOfValuesOfDimension == actualNumberOfValuesOfDimension;
                });

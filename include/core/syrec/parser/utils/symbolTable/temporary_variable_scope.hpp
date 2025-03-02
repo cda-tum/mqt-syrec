@@ -34,8 +34,8 @@ namespace utils {
             [[nodiscard]] std::string                                           getVariableIdentifier() const;
             [[nodiscard]] std::vector<unsigned int>                             getDeclaredVariableDimensions() const;
             [[nodiscard]] std::optional<unsigned int>                           getDeclaredVariableBitwidth() const;
-            [[nodiscard]] std::optional<std::shared_ptr<const syrec::Variable>> getReadonlyVariableData() const;
-            [[nodiscard]] std::optional<std::shared_ptr<const syrec::Number>>   getReadOnlyLoopVariableData() const;
+            [[nodiscard]] std::optional<syrec::Variable::ptr>                   getVariableData() const;
+            [[nodiscard]] std::optional<syrec::Number::ptr>                     getLoopVariableData() const;
 
         protected:
             std::variant<syrec::Variable::ptr, syrec::Number::ptr> data;

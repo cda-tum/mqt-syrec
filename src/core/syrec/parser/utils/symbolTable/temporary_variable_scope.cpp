@@ -12,41 +12,41 @@
 #include <vector>
 
 bool utils::TemporaryVariableScope::ScopeEntry::isReferenceToLoopVariable() const {
-    return getReadOnlyLoopVariableData().value_or(nullptr) != nullptr;
+    return getLoopVariableData().value_or(nullptr) != nullptr;
 }
 
 std::string utils::TemporaryVariableScope::ScopeEntry::getVariableIdentifier() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
         return entryAsVariable->get()->name;
     }
-    if (const std::optional<std::shared_ptr<const syrec::Number>>& entryAsNumber = getReadOnlyLoopVariableData(); entryAsNumber.has_value() && *entryAsNumber != nullptr) {
+    if (const std::optional<std::shared_ptr<const syrec::Number>>& entryAsNumber = getLoopVariableData(); entryAsNumber.has_value() && *entryAsNumber != nullptr) {
         return entryAsNumber->get()->variableName();
     }
     return "";
 }
 
 std::vector<unsigned> utils::TemporaryVariableScope::ScopeEntry::getDeclaredVariableDimensions() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
         return entryAsVariable->get()->dimensions;
     }
     return {1};
 }
 
 std::optional<unsigned> utils::TemporaryVariableScope::ScopeEntry::getDeclaredVariableBitwidth() const {
-    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getReadonlyVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
+    if (const std::optional<std::shared_ptr<const syrec::Variable>>& entryAsVariable = getVariableData(); entryAsVariable.has_value() && *entryAsVariable != nullptr) {
         return entryAsVariable->get()->bitwidth;
     }
     return std::nullopt;
 }
 
-std::optional<std::shared_ptr<const syrec::Variable>> utils::TemporaryVariableScope::ScopeEntry::getReadonlyVariableData() const {
+std::optional<syrec::Variable::ptr> utils::TemporaryVariableScope::ScopeEntry::getVariableData() const {
     if (std::holds_alternative<syrec::Variable::ptr>(data)) {
         return std::get<syrec::Variable::ptr>(data);
     }
     return std::nullopt;
 }
 
-std::optional<std::shared_ptr<const syrec::Number>> utils::TemporaryVariableScope::ScopeEntry::getReadOnlyLoopVariableData() const {
+std::optional<syrec::Number::ptr> utils::TemporaryVariableScope::ScopeEntry::getLoopVariableData() const {
     if (std::holds_alternative<syrec::Number::ptr>(data)) {
         return std::get<syrec::Number::ptr>(data);
     }
@@ -75,7 +75,7 @@ std::vector<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::Tempo
     auto signalsIterator = signalIdentifierLookup.begin();
     const auto endSignalIterator = signalIdentifierLookup.end();
     while (signalsIterator != endSignalIterator) {
-        if (const std::shared_ptr<const syrec::Variable> variableData = signalsIterator->second->getReadonlyVariableData().value_or(nullptr);
+        if (const std::shared_ptr<const syrec::Variable> variableData = signalsIterator->second->getVariableData().value_or(nullptr);
             variableData != nullptr && lookedForVariableTypes.count(variableData->type) != 0) {
             variablesMatchingType.emplace_back(signalsIterator->second);
         }

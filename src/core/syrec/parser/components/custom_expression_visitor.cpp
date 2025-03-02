@@ -82,7 +82,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     // We delegate the truncation of constant values to the caller of this function since the expected bitwidth of the operands could have been set in the currently processed
     // expression and needs to be propagate to any parent expression
     if (lhsOperand.has_value() && rhsOperand.has_value()) {
-        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(syrec::BinaryExpression(*lhsOperand, *mappedToBinaryOperation, *rhsOperand), std::nullopt, nullptr); simplifiedBinaryExpr.has_value()) {
+        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(syrec::BinaryExpression(*lhsOperand, *mappedToBinaryOperation, *rhsOperand), optionalExpectedBitwidthForAnyProcessedEntity, nullptr); simplifiedBinaryExpr.has_value()) {
             return simplifiedBinaryExpr;
         }
         return std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand);
@@ -296,11 +296,15 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
         if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier) {
             recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
         }
-
         if (const std::optional<unsigned int> valueOfLoopVariable = activeVariableScopeInSymbolTable->get()->getValueOfLoopVariable(loopVariableIdentifier); valueOfLoopVariable.has_value()) {
             return std::make_shared<syrec::Number>(*valueOfLoopVariable);
         }
-        return std::make_shared<syrec::Number>(loopVariableIdentifier);
+        if (const std::optional<syrec::Number::ptr>& symbolTableEntryForLoopVariable = matchingLoopVariableForIdentifier->get()->getLoopVariableData(); symbolTableEntryForLoopVariable.has_value()) {
+            return symbolTableEntryForLoopVariable;
+        }
+        if (context->LOOP_VARIABLE_PREFIX() != nullptr) {
+            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Symbol table entry for loop variable with identifier " + loopVariableIdentifier + " did not return variable data. This should not happen");
+        }
     }
 
     if (context->LOOP_VARIABLE_PREFIX() != nullptr) {
@@ -355,7 +359,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
 
     if (!variableIdentifier.empty()) {
         recordExpressionComponent(variableIdentifier);
-        if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getReadonlyVariableData().has_value()) {
+        if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getVariableData().has_value()) {
             recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
             return std::nullopt;   
         }
@@ -408,12 +412,12 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     if (matchingVariableForIdentifier.has_value()) {
         const std::vector<unsigned int>& declaredValuesPerDimensionOfReferenceVariable = matchingVariableForIdentifier.value()->getDeclaredVariableDimensions();
 
-        if (matchingVariableForIdentifier->get()->getReadonlyVariableData().has_value()) {
+        if (const std::optional<syrec::Variable::ptr>& variableDataFromSymbolTable = matchingVariableForIdentifier->get()->getVariableData(); variableDataFromSymbolTable.has_value()) {
             // Currently the shared_pointer instance returned by the symbol table for entry of the variable matching the current identifier cannot be assigned to the variable access
             // data field since it expects a shared_pointer instance to a modifiable variable, thus we are forced to create a copy of the variable data from the symbol table. Future
             // versions might change the variable field in the variable access to match the value returned by the symbol table (Reasoning: Why would the user modify the referenced variable data in the variable access
             // when he can simply reassign the smart_pointer).
-            generatedVariableAccess->setVar(std::make_shared<syrec::Variable>(**matchingVariableForIdentifier->get()->getReadonlyVariableData()));
+            generatedVariableAccess->setVar(*variableDataFromSymbolTable);
         } else {
             recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Symbol table entry for variable with identifier " + variableIdentifier + " did not return variable data. This should not happen");
         }
