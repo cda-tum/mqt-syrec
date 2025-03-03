@@ -48,8 +48,8 @@ Module
 
  Two equal module signatures will result in a semantic error being reported.
 
-- The maximum number of values storable in a dimension is equal to :math:`2^32`
-- A variable can have at most :math:`2^32` dimensions
+- The maximum number of values storable in a dimension is equal to :math:`2^{32}`
+- A variable can have at most :math:`2^{32}` dimensions
 - The bitwidth of a variable must be larger than zero
 - The number of values for any dimension of a variable must be larger than zero
 
