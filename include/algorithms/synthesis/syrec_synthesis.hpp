@@ -17,8 +17,10 @@
 #include <boost/pending/property.hpp>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stack>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace syrec::internal {
@@ -122,7 +124,8 @@ namespace syrec {
         bool         modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
         bool         multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
         bool         notEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // !=
-        void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
+        // TODO: A rename of the function would allow one to drop the now required linter annotations regarding swap functions which are expected to be exceptionless
+        void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // NOLINT(cppcoreguidelines-noexcept-swap, performance-noexcept-swap)
         bool         decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool         increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         virtual bool expressionOpInverse([[maybe_unused]] BinaryExpression::BinaryOperation op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs);
@@ -146,6 +149,9 @@ namespace syrec {
         void     getConstantLines(unsigned bitwidth, unsigned value, std::vector<unsigned>& lines);
 
         static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
+
+        [[nodiscard]] static std::optional<AssignStatement::AssignOperation>  tryMapBinaryToAssignmentOperation(BinaryExpression::BinaryOperation binaryOperation) noexcept;
+        [[nodiscard]] static std::optional<BinaryExpression::BinaryOperation> tryMapAssignmentToBinaryOperation(AssignStatement::AssignOperation assignOperation) noexcept;
 
         std::stack<Statement::ptr>    stmts;
         Circuit&                      circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)

@@ -1,6 +1,14 @@
 #pragma once
 
 #include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace syrec {
     class LineAwareSynthesis: public SyrecSynthesis {
@@ -61,9 +69,5 @@ namespace syrec {
         bool decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
 
         bool expressionOpInverse(BinaryExpression::BinaryOperation op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) override;
-
-        [[nodiscard]] static std::optional<AssignStatement::AssignOperation> tryMapBinaryToAssignmentOperation(BinaryExpression::BinaryOperation binaryOperation) noexcept;
-        [[nodiscard]] static std::optional<BinaryExpression::BinaryOperation> tryMapAssignmentToBinaryOperation(AssignStatement::AssignOperation assignOperation) noexcept;
-
     };
 } // namespace syrec

@@ -1,6 +1,13 @@
 #pragma once
 
 #include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace syrec {
     class CostAwareSynthesis: public SyrecSynthesis {
