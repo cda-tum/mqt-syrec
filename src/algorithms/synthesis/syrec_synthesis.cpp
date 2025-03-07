@@ -272,13 +272,14 @@ namespace syrec {
     bool SyrecSynthesis::onStatement(const ForStatement& statement) {
         const auto& [nfrom, nTo] = statement.range;
 
-        const unsigned     from         = nfrom ? nfrom->evaluate(loopMap) : 1U; // default value is 1u
+        const unsigned     from         = nfrom ? nfrom->evaluate(loopMap) : 0U; // default value is 0u
         const unsigned     to           = nTo->evaluate(loopMap);
         const unsigned     step         = statement.step ? statement.step->evaluate(loopMap) : 1U; // default step is +1
         const std::string& loopVariable = statement.loopVariable;
 
         if (from <= to) {
-            for (unsigned i = from; i <= to; i += step) {
+            // The iteration range of a loop is defined as the interval [start, end)
+            for (unsigned i = from; i < to; i += step) {
                 // adjust loop variable if necessary
 
                 if (!loopVariable.empty()) {
@@ -294,7 +295,9 @@ namespace syrec {
         }
 
         else if (from > to) {
-            for (auto i = static_cast<int>(from); i >= static_cast<int>(to); i -= static_cast<int>(step)) {
+            // Again, the iteration range of a loop in which the start value is larger than the end value, the end value is assumed to be
+            // not included in the iteration range [start, end)
+            for (auto i = static_cast<int>(from); i > static_cast<int>(to); i -= static_cast<int>(step)) {
                 // adjust loop variable if necessary
 
                 if (!loopVariable.empty()) {

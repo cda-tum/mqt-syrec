@@ -309,12 +309,14 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
                     *valueOfIterationRangeStart, *valueOfIterationRangeEnd, *valueOfIterationRangeStepSize);
         }
         
-        // The declared initial value of a loop variable should only be propagated to the statements of its loop body if the number of iterations performed by the loop is equal to one.
-        // Due to the used overflow semantics for unsigned integer causing a wrap-around at the borders of the value range and due to the assumption that the iteration range values are located in the
-        // interval from [start, end] instead of [start, end), a loop cannot perform no iterations.
-        shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart < *valueOfIterationRangeEnd
-            ? *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd
-            : *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
+        // The declared initial value of a loop variable should only be propagated to the statements in the body of the loop if the number of iterations performed by the loop is equal to one.
+        // It is the responsibility of the user to keep the used overflow semantics for unsinged integers, causing a wrap-around at the borders of the value range, in mind when defining the iteration range of a loop.
+        // The iteration range is equivalent to the python range(<START>, <END>, <STEP>) function, meaning that we assume that the <END> value is not included in the iteration range (i.e. equal to for $i = START; $i < END; $i += STEP)
+        if (*valueOfIterationRangeStart < *valueOfIterationRangeEnd) {
+            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd;
+        } else if (*valueOfIterationRangeEnd > *valueOfIterationRangeStart) {
+            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
+        }
     }
 
     if (activeSymbolTableScope.has_value() && loopVariableIdentifier.has_value() && shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody) {

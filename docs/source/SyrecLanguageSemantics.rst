@@ -170,7 +170,8 @@ ForStatement
 
 - Due to the requirement that the number of iterations performed by a ForStatement is known at compile time, assignments to loop variables are forbidden
 - If the step size of a ForStatement is not defined, it is assumed to equal 1
-- If the optional second component of the iteration range in a ForStatement is not defined, it is assumed to be equal 0
+- If the user does not specify a loop variable definition or start-end-value iteration range pair but only a single number component then it is assumed that this number defines the end value of the iteration range while the start value is assumed to be equal to 0.
+  Note that this assumptions also holds if the user defines a negative stepsize. The following example showcases two equivalent loop definitions, one only specifying a single number component while the other defines the start-end-stepsize triple in the loop header:
 
   .. code-block:: text
 
@@ -181,7 +182,7 @@ ForStatement
 
    // Is equivalent to
     module main(inout a(4))
-        for (#a - 1) to 0 step 1 do 
+        for 0 to (#a - 1) step 1 do 
             --= a
         rof
 
@@ -198,11 +199,11 @@ ForStatement
 
    // Is equivalent to the C loop
     unsigned int a = ...;
-    for unsigned int i = 0; i <= 5; i += 2 {
+    for unsigned int i = 0; i < 5; i += 2 {
       ++= a
     }
 
-  The values of the loop variable *$i* would thus be equal to :math:`0, 2, 4`
+  The values of the loop variable *$i* are thus equal to :math:`0, 2, 4`
 
 - The value of the step size of a ForStatement cannot be defined or evaluate to 0 since this would cause an infinite loop.
 
