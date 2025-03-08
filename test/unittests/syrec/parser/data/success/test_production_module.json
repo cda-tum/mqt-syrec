@@ -51,7 +51,7 @@
     "expectedCircuit": "module main() wire a(4), b[2][3](6), c(2), d(4) skip"
   },
   "usageOfMultipleStatementsInModuleBodyAllowed": {
-    "inputCircuit": "module main(inout a(4), in b(4)) a += b; if (a > b) then ++= a else --= a fi (a > b); --= a",
-    "expectedCircuit": "module main(inout a(4), in b(4)) a[0] += b[0]; if (a[0] > b[0]) then ++= a[0] else --= a[0] fi (a[0] > b[0]); --= a[0]"
+    "inputCircuit": "module main(inout a(4), in b(4)) a += b; if (a.1 > b.1) then ++= a else --= a fi (a.1 > b.1); --= a",
+    "expectedCircuit": "module main(inout a(4), in b(4)) a[0] += b[0]; if (a[0].1 > b[0].1) then ++= a[0] else --= a[0] fi (a[0].1 > b[0].1); --= a[0]"
   }
 }

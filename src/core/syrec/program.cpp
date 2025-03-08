@@ -45,6 +45,11 @@ namespace syrec {
         lexer.removeErrorListener(customErrorListener.get());
         antlrParser.removeErrorListener(customErrorListener.get());
 
+        // In some cases the parser generates semantic errors at positions that were already processed or prior to already recorded errors (i.e. index out of range errors are reported during
+        // the processing of the operands of an binary expression while an overlap between the left and right-hand side of an assignment can only be reported if the full expression on the right-hand
+        // side of assignment were processed.
+        // Since the parser currently only generates errors, sorting of the recorded error messages is sufficient.
+        parserMessageGenerator->sortRecordedMessagesOfTypeInAscendingOrder(syrec_parser::Message::Type::Error);
         if (const auto& generatedErrorMessages = parserMessageGenerator->getMessagesOfType(syrec_parser::Message::Type::Error); !generatedErrorMessages.empty()) {
             std::stringstream concatenatedErrorMessageContainer;
             for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i) {

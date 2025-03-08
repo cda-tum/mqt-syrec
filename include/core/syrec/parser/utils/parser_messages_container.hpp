@@ -52,6 +52,7 @@ namespace syrec_parser {
         [[nodiscard]] std::vector<Message::ptr> getMessagesOfType(Message::Type messageType) const;
         [[maybe_unused]] bool                   setFilterForToBeRecordedMessages(const std::string& messageIdToPassFilter);
         void                                    clearFilterForToBeRecordedMessages();
+        void                                    sortRecordedMessagesOfTypeInAscendingOrder(Message::Type messageType);
 
     protected:
         std::unordered_map<Message::Type, std::vector<Message::ptr>> messagesPerType;

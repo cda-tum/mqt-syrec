@@ -227,9 +227,11 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     // (we will follow the behaviour found in other compilers [see https://godbolt.org/z/nM419obo4]).
     auto ifStatementExpressionComponentsComparer = std::make_shared<utils::IfStatementExpressionComponentsRecorder>();
     expressionVisitorInstance->setIfStatementExpressionComponentsRecorder(ifStatementExpressionComponentsComparer);
+    // The operands in the guard/closing-guard condition expression must be equal to one since the value of said condition must evaluate to a boolean value.
+    expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(1);
     generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(context->guardCondition).value_or(nullptr));
 
-    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition) {
+    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition != nullptr) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
         expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
@@ -246,9 +248,10 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->elseStatements = visitStatementListTyped(context->falseBranchStmts).value_or(syrec::Statement::vec());
 
     ifStatementExpressionComponentsComparer->switchMode(utils::IfStatementExpressionComponentsRecorder::OperationMode::Comparing);
+    expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(1);
     generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(context->matchingGuardExpression).value_or(nullptr));
 
-    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition) {
+    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition != nullptr) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
         expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues) {

@@ -214,7 +214,7 @@ IfStatement
   .. code-block:: text
 
     module main(inout a(4), in b(2))
-        if ((a.0:1 + b) * 2) then
+        if ((a.0 + b.1) * 2) then
             skip
         else
             skip
@@ -222,10 +222,11 @@ IfStatement
         // expression as the guard condition, the two expressions are not 
         // considered as equal due to the difference in the substrings '2' and '#b'
         // between the two expressions
-        fi ((a.0:1 + b) * #b)
+        fi ((a.0 + b.1) * #b)
 
 - Semantic/Syntax errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification
 - Semantic/Syntax errors in the not executed branch of an IfStatement are reported due to the parser not implementing the dead code elimination optimization technique
+- The bitlength of the operands defined in the guard as well as closing guard condition must be equal to 1.
 
 SwapStatement
 ^^^^^^^^^^^^^
@@ -291,8 +292,8 @@ Expressions
         // Expected operand bitwidth set by a[0].0:1 to 2
         a[0].0:1 += (b + 4);                            
         for $i = 0 to (#a - 1) do 
-            // Expected operand bitwidth set by a[(b + 2) + 6].$i to 1
-            a[(b + 2) + 5].$i += (c.$i + b.0) << 2;     
+            // Expected operand bitwidth set by a[(b + 2) + 5].$i to 1
+            a[(b + 2) + 5].$i += (c.$i + b.0) + 3;     
             // Expected operand bitwidth set by b.2:0 to 3
             a[1].0:($i + 2) += (b.2:0 + 5);              
             // Expected operand bitwidth set by a[0].1:2 to 2
@@ -304,19 +305,21 @@ Expressions
   .. code-block:: text
 
     module main(inout a[2](4), in b(2), in c(4))
-        // 4 MOD 2 = 0 => simplification of expression (b + 0) to 0
-        a[0].0:1 += b;                                  
+        // 4 MOD 3 = 1
+        a[0].0:1 += (b + 1);                                  
         for $i = 0 to (#a - 1) do 
             // 4 MOD 1 = 0 causes simplification of right-hand side expression
             // Note that the expression ((b + 2) + 6) uses a separate expected 
-            // operand bitwidth of 2 and is simplified to (b + 1)
-            a[(b + 1)].$i += (c.$i + b.0) + 4;     
-            // 5 MOD 2 => 1
-            a[1].0:($i + 2) += (b.2:0 + 1)              
+            // operand bitwidth of 2 and is simplified to (b + 1).
+            // Constant operand (3) of right-hand side of assignment is simplified to zero:
+            //  3 MOD 1 = 0
+            a[(b + 1)].$i += (c.$i + b.0);     
+            // 5 MOD 7 => 1
+            a[1].0:($i + 2) += (b.2:0 + 5)              
             // Expected operand bitwidth of 2 causes simplification of (b << 4) to 0 
             // since shift amount is larger than expected bitwidth
-            // Remaining expression 2 << 1 evaluated to 4 => 4 MOD 2 = 0
-            a[0].1:2 += 0           
+            // Remaining expression 2 << 1 evaluated to 4 => 4 MOD 3 = 1
+            a[0].1:2 += 1           
         rof
 
   Note that for expressions with constant value operands, the integer truncation is only applied after the expression was evaluated with an example being shown below in which we assume that the truncation is performed using the modulo operation:
@@ -328,8 +331,13 @@ Expressions
 
     // Is equivalent to 
     module main(inout a(4))
-     a.0:1 += 1 // 9 MOD 2 = 1
+     a.0:1 += 0 // 9 MOD 3 = 0
 
+  - The following enumeration defines how the right-hand side operand of supported integer constant truncation operations is calculated for the expected operand bitwidth :math:`b`:
+    
+    * Bitwise AND:  :math:`2^{b} - 1`
+    * Modulo:       :math:`2^{b} - 1`
+  
 - Expressions with constant integer operands are evaluated using the C++ semantics for unsigned integers.
 
 
