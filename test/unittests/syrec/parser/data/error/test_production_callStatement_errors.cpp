@@ -19,8 +19,8 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidCallKeywordCausesError) {
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInCallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 45), "extraneous input '(' expecting IDENT");
-    recordSyntaxError(Message::Position(1, 47), "mismatched input ',' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 46), "a");
+    recordSyntaxError(Message::Position(1, 47), "mismatched input ',' expecting '('");
     performTestExecution("module main(in a(4), in b(4), out c(4)) call (a, b, c)");
 }
 
@@ -30,39 +30,39 @@ TEST_F(SyrecParserErrorTestsFixture, ModuleIdentifierNotMatchingAnyDeclaredModul
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterOpeningBracket) {
-    recordSyntaxError(Message::Position(1, 101), "mismatched input ',' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 97), "adda");
+    recordSyntaxError(Message::Position(1, 101), "mismatched input ',' expecting '('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call adda, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidCallStatementParameterOpeningBracket) {
-    recordSyntaxError(Message::Position(1, 100), "mismatched input '[' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
+    recordSyntaxError(Message::Position(1, 100), "mismatched input '[' expecting '('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterIdentifierCausesError) {
-    recordSyntaxError(Message::Position(1, 101), "extraneous input ',' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
+    recordSyntaxError(Message::Position(1, 101), "extraneous input ',' expecting IDENT");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, CallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 101), "d");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 101), "d");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingCallStatementParameterDelimiterCausesError) {
-    recordSyntaxError(Message::Position(1, 103), "extraneous input 'b' expecting {',', ')'}");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 97));
+    recordSyntaxError(Message::Position(1, 103), "extraneous input 'b' expecting {',', ')'}");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsCallStatementParameterCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 68));
     recordSyntaxError(Message::Position(1, 73), "extraneous input '$' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 74), "i");
-    buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 68));
     performTestExecution("module incr(inout a(4)) ++= a module main() for $i = 0 to 3 do call incr($i) rof");
 }
 

@@ -19,8 +19,8 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallKeywordCausesError) {
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInUncallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 47), "extraneous input '(' expecting IDENT");
-    recordSyntaxError(Message::Position(1, 49), "mismatched input ',' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 48), "a");
+    recordSyntaxError(Message::Position(1, 49), "mismatched input ',' expecting '('");
     performTestExecution("module main(in a(4), in b(4), out c(4)) uncall (a, b, c)");
 }
 
@@ -30,32 +30,32 @@ TEST_F(SyrecParserErrorTestsFixture, ModuleIdentifierNotMatchingAnyDeclaredModul
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterOpeningBracket) {
-    recordSyntaxError(Message::Position(1, 103), "mismatched input ',' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 99), "adda");
+    recordSyntaxError(Message::Position(1, 103), "mismatched input ',' expecting '('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall adda, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterOpeningBracket) {
-    recordSyntaxError(Message::Position(1, 102), "mismatched input '[' expecting '('");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
+    recordSyntaxError(Message::Position(1, 102), "mismatched input '[' expecting '('");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add[a, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterIdentifierCausesError) {
-    recordSyntaxError(Message::Position(1, 103), "extraneous input ',' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
+    recordSyntaxError(Message::Position(1, 103), "extraneous input ',' expecting IDENT");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UncallStatementParameterIdentifierNotMatchingAnyDeclaredVariableCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 103), "d");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
+    buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 103), "d");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(d, b, c)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingUncallStatementParameterDelimiterCausesError) {
-    recordSyntaxError(Message::Position(1, 105), "extraneous input 'b' expecting {',', ')'}");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 99));
+    recordSyntaxError(Message::Position(1, 105), "extraneous input 'b' expecting {',', ')'}");
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a b, c)");
 }
 

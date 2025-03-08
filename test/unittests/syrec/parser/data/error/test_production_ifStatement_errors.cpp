@@ -15,8 +15,8 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingIfKeywordCausesError) {
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidIfKeywordCausesError) {
     recordSyntaxError(Message::Position(1, 24), "extraneous input '-' expecting {'!', '~', '$', '#', '(', IDENT, INT}");
-    recordSyntaxError(Message::Position(1, 30), "mismatched input '(' expecting 'then'");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 25), "cond");
+    recordSyntaxError(Message::Position(1, 30), "mismatched input '(' expecting 'then'");
     performTestExecution("module main(out a(4)) if-cond (a.1 > 2) then skip else skip fi (a.1 > 2)");
 }
 
@@ -69,21 +69,21 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingFiKeywordAfterGuardConditionCausesE
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidFiKeywordAfterGuardConditionCausesError) {
     recordSyntaxError(Message::Position(1, 55), "missing 'fi' at 'done'");
-    recordSyntaxError(Message::Position(1, 60), "extraneous input '(' expecting {<EOF>, 'module'}");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 55), "done");
+    recordSyntaxError(Message::Position(1, 60), "extraneous input '(' expecting {<EOF>, 'module'}");
     performTestExecution("module main(out a(4)) if (a.1 > 2) then skip else skip done (a.1 > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 62), "extraneous input '>' expecting {<EOF>, 'module'}");
     buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
+    recordSyntaxError(Message::Position(1, 62), "extraneous input '>' expecting {<EOF>, 'module'}");
     performTestExecution("module main(out a(4)) if (a.1 > 2) then skip else skip fi a.1 > 2)");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketOfIfStatementInNonConstantValueClosingGuardExpressionCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
     recordSyntaxError(Message::Position(1, 58), "token recognition error at: '{'");
     recordSyntaxError(Message::Position(1, 63), "extraneous input '>' expecting {<EOF>, 'module'}");
-    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMissmatch>(Message::Position(1, 25));
     performTestExecution("module main(out a(4)) if (a.1 > 2) then skip else skip fi {a.1 > 2)");
 }
 

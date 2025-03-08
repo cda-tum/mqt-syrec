@@ -16,14 +16,14 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInVariableAccessC
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketForAccessOnDimensionOfVariableCausesError) {
-    recordSyntaxError(Message::Position(1, 31), "extraneous input ']' expecting {<EOF>, 'module'}");
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 29), "a1");
+    recordSyntaxError(Message::Position(1, 31), "extraneous input ']' expecting {<EOF>, 'module'}");
     performTestExecution("module main(out a[2](4)) ++= a1].0");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidOpeningBracketForAccessOnDimensionOfVariableCausesError) {
-    recordSyntaxError(Message::Position(1, 30), "extraneous input '(' expecting {<EOF>, 'module'}");
     buildAndRecordExpectedSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(Message::Position(1, 29));
+    recordSyntaxError(Message::Position(1, 30), "extraneous input '(' expecting {<EOF>, 'module'}");
     performTestExecution("module main(out a[2](4)) ++= a(1].0");
 }
 

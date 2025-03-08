@@ -19,27 +19,27 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOperationInNumericExpressionC
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingOpeningBracketOfNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 31), "mismatched input '-' expecting ']'");
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 28), 4, 0, 1);
+    recordSyntaxError(Message::Position(1, 31), "mismatched input '-' expecting ']'");
     performTestExecution("module main(out a(4)) ++= a[#a - 4)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidOpeningBracketInNumericExpressionCausesError) {
     recordSyntaxError(Message::Position(1, 31), "token recognition error at: '{'");
-    recordSyntaxError(Message::Position(1, 35), "mismatched input '-' expecting ']'");
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 32), 4, 0, 4);
+    recordSyntaxError(Message::Position(1, 35), "mismatched input '-' expecting ']'");
     performTestExecution("module main(out a[4](4)) ++= a[{#a - 2)]");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OmittingClosingBracketOfNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 48), "missing ')' at '<EOF>'");
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 41), 6, 4);
+    recordSyntaxError(Message::Position(1, 48), "missing ')' at '<EOF>'");
     performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a + 2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfInvalidClosingBracketInNumericExpressionCausesError) {
-    recordSyntaxError(Message::Position(1, 48), "mismatched input ']' expecting ')'");
     buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedBitOutOfRange>(Message::Position(1, 41), 6, 4);
+    recordSyntaxError(Message::Position(1, 48), "mismatched input ']' expecting ')'");
     performTestExecution("module main(out a(4), out b[2](4)) ++= a.(#a + 2]");
 }
 
