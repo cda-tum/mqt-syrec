@@ -9,7 +9,7 @@ We will start by defining the semantics of the highest-level entity of a SyReC p
 
 Module
 ------
-- The RevLib project (v2.0.1, section 2.1) states that the entry point of a well-formed SyReC program is either defined explicitly by a module with an identifier *main* or implicitly chosen as the last defined module of the program.
+- The RevLib project (v2.0.1, section 2.1) :footcite:p:`wille2008revlib` states that the entry point of a well-formed SyReC program is either defined explicitly by a module with an identifier *main* or implicitly chosen as the last defined module of the program.
 
 - Omitting the specification of the dimensionality of any variable (i.e., the number of dimensions and the number of values per dimension) will cause the variable to be considered as a 1D signal storing a single value; thus, the next two declarations are equivalent: *module main(inout a(4)) ...* and *module main(inout a[1](4) ...)*).
 - The value of every variable with bitwidth :math:`b` is assumed to be an unsigned integer and thus must be in the range :math:`[0, 2^b]`.
@@ -31,13 +31,13 @@ Module
             +-----------------------------------------------+-------+---------+-------+--------+---------+
             | *in*                                          | X     | X       | X     | X      | X       |
             +-----------------------------------------------+-------+---------+-------+--------+---------+
-            | *inout*                                       | o     | X       | X     | X      | ?       |
+            | *inout*                                       | o     | X       | X     | X      | o       |
             +-----------------------------------------------+-------+---------+-------+--------+---------+
-            | *out*                                         | o     | X       | X     | X      | ?       |
+            | *out*                                         | o     | X       | X     | X      | o       |
             +-----------------------------------------------+-------+---------+-------+--------+---------+
-            | *wire*                                        | o     | X       | X     | X      | ?       |
+            | *wire*                                        | o     | X       | X     | X      | o       |
             +-----------------------------------------------+-------+---------+-------+--------+---------+
-            | *state*                                       | ?     | ?       | ?     | ?      | ?       |
+            | *state*                                       | o     | o       | o     | o      | o       |
             +-----------------------------------------------+-------+---------+-------+--------+---------+
             | o ... does not allow assignment                                                            |
             | X ... allows assignment                                                                    |
@@ -52,7 +52,10 @@ Module
 - A variable can have at most :math:`2^{32}` dimensions
 - The bitwidth of a variable must be larger than zero
 - The number of values for any dimension of a variable must be larger than zero
-
+- Variables of type 'state' require special handling and are treated as read-only in a SyReC program with the initial state being set during synthesis.
+  Both of the available SyReC specifications, namely the original SyReC paper :footcite:p:`wille2016syrec` as well as in the RevLib documentation :footcite:p:`wille2008revlib`, only mention potential use-cases but fail to specify how the value transitions for these variables should be implemented.
+  Thus, the support for 'state' variables in SyReC should be considered as prototypical with future version potentially offering better support or more concise specifications of the expected semantics.
+  
 Statements
 ----------
 Assignments

@@ -9,9 +9,14 @@
 
 using namespace syrec_parser_error_tests;
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableAsAssignedToVariableInUnaryStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeInAsAssignedToVariableInUnaryStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 25), "b");
     performTestExecution("module main(in b(4)) ++= b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeStateAsAssignedToVariableInUnaryStatementCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 29), "b");
+    performTestExecution("module main() state b(4) ++= b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableAsAssignedToVariableInUnaryStatementCausesError) {

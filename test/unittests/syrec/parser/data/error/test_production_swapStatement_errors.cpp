@@ -9,19 +9,35 @@ using namespace syrec_parser_error_tests;
 
 // TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
 
-TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnLhsOfSwapStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeInOnLhsOfSwapStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 31), "a");
     performTestExecution("module main(in a(4), out b(4)) a <=> b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeStateOnLhsOfSwapStatementCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 33), "a");
+    performTestExecution("module main(out b(4)) state a(4) a <=> b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeInOnRhsOfSwapStatementCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 39), "b");
+    performTestExecution("module main(inout a(4), in b(4)) a <=> b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeStateOnRhsOfSwapStatementCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 39), "b");
+    performTestExecution("module main(out a(4)) state b(4) a <=> b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariablesForBothOperandsOfSwapStatementCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 32), "a");
+    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 38), "b");
+    performTestExecution("module main(in a(4)) state b(4) a <=> b");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnLhsOfSwapStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 31), "c");
     performTestExecution("module main(in a(4), out b(4)) c <=> b");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, UsageOfReadonlyVariableOnRhsOfSwapStatementCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 37), "a");
-    performTestExecution("module main(in a(4), out b(4)) b <=> a");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableOnRhsOfSwapStatementCausesError) {
