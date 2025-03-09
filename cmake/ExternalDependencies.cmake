@@ -110,11 +110,9 @@ set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
 # ANTLR v4.13.2 - minor version update could include "minor" breaking changes, thus we include only a specific path version.
 # https://github.com/antlr/antlr4?tab=readme-ov-file#versioning
 set(ANTLR4_TAG "cc82115" CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)") 
-set(ANTLR_BUILD_CPP_TESTS BOOL OFF) 
-#set(CMAKE_POSITION_INDEPENDENT_CODE BOOL ON)
-set(DISABLE_WARNINGS BOOL ON) # Do not report compiler warnings for build of ANTLR runtime
-
-option(ANTLR4_BUILD_AS_STATIC_LIBRARY "Build the ANTLR4 runtime as a static library (turned on by default)" ON)
+set(ANTLR_BUILD_CPP_TESTS OFF CACHE BOOL "Should the ANTLR4 C++ runtime tests be built")
+set(DISABLE_WARNINGS ON BOOL) # Do not report compiler warnings for build of ANTLR runtime
+set(ANTLR4_BUILD_AS_STATIC_LIBRARY ON CACHE BOOL "Build the ANTLR4 runtime as a static library (turned on by default)")
 
 message(STATUS "ANTLR git repo: ${ANTLR4_GIT_REPOSITORY}")
 message(STATUS "ANTLR git tag: ${ANTLR4_TAG}")
@@ -125,35 +123,32 @@ if(NOT DEFINED WITH_STATIC_CRT AND (MSVC OR WIN32))
 endif()
 
 if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
-    set(ANTLR_BUILD_STATIC BOOL ON)
+    set(ANTLR_BUILD_STATIC ON CACHE INTERNAL BOOL)
+    set(ANTLR_BUILD_SHARED OFF CACHE INTERNAL BOOL)
     message(STATUS "ANTLR runtime library type: STATIC")
 
     FetchContent_Declare(
         antlr4_static
-        GIT_PROGRESS 1
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW 1
+        GIT_SHALLOW ON
         GIT_TAG ${ANTLR4_TAG}
         SOURCE_SUBDIR runtime/Cpp
-        EXCLUDE_FROM_ALL 1
     )
     list(APPEND FETCH_PACKAGES antlr4_static)
 else()
-    set(ANTLR_BUILD_SHARED BOOL ON)
+    set(ANTLR_BUILD_STATIC OFF CACHE INTERNAL BOOL)
+    set(ANTLR_BUILD_SHARED ON CACHE INTERNAL BOOL)
     message(STATUS "ANTLR runtime library type: SHARED")
 
     FetchContent_Declare(
         antlr4_shared
-        GIT_PROGRESS 1
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW 1
+        GIT_SHALLOW ON
         GIT_TAG ${ANTLR4_TAG}
         SOURCE_SUBDIR runtime/Cpp
-        EXCLUDE_FROM_ALL 1
     )
     list(APPEND FETCH_PACKAGES antlr4_shared)
 endif()
-
 
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})

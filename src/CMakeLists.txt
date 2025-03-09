@@ -8,26 +8,24 @@ if(NOT TARGET MQT::SyReC)
   add_library(${PROJECT_NAME} ${SYREC_HEADERS} ${SYREC_SOURCES})
   
   # set public include directories
-  target_include_directories(${PROJECT_NAME}
+  target_include_directories(${PROJECT_NAME} 
     PUBLIC 
         $<BUILD_INTERFACE:${MQT_SYREC_INCLUDE_BUILD_DIR}>
         ${CMAKE_SOURCE_DIR}/include/core/syrec/parser/antlr
     )
   # set private include directories
-  target_include_directories(${PROJECT_NAME}
-	PRIVATE ${ANTLR4_INCLUDE_DIRS}
-    )
+  target_include_directories(${PROJECT_NAME} PRIVATE ${ANTLR4_INCLUDE_DIRS})
 
   # link to the MQT::Core libraries
   target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC MQT::CoreDD
     PRIVATE MQT::ProjectWarnings MQT::ProjectOptions fmt::fmt)
-
+   
   if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
 	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_static)
   else()
-	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
+    target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
   endif()
 
   # add header-only part of the Boost library
