@@ -46,7 +46,6 @@ option(BUILD_MQT_SYREC_TESTS "Also build tests for the MQT SYREC project"
        ${MQT_SYREC_MASTER_PROJECT})
 
 include(cmake/ExternalDependencies.cmake)
-include(cmake/ExternalAntlr4Cpp.cmake)
 
 # set the include directory for the build tree
 set(MQT_SYREC_INCLUDE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
