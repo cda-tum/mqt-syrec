@@ -26,7 +26,7 @@ namespace syrec {
     }
 
     Variable::ptr VariableAccess::getVar() const {
-        if (var->reference) {
+        if (var != nullptr && var->reference) {
             return var->reference;
         }
         return var;
