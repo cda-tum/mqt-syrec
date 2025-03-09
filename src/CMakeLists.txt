@@ -8,18 +8,11 @@ if(NOT TARGET MQT::SyReC)
   add_library(${PROJECT_NAME} ${SYREC_HEADERS} ${SYREC_SOURCES})
   target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 
-  if(BUILD_SHARED_LIBS)
-	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
-	add_custom_command(TARGET ${PROJECT_NAME}
-                   POST_BUILD
-                   COMMAND ${CMAKE_COMMAND}
-                           -E copy ${ANTLR4_RUNTIME_LIBRARIES} .
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  else()
-	# required if linking to static library
-	target_compile_definitions(${PROJECT_NAME} PRIVATE -DANTLR4CPP_STATIC)
+  if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
 	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_static)
-   endif()
+  else()
+	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
+  endif()
 
   # set include directories
   target_include_directories(${PROJECT_NAME}
@@ -27,7 +20,7 @@ if(NOT TARGET MQT::SyReC)
             $<BUILD_INTERFACE:${MQT_SYREC_INCLUDE_BUILD_DIR}>
             ${CMAKE_SOURCE_DIR}/include/core/syrec/parser/antlr
 		    ${CMAKE_CURRENT_SOURCE_DIR}/core/syrec/parser/antlr
-            ${ANTLR4_INCLUDE_DIRS})
+        )
 
   # link to the MQT::Core libraries
   target_link_libraries(

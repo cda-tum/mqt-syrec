@@ -199,7 +199,6 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSigna
     }
 
     std::optional<syrec::Variable::Type> localVariableType;
-    // TODO: Do we currently handle variables of type state correctly (i.e. we do not know whether assignments to state variables are allowed due to no mentioning of the semantics for variables of this type in the SyReC specification])
     if (context->VAR_TYPE_STATE() != nullptr) {
         localVariableType = syrec::Variable::Type::State;
     } else if (context->VAR_TYPE_WIRE() != nullptr) {
