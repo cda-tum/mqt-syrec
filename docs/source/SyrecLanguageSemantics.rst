@@ -13,8 +13,8 @@ Module
 
 - Omitting the specification of the dimensionality of any variable (i.e., the number of dimensions and the number of values per dimension) will cause the variable to be considered as a 1D signal storing a single value; thus, the next two declarations are equivalent: *module main(inout a(4)) ...* and *module main(inout a[1](4) ...)*).
 - The value of every variable with bitwidth :math:`b` is assumed to be an unsigned integer and thus must be in the range :math:`[0, 2^b]`.
-- The maximum supported bitwidth of any variable is equal to 32
-- Omitting the bitwidth of a variable will lead to the assumption that its bitwidth is equal to a :doc:`configurable default value <library/Settings>`
+- The maximum supported bitwidth of any variable is equal to 32.
+- Omitting the bitwidth of a variable will lead to the assumption that its bitwidth is equal to a :doc:`configurable default value <library/Settings>`.
 - The identifiers of the parameters and variables of a module must be unique in the latter.
 - Module overloading (i.e., the definition of a module sharing its identifier with another module while the structure [variable type, dimensionality and bitwidth] of their parameters do not match) is supported for all modules whose identifier is not equal to *main*. Thus, overloading the implicitly defined main module of a SyReC program is possible.
 
@@ -48,10 +48,10 @@ Module
 
  Two equal module signatures will result in a semantic error being reported.
 
-- The maximum number of values storable in a dimension is equal to :math:`2^{32}`
-- A variable can have at most :math:`2^{32}` dimensions
-- The bitwidth of a variable must be larger than zero
-- The number of values for any dimension of a variable must be larger than zero
+- The maximum number of values storable in a dimension is equal to :math:`2^{32}`.
+- A variable can have at most :math:`2^{32}` dimensions.
+- The bitwidth of a variable must be larger than zero.
+- The number of values for any dimension of a variable must be larger than zero.
 - Variables of type 'state' require special handling and are treated as read-only in a SyReC program with the initial state being set during synthesis.
   Both of the available SyReC specifications, namely the original SyReC paper :footcite:p:`wille2016syrec` as well as in the RevLib documentation :footcite:p:`wille2008revlib`, only mention potential use-cases but fail to specify how the value transitions for these variables should be implemented.
   Thus, the support for 'state' variables in SyReC should be considered as prototypical with future version potentially offering better support or more concise specifications of the expected semantics.
@@ -109,7 +109,7 @@ Assignments
 
 Call-/UncallStatements
 ^^^^^^^^^^^^^^^^^^^^^^
-- The current implementation does not require that the module referenced by a Call/UncallStatement was already processed at the current position of the Call/UncallStatement in the SyReC program
+- The current implementation does not require that the module referenced by a Call/UncallStatement was already processed at the current position of the Call/UncallStatement in the SyReC program.
 - A CallStatement will execute the referenced module starting from the first statement in its module body and ending after the last one was executed while an UncallStatement will perform an execution in the reverse direction with both semantics being inherited from the predecessor language of SyReC (see Janus :footcite:p:`yokoyama2007janus`).
 - Recursive module calls are allowed but it is the responsibility of the developer of the SyReC program to prevent an infinite recursion. However, calls to the implicitly or explicitly defined main module of the SyReC program are not allowed.
 
@@ -146,8 +146,7 @@ Call-/UncallStatements
 ForStatement
 ^^^^^^^^^^^^
 - While the SyReC grammar does not require the keyword *do* prior to the body of a ForStatement, the examples shown in both documents use such a keyword. Thus, we assume that this is a typo in the grammar and the *do* keyword is required.
-
-- The initial value of a loop variable can be used in the initialization of the iteration ranges 'end' and 'stepsize' value as shown in the following example
+- The initial value of a loop variable can be used in the initialization of the iteration ranges 'end' and 'stepsize' value as shown in the following example:
 
   .. code-block:: text
 
@@ -162,7 +161,7 @@ ForStatement
             ... 
         rof
 
-- The identifier of a loop variable (excluding the dollar sign prefix) is allowed to be equal to the one of another variable as long as the latter is not a loop variable defined in a parent loop
+- The identifier of a loop variable (excluding the dollar sign prefix) is allowed to be equal to the one of another variable as long as the latter is not a loop variable defined in a parent loop:
 
   .. code-block:: text
 
@@ -171,8 +170,8 @@ ForStatement
             a.0:1 += (i + $i)
         rof
 
-- Due to the requirement that the number of iterations performed by a ForStatement is known at compile time, assignments to loop variables are forbidden
-- If the step size of a ForStatement is not defined, it is assumed to equal 1
+- Due to the requirement that the number of iterations performed by a ForStatement is known at compile time, assignments to loop variables are forbidden.
+- If the step size of a ForStatement is not defined, it is assumed to equal 1.
 - If the user does not specify a loop variable definition or start-end-value iteration range pair but only a single number component then it is assumed that this number defines the end value of the iteration range while the start value is assumed to be equal to 0.
   Note that this assumptions also holds if the user defines a negative stepsize. The following example showcases two equivalent loop definitions, one only specifying a single number component while the other defines the start-end-stepsize triple in the loop header:
 
@@ -190,7 +189,7 @@ ForStatement
         rof
 
 - Due to the assumption that all variable values can be represented by unsigned integer values, negative step size values are converted to their unsigned value using the C++17 value conversion semantics (see `chapter 7.8 <https://open-std.org/JTC1/SC22/WG21/docs/standards>`_). The same conversion is applied to all negative values determined at compile time.
-- Semantic/Syntax errors in the statements of the body of a loop performing no iterations are reported due to the parser not implementing the dead code elimination technique
+- Semantic/Syntax errors in the statements of the body of a loop performing no iterations are reported due to the parser not implementing the dead code elimination technique.
 - The following example will showcase how the iteration range of a SyReC loop is evaluated and could be rewritten as a C loop:
 
   .. code-block:: text
@@ -227,15 +226,15 @@ IfStatement
         // between the two expressions
         fi ((a.0 + b.1) * #b)
 
-- Semantic/Syntax errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification
-- Semantic/Syntax errors in the not executed branch of an IfStatement are reported due to the parser not implementing the dead code elimination optimization technique
-- The bitlength of the operands defined in the guard as well as closing guard condition must be equal to 1.
+- Semantic/Syntax errors in any simplified expression of either the guard or closing guard conditions are reported even if the violating expression can be omitted due to the simplification.
+- Semantic/Syntax errors in the not executed branch of an IfStatement are reported due to the parser not implementing the dead code elimination optimization technique.
+- The bitlength of the expression defined in the guard as well as closing guard condition must evaluate to 1.
 
 SwapStatement
 ^^^^^^^^^^^^^
-- Both operands of the swap operation must have the same bitwidth
-- Whether the access on the assigned to variable parts in the dimension access of any VariableAccess on the opposite side of the SwapStatement is allowed depends on the configured value of the corresponding flag in the parser configuration (see :doc:`flag <library/Settings>`)
-- Assignments to the same variable parts between the two sides of the SwapStatement are not allowed and a semantic error is reported if the parser can detect such an overlap
+- Both operands of the swap operation must have the same bitwidth.
+- Whether the access on the assigned to variable parts in the dimension access of any VariableAccess on the opposite side of the SwapStatement is allowed depends on the configured value of the corresponding flag in the parser configuration (see :doc:`flag <library/Settings>`).
+- Assignments to the same variable parts between the two sides of the SwapStatement are not allowed and a semantic error is reported if the parser can detect such an overlap.
 
 VariableAccess
 --------------
@@ -300,7 +299,15 @@ Expressions
             // Expected operand bitwidth set by b.2:0 to 3
             a[1].0:($i + 2) += (b.2:0 + 5);              
             // Expected operand bitwidth set by a[0].1:2 to 2
-            a[0].1:2 += (((b << 4) + 2) << 1)           
+            a[0].1:2 += (((b << 4) + 2) << 1);
+            // Expected operand bitwidth for expression E1 (a > 4) is equal to 4.
+            // Expected operand bitwidth for expression E2 (b != c.0:1) is equal to 2.
+            // Expected operand bitwidth of expression E3 = (E1 || E2) is equal to 1.
+            a[0].0 += ((a[1] > 5) || (b != c.0:1));
+            // Expected operand bitwidth for expression E1 (a[1].1:2 + 5) is equal to 2.
+            // Expected operand bitwidth for expression E2 (a[1] != 11) is equal to 4.
+            // Expected operand bitwidth of expression E3 = (E1 || E2) is equal to 1.
+            a[0].1 += ((a[1].1:2 + 5) || (a[1] != 11)) // This statement is semantically incorrect
         rof
 
   The SyReC program above is transformed to
@@ -322,7 +329,15 @@ Expressions
             // Expected operand bitwidth of 2 causes simplification of (b << 4) to 0 
             // since shift amount is larger than expected bitwidth
             // Remaining expression 2 << 1 evaluated to 4 => 4 MOD 3 = 1
-            a[0].1:2 += 1           
+            a[0].1:2 += 1;
+            // Expected operand bitwidth of 4 for original expression E1 (a[1] > 5) does not modifiy original operand 5 MOD 15 = 5.
+            a[0].0 += ((a[1] > 5) || (b != c.0:1));
+            // Expected operand bitwidth for original expression E1 (a[1].1:2 + 5) causes truncation of 5 MOD 3 = 2.
+            // Expected operand bitwidth for original expression E2 (a[1] != 11) causes truncation of 11 MOD 4 = 3.
+            // Expected operand bitwidth of expression E3 = (E1 || E2) is equal to 1.
+            // Both subexpressions E1 and E2 do not satisfy the expected operand bitwidth of the logical OR operation
+            // and thus the right-hand side expression of the assignment is not semantically correct
+            a[0].1 += ((a[1].1:2 + 2) || (a[1] != 3))
         rof
 
   Note that for expressions with constant value operands, the integer truncation is only applied after the expression was evaluated with an example being shown below in which we assume that the truncation is performed using the modulo operation:
@@ -342,7 +357,7 @@ Expressions
     * Modulo:       :math:`2^{b} - 1`
   
 - Expressions with constant integer operands are evaluated using the C++ semantics for unsigned integers.
-
+- Operands of expressions using the relational ('<', '>', '<=', '>=', '=', '!=') or logical ('||', '&&') operations are required to have a bitwidth equal to 1.
 
 .. rubric:: References
 .. footbibliography::
