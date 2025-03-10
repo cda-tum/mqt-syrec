@@ -69,27 +69,37 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
         return std::nullopt;
     }
 
-    const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = expressionVisitorInstance->visitSignalTyped(context->signal());
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentLhsOperand;
+    const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = expressionVisitorInstance->visitSignalTyped(context->signal(), &expectedBitwidthOfAssignmentLhsOperand);
     if (assignmentLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignmentLhsOperand->get()->var, *context->signal()->start);
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*assignmentLhsOperand);
-        if (const auto& accessedBitrangeOfLhsOperand = assignmentLhsOperand.value()->var != nullptr ? tryDetermineAccessedBitrangeOfVariableAccess(**assignmentLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value()) {
-            expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
-        }
     }
     const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation  = context->assignmentOp != nullptr ? deserializeAssignmentOperationFromString(context->assignmentOp->getText()) : std::nullopt;
-    std::optional<syrec::Expression::ptr>                        assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(context->expression());
 
-    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && assignmentRhsOperand.has_value() && *assignmentRhsOperand) {
-        bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(*assignmentRhsOperand, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
-        if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentRhsOperand;
+    std::optional<syrec::Expression::ptr>                        assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(context->expression(), expectedBitwidthOfAssignmentRhsOperand);
+
+    bool detectedSemanticErrorAfterOperandsWhereProcessed = false;
+    if (expectedBitwidthOfAssignmentLhsOperand.has_value() && assignmentRhsOperand.has_value()) {
+        expressionVisitorInstance->truncateConstantValuesInExpression(*assignmentRhsOperand, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsWhereProcessed);
+        if (detectedSemanticErrorAfterOperandsWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->expression()->getStart()));
+        }
+        else if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
+            Message::Position assignmentOperandBitwidthMissmatchErrorPosition = mapTokenPositionToMessagePosition(*context->signal()->getStart());
+            if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentRhsOperand->positionOfOperandWithKnownBitwidth.has_value()) {
+                assignmentOperandBitwidthMissmatchErrorPosition = *expectedBitwidthOfAssignmentRhsOperand->positionOfOperandWithKnownBitwidth;
+            } else if (expectedBitwidthOfAssignmentLhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->positionOfOperandWithKnownBitwidth.has_value()) {
+                assignmentOperandBitwidthMissmatchErrorPosition = *expectedBitwidthOfAssignmentLhsOperand->positionOfOperandWithKnownBitwidth;
+            }
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(assignmentOperandBitwidthMissmatchErrorPosition, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
+            detectedSemanticErrorAfterOperandsWhereProcessed = true;
         }
     }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
-    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
-    return assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value() ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
+    return  !detectedSemanticErrorAfterOperandsWhereProcessed &&assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value()
+        ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
 }
 
 std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(const TSyrecParser::UnaryStatementContext* context) const {
@@ -97,13 +107,12 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatement
         return std::nullopt;
     }
 
-    const std::optional<syrec::VariableAccess::ptr> assignedToVariable = expressionVisitorInstance->visitSignalTyped(context->signal());
+    const std::optional<syrec::VariableAccess::ptr> assignedToVariable = expressionVisitorInstance->visitSignalTyped(context->signal(), nullptr);
     if (assignedToVariable.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignedToVariable->get()->var, *context->signal()->start);
     }
 
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
-    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     const std::optional<syrec::UnaryStatement::UnaryOperation> assignmentOperation = deserializeUnaryAssignmentOperationFromString(context->unaryOp->getText());
     return assignedToVariable.has_value() && assignmentOperation.has_value() ? std::make_optional(std::make_shared<syrec::UnaryStatement>(*assignmentOperation, *assignedToVariable)) : std::nullopt;
@@ -114,16 +123,15 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
         return std::nullopt;
     }
 
-    const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = expressionVisitorInstance->visitSignalTyped(context->lhsOperand);
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentLhsOperand;
+    const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = expressionVisitorInstance->visitSignalTyped(context->lhsOperand, &expectedBitwidthOfAssignmentLhsOperand);
     if (swapLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapLhsOperand->get()->var, *context->lhsOperand->getStart());
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapLhsOperand);
-        if (const auto& accessedBitrangeOfLhsOperand = swapLhsOperand.value()->var != nullptr ? tryDetermineAccessedBitrangeOfVariableAccess(**swapLhsOperand) : std::nullopt; accessedBitrangeOfLhsOperand.has_value()) {
-            expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(getLengthOfAccessedBitrange(*accessedBitrangeOfLhsOperand));
-        }
     }
-    
-    const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(context->rhsOperand);
+
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentRhsOperand;
+    const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(context->rhsOperand, &expectedBitwidthOfAssignmentRhsOperand);
     if (swapRhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *context->rhsOperand->getStart());
         if (!parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {
@@ -133,13 +141,17 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
             sharedGeneratedMessageContainerInstance->setFilterForToBeRecordedMessages(std::string(getIdentifierForSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>()));
             expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapRhsOperand);
             // Future versions of the parser might implement a more efficient version of this check instead of simply reusing the visitor function as the same logic (i.e. duplicate allocations, etc.) is executed twice.
-            expressionVisitorInstance->visitSignalTyped(context->lhsOperand);
+            // TODO: Do we need to define a filter for operand bitwidth missmatch errors to avoid duplicate errors?
+            expressionVisitorInstance->visitSignalTyped(context->lhsOperand, nullptr);
             sharedGeneratedMessageContainerInstance->clearFilterForToBeRecordedMessages();
         }
     }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
-    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
-
+    if (expectedBitwidthOfAssignmentLhsOperand.has_value() && expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
+        // Since the right-hand side is processed after the left-hand one, the former will also serve as the position in which any potential operand missmatch error is reported. 
+        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->rhsOperand->IDENT()->getSymbol()), expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
+        return std::nullopt;
+    }
     return swapLhsOperand.has_value() && swapRhsOperand.has_value() ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand)) : std::nullopt;
 }
 
@@ -227,18 +239,21 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     // (we will follow the behaviour found in other compilers [see https://godbolt.org/z/nM419obo4]).
     auto ifStatementExpressionComponentsComparer = std::make_shared<utils::IfStatementExpressionComponentsRecorder>();
     expressionVisitorInstance->setIfStatementExpressionComponentsRecorder(ifStatementExpressionComponentsComparer);
-    // The operands in the guard/closing-guard condition expression must be equal to one since the value of said condition must evaluate to a boolean value.
-    expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(1);
-    generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(context->guardCondition).value_or(nullptr));
 
-    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->condition != nullptr) {
-        bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->condition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
-        if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
+    bool detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = false;
+    // The operands in the guard/closing-guard condition expression must be equal to one since the value of said condition must evaluate to a boolean value.
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> determinedOperandBitwidthOfGuardConditionExpression;
+    generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(context->guardCondition, determinedOperandBitwidthOfGuardConditionExpression).value_or(nullptr));
+
+    if (generatedIfStatement->condition != nullptr) {
+        expressionVisitorInstance->truncateConstantValuesInExpression(generatedIfStatement->condition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed);
+        if (detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
+        } else if (determinedOperandBitwidthOfGuardConditionExpression.has_value() && determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth != 1) {
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()), 1, determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth);
+            detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
         }
     }
-    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
 
     // Similarily to the handling of the statement list production in the ForStatement, an empty statement list should already report a syntax error and thus an explicit handling
     // of an empty statement at this point is not necessary. Additionally, currently the parser does not implement the dead code elimination optimization technique which would allow
@@ -248,22 +263,26 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->elseStatements = visitStatementListTyped(context->falseBranchStmts).value_or(syrec::Statement::vec());
 
     ifStatementExpressionComponentsComparer->switchMode(utils::IfStatementExpressionComponentsRecorder::OperationMode::Comparing);
-    expressionVisitorInstance->setExpectedBitwidthForAnyProcessedEntity(1);
-    generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(context->matchingGuardExpression).value_or(nullptr));
+    std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> determinedOperandBitwidthOfClosingGuardConditionExpression;
+    generatedIfStatement->setFiCondition(expressionVisitorInstance->visitExpressionTyped(context->matchingGuardExpression, determinedOperandBitwidthOfClosingGuardConditionExpression).value_or(nullptr));
 
-    if (expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity().has_value() && generatedIfStatement->fiCondition != nullptr) {
+    if (generatedIfStatement->fiCondition != nullptr) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInAnyBinaryExpression(generatedIfStatement->fiCondition, *expressionVisitorInstance->getCurrentExpectedBitwidthForAnyProcessedEntity(), parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        expressionVisitorInstance->truncateConstantValuesInExpression(generatedIfStatement->fiCondition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()));
+            detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
+        } else if (determinedOperandBitwidthOfClosingGuardConditionExpression.has_value() && determinedOperandBitwidthOfClosingGuardConditionExpression->operandBitwidth != 1) {
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()), 1, determinedOperandBitwidthOfClosingGuardConditionExpression->operandBitwidth);
+            detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
         }
     }
-    expressionVisitorInstance->clearExpectedBitwidthForAnyProcessedEntity();
-
+    
     if (generatedIfStatement->condition != nullptr && generatedIfStatement->fiCondition != nullptr && !ifStatementExpressionComponentsComparer->recordedMatchingExpressionComponents().value_or(true)) {
         recordSemanticError<SemanticError::IfGuardExpressionMissmatch>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
+        detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
     }
-    return generatedIfStatement;
+    return !detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed ? std::make_optional(generatedIfStatement) : std::nullopt;
 }
 
 std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTyped(const TSyrecParser::ForStatementContext* context) {

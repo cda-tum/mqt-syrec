@@ -72,29 +72,29 @@ TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroInUpperBitMultiplicationOpera
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInLhsOfBinaryExpression) {
     const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 56));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 105));
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if ((b.$i:1 / 3) + a.0) then ++= a.0:1 else skip fi ((b.$i:1 / 3) + a.0) rof", customParserConfig);
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingModuloOperationInRhsOfBinaryExpression) {
     const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::Modulo);
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 62));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 111));
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 3)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 3)) rof", customParserConfig);
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInLhsOfBinaryExpression) {
     const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 56));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 105));
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if ((b.$i:1 / 4) + a.0) then ++= a.0:1 else skip fi ((b.$i:1 / 4) + a.0) rof", customParserConfig);
 }
 
 TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDueToTruncationOfConstantValuesUsingBitwiseAndOperationInRhsOfBinaryExpression) {
     const auto customParserConfig = syrec::ReadProgramSettings(32, utils::IntegerConstantTruncationOperation::BitwiseAnd);
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 55));
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 104));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 62));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 111));
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 1 do if (a.0 + (b.$i:1 / 4)) then ++= a.0:1 else skip fi (a.0 + (b.$i:1 / 4)) rof", customParserConfig);
 }
 
@@ -106,4 +106,39 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInLhsOperandOfBinaryExpression
 TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInRhsOperandOfBinaryExpressionReportedEvenIfExpressionCouldBeSimplified) {
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 44), "b");
     performTestExecution("module main(inout a(2)) a.0 += ((#a - 2) * (b.1 + 1))");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 53), 2, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) a[1].1:2 += (b + a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfLhsOperandCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 66), 2, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) a[1].1:2 += ((b + a[0].1:2) + a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfRhsOperandCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 99), 2, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 3 do a[1].1:2 += ((a[0].$i:1 + (b + a[0].1:2)) + a[0]) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfLhsOperandUsingLogicalOperationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 65), 1, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) a[1].0 += ((b.1 || a[0].1) + a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfRhsOperandUsingLogicalOperationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 98), 1, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 3 do a[1].0 += ((a[0].$i:1 + (b.0 || a[0].1)) + a[0]) rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfLhsOperandUsingRelationalOperationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 64), 1, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) a[1].0 += ((b = a[0].1:2) + a[0])");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMissmatchForOperandsOfBinaryExpressionWithBitwidthInheritedFromNestedExpressionOfRhsOperandUsingRelationalOperationCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 97), 1, 4);
+    performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 3 do a[1].0 += ((a[0].$i:1 + (b = a[0].1:2)) + a[0]) rof");
 }

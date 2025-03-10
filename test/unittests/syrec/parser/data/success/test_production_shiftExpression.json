@@ -39,5 +39,9 @@
   "simplificationOfRightShiftOperationWithShiftAmountLargerThanLargetsPossibleVariableBitlength": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a >> (#a * 8))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
+  },
+  "integerConstantTruncationNotUsingParentOperandBitwidthIfLogicalOperationIsUsedInParentExpression": {
+    "inputCircuit": "module main(inout a(4), inout b(5)) b.0 += ((((a + 25) - b.1:4) << 2) > 1)",
+    "expectedCircuit": "module main(inout a(4), inout b(5)) b[0].0 += ((((a[0] + 10) - b[0].1:4) << 2) > 1)"
   }
 }

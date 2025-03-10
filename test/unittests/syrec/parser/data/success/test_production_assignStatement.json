@@ -940,5 +940,12 @@
   },
   "accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfAssignmentUsingFullbitwidthAndLhsAccessingBitrangeUsingConstantIndicesWithAcessOnNoOverlappingValuesOfDimensions": {
     "inputCircuit": "module main(inout a[2][4][3](6), in b(3)) a[0][2][1].2:0 += b[a[1][1][1]]"
+  },
+  "usageOfDifferentOperandBitwidthsInNestedBinaryExpressionsOkIfParentExpressionHasBitwidthOfAssignedToSignalParts": {
+    "inputCircuit": "module main(inout a(4), in b(2)) a[0].0 += ((b[0] + 2) > (a[0].1:2 + a[0].3:2))"
+  },
+  "usageOfDifferentOperandBitwidthInNestedShiftExpressionsOkIfParentExpressionHasBitwidthOfAssignedToSignalParts": {
+    "inputCircuit": "module main(inout a[2](4), in b(3)) a[0].1 += (((((b[0] + a[1].0:2) + 5) << 2) < b) || 2)",
+    "expectedCircuit": "module main(inout a[2](4), in b(3)) a[0].1 += ((((b[0] + a[1].0:2) + 5) << 2) < b[0])"
   }
 }

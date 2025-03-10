@@ -23,25 +23,25 @@
 
 using namespace syrec_parser;
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(const TSyrecParser::ExpressionContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTyped(const TSyrecParser::ExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) {
     if (context == nullptr) {
         return std::nullopt;
     }
 
     if (auto* const binaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromBinaryExpressionContext*>(context); binaryExpressionContext != nullptr) {
-        return visitBinaryExpressionTyped(binaryExpressionContext->binaryExpression());
+        return visitBinaryExpressionTyped(binaryExpressionContext->binaryExpression(), optionalDeterminedOperandBitwidth);
     }
     if (auto* const shiftExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromShiftExpressionContext*>(context); shiftExpressionContext != nullptr) {
-        return visitShiftExpressionTyped(shiftExpressionContext->shiftExpression());
+        return visitShiftExpressionTyped(shiftExpressionContext->shiftExpression(), optionalDeterminedOperandBitwidth);
     }
     if (auto* const unaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromUnaryExpressionContext*>(context); unaryExpressionContext != nullptr) {
-        return visitUnaryExpressionTyped(unaryExpressionContext->unaryExpression());
+        return visitUnaryExpressionTyped(unaryExpressionContext->unaryExpression(), optionalDeterminedOperandBitwidth);
     }
     if (auto* const expressionFromNumberContext = dynamic_cast<const TSyrecParser::ExpressionFromNumberContext*>(context); expressionFromNumberContext != nullptr) {
         return visitExpressionFromNumberTyped(expressionFromNumberContext);
     }
     if (auto* const expressionFromSignalContext = dynamic_cast<const TSyrecParser::ExpressionFromSignalContext*>(context); expressionFromSignalContext != nullptr) {
-        return visitExpressionFromSignalTyped(expressionFromSignalContext);
+        return visitExpressionFromSignalTyped(expressionFromSignalContext, optionalDeterminedOperandBitwidth);
     }
 
     // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
@@ -50,13 +50,14 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTy
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) {
     if (context == nullptr) {
         return std::nullopt;
     }
-
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
-    std::optional<syrec::Expression::ptr> lhsOperand = visitExpressionTyped(context->lhsOperand);
+
+    std::optional<DeterminedExpressionOperandBitwidthInformation> determinedLhsOperandBitwidth;
+    std::optional<syrec::Expression::ptr>                         lhsOperand              = visitExpressionTyped(context->lhsOperand, determinedLhsOperandBitwidth);
     const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation != nullptr ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
     if (context->binaryOperation != nullptr && !mappedToBinaryOperation.has_value()) {
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->binaryOperation), context->binaryOperation->getText());
@@ -66,12 +67,16 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
         recordExpressionComponent(*mappedToBinaryOperation);
     }
 
-    std::optional<syrec::Expression::ptr> rhsOperand = visitExpressionTyped(context->rhsOperand);
+    std::optional<DeterminedExpressionOperandBitwidthInformation> determinedRhsOperandBitwidth;
+    std::optional<syrec::Expression::ptr>                         rhsOperand = visitExpressionTyped(context->rhsOperand, determinedRhsOperandBitwidth);
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Closing);
     if (!mappedToBinaryOperation.has_value()) {
+        // We cannot propagate the operand bitwidth of the left or right-hand side operand to the parent expression if we do not know which binary operation
+        // was defined in the current expression since logical and relational operations will aggregate the result in a single bit while all other operations
+        // propagte the bitwidth of its operands
         return std::nullopt;
     }
-
+    
     const std::optional<unsigned int> constantValueOfRhsOperand = rhsOperand.has_value() && *rhsOperand != nullptr ? tryGetConstantValueOf(**rhsOperand) : std::nullopt;
     if ((*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Divide || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::Modulo || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::FracDivide) 
         && constantValueOfRhsOperand.has_value() && *constantValueOfRhsOperand == 0) {
@@ -79,10 +84,87 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
         return std::nullopt;
     }
 
-    // We delegate the truncation of constant values to the caller of this function since the expected bitwidth of the operands could have been set in the currently processed
-    // expression and needs to be propagate to any parent expression
+    optionalDeterminedOperandBitwidth = determinedLhsOperandBitwidth.has_value() ? determinedLhsOperandBitwidth : determinedRhsOperandBitwidth;
+    if (*mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::LogicalOr || *mappedToBinaryOperation == syrec::BinaryExpression::BinaryOperation::LogicalAnd) {
+        if (!optionalDeterminedOperandBitwidth.has_value()) {
+            optionalDeterminedOperandBitwidth = DeterminedExpressionOperandBitwidthInformation();
+        }
+        optionalDeterminedOperandBitwidth->operandBitwidth = 1;
+    }
+
+    if (optionalDeterminedOperandBitwidth.has_value()) {
+        if (!determinedLhsOperandBitwidth.has_value() && lhsOperand.has_value()) {
+            // Truncate integer constants until first logical or relational operation is encountered
+            bool detectedDivisionByZeroDuringTruncationOfIntegerConstants = false;
+            truncateConstantValuesInExpression(*lhsOperand, optionalDeterminedOperandBitwidth->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfIntegerConstants);
+            if (detectedDivisionByZeroDuringTruncationOfIntegerConstants) {
+                recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->lhsOperand->getStart()));
+                return std::nullopt;
+            }
+        } else if (!determinedRhsOperandBitwidth.has_value() && rhsOperand.has_value()) {
+            // Truncate integer constants until first logical or relational operation is encountered
+            bool detectedDivisionByZeroDuringTruncationOfIntegerConstants = false;
+            truncateConstantValuesInExpression(*rhsOperand, optionalDeterminedOperandBitwidth->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfIntegerConstants);
+            if (detectedDivisionByZeroDuringTruncationOfIntegerConstants) {
+                recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->rhsOperand->getStart()));
+                return std::nullopt;
+            }
+        }
+
+        // We start by comparing the bitwidth of the operands of the expression with the expected bitwidth that was potentially set (either by one of the operands) or based on the
+        // operation used in the current expression. In the latter case, the comparison between the operand bitwidths can be omitted since they are already compared to the expected one.
+        // Additionally, if the expected bitwidth was set to the bitwidth of the other operand of the expression then the comparision will already be performed in the following two checks.
+        bool shouldOperandBitwidthsBeCompared = true;
+        if (determinedLhsOperandBitwidth.has_value() && determinedLhsOperandBitwidth->operandBitwidth != optionalDeterminedOperandBitwidth->operandBitwidth) {
+            const Message::Position operandBitwidthLengthMissmatchErrorPosition = determinedLhsOperandBitwidth->positionOfOperandWithKnownBitwidth.has_value()
+                ? determinedLhsOperandBitwidth->positionOfOperandWithKnownBitwidth.value()
+                : mapTokenPositionToMessagePosition(*context->lhsOperand->getStart());
+
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(operandBitwidthLengthMissmatchErrorPosition, optionalDeterminedOperandBitwidth->operandBitwidth, determinedLhsOperandBitwidth->operandBitwidth);
+            shouldOperandBitwidthsBeCompared = false;
+        }
+        if (determinedRhsOperandBitwidth.has_value() && determinedRhsOperandBitwidth->operandBitwidth != optionalDeterminedOperandBitwidth->operandBitwidth) {
+            const Message::Position operandBitwidthLengthMissmatchErrorPosition = determinedRhsOperandBitwidth->positionOfOperandWithKnownBitwidth.has_value()
+                ? determinedRhsOperandBitwidth->positionOfOperandWithKnownBitwidth.value()
+                : mapTokenPositionToMessagePosition(*context->rhsOperand->getStart());
+
+            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(operandBitwidthLengthMissmatchErrorPosition, optionalDeterminedOperandBitwidth->operandBitwidth, determinedRhsOperandBitwidth->operandBitwidth);
+            shouldOperandBitwidthsBeCompared = false;
+        }
+
+        if (shouldOperandBitwidthsBeCompared && determinedLhsOperandBitwidth.has_value() && determinedRhsOperandBitwidth.has_value()) {
+            if (determinedLhsOperandBitwidth->operandBitwidth != determinedRhsOperandBitwidth->operandBitwidth) {
+                // The position of operand that set the expected bitwidth is unknown only if said operand is itself an expression with an unknown bitwidth.
+                // In all other cases, either:
+                // I.   The bitwidth of the operands of the current expression matches (branch should not be entered then)
+                // II.  The bitwidth of the operands did not match. In this case the position of one operand must be known (otherwise the bitwidth of both operands would be unknown
+                //      or would match [if both operands are nested expressions whos bitwidth was set due to the usage of a logical or relational operand]).
+                // The position of the right-hand side operand has precedence over the left-hand one since the former is processed after the latter.
+                const Message::Position operandBitwidthLengthMissmatchErrorPosition = determinedRhsOperandBitwidth->positionOfOperandWithKnownBitwidth.has_value()
+                    ? determinedRhsOperandBitwidth->positionOfOperandWithKnownBitwidth.value()
+                    : determinedLhsOperandBitwidth->positionOfOperandWithKnownBitwidth.value();
+                recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(operandBitwidthLengthMissmatchErrorPosition, determinedLhsOperandBitwidth->operandBitwidth, determinedRhsOperandBitwidth->operandBitwidth);
+                return std::nullopt;
+            }
+            optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth = determinedLhsOperandBitwidth->positionOfOperandWithKnownBitwidth; 
+        }
+    } 
+
+    const std::optional<unsigned int> expectedBitwidthOfOperandsInExpression = optionalDeterminedOperandBitwidth.has_value() ? std::make_optional(optionalDeterminedOperandBitwidth->operandBitwidth) : std::nullopt;
+    if (isBinaryOperationARelationalOrLogicalOne(*mappedToBinaryOperation)) {
+        if (!optionalDeterminedOperandBitwidth.has_value()) {
+            optionalDeterminedOperandBitwidth = DeterminedExpressionOperandBitwidthInformation();
+        } else if (optionalDeterminedOperandBitwidth->operandBitwidth != 1) {
+            // We can only propagate the position of either of the operands if their accessed bitwidth is equal to 1.
+            optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth.reset();
+        }
+        optionalDeterminedOperandBitwidth->operandBitwidth = 1;
+    }
+
     if (lhsOperand.has_value() && rhsOperand.has_value()) {
-        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(syrec::BinaryExpression(*lhsOperand, *mappedToBinaryOperation, *rhsOperand), optionalExpectedBitwidthForAnyProcessedEntity, nullptr); simplifiedBinaryExpr.has_value()) {
+        // We delegate the truncation of constant values to the caller of this function since the expected bitwidth of the operands could have been set in the currently processed
+        // expression and needs to be propagate to any parent expression
+        if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(syrec::BinaryExpression(*lhsOperand, *mappedToBinaryOperation, *rhsOperand), expectedBitwidthOfOperandsInExpression, nullptr); simplifiedBinaryExpr.has_value()) {
             return simplifiedBinaryExpr;
         }
         return std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand);
@@ -90,13 +172,13 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) {
     if (context == nullptr) {
         return std::nullopt;
     }
 
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
-    std::optional<syrec::Expression::ptr>                       toBeShiftedOperand     = visitExpressionTyped(context->expression());
+    std::optional<syrec::Expression::ptr>                       toBeShiftedOperand     = visitExpressionTyped(context->expression(), optionalDeterminedOperandBitwidth);
     const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation != nullptr ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
     if (context->shiftOperation != nullptr && !mappedToShiftOperation.has_value()) {
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->shiftOperation), context->shiftOperation->getText());
@@ -113,7 +195,8 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     }
 
     if (toBeShiftedOperand.has_value() && mappedToShiftOperation.has_value() && shiftAmount.has_value()) {
-        if (const std::optional<syrec::Expression::ptr> optionalSimplifiedShiftExpr = trySimplifyShiftExpression(syrec::ShiftExpression(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount), optionalExpectedBitwidthForAnyProcessedEntity); optionalSimplifiedShiftExpr.has_value()) {
+        const std::optional<unsigned int> expectedBitwidthOfOperandsInLhsOperand = optionalDeterminedOperandBitwidth.has_value() ? std::make_optional(optionalDeterminedOperandBitwidth->operandBitwidth) : std::nullopt;
+        if (const std::optional<syrec::Expression::ptr> optionalSimplifiedShiftExpr = trySimplifyShiftExpression(syrec::ShiftExpression(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount), expectedBitwidthOfOperandsInLhsOperand); optionalSimplifiedShiftExpr.has_value()) {
             return optionalSimplifiedShiftExpr;
         }
         return std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount);
@@ -121,7 +204,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context) const {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context, [[maybe_unused]] std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) const {
     if (context != nullptr && context->start != nullptr) {
         recordCustomError(mapTokenPositionToMessagePosition(*context->start), "Unary expressions are currently not supported");
     }
@@ -130,15 +213,16 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpress
     return std::nullopt;
 }
 
+// TODO: Caller needs to set expected bitwidth and perform the optional integer constant truncation
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(const TSyrecParser::ExpressionFromNumberContext* context) const {
     if (const auto& generatedNumberContainer = context != nullptr ? visitNumberTyped(context->number()) : std::nullopt; generatedNumberContainer.has_value()) {
-        return std::make_shared<syrec::NumericExpression>(*generatedNumberContainer, optionalExpectedBitwidthForAnyProcessedEntity.value_or(DEFAULT_EXPRESSION_BITWIDTH));
+        return std::make_shared<syrec::NumericExpression>(*generatedNumberContainer, DEFAULT_EXPRESSION_BITWIDTH);
     }
     return std::nullopt;
 }
 
-std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context) {
-    if (const auto& generatedSignalContainer = context != nullptr ? visitSignalTyped(context->signal()) : std::nullopt; generatedSignalContainer.has_value()) {
+std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) {
+    if (const auto& generatedSignalContainer = context != nullptr ? visitSignalTyped(context->signal(), &optionalDeterminedOperandBitwidth) : std::nullopt; generatedSignalContainer.has_value()) {
         return std::make_shared<syrec::VariableExpression>(*generatedSignalContainer);
     }
     return std::nullopt;
@@ -336,7 +420,8 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
     return std::nullopt;
 }
 
-std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(const TSyrecParser::SignalContext* context) {
+// TODO: Propagate length of accessed bitrange if possible and remove comparision with expected operand bitwidth, remove expected operand bitwidth member of custom expression visitor
+std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(const TSyrecParser::SignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>* optionalDeterminedOperandBitwidth) {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
     }
@@ -369,10 +454,8 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     syrec::VariableAccess::ptr generatedVariableAccess   = std::make_shared<syrec::VariableAccess>();
     generatedVariableAccess->indexes                     = syrec::Expression::vec(numUserAccessedDimensions, nullptr);
 
-    const std::optional<unsigned int> backupOfPriorExpectedBitwidthSizeForOperands = optionalExpectedBitwidthForAnyProcessedEntity;
     std::optional<bool>               backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed;
     if (!context->accessedDimensions.empty()) {
-        clearExpectedBitwidthForAnyProcessedEntity();
         backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed = isCurrentlyProcessingDimensionAccessOfVariableAccess();
         markStartOfProcessingOfDimensionAccessOfVariableAccess();
     }
@@ -381,28 +464,24 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         // Due to the implemented optimization/simplifications of expression (i.e. an expression multiplied with 0 can be replaced with the latter), we need to record the components of the user defined
         // variable access in their unoptimized 'form' which are available during the processing of said components by the parser.
         recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::DimensionAccessExpressionStart);
-        if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(context->accessedDimensions.at(i)); exprDefiningAccessedValueOfDimension.has_value()) {
+        std::optional<DeterminedExpressionOperandBitwidthInformation> determinedBitwidthOfOperandsInDimensionAccessExpr;
+        if (const std::optional<syrec::Expression::ptr> exprDefiningAccessedValueOfDimension = visitExpressionTyped(context->accessedDimensions.at(i), determinedBitwidthOfOperandsInDimensionAccessExpr); exprDefiningAccessedValueOfDimension.has_value()) {
             generatedVariableAccess->indexes[i] = *exprDefiningAccessedValueOfDimension;
         }
 
         recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::VariableAccessComponent::DimensionAccessExpressionEnd);
         // Any generated bitwidth restriction generated during the processing of the expression defining the accessed value of the dimension needs to be cleared if the latter was processed to prevent
         // the propagation of the restriction to the parsing process for the remaining components of the variable access
-        if (optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
+        if (determinedBitwidthOfOperandsInDimensionAccessExpr.has_value()) {
             // Regardless of whether variable accesses with an unknown length of the accessed bitrange were defined in the expression (referred to as E) specifying the index value for the currently processed dimension of the dimension access,
             // truncation of constant values in any binary expression that is part of E can use the set bitlength of any variable access (since we are assuming that the user defined a well formed expression [i.e. the accessed bitrange of any variable access operands
             // has the same length]).
             bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-            truncateConstantValuesInAnyBinaryExpression(generatedVariableAccess->indexes[i], *optionalExpectedBitwidthForAnyProcessedEntity, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+            truncateConstantValuesInExpression(generatedVariableAccess->indexes[i], determinedBitwidthOfOperandsInDimensionAccessExpr->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
             if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
                 recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->accessedDimensions.at(i)->getStart()));
             }
-            clearExpectedBitwidthForAnyProcessedEntity();   
         }
-    }
-
-    if (backupOfPriorExpectedBitwidthSizeForOperands.has_value()) {
-        setExpectedBitwidthForAnyProcessedEntity(*backupOfPriorExpectedBitwidthSizeForOperands);
     }
 
     if (backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed.has_value() && !*backupOfStatusWhetherDimensionAccessIsCurrentlyProcessed) {
@@ -544,25 +623,11 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
         userAccessedBitrangeLength = 1;
     }
 
-    if (userAccessedBitrangeLength.has_value()) {
-        if (!optionalExpectedBitwidthForAnyProcessedEntity.has_value()) {
-            setExpectedBitwidthForAnyProcessedEntity(*userAccessedBitrangeLength);
-        } else if (userAccessedBitrangeLength != *optionalExpectedBitwidthForAnyProcessedEntity) {
-            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(
-                    mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
-                    *optionalExpectedBitwidthForAnyProcessedEntity,
-                    *userAccessedBitrangeLength);
-        }
+    if (userAccessedBitrangeLength.has_value() && optionalDeterminedOperandBitwidth != nullptr) {
+        *optionalDeterminedOperandBitwidth = DeterminedExpressionOperandBitwidthInformation({*userAccessedBitrangeLength,
+            context->IDENT()->getSymbol() != nullptr ? std::make_optional(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol())) : std::nullopt});    
     }
     return generatedVariableAccess;
-}
-
-void CustomExpressionVisitor::setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth) {
-    optionalExpectedBitwidthForAnyProcessedEntity = bitwidth;
-}
-
-void CustomExpressionVisitor::clearExpectedBitwidthForAnyProcessedEntity() {
-    optionalExpectedBitwidthForAnyProcessedEntity.reset();
 }
 
 void CustomExpressionVisitor::clearRestrictionOnVariableAccesses() {
@@ -613,19 +678,18 @@ bool CustomExpressionVisitor::isCurrentlyProcessingDimensionAccessOfVariableAcce
     return isCurrentlyProcessingDimensionAccessOfVariableAccessFlag;
 }
 
-std::optional<unsigned int> CustomExpressionVisitor::getCurrentExpectedBitwidthForAnyProcessedEntity() const {
-    return optionalExpectedBitwidthForAnyProcessedEntity;
-}
-
-bool CustomExpressionVisitor::truncateConstantValuesInAnyBinaryExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, const utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero) {
+bool CustomExpressionVisitor::truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, const utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero) {
     if (expression == nullptr) {
         return false;
     }
 
     bool wasOriginalExprModified = false;
     if (auto* const exprAsBinaryExpr = dynamic_cast<syrec::BinaryExpression*>(&*expression); exprAsBinaryExpr != nullptr) {
-        const bool wasLhsExprModified = exprAsBinaryExpr->lhs != nullptr ? truncateConstantValuesInAnyBinaryExpression(exprAsBinaryExpr->lhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
-        const bool wasRhsExprModified = exprAsBinaryExpr->rhs != nullptr ? truncateConstantValuesInAnyBinaryExpression(exprAsBinaryExpr->rhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
+        if (isBinaryOperationARelationalOrLogicalOne(exprAsBinaryExpr->binaryOperation)) {
+            return false;
+        }
+        const bool wasLhsExprModified = exprAsBinaryExpr->lhs != nullptr ? truncateConstantValuesInExpression(exprAsBinaryExpr->lhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
+        const bool wasRhsExprModified = exprAsBinaryExpr->rhs != nullptr ? truncateConstantValuesInExpression(exprAsBinaryExpr->rhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
 
         if (wasLhsExprModified || wasRhsExprModified) {
             if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(*exprAsBinaryExpr, expectedBitwidthOfOperandsInExpression, detectedDivisionByZero)) {
@@ -634,7 +698,7 @@ bool CustomExpressionVisitor::truncateConstantValuesInAnyBinaryExpression(syrec:
             }
         }
     } else if (auto* const exprAsShiftExpr = dynamic_cast<syrec::ShiftExpression*>(&*expression); exprAsShiftExpr != nullptr) {
-        wasOriginalExprModified = truncateConstantValuesInAnyBinaryExpression(exprAsShiftExpr->lhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero);
+        wasOriginalExprModified = truncateConstantValuesInExpression(exprAsShiftExpr->lhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero);
         if (const std::optional<syrec::Expression::ptr> simplfifiedShiftExpr = trySimplifyShiftExpression(*exprAsShiftExpr, expectedBitwidthOfOperandsInExpression); simplfifiedShiftExpr.has_value()) {
             expression = *simplfifiedShiftExpr;
         }
@@ -773,9 +837,11 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyBinary
         case syrec::BinaryExpression::BinaryOperation::LogicalOr:
         case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
         case syrec::BinaryExpression::BinaryOperation::Add:
-        case syrec::BinaryExpression::BinaryOperation::Subtract:
         case syrec::BinaryExpression::BinaryOperation::Exor:
             return unknownOperandValue;
+        case syrec::BinaryExpression::BinaryOperation::Subtract:
+            // Expression (0 - x) cannot be simplified
+            return isValueOfLhsOperandKnown ? std::nullopt : std::make_optional(unknownOperandValue);
         case syrec::BinaryExpression::BinaryOperation::Divide:
         case syrec::BinaryExpression::BinaryOperation::FracDivide:
         case syrec::BinaryExpression::BinaryOperation::Modulo:
@@ -828,6 +894,12 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyBinary
         if (const std::optional<unsigned int> evaluationResultOfExpr = utils::tryEvaluate(constantValueOfLhsOperand, binaryExpr.binaryOperation, constantValueOfRhsOperand); evaluationResultOfExpr.has_value()) {
             return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(*evaluationResultOfExpr), optionalBitwidthOfOperandsInExpression.value_or(DEFAULT_EXPRESSION_BITWIDTH));
         }
+    }
+
+    // We cannot propagate a given expected operand bitwidth to a binary expression that uses a logical or relational operation since the result of the expression has an expected bitwidth equal to 1 while its operands are allowed to use
+    // a different operand bitwidth
+    if (isBinaryOperationARelationalOrLogicalOne(binaryExpr.binaryOperation)) {
+        return std::nullopt;
     }
 
     if (const std::optional<syrec::Expression::ptr>& simplifiedLhsOperand = constantValueOfLhsOperand.has_value() 

@@ -24,21 +24,24 @@ namespace syrec_parser {
         CustomExpressionVisitor(const std::shared_ptr<ParserMessagesContainer>& sharedMessagesContainerInstance, const std::shared_ptr<utils::BaseSymbolTable>& sharedSymbolTableInstance, const syrec::ReadProgramSettings& parserConfiguration):
             CustomBaseVisitor(sharedMessagesContainerInstance, sharedSymbolTableInstance, parserConfiguration) {}
 
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionTyped(const TSyrecParser::ExpressionContext* context);
+        struct DeterminedExpressionOperandBitwidthInformation {
+            unsigned int                     operandBitwidth = 0;
+            std::optional<Message::Position> positionOfOperandWithKnownBitwidth;
+        };
+
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionTyped(const TSyrecParser::ExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth);
         [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromNumberTyped(const TSyrecParser::ExpressionFromNumberContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context);
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context) const;
-        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context);
-        [[maybe_unused]] std::optional<syrec::VariableAccess::ptr> visitSignalTyped(const TSyrecParser::SignalContext* context);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitExpressionFromSignalTyped(const TSyrecParser::ExpressionFromSignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitBinaryExpressionTyped(const TSyrecParser::BinaryExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth);
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitUnaryExpressionTyped(const TSyrecParser::UnaryExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth) const;
+        [[nodiscard]] std::optional<syrec::Expression::ptr>        visitShiftExpressionTyped(const TSyrecParser::ShiftExpressionContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>& optionalDeterminedOperandBitwidth);
+        [[maybe_unused]] std::optional<syrec::VariableAccess::ptr> visitSignalTyped(const TSyrecParser::SignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>* optionalDeterminedOperandBitwidth);
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberTyped(const TSyrecParser::NumberContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromConstantTyped(const TSyrecParser::NumberFromConstantContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromSignalwidthTyped(const TSyrecParser::NumberFromSignalwidthContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromExpressionTyped(const TSyrecParser::NumberFromExpressionContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const;
 
-        void                                      setExpectedBitwidthForAnyProcessedEntity(unsigned int bitwidth);
-        void                                      clearExpectedBitwidthForAnyProcessedEntity();
         void                                      clearRestrictionOnVariableAccesses();
         void                                      setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
         void                                      clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
@@ -48,11 +51,9 @@ namespace syrec_parser {
         void                                      markEndOfProcessingOfDimensionAccessOfVariableAccess();
         [[maybe_unused]] bool                     setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
         [[nodiscard]] bool                        isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
-        [[nodiscard]] std::optional<unsigned int> getCurrentExpectedBitwidthForAnyProcessedEntity() const;
-        [[maybe_unused]] static bool              truncateConstantValuesInAnyBinaryExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
+        [[maybe_unused]] static bool              truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
 
     protected:
-        std::optional<unsigned int>                                        optionalExpectedBitwidthForAnyProcessedEntity;
         std::optional<syrec::VariableAccess::ptr>                          optionalRestrictionOnVariableAccesses;
         std::optional<std::string_view>                                    optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization;
         std::optional<utils::IfStatementExpressionComponentsRecorder::ptr> optionalIfStatementExpressionComponentsRecorder;
@@ -66,6 +67,21 @@ namespace syrec_parser {
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(unsigned int knownOperandValue, syrec::BinaryExpression::BinaryOperation binaryOperation, const syrec::Expression::ptr& unknownOperandValue, bool isValueOfLhsOperandKnown);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyShiftExpression(const syrec::ShiftExpression& shiftExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpression(const syrec::BinaryExpression& binaryExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression, bool* detectedDivisionByZero);
+        [[nodiscard]] static constexpr bool                                              isBinaryOperationARelationalOrLogicalOne(syrec::BinaryExpression::BinaryOperation binaryOperation) {
+            switch (binaryOperation) {
+                case syrec::BinaryExpression::BinaryOperation::Equals:
+                case syrec::BinaryExpression::BinaryOperation::GreaterThan:
+                case syrec::BinaryExpression::BinaryOperation::GreaterEquals:
+                case syrec::BinaryExpression::BinaryOperation::LessThan:
+                case syrec::BinaryExpression::BinaryOperation::LessEquals:
+                case syrec::BinaryExpression::BinaryOperation::NotEquals:
+                case syrec::BinaryExpression::BinaryOperation::LogicalAnd:
+                case syrec::BinaryExpression::BinaryOperation::LogicalOr:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     };
 } // namespace syrec_parser
 #endif
