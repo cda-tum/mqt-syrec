@@ -17,7 +17,6 @@
 
 using namespace utils;
 
-// TODO: Check whether the current tests for every function of the symbol table need to be extended to also consider modules with multiple parameters
 namespace {
     constexpr unsigned int          DEFAULT_BITWIDTH          = 16;
     const std::vector<unsigned int> DEFAULT_SIGNAL_DIMENSIONS = {2, 3};

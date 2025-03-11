@@ -47,9 +47,6 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
 }
 
 [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> utils::checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess) {
-    // TODO: syrec::VariableAccess getVar(...) will crash if the variable smart pointer is not set due to the function accessing var->reference
-    // I.   Why does the variable need a smart pointer member field to a syrec::Variable instance
-    // II.  Why does the getVar(...) call access this smart pointer instance instead of simply returning syrec::VariableAccess var member?
     const syrec::Variable::ptr& lVarPtr = lVariableAccess.getVar();
     const syrec::Variable::ptr& rVarPtr = rVariableAccess.getVar();
     if (lVarPtr == nullptr || rVarPtr == nullptr || !doReferenceVariablesMatch(*lVarPtr, *rVarPtr)) {

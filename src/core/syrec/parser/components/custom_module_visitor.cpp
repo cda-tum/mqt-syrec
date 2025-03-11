@@ -73,7 +73,6 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
             // of an if-statement whose guard expression does not evaluate to a constant value, an infinite loop check could be performed (but is not performed in the
             // current parser implementation)
             if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound) {
-                // TODO: Should we log the user provided parameter structure
                 recordSemanticError<SemanticError::NoModuleMatchingCallSignature>(semanticErrorPosition);
             }
             else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound 

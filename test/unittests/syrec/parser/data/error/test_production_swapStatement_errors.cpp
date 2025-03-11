@@ -7,8 +7,6 @@
 
 using namespace syrec_parser_error_tests;
 
-// TODO: Combinations for bitwidth missmatches between full signal bitwidth, bit and bitrange access combinations for operands of binary expression and assignment statement.
-
 TEST_F(SyrecParserErrorTestsFixture, UsageOfVariableOfTypeInOnLhsOfSwapStatementCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::AssignmentToReadonlyVariable>(Message::Position(1, 31), "a");
     performTestExecution("module main(in a(4), out b(4)) a <=> b");

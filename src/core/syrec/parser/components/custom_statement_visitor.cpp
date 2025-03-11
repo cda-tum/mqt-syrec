@@ -141,7 +141,6 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
             sharedGeneratedMessageContainerInstance->setFilterForToBeRecordedMessages(std::string(getIdentifierForSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>()));
             expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapRhsOperand);
             // Future versions of the parser might implement a more efficient version of this check instead of simply reusing the visitor function as the same logic (i.e. duplicate allocations, etc.) is executed twice.
-            // TODO: Do we need to define a filter for operand bitwidth missmatch errors to avoid duplicate errors?
             expressionVisitorInstance->visitSignalTyped(context->lhsOperand, nullptr);
             sharedGeneratedMessageContainerInstance->clearFilterForToBeRecordedMessages();
         }

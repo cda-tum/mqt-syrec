@@ -154,11 +154,18 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
     if (isBinaryOperationARelationalOrLogicalOne(*mappedToBinaryOperation)) {
         if (!optionalDeterminedOperandBitwidth.has_value()) {
             optionalDeterminedOperandBitwidth = DeterminedExpressionOperandBitwidthInformation();
-        } else if (optionalDeterminedOperandBitwidth->operandBitwidth != 1) {
-            // We can only propagate the position of either of the operands if their accessed bitwidth is equal to 1.
-            optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth.reset();
         }
         optionalDeterminedOperandBitwidth->operandBitwidth = 1;
+    }
+
+    // Instead of propagating the position of the operand that led to the expression having the currently set operand bitwidth, we instead propagate the start position
+    // of the current expression to aid the user in determining which expressions need to be modified when resolving operand bitwidth errors.
+    if (optionalDeterminedOperandBitwidth.has_value()) {
+        if (context->getStart() != nullptr) {
+            optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth = mapTokenPositionToMessagePosition(*context->getStart());
+        } else {
+            optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth.reset();
+        }
     }
 
     if (lhsOperand.has_value() && rhsOperand.has_value()) {
@@ -192,6 +199,10 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Closing);
     if (!mappedToShiftOperation.has_value()) {
         return std::nullopt;
+    }
+
+    if (context->getStart() != nullptr && optionalDeterminedOperandBitwidth.has_value()) {
+        optionalDeterminedOperandBitwidth->positionOfOperandWithKnownBitwidth = mapTokenPositionToMessagePosition(*context->getStart());
     }
 
     if (toBeShiftedOperand.has_value() && mappedToShiftOperation.has_value() && shiftAmount.has_value()) {
@@ -420,7 +431,6 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
     return std::nullopt;
 }
 
-// TODO: Propagate length of accessed bitrange if possible and remove comparision with expected operand bitwidth, remove expected operand bitwidth member of custom expression visitor
 std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(const TSyrecParser::SignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>* optionalDeterminedOperandBitwidth) {
     if (context == nullptr || context->IDENT() == nullptr) {
         return std::nullopt;
