@@ -1,11 +1,9 @@
-#ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_ERROR_LISTENER_HPP
-#define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_ERROR_LISTENER_HPP
 #pragma once
 
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "BaseErrorListener.h"
 #include "Recognizer.h"
 #include "Token.h"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 #include <cstddef>
 #include <exception>
@@ -22,8 +20,7 @@ namespace syrec_parser {
         void syntaxError(antlr4::Recognizer* recognizer, antlr4::Token* offendingSymbol, std::size_t line,
                          std::size_t charPositionInLine, const std::string& msg, std::exception_ptr e) override;
 
-        protected:
+    protected:
         std::shared_ptr<ParserMessagesContainer> sharedMessagesContainerInstance;
     };
 } // namespace syrec_parser
-#endif

@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_BASE_SYREC_IR_ENTITY_STRINGIFIER_HPP
-#define CORE_SYREC_PARSER_UTILS_BASE_SYREC_IR_ENTITY_STRINGIFIER_HPP
 #pragma once
 
 #include "core/syrec/expression.hpp"
@@ -19,12 +17,12 @@ namespace utils {
     class BaseSyrecIrEntityStringifier {
     public:
         struct AdditionalFormattingOptions {
-            bool                       useWhitespaceBetweenOperandsOfBinaryOperation = true;
-            bool                       useWhitespaceAfterAfterModuleParameterDeclaration = true;
-            bool                       useWhitespaceAfterCallStatementArgumentDefinition = true;
-            bool                       omitVariableTypeSharedBySequenceOfLocalVariables = true;
+            bool                       useWhitespaceBetweenOperandsOfBinaryOperation                  = true;
+            bool                       useWhitespaceAfterAfterModuleParameterDeclaration              = true;
+            bool                       useWhitespaceAfterCallStatementArgumentDefinition              = true;
+            bool                       omitVariableTypeSharedBySequenceOfLocalVariables               = true;
             bool                       omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue = true;
-            std::size_t                defaultSignalBitwidth = 16;
+            std::size_t                defaultSignalBitwidth                                          = 16;
             std::optional<std::string> optionalCustomNewlineCharacterSequence;
             std::optional<std::string> optionalCustomIdentationCharacterSequence;
 
@@ -34,39 +32,40 @@ namespace utils {
         };
 
         virtual ~BaseSyrecIrEntityStringifier() = default;
-        explicit BaseSyrecIrEntityStringifier(const std::optional<AdditionalFormattingOptions>& additionalFormattingOptions)
-            : additionalFormattingOptions(additionalFormattingOptions.value_or(AdditionalFormattingOptions())) {}
+        explicit BaseSyrecIrEntityStringifier(const std::optional<AdditionalFormattingOptions>& additionalFormattingOptions):
+            additionalFormattingOptions(additionalFormattingOptions.value_or(AdditionalFormattingOptions())) {}
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Program& program);
+
     protected:
-        std::string            moduleKeywordIdent      = "module";
-        std::string            inVariableTypeIdent     = "in";
-        std::string            outVariableTypeIdent    = "out";
-        std::string            inoutVariableTypeIdent  = "inout";
-        std::string            wireVariableTypeIdent   = "wire";
-        std::string            stateVariableTypeIdent  = "state";
-        std::string            bitRangeStartIdent      = ".";
-        std::string            bitRangeEndIdent        = ":";
-        std::string            loopVariablePrefixIdent = "$";
-        std::string            callKeywordIdent        = "call";
-        std::string            uncallKeywordIdent      = "uncall";
-        std::string            ifKeywordIdent          = "if";
-        std::string            thenKeywordIdent        = "then";
-        std::string            elseKeywordIdent        = "else";
-        std::string            fiKeywordIdent          = "fi";
-        std::string            skipKeywordIdent        = "skip";
-        std::string            forKeywordIdent         = "for";
-        std::string            toKeywordIdent          = "to";
-        std::string            stepKeywordIdent        = "step";
-        std::string            doKeywordIdent          = "do";
-        std::string            rofKeywordIdent         = "rof";
-        std::string            swapOperationIdent      = "<=>";
-        std::string            indentIdent             = "\t";
-        std::string            indentationSequence;
+        std::string moduleKeywordIdent      = "module";
+        std::string inVariableTypeIdent     = "in";
+        std::string outVariableTypeIdent    = "out";
+        std::string inoutVariableTypeIdent  = "inout";
+        std::string wireVariableTypeIdent   = "wire";
+        std::string stateVariableTypeIdent  = "state";
+        std::string bitRangeStartIdent      = ".";
+        std::string bitRangeEndIdent        = ":";
+        std::string loopVariablePrefixIdent = "$";
+        std::string callKeywordIdent        = "call";
+        std::string uncallKeywordIdent      = "uncall";
+        std::string ifKeywordIdent          = "if";
+        std::string thenKeywordIdent        = "then";
+        std::string elseKeywordIdent        = "else";
+        std::string fiKeywordIdent          = "fi";
+        std::string skipKeywordIdent        = "skip";
+        std::string forKeywordIdent         = "for";
+        std::string toKeywordIdent          = "to";
+        std::string stepKeywordIdent        = "step";
+        std::string doKeywordIdent          = "do";
+        std::string rofKeywordIdent         = "rof";
+        std::string swapOperationIdent      = "<=>";
+        std::string indentIdent             = "\t";
+        std::string indentationSequence;
 
         AdditionalFormattingOptions additionalFormattingOptions;
 
-        virtual void resetInternals();
+        virtual void          resetInternals();
         [[maybe_unused]] bool incrementIdentationLevel();
         [[maybe_unused]] bool decrementIdentationLevel() noexcept;
 
@@ -106,4 +105,3 @@ namespace utils {
         [[nodiscard]] static bool    stringifyModuleCallVariant(std::ostream& outputStream, const std::string& moduleCallVariantKeyword, const syrec::Module& callTarget, const std::vector<std::string>& callerArguments);
     };
 } // namespace utils
-#endif

@@ -1,27 +1,24 @@
-#ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_STATEMENT_VISITOR_HPP
-#define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_STATEMENT_VISITOR_HPP
 #pragma once
 
+#include "TSyrecParser.h"
+#include "Token.h"
 #include "core/syrec/number.hpp"
-#include "core/syrec/program.hpp"
-#include "core/syrec/variable.hpp"
-#include "core/syrec/statement.hpp"
 #include "core/syrec/parser/components/custom_base_visitor.hpp"
 #include "core/syrec/parser/components/custom_expression_visitor.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
-
-#include "TSyrecParser.h"
-#include "Token.h"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
-#include <utility>
 
 namespace syrec_parser {
     class CustomStatementVisitor: protected CustomBaseVisitor {
@@ -91,4 +88,3 @@ namespace syrec_parser {
         }
     };
 } // namespace syrec_parser
-#endif

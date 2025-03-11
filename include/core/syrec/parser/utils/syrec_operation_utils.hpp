@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_SYREC_OPERATION_UTILS_HPP
-#define CORE_SYREC_PARSER_UTILS_SYREC_OPERATION_UTILS_HPP
 #pragma once
 
 #include "core/syrec/expression.hpp"
@@ -71,7 +69,7 @@ namespace utils {
                 return operandValue == 1;
             default:
                 return false;
-        }    
+        }
     }
 
     /**
@@ -183,11 +181,8 @@ namespace utils {
                 return 0;
             }
 
-            return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left
-                ? *toBeShiftedValue << *shiftAmount
-                : *toBeShiftedValue >> *shiftAmount;   
+            return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left ? *toBeShiftedValue << *shiftAmount : *toBeShiftedValue >> *shiftAmount;
         }
         return std::nullopt;
     }
 } // namespace utils
-#endif

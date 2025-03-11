@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_ANTLR_TSYRECPARSER_VISITOR_H
-#define CORE_SYREC_PARSER_ANTLR_TSYRECPARSER_VISITOR_H
 #pragma once
 
 #include "TSyrecParser.h"
@@ -79,4 +77,3 @@ namespace syrec_parser {
         virtual std::any visitShiftExpression(TSyrecParser::ShiftExpressionContext* context) = 0;
     };
 } // namespace syrec_parser
-#endif

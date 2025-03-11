@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_IF_STATEMENT_EXPRESSION_COMPONENTS_RECORDER_HPP
-#define CORE_SYREC_PARSER_UTILS_IF_STATEMENT_EXPRESSION_COMPONENTS_RECORDER_HPP
 #pragma once
 
 #include "core/syrec/expression.hpp"
@@ -45,4 +43,3 @@ namespace utils {
         std::optional<bool>              aggregateOfComparisonResultsOfExpressionComponents;
     };
 } // namespace utils
-#endif

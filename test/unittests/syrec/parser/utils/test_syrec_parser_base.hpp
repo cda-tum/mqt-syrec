@@ -1,23 +1,20 @@
-#ifndef SYREC_PARSER_UTILS_TEST_SYREC_PARSER_BASE_HPP
-#define SYREC_PARSER_UTILS_TEST_SYREC_PARSER_BASE_HPP
 #pragma once
 
-#include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+#include "core/syrec/program.hpp"
 
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
-
-#include <string>
 #include <fstream>
+#include <gtest/gtest.h>
 #include <ios>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <ostream>
 #include <sstream>
+#include <string>
 #include <utility>
 
-using json = nlohmann::json;
+using json = nlohmann::json; // NOLINT(misc-include-cleaner) Warning reported here seems to be a false positive since <nlohmann/json.hpp> is included
 
 struct TestFromJsonConfig {
     std::string nameOfJsonFile;
@@ -28,7 +25,7 @@ struct TestFromJsonConfig {
         nameOfJsonFile(std::move(nameOfJsonFile)), keyOfTestInJsonFile(std::move(keyOfTestInJsonFile)), testCaseName(std::move(testCaseName)) {}
 };
 
-class SyrecParserBaseTestsFixture : public testing::TestWithParam<TestFromJsonConfig> {
+class SyrecParserBaseTestsFixture: public testing::TestWithParam<TestFromJsonConfig> {
 protected:
     struct TestFromJson {
         std::string stringifiedSyrecProgramToProcess;
@@ -47,9 +44,9 @@ protected:
     std::optional<syrec::ReadProgramSettings> userDefinedParserConfiguration;
 
     void SetUp() override {
-        const TestFromJsonConfig& testParameterData = GetParam();
+        const TestFromJsonConfig& testParameterData     = GetParam();
         const std::string&        testCaseJsonKeyInFile = testParameterData.keyOfTestInJsonFile;
-        std::ifstream inputFileStream(testParameterData.nameOfJsonFile, std::ios_base::in);
+        std::ifstream             inputFileStream(testParameterData.nameOfJsonFile, std::ios_base::in);
         ASSERT_TRUE(inputFileStream.good()) << "Input file @" << testParameterData.nameOfJsonFile << " is not in a usable state (e.g. does not exist)";
 
         const json parsedJsonDataOfFile = json::parse(inputFileStream);
@@ -69,7 +66,7 @@ protected:
         }
 
         if (testCaseDataJson.contains(jsonKeyInTestCaseDataForParserConfiguration)) {
-            ASSERT_NO_FATAL_FAILURE(loadUserDefinedParserConfigurationFromJson(testCaseDataJson.at(jsonKeyInTestCaseDataForParserConfiguration)));   
+            ASSERT_NO_FATAL_FAILURE(loadUserDefinedParserConfigurationFromJson(testCaseDataJson.at(jsonKeyInTestCaseDataForParserConfiguration)));
         }
     }
 
@@ -119,7 +116,7 @@ protected:
 
     virtual void performTestExecution() {
         const syrec::ReadProgramSettings& parserConfiguration = userDefinedParserConfiguration.value_or(syrec::ReadProgramSettings());
-        std::string aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram;
+        std::string                       aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram;
         ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess, parserConfiguration));
         ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the given SyReC program";
 
@@ -132,5 +129,3 @@ protected:
         ASSERT_EQ(containerForStringifiedProgram.str(), loadedTestCaseData.stringifiedExpectedSyrecProgramContent) << "SyReC program processed by the parser needs to match the user defined input circuit";
     }
 };
-
-#endif

@@ -1,14 +1,12 @@
-#ifndef CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
-#define CORE_SYREC_PARSER_UTILS_PARSER_MESSAGES_CONTAINER_HPP
 #pragma once
 
 #include <cstddef>
 #include <memory>
-#include <vector>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace syrec_parser {
     struct Message {
@@ -59,4 +57,3 @@ namespace syrec_parser {
         std::optional<std::string>                                   temporaryFilterForToBeRecordedMessages;
     };
 } // namespace syrec_parser
-#endif

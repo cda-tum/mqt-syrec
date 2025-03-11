@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_VARIABLE_ASSIGNABILITY_CHECK_HPP
-#define CORE_SYREC_PARSER_UTILS_VARIABLE_ASSIGNABILITY_CHECK_HPP
 #pragma once
 
 #include "core/syrec/variable.hpp"
@@ -17,4 +15,3 @@ namespace variable_assignability_check {
         }
     }
 } // namespace variable_assignability_check
-#endif

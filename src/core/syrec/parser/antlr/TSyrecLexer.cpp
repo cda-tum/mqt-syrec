@@ -41,20 +41,20 @@ namespace {
         TSyrecLexerStaticData& operator=(const TSyrecLexerStaticData&) = delete;
         TSyrecLexerStaticData& operator=(TSyrecLexerStaticData&&)      = delete;
 
-        std::vector<dfa::DFA>       decisionToDFA;
-        atn::PredictionContextCache sharedContextCache;
-        const std::vector<std::string>      ruleNames;
-        const std::vector<std::string>      channelNames;
-        const std::vector<std::string>      modeNames;
-        const std::vector<std::string>      literalNames;
-        const std::vector<std::string>      symbolicNames;
-        const dfa::Vocabulary       vocabulary;
-        atn::SerializedATNView      serializedATN;
-        std::unique_ptr<atn::ATN>   atn;
+        std::vector<dfa::DFA>          decisionToDFA;
+        atn::PredictionContextCache    sharedContextCache;
+        const std::vector<std::string> ruleNames;
+        const std::vector<std::string> channelNames;
+        const std::vector<std::string> modeNames;
+        const std::vector<std::string> literalNames;
+        const std::vector<std::string> symbolicNames;
+        const dfa::Vocabulary          vocabulary;
+        atn::SerializedATNView         serializedATN;
+        std::unique_ptr<atn::ATN>      atn;
     };
 
     // TODO: Fix remaining .clang-tidy issues in ANTLR related files
-    internal::OnceFlag lexerInitializationSyncFlag;
+    internal::OnceFlag                     lexerInitializationSyncFlag;
     std::unique_ptr<TSyrecLexerStaticData> lexerStaticData = nullptr;
 
     void initializeStaticLexerData() {
@@ -104,7 +104,7 @@ namespace {
                         "KEYWORD_THEN", "KEYWORD_ELSE", "KEYWORD_FI", "KEYWORD_SKIP", "BITRANGE_START_PREFIX",
                         "BITRANGE_END_PREFIX", "SKIPABLEWHITSPACES", "LINE_COMMENT", "MULTI_LINE_COMMENT",
                         "IDENT", "INT"});
-        static std::array<int32_t, 3093> serializedAtnSegment {
+        static std::array<int32_t, 3093> serializedAtnSegment{
                 4, 0, 61, 360, 6, -1, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7,
                 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14,
                 7, 14, 2, 15, 7, 15, 2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7, 20, 2, 21,
@@ -240,7 +240,7 @@ TSyrecLexer::TSyrecLexer(CharStream* input):
     initialize();
     // .clang-tidy checks warn that using raw pointers instead of one of the smart pointer alternatives defined by the STL might lead to memory leaks, etc. if not handled with care.
     // We cannot resolve all references to the raw pointer with its smart pointer alternative since the many references are defined in third-party code whos source files do not live in this solution (and are fetched at configure time)
-    _interpreter =  new atn::LexerATNSimulator(this, *lexerStaticData->atn, lexerStaticData->decisionToDFA, lexerStaticData->sharedContextCache); // NOLINT
+    _interpreter = new atn::LexerATNSimulator(this, *lexerStaticData->atn, lexerStaticData->decisionToDFA, lexerStaticData->sharedContextCache); // NOLINT
 }
 
 TSyrecLexer::~TSyrecLexer() {

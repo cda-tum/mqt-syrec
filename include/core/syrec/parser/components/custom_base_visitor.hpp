@@ -1,20 +1,17 @@
-#ifndef CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
-#define CORE_SYREC_COMPONENTS_CUSTOM_BASE_VISITOR_HPP
 #pragma once
 
+#include "Token.h"
 #include "core/syrec/expression.hpp"
 #include "core/syrec/number.hpp"
-#include "core/syrec/program.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/variable.hpp"
 
-#include "Token.h"
-
-#include <fmt/format.h>
 #include <cerrno>
-#include <cstdlib> 
+#include <cstdlib>
+#include <fmt/format.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -56,12 +53,12 @@ namespace syrec_parser {
             sharedGeneratedMessageContainerInstance(sharedGeneratedMessageContainerInstance), symbolTable(sharedSymbolTableInstance), parserConfiguration(parserConfiguration) {}
 
     protected:
-        static constexpr unsigned int             DEFAULT_EXPRESSION_BITWIDTH   = 32;
-        static constexpr unsigned int             MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
+        static constexpr unsigned int DEFAULT_EXPRESSION_BITWIDTH   = 32;
+        static constexpr unsigned int MAX_SUPPORTED_SIGNAL_BITWIDTH = 32;
 
-        std::shared_ptr<ParserMessagesContainer>  sharedGeneratedMessageContainerInstance;
-        std::shared_ptr<utils::BaseSymbolTable>   symbolTable;
-        syrec::ReadProgramSettings                parserConfiguration;
+        std::shared_ptr<ParserMessagesContainer> sharedGeneratedMessageContainerInstance;
+        std::shared_ptr<utils::BaseSymbolTable>  symbolTable;
+        syrec::ReadProgramSettings               parserConfiguration;
 
         [[nodiscard]] static Message::Position mapTokenPositionToMessagePosition(const antlr4::Token& token) {
             return Message::Position(token.getLine(), token.getCharPositionInLine());
@@ -115,9 +112,7 @@ namespace syrec_parser {
         }
 
         [[nodiscard]] static unsigned int getLengthOfAccessedBitrange(const std::pair<unsigned int, unsigned int> accessedBitrange) {
-            return (accessedBitrange.first > accessedBitrange.second
-                ? accessedBitrange.first - accessedBitrange.second
-                : accessedBitrange.second - accessedBitrange.first) + 1;
+            return (accessedBitrange.first > accessedBitrange.second ? accessedBitrange.first - accessedBitrange.second : accessedBitrange.second - accessedBitrange.first) + 1;
         }
 
         template<SemanticError semanticError, typename... T>
@@ -145,7 +140,7 @@ namespace syrec_parser {
 
             constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
             // TODO: How should runtime errors be handled?
-            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, std::string(identifierForSemanticError), messagePosition,  std::string(getFormatForSemanticErrorMessage<semanticError>())));
+            sharedGeneratedMessageContainerInstance->recordMessage(std::make_unique<Message>(Message::Type::Error, std::string(identifierForSemanticError), messagePosition, std::string(getFormatForSemanticErrorMessage<semanticError>())));
         }
 
         void recordCustomError(Message::Position messagePosition, const std::string& errorMessage) const {
@@ -153,4 +148,3 @@ namespace syrec_parser {
         }
     };
 } // namespace syrec_parser
-#endif

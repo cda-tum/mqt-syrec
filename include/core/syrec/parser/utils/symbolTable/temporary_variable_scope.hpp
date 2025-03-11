@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_TEMPORARY_VARIABLE_SCOPE_HPP
-#define CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_TEMPORARY_VARIABLE_SCOPE_HPP
 #pragma once
 
 #include "core/syrec/number.hpp"
@@ -21,7 +19,7 @@ namespace utils {
         using ptr = std::shared_ptr<TemporaryVariableScope>;
         class ScopeEntry {
         public:
-            using ptr = std::shared_ptr<ScopeEntry>;
+            using ptr         = std::shared_ptr<ScopeEntry>;
             using readOnylPtr = std::shared_ptr<const ScopeEntry>;
 
             explicit ScopeEntry(syrec::Variable::ptr signalData):
@@ -30,12 +28,12 @@ namespace utils {
             explicit ScopeEntry(syrec::Number::ptr loopVariable):
                 data(loopVariable) {}
 
-            [[nodiscard]] bool                                                  isReferenceToLoopVariable() const;
-            [[nodiscard]] std::string                                           getVariableIdentifier() const;
-            [[nodiscard]] std::vector<unsigned int>                             getDeclaredVariableDimensions() const;
-            [[nodiscard]] std::optional<unsigned int>                           getDeclaredVariableBitwidth() const;
-            [[nodiscard]] std::optional<syrec::Variable::ptr>                   getVariableData() const;
-            [[nodiscard]] std::optional<syrec::Number::ptr>                     getLoopVariableData() const;
+            [[nodiscard]] bool                                isReferenceToLoopVariable() const;
+            [[nodiscard]] std::string                         getVariableIdentifier() const;
+            [[nodiscard]] std::vector<unsigned int>           getDeclaredVariableDimensions() const;
+            [[nodiscard]] std::optional<unsigned int>         getDeclaredVariableBitwidth() const;
+            [[nodiscard]] std::optional<syrec::Variable::ptr> getVariableData() const;
+            [[nodiscard]] std::optional<syrec::Number::ptr>   getLoopVariableData() const;
 
         protected:
             std::variant<syrec::Variable::ptr, syrec::Number::ptr> data;
@@ -49,10 +47,10 @@ namespace utils {
         [[maybe_unused]] bool                                removeVariable(const std::string_view& signalIdentifier);
         [[maybe_unused]] bool                                updateValueOfLoopVariable(const std::string_view& loopVariableIdentifier, const std::optional<unsigned int>& newValue);
         [[nodiscard]] std::optional<unsigned int>            getValueOfLoopVariable(const std::string_view& loopVariableIdentifier);
+
     protected:
         // To be able to perform heterogeneous lookup using std::string_view in a STL set/dictionary container in C++17 only std::map and std::set can be used. C++20 supports this functionality also for the unordered STL container variants.
         std::map<std::string, ScopeEntry::ptr, std::less<>> signalIdentifierLookup;
         std::map<std::string, unsigned int, std::less<>>    knownLoopVariableValues;
     };
 } //namespace utils
-#endif

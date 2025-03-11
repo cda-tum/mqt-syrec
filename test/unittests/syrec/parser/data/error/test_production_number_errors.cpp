@@ -5,6 +5,8 @@
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 
+#include <climits>
+
 using namespace syrec_parser_error_tests;
 
 TEST_F(SyrecParserErrorTestsFixture, UsageOfUndeclaredVariableInNumericExpressionCausesError) {

@@ -1,9 +1,6 @@
-#ifndef CORE_SYREC_PARSER_UTILS_VARIABLE_OVERLAP_CHECK_HPP
-#define CORE_SYREC_PARSER_UTILS_VARIABLE_OVERLAP_CHECK_HPP
 #pragma once
 
 #include <core/syrec/variable.hpp>
-
 #include <optional>
 #include <string>
 #include <vector>
@@ -51,4 +48,3 @@ namespace utils {
      */
     [[nodiscard]] std::optional<VariableAccessOverlapCheckResult> checkOverlapBetweenVariableAccesses(const syrec::VariableAccess& lVariableAccess, const syrec::VariableAccess& rVariableAccess);
 } // namespace utils
-#endif

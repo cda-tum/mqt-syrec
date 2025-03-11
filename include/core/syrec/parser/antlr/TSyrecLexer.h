@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_ANTLR_TSYRECLEXER_H
-#define CORE_SYREC_PARSER_ANTLR_TSYRECLEXER_H
 #pragma once
 
 // Generated from C:/School/MThesis/mqt-syrec-antlr/src/core/syrec/parser/antlr/grammar/TSyrecLexer.g4 by ANTLR 4.13.2
@@ -33,4 +31,3 @@ namespace syrec_parser {
         static void initialize();
     };
 } // namespace syrec_parser
-#endif

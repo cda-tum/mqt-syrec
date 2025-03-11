@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_CUSTOM_ERROR_MESSAGES_HPP
-#define CORE_SYREC_PARSER_UTILS_CUSTOM_ERROR_MESSAGES_HPP
 #pragma once
 
 #include <string_view>
@@ -126,7 +124,7 @@ namespace syrec_parser {
             case SemanticError::IfGuardExpressionMissmatch:
                 return "Guard and closing guard expression of IfStatement did not match";
             case SemanticError::NoModuleMatchingCallSignature:
-                return "No module matching user provided call signature";   // TODO: Print closest matching signature, user provided call signature?
+                return "No module matching user provided call signature"; // TODO: Print closest matching signature, user provided call signature?
             case SemanticError::ExpressionBitwidthMissmatches:
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
@@ -158,4 +156,3 @@ namespace syrec_parser {
         }
     }
 } // namespace syrec_parser
-#endif

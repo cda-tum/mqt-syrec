@@ -1,18 +1,15 @@
-#ifndef CORE_SYREC_PARSER_COMPONENTS_CUSTOM_EXPRESSION_VISITOR_HPP
-#define CORE_SYREC_PARSER_COMPONENTS_CUSTOM_EXPRESSION_VISITOR_HPP
 #pragma once
 
+#include "TSyrecParser.h"
 #include "core/syrec/expression.hpp"
 #include "core/syrec/number.hpp"
-#include "core/syrec/program.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/components/custom_base_visitor.hpp"
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
-#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
-
-#include "TSyrecParser.h"
+#include "core/syrec/parser/utils/syrec_operation_utils.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <memory>
 #include <optional>
@@ -42,16 +39,16 @@ namespace syrec_parser {
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromExpressionTyped(const TSyrecParser::NumberFromExpressionContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const;
 
-        void                                      clearRestrictionOnVariableAccesses();
-        void                                      setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
-        void                                      clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
-        void                                      setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
-        void                                      clearIfStatementExpressionComponentsRecorder();
-        void                                      markStartOfProcessingOfDimensionAccessOfVariableAccess();
-        void                                      markEndOfProcessingOfDimensionAccessOfVariableAccess();
-        [[maybe_unused]] bool                     setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
-        [[nodiscard]] bool                        isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
-        [[maybe_unused]] static bool              truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
+        void                         clearRestrictionOnVariableAccesses();
+        void                         setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
+        void                         clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
+        void                         setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
+        void                         clearIfStatementExpressionComponentsRecorder();
+        void                         markStartOfProcessingOfDimensionAccessOfVariableAccess();
+        void                         markEndOfProcessingOfDimensionAccessOfVariableAccess();
+        [[maybe_unused]] bool        setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
+        [[nodiscard]] bool           isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
+        [[maybe_unused]] static bool truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
 
     protected:
         std::optional<syrec::VariableAccess::ptr>                          optionalRestrictionOnVariableAccesses;
@@ -84,4 +81,3 @@ namespace syrec_parser {
         }
     };
 } // namespace syrec_parser
-#endif

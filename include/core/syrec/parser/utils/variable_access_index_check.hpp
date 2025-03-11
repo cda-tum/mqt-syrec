@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PARSER_UTILS_VARIABLE_ACCESS_INDEX_CHECK_HPP
-#define CORE_SYREC_PARSER_UTILS_VARIABLE_ACCESS_INDEX_CHECK_HPP
 #pragma once
 
 #include "core/syrec/variable.hpp"
@@ -41,4 +39,3 @@ namespace utils {
      */
     [[nodiscard]] std::optional<VariableAccessIndicesValidity> validateVariableAccessIndices(const syrec::VariableAccess& variableAccess);
 } //namespace utils
-#endif

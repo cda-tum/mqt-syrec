@@ -1,17 +1,14 @@
-#ifndef SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
-#define SYREC_PARSER_UTILS_TEST_SYREC_PARSER_ERRORS_BASE_HPP
 #pragma once
 
-#include "core/syrec/program.hpp"
+#include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
-#include "core/syrec/parser/utils/base_syrec_ir_entity_stringifier.hpp"
-
-#include <fmt/format.h>
-#include <gtest/gtest.h>
+#include "core/syrec/program.hpp"
 
 #include <cstddef>
+#include <fmt/format.h>
+#include <gtest/gtest.h>
 #include <initializer_list>
 #include <optional>
 #include <ostream>
@@ -20,7 +17,7 @@
 #include <vector>
 
 // TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
-// TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute 
+// TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute
 
 namespace syrec_parser_error_tests {
     using namespace syrec_parser;
@@ -85,9 +82,9 @@ namespace syrec_parser_error_tests {
                 // On Windows system we assume that the newline is encoded as the '\r\n' character sequence while on all other system it should be equal to the '\n' character
                 lastFoundPositionOfNewlineDelimiter = currNewLineDelimiterPosition + 1;
 
-                #if _WIN32
-                    ++lastFoundPositionOfNewlineDelimiter;
-                #endif
+#if _WIN32
+                ++lastFoundPositionOfNewlineDelimiter;
+#endif
                 currNewLineDelimiterPosition = findNextNewlineDelimiterInString(aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram, lastFoundPositionOfNewlineDelimiter);
             }
 
@@ -143,4 +140,3 @@ namespace syrec_parser_error_tests {
         }
     };
 } // namespace syrec_parser_error_tests
-#endif

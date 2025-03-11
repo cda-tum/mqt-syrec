@@ -1,10 +1,8 @@
-#ifndef CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_BASE_SYMBOLTABLE_HPP
-#define CORE_SYREC_PARSER_UTILS_SYMBOLTABLE_BASE_SYMBOLTABLE_HPP
 #pragma once
 
 #include "core/syrec/module.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <functional>
 #include <map>
@@ -61,4 +59,3 @@ namespace utils {
         [[nodiscard]] static bool doVariableStructuresMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) noexcept;
     };
 } // namespace utils
-#endif
