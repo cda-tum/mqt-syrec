@@ -1,4 +1,3 @@
-#include "core/syrec/expression.hpp"
 #include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"
 

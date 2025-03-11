@@ -3,6 +3,7 @@
 #pragma once
 
 #include "core/syrec/expression.hpp"
+#include "core/syrec/number.hpp"
 #include "core/syrec/program.hpp"
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
@@ -13,7 +14,7 @@
 
 #include <fmt/format.h>
 #include <cerrno>
-#include <cstdlib>
+#include <cstdlib> 
 #include <memory>
 #include <optional>
 #include <string>
@@ -21,14 +22,14 @@
 
 namespace syrec_parser {
     /**
-     * The base class containing data structure and utility functions required in more specialized visitors.
+     * The base class containing data structures and utility functions required in more specialized visitors.
      *
      * Note that this class does not derive from the TSyrecParserVisitor class, defining the potential visitor functions for the SyReC grammar, since we are providing
      * type-safe overload for the visitor functions instead of relying on complex conversion from the std::any type to the expected return type of the visitor function.
      * The problem with the std::any type is that the user must know the exact type that is stored in the value of the std::any to be able to access it. This std::any_cast<T>
-     * operation does not support polymorphism and other convinent behaviour that one can use std::optional<T>. Additionally, we can avoid the dynamic dispatch mechanism to
+     * operation does not support polymorphism and other convenient behaviour that one can use std::optional<T>. Additionally, we can avoid the dynamic dispatch mechanism to
      * determine the correct visitor function (while still requiring dynamic_cast cascades) which now requires for future extensions of the grammar that the developer correctly
-     * defines the handling of these new types in the visitors (instead of relying on the dynamic dispatch mechanism determine which visitor function overload to call).
+     * defines the handling of these new types in the visitors (instead of relying on the dynamic dispatch mechanism to determine which visitor function overload to call).
      *
      * An example:
      * struct Base { virtual std::string getName() = 0; };

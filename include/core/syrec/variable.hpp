@@ -2,7 +2,7 @@
 
 #include "core/syrec/number.hpp"
 
-#include <iostream>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>

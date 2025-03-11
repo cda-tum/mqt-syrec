@@ -2,15 +2,12 @@
 #define CORE_SYREC_PROGRAM_HPP
 #pragma once
 
-#include "core/syrec/expression.hpp"
 #include "core/syrec/module.hpp"
-#include "core/syrec/number.hpp"
-#include "core/syrec/statement.hpp"
-#include "core/syrec/variable.hpp"
 #include "parser/utils/syrec_operation_utils.hpp"
 
-#include <fstream>
-#include <vector>
+#include <optional>
+#include <string>
+#include <string_view>
 
 namespace syrec {
     struct ReadProgramSettings {

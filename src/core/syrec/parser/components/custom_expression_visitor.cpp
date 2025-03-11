@@ -5,14 +5,17 @@
 #include "core/syrec/variable.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/parser/utils/syrec_operation_utils.hpp"
 #include "core/syrec/parser/utils/variable_access_index_check.hpp"
 #include "core/syrec/parser/utils/variable_overlap_check.hpp"
 
 #include "TSyrecParser.h"
+#include "tree/ParseTreeType.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -28,19 +31,19 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionTy
         return std::nullopt;
     }
 
-    if (auto* const binaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromBinaryExpressionContext*>(context); binaryExpressionContext != nullptr) {
+    if (const auto* const binaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromBinaryExpressionContext*>(context); binaryExpressionContext != nullptr) {
         return visitBinaryExpressionTyped(binaryExpressionContext->binaryExpression(), optionalDeterminedOperandBitwidth);
     }
-    if (auto* const shiftExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromShiftExpressionContext*>(context); shiftExpressionContext != nullptr) {
+    if (const auto* const shiftExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromShiftExpressionContext*>(context); shiftExpressionContext != nullptr) {
         return visitShiftExpressionTyped(shiftExpressionContext->shiftExpression(), optionalDeterminedOperandBitwidth);
     }
-    if (auto* const unaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromUnaryExpressionContext*>(context); unaryExpressionContext != nullptr) {
+    if (const auto* const unaryExpressionContext = dynamic_cast<const TSyrecParser::ExpressionFromUnaryExpressionContext*>(context); unaryExpressionContext != nullptr) {
         return visitUnaryExpressionTyped(unaryExpressionContext->unaryExpression(), optionalDeterminedOperandBitwidth);
     }
-    if (auto* const expressionFromNumberContext = dynamic_cast<const TSyrecParser::ExpressionFromNumberContext*>(context); expressionFromNumberContext != nullptr) {
+    if (const auto* const expressionFromNumberContext = dynamic_cast<const TSyrecParser::ExpressionFromNumberContext*>(context); expressionFromNumberContext != nullptr) {
         return visitExpressionFromNumberTyped(expressionFromNumberContext);
     }
-    if (auto* const expressionFromSignalContext = dynamic_cast<const TSyrecParser::ExpressionFromSignalContext*>(context); expressionFromSignalContext != nullptr) {
+    if (const auto* const expressionFromSignalContext = dynamic_cast<const TSyrecParser::ExpressionFromSignalContext*>(context); expressionFromSignalContext != nullptr) {
         return visitExpressionFromSignalTyped(expressionFromSignalContext, optionalDeterminedOperandBitwidth);
     }
 
@@ -244,16 +247,16 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberTyped(cons
         return std::nullopt;
     }
 
-    if (auto* const numberFromConstantContext = dynamic_cast<const TSyrecParser::NumberFromConstantContext*>(context); numberFromConstantContext != nullptr) {
+    if (const auto* const numberFromConstantContext = dynamic_cast<const TSyrecParser::NumberFromConstantContext*>(context); numberFromConstantContext != nullptr) {
         return visitNumberFromConstantTyped(numberFromConstantContext);
     }
-    if (auto* const numberFromExpressionContext = dynamic_cast<const TSyrecParser::NumberFromExpressionContext*>(context); numberFromExpressionContext != nullptr) {
+    if (const auto* const numberFromExpressionContext = dynamic_cast<const TSyrecParser::NumberFromExpressionContext*>(context); numberFromExpressionContext != nullptr) {
         return visitNumberFromExpressionTyped(numberFromExpressionContext);
     }
-    if (auto* const numberFromLoopVariableContext = dynamic_cast<const TSyrecParser::NumberFromLoopVariableContext*>(context); numberFromLoopVariableContext != nullptr) {
+    if (const auto* const numberFromLoopVariableContext = dynamic_cast<const TSyrecParser::NumberFromLoopVariableContext*>(context); numberFromLoopVariableContext != nullptr) {
         return visitNumberFromLoopVariableTyped(numberFromLoopVariableContext);
     }
-    if (auto* const numberFromSignalWidthContext = dynamic_cast<const TSyrecParser::NumberFromSignalwidthContext*>(context); numberFromSignalWidthContext != nullptr) {
+    if (const auto* const numberFromSignalWidthContext = dynamic_cast<const TSyrecParser::NumberFromSignalwidthContext*>(context); numberFromSignalWidthContext != nullptr) {
         return visitNumberFromSignalwidthTyped(numberFromSignalWidthContext);
     }
     // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
@@ -266,18 +269,18 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromConsta
     // Production should only be called if the token contains only numeric characters and thus deserialization should only fail if an overflow occurs.
     // Leading and trailing whitespace should also be trimmed from the token text by the parser. If the text of the token contains non-numeric characters,
     // the deserialization will not throw an exception.
-    if (context == nullptr || context->INT() == nullptr) {
+    if (context == nullptr || context->literalInt() == nullptr) {
         return std::nullopt;
     }
 
     bool didSerializationOfIntegerFromStringFailDueToValueOverflow = false;
-    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->INT()->getText(), &didSerializationOfIntegerFromStringFailDueToValueOverflow); constantValue.has_value() && !didSerializationOfIntegerFromStringFailDueToValueOverflow) {
+    if (const std::optional<unsigned int> constantValue = deserializeConstantFromString(context->literalInt()->getText(), &didSerializationOfIntegerFromStringFailDueToValueOverflow); constantValue.has_value() && !didSerializationOfIntegerFromStringFailDueToValueOverflow) {
         recordExpressionComponent(*constantValue);
         return std::make_shared<syrec::Number>(*constantValue);
     }
 
     if (didSerializationOfIntegerFromStringFailDueToValueOverflow) {
-        recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*context->INT()->getSymbol()), context->INT()->getText(), UINT_MAX);
+        recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*context->literalInt()->getSymbol()), context->literalInt()->getText(), UINT_MAX);
     }
     return std::nullopt;
 }
@@ -376,7 +379,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
 }
 
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const {
-    if (context == nullptr || context->IDENT() == nullptr) {
+    if (context == nullptr || context->literalIdent() == nullptr) {
         return std::nullopt;
     }
 
@@ -385,11 +388,11 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
         return std::nullopt;
     }
 
-    const std::string loopVariableIdentifier = "$" + context->IDENT()->getText();
+    const std::string loopVariableIdentifier = "$" + context->literalIdent()->getText();
     recordExpressionComponent(loopVariableIdentifier);
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingLoopVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(loopVariableIdentifier); matchingLoopVariableForIdentifier.has_value() && matchingLoopVariableForIdentifier->get()->isReferenceToLoopVariable()) {
         if (optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.has_value() && optionalRestrictionOnLoopVariableUsageInLoopVariableValueInitialization.value() == loopVariableIdentifier) {
-            recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
+            recordSemanticError<SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration>(mapTokenPositionToMessagePosition(*context->literalLoopVariablePrefix()->getSymbol()), loopVariableIdentifier);
         }
         if (const std::optional<unsigned int> valueOfLoopVariable = activeVariableScopeInSymbolTable->get()->getValueOfLoopVariable(loopVariableIdentifier); valueOfLoopVariable.has_value()) {
             return std::make_shared<syrec::Number>(*valueOfLoopVariable);
@@ -397,20 +400,20 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromLoopVa
         if (const std::optional<syrec::Number::ptr>& symbolTableEntryForLoopVariable = matchingLoopVariableForIdentifier->get()->getLoopVariableData(); symbolTableEntryForLoopVariable.has_value()) {
             return symbolTableEntryForLoopVariable;
         }
-        if (context->LOOP_VARIABLE_PREFIX() != nullptr) {
-            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Symbol table entry for loop variable with identifier " + loopVariableIdentifier + " did not return variable data. This should not happen");
+        if (context->literalLoopVariablePrefix() != nullptr) {
+            recordCustomError(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), "Symbol table entry for loop variable with identifier " + loopVariableIdentifier + " did not return variable data. This should not happen");
         }
     }
 
-    if (context->LOOP_VARIABLE_PREFIX() != nullptr) {
+    if (context->literalLoopVariablePrefix() != nullptr) {
         // It would not make sense to report at the position of the loop variable prefix '$' that the loop variable '$<LOOP_VAR>' was not declared the loop variable prefix did not exist.
-        recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->LOOP_VARIABLE_PREFIX()->getSymbol()), loopVariableIdentifier);
+        recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->literalLoopVariablePrefix()->getSymbol()), loopVariableIdentifier);
     }
     return std::nullopt;
 }
 
 std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignalwidthTyped(const TSyrecParser::NumberFromSignalwidthContext* context) const {
-    if (context == nullptr || context->IDENT() == nullptr) {
+    if (context == nullptr || context->literalIdent() == nullptr) {
         return std::nullopt;
     }
 
@@ -419,20 +422,20 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromSignal
         return std::nullopt;
     }
 
-    const std::string& variableIdentifier = context->IDENT()->getSymbol()->getText();
-    recordExpressionComponent(context->SIGNAL_WIDTH_PREFIX()->getSymbol()->getText() + variableIdentifier);
+    const std::string& variableIdentifier = context->literalIdent()->getSymbol()->getText();
+    recordExpressionComponent(context->literalSignalWidthPrefix()->getSymbol()->getText() + variableIdentifier);
     if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = activeVariableScopeInSymbolTable->get()->getVariableByName(variableIdentifier); matchingVariableForIdentifier.has_value()) {
         if (matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth().has_value()) {
             return std::make_shared<syrec::Number>(*matchingVariableForIdentifier->get()->getDeclaredVariableBitwidth());
         }
         return std::nullopt;
     }
-    recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
+    recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), variableIdentifier);
     return std::nullopt;
 }
 
 std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTyped(const TSyrecParser::SignalContext* context, std::optional<DeterminedExpressionOperandBitwidthInformation>* optionalDeterminedOperandBitwidth) {
-    if (context == nullptr || context->IDENT() == nullptr) {
+    if (context == nullptr || context->literalIdent() == nullptr) {
         return std::nullopt;
     }
 
@@ -444,8 +447,8 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     // If we are omitting the variable identifier in the production, a default token for the variable identifier is generated (its text states that the IDENT token is missing) and its
     // 'error' message text used as the variables identifier and thus potentially reported in semantic erros. Since the lexer will already generate an identical syntax error, we assume that
     // the actual variable identifier is empty in this error case.
-    const std::string& variableIdentifier = context->IDENT()->getTreeType() != antlr4::tree::ParseTreeType::ERROR
-        ? context->IDENT()->getSymbol()->getText()
+    const std::string& variableIdentifier = context->literalIdent()->getTreeType() != antlr4::tree::ParseTreeType::ERROR
+        ? context->literalIdent()->getSymbol()->getText()
         : "";
 
     const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingVariableForIdentifier = !variableIdentifier.empty()
@@ -455,7 +458,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
     if (!variableIdentifier.empty()) {
         recordExpressionComponent(variableIdentifier);
         if (!matchingVariableForIdentifier.has_value() || !matchingVariableForIdentifier.value()->getVariableData().has_value()) {
-            recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableIdentifier);
+            recordSemanticError<SemanticError::NoVariableMatchingIdentifier>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), variableIdentifier);
             return std::nullopt;   
         }
     }
@@ -508,21 +511,21 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             // when he can simply reassign the smart_pointer).
             generatedVariableAccess->setVar(*variableDataFromSymbolTable);
         } else {
-            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Symbol table entry for variable with identifier " + variableIdentifier + " did not return variable data. This should not happen");
+            recordCustomError(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), "Symbol table entry for variable with identifier " + variableIdentifier + " did not return variable data. This should not happen");
         }
 
         if (numUserAccessedDimensions == 0) {
             if (declaredValuesPerDimensionOfReferenceVariable.size() == 1 && declaredValuesPerDimensionOfReferenceVariable.front() == 1) {
                 generatedVariableAccess->indexes.emplace_back(std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1));
             } else {
-                recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
+                recordSemanticError<SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()));
             }
         } else if (numUserAccessedDimensions != declaredValuesPerDimensionOfReferenceVariable.size()) {
             if (numUserAccessedDimensions > declaredValuesPerDimensionOfReferenceVariable.size()) {
-                recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
+                recordSemanticError<SemanticError::TooManyDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
             } else {
                 // Checking whether the dimension access of the variable was fully defined by the user prevents the propagation of non-1D signal values
-                recordSemanticError<SemanticError::TooFewDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
+                recordSemanticError<SemanticError::TooFewDimensionsAccessed>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), numUserAccessedDimensions, declaredValuesPerDimensionOfReferenceVariable.size());
             }
         }
 
@@ -595,16 +598,16 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
             : std::nullopt;
         overlapCheckResultWithRestrictedVariableParts.has_value() && overlapCheckResultWithRestrictedVariableParts->overlapState == utils::VariableAccessOverlapCheckResult::OverlapState::Overlapping) {
         if (!overlapCheckResultWithRestrictedVariableParts->overlappingIndicesInformation.has_value()) {
-            recordCustomError(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), "Overlap with restricted variable parts detected but no further information about overlap available. This should not happen");
+            recordCustomError(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), "Overlap with restricted variable parts detected but no further information about overlap available. This should not happen");
         }
         else {
             if (isCurrentlyProcessingDimensionAccessOfVariableAccess()) {
                 recordSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
-                        mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
+                        mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()),
                         overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
             } else {
                 recordSemanticError<SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts>(
-                        mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()),
+                        mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()),
                         overlapCheckResultWithRestrictedVariableParts->stringifyOverlappingIndicesInformation());
             }
         }
@@ -635,7 +638,7 @@ std::optional<syrec::VariableAccess::ptr> CustomExpressionVisitor::visitSignalTy
 
     if (userAccessedBitrangeLength.has_value() && optionalDeterminedOperandBitwidth != nullptr) {
         *optionalDeterminedOperandBitwidth = DeterminedExpressionOperandBitwidthInformation({*userAccessedBitrangeLength,
-            context->IDENT()->getSymbol() != nullptr ? std::make_optional(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol())) : std::nullopt});    
+            context->literalIdent()->getSymbol() != nullptr ? std::make_optional(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol())) : std::nullopt});    
     }
     return generatedVariableAccess;
 }

@@ -5,8 +5,8 @@
 #include "Parser.h"
 #include "ParserRuleContext.h"
 #include "RecognitionException.h"
-#include "TokenStream.h"
 #include "TSyrecParserVisitor.h"
+#include "TokenStream.h"
 #include "Vocabulary.h"
 #include "atn/ATN.h"
 #include "atn/ATNDeserializer.h"
@@ -16,8 +16,8 @@
 #include "atn/SerializedATNView.h"
 #include "dfa/DFA.h"
 #include "internal/Synchronization.h"
-#include "support/Casts.h"
 #include "support/CPPUtils.h"
+#include "support/Casts.h"
 #include "tree/ParseTreeVisitor.h"
 #include "tree/TerminalNode.h"
 
@@ -61,21 +61,11 @@ namespace {
         std::unique_ptr<atn::ATN>      atn;
     };
 
-    internal::OnceFlag tsyrecparserParserOnceFlag;
-#if ANTLR4_USE_THREAD_LOCAL_CACHE
-    static thread_local
-#endif
-            std::unique_ptr<TSyrecParserStaticData>
-                    parserStaticData = nullptr;
+    internal::OnceFlag                      parserSingletonInitializationSyncFlag;
+    std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;
 
     void initializeStaticParserData() {
-#if ANTLR4_USE_THREAD_LOCAL_CACHE
-        if (tsyrecparserParserStaticData != nullptr) {
-            return;
-        }
-#else
-        assert(parserStaticData == nullptr);
-#endif
+        assert(parserSingletonStaticData == nullptr);
         auto staticData = std::make_unique<TSyrecParserStaticData>(
                 std::vector<std::string>{
                         "number", "program", "module", "parameterList", "parameter", "signalList",
@@ -108,7 +98,7 @@ namespace {
                         "KEYWORD_THEN", "KEYWORD_ELSE", "KEYWORD_FI", "KEYWORD_SKIP", "BITRANGE_START_PREFIX",
                         "BITRANGE_END_PREFIX", "SKIPABLEWHITSPACES", "LINE_COMMENT", "MULTI_LINE_COMMENT",
                         "IDENT", "INT"});
-        
+
         static std::array<int32_t, 2036> serializedATNSegment = {
                 4, 1, 61, 235, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7, 4, 2, 5, 7, 5, 2, 6, 7, 6, 2,
                 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7, 10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7,
@@ -195,7 +185,7 @@ namespace {
         for (size_t i = 0; i < count; i++) {
             staticData->decisionToDFA.emplace_back(staticData->atn->getDecisionState(i), i);
         }
-        parserStaticData = std::move(staticData);
+        parserSingletonStaticData = std::move(staticData);
     }
 
 } // namespace
@@ -207,9 +197,8 @@ TSyrecParser::TSyrecParser(TokenStream* input, const atn::ParserATNSimulatorOpti
     Parser(input) {
     initialize();
     // .clang-tidy checks warn that using raw pointers instead of one of the smart pointer alternatives defined by the STL might lead to memory leaks, etc. if not handled with care.
-    // We cannot resolve all references on the raw pointer to a smart pointer alternative since some of the code is "downloaded" and built when the ANTLR runtime is built with the source files of the latter
-    // only being available in the output directoy
-    _interpreter = new atn::ParserATNSimulator(this, *parserStaticData->atn, parserStaticData->decisionToDFA, parserStaticData->sharedContextCache, options); // NOLINT
+    // We cannot resolve all references to the raw pointer with its smart pointer alternative since the many references are defined in third-party code whos source files do not live in this solution (and are fetched at configure time)
+    _interpreter = new atn::ParserATNSimulator(this, *parserSingletonStaticData->atn, parserSingletonStaticData->decisionToDFA, parserSingletonStaticData->sharedContextCache, options); // NOLINT
 }
 
 TSyrecParser::~TSyrecParser() {
@@ -217,7 +206,7 @@ TSyrecParser::~TSyrecParser() {
 }
 
 const atn::ATN& TSyrecParser::getATN() const {
-    return *parserStaticData->atn;
+    return *parserSingletonStaticData->atn;
 }
 
 std::string TSyrecParser::getGrammarFileName() const {
@@ -225,15 +214,15 @@ std::string TSyrecParser::getGrammarFileName() const {
 }
 
 const std::vector<std::string>& TSyrecParser::getRuleNames() const {
-    return parserStaticData->ruleNames;
+    return parserSingletonStaticData->ruleNames;
 }
 
 const dfa::Vocabulary& TSyrecParser::getVocabulary() const {
-    return parserStaticData->vocabulary;
+    return parserSingletonStaticData->vocabulary;
 }
 
 atn::SerializedATNView TSyrecParser::getSerializedATN() const {
-    return parserStaticData->serializedATN;
+    return parserSingletonStaticData->serializedATN;
 }
 
 //----------------- NumberContext ------------------------------------------------------------------
@@ -252,12 +241,12 @@ void TSyrecParser::NumberContext::copyFrom(NumberContext* ctx) {
 
 //----------------- NumberFromSignalwidthContext ------------------------------------------------------------------
 
-tree::TerminalNode* TSyrecParser::NumberFromSignalwidthContext::SIGNAL_WIDTH_PREFIX() const {
-    return getToken(TSyrecParser::SIGNAL_WIDTH_PREFIX, 0);
+tree::TerminalNode* TSyrecParser::NumberFromSignalwidthContext::literalSignalWidthPrefix() const {
+    return getToken(SignalWidthPrefix, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromSignalwidthContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::NumberFromSignalwidthContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
 TSyrecParser::NumberFromSignalwidthContext::NumberFromSignalwidthContext(NumberContext* ctx) {
@@ -275,12 +264,12 @@ std::any TSyrecParser::NumberFromSignalwidthContext::accept(tree::ParseTreeVisit
 }
 //----------------- NumberFromLoopVariableContext ------------------------------------------------------------------
 
-tree::TerminalNode* TSyrecParser::NumberFromLoopVariableContext::LOOP_VARIABLE_PREFIX() const {
-    return getToken(TSyrecParser::LOOP_VARIABLE_PREFIX, 0);
+tree::TerminalNode* TSyrecParser::NumberFromLoopVariableContext::literalLoopVariablePrefix() const {
+    return getToken(LoopVariablePrefix, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromLoopVariableContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::NumberFromLoopVariableContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
 TSyrecParser::NumberFromLoopVariableContext::NumberFromLoopVariableContext(NumberContext* ctx) {
@@ -298,8 +287,8 @@ std::any TSyrecParser::NumberFromLoopVariableContext::accept(tree::ParseTreeVisi
 }
 //----------------- NumberFromConstantContext ------------------------------------------------------------------
 
-tree::TerminalNode* TSyrecParser::NumberFromConstantContext::INT() const {
-    return getToken(TSyrecParser::INT, 0); 
+tree::TerminalNode* TSyrecParser::NumberFromConstantContext::literalInt() const {
+    return getToken(Int, 0);
 }
 
 TSyrecParser::NumberFromConstantContext::NumberFromConstantContext(NumberContext* ctx) {
@@ -317,12 +306,12 @@ std::any TSyrecParser::NumberFromConstantContext::accept(tree::ParseTreeVisitor*
 }
 //----------------- NumberFromExpressionContext ------------------------------------------------------------------
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
 std::vector<TSyrecParser::NumberContext*> TSyrecParser::NumberFromExpressionContext::number() const {
@@ -333,20 +322,20 @@ TSyrecParser::NumberContext* TSyrecParser::NumberFromExpressionContext::number(s
     return getRuleContext<NumberContext>(i);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::OP_PLUS() const {
-    return getToken(TSyrecParser::OP_PLUS, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalOpPlus() const {
+    return getToken(OpPlus, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::OP_MINUS() const {
-    return getToken(TSyrecParser::OP_MINUS, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalOpMinus() const {
+    return getToken(OpMinus, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::OP_MULTIPLY() const {
-    return getToken(TSyrecParser::OP_MULTIPLY, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalOpMultiply() const {
+    return getToken(OpMultiply, 0);
 }
 
-tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::OP_DIVISION() const {
-    return getToken(TSyrecParser::OP_DIVISION, 0);
+tree::TerminalNode* TSyrecParser::NumberFromExpressionContext::literalOpDivision() const {
+    return getToken(OpDivision, 0);
 }
 
 TSyrecParser::NumberFromExpressionContext::NumberFromExpressionContext(NumberContext* ctx) {
@@ -367,7 +356,7 @@ TSyrecParser::NumberContext* TSyrecParser::number() {
     enterRule(localCtx, 0, RuleNumber);
 
     // We are assuming that the parser will be built with the standard >= C++17
-    auto onExit = finally([&]{
+    auto onExit = finally([&] {
         exitRule();
     });
 
@@ -375,45 +364,45 @@ TSyrecParser::NumberContext* TSyrecParser::number() {
         setState(57);
         _errHandler->sync(this);
         switch (_input->LA(1)) {
-            case INT: {
+            case Int: {
                 localCtx = _tracker.createInstance<NumberFromConstantContext>(localCtx);
                 enterOuterAlt(localCtx, 1);
                 setState(46);
-                match(INT);
+                match(Int);
                 break;
             }
 
-            case SIGNAL_WIDTH_PREFIX: {
+            case SignalWidthPrefix: {
                 localCtx = _tracker.createInstance<NumberFromSignalwidthContext>(localCtx);
                 enterOuterAlt(localCtx, 2);
                 setState(47);
-                match(SIGNAL_WIDTH_PREFIX);
+                match(SignalWidthPrefix);
                 setState(48);
-                match(IDENT);
+                match(Ident);
                 break;
             }
 
-            case LOOP_VARIABLE_PREFIX: {
+            case LoopVariablePrefix: {
                 localCtx = _tracker.createInstance<NumberFromLoopVariableContext>(localCtx);
                 enterOuterAlt(localCtx, 3);
                 setState(49);
-                match(LOOP_VARIABLE_PREFIX);
+                match(LoopVariablePrefix);
                 setState(50);
-                match(IDENT);
+                match(Ident);
                 break;
             }
 
-            case OPEN_RBRACKET: {
+            case OpenRBracket: {
                 size_t lookahead = 0;
                 localCtx         = _tracker.createInstance<NumberFromExpressionContext>(localCtx);
                 enterOuterAlt(localCtx, 4);
                 setState(51);
-                match(OPEN_RBRACKET);
+                match(OpenRBracket);
                 setState(52);
                 antlrcpp::downCast<NumberFromExpressionContext*>(localCtx)->lhsOperand = number();
                 setState(53);
                 antlrcpp::downCast<NumberFromExpressionContext*>(localCtx)->op = _input->LT(1);
-                lookahead                                                             = _input->LA(1);
+                lookahead                                                      = _input->LA(1);
                 if (!((((lookahead & ~0x3fULL) == 0) && ((1ULL << lookahead) & 2944) != 0))) {
                     antlrcpp::downCast<NumberFromExpressionContext*>(localCtx)->op = _errHandler->recoverInline(this);
                 } else {
@@ -423,7 +412,7 @@ TSyrecParser::NumberContext* TSyrecParser::number() {
                 setState(54);
                 antlrcpp::downCast<NumberFromExpressionContext*>(localCtx)->rhsOperand = number();
                 setState(55);
-                match(CLOSE_RBRACKET);
+                match(CloseRBracket);
                 break;
             }
 
@@ -446,7 +435,7 @@ TSyrecParser::ProgramContext::ProgramContext(ParserRuleContext* parent, size_t i
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::ProgramContext::EOF() const {
+tree::TerminalNode* TSyrecParser::ProgramContext::literalEOF() const {
     return getToken(TSyrecParser::EOF, 0);
 }
 
@@ -486,8 +475,8 @@ TSyrecParser::ProgramContext* TSyrecParser::program() {
         setState(60);
         _errHandler->sync(this);
 
-        size_t lookahead = KEYWORD_MODULE;
-        while (lookahead == KEYWORD_MODULE) {
+        size_t lookahead = KeywordModule;
+        while (lookahead == KeywordModule) {
             setState(59);
             module();
             setState(62);
@@ -512,20 +501,20 @@ TSyrecParser::ModuleContext::ModuleContext(ParserRuleContext* parent, size_t inv
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::ModuleContext::KEYWORD_MODULE() const {
-    return getToken(TSyrecParser::KEYWORD_MODULE, 0);
+tree::TerminalNode* TSyrecParser::ModuleContext::literalKeywordModule() const {
+    return getToken(KeywordModule, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ModuleContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::ModuleContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ModuleContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::ModuleContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ModuleContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::ModuleContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
 TSyrecParser::StatementListContext* TSyrecParser::ModuleContext::statementList() const {
@@ -571,11 +560,11 @@ TSyrecParser::ModuleContext* TSyrecParser::module() {
         size_t lookahead = 0;
         enterOuterAlt(localCtx, 1);
         setState(66);
-        match(KEYWORD_MODULE);
+        match(KeywordModule);
         setState(67);
-        match(IDENT);
+        match(Ident);
         setState(68);
-        match(OPEN_RBRACKET);
+        match(OpenRBracket);
         setState(70);
         _errHandler->sync(this);
 
@@ -585,11 +574,11 @@ TSyrecParser::ModuleContext* TSyrecParser::module() {
             parameterList();
         }
         setState(72);
-        match(CLOSE_RBRACKET);
+        match(CloseRBracket);
         setState(76);
         _errHandler->sync(this);
         lookahead = _input->LA(1);
-        while (lookahead == VAR_TYPE_WIRE || lookahead == VAR_TYPE_STATE) {
+        while (lookahead == VarTypeWire || lookahead == VarTypeState) {
             setState(73);
             signalList();
             setState(78);
@@ -622,12 +611,12 @@ TSyrecParser::ParameterContext* TSyrecParser::ParameterListContext::parameter(si
     return getRuleContext<ParameterContext>(i);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::ParameterListContext::PARAMETER_DELIMITER() const {
-    return getTokens(TSyrecParser::PARAMETER_DELIMITER);
+std::vector<tree::TerminalNode*> TSyrecParser::ParameterListContext::literalParameterDelimiter() const {
+    return getTokens(ParameterDelimiter);
 }
 
-tree::TerminalNode* TSyrecParser::ParameterListContext::PARAMETER_DELIMITER(size_t i) const {
-    return getToken(TSyrecParser::PARAMETER_DELIMITER, i);
+tree::TerminalNode* TSyrecParser::ParameterListContext::literalParameterDelimiter(size_t i) const {
+    return getToken(ParameterDelimiter, i);
 }
 
 size_t TSyrecParser::ParameterListContext::getRuleIndex() const {
@@ -660,9 +649,9 @@ TSyrecParser::ParameterListContext* TSyrecParser::parameterList() {
         setState(86);
         _errHandler->sync(this);
         std::size_t lookahead = _input->LA(1);
-        while (lookahead == PARAMETER_DELIMITER) {
+        while (lookahead == ParameterDelimiter) {
             setState(82);
-            match(PARAMETER_DELIMITER);
+            match(ParameterDelimiter);
             setState(83);
             parameter();
             setState(88);
@@ -689,16 +678,16 @@ TSyrecParser::SignalDeclarationContext* TSyrecParser::ParameterContext::signalDe
     return getRuleContext<SignalDeclarationContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::ParameterContext::VAR_TYPE_IN() const {
-    return getToken(TSyrecParser::VAR_TYPE_IN, 0);
+tree::TerminalNode* TSyrecParser::ParameterContext::literalVarTypeIn() const {
+    return getToken(VarTypeIn, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ParameterContext::VAR_TYPE_OUT() const {
-    return getToken(TSyrecParser::VAR_TYPE_OUT, 0);
+tree::TerminalNode* TSyrecParser::ParameterContext::literalVarTypeOut() const {
+    return getToken(VarTypeOut, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ParameterContext::VAR_TYPE_INOUT() const {
-    return getToken(TSyrecParser::VAR_TYPE_INOUT, 0);
+tree::TerminalNode* TSyrecParser::ParameterContext::literalVarTypeInout() const {
+    return getToken(VarTypeInout, 0);
 }
 
 size_t TSyrecParser::ParameterContext::getRuleIndex() const {
@@ -760,20 +749,20 @@ TSyrecParser::SignalDeclarationContext* TSyrecParser::SignalListContext::signalD
     return getRuleContext<SignalDeclarationContext>(i);
 }
 
-tree::TerminalNode* TSyrecParser::SignalListContext::VAR_TYPE_WIRE() const {
-    return getToken(TSyrecParser::VAR_TYPE_WIRE, 0);
+tree::TerminalNode* TSyrecParser::SignalListContext::literalVarTypeWire() const {
+    return getToken(VarTypeWire, 0);
 }
 
-tree::TerminalNode* TSyrecParser::SignalListContext::VAR_TYPE_STATE() const {
-    return getToken(TSyrecParser::VAR_TYPE_STATE, 0);
+tree::TerminalNode* TSyrecParser::SignalListContext::literalVarTypeState() const {
+    return getToken(VarTypeState, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalListContext::PARAMETER_DELIMITER() const {
-    return getTokens(TSyrecParser::PARAMETER_DELIMITER);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalListContext::literalParameterDelimiter() const {
+    return getTokens(ParameterDelimiter);
 }
 
-tree::TerminalNode* TSyrecParser::SignalListContext::PARAMETER_DELIMITER(size_t i) const {
-    return getToken(TSyrecParser::PARAMETER_DELIMITER, i);
+tree::TerminalNode* TSyrecParser::SignalListContext::literalParameterDelimiter(size_t i) const {
+    return getToken(ParameterDelimiter, i);
 }
 
 size_t TSyrecParser::SignalListContext::getRuleIndex() const {
@@ -803,7 +792,7 @@ TSyrecParser::SignalListContext* TSyrecParser::signalList() {
         enterOuterAlt(localCtx, 1);
         setState(92);
         std::size_t lookahead = _input->LA(1);
-        if (lookahead != VAR_TYPE_WIRE && lookahead != VAR_TYPE_STATE) {
+        if (lookahead != VarTypeWire && lookahead != VarTypeState) {
             _errHandler->recoverInline(this);
         } else {
             _errHandler->reportMatch(this);
@@ -814,9 +803,9 @@ TSyrecParser::SignalListContext* TSyrecParser::signalList() {
         setState(98);
         _errHandler->sync(this);
         lookahead = _input->LA(1);
-        while (lookahead == PARAMETER_DELIMITER) {
+        while (lookahead == ParameterDelimiter) {
             setState(94);
-            match(PARAMETER_DELIMITER);
+            match(ParameterDelimiter);
             setState(95);
             signalDeclaration();
             setState(100);
@@ -839,40 +828,40 @@ TSyrecParser::SignalDeclarationContext::SignalDeclarationContext(ParserRuleConte
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::OPEN_SBRACKET() const {
-    return getTokens(TSyrecParser::OPEN_SBRACKET);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::literalOpenSBracket() const {
+    return getTokens(OpenSBracket);
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::OPEN_SBRACKET(size_t i) const {
-    return getToken(TSyrecParser::OPEN_SBRACKET, i);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalOpenSBracket(size_t i) const {
+    return getToken(OpenSBracket, i);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::CLOSE_SBRACKET() const {
-    return getTokens(TSyrecParser::CLOSE_SBRACKET);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::literalCloseSBracket() const {
+    return getTokens(CloseSBracket);
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::CLOSE_SBRACKET(size_t i) const {
-    return getToken(TSyrecParser::CLOSE_SBRACKET, i);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalCloseSBracket(size_t i) const {
+    return getToken(CloseSBracket, i);
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::INT() const {
-    return getTokens(TSyrecParser::INT);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::literalInt() const {
+    return getTokens(Int);
 }
 
-tree::TerminalNode* TSyrecParser::SignalDeclarationContext::INT(size_t i) const {
-    return getToken(TSyrecParser::INT, i);
+tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalInt(size_t i) const {
+    return getToken(Int, i);
 }
 
 size_t TSyrecParser::SignalDeclarationContext::getRuleIndex() const {
@@ -901,18 +890,18 @@ TSyrecParser::SignalDeclarationContext* TSyrecParser::signalDeclaration() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(101);
-        match(IDENT);
+        match(Ident);
         setState(107);
         _errHandler->sync(this);
         std::size_t lookahead = _input->LA(1);
-        while (lookahead == OPEN_SBRACKET) {
+        while (lookahead == OpenSBracket) {
             setState(102);
-            match(OPEN_SBRACKET);
+            match(OpenSBracket);
             setState(103);
-            antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->intToken = match(INT);
+            antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->intToken = match(Int);
             antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->dimensionTokens.push_back(antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->intToken);
             setState(104);
-            match(CLOSE_SBRACKET);
+            match(CloseSBracket);
             setState(109);
             _errHandler->sync(this);
             lookahead = _input->LA(1);
@@ -921,13 +910,13 @@ TSyrecParser::SignalDeclarationContext* TSyrecParser::signalDeclaration() {
         _errHandler->sync(this);
 
         lookahead = _input->LA(1);
-        if (lookahead == OPEN_RBRACKET) {
+        if (lookahead == OpenRBracket) {
             setState(110);
-            match(OPEN_RBRACKET);
+            match(OpenRBracket);
             setState(111);
-            antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->signalWidthToken = match(INT);
+            antlrcpp::downCast<SignalDeclarationContext*>(localCtx)->signalWidthToken = match(Int);
             setState(112);
-            match(CLOSE_RBRACKET);
+            match(CloseRBracket);
         }
 
     } catch (RecognitionException& e) {
@@ -953,12 +942,12 @@ TSyrecParser::StatementContext* TSyrecParser::StatementListContext::statement(si
     return getRuleContext<StatementContext>(i);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::StatementListContext::STATEMENT_DELIMITER() const {
-    return getTokens(TSyrecParser::STATEMENT_DELIMITER);
+std::vector<tree::TerminalNode*> TSyrecParser::StatementListContext::literalStatementDelimiter() const {
+    return getTokens(StatementDelimiter);
 }
 
-tree::TerminalNode* TSyrecParser::StatementListContext::STATEMENT_DELIMITER(size_t i) const {
-    return getToken(TSyrecParser::STATEMENT_DELIMITER, i);
+tree::TerminalNode* TSyrecParser::StatementListContext::literalStatementDelimiter(size_t i) const {
+    return getToken(StatementDelimiter, i);
 }
 
 size_t TSyrecParser::StatementListContext::getRuleIndex() const {
@@ -992,9 +981,9 @@ TSyrecParser::StatementListContext* TSyrecParser::statementList() {
         setState(120);
         _errHandler->sync(this);
         std::size_t lookahead = _input->LA(1);
-        while (lookahead == STATEMENT_DELIMITER) {
+        while (lookahead == StatementDelimiter) {
             setState(116);
-            match(STATEMENT_DELIMITER);
+            match(StatementDelimiter);
             setState(117);
             antlrcpp::downCast<StatementListContext*>(localCtx)->statementContext = statement();
             antlrcpp::downCast<StatementListContext*>(localCtx)->stmts.push_back(antlrcpp::downCast<StatementListContext*>(localCtx)->statementContext);
@@ -1134,36 +1123,36 @@ TSyrecParser::CallStatementContext::CallStatementContext(ParserRuleContext* pare
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::OP_CALL() const {
-    return getToken(TSyrecParser::OP_CALL, 0);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalOpCall() const {
+    return getToken(OpCall, 0);
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::OP_UNCALL() const {
-    return getToken(TSyrecParser::OP_UNCALL, 0);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalOpUncall() const {
+    return getToken(OpUncall, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::CallStatementContext::IDENT() const {
-    return getTokens(TSyrecParser::IDENT);
+std::vector<tree::TerminalNode*> TSyrecParser::CallStatementContext::literalIdent() const {
+    return getTokens(Ident);
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::IDENT(size_t i) const {
-    return getToken(TSyrecParser::IDENT, i);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalIdent(size_t i) const {
+    return getToken(Ident, i);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::CallStatementContext::PARAMETER_DELIMITER() const {
-    return getTokens(TSyrecParser::PARAMETER_DELIMITER);
+std::vector<tree::TerminalNode*> TSyrecParser::CallStatementContext::literalParameterDelimiter() const {
+    return getTokens(ParameterDelimiter);
 }
 
-tree::TerminalNode* TSyrecParser::CallStatementContext::PARAMETER_DELIMITER(size_t i) const {
-    return getToken(TSyrecParser::PARAMETER_DELIMITER, i);
+tree::TerminalNode* TSyrecParser::CallStatementContext::literalParameterDelimiter(size_t i) const {
+    return getToken(ParameterDelimiter, i);
 }
 
 size_t TSyrecParser::CallStatementContext::getRuleIndex() const {
@@ -1193,34 +1182,34 @@ TSyrecParser::CallStatementContext* TSyrecParser::callStatement() {
         enterOuterAlt(localCtx, 1);
         setState(132);
         std::size_t lookahead = _input->LA(1);
-        if (lookahead != OP_CALL && lookahead != OP_UNCALL) {
+        if (lookahead != OpCall && lookahead != OpUncall) {
             _errHandler->recoverInline(this);
         } else {
             _errHandler->reportMatch(this);
             consume();
         }
         setState(133);
-        antlrcpp::downCast<CallStatementContext*>(localCtx)->moduleIdent = match(IDENT);
+        antlrcpp::downCast<CallStatementContext*>(localCtx)->moduleIdent = match(Ident);
         setState(134);
-        match(OPEN_RBRACKET);
+        match(OpenRBracket);
         setState(135);
-        antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken = match(IDENT);
+        antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken = match(Ident);
         antlrcpp::downCast<CallStatementContext*>(localCtx)->callerArguments.push_back(antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken);
         setState(140);
         _errHandler->sync(this);
         lookahead = _input->LA(1);
-        while (lookahead == PARAMETER_DELIMITER) {
+        while (lookahead == ParameterDelimiter) {
             setState(136);
-            match(PARAMETER_DELIMITER);
+            match(ParameterDelimiter);
             setState(137);
-            antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken = match(IDENT);
+            antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken = match(Ident);
             antlrcpp::downCast<CallStatementContext*>(localCtx)->callerArguments.push_back(antlrcpp::downCast<CallStatementContext*>(localCtx)->identToken);
             setState(142);
             _errHandler->sync(this);
             lookahead = _input->LA(1);
         }
         setState(143);
-        match(CLOSE_RBRACKET);
+        match(CloseRBracket);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -1237,16 +1226,16 @@ TSyrecParser::LoopVariableDefinitionContext::LoopVariableDefinitionContext(Parse
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::LOOP_VARIABLE_PREFIX() const {
-    return getToken(TSyrecParser::LOOP_VARIABLE_PREFIX, 0);
+tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalLoopVariablePrefix() const {
+    return getToken(LoopVariablePrefix, 0);
 }
 
-tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::OP_EQUAL() const {
-    return getToken(TSyrecParser::OP_EQUAL, 0);
+tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalOpEqual() const {
+    return getToken(OpEqual, 0);
 }
 
-tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
 size_t TSyrecParser::LoopVariableDefinitionContext::getRuleIndex() const {
@@ -1275,11 +1264,11 @@ TSyrecParser::LoopVariableDefinitionContext* TSyrecParser::loopVariableDefinitio
     try {
         enterOuterAlt(localCtx, 1);
         setState(145);
-        match(LOOP_VARIABLE_PREFIX);
+        match(LoopVariablePrefix);
         setState(146);
-        antlrcpp::downCast<LoopVariableDefinitionContext*>(localCtx)->variableIdent = match(IDENT);
+        antlrcpp::downCast<LoopVariableDefinitionContext*>(localCtx)->variableIdent = match(Ident);
         setState(147);
-        match(OP_EQUAL);
+        match(OpEqual);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -1296,16 +1285,16 @@ TSyrecParser::LoopStepsizeDefinitionContext::LoopStepsizeDefinitionContext(Parse
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::LoopStepsizeDefinitionContext::KEYWORD_STEP() const {
-    return getToken(TSyrecParser::KEYWORD_STEP, 0);
+tree::TerminalNode* TSyrecParser::LoopStepsizeDefinitionContext::literalKeywordStep() const {
+    return getToken(KeywordStep, 0);
 }
 
 TSyrecParser::NumberContext* TSyrecParser::LoopStepsizeDefinitionContext::number() const {
     return getRuleContext<NumberContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::LoopStepsizeDefinitionContext::OP_MINUS() const {
-    return getToken(TSyrecParser::OP_MINUS, 0);
+tree::TerminalNode* TSyrecParser::LoopStepsizeDefinitionContext::literalOpMinus() const {
+    return getToken(OpMinus, 0);
 }
 
 size_t TSyrecParser::LoopStepsizeDefinitionContext::getRuleIndex() const {
@@ -1334,12 +1323,12 @@ TSyrecParser::LoopStepsizeDefinitionContext* TSyrecParser::loopStepsizeDefinitio
     try {
         enterOuterAlt(localCtx, 1);
         setState(149);
-        match(KEYWORD_STEP);
+        match(KeywordStep);
         setState(151);
         _errHandler->sync(this);
-        if (const std::size_t lookahead = _input->LA(1); lookahead == OP_MINUS) {
+        if (const std::size_t lookahead = _input->LA(1); lookahead == OpMinus) {
             setState(150);
-            match(OP_MINUS);
+            match(OpMinus);
         }
         setState(153);
         number();
@@ -1359,20 +1348,20 @@ TSyrecParser::ForStatementContext::ForStatementContext(ParserRuleContext* parent
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::ForStatementContext::KEYWORD_FOR() const {
-    return getToken(TSyrecParser::KEYWORD_FOR, 0);
+tree::TerminalNode* TSyrecParser::ForStatementContext::literalKeywordFor() const {
+    return getToken(KeywordFor, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ForStatementContext::KEYWORD_DO() const {
-    return getToken(TSyrecParser::KEYWORD_DO, 0);
+tree::TerminalNode* TSyrecParser::ForStatementContext::literalKeywordDo() const {
+    return getToken(KeywordDo, 0);
 }
 
 TSyrecParser::StatementListContext* TSyrecParser::ForStatementContext::statementList() const {
     return getRuleContext<StatementListContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::ForStatementContext::KEYWORD_ROF() const {
-    return getToken(TSyrecParser::KEYWORD_ROF, 0);
+tree::TerminalNode* TSyrecParser::ForStatementContext::literalKeywordRof() const {
+    return getToken(KeywordRof, 0);
 }
 
 std::vector<TSyrecParser::NumberContext*> TSyrecParser::ForStatementContext::number() const {
@@ -1383,8 +1372,8 @@ TSyrecParser::NumberContext* TSyrecParser::ForStatementContext::number(size_t i)
     return getRuleContext<NumberContext>(i);
 }
 
-tree::TerminalNode* TSyrecParser::ForStatementContext::KEYWORD_TO() const {
-    return getToken(TSyrecParser::KEYWORD_TO, 0);
+tree::TerminalNode* TSyrecParser::ForStatementContext::literalKeywordTo() const {
+    return getToken(KeywordTo, 0);
 }
 
 TSyrecParser::LoopStepsizeDefinitionContext* TSyrecParser::ForStatementContext::loopStepsizeDefinition() const {
@@ -1421,7 +1410,7 @@ TSyrecParser::ForStatementContext* TSyrecParser::forStatement() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(155);
-        match(KEYWORD_FOR);
+        match(KeywordFor);
         setState(162);
         _errHandler->sync(this);
 
@@ -1443,7 +1432,7 @@ TSyrecParser::ForStatementContext* TSyrecParser::forStatement() {
                 setState(159);
                 antlrcpp::downCast<ForStatementContext*>(localCtx)->startValue = number();
                 setState(160);
-                match(KEYWORD_TO);
+                match(KeywordTo);
                 break;
             }
 
@@ -1455,16 +1444,16 @@ TSyrecParser::ForStatementContext* TSyrecParser::forStatement() {
         setState(166);
         _errHandler->sync(this);
 
-        if (const std::size_t lookahead = _input->LA(1); lookahead == KEYWORD_STEP) {
+        if (const std::size_t lookahead = _input->LA(1); lookahead == KeywordStep) {
             setState(165);
             loopStepsizeDefinition();
         }
         setState(168);
-        match(KEYWORD_DO);
+        match(KeywordDo);
         setState(169);
         statementList();
         setState(170);
-        match(KEYWORD_ROF);
+        match(KeywordRof);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -1481,20 +1470,20 @@ TSyrecParser::IfStatementContext::IfStatementContext(ParserRuleContext* parent, 
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::IfStatementContext::KEYWORD_IF() const {
-    return getToken(TSyrecParser::KEYWORD_IF, 0);
+tree::TerminalNode* TSyrecParser::IfStatementContext::literalKeywordIf() const {
+    return getToken(KeywordIf, 0);
 }
 
-tree::TerminalNode* TSyrecParser::IfStatementContext::KEYWORD_THEN() const {
-    return getToken(TSyrecParser::KEYWORD_THEN, 0);
+tree::TerminalNode* TSyrecParser::IfStatementContext::literalKeywordThen() const {
+    return getToken(KeywordThen, 0);
 }
 
-tree::TerminalNode* TSyrecParser::IfStatementContext::KEYWORD_ELSE() const {
-    return getToken(TSyrecParser::KEYWORD_ELSE, 0);
+tree::TerminalNode* TSyrecParser::IfStatementContext::literalKeywordElse() const {
+    return getToken(KeywordElse, 0);
 }
 
-tree::TerminalNode* TSyrecParser::IfStatementContext::KEYWORD_FI() const {
-    return getToken(TSyrecParser::KEYWORD_FI, 0);
+tree::TerminalNode* TSyrecParser::IfStatementContext::literalKeywordFi() const {
+    return getToken(KeywordFi, 0);
 }
 
 std::vector<TSyrecParser::ExpressionContext*> TSyrecParser::IfStatementContext::expression() const {
@@ -1539,19 +1528,19 @@ TSyrecParser::IfStatementContext* TSyrecParser::ifStatement() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(172);
-        match(KEYWORD_IF);
+        match(KeywordIf);
         setState(173);
         antlrcpp::downCast<IfStatementContext*>(localCtx)->guardCondition = expression();
         setState(174);
-        match(KEYWORD_THEN);
+        match(KeywordThen);
         setState(175);
         antlrcpp::downCast<IfStatementContext*>(localCtx)->trueBranchStmts = statementList();
         setState(176);
-        match(KEYWORD_ELSE);
+        match(KeywordElse);
         setState(177);
         antlrcpp::downCast<IfStatementContext*>(localCtx)->falseBranchStmts = statementList();
         setState(178);
-        match(KEYWORD_FI);
+        match(KeywordFi);
         setState(179);
         antlrcpp::downCast<IfStatementContext*>(localCtx)->matchingGuardExpression = expression();
 
@@ -1574,16 +1563,16 @@ TSyrecParser::SignalContext* TSyrecParser::UnaryStatementContext::signal() const
     return getRuleContext<SignalContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::UnaryStatementContext::OP_INVERT_ASSIGN() const {
-    return getToken(TSyrecParser::OP_INVERT_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::UnaryStatementContext::literalOpInvertAssign() const {
+    return getToken(OpInvertAssign, 0);
 }
 
-tree::TerminalNode* TSyrecParser::UnaryStatementContext::OP_INCREMENT_ASSIGN() const {
-    return getToken(TSyrecParser::OP_INCREMENT_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::UnaryStatementContext::literalOpIncrementAssign() const {
+    return getToken(OpIncrementAssign, 0);
 }
 
-tree::TerminalNode* TSyrecParser::UnaryStatementContext::OP_DECREMENT_ASSIGN() const {
-    return getToken(TSyrecParser::OP_DECREMENT_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::UnaryStatementContext::literalOpDecrementAssign() const {
+    return getToken(OpDecrementAssign, 0);
 }
 
 size_t TSyrecParser::UnaryStatementContext::getRuleIndex() const {
@@ -1646,16 +1635,16 @@ TSyrecParser::ExpressionContext* TSyrecParser::AssignStatementContext::expressio
     return getRuleContext<ExpressionContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::AssignStatementContext::OP_ADD_ASSIGN() const {
-    return getToken(TSyrecParser::OP_ADD_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::AssignStatementContext::literalOpAddAssign() const {
+    return getToken(OpAddAssign, 0);
 }
 
-tree::TerminalNode* TSyrecParser::AssignStatementContext::OP_SUB_ASSIGN() const {
-    return getToken(TSyrecParser::OP_SUB_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::AssignStatementContext::literalOpSubAssign() const {
+    return getToken(OpSubAssign, 0);
 }
 
-tree::TerminalNode* TSyrecParser::AssignStatementContext::OP_XOR_ASSIGN() const {
-    return getToken(TSyrecParser::OP_XOR_ASSIGN, 0);
+tree::TerminalNode* TSyrecParser::AssignStatementContext::literalOpXorAssign() const {
+    return getToken(OpXorAssign, 0);
 }
 
 size_t TSyrecParser::AssignStatementContext::getRuleIndex() const {
@@ -1712,8 +1701,8 @@ TSyrecParser::SwapStatementContext::SwapStatementContext(ParserRuleContext* pare
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SwapStatementContext::OP_SWAP() const {
-    return getToken(TSyrecParser::OP_SWAP, 0);
+tree::TerminalNode* TSyrecParser::SwapStatementContext::literalOpSwap() const {
+    return getToken(OpSwap, 0);
 }
 
 std::vector<TSyrecParser::SignalContext*> TSyrecParser::SwapStatementContext::signal() const {
@@ -1752,7 +1741,7 @@ TSyrecParser::SwapStatementContext* TSyrecParser::swapStatement() {
         setState(188);
         antlrcpp::downCast<SwapStatementContext*>(localCtx)->lhsOperand = signal();
         setState(189);
-        match(OP_SWAP);
+        match(OpSwap);
         setState(190);
         antlrcpp::downCast<SwapStatementContext*>(localCtx)->rhsOperand = signal();
 
@@ -1771,8 +1760,8 @@ TSyrecParser::SkipStatementContext::SkipStatementContext(ParserRuleContext* pare
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SkipStatementContext::KEYWORD_SKIP() const {
-    return getToken(TSyrecParser::KEYWORD_SKIP, 0);
+tree::TerminalNode* TSyrecParser::SkipStatementContext::literalKeywordSkip() const {
+    return getToken(KeywordSkip, 0);
 }
 
 size_t TSyrecParser::SkipStatementContext::getRuleIndex() const {
@@ -1801,7 +1790,7 @@ TSyrecParser::SkipStatementContext* TSyrecParser::skipStatement() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(192);
-        match(KEYWORD_SKIP);
+        match(KeywordSkip);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -1818,28 +1807,28 @@ TSyrecParser::SignalContext::SignalContext(ParserRuleContext* parent, size_t inv
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SignalContext::IDENT() const {
-    return getToken(TSyrecParser::IDENT, 0);
+tree::TerminalNode* TSyrecParser::SignalContext::literalIdent() const {
+    return getToken(Ident, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalContext::OPEN_SBRACKET() const {
-    return getTokens(TSyrecParser::OPEN_SBRACKET);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalContext::literalOpenSBracket() const {
+    return getTokens(OpenSBracket);
 }
 
-tree::TerminalNode* TSyrecParser::SignalContext::OPEN_SBRACKET(size_t i) const {
-    return getToken(TSyrecParser::OPEN_SBRACKET, i);
+tree::TerminalNode* TSyrecParser::SignalContext::literalOpenSBracket(size_t i) const {
+    return getToken(OpenSBracket, i);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalContext::CLOSE_SBRACKET() const {
-    return getTokens(TSyrecParser::CLOSE_SBRACKET);
+std::vector<tree::TerminalNode*> TSyrecParser::SignalContext::literalCloseSBracket() const {
+    return getTokens(CloseSBracket);
 }
 
-tree::TerminalNode* TSyrecParser::SignalContext::CLOSE_SBRACKET(size_t i) const {
-    return getToken(TSyrecParser::CLOSE_SBRACKET, i);
+tree::TerminalNode* TSyrecParser::SignalContext::literalCloseSBracket(size_t i) const {
+    return getToken(CloseSBracket, i);
 }
 
-tree::TerminalNode* TSyrecParser::SignalContext::BITRANGE_START_PREFIX() const {
-    return getToken(TSyrecParser::BITRANGE_START_PREFIX, 0);
+tree::TerminalNode* TSyrecParser::SignalContext::literalBitrangeStartPrefix() const {
+    return getToken(BitrangeStartPrefix, 0);
 }
 
 std::vector<TSyrecParser::ExpressionContext*> TSyrecParser::SignalContext::expression() const {
@@ -1858,8 +1847,8 @@ TSyrecParser::NumberContext* TSyrecParser::SignalContext::number(size_t i) const
     return getRuleContext<NumberContext>(i);
 }
 
-tree::TerminalNode* TSyrecParser::SignalContext::BITRANGE_END_PREFIX() const {
-    return getToken(TSyrecParser::BITRANGE_END_PREFIX, 0);
+tree::TerminalNode* TSyrecParser::SignalContext::literalBitrangeEndPrefix() const {
+    return getToken(BitrangEndPrefix, 0);
 }
 
 size_t TSyrecParser::SignalContext::getRuleIndex() const {
@@ -1888,18 +1877,18 @@ TSyrecParser::SignalContext* TSyrecParser::signal() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(194);
-        match(IDENT);
+        match(Ident);
         setState(201);
         _errHandler->sync(this);
         std::size_t lookahead = _input->LA(1);
-        while (lookahead == OPEN_SBRACKET) {
+        while (lookahead == OpenSBracket) {
             setState(195);
-            match(OPEN_SBRACKET);
+            match(OpenSBracket);
             setState(196);
             antlrcpp::downCast<SignalContext*>(localCtx)->expressionContext = expression();
             antlrcpp::downCast<SignalContext*>(localCtx)->accessedDimensions.push_back(antlrcpp::downCast<SignalContext*>(localCtx)->expressionContext);
             setState(197);
-            match(CLOSE_SBRACKET);
+            match(CloseSBracket);
             setState(203);
             _errHandler->sync(this);
             lookahead = _input->LA(1);
@@ -1908,18 +1897,18 @@ TSyrecParser::SignalContext* TSyrecParser::signal() {
         _errHandler->sync(this);
 
         lookahead = _input->LA(1);
-        if (lookahead == BITRANGE_START_PREFIX) {
+        if (lookahead == BitrangeStartPrefix) {
             setState(204);
-            match(BITRANGE_START_PREFIX);
+            match(BitrangeStartPrefix);
             setState(205);
             antlrcpp::downCast<SignalContext*>(localCtx)->bitStart = number();
             setState(208);
             _errHandler->sync(this);
 
             lookahead = _input->LA(1);
-            if (lookahead == BITRANGE_END_PREFIX) {
+            if (lookahead == BitrangEndPrefix) {
                 setState(206);
-                match(BITRANGE_END_PREFIX);
+                match(BitrangEndPrefix);
                 setState(207);
                 antlrcpp::downCast<SignalContext*>(localCtx)->bitRangeEnd = number();
             }
@@ -2112,12 +2101,12 @@ TSyrecParser::BinaryExpressionContext::BinaryExpressionContext(ParserRuleContext
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
 std::vector<TSyrecParser::ExpressionContext*> TSyrecParser::BinaryExpressionContext::expression() const {
@@ -2128,72 +2117,72 @@ TSyrecParser::ExpressionContext* TSyrecParser::BinaryExpressionContext::expressi
     return getRuleContext<ExpressionContext>(i);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_PLUS() const {
-    return getToken(TSyrecParser::OP_PLUS, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpPlus() const {
+    return getToken(OpPlus, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_MINUS() const {
-    return getToken(TSyrecParser::OP_MINUS, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpMinus() const {
+    return getToken(OpMinus, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_MULTIPLY() const {
-    return getToken(TSyrecParser::OP_MULTIPLY, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpMultiply() const {
+    return getToken(OpMultiply, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_DIVISION() const {
-    return getToken(TSyrecParser::OP_DIVISION, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpDivision() const {
+    return getToken(OpDivision, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_MODULO() const {
-    return getToken(TSyrecParser::OP_MODULO, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpModulo() const {
+    return getToken(OpModulo, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_UPPER_BIT_MULTIPLY() const {
-    return getToken(TSyrecParser::OP_UPPER_BIT_MULTIPLY, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpUpperBitMultiply() const {
+    return getToken(OpUpperBitMultiply, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_LOGICAL_AND() const {
-    return getToken(TSyrecParser::OP_LOGICAL_AND, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpLogicalAnd() const {
+    return getToken(OpLogicalAnd, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_LOGICAL_OR() const {
-    return getToken(TSyrecParser::OP_LOGICAL_OR, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpLogicalOr() const {
+    return getToken(OpLogicalOr, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_BITWISE_AND() const {
-    return getToken(TSyrecParser::OP_BITWISE_AND, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpBitwiseAnd() const {
+    return getToken(OpBitwiseAnd, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_BITWISE_OR() const {
-    return getToken(TSyrecParser::OP_BITWISE_OR, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpBitwiseOr() const {
+    return getToken(OpBitwiseOr, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_BITWISE_XOR() const {
-    return getToken(TSyrecParser::OP_BITWISE_XOR, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpBitwiseXor() const {
+    return getToken(OpBitwiseXor, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_LESS_THAN() const {
-    return getToken(TSyrecParser::OP_LESS_THAN, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpLessThan() const {
+    return getToken(OpLessThan, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_GREATER_THAN() const {
-    return getToken(TSyrecParser::OP_GREATER_THAN, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpGreaterThan() const {
+    return getToken(OpGreaterThan, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_EQUAL() const {
-    return getToken(TSyrecParser::OP_EQUAL, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpEqual() const {
+    return getToken(OpEqual, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_NOT_EQUAL() const {
-    return getToken(TSyrecParser::OP_NOT_EQUAL, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpNotEqual() const {
+    return getToken(OpNotEqual, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_LESS_OR_EQUAL() const {
-    return getToken(TSyrecParser::OP_LESS_OR_EQUAL, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpLessOrEqual() const {
+    return getToken(OpLessOrEqual, 0);
 }
 
-tree::TerminalNode* TSyrecParser::BinaryExpressionContext::OP_GREATER_OR_EQUAL() const {
-    return getToken(TSyrecParser::OP_GREATER_OR_EQUAL, 0);
+tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpGreaterOrEqual() const {
+    return getToken(OpGreaterOrEqual, 0);
 }
 
 size_t TSyrecParser::BinaryExpressionContext::getRuleIndex() const {
@@ -2222,7 +2211,7 @@ TSyrecParser::BinaryExpressionContext* TSyrecParser::binaryExpression() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(219);
-        match(OPEN_RBRACKET);
+        match(OpenRBracket);
         setState(220);
         antlrcpp::downCast<BinaryExpressionContext*>(localCtx)->lhsOperand = expression();
         setState(221);
@@ -2237,7 +2226,7 @@ TSyrecParser::BinaryExpressionContext* TSyrecParser::binaryExpression() {
         setState(222);
         antlrcpp::downCast<BinaryExpressionContext*>(localCtx)->rhsOperand = expression();
         setState(223);
-        match(CLOSE_RBRACKET);
+        match(CloseRBracket);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -2258,12 +2247,12 @@ TSyrecParser::ExpressionContext* TSyrecParser::UnaryExpressionContext::expressio
     return getRuleContext<ExpressionContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::UnaryExpressionContext::OP_LOGICAL_NEGATION() const {
-    return getToken(TSyrecParser::OP_LOGICAL_NEGATION, 0);
+tree::TerminalNode* TSyrecParser::UnaryExpressionContext::literalOpLogicalNegation() const {
+    return getToken(OpLogicalNegation, 0);
 }
 
-tree::TerminalNode* TSyrecParser::UnaryExpressionContext::OP_BITWISE_NEGATION() const {
-    return getToken(TSyrecParser::OP_BITWISE_NEGATION, 0);
+tree::TerminalNode* TSyrecParser::UnaryExpressionContext::literalOpBitwiseNegation() const {
+    return getToken(OpBitwiseNegation, 0);
 }
 
 size_t TSyrecParser::UnaryExpressionContext::getRuleIndex() const {
@@ -2294,7 +2283,7 @@ TSyrecParser::UnaryExpressionContext* TSyrecParser::unaryExpression() {
         setState(225);
         antlrcpp::downCast<UnaryExpressionContext*>(localCtx)->unaryOperation = _input->LT(1);
         const std::size_t lookahead                                           = _input->LA(1);
-        if (lookahead != OP_LOGICAL_NEGATION && lookahead != OP_BITWISE_NEGATION) {
+        if (lookahead != OpLogicalNegation && lookahead != OpBitwiseNegation) {
             antlrcpp::downCast<UnaryExpressionContext*>(localCtx)->unaryOperation = _errHandler->recoverInline(this);
         } else {
             _errHandler->reportMatch(this);
@@ -2318,8 +2307,8 @@ TSyrecParser::ShiftExpressionContext::ShiftExpressionContext(ParserRuleContext* 
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::ShiftExpressionContext::OPEN_RBRACKET() const {
-    return getToken(TSyrecParser::OPEN_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::ShiftExpressionContext::literalOpenRBracket() const {
+    return getToken(OpenRBracket, 0);
 }
 
 TSyrecParser::ExpressionContext* TSyrecParser::ShiftExpressionContext::expression() const {
@@ -2330,16 +2319,16 @@ TSyrecParser::NumberContext* TSyrecParser::ShiftExpressionContext::number() cons
     return getRuleContext<NumberContext>(0);
 }
 
-tree::TerminalNode* TSyrecParser::ShiftExpressionContext::CLOSE_RBRACKET() const {
-    return getToken(TSyrecParser::CLOSE_RBRACKET, 0);
+tree::TerminalNode* TSyrecParser::ShiftExpressionContext::literalCloseRBracket() const {
+    return getToken(CloseRBracket, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ShiftExpressionContext::OP_RIGHT_SHIFT() const {
-    return getToken(TSyrecParser::OP_RIGHT_SHIFT, 0);
+tree::TerminalNode* TSyrecParser::ShiftExpressionContext::literalOpRightShift() const {
+    return getToken(OpRightShift, 0);
 }
 
-tree::TerminalNode* TSyrecParser::ShiftExpressionContext::OP_LEFT_SHIFT() const {
-    return getToken(TSyrecParser::OP_LEFT_SHIFT, 0);
+tree::TerminalNode* TSyrecParser::ShiftExpressionContext::literalOpLeftShift() const {
+    return getToken(OpLeftShift, 0);
 }
 
 size_t TSyrecParser::ShiftExpressionContext::getRuleIndex() const {
@@ -2368,12 +2357,12 @@ TSyrecParser::ShiftExpressionContext* TSyrecParser::shiftExpression() {
     try {
         enterOuterAlt(localCtx, 1);
         setState(228);
-        match(OPEN_RBRACKET);
+        match(OpenRBracket);
         setState(229);
         expression();
         setState(230);
         antlrcpp::downCast<ShiftExpressionContext*>(localCtx)->shiftOperation = _input->LT(1);
-        if (const std::size_t lookahead = _input->LA(1); lookahead != OP_LEFT_SHIFT && lookahead != OP_RIGHT_SHIFT) {
+        if (const std::size_t lookahead = _input->LA(1); lookahead != OpLeftShift && lookahead != OpRightShift) {
             antlrcpp::downCast<ShiftExpressionContext*>(localCtx)->shiftOperation = _errHandler->recoverInline(this);
         } else {
             _errHandler->reportMatch(this);
@@ -2382,7 +2371,7 @@ TSyrecParser::ShiftExpressionContext* TSyrecParser::shiftExpression() {
         setState(231);
         number();
         setState(232);
-        match(CLOSE_RBRACKET);
+        match(CloseRBracket);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -2394,9 +2383,5 @@ TSyrecParser::ShiftExpressionContext* TSyrecParser::shiftExpression() {
 }
 
 void TSyrecParser::initialize() {
-#if ANTLR4_USE_THREAD_LOCAL_CACHE
-    initializeStaticParserData();
-#else
-    call_once(tsyrecparserParserOnceFlag, initializeStaticParserData);
-#endif
+    call_once(parserSingletonInitializationSyncFlag, initializeStaticParserData);
 }

@@ -1,19 +1,30 @@
+#include "core/syrec/program.hpp"
+
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
 #include "TSyrecParser.h"
 #include "TSyrecLexer.h"
+
 #include "core/syrec/parser/components/custom_error_listener.hpp"
-
-#include "core/syrec/program.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/components/custom_module_visitor.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
+#include <cstddef>
+#include <fstream>
+#include <ios>
+#include <limits>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <string_view>
 
 namespace syrec {
     std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
         std::string                      foundErrorWhileReadingFileContent;
-        if (const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent); readFileContent.has_value() && foundErrorWhileReadingFileContent.empty())
-            readProgramFromString(*readFileContent, settings, foundErrorWhileReadingFileContent);   
+        if (const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent); readFileContent.has_value() && foundErrorWhileReadingFileContent.empty()) {
+            readProgramFromString(*readFileContent, settings, foundErrorWhileReadingFileContent);
+        }
         return foundErrorWhileReadingFileContent;
     }
     
@@ -64,32 +75,32 @@ namespace syrec {
             error = concatenatedErrorMessageContainer.str();
             return false;
         }
-        if (parsedSyrecProgram.has_value() && *parsedSyrecProgram)
+        if (parsedSyrecProgram.has_value() && *parsedSyrecProgram != nullptr) {
             modulesVec = parsedSyrecProgram->get()->modulesVec;
+        }
         return true;
     }
 
     std::optional<std::string> Program::tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors) {
         if (std::ifstream inputFileStream(filename.data(), std::ifstream::in | std::ifstream::binary); inputFileStream.is_open()) {
             inputFileStream.ignore(std::numeric_limits<std::streamsize>::max());
-            const std::streampos fileContentLength = inputFileStream.gcount();
+            const std::streamsize fileContentLength = inputFileStream.gcount();
             inputFileStream.clear(); //  Since ignore will have set eof.
             inputFileStream.seekg(0, std::ios_base::beg);
 
-            // Since std::streampos is a signed data type, std::string::size_type will always be larger thus or static_case will work in all cases
-            // ReSharper disable once CppRedundantCastExpression
             std::string fileContentBuffer(static_cast<std::string::size_type>(fileContentLength), ' ');
             inputFileStream.read(fileContentBuffer.data(), fileContentLength);
-            if (!inputFileStream.bad())
+            if (!inputFileStream.bad()) {
                 return std::make_optional(fileContentBuffer);
-
-            if (foundFileHandlingErrors)
+            }
+            if (foundFileHandlingErrors != nullptr) {
                 *foundFileHandlingErrors = "Error while reading content from file @ " + std::string(filename);
+            }
         }
 
-        if (foundFileHandlingErrors && foundFileHandlingErrors->empty()) 
+        if (foundFileHandlingErrors != nullptr && foundFileHandlingErrors->empty()) {
             *foundFileHandlingErrors = "Cannot open given circuit file @ " + std::string(filename);
-        
+        }
         return std::nullopt;
     }
 } // namespace syrec

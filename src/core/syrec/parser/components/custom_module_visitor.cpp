@@ -14,6 +14,7 @@
 #include "Token.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <climits>
 #include <memory>
 #include <optional>
@@ -104,13 +105,13 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(const TS
     }
 
     std::optional<std::string> moduleIdentifier;
-    if (context->IDENT() != nullptr) {
-        moduleIdentifier = context->IDENT()->getText();
+    if (context->literalIdent() != nullptr) {
+        moduleIdentifier = context->literalIdent()->getText();
         // According to the SyReC specification (https://revlib.org/doc/docu/revlib_2_0_1.pdf section 2.1): "The top-module of a program is defined by the special identifier main.".
         // Due to this restriction, the otherwise allowed overload of SyReC modules is disabled for modules declared with the identifier 'main' and will report a semantic error in case of a duplicate definition of
         // such a 'main' module.
         if (moduleIdentifier == "main" && symbolTable->existsModuleForName(*moduleIdentifier)) {
-            recordSemanticError<SemanticError::DuplicateMainModuleDefinition>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));
+            recordSemanticError<SemanticError::DuplicateMainModuleDefinition>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()));
         }
     }
 
@@ -138,7 +139,7 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(const TS
                     : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
             }
             if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound) {
-                recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *moduleIdentifier);
+                recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), *moduleIdentifier);
             }
         }
         if (generatedModule != nullptr) {
@@ -177,11 +178,11 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitParameterTyped(con
     }
 
     std::optional<syrec::Variable::Type> parameterVariableType;
-    if (context->VAR_TYPE_IN() != nullptr) {
+    if (context->literalVarTypeIn() != nullptr) {
         parameterVariableType = syrec::Variable::Type::In;
-    } else if (context->VAR_TYPE_INOUT() != nullptr) {
+    } else if (context->literalVarTypeInout() != nullptr) {
         parameterVariableType = syrec::Variable::Type::Inout;
-    } else if (context->VAR_TYPE_OUT() != nullptr) {
+    } else if (context->literalVarTypeOut() != nullptr) {
         parameterVariableType = syrec::Variable::Type::Out;
     }
 
@@ -198,9 +199,9 @@ std::optional<std::vector<syrec::Variable::ptr>> CustomModuleVisitor::visitSigna
     }
 
     std::optional<syrec::Variable::Type> localVariableType;
-    if (context->VAR_TYPE_STATE() != nullptr) {
+    if (context->literalVarTypeState() != nullptr) {
         localVariableType = syrec::Variable::Type::State;
-    } else if (context->VAR_TYPE_WIRE() != nullptr) {
+    } else if (context->literalVarTypeWire() != nullptr) {
         localVariableType = syrec::Variable::Type::Wire;
     }
 
@@ -226,9 +227,9 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
     }
 
     const std::optional<utils::TemporaryVariableScope::ptr> activeSymbolTableScope = symbolTable->getActiveTemporaryScope();
-    const std::optional<std::string>                        variableIdentifier     = context->IDENT() != nullptr ? std::make_optional(context->IDENT()->getText()) : std::nullopt;
+    const std::optional<std::string>                        variableIdentifier     = context->literalIdent() != nullptr ? std::make_optional(context->literalIdent()->getText()) : std::nullopt;
     if (variableIdentifier.has_value() && activeSymbolTableScope.has_value() && activeSymbolTableScope->get()->existsVariableForName(*variableIdentifier)) {
-        recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), *variableIdentifier);
+        recordSemanticError<SemanticError::DuplicateVariableDeclaration>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), *variableIdentifier);
     }
 
     std::vector<unsigned int> declaredNumberOfValuesPerDimension;
@@ -275,14 +276,14 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
     if (variableBitwidth > MAX_SUPPORTED_SIGNAL_BITWIDTH) {
         if (context->signalWidthToken != nullptr) {
             recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->signalWidthToken), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
-        } else if (context->IDENT() != nullptr) {
-            recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
+        } else if (context->literalIdent() != nullptr) {
+            recordSemanticError<SemanticError::DeclaredVariableBitwidthTooLarge>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), variableBitwidth, MAX_SUPPORTED_SIGNAL_BITWIDTH);
         }
     } else if (variableBitwidth == 0) {
         if (context->signalWidthToken != nullptr) {
             recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->signalWidthToken));    
         } else {
-            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->IDENT()->getSymbol()));    
+            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()));    
         }
     }
 

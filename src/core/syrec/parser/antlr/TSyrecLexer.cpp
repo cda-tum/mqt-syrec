@@ -54,22 +54,11 @@ namespace {
     };
 
     // TODO: Fix remaining .clang-tidy issues in ANTLR related files
-    internal::OnceFlag tsyreclexerLexerOnceFlag;
-    #if ANTLR4_USE_THREAD_LOCAL_CACHE
-        static thread_local std::unique_ptr<TSyrecLexerStaticData> lexerStaticData = nullptr;
-    #else
-        std::unique_ptr<TSyrecLexerStaticData> lexerStaticData = nullptr;
-    #endif
+    internal::OnceFlag lexerInitializationSyncFlag;
+    std::unique_ptr<TSyrecLexerStaticData> lexerStaticData = nullptr;
 
     void initializeStaticLexerData() {
-        #if ANTLR4_USE_THREAD_LOCAL_CACHE
-            if (tsyreclexerLexerStaticData != nullptr) {
-                return;
-            }
-        #else
-            assert(lexerStaticData == nullptr);
-        #endif
-
+        assert(lexerStaticData == nullptr);
         auto staticData = std::make_unique<TSyrecLexerStaticData>(
                 std::vector<std::string>{
                         "OP_INCREMENT_ASSIGN", "OP_DECREMENT_ASSIGN", "OP_INVERT_ASSIGN",
@@ -250,8 +239,7 @@ TSyrecLexer::TSyrecLexer(CharStream* input):
     Lexer(input) {
     initialize();
     // .clang-tidy checks warn that using raw pointers instead of one of the smart pointer alternatives defined by the STL might lead to memory leaks, etc. if not handled with care.
-    // We cannot resolve all references on the raw pointer to a smart pointer alternative since some of the code is "downloaded" and built when the ANTLR runtime is built with the source files of the latter
-    // only being available in the output directoy
+    // We cannot resolve all references to the raw pointer with its smart pointer alternative since the many references are defined in third-party code whos source files do not live in this solution (and are fetched at configure time)
     _interpreter =  new atn::LexerATNSimulator(this, *lexerStaticData->atn, lexerStaticData->decisionToDFA, lexerStaticData->sharedContextCache); // NOLINT
 }
 
@@ -288,9 +276,5 @@ const atn::ATN& TSyrecLexer::getATN() const {
 }
 
 void TSyrecLexer::initialize() {
-    #if ANTLR4_USE_THREAD_LOCAL_CACHE
-        initializeStaticLexerData();
-    #else
-        call_once(tsyreclexerLexerOnceFlag, initializeStaticLexerData);
-    #endif
+    call_once(lexerInitializationSyncFlag, initializeStaticLexerData);
 }
