@@ -61,8 +61,13 @@ namespace {
         std::unique_ptr<atn::ATN>      atn;
     };
 
-    internal::OnceFlag                      parserSingletonInitializationSyncFlag;
-    std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;
+    // Both of these variables are global static variables and thus the .clang-tidy check is correct in warning about their usage but
+    // since they are declared in an anonymous namespace they are also local to the compilation unit and thus not accessible outside of this source file.
+    // The remaining multithreading issues (as mentioned in the cpp-core-guidelines [https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#i2-avoid-non-const-global-variables])
+    // that could arise for global static variables are resolved by using the synchronization mechanism via antlr4::internal::OnceFlag for a thread-safe initialization
+    // of the static data instance.
+    internal::OnceFlag                      parserSingletonInitializationSyncFlag;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
     void initializeStaticParserData() {
         assert(parserSingletonStaticData == nullptr);
