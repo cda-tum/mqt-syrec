@@ -175,6 +175,10 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
         // We delegate the truncation of constant values to the caller of this function since the expected bitwidth of the operands could have been set in the currently processed
         // expression and needs to be propagate to any parent expression
         if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(syrec::BinaryExpression(*lhsOperand, *mappedToBinaryOperation, *rhsOperand), expectedBitwidthOfOperandsInExpression, nullptr); simplifiedBinaryExpr.has_value()) {
+            // If the binary expression evaluated to a numeric expression then the expected operand bitwidth needs to be reset since we cannot assume the expected bitwidth for such an expression.
+            if (const auto& simplifiedBinaryExprAsNumericOne = optionalDeterminedOperandBitwidth.has_value() ? std::dynamic_pointer_cast<syrec::NumericExpression>(*simplifiedBinaryExpr) : nullptr; simplifiedBinaryExprAsNumericOne != nullptr) {
+                optionalDeterminedOperandBitwidth.reset();
+            }
             return simplifiedBinaryExpr;
         }
         return std::make_shared<syrec::BinaryExpression>(*lhsOperand, *mappedToBinaryOperation, *rhsOperand);
@@ -211,6 +215,10 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
     if (toBeShiftedOperand.has_value() && mappedToShiftOperation.has_value() && shiftAmount.has_value()) {
         const std::optional<unsigned int> expectedBitwidthOfOperandsInLhsOperand = optionalDeterminedOperandBitwidth.has_value() ? std::make_optional(optionalDeterminedOperandBitwidth->operandBitwidth) : std::nullopt;
         if (const std::optional<syrec::Expression::ptr> optionalSimplifiedShiftExpr = trySimplifyShiftExpression(syrec::ShiftExpression(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount), expectedBitwidthOfOperandsInLhsOperand); optionalSimplifiedShiftExpr.has_value()) {
+            // If the binary expression evaluated to a numeric expression then the expected operand bitwidth needs to be reset since we cannot assume the expected bitwidth for such an expression.
+            if (const auto& simplifiedShiftExprAsNumericOne = optionalDeterminedOperandBitwidth.has_value() ? std::dynamic_pointer_cast<syrec::NumericExpression>(*optionalSimplifiedShiftExpr) : nullptr; simplifiedShiftExprAsNumericOne != nullptr) {
+                optionalDeterminedOperandBitwidth.reset();
+            }
             return optionalSimplifiedShiftExpr;
         }
         return std::make_shared<syrec::ShiftExpression>(*toBeShiftedOperand, *mappedToShiftOperation, *shiftAmount);
@@ -705,7 +713,7 @@ bool CustomExpressionVisitor::truncateConstantValuesInExpression(syrec::Expressi
         const bool wasRhsExprModified = exprAsBinaryExpr->rhs != nullptr ? truncateConstantValuesInExpression(exprAsBinaryExpr->rhs, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants, detectedDivisionByZero) : false;
 
         if (wasLhsExprModified || wasRhsExprModified) {
-            if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(*exprAsBinaryExpr, expectedBitwidthOfOperandsInExpression, detectedDivisionByZero)) {
+            if (const std::optional<syrec::Expression::ptr> simplifiedBinaryExpr = trySimplifyBinaryExpression(*exprAsBinaryExpr, expectedBitwidthOfOperandsInExpression, detectedDivisionByZero); simplifiedBinaryExpr.has_value()) {
                 expression = *simplifiedBinaryExpr;
                 return true;
             }

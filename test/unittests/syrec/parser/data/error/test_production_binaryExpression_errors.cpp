@@ -259,3 +259,13 @@ TEST_F(SyrecParserErrorTestsFixture, LogicalOperationRequiringOperandsWithBitwid
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 84), 1, 2);
     performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 1 do a[0].1 += ((a[1].0:1 + b) || (a[1].1:2 << $i)) rof");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, BinaryExpressionUsingLogicalOperationWithConstantOperandsCausesPropagationOfExpectedBitwidthOfNonConstantOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 3, 2);
+    performTestExecution("module main(inout a(4), in b(2)) a.1:3 += ((#a || 2) + b)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, BinaryExpressionUsingRelationalOperationWithConstantOperandsCausesPropagationOfExpectedBitwidthOfNonConstantOperand) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 3, 2);
+    performTestExecution("module main(inout a(4), in b(2)) a.1:3 += (b + (#a < 2))");
+}

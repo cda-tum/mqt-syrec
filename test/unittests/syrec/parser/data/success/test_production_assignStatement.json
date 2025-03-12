@@ -955,5 +955,13 @@
   "startAndEndIndicesOfAccessedBitrangeOnRhsBeingEqualRecognizedAsAccessedBitwidthOfLengthOne": {
     "inputCircuit": "module main(inout a(4), in b(2)) a[0].1 += (b.1:1 + 2)",
     "expectedCircuit": "module main(inout a(4), in b(2)) a[0].1 += b[0].1:1"
+  },
+  "expectedOperandBitwidthOfTopmostRightHandSideExpressionUsingLogicalOperationResetIfBothOperandsEvaluatedToConstants": {
+    "inputCircuit": "module main(inout a(4), in b(2)) a += ((b * 0) || 2)",
+    "expectedCircuit": "module main(inout a(4), in b(2)) a[0] += 1"
+  },
+  "expectedOperandBitwidthOfTopmostRightHandSideExpressionUsingRelationalOperationResetIfBothOperandsEvaluatedToConstants": {
+    "inputCircuit": "module main(inout a(4), in b(2)) a += ((b * 0) > 2)",
+    "expectedCircuit": "module main(inout a(4), in b(2)) a[0] += 0"
   }
 }

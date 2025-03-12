@@ -43,5 +43,13 @@
   "integerConstantTruncationNotUsingParentOperandBitwidthIfLogicalOperationIsUsedInParentExpression": {
     "inputCircuit": "module main(inout a(4), inout b(5)) b.0 += ((((a + 25) - b.1:4) << 2) > 1)",
     "expectedCircuit": "module main(inout a(4), inout b(5)) b[0].0 += ((((a[0] + 10) - b[0].1:4) << 2) > 1)"
+  },
+  "expectedOperandBitwidthSetByBinaryOperationInLhsOperandOfShiftExpressionUsingLogicalOperationResetIfBothOperandsEvaluatedToAConstant": {
+    "inputCircuit": "module main(inout a(4), in b(2)) a.0:1 += (((#a || 2) << 1) + b)",
+    "expectedCircuit": "module main(inout a(4), in b(2)) a[0].0:1 += (2 + b[0])"
+  },
+  "expectedOperandBitwidthSetByBinaryOperationInLhsOperandOfShiftExpressionUsingRelationalOperationResetIfBothOperandsEvaluatedToAConstant": {
+    "inputCircuit": "module main(inout a(4), in b(2)) a.0:1 += (((#a > 2) << 1) + b)",
+    "expectedCircuit": "module main(inout a(4), in b(2)) a[0].0:1 += (2 + b[0])"
   }
 }

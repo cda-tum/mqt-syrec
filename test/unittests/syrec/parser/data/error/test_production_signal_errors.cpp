@@ -250,5 +250,5 @@ TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionForUnknownAccesse
 
 TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOnlyLocalToCurrentExpressionIsResetAfterDimensionWasProcessedWithNewRestrictionInNextDimensionNotBlocked) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 106), 2, 4);
-    performTestExecution("module main(inout a[2][4](4), out b(4), in c(2)) for $i = 0 to 3 do ++= a[((b.$i + 2) - c.0)][((c << 2) + b[0])] rof");
+    performTestExecution("module main(inout a[2][4](4), out b(4), in c(2)) for $i = 0 to 3 do ++= a[((b.$i + 2) - c.0)][((c << 1) + b[0])] rof");
 }
