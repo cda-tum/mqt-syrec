@@ -155,6 +155,15 @@ FetchContent_MakeAvailable(${FETCH_PACKAGES})
 
 if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
     set(ANTLR4_INCLUDE_DIRS ${antlr4_static_SOURCE_DIR}/runtime/Cpp/runtime/src)
+    # When linking the ANTLR4 static runtime to a shared library or executable, the position independent
+    # code compiler options needs to be set otherwise the linker will fail
+    # https://github.com/antlr/antlr4/issues/2776
+    set_target_properties(antlr4_static PROPERTIES CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+    # Dlls do not use position independent code compiler option (https://github.com/BVLC/caffe/issues/5992)
+    if(NOT WIN32)
+        target_compile_options(antlr4_static PUBLIC -fPIC)
+    endif()
 else()
     set(ANTLR4_INCLUDE_DIRS ${antlr4_shared_SOURCE_DIR}/runtime/Cpp/runtime/src)
 endif()
