@@ -28,10 +28,10 @@
   },
 
   "bn_2": {
-    "num_gates": 188,
-    "lines": 74,
-    "quantum_costs": 520,
-    "transistor_costs": 1920
+    "num_gates": 178,
+    "lines": 70,
+    "quantum_costs": 498,
+    "transistor_costs": 1816
   },
 
   "call_8": {
