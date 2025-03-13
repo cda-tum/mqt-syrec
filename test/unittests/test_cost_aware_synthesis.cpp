@@ -75,10 +75,9 @@ TEST_P(SyrecAddLinesSynthesisTest, GenericSynthesisTest) {
     ReadProgramSettings settings;
     std::string         errorString;
 
-    errorString = prog.read(fileName, settings);
-    EXPECT_TRUE(errorString.empty());
-
-    EXPECT_TRUE(CostAwareSynthesis::synthesize(circ, prog));
+    ASSERT_NO_FATAL_FAILURE(errorString = prog.read(fileName, settings)) << "Unexpected crash during processing of SyReC program";
+    ASSERT_TRUE(errorString.empty()) << "Found errors during processing of SyReC program: " << errorString;
+    ASSERT_TRUE(CostAwareSynthesis::synthesize(circ, prog));
 
     qc = circ.quantumCost();
     tc = circ.transistorCost();
