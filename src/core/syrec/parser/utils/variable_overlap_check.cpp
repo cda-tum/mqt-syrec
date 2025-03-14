@@ -24,8 +24,8 @@ std::optional<unsigned int> tryEvaluateNumber(const syrec::Number::ptr& numberTo
     return numberToEvaluate && numberToEvaluate->isConstant() ? numberToEvaluate->tryEvaluate({}) : std::nullopt;
 }
 
-std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression::ptr& expression) {
-    if (const auto& numericExprOfContainerToEvaluate = std::dynamic_pointer_cast<syrec::NumericExpression>(expression); numericExprOfContainerToEvaluate != nullptr) {
+std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression& expression) {
+    if (const auto& numericExprOfContainerToEvaluate = dynamic_cast<const syrec::NumericExpression*>(&expression); numericExprOfContainerToEvaluate != nullptr) {
         return tryEvaluateNumber(numericExprOfContainerToEvaluate->value);
     }
     return std::nullopt;
@@ -56,12 +56,38 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
     const syrec::Variable& lVar = *lVarPtr;
     const syrec::Variable& rVar = *rVarPtr;
 
-    const std::size_t numDimensionsToCheck = std::min(
+    std::size_t numDimensionsToCheck = std::min(
         std::min(lVar.dimensions.size(), lVariableAccess.indexes.size()), 
         std::min(rVar.dimensions.size(), rVariableAccess.indexes.size())
     );
     std::vector<unsigned int> constantIndicesOfAccessedValuesPerDimension;
     if (numDimensionsToCheck == 0) {
+        const auto& exprDefiningAccessedValueOfDimensionInLVar = !lVariableAccess.indexes.empty() ? lVariableAccess.indexes.front() : nullptr;
+        const auto& exprDefiningAccessedValueOfDimensionInRVar = !rVariableAccess.indexes.empty() ? rVariableAccess.indexes.front() : nullptr;
+
+        std::optional<unsigned int> accessedValueInLVar;
+        std::optional<unsigned int> accessedValueInRVar;
+        if (exprDefiningAccessedValueOfDimensionInLVar == nullptr) {
+            accessedValueInLVar = lVar.dimensions.size() == 1 && lVar.dimensions.front() == 1 ? std::make_optional(0) : std::nullopt;
+        } else {
+            accessedValueInLVar = tryEvaluateNumericExpr(*exprDefiningAccessedValueOfDimensionInLVar);
+        }
+
+        if (exprDefiningAccessedValueOfDimensionInRVar == nullptr) {
+            accessedValueInRVar = rVar.dimensions.size() == 1 && rVar.dimensions.front() == 1 ? std::make_optional(0) : std::nullopt;
+        } else {
+            accessedValueInRVar = tryEvaluateNumericExpr(*exprDefiningAccessedValueOfDimensionInRVar);
+        }
+       
+        // If one were to assume that all indices provided in the two variable accesses are within range of the formal bounds of the accessed variable, an index with an non-constant value
+        // could be assumed to be overlapping for a dimension that has only one value. However, we do not assume in-range indices and thus can only report a potential overlap. The same reasoning
+        // can be applied for non-constant indices of the accessed bitrange for a variable with defined bitwidth of 1.
+        if (!accessedValueInLVar.has_value() || !accessedValueInRVar.has_value()) {
+            return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
+        }
+        if (accessedValueInLVar.value() != accessedValueInRVar.value()) {
+            return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::NotOverlapping);
+        }
         constantIndicesOfAccessedValuesPerDimension.emplace_back(0);
     } else {
         constantIndicesOfAccessedValuesPerDimension.reserve(numDimensionsToCheck);
@@ -74,8 +100,8 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
             return VariableAccessOverlapCheckResult(VariableAccessOverlapCheckResult::OverlapState::MaybeOverlapping);
         }
 
-        const std::optional<unsigned int> accessedValueInLVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInLVar);
-        const std::optional<unsigned int> accessedValueInRVar = tryEvaluateNumericExpr(exprDefiningAccessedValueOfDimensionInRVar);
+        const std::optional<unsigned int> accessedValueInLVar = exprDefiningAccessedValueOfDimensionInLVar != nullptr ? tryEvaluateNumericExpr(*exprDefiningAccessedValueOfDimensionInLVar) : std::nullopt;
+        const std::optional<unsigned int> accessedValueInRVar = exprDefiningAccessedValueOfDimensionInRVar != nullptr ? tryEvaluateNumericExpr(*exprDefiningAccessedValueOfDimensionInRVar) : std::nullopt;
 
         // If one were to assume that all indices provided in the two variable accesses are within range of the formal bounds of the accessed variable, an index with an non-constant value
         // could be assumed to be overlapping for a dimension that has only one value. However, we do not assume in-range indices and thus can only report a potential overlap. The same reasoning
