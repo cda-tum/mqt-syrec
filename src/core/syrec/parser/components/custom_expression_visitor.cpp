@@ -724,11 +724,18 @@ bool CustomExpressionVisitor::truncateConstantValuesInExpression(syrec::Expressi
             expression = *simplfifiedShiftExpr;
         }
     } else if (auto* const exprAsNumericExpr = dynamic_cast<syrec::NumericExpression*>(&*expression); exprAsNumericExpr != nullptr) {
-        if (!exprAsNumericExpr->value || exprAsNumericExpr->value->isLoopVariable()) {
+        if (exprAsNumericExpr->value == nullptr) {
             return false;
         }
+
+        if (!exprAsNumericExpr->value->isConstant()) {
+            exprAsNumericExpr->bwidth = expectedBitwidthOfOperandsInExpression;
+            wasOriginalExprModified   = true;
+        }
+
         if (const std::optional<unsigned int> constantValueOfNumericExpr = exprAsNumericExpr->value->tryEvaluate({}); constantValueOfNumericExpr.has_value()) {
             exprAsNumericExpr->value = std::make_shared<syrec::Number>(truncateConstantValueToExpectedBitwidth(*constantValueOfNumericExpr, expectedBitwidthOfOperandsInExpression, truncationOperationToUseForIntegerConstants));
+            exprAsNumericExpr->bwidth = expectedBitwidthOfOperandsInExpression;
             wasOriginalExprModified  = true;
         }
     }
