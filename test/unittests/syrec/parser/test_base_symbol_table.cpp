@@ -494,32 +494,49 @@ TEST_P(VariableTypeAssignabilityDuringOverloadResolution, VariableTypeAssignabil
     moduleWithOneParameter->statements = createStatementBodyContainingSingleSkipStmt();
     ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, moduleWithOneParameter));
 
-    const auto moduleParameterNotAssignableForFirstModuleParameter = std::make_shared<syrec::Variable>(variableTypeAssignabilityLookup.notAssignableVariableTypes.front(), "moduleParamTwo", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
-    const auto moduleWithACompatibleAndIncompatibleParameter       = std::make_shared<syrec::Module>(moduleWithOneParameter->name);
-    moduleWithACompatibleAndIncompatibleParameter->parameters.emplace_back(moduleParameter);
-    moduleWithACompatibleAndIncompatibleParameter->parameters.emplace_back(moduleParameterNotAssignableForFirstModuleParameter);
-    moduleWithACompatibleAndIncompatibleParameter->statements = createStatementBodyContainingSingleSkipStmt();
-    ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, moduleWithACompatibleAndIncompatibleParameter));
+    if (variableTypeAssignabilityLookup.notAssignableVariableTypes.empty()) {
+        syrec::Module::vec modulesMatchingName;
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleWithOneParameter->name));
+        ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({moduleWithOneParameter}, modulesMatchingName));
 
-    syrec::Module::vec modulesMatchingName;
-    ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleWithOneParameter->name));
-    ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({moduleWithOneParameter, moduleWithACompatibleAndIncompatibleParameter}, modulesMatchingName));
-
-    auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
-    ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {moduleParameter}));
-    ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
-
-    auto firstCallerArg = std::make_shared<syrec::Variable>(moduleParameter->type, "callerArg", moduleParameter->dimensions, moduleParameter->bitwidth);
-    for (const syrec::Variable::Type assignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.assignableVariableTypes) {
-        firstCallerArg->type = assignableVariableTypeForModuleParameter;
-        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+        auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::SingleMatchFound, std::nullopt);
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {moduleParameter}));
         ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
-    }
 
-    for (const syrec::Variable::Type notAssignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.notAssignableVariableTypes) {
-        firstCallerArg->type = notAssignableVariableTypeForModuleParameter;
-        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
-        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
+        auto firstCallerArg = std::make_shared<syrec::Variable>(moduleParameter->type, "callerArg", moduleParameter->dimensions, moduleParameter->bitwidth);
+        for (const syrec::Variable::Type assignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.assignableVariableTypes) {
+            firstCallerArg->type = assignableVariableTypeForModuleParameter;
+            ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+            ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
+        }
+    } else {
+        const auto moduleParameterNotAssignableForFirstModuleParameter = std::make_shared<syrec::Variable>(variableTypeAssignabilityLookup.notAssignableVariableTypes.front(), "moduleParamTwo", DEFAULT_SIGNAL_DIMENSIONS, DEFAULT_BITWIDTH);
+        const auto moduleWithACompatibleAndIncompatibleParameter       = std::make_shared<syrec::Module>(moduleWithOneParameter->name);
+        moduleWithACompatibleAndIncompatibleParameter->parameters.emplace_back(moduleParameter);
+        moduleWithACompatibleAndIncompatibleParameter->parameters.emplace_back(moduleParameterNotAssignableForFirstModuleParameter);
+        moduleWithACompatibleAndIncompatibleParameter->statements = createStatementBodyContainingSingleSkipStmt();
+        ASSERT_NO_FATAL_FAILURE(assertModuleInsertionCompletesSuccessfully(symbolTable, moduleWithACompatibleAndIncompatibleParameter));
+
+        syrec::Module::vec modulesMatchingName;
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingName = symbolTable.getModulesByName(moduleWithOneParameter->name));
+        ASSERT_NO_FATAL_FAILURE(assertModuleCollectionsMatch({moduleWithOneParameter, moduleWithACompatibleAndIncompatibleParameter}, modulesMatchingName));
+
+        auto modulesMatchingSignature = BaseSymbolTable::ModuleOverloadResolutionResult(BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound, std::nullopt);
+        ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {moduleParameter}));
+        ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
+
+        auto firstCallerArg = std::make_shared<syrec::Variable>(moduleParameter->type, "callerArg", moduleParameter->dimensions, moduleParameter->bitwidth);
+        for (const syrec::Variable::Type assignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.assignableVariableTypes) {
+            firstCallerArg->type = assignableVariableTypeForModuleParameter;
+            ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+            ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForSingleMatch(moduleWithOneParameter), modulesMatchingSignature));
+        }
+
+        for (const syrec::Variable::Type notAssignableVariableTypeForModuleParameter: variableTypeAssignabilityLookup.notAssignableVariableTypes) {
+            firstCallerArg->type = notAssignableVariableTypeForModuleParameter;
+            ASSERT_NO_FATAL_FAILURE(modulesMatchingSignature = symbolTable.getModulesMatchingSignature(moduleWithOneParameter->name, {firstCallerArg}));
+            ASSERT_NO_FATAL_FAILURE(assertModuleMatchingSignatureMatchesExpectedOne(createModuleOverloadResolutionResultForNoMatch(), modulesMatchingSignature));
+        }
     }
 }
 
@@ -527,7 +544,7 @@ INSTANTIATE_TEST_SUITE_P(
         VariableTypeAssignabilityCheckWhenLookingForModulesMatchingSignature,
         VariableTypeAssignabilityDuringOverloadResolution,
         ::testing::Values(
-                VariableTypeAssignabilityLookup(syrec::Variable::Type::In, {syrec::Variable::Type::In, syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::Wire}, {syrec::Variable::Type::State}),
+                VariableTypeAssignabilityLookup(syrec::Variable::Type::In, {syrec::Variable::Type::In, syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::Wire, syrec::Variable::Type::State}, {}),
                 VariableTypeAssignabilityLookup(syrec::Variable::Type::Out, {syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::Wire}, {syrec::Variable::Type::In, syrec::Variable::Type::State}),
                 VariableTypeAssignabilityLookup(syrec::Variable::Type::Inout, {syrec::Variable::Type::Out, syrec::Variable::Type::Inout, syrec::Variable::Type::Wire}, {syrec::Variable::Type::In, syrec::Variable::Type::State})));
 
