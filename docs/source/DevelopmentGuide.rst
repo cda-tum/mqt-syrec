@@ -124,7 +124,7 @@ First, CMake needs to be *configured* by calling
 
     .. code-block:: console
 
-        $ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_MQT_SYREC_TESTS=ON -DBUILD_MQT_SYREC_DBINDINGS=ON
+        $ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_MQT_SYREC_TESTS=ON -DBUILD_MQT_SYREC_BINDINGS=ON
 
 This tells CMake to
 
@@ -205,11 +205,11 @@ To keep the number of external dependencies for this project low and due to the 
 1. Download the `ANTLR java binary <https://www.antlr.org/download.html>`_ and copy it to a location of your choice.
 2. Assuming that the *antlr.jar* is located in the same folder as the *.g4* grammar files and that the Java binary is available in the command line, execute the following command:
 
-  .. code-block:: console
+    .. code-block:: console
 
-    $ java -jar antlr.jar -Dlanguage=Cpp -package syrec_parser -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
+      $ java -jar antlr.jar -Dlanguage=Cpp -package syrec_parser -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
   
-  Out of all the generated files in the specified *<OUTPUT_DIRECTORY_FOR_GEN_FILES>* directory only the following are relevant for the C++ core library: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*, *TSyrecBaseVisitor.h*.
+   Out of all the generated files in the specified *<OUTPUT_DIRECTORY_FOR_GEN_FILES>* directory only the following are relevant for the C++ core library: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*, *TSyrecBaseVisitor.h*.
 
 3. Copy the relevant files generated in the previous step to the corresponding folders in the project:
 
@@ -219,7 +219,7 @@ To keep the number of external dependencies for this project low and due to the 
   .. note::
 
     Executing the .clang-tidy and .clang-format checks for the generated header and source files will result in a large number of warnings being reported that need to be fixed prior to any pull-request.
-    We recommend that one uses a diff-tool to determine the changes between the current implementation and the newly generated code and then merge the relevant portions of the new code into the existing one. Changes in the *.g4* grammar files might also require an update of the implementation of the parser components (in :code:`src\core\syrec\parser\components`).
+    We recommend that one uses a diff-tool to determine the changes between the current implementation and the newly generated code and then merge the relevant portions of the new code into the existing one. Changes in the *.g4* grammar files might also require an update of the implementation of the parser components (in :code:`src/core/syrec/parser/components`).
 
 Working on the Python module
 ############################
