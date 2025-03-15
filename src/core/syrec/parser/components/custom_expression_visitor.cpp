@@ -235,7 +235,6 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitUnaryExpress
     return std::nullopt;
 }
 
-// TODO: Caller needs to set expected bitwidth and perform the optional integer constant truncation
 std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitExpressionFromNumberTyped(const TSyrecParser::ExpressionFromNumberContext* context) const {
     if (const auto& generatedNumberContainer = context != nullptr ? visitNumberTyped(context->number()) : std::nullopt; generatedNumberContainer.has_value()) {
         return std::make_shared<syrec::NumericExpression>(*generatedNumberContainer, DEFAULT_EXPRESSION_BITWIDTH);

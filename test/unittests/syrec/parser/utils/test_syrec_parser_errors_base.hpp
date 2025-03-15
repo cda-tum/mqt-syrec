@@ -16,9 +16,6 @@
 #include <string_view>
 #include <vector>
 
-// TOOD: Is the expression defined for an if statement expected to have a bitwidth of one?
-// TODO: Some syrec synthesis test use the EXPECT_XX macros instead of the ASSERT_XX macros with the former silently failing and causes erros in latter code that should not execute
-
 namespace syrec_parser_error_tests {
     using namespace syrec_parser;
 
