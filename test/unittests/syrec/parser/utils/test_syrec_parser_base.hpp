@@ -120,11 +120,11 @@ protected:
         const syrec::ReadProgramSettings& parserConfiguration = userDefinedParserConfiguration.value_or(syrec::ReadProgramSettings());
         std::string                       aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram;
         ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedSyrecProgramToProcess, parserConfiguration));
-        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the given SyReC program";
+        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the given SyReC program but actual found errors where: " << aggregateOfDetectedErrorsDuringProcessingOfUserProvidedSyrecProgram;
 
         std::string aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram;
         ASSERT_NO_FATAL_FAILURE(aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram = parserInstance.readFromString(loadedTestCaseData.stringifiedExpectedSyrecProgramContent, parserConfiguration));
-        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the stringified version of the given SyReC program expected to be generated when stringifying the IR of the parser";
+        ASSERT_TRUE(aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram.empty()) << "Expected no errors to be reported when parsing the stringified version of the given SyReC program expected to be generated when stringifying the IR of the parser but actual found errors where: " << aggregateOfDetectedErrorsDuringProcessingOfExpectedOutputOfStringificationOfUserProvidedSyrecProgram;
 
         std::ostringstream containerForStringifiedProgram;
         ASSERT_NO_FATAL_FAILURE(assertStringificationOfParsedSyrecProgramIsSuccessful(parserInstance, containerForStringifiedProgram));
