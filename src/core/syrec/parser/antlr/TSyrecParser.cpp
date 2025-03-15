@@ -66,8 +66,8 @@ namespace {
     // The remaining multithreading issues (as mentioned in the cpp-core-guidelines [https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#i2-avoid-non-const-global-variables])
     // that could arise for global static variables are resolved by using the synchronization mechanism via antlr4::internal::OnceFlag for a thread-safe initialization
     // of the static data instance.
-    internal::OnceFlag                      parserSingletonInitializationSyncFlag;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
-    std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;    // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    internal::OnceFlag                      parserSingletonInitializationSyncFlag; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;   // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
     void initializeStaticParserData() {
         assert(parserSingletonStaticData == nullptr);
@@ -202,7 +202,7 @@ TSyrecParser::TSyrecParser(TokenStream* input, const atn::ParserATNSimulatorOpti
     Parser(input) {
     initialize();
     // .clang-tidy checks warn that using raw pointers instead of one of the smart pointer alternatives defined by the STL might lead to memory leaks, etc. if not handled with care.
-    // We cannot resolve all references to the raw pointer with its smart pointer alternative since the many references are defined in third-party code whos source files do not live in this solution (and are fetched at configure time)
+    // We cannot resolve all references to the raw pointer with its smart pointer alternative since the many references are defined in third-party code whose source files do not live in this solution (and are fetched at configure time)
     _interpreter = new atn::ParserATNSimulator(this, *parserSingletonStaticData->atn, parserSingletonStaticData->decisionToDFA, parserSingletonStaticData->sharedContextCache, options); // NOLINT
 }
 

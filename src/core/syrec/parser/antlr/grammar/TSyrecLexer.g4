@@ -1,6 +1,6 @@
 lexer grammar TSyrecLexer;
 
-/* Token defintions */
+/* Token definitions */
 OP_INCREMENT_ASSIGN: '++=' ;
 OP_DECREMENT_ASSIGN: '--=' ;
 OP_INVERT_ASSIGN: '~=' ;

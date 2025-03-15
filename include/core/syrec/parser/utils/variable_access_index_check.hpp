@@ -22,7 +22,7 @@ namespace utils {
 
         struct BitRangeValidityResult {
             IndexValidationResult bitRangeStartValidity;
-            IndexValidationResult bitRangeEndValiditiy;
+            IndexValidationResult bitRangeEndValidity;
         };
         std::vector<IndexValidationResult>    accessedValuePerDimensionValidity;
         std::optional<BitRangeValidityResult> bitRangeAccessValidity;

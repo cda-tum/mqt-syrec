@@ -1,9 +1,8 @@
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
 #include <gtest/gtest.h>
-
-#include "core/syrec/parser/utils/custom_error_messages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 using namespace syrec_parser_error_tests;
 
@@ -13,8 +12,8 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidModuleKeywordUsageCausesError) {
-    recordSyntaxError(Message::Position(1, 0), "mismatched input 'modul' expecting 'module'");
-    performTestExecution("modul main() skip");
+    recordSyntaxError(Message::Position(1, 0), "mismatched input 'module' expecting 'module'");
+    performTestExecution("module main() skip");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInModuleIdentifierCausesError) {

@@ -24,11 +24,11 @@ namespace utils {
             bool                       omitNumberOfDimensionsDeclarationFor1DVariablesWithSingleValue = true;
             std::size_t                defaultSignalBitwidth                                          = 16;
             std::optional<std::string> optionalCustomNewlineCharacterSequence;
-            std::optional<std::string> optionalCustomIdentationCharacterSequence;
+            std::optional<std::string> optionalCustomIndentationCharacterSequence;
 
             AdditionalFormattingOptions():
                 optionalCustomNewlineCharacterSequence(std::nullopt),
-                optionalCustomIdentationCharacterSequence(std::nullopt) {}
+                optionalCustomIndentationCharacterSequence(std::nullopt) {}
         };
 
         virtual ~BaseSyrecIrEntityStringifier() = default;
@@ -66,8 +66,8 @@ namespace utils {
         AdditionalFormattingOptions additionalFormattingOptions;
 
         virtual void          resetInternals();
-        [[maybe_unused]] bool incrementIdentationLevel();
-        [[maybe_unused]] bool decrementIdentationLevel() noexcept;
+        [[maybe_unused]] bool incrementIndentationLevel();
+        [[maybe_unused]] bool decrementIndentationLevel() noexcept;
 
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Module& programModule);
         [[maybe_unused]] virtual bool stringify(std::ostream& outputStream, const syrec::Variable& variable, bool stringifyVariableType) const;
@@ -99,7 +99,7 @@ namespace utils {
 
         [[nodiscard]] bool           appendNewlineToStream(std::ostream& outputStream) const;
         [[maybe_unused]] static bool setStreamInFailedState(std::ostream& stream);
-        [[nodiscard]] static bool    appendIdentationPaddingSequence(std::ostream& outputStream, const std::string& indentationSequence);
+        [[nodiscard]] static bool    appendIndentationPaddingSequence(std::ostream& outputStream, const std::string& indentationSequence);
         [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, const std::string& characterSequence);
         [[nodiscard]] static bool    appendToStream(std::ostream& outputStream, char character);
         [[nodiscard]] static bool    stringifyModuleCallVariant(std::ostream& outputStream, const std::string& moduleCallVariantKeyword, const syrec::Module& callTarget, const std::vector<std::string>& callerArguments);

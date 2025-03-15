@@ -1,10 +1,9 @@
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/program.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
 #include <gtest/gtest.h>
-
-#include "core/syrec/program.hpp"
-#include "core/syrec/parser/utils/custom_error_messages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 using namespace syrec_parser_error_tests;
 
@@ -33,12 +32,12 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingVariableIdentifierInLocalModulePara
     performTestExecution("module main() wire a(16), [2](4) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeInLocalModuleParameterDeclarationCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierSharingSameVariableTypeInLocalModuleParameterDeclarationCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 32), "a");
     performTestExecution("module main() wire a(16), b(8), a(4) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferSharingSameVariableTypeInSeparateDeclarationInLocalModuleParameterDeclarationCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierSharingSameVariableTypeInSeparateDeclarationInLocalModuleParameterDeclarationCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 36), "a");
     performTestExecution("module main() wire a(16), b(8) wire a(4) skip");
 }
@@ -48,7 +47,7 @@ TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferUsingDifferentVar
     performTestExecution("module main() wire a(16) state b(8), a(4) skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentiferBetweenModuleParameterAndLocalVariableInSeparateLocalVariableDeclaration) {
+TEST_F(SyrecParserErrorTestsFixture, DuplicateVariableIdentifierBetweenModuleParameterAndLocalVariableInSeparateLocalVariableDeclaration) {
     buildAndRecordExpectedSemanticError<SemanticError::DuplicateVariableDeclaration>(Message::Position(1, 38), "a");
     performTestExecution("module main(in a(16)) wire b(8) state a(4) skip");
 }

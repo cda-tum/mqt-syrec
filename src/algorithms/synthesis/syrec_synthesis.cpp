@@ -9,11 +9,11 @@
 #include "core/syrec/variable.hpp"
 #include "core/utils/timer.hpp"
 
+#include <algorithm>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/graph/properties.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/detail/adjacency_list.hpp>
-#include <algorithm>
+#include <boost/graph/properties.hpp>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -235,7 +235,7 @@ namespace syrec {
         } else {
             onExpression(statement.condition, expressionResult, {}, BinaryExpression::BinaryOperation::Add);
         }
-        
+
         assert(expressionResult.size() == 1U);
 
         // add new helper line
@@ -436,17 +436,15 @@ namespace syrec {
         expOpp.push(expression.binaryOperation);
 
         // The previous implementation used unscoped enum declarations for both the operations of a BinaryExpression as well as for an AssignStatement.
-        // Additionally, the expOpp and opVec data structures used to store both types of operations as unsigned integers (with unscoped enums being implicitly convertable to unsigned integers)
-        // thus the comparison between the elements was possible. Since we are now storing the scoped enum values instead, we need to separatly handle binary and assignment operations when
+        // Additionally, the expOpp and opVec data structures used to store both types of operations as unsigned integers (with unscoped enums being implicitly convertible to unsigned integers)
+        // thus the comparison between the elements was possible. Since we are now storing the scoped enum values instead, we need to separately handle binary and assignment operations when
         // comparing the two types with the latter requiring a conversion to determine its matching binary operation counterpart. While the scoped enum values can be converted to their underlying
         // numeric data type (or any other type), they require an explicit cast instead.
         if (expOpp.size() == opVec.size()) {
             if (std::holds_alternative<BinaryExpression::BinaryOperation>(op) && expOpp.top() == std::get<BinaryExpression::BinaryOperation>(op)) {
                 return true;
             }
-            if (std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperationFromAssignmentOperation = std::holds_alternative<AssignStatement::AssignOperation>(op) 
-                ? tryMapAssignmentToBinaryOperation(std::get<AssignStatement::AssignOperation>(op))
-                : std::nullopt; mappedToBinaryOperationFromAssignmentOperation.has_value() && expOpp.top() == *mappedToBinaryOperationFromAssignmentOperation) {
+            if (std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperationFromAssignmentOperation = std::holds_alternative<AssignStatement::AssignOperation>(op) ? tryMapAssignmentToBinaryOperation(std::get<AssignStatement::AssignOperation>(op)) : std::nullopt; mappedToBinaryOperationFromAssignmentOperation.has_value() && expOpp.top() == *mappedToBinaryOperationFromAssignmentOperation) {
                 return true;
             }
         }
@@ -851,7 +849,7 @@ namespace syrec {
 
     // TODO: A rename of the function would allow one to drop the now required linter annotations regarding swap functions which are expected to be exceptionless
     // NOLINTNEXTLINE(cppcoreguidelines-noexcept-swap, performance-noexcept-swap, bugprone-exception-escape)
-    void SyrecSynthesis::swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) { 
+    void SyrecSynthesis::swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) {
         for (unsigned i = 0U; i < dest1.size(); ++i) {
             get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendFredkin(dest1.at(i), dest2.at(i));
         }

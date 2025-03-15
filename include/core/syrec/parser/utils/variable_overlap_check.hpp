@@ -38,7 +38,7 @@ namespace utils {
      * - The accessed bit ranges overlap <br>
      * Note: Expressions defined in either the bitrange or accessed value per dimension are not evaluated and will result in a potential overlap being reported if such an expression is detected for any of the accessed value of any dimension. <br>
      * In case that all indices in the dimension access evaluate to a constant value, the result will depend on the overlap between the accessed bit ranges. <br>
-     * If both indicies of the explicitly accessed bitrange of either of the two varaible access are not constants, a potential overlap will be reported. <br>
+     * If both indices of the explicitly accessed bitrange of either of the two variable access are not constants, a potential overlap will be reported. <br>
      * Invalid values for either any of the expressions defining the accessed value per dimension of for any component of the bitrange is treated in the same way as non-constant values (i.e. resulting in a potential overlap [see description above]) while out of range constant value indices
      * are treated identical to 'valid' indices.
      *

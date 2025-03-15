@@ -2,9 +2,8 @@
 
 #include "ANTLRInputStream.h"
 #include "CommonTokenStream.h"
-#include "TSyrecParser.h"
 #include "TSyrecLexer.h"
-
+#include "TSyrecParser.h"
 #include "core/syrec/parser/components/custom_error_listener.hpp"
 #include "core/syrec/parser/components/custom_module_visitor.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
@@ -21,13 +20,13 @@
 
 namespace syrec {
     std::string Program::read(const std::string& filename, const ReadProgramSettings settings) {
-        std::string                      foundErrorWhileReadingFileContent;
+        std::string foundErrorWhileReadingFileContent;
         if (const std::optional<std::string> readFileContent = tryReadFileContent(filename, &foundErrorWhileReadingFileContent); readFileContent.has_value() && foundErrorWhileReadingFileContent.empty()) {
             readProgramFromString(*readFileContent, settings, foundErrorWhileReadingFileContent);
         }
         return foundErrorWhileReadingFileContent;
     }
-    
+
     std::string Program::readFromString(const std::string_view& stringifiedProgram, const ReadProgramSettings settings) {
         std::string foundErrorWhileReadingFileContent;
         readProgramFromString(stringifiedProgram, settings, foundErrorWhileReadingFileContent);
@@ -40,9 +39,9 @@ namespace syrec {
     }
 
     bool Program::readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string& error) {
-        antlr4::ANTLRInputStream  input(content);
+        antlr4::ANTLRInputStream   input(content);
         syrec_parser::TSyrecLexer  lexer(&input);
-        antlr4::CommonTokenStream tokens(&lexer);
+        antlr4::CommonTokenStream  tokens(&lexer);
         syrec_parser::TSyrecParser antlrParser(&tokens);
 
         auto       parserMessageGenerator = std::make_shared<syrec_parser::ParserMessagesContainer>();
@@ -65,11 +64,11 @@ namespace syrec {
             std::stringstream concatenatedErrorMessageContainer;
             for (std::size_t i = 0; i < generatedErrorMessages.size() - 1; ++i) {
                 concatenatedErrorMessageContainer << generatedErrorMessages.at(i)->stringify();
-                #if _WIN32
-                    concatenatedErrorMessageContainer << "\r\n";
-                #else 
-                    concatenatedErrorMessageContainer << "\n";
-                #endif
+#if _WIN32
+                concatenatedErrorMessageContainer << "\r\n";
+#else
+                concatenatedErrorMessageContainer << "\n";
+#endif
             }
             concatenatedErrorMessageContainer << generatedErrorMessages.back()->stringify();
             error = concatenatedErrorMessageContainer.str();

@@ -1,24 +1,23 @@
 #include "core/syrec/parser/components/custom_statement_visitor.hpp"
 
+#include "TSyrecParser.h"
+#include "Token.h"
 #include "core/syrec/number.hpp"
-#include "core/syrec/statement.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/components/custom_expression_visitor.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
-
-#include "TSyrecParser.h"
-#include "Token.h"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using namespace syrec_parser;
 
@@ -71,36 +70,34 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
     }
 
     std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentLhsOperand;
-    const std::optional<syrec::VariableAccess::ptr> assignmentLhsOperand = expressionVisitorInstance->visitSignalTyped(context->signal(), &expectedBitwidthOfAssignmentLhsOperand);
+    const std::optional<syrec::VariableAccess::ptr>                                        assignmentLhsOperand = expressionVisitorInstance->visitSignalTyped(context->signal(), &expectedBitwidthOfAssignmentLhsOperand);
     if (assignmentLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignmentLhsOperand->get()->var, *context->signal()->start);
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*assignmentLhsOperand);
     }
-    const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation  = context->assignmentOp != nullptr ? deserializeAssignmentOperationFromString(context->assignmentOp->getText()) : std::nullopt;
+    const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation = context->assignmentOp != nullptr ? deserializeAssignmentOperationFromString(context->assignmentOp->getText()) : std::nullopt;
 
     std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentRhsOperand;
-    std::optional<syrec::Expression::ptr>                        assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(context->expression(), expectedBitwidthOfAssignmentRhsOperand);
+    std::optional<syrec::Expression::ptr>                                                  assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(context->expression(), expectedBitwidthOfAssignmentRhsOperand);
 
     bool detectedSemanticErrorAfterOperandsWhereProcessed = false;
     if (expectedBitwidthOfAssignmentLhsOperand.has_value() && assignmentRhsOperand.has_value()) {
         expressionVisitorInstance->truncateConstantValuesInExpression(*assignmentRhsOperand, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsWhereProcessed);
         if (detectedSemanticErrorAfterOperandsWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->expression()->getStart()));
-        }
-        else if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
-            Message::Position assignmentOperandBitwidthMissmatchErrorPosition = mapTokenPositionToMessagePosition(*context->signal()->getStart());
+        } else if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
+            Message::Position assignmentOperandBitwidthMismatchErrorPosition = mapTokenPositionToMessagePosition(*context->signal()->getStart());
             if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentRhsOperand->positionOfOperandWithKnownBitwidth.has_value()) {
-                assignmentOperandBitwidthMissmatchErrorPosition = *expectedBitwidthOfAssignmentRhsOperand->positionOfOperandWithKnownBitwidth;
+                assignmentOperandBitwidthMismatchErrorPosition = *expectedBitwidthOfAssignmentRhsOperand->positionOfOperandWithKnownBitwidth;
             } else if (expectedBitwidthOfAssignmentLhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->positionOfOperandWithKnownBitwidth.has_value()) {
-                assignmentOperandBitwidthMissmatchErrorPosition = *expectedBitwidthOfAssignmentLhsOperand->positionOfOperandWithKnownBitwidth;
+                assignmentOperandBitwidthMismatchErrorPosition = *expectedBitwidthOfAssignmentLhsOperand->positionOfOperandWithKnownBitwidth;
             }
-            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(assignmentOperandBitwidthMissmatchErrorPosition, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
+            recordSemanticError<SemanticError::ExpressionBitwidthMismatches>(assignmentOperandBitwidthMismatchErrorPosition, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
             detectedSemanticErrorAfterOperandsWhereProcessed = true;
         }
     }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
-    return  !detectedSemanticErrorAfterOperandsWhereProcessed &&assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value()
-        ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
+    return !detectedSemanticErrorAfterOperandsWhereProcessed && assignmentLhsOperand.has_value() && assignmentOperation.has_value() && assignmentRhsOperand.has_value() ? std::optional(std::make_shared<syrec::AssignStatement>(*assignmentLhsOperand, *assignmentOperation, *assignmentRhsOperand)) : std::nullopt;
 }
 
 std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatementTyped(const TSyrecParser::UnaryStatementContext* context) const {
@@ -125,18 +122,18 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
     }
 
     std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentLhsOperand;
-    const std::optional<syrec::VariableAccess::ptr> swapLhsOperand = expressionVisitorInstance->visitSignalTyped(context->lhsOperand, &expectedBitwidthOfAssignmentLhsOperand);
+    const std::optional<syrec::VariableAccess::ptr>                                        swapLhsOperand = expressionVisitorInstance->visitSignalTyped(context->lhsOperand, &expectedBitwidthOfAssignmentLhsOperand);
     if (swapLhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapLhsOperand->get()->var, *context->lhsOperand->getStart());
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*swapLhsOperand);
     }
 
     std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentRhsOperand;
-    const std::optional<syrec::VariableAccess::ptr> swapRhsOperand = expressionVisitorInstance->visitSignalTyped(context->rhsOperand, &expectedBitwidthOfAssignmentRhsOperand);
+    const std::optional<syrec::VariableAccess::ptr>                                        swapRhsOperand = expressionVisitorInstance->visitSignalTyped(context->rhsOperand, &expectedBitwidthOfAssignmentRhsOperand);
     if (swapRhsOperand.has_value()) {
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*swapRhsOperand->get()->var, *context->rhsOperand->getStart());
         if (!parserConfiguration.allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {
-            // A semantic error genereated during the processing of the lhs or rhs operand of the swap statement should not prevent the check for the usage of overlapping variable accesses in the dimension access of the operand
+            // A semantic error generated during the processing of the lhs or rhs operand of the swap statement should not prevent the check for the usage of overlapping variable accesses in the dimension access of the operand
             // on the lhs. To prevent the duplicate generation of the already found semantic errors on the lhs, a filter for the semantic error of interest will be temporarily set. An identical check for the usage of the variable
             // of the lhs in any dimension access on the rhs is already performed during the processing of the latter.
             sharedGeneratedMessageContainerInstance->setFilterForToBeRecordedMessages(std::string(getIdentifierForSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>()));
@@ -148,8 +145,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitSwapStatementT
     }
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
     if (expectedBitwidthOfAssignmentLhsOperand.has_value() && expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
-        // Since the right-hand side is processed after the left-hand one, the former will also serve as the position in which any potential operand missmatch error is reported. 
-        recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->rhsOperand->literalIdent()->getSymbol()), expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
+        // Since the right-hand side is processed after the left-hand one, the former will also serve as the position in which any potential operand mismatch error is reported.
+        recordSemanticError<SemanticError::ExpressionBitwidthMismatches>(mapTokenPositionToMessagePosition(*context->rhsOperand->literalIdent()->getSymbol()), expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, expectedBitwidthOfAssignmentRhsOperand->operandBitwidth);
         return std::nullopt;
     }
     return swapLhsOperand.has_value() && swapRhsOperand.has_value() ? std::make_optional(std::make_shared<syrec::SwapStatement>(*swapLhsOperand, *swapRhsOperand)) : std::nullopt;
@@ -183,7 +180,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitCallStatementT
         // the loop variable identifier not matching an variable causes more semantic errors. Due to the generation of a syntax error, the false positive of the loop variable matching an existing variable
         // will not cause the SyReC program to be detected as well formed.
         callerArgumentVariableIdentifiers.emplace_back(antlrCallerArgumentToken->getText());
-        if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> matchingSymbolTableEntryForCallerArgument = activeSymbolTableScope->get()->getVariableByName(antlrCallerArgumentToken->getText()); matchingSymbolTableEntryForCallerArgument.has_value()) {
+        if (const std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnlyPtr> matchingSymbolTableEntryForCallerArgument = activeSymbolTableScope->get()->getVariableByName(antlrCallerArgumentToken->getText()); matchingSymbolTableEntryForCallerArgument.has_value()) {
             if (matchingSymbolTableEntryForCallerArgument->get()->getVariableData().has_value()) {
                 symbolTableEntryPerCallerArgument.emplace_back(std::make_shared<syrec::Variable>(**matchingSymbolTableEntryForCallerArgument->get()->getVariableData()));
             }
@@ -250,12 +247,12 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
         if (detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
         } else if (determinedOperandBitwidthOfGuardConditionExpression.has_value() && determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth != 1) {
-            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()), 1, determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth);
+            recordSemanticError<SemanticError::ExpressionBitwidthMismatches>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()), 1, determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth);
             detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
         }
     }
 
-    // Similarily to the handling of the statement list production in the ForStatement, an empty statement list should already report a syntax error and thus an explicit handling
+    // Similarly to the handling of the statement list production in the ForStatement, an empty statement list should already report a syntax error and thus an explicit handling
     // of an empty statement at this point is not necessary. Additionally, currently the parser does not implement the dead code elimination optimization technique which would allow
     // the parser to remove the statements of the not executed branch, if one can determine the value of the guard condition at compile time, thus semantic errors are reported regardless
     // of the value of the guard condition.
@@ -273,13 +270,13 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()));
             detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
         } else if (determinedOperandBitwidthOfClosingGuardConditionExpression.has_value() && determinedOperandBitwidthOfClosingGuardConditionExpression->operandBitwidth != 1) {
-            recordSemanticError<SemanticError::ExpressionBitwidthMissmatches>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()), 1, determinedOperandBitwidthOfClosingGuardConditionExpression->operandBitwidth);
+            recordSemanticError<SemanticError::ExpressionBitwidthMismatches>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()), 1, determinedOperandBitwidthOfClosingGuardConditionExpression->operandBitwidth);
             detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
         }
     }
-    
+
     if (generatedIfStatement->condition != nullptr && generatedIfStatement->fiCondition != nullptr && !ifStatementExpressionComponentsComparer->recordedMatchingExpressionComponents().value_or(true)) {
-        recordSemanticError<SemanticError::IfGuardExpressionMissmatch>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
+        recordSemanticError<SemanticError::IfGuardExpressionMismatch>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
         detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
     }
     return !detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed ? std::make_optional(generatedIfStatement) : std::nullopt;
@@ -299,7 +296,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
         expressionVisitorInstance->setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(*loopVariableIdentifier);
     }
 
-    const std::optional<syrec::Number::ptr> iterationRangeStartValue = expressionVisitorInstance->visitNumberTyped(context->startValue);
+    const std::optional<syrec::Number::ptr> iterationRangeStartValue   = expressionVisitorInstance->visitNumberTyped(context->startValue);
     std::optional<unsigned int>             valueOfIterationRangeStart = iterationRangeStartValue.has_value() && *iterationRangeStartValue != nullptr ? tryGetConstantValueOf(**iterationRangeStartValue) : std::nullopt;
     expressionVisitorInstance->clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
 
@@ -307,7 +304,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
         activeSymbolTableScope->get()->updateValueOfLoopVariable(*loopVariableIdentifier, valueOfIterationRangeStart);
     }
 
-    const std::optional<syrec::Number::ptr> iterationRangeEndValue      = expressionVisitorInstance->visitNumberTyped(context->endValue);
+    const std::optional<syrec::Number::ptr> iterationRangeEndValue   = expressionVisitorInstance->visitNumberTyped(context->endValue);
     const std::optional<unsigned int>       valueOfIterationRangeEnd = iterationRangeEndValue.has_value() && *iterationRangeEndValue != nullptr ? tryGetConstantValueOf(**iterationRangeEndValue) : std::nullopt;
 
     const syrec::Number::ptr iterationRangeStepSizeValue = visitLoopStepsizeDefinitionTyped(context->loopStepsizeDefinition()).value_or(std::make_shared<syrec::Number>(1));
@@ -321,8 +318,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
         valueOfIterationRangeStart   = 0;
     }
 
-    generatedForStatement->step                                     = iterationRangeStepSizeValue;
-    const std::optional<unsigned int> valueOfIterationRangeStepSize = iterationRangeStepSizeValue != nullptr ? tryGetConstantValueOf(*iterationRangeStepSizeValue) : std::nullopt;
+    generatedForStatement->step                                                                   = iterationRangeStepSizeValue;
+    const std::optional<unsigned int> valueOfIterationRangeStepSize                               = iterationRangeStepSizeValue != nullptr ? tryGetConstantValueOf(*iterationRangeStepSizeValue) : std::nullopt;
     bool                              shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = true;
     if (valueOfIterationRangeStepSize.has_value() && valueOfIterationRangeStart.has_value() && valueOfIterationRangeEnd.has_value()) {
         if (*valueOfIterationRangeStepSize == 0) {
@@ -330,9 +327,9 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
                     mapTokenPositionToMessagePosition(*context->literalKeywordFor()->getSymbol()),
                     *valueOfIterationRangeStart, *valueOfIterationRangeEnd, *valueOfIterationRangeStepSize);
         }
-        
+
         // The declared initial value of a loop variable should only be propagated to the statements in the body of the loop if the number of iterations performed by the loop is equal to one.
-        // It is the responsibility of the user to keep the used overflow semantics for unsinged integers, causing a wrap-around at the borders of the value range, in mind when defining the iteration range of a loop.
+        // It is the responsibility of the user to keep the used overflow semantics for unsigned integers, causing a wrap-around at the borders of the value range, in mind when defining the iteration range of a loop.
         // The iteration range is equivalent to the python range(<START>, <END>, <STEP>) function, meaning that we assume that the <END> value is not included in the iteration range (i.e. equal to for $i = START; $i < END; $i += STEP)
         if (*valueOfIterationRangeStart < *valueOfIterationRangeEnd) {
             shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd;

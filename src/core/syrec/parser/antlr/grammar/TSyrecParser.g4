@@ -5,7 +5,7 @@ options {
 }
 
 /* Number production */
-number: 
+number:
 	INT								# NumberFromConstant
 	| SIGNAL_WIDTH_PREFIX IDENT		# NumberFromSignalwidth
 	| LOOP_VARIABLE_PREFIX IDENT	# NumberFromLoopVariable
@@ -17,38 +17,38 @@ number:
 program: module+ EOF;
 
 module :
-	'module' 
-	IDENT													
-	OPEN_RBRACKET parameterList? CLOSE_RBRACKET 
-	signalList*										
-	statementList										
+	'module'
+	IDENT
+	OPEN_RBRACKET parameterList? CLOSE_RBRACKET
+	signalList*
+	statementList
 	;
 
 parameterList:
 	parameter
-	( PARAMETER_DELIMITER parameter )* 
+	( PARAMETER_DELIMITER parameter )*
 	;
 
 parameter:
 	( VAR_TYPE_IN
 		| VAR_TYPE_OUT
 		| VAR_TYPE_INOUT
-	)														
+	)
 	signalDeclaration
 	;
 
-signalList: 
+signalList:
 	( VAR_TYPE_WIRE
 		| VAR_TYPE_STATE
 	)
 	signalDeclaration
-	( PARAMETER_DELIMITER signalDeclaration )* 
+	( PARAMETER_DELIMITER signalDeclaration )*
 	;
 
-signalDeclaration:	
-IDENT																		
-( OPEN_SBRACKET dimensionTokens+=INT CLOSE_SBRACKET )* 
-( OPEN_RBRACKET signalWidthToken=INT CLOSE_RBRACKET )?															
+signalDeclaration:
+IDENT
+( OPEN_SBRACKET dimensionTokens+=INT CLOSE_SBRACKET )*
+( OPEN_RBRACKET signalWidthToken=INT CLOSE_RBRACKET )?
 ;
 
 /* Statements productions */
@@ -62,7 +62,7 @@ statement:
 	| unaryStatement
 	| assignStatement
 	| swapStatement
-	| skipStatement	
+	| skipStatement
 	;
 
 callStatement: ( OP_CALL | OP_UNCALL ) moduleIdent=IDENT OPEN_RBRACKET callerArguments+=IDENT ( PARAMETER_DELIMITER callerArguments+=IDENT )* CLOSE_RBRACKET ;
@@ -71,18 +71,18 @@ loopVariableDefinition: LOOP_VARIABLE_PREFIX variableIdent=IDENT OP_EQUAL ;
 loopStepsizeDefinition: KEYWORD_STEP OP_MINUS? number ;
 forStatement: KEYWORD_FOR ( loopVariableDefinition? startValue=number KEYWORD_TO )? endValue=number loopStepsizeDefinition? KEYWORD_DO statementList KEYWORD_ROF ;
 
-ifStatement: 
+ifStatement:
 	KEYWORD_IF guardCondition=expression KEYWORD_THEN
-		trueBranchStmts=statementList 
-	KEYWORD_ELSE 
-		falseBranchStmts=statementList 
+		trueBranchStmts=statementList
+	KEYWORD_ELSE
+		falseBranchStmts=statementList
 	KEYWORD_FI matchingGuardExpression=expression ;
 
 unaryStatement:  unaryOp=( OP_INVERT_ASSIGN | OP_INCREMENT_ASSIGN | OP_DECREMENT_ASSIGN ) signal ;
 
 assignStatement: signal assignmentOp=( OP_ADD_ASSIGN | OP_SUB_ASSIGN | OP_XOR_ASSIGN ) expression ;
 
-swapStatement: 
+swapStatement:
 	lhsOperand=signal OP_SWAP rhsOperand=signal ;
 
 skipStatement: KEYWORD_SKIP ;
@@ -91,7 +91,7 @@ signal: IDENT ( OPEN_SBRACKET accessedDimensions+=expression CLOSE_SBRACKET )* (
 
 /* Expression productions */
 
-expression: 
+expression:
 	number						# ExpressionFromNumber
 	| signal					# ExpressionFromSignal
 	| binaryExpression			# ExpressionFromBinaryExpression
@@ -119,7 +119,7 @@ binaryExpression:
 		| OP_LESS_OR_EQUAL
 		| OP_GREATER_OR_EQUAL
 		)
-	rhsOperand=expression  CLOSE_RBRACKET 
+	rhsOperand=expression  CLOSE_RBRACKET
 	;
 
 unaryExpression: unaryOperation=( OP_LOGICAL_NEGATION | OP_BITWISE_NEGATION ) expression ;

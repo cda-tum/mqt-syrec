@@ -17,12 +17,12 @@ namespace syrec {
             allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess(allowAccessOnAssignedToVariablePartsInDimensionAccessOfVariableAccess) {}
 
         /**
-         * @brief Defines the default variable bitwidth used by the SyReC parser for variables whos bitwidth specification was omitted.
+         * @brief Defines the default variable bitwidth used by the SyReC parser for variables whose bitwidth specification was omitted.
          */
         unsigned defaultBitwidth;
-        
+
         /**
-         * @brief The operation used by the parser to perform the trunction of constant values.
+         * @brief The operation used by the parser to perform the truncation of constant values.
          *
          * @details When are constant values truncated in the parser: <br>
          * I.   The expected bitwidth of the operands of a binary expression is known and only one operand of the binary expression evaluates to a constant. <br>
@@ -51,7 +51,7 @@ namespace syrec {
          * as shown in the examples I. and II. are allowed via the corresponding flag in the parser configuration. However, the parser can only verify this check if all indices of the assigned to variable access evaluate to constant values with  <br>
          * the same requirement for the indices for any potentially violating variable access in a dimension access (thus the parser will only report cases where it can prove that an overlap exists).  <br>
          * Examples that are not reported as overlaps are:  <br>
-         * I.      module main(inout a[2](4)) ++= a[a[0]]  <br> 
+         * I.      module main(inout a[2](4)) ++= a[a[0]]  <br>
          * II.     module main(inout a[2](4)) for $i = 0 to 1 do a[$i] += a[0] rof  <br>
          * III.    module main(inout a[2](4)) for $i = 0 to 1 do a[0] += a[$i] rof
          */
@@ -82,12 +82,12 @@ namespace syrec {
 
         /**
          * @brief Read and parse a SyReC program from a file.
-         * 
+         *
          * This function call performs both the lexical parsing
          * as well as the semantic analysis of the program which
          * creates the corresponding C++ constructs for the
          * program.
-         * 
+         *
          * @param filename Defines where the SyReC program to process is located.
          * @param settings The configuration to use by the parser.
          * @return A std::string containing the list of errors found during the processing of the file or the parsing of the SyReC program.
@@ -125,8 +125,8 @@ namespace syrec {
         *
         * @return true if parsing was successful, otherwise false
         */
-        bool readFile(const std::string& filename, ReadProgramSettings settings, std::string& error);
-        bool readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string&);
+        bool                                            readFile(const std::string& filename, ReadProgramSettings settings, std::string& error);
+        bool                                            readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string&);
         [[nodiscard]] static std::optional<std::string> tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors);
     };
 

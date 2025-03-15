@@ -63,7 +63,7 @@ namespace syrec_parser_test_utils {
                 });
     }
 
-    inline std::string concatinateStrings(const std::string& lString, const char delimiter, const std::initializer_list<std::string>& otherComponents) {
+    inline std::string concatenateStrings(const std::string& lString, const char delimiter, const std::initializer_list<std::string>& otherComponents) {
         std::string resultContainer = lString;
         for (const auto& toBeConcatinatedComponents: otherComponents) {
             resultContainer += delimiter;
@@ -96,15 +96,15 @@ namespace syrec_parser_test_utils {
     inline std::vector<std::string> loadTestCaseNamesFromFile(const std::string& relativePathToFile, const std::string& inputFileName, const std::string& testCaseNamePrefix) {
         std::ifstream inputFileStream(relativePathToFile + "/" + inputFileName, std::ios_base::in);
         if (!inputFileStream.good()) {
-            return {concatinateStrings(ERROR_REASON_FAILED_TO_LOAD_FROM_FILE, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
+            return {concatenateStrings(ERROR_REASON_FAILED_TO_LOAD_FROM_FILE, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
         }
 
         const auto parsedJson = json::parse(inputFileStream, nullptr, false);
         if (parsedJson.is_discarded()) {
-            return {concatinateStrings(ERROR_REASON_JSON_DATA_INVALID, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
+            return {concatenateStrings(ERROR_REASON_JSON_DATA_INVALID, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
         }
         if (!parsedJson.is_object()) {
-            return {concatinateStrings(ERROR_REASON_JSON_DATA_NOT_OBJECT, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
+            return {concatenateStrings(ERROR_REASON_JSON_DATA_NOT_OBJECT, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName)})};
         }
 
         std::vector<std::string> foundTestCases;
@@ -113,8 +113,8 @@ namespace syrec_parser_test_utils {
         // Thus no random access iterator is used => the std::distance call should be positive in all cases (thus we can take the absolute value of returned iter_diff_t)
         foundTestCases.reserve(static_cast<std::size_t>(std::distance(parsedJson.items().begin(), parsedJson.items().end())));
 
-        for (const auto& topLevelJsonObjectKeysIteratable: parsedJson.items()) {
-            const std::string& testCaseName = topLevelJsonObjectKeysIteratable.key();
+        for (const auto& topLevelJsonObjectKeysIterable: parsedJson.items()) {
+            const std::string& testCaseName = topLevelJsonObjectKeysIterable.key();
             if (testCaseName.empty()) {
                 continue;
             }
@@ -122,7 +122,7 @@ namespace syrec_parser_test_utils {
             if (doesStringContainOnlyAsciiCharactersOrUnderscores(testCaseName)) {
                 foundTestCases.emplace_back(testCaseName);
             } else {
-                foundTestCases.emplace_back(concatinateStrings(
+                foundTestCases.emplace_back(concatenateStrings(
                         ERROR_REASON_JSON_DATA_INVALID, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {extractFilenameWithoutFileExtension(inputFileName), std::string(GTEST_IGNORE_PREFIX), "Test", std::to_string(testCaseIndexInFile), "ContainedNonConformingCharactersInName", testCaseNamePrefix}));
             }
 
@@ -157,7 +157,7 @@ namespace syrec_parser_test_utils {
                         return TestFromJsonConfig(
                                 inputFileNameData.relativePathToTestDataFolder + "/" + inputFileNameData.nameOfFileContainingTestData,
                                 keyOfTestCaseInJsonFile,
-                                replaceInvalidCharactersInTestCaseName(!inputFileNameData.testnamePrefixForTestsLoadedFromFile.empty() ? concatinateStrings(inputFileNameData.testnamePrefixForTestsLoadedFromFile, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {keyOfTestCaseInJsonFile}) : keyOfTestCaseInJsonFile));
+                                replaceInvalidCharactersInTestCaseName(!inputFileNameData.testnamePrefixForTestsLoadedFromFile.empty() ? concatenateStrings(inputFileNameData.testnamePrefixForTestsLoadedFromFile, TEST_NAME_COMPONENT_DELIMITER_SYMBOL, {keyOfTestCaseInJsonFile}) : keyOfTestCaseInJsonFile));
                     });
         }
         return loadedTestCases;

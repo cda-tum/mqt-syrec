@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using namespace syrec_parser;
 
@@ -35,7 +35,7 @@ void ParserMessagesContainer::clearFilterForToBeRecordedMessages() {
 
 void ParserMessagesContainer::sortRecordedMessagesOfTypeInAscendingOrder(Message::Type messageType) {
     if (messagesPerType.count(messageType) == 0) {
-        return;   
+        return;
     }
 
     std::vector<Message::ptr>& messagesOfType = messagesPerType[messageType];

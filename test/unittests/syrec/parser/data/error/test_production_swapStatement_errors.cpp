@@ -1,9 +1,8 @@
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
 #include <gtest/gtest.h>
-
-#include "core/syrec/parser/utils/custom_error_messages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 using namespace syrec_parser_error_tests;
 
@@ -55,88 +54,88 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfExpressionOnRhsOfSwapStatementCauses
     performTestExecution("module main(inout a(4), out b(4)) a <=> (b - 2)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 40), 4, 1);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 40), 4, 1);
     performTestExecution("module main(inout a(4), out b(4)) a <=> b.1");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 40), 4, 2);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 40), 4, 2);
     performTestExecution("module main(inout a(4), out b(4)) a <=> b.0:1");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsDefiningNoBitAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 40), 4, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 40), 4, 2);
     performTestExecution("module main(inout a(4), out b(4)) a <=> b.1:0");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningNoBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 1, 4);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningNoBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 42), 1, 4);
     performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 1, 2);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 42), 1, 2);
     performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b.2:3");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 42), 1, 2);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 42), 1, 2);
     performTestExecution("module main(inout a(4), out b(4)) a.1 <=> b.3:2");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningNoBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 4);
     performTestExecution("module main(inout a(4), out b(4)) a.1:2 <=> b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningNoBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 4);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningNoBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 4);
     performTestExecution("module main(inout a(4), out b(4)) a.2:1 <=> b");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 1);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 1);
     performTestExecution("module main(inout a(4), out b(4)) a.2:3 <=> b.1");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 1);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 1);
     performTestExecution("module main(inout a(4), out b(4)) a.3:2 <=> b.1");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 3);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.0:1 <=> b.1:3");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 3);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.0:1 <=> b.3:1");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 44), 2, 3);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessWithStartLargerThanEndAndRhsDefiningBitrangeWithStartLargerThanEndAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 44), 2, 3);
     performTestExecution("module main(inout a(4), out b(4)) a.1:0 <=> b.3:1");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessWithUnknownValueForIndexAndRhsBeingBitrangeAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 62), 1, 3);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitAccessWithUnknownValueForIndexAndRhsBeingBitrangeAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 62), 1, 3);
     performTestExecution("module main(inout a(4), out b(4)) for $i = 0 to 3 do a.$i <=> b.3:1 rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitAccessWithUnknownValueForIndexAndRhsBeingFullBitwidthAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 62), 1, 4);
+TEST_F(SyrecParserErrorTestsFixture, MismatchInSwapOperationBitwidthsWithLhsBeingBitAccessWithUnknownValueForIndexAndRhsBeingFullBitwidthAccessCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 62), 1, 4);
     performTestExecution("module main(inout a(4), out b(4)) for $i = 0 to 3 do a.$i <=> b rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingBitrangeAccessAndRhsBeingBitAccessWithUnknownValueForIndexAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 63), 3, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 63), 3, 1);
     performTestExecution("module main(inout a(4), out b(4)) for $i = 0 to 3 do a.3:1 <=> b.$i rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, MissmatchInSwapOperationBitwidthsWithLhsBeingFullBitwidthAccessAndRhsBeingBitAccessWithUnknownValueForIndexAccessCausesError) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 59), 4, 1);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 59), 4, 1);
     performTestExecution("module main(inout a(4), out b(4)) for $i = 0 to 3 do a <=> b.$i rof");
 }
 
@@ -176,7 +175,6 @@ TEST_F(SyrecParserErrorTestsFixture, UsageOfLoopVariableAsRhsOperandOfSwapOperat
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 48), "i");
     performTestExecution("module main(out b(4)) for $i = 0 to 3 do b <=> $i rof");
 }
-
 
 TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfLhsOfSwapStatementInDimensionAccessOfVariableAccessOfRhsAccessingFullbitwidth) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
@@ -406,37 +404,37 @@ TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimen
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1]]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitaccessWithConstantValueAndLhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].1]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndLhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 62), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) a[0][2][1] <=> b[a[0][2][1].1:2]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndLhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 88), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do a[0][2][1] <=> b[a[0][2][1].1:$i] rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValueAndLhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 64), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].0 <=> b[a[0][2][1].0]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndLhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 64), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(1)) a[0][2][1].1 <=> b[a[0][2][1].2:0]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndiciesWithAccessedBitEnclosedByBitrangeWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnRhsOfSwapStatementUsingBitAccessWithConstantValuesAndLhsAccessingBitrangeUsingConstantIndicesWithAccessedBitEnclosedByBitrangeWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 66), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(3)) a[0][2][1].2:0 <=> b[a[0][2][1].1]");
@@ -459,7 +457,6 @@ TEST_F(SyrecParserErrorTestsFixture, accessingLhsOperandInShiftExpressionInDimen
             Message::Position(1, 52), generateVariableAccessOverlappingIndicesDataContainer({0}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a(4), inout b(3)) a[0].0:2 <=> b[(a[0].1:3 << 2)]");
 }
-
 
 TEST_F(SyrecParserErrorTestsFixture, OverlappingAccessOnAssignedToFullSignalBitwidthOfRhsOfSwapStatementInDimensionAccessOfVariableAccessOfLhsAccessingFullbitwidth) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
@@ -689,31 +686,31 @@ TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimen
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1]] <=> a[0][2][1]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitaccessWithConstantValueAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitaccessWithConstantValueAndRhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1].1] <=> a[0][2][1]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantIndicesAndRhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) b[a[0][2][1].1:2] <=> a[0][2][1]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndRhsAccessingFullbitwidthWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithStartIndexHavingConstantValueAndRhsAccessingFullbitwidthWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 73), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(6)) for $i = 0 to 3 step 2 do b[a[0][2][1].1:$i] <=> a[0][2][1] rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitAccessWithConstantValueAndRhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitAccessWithConstantValueAndRhsAccessingBitUsingConstantValueAndAccessedBitsOverlappingWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 0).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(1)) b[a[0][2][1].0] <=> a[0][2][1].0");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndRhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAcessOnSameValuesOfDimensions) {
+TEST_F(SyrecParserErrorTestsFixture, accessOnValueOfDimensionsOfAssignedToNDimensionalSignalOnLhsOfSwapStatementUsingBitrangeAccessWithConstantValuesAndRhsAccessingBitUsingConstantValueAndAccessedBitEnclosedInBitrangeWithAccessOnSameValuesOfDimensions) {
     buildAndRecordExpectedSemanticError<SemanticError::SynthesisOfExpressionPotentiallyNotPossibleDueToAccessOnRestrictedVariableParts>(
             Message::Position(1, 47), generateVariableAccessOverlappingIndicesDataContainer({0, 2, 1}, 1).stringifyOverlappingIndicesInformation());
     performTestExecution("module main(inout a[2][4][3](6), inout b(1)) b[a[0][2][1].2:0] <=> a[0][2][1].1");

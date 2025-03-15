@@ -97,7 +97,7 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisQASMTest) {
     ASSERT_NO_FATAL_FAILURE(errorString = prog.read(fileName, settings)) << "Unexpected crash during processing of SyReC program";
     ASSERT_TRUE(errorString.empty()) << "Found errors during processing of SyReC program: " << errorString;
     // We are not asserting that the synthesis completes successfully since the 'dump' of the circuit into the .qasm file might help debugging the error.
-    EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog)); 
+    EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
 
     const auto lastIndex      = fileName.find_last_of('.');
     const auto outputFileName = fileName.substr(0, lastIndex);

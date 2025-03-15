@@ -66,7 +66,7 @@ namespace syrec {
         void setMainModule(const Module::ptr& mainModule);
 
     protected:
-        using OperationVariant = std::variant<AssignStatement::AssignOperation, BinaryExpression::BinaryOperation, ShiftExpression::ShiftOperation>;
+        using OperationVariant                                         = std::variant<AssignStatement::AssignOperation, BinaryExpression::BinaryOperation, ShiftExpression::ShiftOperation>;
         virtual bool processStatement(const Statement::ptr& statement) = 0;
 
         virtual bool onModule(const Module::ptr&);
@@ -108,24 +108,24 @@ namespace syrec {
         bool increment(const std::vector<unsigned>& dest);       // ++
 
         // binary operations
-        bool         bitwiseAnd(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
-        bool         bitwiseCnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
-        bool         bitwiseOr(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // &
-        bool         conjunction(unsigned dest, unsigned src1, unsigned src2);                                                            // &&// -=
-        bool         decreaseWithCarry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool         disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
-        bool         division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
-        bool         equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
-        bool         greaterEquals(unsigned dest, const std::vector<unsigned>& srcTwo, const std::vector<unsigned>& srcOne);            // >
-        bool         greaterThan(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                  // >// +=
-        bool         increaseWithCarry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
-        bool         lessEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                         // <=
-        bool         lessThan(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                           // <
-        bool         modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
-        bool         multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
-        bool         notEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // !=
+        bool bitwiseAnd(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // &
+        bool bitwiseCnot(const std::vector<unsigned>& dest, const std::vector<unsigned>& src);                                    // ^=
+        bool bitwiseOr(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);  // &
+        bool conjunction(unsigned dest, unsigned src1, unsigned src2);                                                            // &&// -=
+        bool decreaseWithCarry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        bool disjunction(unsigned dest, unsigned src1, unsigned src2);                                                          // ||
+        bool division(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // /
+        bool equals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                       // =
+        bool greaterEquals(unsigned dest, const std::vector<unsigned>& srcTwo, const std::vector<unsigned>& srcOne);            // >
+        bool greaterThan(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                  // >// +=
+        bool increaseWithCarry(const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry);
+        bool lessEquals(unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1);                         // <=
+        bool lessThan(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                           // <
+        bool modulo(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
+        bool multiplication(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
+        bool notEquals(unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // !=
         // TODO: A rename of the function would allow one to drop the now required linter annotations regarding swap functions which are expected to be exceptionless
-        void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // NOLINT(cppcoreguidelines-noexcept-swap, performance-noexcept-swap)
+        void         swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2); // NOLINT(cppcoreguidelines-noexcept-swap, performance-noexcept-swap)
         bool         decrease(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         bool         increase(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         virtual bool expressionOpInverse([[maybe_unused]] BinaryExpression::BinaryOperation op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs);
@@ -153,10 +153,10 @@ namespace syrec {
         [[nodiscard]] static std::optional<AssignStatement::AssignOperation>  tryMapBinaryToAssignmentOperation(BinaryExpression::BinaryOperation binaryOperation) noexcept;
         [[nodiscard]] static std::optional<BinaryExpression::BinaryOperation> tryMapAssignmentToBinaryOperation(AssignStatement::AssignOperation assignOperation) noexcept;
 
-        std::stack<Statement::ptr>    stmts;
-        Circuit&                      circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
-        Number::LoopVariableMapping   loopMap;
-        std::stack<Module::ptr>       modules;
+        std::stack<Statement::ptr>  stmts;
+        Circuit&                    circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+        Number::LoopVariableMapping loopMap;
+        std::stack<Module::ptr>     modules;
 
     private:
         var_lines_map                         varLines;

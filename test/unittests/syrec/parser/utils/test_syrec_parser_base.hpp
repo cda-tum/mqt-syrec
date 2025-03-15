@@ -38,7 +38,7 @@ protected:
     std::string jsonKeyInTestCaseDataForExpectedCircuit                                                                   = "expectedCircuit";
     std::string jsonKeyInTestCaseDataForParserConfiguration                                                               = "parserConfig";
     std::string jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig                                               = "defaultBitwidth";
-    std::string jsonKeyInTestCaseDataForConstantValueTrunctionOperation                                                   = "constValTruncationOp";
+    std::string jsonKeyInTestCaseDataForConstantValueTruncationOperation                                                   = "constValTruncationOp";
     std::string jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment = "allowOverlappingAccessOnAssignedToSignalParts";
 
     TestFromJson                              loadedTestCaseData;
@@ -79,7 +79,7 @@ protected:
 
     static void assertStringificationOfParsedSyrecProgramIsSuccessful(const syrec::Program& syrecProgramToStringifiy, std::ostream& containerForStringifiedProgram) {
         utils::BaseSyrecIrEntityStringifier::AdditionalFormattingOptions customFormattingOptions;
-        customFormattingOptions.optionalCustomIdentationCharacterSequence = "";
+        customFormattingOptions.optionalCustomIndentationCharacterSequence = "";
         customFormattingOptions.optionalCustomNewlineCharacterSequence    = " ";
 
         utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(customFormattingOptions);
@@ -95,9 +95,9 @@ protected:
             ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig).is_number_unsigned()) << "User defined default variable bitwidth needs to be defined as an unsigned integer";
             userDefinedParserConfiguration->defaultBitwidth = jsonObject.at(jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig).get<unsigned int>();
         }
-        if (jsonObject.contains(jsonKeyInTestCaseDataForConstantValueTrunctionOperation)) {
-            ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).is_string());
-            const auto& stringifiedTruncationOperation = jsonObject.at(jsonKeyInTestCaseDataForConstantValueTrunctionOperation).get<std::string>();
+        if (jsonObject.contains(jsonKeyInTestCaseDataForConstantValueTruncationOperation)) {
+            ASSERT_TRUE(jsonObject.at(jsonKeyInTestCaseDataForConstantValueTruncationOperation).is_string());
+            const auto& stringifiedTruncationOperation = jsonObject.at(jsonKeyInTestCaseDataForConstantValueTruncationOperation).get<std::string>();
             if (stringifiedTruncationOperation == "modulo") {
                 userDefinedParserConfiguration->integerConstantTruncationOperation = utils::IntegerConstantTruncationOperation::Modulo;
             } else if (stringifiedTruncationOperation == "bitwiseAnd") {

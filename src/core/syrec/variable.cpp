@@ -1,5 +1,6 @@
-#include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"
+
+#include "core/syrec/number.hpp"
 
 #include <cassert>
 #include <cstdlib>

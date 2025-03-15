@@ -14,9 +14,9 @@ namespace syrec_parser {
         DuplicateModuleDeclaration,
         AssignmentToReadonlyVariable,
         ExpressionEvaluationFailedDueToDivisionByZero,
-        IfGuardExpressionMissmatch,
+        IfGuardExpressionMismatch,
         NoModuleMatchingCallSignature,
-        ExpressionBitwidthMissmatches,
+        ExpressionBitwidthMismatches,
         OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue,
         DuplicateMainModuleDefinition,
         ValueOverflowDueToNoImplicitTruncationPerformed,
@@ -58,11 +58,11 @@ namespace syrec_parser {
                 return "SEM09";
             case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
                 return "SEM10";
-            case SemanticError::IfGuardExpressionMissmatch:
+            case SemanticError::IfGuardExpressionMismatch:
                 return "SEM11";
             case SemanticError::NoModuleMatchingCallSignature:
                 return "SEM12";
-            case SemanticError::ExpressionBitwidthMissmatches:
+            case SemanticError::ExpressionBitwidthMismatches:
                 return "SEM13";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "SEM14";
@@ -104,7 +104,7 @@ namespace syrec_parser {
             case SemanticError::NoVariableMatchingIdentifier:
                 return "No variable matching identifier '{:s}'";
             case SemanticError::NoModuleMatchingIdentifier:
-                return "No module matching definied identifier '{:s}'";
+                return "No module matching defined identifier '{:s}'";
             case SemanticError::IndexOfAccessedValueForDimensionOutOfRange:
                 return "Defined index value {:d} was out of range for dimension {:d} which was defined to contain {:d} values. Please use zero-based indices";
             case SemanticError::TooManyDimensionsAccessed:
@@ -121,11 +121,11 @@ namespace syrec_parser {
                 return "No assignment to readonly variable '{:s}' possible";
             case SemanticError::ExpressionEvaluationFailedDueToDivisionByZero:
                 return "Expression evaluation failed due to a division by zero";
-            case SemanticError::IfGuardExpressionMissmatch:
+            case SemanticError::IfGuardExpressionMismatch:
                 return "Guard and closing guard expression of IfStatement did not match";
             case SemanticError::NoModuleMatchingCallSignature:
                 return "No module matching user provided call signature"; // TODO: Print closest matching signature, user provided call signature?
-            case SemanticError::ExpressionBitwidthMissmatches:
+            case SemanticError::ExpressionBitwidthMismatches:
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
                 return "Omitting explicit access on value of dimension is only possible for 1D signal containing a single value";

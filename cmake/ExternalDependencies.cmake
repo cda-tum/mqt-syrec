@@ -78,92 +78,103 @@ if(BUILD_MQT_SYREC_TESTS)
   endif()
 endif()
 
-set(FMT_VERSION 11.0.2
+set(FMT_VERSION
+    11.0.2
     CACHE STRING "FMT library version")
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-    FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG ${FMT_VERSION}
-    )
-    list(APPEND FETCH_PACKAGES fmt)
+  FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG ${FMT_VERSION})
+  list(APPEND FETCH_PACKAGES fmt)
 else()
-    find_package(fmt ${FMT_VERSION} QUIET)
-    if(NOT fmt_FOUND)
-        FetchContent_Declare(
-            fmt
-            GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        )
-        list(APPEND FETCH_PACKAGES fmt)
+  find_package(fmt ${FMT_VERSION} QUIET)
+  if(NOT fmt_FOUND)
+    FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git)
+    list(APPEND FETCH_PACKAGES fmt)
   endif()
 endif()
 
-# The original CMake configuration in the ANTLR C++ git repository (https://github.com/antlr/antlr4/blob/master/runtime/Cpp/cmake/ExternalAntlr4Cpp.cmake)
-# uses the ExternalProject_XX functions to configure the built of the ANTLR runtime and serves as a reference from which this configuration file was built
-# using the FetchContent_XX functions instead.
+# The original CMake configuration in the ANTLR C++ git repository
+# (https://github.com/antlr/antlr4/blob/master/runtime/Cpp/cmake/ExternalAntlr4Cpp.cmake) uses the
+# ExternalProject_XX functions to configure the built of the ANTLR runtime and serves as a reference
+# from which this configuration file was built using the FetchContent_XX functions instead.
 
 if(POLICY CMP0135)
-    cmake_policy(SET CMP0135 NEW)
+  cmake_policy(SET CMP0135 NEW)
 endif()
 
 set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
-# ANTLR v4.13.2 - minor version update could include "minor" breaking changes, thus we include only a specific path version.
-# https://github.com/antlr/antlr4?tab=readme-ov-file#versioning
-set(ANTLR4_TAG "cc82115" CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)") 
-set(ANTLR_BUILD_CPP_TESTS OFF CACHE BOOL "Should the ANTLR4 C++ runtime tests be built")
+# ANTLR v4.13.2 - minor version update could include "minor" breaking changes, thus we include only
+# a specific path version. https://github.com/antlr/antlr4?tab=readme-ov-file#versioning
+set(ANTLR4_TAG
+    "cc82115"
+    CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)")
+set(ANTLR_BUILD_CPP_TESTS
+    OFF
+    CACHE BOOL "Should the ANTLR4 C++ runtime tests be built")
 set(DISABLE_WARNINGS ON BOOL) # Do not report compiler warnings for build of ANTLR runtime
-set(ANTLR4_BUILD_AS_STATIC_LIBRARY ON CACHE BOOL "Build the ANTLR4 runtime as a static library (turned on by default)")
+set(ANTLR4_BUILD_AS_STATIC_LIBRARY
+    ON
+    CACHE BOOL "Build the ANTLR4 runtime as a static library (turned on by default)")
 
 message(STATUS "ANTLR git repo: ${ANTLR4_GIT_REPOSITORY}")
 message(STATUS "ANTLR git tag: ${ANTLR4_TAG}")
 
 if(NOT DEFINED WITH_STATIC_CRT AND (MSVC OR WIN32))
-    # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
-    set(WITH_STATIC_CRT OFF)
+  # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
+  set(WITH_STATIC_CRT OFF)
 endif()
 
 if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
-    set(ANTLR_BUILD_STATIC ON CACHE INTERNAL BOOL)
-    set(ANTLR_BUILD_SHARED OFF CACHE INTERNAL BOOL)
-    message(STATUS "ANTLR runtime library type: STATIC")
+  set(ANTLR_BUILD_STATIC
+      ON
+      CACHE INTERNAL BOOL)
+  set(ANTLR_BUILD_SHARED
+      OFF
+      CACHE INTERNAL BOOL)
+  message(STATUS "ANTLR runtime library type: STATIC")
 
-    FetchContent_Declare(
-        antlr4_static
-        GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW ON
-        GIT_TAG ${ANTLR4_TAG}
-        SOURCE_SUBDIR runtime/Cpp
-    )
-    list(APPEND FETCH_PACKAGES antlr4_static)
+  FetchContent_Declare(
+    antlr4_static
+    GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
+    GIT_SHALLOW ON
+    GIT_TAG ${ANTLR4_TAG}
+    SOURCE_SUBDIR runtime/Cpp)
+  list(APPEND FETCH_PACKAGES antlr4_static)
 else()
-    set(ANTLR_BUILD_STATIC OFF CACHE INTERNAL BOOL)
-    set(ANTLR_BUILD_SHARED ON CACHE INTERNAL BOOL)
-    message(STATUS "ANTLR runtime library type: SHARED")
+  set(ANTLR_BUILD_STATIC
+      OFF
+      CACHE INTERNAL BOOL)
+  set(ANTLR_BUILD_SHARED
+      ON
+      CACHE INTERNAL BOOL)
+  message(STATUS "ANTLR runtime library type: SHARED")
 
-    FetchContent_Declare(
-        antlr4_shared
-        GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW ON
-        GIT_TAG ${ANTLR4_TAG}
-        SOURCE_SUBDIR runtime/Cpp
-    )
-    list(APPEND FETCH_PACKAGES antlr4_shared)
+  FetchContent_Declare(
+    antlr4_shared
+    GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
+    GIT_SHALLOW ON
+    GIT_TAG ${ANTLR4_TAG}
+    SOURCE_SUBDIR runtime/Cpp)
+  list(APPEND FETCH_PACKAGES antlr4_shared)
 endif()
 
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
 
 if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
-    set(ANTLR4_INCLUDE_DIRS ${antlr4_static_SOURCE_DIR}/runtime/Cpp/runtime/src)
-    # When linking the ANTLR4 static runtime to a shared library or executable, the position independent
-    # code compiler options needs to be set otherwise the linker will fail
-    # https://github.com/antlr/antlr4/issues/2776
-    set_target_properties(antlr4_static PROPERTIES CMAKE_POSITION_INDEPENDENT_CODE ON)
+  set(ANTLR4_INCLUDE_DIRS ${antlr4_static_SOURCE_DIR}/runtime/Cpp/runtime/src)
+  # When linking the ANTLR4 static runtime to a shared library or executable, the position
+  # independent code compiler options needs to be set otherwise the linker will fail
+  # https://github.com/antlr/antlr4/issues/2776
+  set_target_properties(antlr4_static PROPERTIES CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-    # Dlls do not use position independent code compiler option (https://github.com/BVLC/caffe/issues/5992)
-    if(NOT WIN32)
-        target_compile_options(antlr4_static PUBLIC -fPIC)
-    endif()
+  # Dlls do not use position independent code compiler option
+  # (https://github.com/BVLC/caffe/issues/5992)
+  if(NOT WIN32)
+    target_compile_options(antlr4_static PUBLIC -fPIC)
+  endif()
 else()
-    set(ANTLR4_INCLUDE_DIRS ${antlr4_shared_SOURCE_DIR}/runtime/Cpp/runtime/src)
+  set(ANTLR4_INCLUDE_DIRS ${antlr4_shared_SOURCE_DIR}/runtime/Cpp/runtime/src)
 endif()

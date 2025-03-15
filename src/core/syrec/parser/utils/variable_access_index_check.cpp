@@ -4,8 +4,8 @@
 #include "core/syrec/number.hpp"
 #include "core/syrec/variable.hpp"
 
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -18,13 +18,12 @@ inline VariableAccessIndicesValidity::IndexValidationResult::IndexValidity isInd
 
 bool VariableAccessIndicesValidity::isValid() const {
     return std::all_of(
-    accessedValuePerDimensionValidity.cbegin(),
-    accessedValuePerDimensionValidity.cend(),
-    [](const IndexValidationResult& validityOfAccessedValueOfDimension) {
-        return validityOfAccessedValueOfDimension.indexValidity == IndexValidationResult::IndexValidity::Ok;
-    })
-    && (!bitRangeAccessValidity.has_value() 
-        || (bitRangeAccessValidity->bitRangeStartValidity.indexValidity == IndexValidationResult::IndexValidity::Ok && bitRangeAccessValidity->bitRangeEndValiditiy.indexValidity == IndexValidationResult::IndexValidity::Ok));
+                   accessedValuePerDimensionValidity.cbegin(),
+                   accessedValuePerDimensionValidity.cend(),
+                   [](const IndexValidationResult& validityOfAccessedValueOfDimension) {
+                       return validityOfAccessedValueOfDimension.indexValidity == IndexValidationResult::IndexValidity::Ok;
+                   }) &&
+           (!bitRangeAccessValidity.has_value() || (bitRangeAccessValidity->bitRangeStartValidity.indexValidity == IndexValidationResult::IndexValidity::Ok && bitRangeAccessValidity->bitRangeEndValidity.indexValidity == IndexValidationResult::IndexValidity::Ok));
 }
 
 std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndices(const syrec::VariableAccess& variableAccess) {

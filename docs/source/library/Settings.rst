@@ -7,7 +7,7 @@ Class representing the settings of a SyReC program (mainly used to configure opt
         :undoc-members:
         :members:
 
-The following enum defines the integer constant trunction operations supported by the SyReC parser.
+The following enum defines the integer constant truncation operations supported by the SyReC parser.
 
     .. autoclass:: mqt.syrec.pysyrec.integer_constant_truncation_operation
         :undoc-members:

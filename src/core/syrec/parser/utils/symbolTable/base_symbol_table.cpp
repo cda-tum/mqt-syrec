@@ -1,9 +1,9 @@
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 
 #include "core/syrec/module.hpp"
-#include "core/syrec/variable.hpp"
-#include "core/syrec/parser/utils/variable_assignability_check.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
+#include "core/syrec/parser/utils/variable_assignability_check.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <algorithm>
 #include <memory>
@@ -24,21 +24,18 @@ bool utils::BaseSymbolTable::insertModule(const syrec::Module::ptr& module) {
     //
     const syrec::Module::vec& modulesMatchingIdentifier = getModulesByName(module->name);
     if (std::any_of(
-            modulesMatchingIdentifier.cbegin(),
-            modulesMatchingIdentifier.cend(),
-            [&module](const syrec::Module::ptr& existingModuleMatchingIdentifier) {
-                return existingModuleMatchingIdentifier->parameters.size() == module->parameters.size()
-                    && std::equal(
-                        existingModuleMatchingIdentifier->parameters.cbegin(),
-                        existingModuleMatchingIdentifier->parameters.cend(),
-                        module->parameters.cbegin(),
-                        module->parameters.cend(),
-                        [](const syrec::Variable::ptr& symTabModuleParameter, const syrec::Variable::ptr& userModuleParameter) {
-                            return doVariableStructuresMatch(*symTabModuleParameter, *userModuleParameter)
-                                ? doesVariableTypePairCreateOverloadResolutionAmbiguity(symTabModuleParameter->type, userModuleParameter->type)
-                                : false;
-                        });
-            })) {
+                modulesMatchingIdentifier.cbegin(),
+                modulesMatchingIdentifier.cend(),
+                [&module](const syrec::Module::ptr& existingModuleMatchingIdentifier) {
+                    return existingModuleMatchingIdentifier->parameters.size() == module->parameters.size() && std::equal(
+                                                                                                                       existingModuleMatchingIdentifier->parameters.cbegin(),
+                                                                                                                       existingModuleMatchingIdentifier->parameters.cend(),
+                                                                                                                       module->parameters.cbegin(),
+                                                                                                                       module->parameters.cend(),
+                                                                                                                       [](const syrec::Variable::ptr& symTabModuleParameter, const syrec::Variable::ptr& userModuleParameter) {
+                                                                                                                           return doVariableStructuresMatch(*symTabModuleParameter, *userModuleParameter) ? doesVariableTypePairCreateOverloadResolutionAmbiguity(symTabModuleParameter->type, userModuleParameter->type) : false;
+                                                                                                                       });
+                })) {
         return false;
     }
 
@@ -86,11 +83,11 @@ std::optional<utils::TemporaryVariableScope::ptr> utils::BaseSymbolTable::closeT
 utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::getModulesMatchingSignature(const std::string_view& accessedModuleIdentifier, const syrec::Variable::vec& callerArguments, bool validateCallerArguments) const {
     if (validateCallerArguments) {
         if (std::any_of(
-            callerArguments.cbegin(),
-            callerArguments.cend(),
-            [](const syrec::Variable::ptr& callerArgument) {
-                return !callerArgument || callerArgument->name.empty();
-        })) {
+                    callerArguments.cbegin(),
+                    callerArguments.cend(),
+                    [](const syrec::Variable::ptr& callerArgument) {
+                        return !callerArgument || callerArgument->name.empty();
+                    })) {
             return ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid, std::nullopt);
         }
     }
@@ -101,16 +98,14 @@ utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::g
                     modulesMatchingIdentifier.begin(),
                     modulesMatchingIdentifier.end(),
                     [&callerArguments](const syrec::Module::ptr& moduleMatchingIdentifier) {
-                        return moduleMatchingIdentifier->parameters.size() != callerArguments.size()
-                            || !std::equal(
-                                moduleMatchingIdentifier->parameters.cbegin(),
-                                moduleMatchingIdentifier->parameters.cend(),
-                                callerArguments.cbegin(),
-                                callerArguments.cend(),
-                                [](const syrec::Variable::ptr& moduleParameter, const syrec::Variable::ptr& callerArgument) {
-                                        return variable_assignability_check::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type)
-                                            && doVariableStructuresMatch(*moduleParameter, *callerArgument);
-                        });
+                        return moduleMatchingIdentifier->parameters.size() != callerArguments.size() || !std::equal(
+                                                                                                                moduleMatchingIdentifier->parameters.cbegin(),
+                                                                                                                moduleMatchingIdentifier->parameters.cend(),
+                                                                                                                callerArguments.cbegin(),
+                                                                                                                callerArguments.cend(),
+                                                                                                                [](const syrec::Variable::ptr& moduleParameter, const syrec::Variable::ptr& callerArgument) {
+                                                                                                                    return variable_assignability_check::doesModuleParameterTypeAllowAssignmentFromVariableType(moduleParameter->type, callerArgument->type) && doVariableStructuresMatch(*moduleParameter, *callerArgument);
+                                                                                                                });
                     }),
             modulesMatchingIdentifier.end());
 
@@ -118,20 +113,16 @@ utils::BaseSymbolTable::ModuleOverloadResolutionResult utils::BaseSymbolTable::g
         return ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
     }
 
-    return modulesMatchingIdentifier.size() == 1
-        ? ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front())
-        : ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt);
+    return modulesMatchingIdentifier.size() == 1 ? ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::SingleMatchFound, modulesMatchingIdentifier.front()) : ModuleOverloadResolutionResult(ModuleOverloadResolutionResult::MultipleMatchesFound, std::nullopt);
 }
 
 bool utils::BaseSymbolTable::doVariableStructuresMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) noexcept {
-    return lVariable.bitwidth == rVariable.bitwidth
-        && std::equal(
-            lVariable.dimensions.cbegin(),
-            lVariable.dimensions.cend(),
-            rVariable.dimensions.cbegin(),
-            rVariable.dimensions.cend(),
-            [](const auto moduleParameterNumValuesOfDimension, const auto callerArgumentNumValuesOfDimension) {
-                return moduleParameterNumValuesOfDimension == callerArgumentNumValuesOfDimension;
-    });
+    return lVariable.bitwidth == rVariable.bitwidth && std::equal(
+                                                               lVariable.dimensions.cbegin(),
+                                                               lVariable.dimensions.cend(),
+                                                               rVariable.dimensions.cbegin(),
+                                                               rVariable.dimensions.cend(),
+                                                               [](const auto moduleParameterNumValuesOfDimension, const auto callerArgumentNumValuesOfDimension) {
+                                                                   return moduleParameterNumValuesOfDimension == callerArgumentNumValuesOfDimension;
+                                                               });
 }
-

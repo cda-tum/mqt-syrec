@@ -3,16 +3,15 @@ if(NOT TARGET MQT::SyReC)
   file(GLOB_RECURSE SYREC_HEADERS ${MQT_SYREC_INCLUDE_BUILD_DIR}/*.hpp)
   file(GLOB_RECURSE SYREC_SOURCES **.cpp)
   list(FILTER SYREC_SOURCES EXCLUDE REGEX ".*/python/.*$")
-   
-  # TODO: Split library into IR and parser target and SyReC Package library (recheck .clang-tidy and .clang-format checks)
+
+  # TODO: Split library into IR and parser target and SyReC Package library (recheck .clang-tidy and
+  # .clang-format checks)
   add_library(${PROJECT_NAME} ${SYREC_HEADERS} ${SYREC_SOURCES})
-  
+
   # set public include directories
-  target_include_directories(${PROJECT_NAME} 
-    PUBLIC 
-        $<BUILD_INTERFACE:${MQT_SYREC_INCLUDE_BUILD_DIR}>
-        ${CMAKE_SOURCE_DIR}/include/core/syrec/parser/antlr
-    )
+  target_include_directories(
+    ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${MQT_SYREC_INCLUDE_BUILD_DIR}>
+                           ${CMAKE_SOURCE_DIR}/include/core/syrec/parser/antlr)
   # set private include directories
   target_include_directories(${PROJECT_NAME} PRIVATE ${ANTLR4_INCLUDE_DIRS})
 
@@ -21,9 +20,9 @@ if(NOT TARGET MQT::SyReC)
     ${PROJECT_NAME}
     PUBLIC MQT::CoreDD
     PRIVATE MQT::ProjectWarnings MQT::ProjectOptions fmt::fmt)
-   
+
   if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
-	target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_static)
+    target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_static)
   else()
     target_link_libraries(${PROJECT_NAME} PRIVATE antlr4_shared)
   endif()

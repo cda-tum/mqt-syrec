@@ -116,7 +116,7 @@ namespace syrec_parser {
         }
 
         /**
-         * @brief Build and record a semantic error of a specific type whos message template accepts one or more arguments
+         * @brief Build and record a semantic error of a specific type whose message template accepts one or more arguments
          * @tparam ...T The types of the arguments provided to the template parameter pack
          * @tparam semanticError The kind of semantic error to create
          * @param messagePosition The origin of the semantic error in the SyReC program
@@ -133,9 +133,9 @@ namespace syrec_parser {
 
             constexpr std::string_view identifierForSemanticError = getIdentifierForSemanticError<semanticError>();
             // An informal requirement for the C++ code of the mqt-syrec library is to strongly discourage explicitly throwing exceptions to not degrage the performance of the library.
-            // Thus the parser will record syntax as well as semantic errors in a STL container in the form of std::string messages create via the {fmt} library. We do make use of the 
+            // Thus the parser will record syntax as well as semantic errors in a STL container in the form of std::string messages create via the {fmt} library. We do make use of the
             // compile time checks provided by the {fmt} library to perform type-safety checks between the specified messages templates parameter types and the user-provided arguments,
-            // but cannot guarantee that no exception is thrown during the conversion process of the user-provided arguments (i.e. for a datetime, etc.). Currently we are only using 
+            // but cannot guarantee that no exception is thrown during the conversion process of the user-provided arguments (i.e. for a datetime, etc.). Currently we are only using
             // std::string and other primitive types in the message templates (and thus no exception should be thrown here [if the prior stringification from a custom type to std::string succeeds]).
             // We recommend to also use the approach in the future in which the user must at first 'stringify'/transform his custom-types to corresponding std::string/primitive or any of the other
             // supported types supported by {fmt} (https://fmt.dev/11.1/api/#standard-library-types-formatting).
@@ -143,7 +143,7 @@ namespace syrec_parser {
         }
 
         /**
-         * @brief Build and record a semantic error of a specific type whos message template accepts no arguments
+         * @brief Build and record a semantic error of a specific type whose message template accepts no arguments
          * @tparam semanticError The kind of semantic error to create
          * @param messagePosition The origin of the semantic error in the SyReC program
          */
@@ -168,7 +168,7 @@ namespace syrec_parser {
         }
 
         /**
-         * @brief Record a custom error 
+         * @brief Record a custom error
          * @param messagePosition The origin of the semantic error in the SyReC program
          * @param errorMessage The text of the error message (can be empty)
          */

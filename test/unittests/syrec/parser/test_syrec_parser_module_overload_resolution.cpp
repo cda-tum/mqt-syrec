@@ -3,11 +3,10 @@
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
 
-#include <gmock/gmock-matchers.h>
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <cstddef>
+#include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
 #include <memory>
 #include <optional>
 #include <string>
@@ -15,9 +14,9 @@
 #include <variant>
 #include <vector>
 
-class ParserModuleOverloadResolutionTestsFixture : public testing::TestWithParam<std::string> {
+class ParserModuleOverloadResolutionTestsFixture: public testing::TestWithParam<std::string> {
 public:
-    using CallStmtVariant = std::variant<std::shared_ptr<syrec::CallStatement>, std::shared_ptr<syrec::UncallStatement>>;
+    using CallStmtVariant                                                 = std::variant<std::shared_ptr<syrec::CallStatement>, std::shared_ptr<syrec::UncallStatement>>;
     static constexpr std::string_view MODULE_CALL_STMT_PREFIX_PLACEHOLDER = "<CALL_STMT_PREFIX>";
 
     void SetUp() override {
@@ -25,10 +24,10 @@ public:
         ASSERT_TRUE(moduleCallStmtPrefix == "call" || moduleCallStmtPrefix == "uncall") << "Module call prefix must be either defined as 'call' or 'uncall'";
     }
 
-    void performTestExecution(std::string& stringifiedSyrecProgram, 
-        const syrec::Module& signatureOfModuleInWhichCallStatementShallBeInspected, 
-        const syrec::Module& signatureOfModuleBeingTargetOfCall, 
-        const std::vector<std::string>& expectedVariableIdentifiersOfParametersForCallStatement) const {
+    void performTestExecution(std::string&                    stringifiedSyrecProgram,
+                              const syrec::Module&            signatureOfModuleInWhichCallStatementShallBeInspected,
+                              const syrec::Module&            signatureOfModuleBeingTargetOfCall,
+                              const std::vector<std::string>& expectedVariableIdentifiersOfParametersForCallStatement) const {
         syrec::Program parserInstance;
 
         const std::size_t positionOfModuleCallStmtPrefixPlaceholder = stringifiedSyrecProgram.find(MODULE_CALL_STMT_PREFIX_PLACEHOLDER, 0);
@@ -52,15 +51,15 @@ public:
         const auto* const expectedCallStatement   = std::get_if<std::shared_ptr<syrec::CallStatement>>(&*actualCallStatementVariant);
         const auto* const expectedUncallStatement = std::get_if<std::shared_ptr<syrec::UncallStatement>>(&*actualCallStatementVariant);
 
-        syrec::Module::ptr   actualModuleBeingTargetOfCall;
+        syrec::Module::ptr       actualModuleBeingTargetOfCall;
         std::vector<std::string> actualVariableIdentifiersOfParametersForCallStatement;
         if (expectedCallStatement != nullptr) {
             ASSERT_THAT(expectedCallStatement->get()->target, testing::NotNull());
-            actualModuleBeingTargetOfCall    = expectedCallStatement->get()->target;
+            actualModuleBeingTargetOfCall                         = expectedCallStatement->get()->target;
             actualVariableIdentifiersOfParametersForCallStatement = expectedCallStatement->get()->parameters;
         } else {
             ASSERT_THAT(expectedUncallStatement->get()->target, testing::NotNull());
-            actualModuleBeingTargetOfCall    = expectedUncallStatement->get()->target;
+            actualModuleBeingTargetOfCall                         = expectedUncallStatement->get()->target;
             actualVariableIdentifiersOfParametersForCallStatement = expectedUncallStatement->get()->parameters;
         }
 
@@ -80,7 +79,7 @@ protected:
     [[nodiscard]] static std::optional<CallStmtVariant> findFirstCallStatementInListOfStatements(const std::vector<syrec::Statement::ptr>& statements, const std::string& callStmtPrefixIdentifyingRelevantCallStatements) {
         std::optional<CallStmtVariant> foundCallStmtInstance;
 
-        for (std::size_t i = 0; i < statements.size() && !foundCallStmtInstance.has_value(); ++i){
+        for (std::size_t i = 0; i < statements.size() && !foundCallStmtInstance.has_value(); ++i) {
             if (!statements.at(i)) {
                 continue;
             }
@@ -113,33 +112,23 @@ protected:
     }
 
     [[nodiscard]] static bool doModuleSignaturesMatch(const syrec::Module& expectedModuleSignatureData, const syrec::Module& actualModuleSignatureData) {
-        return actualModuleSignatureData.name == expectedModuleSignatureData.name
-            && actualModuleSignatureData.parameters.size() == expectedModuleSignatureData.parameters.size()
-            && (!expectedModuleSignatureData.parameters.empty()
-                ? std::find_first_of(
-                actualModuleSignatureData.parameters.cbegin(), actualModuleSignatureData.parameters.cend(),
-                expectedModuleSignatureData.parameters.cbegin(), expectedModuleSignatureData.parameters.cend(),
-                [](const syrec::Variable::ptr& actualParameter, const syrec::Variable::ptr& expectedParameter) {
-                    return actualParameter->name == expectedParameter->name
-                            && actualParameter->dimensions.size() == expectedParameter->dimensions.size()
-                            && (!expectedParameter->dimensions.empty()
-                                ? std::find_first_of(
-                                actualParameter->dimensions.cbegin(), actualParameter->dimensions.cend(),
-                                expectedParameter->dimensions.cbegin(), expectedParameter->dimensions.cend(), 
-                                [](const unsigned int actualNumValuesOfDimension, const unsigned int expectedNumValuesOfDimension) {
-                                        return actualNumValuesOfDimension == expectedNumValuesOfDimension;
-                                }) != actualParameter->dimensions.cend() : true)
-                            && actualParameter->bitwidth == expectedParameter->bitwidth;
-            }) != actualModuleSignatureData.parameters.cend() : true);
+        return actualModuleSignatureData.name == expectedModuleSignatureData.name && actualModuleSignatureData.parameters.size() == expectedModuleSignatureData.parameters.size() && (!expectedModuleSignatureData.parameters.empty() ? std::find_first_of(actualModuleSignatureData.parameters.cbegin(), actualModuleSignatureData.parameters.cend(), expectedModuleSignatureData.parameters.cbegin(), expectedModuleSignatureData.parameters.cend(), [](const syrec::Variable::ptr& actualParameter, const syrec::Variable::ptr& expectedParameter) {
+                                                                                                                                                                                                                                            return actualParameter->name == expectedParameter->name && actualParameter->dimensions.size() == expectedParameter->dimensions.size() && (!expectedParameter->dimensions.empty() ? std::find_first_of(actualParameter->dimensions.cbegin(), actualParameter->dimensions.cend(), expectedParameter->dimensions.cbegin(), expectedParameter->dimensions.cend(), [](const unsigned int actualNumValuesOfDimension, const unsigned int expectedNumValuesOfDimension) {
+                                                                                                                                                                                                                                                                                                                                                                                                                                   return actualNumValuesOfDimension == expectedNumValuesOfDimension;
+                                                                                                                                                                                                                                                                                                                                                                                                                               }) != actualParameter->dimensions.cend() :
+                                                                                                                                                                                                                                                                                                                                                                                                                               true) &&
+                                                                                                                                                                                                                                                   actualParameter->bitwidth == expectedParameter->bitwidth;
+                                                                                                                                                                                                                                        }) != actualModuleSignatureData.parameters.cend() :
+                                                                                                                                                                                                                                        true);
     }
 };
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeInWithCallerArgumentOfTypeIn) {
-    std::string stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(in b(4)) <CALL_STMT_PREFIX> print(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(in b(4)) <CALL_STMT_PREFIX> print(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "b", std::vector({1U}), 4));
 
-    syrec::Module      signatureOfModuleBeingTargetOfCall("print");
+    syrec::Module signatureOfModuleBeingTargetOfCall("print");
     signatureOfModuleBeingTargetOfCall.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "a", std::vector({1U}), 4));
 
     std::vector<std::string> variableIdentifiersOfParametersForCallStmt;
@@ -149,8 +138,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeInWithCallerArgumentOfTypeInout) {
-    std::string stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(inout b(4)) <CALL_STMT_PREFIX> print(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(inout b(4)) <CALL_STMT_PREFIX> print(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::In, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("print");
@@ -163,8 +152,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeInWithCallerArgumentOfTypeOut) {
-    std::string stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(out b(4)) <CALL_STMT_PREFIX> print(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module print(in a(4)) skip module main(out b(4)) <CALL_STMT_PREFIX> print(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::Out, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("print");
@@ -203,8 +192,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeInoutWithCallerArgumentOfTypeInout) {
-    std::string stringifiedSyrecProgramToProcess = "module incr(inout a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module incr(inout a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("incr");
@@ -217,8 +206,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeInoutWithCallerArgumentOfTypeOut) {
-    std::string stringifiedSyrecProgramToProcess = "module incr(inout a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module incr(inout a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::Out, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("incr");
@@ -244,8 +233,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeOutWithCallerArgumentOfTypeInout) {
-    std::string stringifiedSyrecProgramToProcess = "module incr(out a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module incr(out a(4)) ++= a module main(inout b(4)) <CALL_STMT_PREFIX> incr(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::Inout, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("incr");
@@ -258,8 +247,8 @@ TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTy
 }
 
 TEST_P(ParserModuleOverloadResolutionTestsFixture, CallOfModuleWithParameterOfTypeOutWithCallerArgumentOfTypeOut) {
-    std::string stringifiedSyrecProgramToProcess = "module incr(out a(4)) ++= a module main(out b(4)) <CALL_STMT_PREFIX> incr(b)";
-    syrec::Module      signatureOfModuleContainingCallStmt("main");
+    std::string   stringifiedSyrecProgramToProcess = "module incr(out a(4)) ++= a module main(out b(4)) <CALL_STMT_PREFIX> incr(b)";
+    syrec::Module signatureOfModuleContainingCallStmt("main");
     signatureOfModuleContainingCallStmt.parameters.emplace_back(std::make_shared<syrec::Variable>(syrec::Variable::Type::Out, "b", std::vector({1U}), 4));
 
     syrec::Module signatureOfModuleBeingTargetOfCall("incr");

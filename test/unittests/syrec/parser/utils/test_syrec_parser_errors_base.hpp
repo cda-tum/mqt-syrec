@@ -43,7 +43,7 @@ namespace syrec_parser_error_tests {
             syrec::Program program;
 
             std::string aggregateOfDetectedErrorsDuringProcessingOfSyrecProgram;
-            // We needed to modifiy the syrec::Program interface to allow processing of programs from a string due to the missing cross platform support
+            // We needed to modify the syrec::Program interface to allow processing of programs from a string due to the missing cross platform support
             // to create temporary or in-memory files (see mkstemp and fmemopen functions which are POSIX specific ones) without using the boost library.
             // Using the tmpfile/tmpfile_s of the C++ standard library is also not viable for the creating of temporary files due to the missing ability
             // to determine the path/filename of the generated file descriptor on all platforms.
@@ -109,11 +109,11 @@ namespace syrec_parser_error_tests {
 
     private:
         [[nodiscard]] static std::size_t findNextNewlineDelimiterInString(const std::string_view& stringToSearchThrough, std::size_t searchStartPosition) {
-            #if _WIN32
-                return stringToSearchThrough.find_first_of("\r\n", searchStartPosition);
-            #else
-                return stringToSearchThrough.find_first_of('\n', searchStartPosition);
-            #endif
+#if _WIN32
+            return stringToSearchThrough.find_first_of("\r\n", searchStartPosition);
+#else
+            return stringToSearchThrough.find_first_of('\n', searchStartPosition);
+#endif
         }
 
         [[nodiscard]] static testing::Message stringifiyCollectionOfMessages(const MessagesContainer& messagesContainer) {

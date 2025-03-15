@@ -1,9 +1,8 @@
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
 #include <gtest/gtest.h>
-
-#include "core/syrec/parser/utils/custom_error_messages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 using namespace syrec_parser_error_tests;
 
@@ -17,7 +16,7 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidCallKeywordCausesError) {
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) performCall add(a, b, c)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInCallStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentifierInCallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 45), "extraneous input '(' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 46), "a");
     recordSyntaxError(Message::Position(1, 47), "mismatched input ',' expecting '('");
@@ -76,12 +75,12 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidCallStatementParameterClosingBracket
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) call add(a, b, c]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableBitwidthMismatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 151));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(8), in b(8), out c(8)) c ^= (a + b) module main(in a(12), in b(8), out c(10)) call add(a, b, c)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableTypeMissmatchCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionFailedDueToVariableTypeMismatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 102));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in res(4)) wire tmp1(4), tmp2(4) call add(tmp1, tmp2, res)");
 }

@@ -1,21 +1,20 @@
-#include "core/syrec/parser/components/custom_statement_visitor.hpp"
-
-#include "core/syrec/module.hpp"
-#include "core/syrec/program.hpp"
-#include "core/syrec/statement.hpp"
-#include "core/syrec/variable.hpp"
 #include "core/syrec/parser/components/custom_module_visitor.hpp"
+
+#include "TSyrecParser.h"
+#include "Token.h"
+#include "core/syrec/module.hpp"
+#include "core/syrec/parser/components/custom_statement_visitor.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
-
-#include "TSyrecParser.h"
-#include "Token.h"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+#include "core/syrec/variable.hpp"
 
 #include <algorithm>
-#include <cstddef>
 #include <climits>
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
@@ -35,7 +34,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
     }
 
     std::shared_ptr<const syrec::Module> lastProcessedUserDefinedModule = nullptr;
-    auto                                 generatedProgram = std::make_shared<syrec::Program>();
+    auto                                 generatedProgram               = std::make_shared<syrec::Program>();
     for (const auto& antlrModuleContext: context->module()) {
         if (const std::optional<syrec::Module::ptr>& parsedModule = visitModuleTyped(antlrModuleContext); parsedModule.has_value()) {
             generatedProgram->addModule(*parsedModule);
@@ -45,9 +44,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
         }
     }
 
-    const std::shared_ptr<const syrec::Module> definedMainModule = symbolTable->existsModuleForName("name")
-        ? symbolTable->getModulesByName("main").front()
-        : lastProcessedUserDefinedModule;
+    const std::shared_ptr<const syrec::Module> definedMainModule = symbolTable->existsModuleForName("name") ? symbolTable->getModulesByName("main").front() : lastProcessedUserDefinedModule;
 
     // We are not requiring a C89 style def-before use for both call-/uncall statements, thus we need to perform overload resolution for any of these statements after the whole program was processed.
     const std::vector<CustomStatementVisitor::NotOverloadResolutedCallStatementScope> callStatementsScopeForWhichOverloadResolutionShouldBePerformed = statementVisitorInstance->getCallStatementsWithNotPerformedOverloadResolution();
@@ -75,14 +72,10 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
             // current parser implementation)
             if (overloadResolutionResult.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound) {
                 recordSemanticError<SemanticError::NoModuleMatchingCallSignature>(semanticErrorPosition);
-            }
-            else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound 
-                && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value() 
-                && definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name 
-                && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters)) {
+            } else if (overloadResolutionResult.resolutionResult == utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound && overloadResolutionResult.moduleMatchingSignature.has_value() && overloadResolutionResult.moduleMatchingSignature.value() && definedMainModule && definedMainModule->name == overloadResolutionResult.moduleMatchingSignature->get()->name && doVariableCollectionsMatch(definedMainModule->parameters, overloadResolutionResult.moduleMatchingSignature->get()->parameters)) {
                 // Recursive module calls are allowed except for either the explicitly or implicitly defined 'main' module of a SyReC program. The parser will not check whether a recursive
-                // call will lead to an infinite recursion since this would require a formal execution of the program and the reponsibility to prevent such calls is placed on the user.
-                recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);   
+                // call will lead to an infinite recursion since this would require a formal execution of the program and the responsibility to prevent such calls is placed on the user.
+                recordSemanticError<SemanticError::CannotCallMainModule>(semanticErrorPosition);
             } else if (overloadResolutionResult.moduleMatchingSignature.has_value()) {
                 if (std::holds_alternative<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance)) {
                     const auto& callStatementInstance = std::get<std::shared_ptr<syrec::CallStatement>>(callStatementVariant.callStatementVariantInstance);
@@ -92,7 +85,7 @@ std::optional<std::shared_ptr<syrec::Program>> CustomModuleVisitor::visitProgram
                     uncallStatementInstance->target     = overloadResolutionResult.moduleMatchingSignature.value();
                 }
             } else {
-                recordCustomError(semanticErrorPosition, "Failed to determine target module for call/uncall statement");   
+                recordCustomError(semanticErrorPosition, "Failed to determine target module for call/uncall statement");
             }
         }
     }
@@ -134,9 +127,7 @@ std::optional<syrec::Module::ptr> CustomModuleVisitor::visitModuleTyped(const TS
             if (context->parameterList() != nullptr && !context->parameterList()->parameter().empty()) {
                 moduleOverloadResolutionCall = symbolTable->getModulesMatchingSignature(*moduleIdentifier, generatedModule->parameters);
             } else {
-                moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(symbolTable->existsModuleForName(*moduleIdentifier) 
-                    ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound
-                    : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
+                moduleOverloadResolutionCall = utils::BaseSymbolTable::ModuleOverloadResolutionResult(symbolTable->existsModuleForName(*moduleIdentifier) ? utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::SingleMatchFound : utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::NoMatchFound, std::nullopt);
             }
             if (moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::Result::CallerArgumentsInvalid && moduleOverloadResolutionCall.resolutionResult != utils::BaseSymbolTable::ModuleOverloadResolutionResult::NoMatchFound) {
                 recordSemanticError<SemanticError::DuplicateModuleDeclaration>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()), *moduleIdentifier);
@@ -281,9 +272,9 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
         }
     } else if (variableBitwidth == 0) {
         if (context->signalWidthToken != nullptr) {
-            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->signalWidthToken));    
+            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->signalWidthToken));
         } else {
-            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()));    
+            recordSemanticError<SemanticError::VariableBitwidthEqualToZero>(mapTokenPositionToMessagePosition(*context->literalIdent()->getSymbol()));
         }
     }
 
@@ -315,9 +306,7 @@ std::optional<std::vector<syrec::Statement::ptr>> CustomModuleVisitor::visitStat
 }
 
 bool CustomModuleVisitor::doVariablesMatch(const syrec::Variable& lVariable, const syrec::Variable& rVariable) {
-    return lVariable.name == rVariable.name
-        && std::equal(lVariable.dimensions.cbegin(), lVariable.dimensions.cend(), rVariable.dimensions.cbegin(), rVariable.dimensions.cend())
-        && lVariable.bitwidth == rVariable.bitwidth;
+    return lVariable.name == rVariable.name && std::equal(lVariable.dimensions.cbegin(), lVariable.dimensions.cend(), rVariable.dimensions.cbegin(), rVariable.dimensions.cend()) && lVariable.bitwidth == rVariable.bitwidth;
 }
 
 bool CustomModuleVisitor::doVariableCollectionsMatch(const syrec::Variable::vec& lVariableCollection, const syrec::Variable::vec& rVariableCollection) {

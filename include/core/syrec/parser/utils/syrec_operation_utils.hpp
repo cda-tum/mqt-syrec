@@ -73,7 +73,7 @@ namespace utils {
     }
 
     /**
-     * @brief Try to evalute the given binary operation using the provided operand values.
+     * @brief Try to evaluate the given binary operation using the provided operand values.
      * @param lOperand The optional value of the left hand side operand of the binary operation
      * @param binaryOperation The binary operation used for the evaluation of the binary expression
      * @param rOperand The optional value of the right hand side operand of the binary operation

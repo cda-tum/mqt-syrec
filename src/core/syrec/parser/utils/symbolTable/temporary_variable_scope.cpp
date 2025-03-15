@@ -57,7 +57,7 @@ bool utils::TemporaryVariableScope::existsVariableForName(const std::string_view
     return getVariableByName(signalIdentifier).has_value();
 }
 
-std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::TemporaryVariableScope::getVariableByName(const std::string_view& signalIdentifier) const {
+std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnlyPtr> utils::TemporaryVariableScope::getVariableByName(const std::string_view& signalIdentifier) const {
     const auto scopeEntryMatchingSignalIdentifier = !signalIdentifier.empty() ? signalIdentifierLookup.find(signalIdentifier) : signalIdentifierLookup.end();
     if (scopeEntryMatchingSignalIdentifier == signalIdentifierLookup.end()) {
         return std::nullopt;
@@ -65,14 +65,14 @@ std::optional<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::Tem
     return scopeEntryMatchingSignalIdentifier->second;
 }
 
-std::vector<utils::TemporaryVariableScope::ScopeEntry::readOnylPtr> utils::TemporaryVariableScope::getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const {
+std::vector<utils::TemporaryVariableScope::ScopeEntry::readOnlyPtr> utils::TemporaryVariableScope::getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const {
     if (lookedForVariableTypes.empty()) {
         return {};
     }
 
-    std::vector<ScopeEntry::readOnylPtr> variablesMatchingType;
+    std::vector<ScopeEntry::readOnlyPtr> variablesMatchingType;
 
-    auto signalsIterator = signalIdentifierLookup.begin();
+    auto       signalsIterator   = signalIdentifierLookup.begin();
     const auto endSignalIterator = signalIdentifierLookup.end();
     while (signalsIterator != endSignalIterator) {
         if (const std::shared_ptr<const syrec::Variable> variableData = signalsIterator->second->getVariableData().value_or(nullptr);

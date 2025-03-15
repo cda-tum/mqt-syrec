@@ -2,10 +2,10 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <variant>
-#include <optional>
 
 template<class... Ts>
 struct Overloaded: Ts... {
@@ -48,7 +48,7 @@ namespace syrec {
                         if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
                             return lhsOperandEvaluated;
                         }
-                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value()? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
+                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
                     case Operation::Subtraction:
                         if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
                             return lhsOperandEvaluated;
@@ -67,7 +67,7 @@ namespace syrec {
                         if (lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) {
                             return 0;
                         }
-                        return rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated / *rhsOperandEvaluated) : std::nullopt; 
+                        return rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated / *rhsOperandEvaluated) : std::nullopt;
                 }
                 return std::nullopt;
             }
@@ -111,11 +111,11 @@ namespace syrec {
         }
 
         [[nodiscard]] unsigned evaluate(const LoopVariableMapping& map) const {
-            return std::visit(Overloaded {
-                [](unsigned arg) { return arg; },
-                [&map](const std::string& value) { return map.find(value)->second; },
-                [&map](const ConstantExpression& constantExpression) { return constantExpression.tryEvaluate(map).value(); }},
-                numberVar);
+            return std::visit(Overloaded{
+                                      [](unsigned arg) { return arg; },
+                                      [&map](const std::string& value) { return map.find(value)->second; },
+                                      [&map](const ConstantExpression& constantExpression) { return constantExpression.tryEvaluate(map).value(); }},
+                              numberVar);
         }
 
         [[nodiscard]] std::optional<unsigned> tryEvaluate(const LoopVariableMapping& loopVariableValueLookup) const {

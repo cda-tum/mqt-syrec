@@ -197,7 +197,7 @@ The files of the ANTLR runtime required for the build of the generated header an
 
 | Modifications of the SyReC grammar require an execution of the parser generator to make the changes available in the C++ files of the SyReC scanner and parser. There are two different options for how the parser generator can be executed:
 
-1. Including the parser generator into CMake as described in the `offical ANTLR repository <https://github.com/antlr/antlr4/tree/dev/runtime/Cpp/cmake>`_. However, this would require an existing Java SE installation on the system performing the build.
+1. Including the parser generator into CMake as described in the `official ANTLR repository <https://github.com/antlr/antlr4/tree/dev/runtime/Cpp/cmake>`_. However, this would require an existing Java SE installation on the system performing the build.
 2. A manual execution of the parser generator on the machine of the developers followed by an update of the already existing files.
 
 To keep the number of external dependencies for this project low and due to the expected infrequent changes to the SyReC grammar, the second option was chosen. A manual execution of the parser generator via the command line requires the following steps (with the assumption that the execution is performed on Windows with other operating systems only requiring minor changes):
@@ -208,7 +208,7 @@ To keep the number of external dependencies for this project low and due to the 
     .. code-block:: console
 
       $ java -jar antlr.jar -Dlanguage=Cpp -package syrec_parser -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
-  
+
    Out of all the generated files in the specified *<OUTPUT_DIRECTORY_FOR_GEN_FILES>* directory only the following are relevant for the C++ core library: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*, *TSyrecBaseVisitor.h*.
 
 3. Copy the relevant files generated in the previous step to the corresponding folders in the project:

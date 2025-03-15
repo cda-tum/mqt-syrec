@@ -3,10 +3,10 @@
     "inputCircuit": "module main(inout a(4)) ++= a",
     "expectedCircuit": "module main(inout a(4)) ++= a[0]"
   },
-  "accessingBitUsingConstantIndexOf1DSignalWithImplicitAcessOnOnlyValueOfDimensionPossible": {
+  "accessingBitUsingConstantIndexOf1DSignalWithImplicitAccessOnOnlyValueOfDimensionPossible": {
     "inputCircuit": "module main(inout a(4)) ++= a[0].0"
   },
-  "accessingBitrangeUsingConstantIndecesOf1DSignalWithImplicitAcessOnOnlyValueOfDimensionPossible": {
+  "accessingBitrangeUsingConstantIndicesOf1DSignalWithImplicitAccessOnOnlyValueOfDimensionPossible": {
     "inputCircuit": "module main(inout a(4)) ++= a[0].0:2"
   },
   "accessingBitUsingDynamicIndexEvaluatingToConstantOf1DSignalWithImplicitAccessOnOnlyValueOfDimensionPossible": {
@@ -85,7 +85,6 @@
     "inputCircuit": "module main(inout a(4), in b(1)) for $i = 0 to 3 step 1 do ++= a[0].($i - 2):(2 + ($i - 2)) rof"
   },
 
-
   "accessingValueOfDimensionUsingConstantIndex": {
     "inputCircuit": "module main(inout a[2][3](4)) ++= a[0][2]"
   },
@@ -107,10 +106,10 @@
     "inputCircuit": "module main(inout a[3](4), in b(2)) --= a[#b]",
     "expectedCircuit": "module main(inout a[3](4), in b(2)) --= a[2]"
   },
-  "accessingBitOfNDSignal": {
+  "accessingBitOfANDSignal": {
     "inputCircuit": "module main(inout a[2][3](4)) a[0][1].0 += a[1][2].2"
   },
-  "accessingBitrangeOfNDSignal": {
+  "accessingBitrangeOfANDSignal": {
     "inputCircuit": "module main(inout a[2][3](4)) a[0][1].(#a - 1):2 += a[1][2].1:0",
     "expectedCircuit": "module main(inout a[2][3](4)) a[0][1].3:2 += a[1][2].1:0"
   },
@@ -119,7 +118,7 @@
     "inputCircuit": "module main(inout a[2](4), in b(2), in c(4)) a[(b + 2)] += c",
     "expectedCircuit": "module main(inout a[2](4), in b(2), in c(4)) a[(b[0] + 2)] += c[0]"
   },
-  "operandBitwidthSizeRestrictionOnlyLocalToCurrentlyProcessedDimensionOfNDSignal": {
+  "operandBitwidthSizeRestrictionOnlyLocalToCurrentlyProcessedDimensionOfANDSignal": {
     "inputCircuit": "module main(inout a[2][4](4), in b(2), in c(4)) a[(b + 2)][(c - 1)] += c",
     "expectedCircuit": "module main(inout a[2][4](4), in b(2), in c(4)) a[(b[0] + 2)][(c[0] - 1)] += c[0]"
   },

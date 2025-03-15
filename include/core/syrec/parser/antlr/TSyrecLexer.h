@@ -4,7 +4,6 @@
 #include "CharStream.h"
 #include "Lexer.h"
 #include "Vocabulary.h"
-
 #include "atn/ATN.h"
 #include "atn/SerializedATNView.h"
 

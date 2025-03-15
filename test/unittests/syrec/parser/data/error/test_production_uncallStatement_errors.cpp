@@ -1,9 +1,8 @@
+#include "core/syrec/parser/utils/custom_error_messages.hpp"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
 #include <gtest/gtest.h>
-
-#include "core/syrec/parser/utils/custom_error_messages.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 using namespace syrec_parser_error_tests;
 
@@ -17,7 +16,7 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallKeywordCausesError) {
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) performCall add(a, b, c)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentiferInUncallStatementCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, OmittingModuleIdentifierInUncallStatementCausesError) {
     recordSyntaxError(Message::Position(1, 47), "extraneous input '(' expecting IDENT");
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingIdentifier>(Message::Position(1, 48), "a");
     recordSyntaxError(Message::Position(1, 49), "mismatched input ',' expecting '('");
@@ -69,12 +68,12 @@ TEST_F(SyrecParserErrorTestsFixture, InvalidUncallStatementParameterClosingBrack
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in a(4), in b(4), out c(4)) uncall add(a, b, c]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableBitwidthMissmatchCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableBitwidthMismatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 153));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(in a(8), in b(8), out c(8)) c ^= (a + b) module main(in a(12), in b(8), out c(10)) uncall add(a, b, c)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableTypeMissmatchCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, ModuleUncallOverloadResolutionFailedDueToVariableTypeMismatchCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::NoModuleMatchingCallSignature>(Message::Position(1, 104));
     performTestExecution("module add(in a(4), in b(4), out c(4)) c ^= (a + b) module main(in res(4)) wire tmp1(4), tmp2(4) uncall add(tmp1, tmp2, res)");
 }

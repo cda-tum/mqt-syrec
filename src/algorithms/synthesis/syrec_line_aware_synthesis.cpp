@@ -7,9 +7,9 @@
 #include "core/syrec/program.hpp"
 #include "core/syrec/statement.hpp"
 
+#include <algorithm>
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
-#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -213,8 +213,7 @@ namespace syrec {
 
         if (const std::optional<AssignStatement::AssignOperation> mappedToAssignmentOperation = tryMapBinaryToAssignmentOperation(expression.binaryOperation); mappedToAssignmentOperation.has_value()) {
             assignOpVector.push_back(*mappedToAssignmentOperation);
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -341,11 +340,10 @@ namespace syrec {
         } else {
             status = SyrecSynthesis::bitwiseCnot(lhs, rhs);
         }
-        
+
         while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
-
     }
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
     bool LineAwareSynthesis::expEvaluate(std::vector<unsigned>& lines, BinaryExpression::BinaryOperation op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
@@ -364,7 +362,7 @@ namespace syrec {
                 }
                 break;
             case BinaryExpression::BinaryOperation::Exor: // ^
-                bitwiseCnot(rhs, lhs);   // duplicate lhs
+                bitwiseCnot(rhs, lhs);                    // duplicate lhs
                 lines = rhs;
                 break;
             default:

@@ -1,8 +1,8 @@
 #include "core/syrec/parser/components/custom_error_listener.hpp"
-#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 #include "Recognizer.h"
 #include "Token.h"
+#include "core/syrec/parser/utils/parser_messages_container.hpp"
 
 #include <cstddef>
 #include <exception>

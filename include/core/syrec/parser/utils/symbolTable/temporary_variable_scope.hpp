@@ -20,7 +20,7 @@ namespace utils {
         class ScopeEntry {
         public:
             using ptr         = std::shared_ptr<ScopeEntry>;
-            using readOnylPtr = std::shared_ptr<const ScopeEntry>;
+            using readOnlyPtr = std::shared_ptr<const ScopeEntry>;
 
             explicit ScopeEntry(syrec::Variable::ptr signalData):
                 data(signalData) {}
@@ -40,8 +40,8 @@ namespace utils {
         };
 
         [[nodiscard]] bool                                   existsVariableForName(const std::string_view& signalIdentifier) const;
-        [[nodiscard]] std::optional<ScopeEntry::readOnylPtr> getVariableByName(const std::string_view& signalIdentifier) const;
-        [[nodiscard]] std::vector<ScopeEntry::readOnylPtr>   getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const;
+        [[nodiscard]] std::optional<ScopeEntry::readOnlyPtr> getVariableByName(const std::string_view& signalIdentifier) const;
+        [[nodiscard]] std::vector<ScopeEntry::readOnlyPtr>   getVariablesMatchingType(const std::unordered_set<syrec::Variable::Type>& lookedForVariableTypes) const;
         [[maybe_unused]] bool                                recordVariable(const syrec::Variable::ptr& signal);
         [[maybe_unused]] bool                                recordLoopVariable(const syrec::Number::ptr& loopVariable);
         [[maybe_unused]] bool                                removeVariable(const std::string_view& signalIdentifier);

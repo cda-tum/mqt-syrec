@@ -1,12 +1,10 @@
-#include "test_syrec_parser_errors_base.hpp"
-
-#include <gtest/gtest.h>
-
-#include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/program.hpp"
+#include "test_syrec_parser_errors_base.hpp"
 
 #include <climits>
+#include <gtest/gtest.h>
 
 using namespace syrec_parser_error_tests;
 
@@ -134,12 +132,12 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingExplicitDimensionAccessOn1DSignalWi
     performTestExecution("module main(out a[2](4)) ++= a");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, AccessingTooFewDimensionsOfNDSignalInVariableAccessCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, AccessingTooFewDimensionsOfANDSignalInVariableAccessCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::TooFewDimensionsAccessed>(Message::Position(1, 32), 1, 2);
     performTestExecution("module main(out a[2][3](4)) ++= a[0]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, AccessingTooManyDimensionsOfNDSignalInVariableAccessCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, AccessingTooManyDimensionsOfANDSignalInVariableAccessCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::TooManyDimensionsAccessed>(Message::Position(1, 32), 3, 2);
     performTestExecution("module main(out a[2][3](4)) ++= a[0][1][2]");
 }
@@ -243,12 +241,12 @@ TEST_F(SyrecParserErrorTestsFixture, AccessingOutOfRangeValueOfDimensionWithEval
     performTestExecution("module main(out a(3)) ++= a[((#a - 4) + 5)]");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionForUnknownAccessedBitInDimensionAccessIsOnlyLocalToCurrentExpressionAndCausesErrorOnOperandBitwidthMissmatch) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 82), 1, 2);
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionForUnknownAccessedBitInDimensionAccessIsOnlyLocalToCurrentExpressionAndCausesErrorOnOperandBitwidthMismatch) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 82), 1, 2);
     performTestExecution("module main(inout a(4), out b(4), in c(2)) for $i = 0 to 3 do ++= a[((b.$i + 2) - c)] rof");
 }
 
 TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOnlyLocalToCurrentExpressionIsResetAfterDimensionWasProcessedWithNewRestrictionInNextDimensionNotBlocked) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMissmatches>(Message::Position(1, 106), 2, 4);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 106), 2, 4);
     performTestExecution("module main(inout a[2][4](4), out b(4), in c(2)) for $i = 0 to 3 do ++= a[((b.$i + 2) - c.0)][((c << 1) + b[0])] rof");
 }
