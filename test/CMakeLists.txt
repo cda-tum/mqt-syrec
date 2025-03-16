@@ -10,8 +10,9 @@ target_include_directories(${PROJECT_NAME}-test
 add_custom_command(
   TARGET ${PROJECT_NAME}-test
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/${PROJECT_NAME}-test
-          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-test
+  COMMAND
+    ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/${PROJECT_NAME}-test
+    ${CMAKE_BINARY_DIR}/${PROJECT_NAME}-test
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/circuits
           $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/circuits
   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/circuits
