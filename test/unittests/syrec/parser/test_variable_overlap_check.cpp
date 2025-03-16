@@ -254,7 +254,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
@@ -280,17 +280,17 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessStartEqualToBit",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(2U),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessEndEqualToBit",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(14),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
-                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 14)),
+                                                 VariableAccessDefinition(14U),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
+                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 14U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingBit",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(5U),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 5U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
@@ -305,24 +305,24 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
 
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessNoBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(5U),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 5U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccessStartEqualToBit_rAccess_NoDimensionAccessBitAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(2U),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccessEndEqualToBit_rAccess_NoDimensionAccessBitAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
-                                                 VariableAccessDefinition(14),
-                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
+                                                 VariableAccessDefinition(14U),
+                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 14U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToStartBitOfLVarBitrange",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(std::make_pair(2U, DEFAULT_VARIABLE_BITWIDTH - 1U)),
@@ -355,22 +355,22 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 5U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingFromTheLeft",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::make_pair(1U, 3U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessOverlappingFromTheRight",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
-                                                 VariableAccessDefinition(std::make_pair(1U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
+                                                 VariableAccessDefinition(std::make_pair(1U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessBeingEqualToLeftOne",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 2U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessInLeftOne",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::make_pair(5U, 8U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U}), 5U)),
                                  OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRange_nonConstantBitrangeStartInLVarBitrangeAccessAndBitrangeEndEqualToRVarBitrangeStart",
@@ -422,7 +422,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessNoBitRangeAccess_rAccess_DimensionAccessBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)})),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessNoBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValue",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
@@ -448,7 +448,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheLeft",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), 2U),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheRight",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
@@ -473,32 +473,32 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
 
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessNoBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)})),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), 2U),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheLeft",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(0U, 3U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessOverlappingFromTheRight",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(1U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(1U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessEqualToLeftAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 2U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessBitRangeAccess_rAccess_DimensionAccessBitRangeAccessInLeftOne",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14)),
+                                                 VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(2U, 14U)),
                                                  VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(5U, 8U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({1U}), 5U)),
                                  OverlapTestData("1DSignalMultipleValues_lAccess_NoDimensionAccessBitRangeAccess_rAccess_NoDimensionAccessBitRangeAccessWithNonConstantStartValueEqualToStartBitOfLVarBitrange",
@@ -622,23 +622,23 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                                  OverlapTestData("ANDSignal_lAccess_BitRangeAccessEnclosingBit_rAccessBitAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U, 3U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(2U, 5U)),
-                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), 4),
-                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 4)),
+                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), 4U),
+                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 4U)),
                                  OverlapTestData("ANDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U, 3U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(0U, 4)),
+                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(0U, 4U)),
                                                  VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(2U, 5U)),
                                                  ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 2U)),
                                  OverlapTestData("ANDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccessWithLhsBitrangeStartLargerThanEnd",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U, 3U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(4, 0U)),
+                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(4U, 0U)),
                                                  VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(2U, 5U)),
-                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 4, 2U)),
+                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 4U, 2U)),
                                  OverlapTestData("ANDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheLeft_rAccessBitRangeAccessWithRhsBitrangeStartLargerThanEnd",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U, 3U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(0U, 4)),
+                                                 VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(0U, 4U)),
                                                  VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(5U, 2U)),
-                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 2U, 4)),
+                                                 ExpectedSymmetricOverlapCheckResultData(std::vector({0U, 1U}), 2U, 4U)),
                                  OverlapTestData("ANDSignal_lAccess_BitRangeAccessOverlappingOtherFromTheRight_rAccessBitRangeAccess",
                                                  VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({2U, 3U}), DEFAULT_VARIABLE_BITWIDTH),
                                                  VariableAccessDefinition(std::vector<VariableAccessDefinition::IndexDataVariant>({0U, 1U}), std::make_pair(8U, 0U)),
@@ -698,128 +698,6 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingOverlappingVariabl
                          [](const testing::TestParamInfo<ExpectingOverlappingVariableAccessesTestFixture::ParamType>& info) {
                              return info.param.testName;
                          });
-
-/* 1DSignal:
-        * l: implicit dimension access, no bit access, r: implicit dimension access, bit access,
-        * l: implicit dimension access, no bit access, r: implicit dimension access, bit range access, start unknown,
-        * l: implicit dimension access, no bit access, r: implicit dimension access, bit range access, end unknown,
-        * l: implicit dimension access, no bit access, r: implicit dimension access, bit range access, start and end unknown,
-        * l: implicit dimension access, no bit access, r: explicit dimension access, value unknown, no bit access
-        * l: implicit dimension access, no bit access, r: explicit dimension access, value unknown, bit access
-        * l: implicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: implicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: implicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit access (loop variable match),
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit range access, start and end constant,
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit range access, start unknown,
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit range access, end unknown,
-        * l: implicit dimension access, bit access, r: implicit dimension access, bit range access, start and end unknown,
-        * l: implicit dimension access, bit access, r: explicit dimension access, value unknown, no bit access
-        * l: implicit dimension access, bit access, r: explicit dimension access, value unknown, bit access
-        * l: implicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: implicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: implicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: implicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: implicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, no bit access
-        * l: implicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit access
-        * l: implicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: implicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: implicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        *
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: implicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: implicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, no bit access
-        * l: implicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit access
-        * l: implicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: implicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: implicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        *
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: implicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: implicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, no bit access
-        * l: implicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit access
-        * l: implicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: implicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: implicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        * l: explicit dimension access, no bit access, r: implicit dimension access, bit access,
-        * l: explicit dimension access, no bit access, r: implicit dimension access, bit range access, start unknown,
-        * l: explicit dimension access, no bit access, r: implicit dimension access, bit range access, end unknown,
-        * l: explicit dimension access, no bit access, r: implicit dimension access, bit range access, start and end unknown,
-        * l: explicit dimension access, no bit access, r: explicit dimension access, value unknown, no bit access
-        * l: explicit dimension access, no bit access, r: explicit dimension access, value unknown, bit access
-        * l: explicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: explicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: explicit dimension access, no bit access, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit access (loop variable match),
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit range access, start and end constant,
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit range access, start unknown,
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit range access, end unknown,
-        * l: explicit dimension access, bit access, r: implicit dimension access, bit range access, start and end unknown,
-        * l: explicit dimension access, bit access, r: explicit dimension access, value unknown, no bit access
-        * l: explicit dimension access, bit access, r: explicit dimension access, value unknown, bit access
-        * l: explicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: explicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: explicit dimension access, bit access, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: explicit dimension access, bit range access, start unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: explicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, no bit access
-        * l: explicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit access
-        * l: explicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: explicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: explicit dimension access, bit range access, start unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        *
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: explicit dimension access, bit range access, end unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: explicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, no bit access
-        * l: explicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit access
-        * l: explicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: explicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: explicit dimension access, bit range access, end unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        *
-        *
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit access (loop variable match),
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit access (loop variable mismatch),
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start and end constant,
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start unknown,
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, end unknown,
-        * l: explicit dimension access, bit range access, start and end unknown, r: implicit dimension access, bit range access, start and end unknown,
-        * l: explicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, no bit access
-        * l: explicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit access
-        * l: explicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, start unknown
-        * l: explicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, end unknown
-        * l: explicit dimension access, bit range access, start and end unknown, r: explicit dimension access, value unknown, bit range access, start and end unknown
-        */
 
 INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingPotentiallyOverlappingVariableAccessesTestFixture,
                          testing::ValuesIn({OverlapTestData("1DSignal_lAccess_ImplicitDimensionAccessWithNoBitrangeAccess_rAccess_ImplicitDimensionAccessWithUnknownBitAccess",
@@ -1529,14 +1407,14 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingNotOverlappingVari
                          testing::ValuesIn({OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_BitAccess",
                                                             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
                                                             VariableAccessDefinition(2U),
-                                                            VariableAccessDefinition(4)),
+                                                            VariableAccessDefinition(4U)),
                                             OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_BitRangeAccessSmallerThanBit",
                                                             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                            VariableAccessDefinition(4),
+                                                            VariableAccessDefinition(4U),
                                                             VariableAccessDefinition(std::make_pair(0U, 2U))),
                                             OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitAccess_rAccess_BitRangeAccessLargerThanBit",
                                                             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({1U}), DEFAULT_VARIABLE_BITWIDTH),
-                                                            VariableAccessDefinition(4),
+                                                            VariableAccessDefinition(4U),
                                                             VariableAccessDefinition(std::make_pair(5U, 7U))),
 
                                             OverlapTestData("1DSignal_lAccess_NoDimensionAccessBitRangeAccess_rAccess_BitAccessSmallerThanBitrange",
@@ -1618,7 +1496,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessOverlapTests, ExpectingNotOverlappingVari
                                             OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessWithBitRangeAccess_rAccess_DimensionAccessWithBitAccessInBitrangeWithDifferentValueOfDimension",
                                                             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({3U}), DEFAULT_VARIABLE_BITWIDTH),
                                                             VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(3U, 5U)),
-                                                            VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(2U)}), 4)),
+                                                            VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(2U)}), 4U)),
                                             OverlapTestData("1DSignalMultipleValues_lAccess_DimensionAccessWithBitRangeAccess_rAccess_DimensionAccessWithBitAccessEqualToBitrangeStartWithDifferentValueOfDimension",
                                                             VariableDefinition(DEFAULT_VARIABLE_IDENTIFIER, std::vector({3U}), DEFAULT_VARIABLE_BITWIDTH),
                                                             VariableAccessDefinition(std::vector({VariableAccessDefinition::IndexDataVariant(1U)}), std::make_pair(3U, 7U)),
