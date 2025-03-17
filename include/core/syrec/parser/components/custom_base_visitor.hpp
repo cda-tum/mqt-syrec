@@ -64,20 +64,49 @@ namespace syrec_parser {
             return Message::Position(token.getLine(), token.getCharPositionInLine());
         }
 
-        [[nodiscard]] static std::optional<unsigned int> deserializeConstantFromString(const std::string& stringifiedConstantValue, bool* didDeserializationFailDueToOverflow) {
+        [[nodiscard]] static std::optional<unsigned int> deserializeConstantFromString(const std::string_view& stringifiedConstantValue, bool* didDeserializationFailDueToOverflow) {
+            if (stringifiedConstantValue.empty()) {
+                return std::nullopt;
+            }
             char* pointerToLastNonNumericCharacterInString = nullptr;
             // Need to reset errno to not reuse already set values
             errno = 0;
 
+            std::string_view viewOfStringifiedConstantValue = stringifiedConstantValue;
+            // Trim leading and trailing whitespaces from given std::string prior to the actual deserialization call
+            const std::size_t numLeadingWhitespaces = viewOfStringifiedConstantValue.find_first_not_of(" ");
+            viewOfStringifiedConstantValue.remove_prefix(numLeadingWhitespaces != std::string::npos ? numLeadingWhitespaces : 0);
+
+            const std::size_t numTrailingWhitespaces = viewOfStringifiedConstantValue.find_last_not_of(" ");
+            viewOfStringifiedConstantValue.remove_suffix(viewOfStringifiedConstantValue.size() - (numTrailingWhitespaces != std::string::npos ? (numTrailingWhitespaces + 1) : viewOfStringifiedConstantValue.size()));
+
             // Using this conversion method for any user provided constant value forces the maximum possible value of a constant that can be specified
             // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
-            const unsigned int constantValue = std::strtoul(stringifiedConstantValue.c_str(), &pointerToLastNonNumericCharacterInString, 10);
-            // Using these error conditions checks will detect strings of the form "0 " as not valid while " 0" is considered valid.
-            if (didDeserializationFailDueToOverflow != nullptr && errno == ERANGE) {
-                *didDeserializationFailDueToOverflow = true;
+            const unsigned long constantValue = std::strtoul(viewOfStringifiedConstantValue.data(), &pointerToLastNonNumericCharacterInString, 10);
+        #if _WIN32
+            // On windows the UINT_MAX and ULONG_MAX constants defined in the STD header file <climits> have the same value of 2^32 on both
+            // x86 and x64 systems (https://learn.microsoft.com/en-gb/cpp/c-language/cpp-integer-limits?view=msvc-170). Since the type of the return value
+            // of std::strtoul is ulong, the errno flag should be set when a value larger than ULONG_MAX was processed to detect a value large than the maximum allowed one.
+            if (errno == ERANGE) {
+                if (didDeserializationFailDueToOverflow != nullptr) {
+                    *didDeserializationFailDueToOverflow = true;
+                }
+                return std::nullopt;
             }
+        #else
+            // On none windows systems the ULONG_MAX constant is equal to 2^64 and thus a value larger than UINT_MAX will not set the corresponding ERANGE error in the errno flag
+            // which requires us to manually check whether the returned value is larger than UINT_MAX.
+            if (errno == ERANGE || constantValue > UINT_MAX) {
+                if (didDeserializationFailDueToOverflow != nullptr) {
+                    *didDeserializationFailDueToOverflow = true;
+                }
+                return std::nullopt;
+            }
+        #endif
 
-            if (stringifiedConstantValue.c_str() == pointerToLastNonNumericCharacterInString || errno == ERANGE || (pointerToLastNonNumericCharacterInString != nullptr && *pointerToLastNonNumericCharacterInString != 0)) {
+            // Check whether the whole string was processed by std::strtoul by checking whether the returned out pointer is equal to the end of the processed.
+            // Otherwise, the provided input string contained non-numeric character (i.e. '123abc')
+            if (pointerToLastNonNumericCharacterInString != (viewOfStringifiedConstantValue.data() + viewOfStringifiedConstantValue.size())) {
                 return std::nullopt;
             }
             return constantValue;
