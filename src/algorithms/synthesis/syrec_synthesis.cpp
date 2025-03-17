@@ -93,7 +93,7 @@ namespace syrec {
 
         for (int i = 0; i < static_cast<int>(checkRhsVec.size()); i++) {
             for (int j = 0; j < static_cast<int>(checkRhsVec.size()); j++) {
-                if (j != i && checkRhsVec.at(i) == checkRhsVec.at(j)) {
+                if ((j != i) && checkRhsVec.at(i) == checkRhsVec.at(j)) {
                     expOpVector.clear();
                     expLhsVector.clear();
                     expRhsVector.clear();

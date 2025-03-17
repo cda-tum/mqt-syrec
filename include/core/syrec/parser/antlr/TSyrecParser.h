@@ -1,7 +1,6 @@
 #pragma once
 
 // Generated from C:/School/MThesis/mqt-syrec-antlr/src/core/syrec/parser/antlr/grammar/TSyrecParser.g4 by ANTLR 4.13.2
-// We need to include the CommenTokenStream header file as otherwise, X would be
 #include "Parser.h"
 #include "ParserRuleContext.h"
 #include "Token.h"

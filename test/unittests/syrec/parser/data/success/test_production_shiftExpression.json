@@ -32,11 +32,11 @@
     "inputCircuit": "module main(in a(4), out res(4)) res += (a >> (#a - 4))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
-  "simplificationOfLeftShiftOperationWithShiftAmountLargerThanLargetsPossibleVariableBitlength": {
+  "simplificationOfLeftShiftOperationWithShiftAmountLargerThanLargestPossibleVariableBitlength": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a << (#a * 8))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
-  "simplificationOfRightShiftOperationWithShiftAmountLargerThanLargetsPossibleVariableBitlength": {
+  "simplificationOfRightShiftOperationWithShiftAmountLargerThanLargestPossibleVariableBitlength": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a >> (#a * 8))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },

@@ -65,9 +65,9 @@ namespace syrec_parser_test_utils {
 
     inline std::string concatenateStrings(const std::string& lString, const char delimiter, const std::initializer_list<std::string>& otherComponents) {
         std::string resultContainer = lString;
-        for (const auto& toBeConcatinatedComponents: otherComponents) {
+        for (const auto& toBeConcatenatedComponents: otherComponents) {
             resultContainer += delimiter;
-            resultContainer += toBeConcatinatedComponents;
+            resultContainer += toBeConcatenatedComponents;
         }
         return resultContainer;
     }
