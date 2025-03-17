@@ -4,6 +4,7 @@
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/variable.hpp"
 
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -16,7 +17,7 @@ namespace utils {
     class BaseSymbolTable {
     public:
         struct ModuleOverloadResolutionResult {
-            enum Result {
+            enum Result : std::uint8_t {
                 CallerArgumentsInvalid,
                 SingleMatchFound,
                 MultipleMatchesFound,

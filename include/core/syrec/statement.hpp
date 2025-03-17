@@ -3,10 +3,9 @@
 #include "core/syrec/expression.hpp"
 #include "core/syrec/variable.hpp"
 
-#include <iostream>
+#include <cstdint>
 #include <memory>
-#include <utility>
-#include <vector>
+#include <string>
 
 namespace syrec {
 

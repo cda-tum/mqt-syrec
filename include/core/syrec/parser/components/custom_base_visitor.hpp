@@ -11,6 +11,10 @@
 
 #include <cerrno>
 #include <cstdint>
+#if !defined(_WIN32)
+// Include is required to access UINT_MAX constant in utility function to deserialize constant from string on non windows systems
+#include <climits>
+#endif
 #include <cstdlib>
 #include <fmt/format.h>
 #include <memory>
@@ -98,7 +102,7 @@ namespace syrec_parser {
 #else
             // On none windows systems the ULONG_MAX constant is equal to 2^64 and thus a value larger than UINT_MAX will not set the corresponding ERANGE error in the errno flag
             // which requires us to manually check whether the returned value is larger than UINT_MAX.
-            if (errno == ERANGE || constantValue > static_cast<unsigned long>(UINT_MAX)) {
+            if (errno == ERANGE || constantValue > static_cast<uint64_t>(UINT_MAX)) {
                 if (didDeserializationFailDueToOverflow != nullptr) {
                     *didDeserializationFailDueToOverflow = true;
                 }

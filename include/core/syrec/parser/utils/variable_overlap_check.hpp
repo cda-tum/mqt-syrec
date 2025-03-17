@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/syrec/variable.hpp>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <vector>

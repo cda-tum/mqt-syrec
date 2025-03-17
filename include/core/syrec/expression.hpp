@@ -2,9 +2,8 @@
 
 #include "core/syrec/variable.hpp"
 
-#include <iostream>
+#include <cstdint>
 #include <memory>
-#include <utility>
 
 namespace syrec {
 

@@ -32,7 +32,7 @@ namespace utils {
             return 0;
         }
 
-        const unsigned int maxValueStorableInExpectedResultBitwidth = (1 << expectedResultBitwidth) - 1;
+        const unsigned int maxValueStorableInExpectedResultBitwidth = (1U << expectedResultBitwidth) - 1U;
         if (expectedResultBitwidth >= 32 || valueToTruncate < maxValueStorableInExpectedResultBitwidth) {
             return valueToTruncate;
         }

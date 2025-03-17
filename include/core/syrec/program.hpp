@@ -1,5 +1,3 @@
-#ifndef CORE_SYREC_PROGRAM_HPP
-#define CORE_SYREC_PROGRAM_HPP
 #pragma once
 
 #include "core/syrec/module.hpp"
@@ -131,4 +129,3 @@ namespace syrec {
     };
 
 } // namespace syrec
-#endif

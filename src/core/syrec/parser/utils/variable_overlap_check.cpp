@@ -18,22 +18,22 @@ namespace {
     std::pair<unsigned int, unsigned int> determineBitrangeConstantIndexPairOrderedAscendingly(unsigned int bitrangeStartIndexValue, unsigned int bitrangeEndIndexValue) {
         return bitrangeStartIndexValue <= bitrangeEndIndexValue ? std::make_pair(bitrangeStartIndexValue, bitrangeEndIndexValue) : std::make_pair(bitrangeEndIndexValue, bitrangeStartIndexValue);
     }
-} // namespace
 
-std::optional<unsigned int> tryEvaluateNumber(const syrec::Number::ptr& numberToEvaluate) {
-    return numberToEvaluate && numberToEvaluate->isConstant() ? numberToEvaluate->tryEvaluate({}) : std::nullopt;
-}
-
-std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression& expression) {
-    if (const auto& numericExprOfContainerToEvaluate = dynamic_cast<const syrec::NumericExpression*>(&expression); numericExprOfContainerToEvaluate != nullptr) {
-        return tryEvaluateNumber(numericExprOfContainerToEvaluate->value);
+    std::optional<unsigned int> tryEvaluateNumber(const syrec::Number::ptr& numberToEvaluate) {
+        return numberToEvaluate && numberToEvaluate->isConstant() ? numberToEvaluate->tryEvaluate({}) : std::nullopt;
     }
-    return std::nullopt;
-}
 
-bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec::Variable& rVarReference) noexcept {
-    return lVarReference.name == rVarReference.name && lVarReference.bitwidth == rVarReference.bitwidth && std::equal(lVarReference.dimensions.cbegin(), lVarReference.dimensions.cend(), rVarReference.dimensions.cbegin(), rVarReference.dimensions.cend());
-}
+    std::optional<unsigned int> tryEvaluateNumericExpr(const syrec::Expression& expression) {
+        if (const auto& numericExprOfContainerToEvaluate = dynamic_cast<const syrec::NumericExpression*>(&expression); numericExprOfContainerToEvaluate != nullptr) {
+            return tryEvaluateNumber(numericExprOfContainerToEvaluate->value);
+        }
+        return std::nullopt;
+    }
+
+    bool doReferenceVariablesMatch(const syrec::Variable& lVarReference, const syrec::Variable& rVarReference) noexcept {
+        return lVarReference.name == rVarReference.name && lVarReference.bitwidth == rVarReference.bitwidth && std::equal(lVarReference.dimensions.cbegin(), lVarReference.dimensions.cend(), rVarReference.dimensions.cbegin(), rVarReference.dimensions.cend());
+    }
+} // namespace
 
 std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInformation() const {
     std::string stringificationBuffer;
@@ -54,9 +54,8 @@ std::string VariableAccessOverlapCheckResult::stringifyOverlappingIndicesInforma
     const syrec::Variable& lVar = *lVarPtr;
     const syrec::Variable& rVar = *rVarPtr;
 
-    std::size_t numDimensionsToCheck = std::min(
-            std::min(lVar.dimensions.size(), lVariableAccess.indexes.size()),
-            std::min(rVar.dimensions.size(), rVariableAccess.indexes.size()));
+    const std::size_t         numDimensionsToCheck = std::min({lVar.dimensions.size(), lVariableAccess.indexes.size(),
+                                                               rVar.dimensions.size(), rVariableAccess.indexes.size()});
     std::vector<unsigned int> constantIndicesOfAccessedValuesPerDimension;
     if (numDimensionsToCheck == 0) {
         const auto& exprDefiningAccessedValueOfDimensionInLVar = !lVariableAccess.indexes.empty() ? lVariableAccess.indexes.front() : nullptr;

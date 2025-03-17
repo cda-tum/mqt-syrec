@@ -3,6 +3,7 @@
 #include "core/syrec/expression.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>

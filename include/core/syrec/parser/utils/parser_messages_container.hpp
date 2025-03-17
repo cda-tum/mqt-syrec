@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -19,7 +20,7 @@ namespace syrec_parser {
                 line(line), column(column) {}
         };
 
-        enum class Type {
+        enum class Type : std::uint8_t {
             Error,
             Information,
             Warning

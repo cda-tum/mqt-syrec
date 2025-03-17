@@ -12,9 +12,11 @@
 
 using namespace utils;
 
-inline VariableAccessIndicesValidity::IndexValidationResult::IndexValidity isIndexInRange(unsigned int indexValue, unsigned int maxAllowedValue) {
-    return indexValue <= maxAllowedValue ? VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Ok : VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange;
-}
+namespace {
+    VariableAccessIndicesValidity::IndexValidationResult::IndexValidity isIndexInRange(unsigned int indexValue, unsigned int maxAllowedValue) {
+        return indexValue <= maxAllowedValue ? VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Ok : VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange;
+    }
+} // namespace
 
 bool VariableAccessIndicesValidity::isValid() const {
     return std::all_of(

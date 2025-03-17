@@ -2,6 +2,7 @@
 
 #include "core/syrec/variable.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <vector>
 

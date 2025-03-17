@@ -15,13 +15,14 @@
 
 #include <any>
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 namespace syrec_parser {
     class TSyrecParser: public antlr4::Parser {
     public:
-        enum {
+        enum : std::uint8_t {
             OpIncrementAssign   = 1,
             OpDecrementAssign   = 2,
             OpInvertAssign      = 3,
@@ -85,7 +86,7 @@ namespace syrec_parser {
             Int                 = 61
         };
 
-        enum {
+        enum : std::uint8_t {
             RuleNumber                 = 0,
             RuleProgram                = 1,
             RuleModule                 = 2,
