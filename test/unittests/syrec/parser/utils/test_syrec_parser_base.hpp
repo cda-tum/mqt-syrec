@@ -38,7 +38,7 @@ protected:
     std::string jsonKeyInTestCaseDataForExpectedCircuit                                                                   = "expectedCircuit";
     std::string jsonKeyInTestCaseDataForParserConfiguration                                                               = "parserConfig";
     std::string jsonKeyInTestCaseDataForDefaultSignalBitwidthInParserConfig                                               = "defaultBitwidth";
-    std::string jsonKeyInTestCaseDataForConstantValueTruncationOperation                                                   = "constValTruncationOp";
+    std::string jsonKeyInTestCaseDataForConstantValueTruncationOperation                                                  = "constValTruncationOp";
     std::string jsonKeyInTestCaseDataForAllowingOverlappingAccessOnAssignedToVariablePartsInAnyVariableAccessOfAssignment = "allowOverlappingAccessOnAssignedToSignalParts";
 
     TestFromJson                              loadedTestCaseData;
@@ -80,7 +80,7 @@ protected:
     static void assertStringificationOfParsedSyrecProgramIsSuccessful(const syrec::Program& syrecProgramToStringifiy, std::ostream& containerForStringifiedProgram) {
         utils::BaseSyrecIrEntityStringifier::AdditionalFormattingOptions customFormattingOptions;
         customFormattingOptions.optionalCustomIndentationCharacterSequence = "";
-        customFormattingOptions.optionalCustomNewlineCharacterSequence    = " ";
+        customFormattingOptions.optionalCustomNewlineCharacterSequence     = " ";
 
         utils::BaseSyrecIrEntityStringifier syrecProgramStringifier(customFormattingOptions);
         bool                                wasStringificationSuccessful = false;

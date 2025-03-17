@@ -335,7 +335,7 @@ TEST_P(SingleVariableTypeTestFixture, ExistsVariableForIdentifier) {
     syrec::Variable::vec  createdVariableInstancesNotMatchingType;
     ASSERT_NO_FATAL_FAILURE(assertInsertionOfNVariableInstanceOfTypeIsSuccessful(*variableScope, otherVariableType, numVariableEntriesNotMatchingType, "notOfType", &createdVariableInstancesNotMatchingType));
 
-    const syrec::Variable::ptr variableInstanceOfInterest                                 = createdVariableInstancesMatchingType.at(numVariableEntriesMatchingType - 3);
+    const syrec::Variable::ptr variableInstanceOfInterest                                  = createdVariableInstancesMatchingType.at(numVariableEntriesMatchingType - 3);
     bool                       actualStatusWhetherVariableForIdentifierExistsInSymboltable = false;
     ASSERT_NO_FATAL_FAILURE(actualStatusWhetherVariableForIdentifierExistsInSymboltable = variableScope->existsVariableForName(variableInstanceOfInterest->name));
     ASSERT_TRUE(actualStatusWhetherVariableForIdentifierExistsInSymboltable);
