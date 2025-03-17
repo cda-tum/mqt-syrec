@@ -124,7 +124,7 @@ namespace syrec_parser {
             case SemanticError::IfGuardExpressionMismatch:
                 return "Guard and closing guard expression of IfStatement did not match";
             case SemanticError::NoModuleMatchingCallSignature:
-                return "No module matching user provided call signature"; 
+                return "No module matching user provided call signature";
             case SemanticError::ExpressionBitwidthMismatches:
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:

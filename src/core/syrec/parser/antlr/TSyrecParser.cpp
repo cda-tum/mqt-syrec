@@ -74,9 +74,9 @@ namespace {
 
     /**
      * @brief Initialize the data structures used by the parser to implement the ANTLR ALL(*) parsing technique.
-     * 
+     *
      * The ALL(*) parsing technique utilizes an augmented recursive transition network (ATN) to resolve ambiguities/
-     * determine how to continue in the grammar at a given non-terminal symbol in the input grammar while also utilizing 
+     * determine how to continue in the grammar at a given non-terminal symbol in the input grammar while also utilizing
      * a deterministic finite automata (DFA) to cache previous decisions. For further details on the algorithm we refer
      * to: "Adaptive LL(*) parsing: the power of dynamic analysis" (DOI: https://doi.org/10.1145/2714064.2660202).
      */

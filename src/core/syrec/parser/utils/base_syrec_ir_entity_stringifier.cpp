@@ -298,7 +298,7 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
 
     bool        stringificationSuccessful          = true;
     const auto& firstStatementWithSemicolonPostfix = statements.cbegin();
-    const auto& lastStatementWithSemicolonPostfix = std::prev(statements.cend());
+    const auto& lastStatementWithSemicolonPostfix  = std::prev(statements.cend());
     for (auto statementIterator = firstStatementWithSemicolonPostfix; stringificationSuccessful && statementIterator != lastStatementWithSemicolonPostfix; ++statementIterator) {
         stringificationSuccessful &= *statementIterator && appendIndentationPaddingSequence(outputStream, indentationSequence) && stringify(outputStream, *statementIterator) && appendToStream(outputStream, ';') && appendNewlineToStream(outputStream);
     }
