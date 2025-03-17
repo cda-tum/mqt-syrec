@@ -11,11 +11,6 @@ TEST_F(SyrecParserErrorTestsFixture, OmittingModuleKeywordCausesError) {
     performTestExecution("main() skip");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, InvalidModuleKeywordUsageCausesError) {
-    recordSyntaxError(Message::Position(1, 0), "mismatched input 'module' expecting 'module'");
-    performTestExecution("module main() skip");
-}
-
 TEST_F(SyrecParserErrorTestsFixture, InvalidSymbolInModuleIdentifierCausesError) {
     recordSyntaxError(Message::Position(1, 0), "mismatched input 'mod' expecting 'module'");
     performTestExecution("mod-ule main() skip");

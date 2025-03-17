@@ -124,7 +124,7 @@ namespace syrec_parser {
             case SemanticError::IfGuardExpressionMismatch:
                 return "Guard and closing guard expression of IfStatement did not match";
             case SemanticError::NoModuleMatchingCallSignature:
-                return "No module matching user provided call signature"; // TODO: Print closest matching signature, user provided call signature?
+                return "No module matching user provided call signature"; 
             case SemanticError::ExpressionBitwidthMismatches:
                 return "Expected operand to have a bitwidth of {:d} while it actually had a bitwidth of {:d}";
             case SemanticError::OmittingDimensionAccessOnlyPossibleFor1DSignalWithSingleValue:
@@ -134,7 +134,7 @@ namespace syrec_parser {
             case SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed:
                 return "Implicit truncation of values is disabled at this point of the program thus value ({:s}) that was large than the maximum storable value of {:d} lead to an overflow";
             case SemanticError::CannotCallMainModule:
-                return "Cannot call 'main' module of SyReC program"; // TODO: Should we also print signature of 'main' module
+                return "Cannot call 'main' module of SyReC program";
             case SemanticError::ValueOfLoopVariableNotUsableInItsInitialValueDeclaration:
                 return "Loop variable {:s} cannot be used in the definition of its initial value";
             case SemanticError::ReversibilityOfStatementNotPossibleDueToAccessOnRestrictedVariableParts:
