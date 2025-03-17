@@ -23,6 +23,9 @@
 using namespace syrec_parser;
 using namespace antlr4;
 
+// Details on the internal mechanisms of ANTLR can be found in:
+// - "The Definitive ANTLR 4 Reference" (ISBN-13: 978 - 1934356999)
+// - "Adaptive LL(*) parsing: the power of dynamic analysis" (DOI: https://doi.org/10.1145/2714064.2660202)
 namespace {
     struct TSyrecLexerStaticData final {
         TSyrecLexerStaticData(std::vector<std::string> ruleNames,
@@ -61,6 +64,14 @@ namespace {
     internal::OnceFlag                     lexerInitializationSyncFlag; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
     std::unique_ptr<TSyrecLexerStaticData> lexerStaticData = nullptr;   // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
+    /**
+     * @brief Initialize the data structures used by the lexer to implement the ANTLR ALL(*) parsing technique.
+     * 
+     * The ALL(*) parsing technique utilizes an augmented recursive transition network (ATN) to resolve ambiguities/
+     * determine how to continue in the grammar at a given non-terminal symbol in the input grammar while also utilizing 
+     * a deterministic finite automata (DFA) to cache previous decisions. For further details on the algorithm we refer
+     * to: "Adaptive LL(*) parsing: the power of dynamic analysis" (DOI: https://doi.org/10.1145/2714064.2660202).
+     */
     void initializeStaticLexerData() {
         assert(lexerStaticData == nullptr);
         auto staticData = std::make_unique<TSyrecLexerStaticData>(

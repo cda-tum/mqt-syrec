@@ -10,11 +10,13 @@
 #include "core/syrec/variable.hpp"
 
 #include <cerrno>
+#include <cstdint>
 #include <cstdlib>
 #include <fmt/format.h>
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace syrec_parser {
@@ -74,16 +76,16 @@ namespace syrec_parser {
 
             std::string_view viewOfStringifiedConstantValue = stringifiedConstantValue;
             // Trim leading and trailing whitespaces from given std::string prior to the actual deserialization call
-            const std::size_t numLeadingWhitespaces = viewOfStringifiedConstantValue.find_first_not_of(" ");
+            const std::size_t numLeadingWhitespaces = viewOfStringifiedConstantValue.find_first_not_of(' ');
             viewOfStringifiedConstantValue.remove_prefix(numLeadingWhitespaces != std::string::npos ? numLeadingWhitespaces : 0);
 
-            const std::size_t numTrailingWhitespaces = viewOfStringifiedConstantValue.find_last_not_of(" ");
+            const std::size_t numTrailingWhitespaces = viewOfStringifiedConstantValue.find_last_not_of(' ');
             viewOfStringifiedConstantValue.remove_suffix(viewOfStringifiedConstantValue.size() - (numTrailingWhitespaces != std::string::npos ? (numTrailingWhitespaces + 1) : viewOfStringifiedConstantValue.size()));
 
             // Using this conversion method for any user provided constant value forces the maximum possible value of a constant that can be specified
             // by the user in a SyReC circuit to 2^32. Larger values are not truncated but reported as an error instead.
-            const unsigned long constantValue = std::strtoul(viewOfStringifiedConstantValue.data(), &pointerToLastNonNumericCharacterInString, 10);
-        #if _WIN32
+            const uint64_t constantValue = std::strtoul(viewOfStringifiedConstantValue.data(), &pointerToLastNonNumericCharacterInString, 10);
+#if _WIN32
             // On windows the UINT_MAX and ULONG_MAX constants defined in the STD header file <climits> have the same value of 2^32 on both
             // x86 and x64 systems (https://learn.microsoft.com/en-gb/cpp/c-language/cpp-integer-limits?view=msvc-170). Since the type of the return value
             // of std::strtoul is ulong, the errno flag should be set when a value larger than ULONG_MAX was processed to detect a value large than the maximum allowed one.
@@ -93,23 +95,23 @@ namespace syrec_parser {
                 }
                 return std::nullopt;
             }
-        #else
+#else
             // On none windows systems the ULONG_MAX constant is equal to 2^64 and thus a value larger than UINT_MAX will not set the corresponding ERANGE error in the errno flag
             // which requires us to manually check whether the returned value is larger than UINT_MAX.
-            if (errno == ERANGE || constantValue > UINT_MAX) {
+            if (errno == ERANGE || constantValue > static_cast<unsigned long>(UINT_MAX)) {
                 if (didDeserializationFailDueToOverflow != nullptr) {
                     *didDeserializationFailDueToOverflow = true;
                 }
                 return std::nullopt;
             }
-        #endif
+#endif
 
             // Check whether the whole string was processed by std::strtoul by checking whether the returned out pointer is equal to the end of the processed.
             // Otherwise, the provided input string contained non-numeric character (i.e. '123abc')
             if (pointerToLastNonNumericCharacterInString != (viewOfStringifiedConstantValue.data() + viewOfStringifiedConstantValue.size())) {
                 return std::nullopt;
             }
-            return constantValue;
+            return static_cast<unsigned int>(constantValue);
         }
 
         [[nodiscard]] static std::optional<unsigned int> tryGetConstantValueOf(const syrec::Expression& expression) {

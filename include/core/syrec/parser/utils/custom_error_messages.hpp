@@ -3,7 +3,7 @@
 #include <string_view>
 
 namespace syrec_parser {
-    enum class SemanticError : unsigned int {
+    enum class SemanticError : std::uint8_t {
         NoVariableMatchingIdentifier,
         NoModuleMatchingIdentifier,
         IndexOfAccessedValueForDimensionOutOfRange,

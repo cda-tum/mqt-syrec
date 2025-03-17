@@ -96,7 +96,7 @@ namespace syrec {
         /**
        * @brief Operation to perform
        */
-        enum class BinaryOperation {
+        enum class BinaryOperation : std::uint8_t {
             /**
          * @brief Addition
          */

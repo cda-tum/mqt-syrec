@@ -42,15 +42,15 @@ namespace {
     }
 
     VariableAccessIndicesValidity::IndexValidationResult createValidIndexValidationResult(unsigned int value) {
-        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::Ok, value);
+        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Ok, value);
     }
 
     VariableAccessIndicesValidity::IndexValidationResult createUnknownIndexValidationResult(std::optional<unsigned int> accessedValueOfDimension) {
-        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::Unknown, accessedValueOfDimension);
+        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Unknown, accessedValueOfDimension);
     }
 
     VariableAccessIndicesValidity::IndexValidationResult createOutOfRangeIndexValidationResult(unsigned int value) {
-        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::OutOfRange, value);
+        return VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange, value);
     }
 
     void assertIndexValidiationResultsMatch(const VariableAccessIndicesValidity::IndexValidationResult& expected, const VariableAccessIndicesValidity::IndexValidationResult& actual) {

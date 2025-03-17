@@ -9,7 +9,7 @@ namespace utils {
     /**
      * @brief Defines the available operations for the truncation of constant integer values.
      */
-    enum class IntegerConstantTruncationOperation {
+    enum class IntegerConstantTruncationOperation : std::uint8_t {
         /**
          * @brief Truncate using the module operation (e.g. 5 MOD 3 = 2)
          */

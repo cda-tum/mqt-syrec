@@ -24,7 +24,7 @@ namespace syrec {
         struct ConstantExpression {
             using ptr = std::shared_ptr<ConstantExpression>;
 
-            enum class Operation {
+            enum class Operation : std::uint8_t {
                 Addition,
                 Subtraction,
                 Multiplication,

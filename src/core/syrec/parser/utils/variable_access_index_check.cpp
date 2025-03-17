@@ -32,7 +32,7 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
     }
 
     VariableAccessIndicesValidity validityOfVariableAccessIndices;
-    validityOfVariableAccessIndices.accessedValuePerDimensionValidity = std::vector(variableAccess.indexes.size(), VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::Unknown, std::nullopt));
+    validityOfVariableAccessIndices.accessedValuePerDimensionValidity = std::vector(variableAccess.indexes.size(), VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Unknown, std::nullopt));
 
     const std::size_t numDimensionsOfVariable = variableAccess.getVar()->dimensions.size();
     for (std::size_t dimensionIdx = 0; dimensionIdx < variableAccess.indexes.size(); ++dimensionIdx) {
@@ -49,13 +49,13 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
         const std::optional<unsigned int> evaluatedAccessedValueOfDimension = accessedValueOfDimensionExprCasted->value->tryEvaluate({});
         if (dimensionIdx < numDimensionsOfVariable && evaluatedAccessedValueOfDimension.has_value()) {
             if (variableAccess.getVar()->dimensions.at(dimensionIdx) == 0) {
-                validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+                validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange;
             } else {
                 // We are assuming zero-based indexing
                 validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = isIndexInRange(*evaluatedAccessedValueOfDimension, variableAccess.getVar()->dimensions.at(dimensionIdx) - 1);
             }
         } else {
-            validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::Unknown;
+            validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValidity = VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Unknown;
         }
         validityOfVariableAccessIndices.accessedValuePerDimensionValidity[dimensionIdx].indexValue = evaluatedAccessedValueOfDimension;
     }
@@ -64,14 +64,14 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
         return validityOfVariableAccessIndices;
     }
 
-    auto bitRangeStartValidity = VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::Unknown, std::nullopt);
-    auto bitRangeEndValidity   = VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::Unknown, std::nullopt);
+    auto bitRangeStartValidity = VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Unknown, std::nullopt);
+    auto bitRangeEndValidity   = VariableAccessIndicesValidity::IndexValidationResult(VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::Unknown, std::nullopt);
 
     const syrec::Number::ptr& bitRangeStart = variableAccess.range->first;
     const syrec::Number::ptr& bitRangeEnd   = variableAccess.range->second;
     if (const std::optional<unsigned int> evaluatedBitRangeStart = bitRangeStart != nullptr && bitRangeStart->isConstant() ? bitRangeStart->tryEvaluate({}) : std::nullopt; evaluatedBitRangeStart.has_value()) {
         if (variableAccess.getVar()->bitwidth == 0) {
-            bitRangeStartValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+            bitRangeStartValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange;
         } else {
             // We are assuming zero-based indexing
             bitRangeStartValidity.indexValidity = isIndexInRange(*evaluatedBitRangeStart, variableAccess.getVar()->bitwidth - 1);
@@ -81,7 +81,7 @@ std::optional<VariableAccessIndicesValidity> utils::validateVariableAccessIndice
 
     if (const std::optional<unsigned int> evaluatedBitRangeEnd = bitRangeEnd != nullptr && bitRangeEnd->isConstant() ? bitRangeEnd->tryEvaluate({}) : std::nullopt; evaluatedBitRangeEnd.has_value()) {
         if (variableAccess.getVar()->bitwidth == 0) {
-            bitRangeEndValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::OutOfRange;
+            bitRangeEndValidity.indexValidity = VariableAccessIndicesValidity::IndexValidationResult::IndexValidity::OutOfRange;
         } else {
             // We are assuming zero-based indexing
             bitRangeEndValidity.indexValidity = isIndexInRange(*evaluatedBitRangeEnd, variableAccess.getVar()->bitwidth - 1);

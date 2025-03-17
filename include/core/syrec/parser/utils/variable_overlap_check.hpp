@@ -7,7 +7,7 @@
 
 namespace utils {
     struct VariableAccessOverlapCheckResult {
-        enum class OverlapState {
+        enum class OverlapState : std::uint8_t {
             Overlapping,
             MaybeOverlapping,
             NotOverlapping

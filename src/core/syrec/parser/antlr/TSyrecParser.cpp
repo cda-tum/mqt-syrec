@@ -36,6 +36,9 @@ using namespace antlrcpp;
 using namespace syrec_parser;
 using namespace antlr4;
 
+// Details on the internal mechanisms of ANTLR can be found in:
+// - "The Definitive ANTLR 4 Reference" (ISBN-13: 978 - 1934356999)
+// - "Adaptive LL(*) parsing: the power of dynamic analysis" (DOI: https://doi.org/10.1145/2714064.2660202)
 namespace {
     struct TSyrecParserStaticData final {
         TSyrecParserStaticData(std::vector<std::string> ruleNames,
@@ -69,6 +72,14 @@ namespace {
     internal::OnceFlag                      parserSingletonInitializationSyncFlag; // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
     std::unique_ptr<TSyrecParserStaticData> parserSingletonStaticData = nullptr;   // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
+    /**
+     * @brief Initialize the data structures used by the parser to implement the ANTLR ALL(*) parsing technique.
+     * 
+     * The ALL(*) parsing technique utilizes an augmented recursive transition network (ATN) to resolve ambiguities/
+     * determine how to continue in the grammar at a given non-terminal symbol in the input grammar while also utilizing 
+     * a deterministic finite automata (DFA) to cache previous decisions. For further details on the algorithm we refer
+     * to: "Adaptive LL(*) parsing: the power of dynamic analysis" (DOI: https://doi.org/10.1145/2714064.2660202).
+     */
     void initializeStaticParserData() {
         assert(parserSingletonStaticData == nullptr);
         auto staticData = std::make_unique<TSyrecParserStaticData>(
@@ -489,7 +500,7 @@ TSyrecParser::ProgramContext* TSyrecParser::program() {
             lookahead = _input->LA(1);
         }
         setState(64);
-        match(EOF);
+        match(TSyrecParser::EOF);
 
     } catch (RecognitionException& e) {
         _errHandler->reportError(this, e);
@@ -1419,30 +1430,18 @@ TSyrecParser::ForStatementContext* TSyrecParser::forStatement() {
         setState(162);
         _errHandler->sync(this);
 
-        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx)) {
-            case 1: {
-                setState(157);
-                _errHandler->sync(this);
+        if (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 13, _ctx) == 1) {
+            setState(157);
+            _errHandler->sync(this);
 
-                switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx)) {
-                    case 1: {
-                        setState(156);
-                        loopVariableDefinition();
-                        break;
-                    }
-
-                    default:
-                        break;
-                }
-                setState(159);
-                antlrcpp::downCast<ForStatementContext*>(localCtx)->startValue = number();
-                setState(160);
-                match(KeywordTo);
-                break;
+            if (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx) == 1) {
+                setState(156);
+                loopVariableDefinition();
             }
-
-            default:
-                break;
+            setState(159);
+            antlrcpp::downCast<ForStatementContext*>(localCtx)->startValue = number();
+            setState(160);
+            match(KeywordTo);
         }
         setState(164);
         antlrcpp::downCast<ForStatementContext*>(localCtx)->endValue = number();

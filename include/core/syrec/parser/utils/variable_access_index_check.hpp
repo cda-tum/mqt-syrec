@@ -8,7 +8,7 @@
 namespace utils {
     struct VariableAccessIndicesValidity {
         struct IndexValidationResult {
-            enum IndexValidity {
+            enum class IndexValidity : std::uint8_t {
                 Ok,
                 OutOfRange,
                 Unknown

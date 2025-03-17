@@ -13,19 +13,19 @@ namespace utils {
     class IfStatementExpressionComponentsRecorder {
     public:
         using ptr = std::shared_ptr<IfStatementExpressionComponentsRecorder>;
-        enum class ExpressionBracketKind {
+        enum class ExpressionBracketKind : std::uint8_t {
             Opening,
             Closing
         };
 
-        enum class VariableAccessComponent {
+        enum class VariableAccessComponent : std::uint8_t {
             BitrangeStart,
             BitrangeEnd,
             DimensionAccessExpressionStart,
             DimensionAccessExpressionEnd
         };
 
-        enum class OperationMode {
+        enum class OperationMode : std::uint8_t {
             Recording,
             Comparing
         };
