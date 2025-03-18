@@ -78,7 +78,8 @@ if(BUILD_MQT_SYREC_TESTS)
   endif()
 endif()
 
-set(FMT_VERSION 11.0.2
+set(FMT_VERSION
+    11.0.2
     CACHE STRING "FMT library version")
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
   FetchContent_Declare(
@@ -107,11 +108,12 @@ set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
 # ANTLR v4.13.2 - minor version update could include "minor" breaking changes, thus we include only
 # a specific path version. https://github.com/antlr/antlr4?tab=readme-ov-file#versioning
 
-set(ANTLR4_VERSION 4.13.2
+set(ANTLR4_VERSION
+    4.13.2
     CACHE STRING "ANTLR4 runtime version")
 
-# Note that the commit SHA hash 5435f14 refers to a commit in the dev branch of the repository due to some
-# required commits not being merged into the master branch as of 18.03.2025
+# Note that the commit SHA hash 5435f14 refers to a commit in the dev branch of the repository due
+# to some required commits not being merged into the master branch as of 18.03.2025
 set(ANTLR4_TAG
     "5435f14134eb699d7484d46d946df817dfe97297"
     CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)")
@@ -142,21 +144,20 @@ if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
 
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
     FetchContent_Declare(
+      antlr4_static
+      GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
+      GIT_SHALLOW ON
+      GIT_TAG ${ANTLR4_TAG}
+      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTL4_VERSION})
+  else()
+    find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
+    if(NOT antlr4_static_FOUND)
+      FetchContent_Declare(
         antlr4_static
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
         GIT_SHALLOW ON
         GIT_TAG ${ANTLR4_TAG}
-        SOURCE_SUBDIR runtime/Cpp
-        FIND_PACKAGE_ARGS ${ANTL4_VERSION})
-  else()
-    find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
-    if(NOT antlr4_static_FOUND)
-         FetchContent_Declare(
-            antlr4_static
-            GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-            GIT_SHALLOW ON
-            GIT_TAG ${ANTLR4_TAG}
-            SOURCE_SUBDIR runtime/Cpp)
+        SOURCE_SUBDIR runtime/Cpp)
     endif()
   endif()
   list(APPEND FETCH_PACKAGES antlr4_static)
@@ -171,21 +172,20 @@ else()
 
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
     FetchContent_Declare(
+      antlr4_shared
+      GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
+      GIT_SHALLOW ON
+      GIT_TAG ${ANTLR4_TAG}
+      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTL4_VERSION})
+  else()
+    find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
+    if(NOT antlr4_static_FOUND)
+      FetchContent_Declare(
         antlr4_shared
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
         GIT_SHALLOW ON
         GIT_TAG ${ANTLR4_TAG}
-        SOURCE_SUBDIR runtime/Cpp
-        FIND_PACKAGE_ARGS ${ANTL4_VERSION})
-  else()
-    find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
-    if(NOT antlr4_static_FOUND)
-         FetchContent_Declare(
-            antlr4_shared
-            GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-            GIT_SHALLOW ON
-            GIT_TAG ${ANTLR4_TAG}
-            SOURCE_SUBDIR runtime/Cpp)
+        SOURCE_SUBDIR runtime/Cpp)
     endif()
   endif()
   list(APPEND FETCH_PACKAGES antlr4_shared)

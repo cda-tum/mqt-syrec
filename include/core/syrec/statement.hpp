@@ -112,9 +112,9 @@ namespace syrec {
         Statement::ptr reverse() override {
             switch (unaryOperation) {
                 case UnaryOperation::Increment: // NOLINT(bugprone-branch-clone)
-                    return std::make_shared<UnaryStatement>(UnaryOperation::Decrement, var); 
+                    return std::make_shared<UnaryStatement>(UnaryOperation::Decrement, var);
                 case UnaryOperation::Decrement:
-                    return std::make_shared<UnaryStatement>(UnaryOperation::Increment, var); 
+                    return std::make_shared<UnaryStatement>(UnaryOperation::Increment, var);
                 // TODO: Handling all other cases via the default branch might not be correct when further unary operations are added
                 default:
                     return std::make_shared<UnaryStatement>(*this);
@@ -167,10 +167,10 @@ namespace syrec {
 
         Statement::ptr reverse() override {
             switch (assignOperation) {
-                case AssignOperation::Add:  // NOLINT(bugprone-branch-clone)
+                case AssignOperation::Add: // NOLINT(bugprone-branch-clone)
                     return std::make_shared<AssignStatement>(lhs, AssignOperation::Subtract, rhs);
                 case AssignOperation::Subtract:
-                    return std::make_shared<AssignStatement>(lhs, AssignOperation::Add, rhs); 
+                    return std::make_shared<AssignStatement>(lhs, AssignOperation::Add, rhs);
                 // TODO: Handling all other cases via the default branch might not be correct when further assignment operations are added
                 default:
                     return std::make_shared<AssignStatement>(*this);

@@ -76,7 +76,7 @@ namespace syrec_parser {
             viewOfStringifiedConstantValue.remove_suffix(viewOfStringifiedConstantValue.size() - (numTrailingWhitespaces != std::string::npos ? (numTrailingWhitespaces + 1) : viewOfStringifiedConstantValue.size()));
 
             unsigned int constantValue = 0;
-            // Instead of using std::stroul to deserialize an integer from a string (which requires a null-terminated string) we use the C++17 std::from_chars call usable with a std::string_view input and better error handling 
+            // Instead of using std::stroul to deserialize an integer from a string (which requires a null-terminated string) we use the C++17 std::from_chars call usable with a std::string_view input and better error handling
             // in case of overflows or non-numeric characters being included in the input string
             auto [pointerToLastNonNumericCharacterInString, errorCode] = std::from_chars(viewOfStringifiedConstantValue.data(), viewOfStringifiedConstantValue.data() + viewOfStringifiedConstantValue.size(), constantValue);
             if (errorCode == std::errc::result_out_of_range || errorCode == std::errc::invalid_argument) {
