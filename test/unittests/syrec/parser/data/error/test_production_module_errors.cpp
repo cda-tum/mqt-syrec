@@ -85,3 +85,49 @@ TEST_F(SyrecParserErrorTestsFixture, DuplicateDeclarationOfModuleWithFirstModule
     buildAndRecordExpectedSemanticError<SemanticError::DuplicateModuleDeclaration>(Message::Position(1, 44), "add");
     performTestExecution("module add(out a(4), in b(4)) a += b module add(inout lOp(4), in rOp(4)) lOp ^= rOp");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredBitwidthOfModuleParameterExceedingMaximumPossibleValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(Message::Position(1, 17), "4294987296", UINT_MAX);
+    // Maximum possible value: 4294967296
+    performTestExecution("module add(out a(4294987296)) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredNumberOfValuesOfDimensionOfModuleParameterExceedingMaximumPossibleValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(Message::Position(1, 17), "4294987296", UINT_MAX);
+    // Maximum possible value: 4294967296
+    performTestExecution("module add(out a[4294987296]) ++= a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredBitwidthOfModuleVariableExceedingMaximumPossibleValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(Message::Position(1, 20), "4294987296", UINT_MAX);
+    // Maximum possible value: 4294967296
+    performTestExecution("module add() wire a(4294987296) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredNumberOfValuesOfDimensionOfModuleVariableExceedingMaximumPossibleValueCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(Message::Position(1, 20), "4294987296", UINT_MAX);
+    // Maximum possible value: 4294967296
+    performTestExecution("module add() wire a[4294987296] ++= a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredBitwidthOfModuleParameterEqualsZeroCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 17));
+    performTestExecution("module add(out a(0)) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredNumberOfValuesOfDimensionOfModuleParameterEqualsCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 17), 0);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 27), 0, 0, 0);
+    performTestExecution("module add(out a[0]) ++= a[0]");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredBitwidthOfModuleVariableEqualsZeroCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 20));
+    performTestExecution("module add() wire a(0) ++= a");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, DeclaredNumberOfValuesOfDimensionOfModuleVariableEqualsZeroCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(Message::Position(1, 20), 0);
+    buildAndRecordExpectedSemanticError<SemanticError::IndexOfAccessedValueForDimensionOutOfRange>(Message::Position(1, 29), 0, 0, 0);
+    performTestExecution("module add() wire a[0] ++= a[0]");
+}

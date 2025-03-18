@@ -236,14 +236,16 @@ std::optional<syrec::Variable::ptr> CustomModuleVisitor::visitSignalDeclarationT
         const std::optional<unsigned int> parsedIntegerConstantFromAntlrToken                = deserializeConstantFromString(antlrTokenForDeclaredNumberOfValuesOfDimension->getText(), &didIntegerConstantDeserializationFailToDueOverflow);
 
         if (parsedIntegerConstantFromAntlrToken.has_value()) {
-            if (didIntegerConstantDeserializationFailToDueOverflow) {
-                recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*antlrTokenForDeclaredNumberOfValuesOfDimension), antlrTokenForDeclaredNumberOfValuesOfDimension->getText(), UINT_MAX);
-                declaredNumberOfValuesPerDimension.emplace_back(UINT_MAX);
-            } else if (*parsedIntegerConstantFromAntlrToken == 0) {
+             if (*parsedIntegerConstantFromAntlrToken == 0) {
                 recordSemanticError<SemanticError::NumberOfValuesOfDimensionEqualToZero>(mapTokenPositionToMessagePosition(*antlrTokenForDeclaredNumberOfValuesOfDimension), i);
                 declaredNumberOfValuesPerDimension.emplace_back(0);
             } else {
                 declaredNumberOfValuesPerDimension.emplace_back(*parsedIntegerConstantFromAntlrToken);
+            }
+        } else {
+            if (didIntegerConstantDeserializationFailToDueOverflow) {
+                recordSemanticError<SemanticError::ValueOverflowDueToNoImplicitTruncationPerformed>(mapTokenPositionToMessagePosition(*antlrTokenForDeclaredNumberOfValuesOfDimension), antlrTokenForDeclaredNumberOfValuesOfDimension->getText(), UINT_MAX);
+                declaredNumberOfValuesPerDimension.emplace_back(UINT_MAX);
             }
         }
     }

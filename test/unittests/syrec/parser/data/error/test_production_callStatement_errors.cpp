@@ -120,7 +120,12 @@ TEST_F(SyrecParserErrorTestsFixture, ModuleCallOfImplicitlyDefinedMainModuleCaus
     performTestExecution("module increment(out c(4)) wire one(4) ++= one; call add(c, one, c) module add(in a(4), in b(4), out c(4)) c ^= (a + b)");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionResolvesToOfImplicitlyDefinedMainModuleCausesError) {
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionResolvingToImplicitlyDefinedMainModuleCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 53));
     performTestExecution("module increment(out c(4)) wire one(4) ++= one; call add(c, one) module add(in a(4), in b(4), out c(4)) c ^= (a + b) module add(inout a(4), in b(4)) a += b");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, ModuleCallOverloadResolutionResolvingToExplicitlyDefinedMainModuleCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::CannotCallMainModule>(Message::Position(1, 53));
+    performTestExecution("module increment(out c(4)) wire one(4) ++= one; call main(c) module main(inout a(4)) call increment(a)");
 }
