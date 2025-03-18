@@ -60,7 +60,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitBinaryExpres
 
     std::optional<DeterminedExpressionOperandBitwidthInformation> determinedLhsOperandBitwidth;
     std::optional<syrec::Expression::ptr>                         lhsOperand              = visitExpressionTyped(context->lhsOperand, determinedLhsOperandBitwidth);
-    const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation != nullptr ? deserializeBinaryOperationFromString(context->binaryOperation->getText()) : std::nullopt;
+    const std::optional<syrec::BinaryExpression::BinaryOperation> mappedToBinaryOperation = context->binaryOperation != nullptr ? mapTokenToBinaryOperation(*context) : std::nullopt;
     if (context->binaryOperation != nullptr && !mappedToBinaryOperation.has_value()) {
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->binaryOperation), context->binaryOperation->getText());
     }
@@ -185,7 +185,7 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::visitShiftExpress
 
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
     std::optional<syrec::Expression::ptr>                       toBeShiftedOperand     = visitExpressionTyped(context->expression(), optionalDeterminedOperandBitwidth);
-    const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation != nullptr ? deserializeShiftOperationFromString(context->shiftOperation->getText()) : std::nullopt;
+    const std::optional<syrec::ShiftExpression::ShiftOperation> mappedToShiftOperation = context->shiftOperation != nullptr ? mapTokenToShiftOperation(*context) : std::nullopt;
     if (context->shiftOperation != nullptr && !mappedToShiftOperation.has_value()) {
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->shiftOperation), context->shiftOperation->getText());
     }
@@ -292,7 +292,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     recordExpressionComponent(utils::IfStatementExpressionComponentsRecorder::ExpressionBracketKind::Opening);
     std::optional<syrec::Number::ptr> lhsOperand = visitNumberTyped(context->lhsOperand);
 
-    const std::optional<syrec::Number::ConstantExpression::Operation> operation = context->op != nullptr ? deserializeConstantExpressionOperationFromString(context->op->getText()) : std::nullopt;
+    const std::optional<syrec::Number::ConstantExpression::Operation> operation = context->op != nullptr ? mapTokenToConstantExpressionOperation(*context) : std::nullopt;
     if (context->op != nullptr && !operation.has_value()) {
         recordSemanticError<SemanticError::UnhandledOperationFromGrammarInParser>(mapTokenPositionToMessagePosition(*context->op), context->op->getText());
     }
@@ -729,82 +729,82 @@ void CustomExpressionVisitor::recordExpressionComponent(const utils::IfStatement
     optionalIfStatementExpressionComponentsRecorder->get()->recordExpressionComponent(expressionComponent);
 }
 
-std::optional<syrec::BinaryExpression::BinaryOperation> CustomExpressionVisitor::deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation) {
-    if (stringifiedOperation == "+") {
+std::optional<syrec::BinaryExpression::BinaryOperation> CustomExpressionVisitor::mapTokenToBinaryOperation(const TSyrecParser::BinaryExpressionContext& binaryExpressionContext) {
+    if (binaryExpressionContext.literalOpPlus() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Add;
     }
-    if (stringifiedOperation == "-") {
+    if (binaryExpressionContext.literalOpMinus() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Subtract;
     }
-    if (stringifiedOperation == "^") {
+    if (binaryExpressionContext.literalOpBitwiseXor() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Exor;
     }
-    if (stringifiedOperation == "*") {
+    if (binaryExpressionContext.literalOpMultiply() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Multiply;
     }
-    if (stringifiedOperation == "/") {
+    if (binaryExpressionContext.literalOpDivision() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Divide;
     }
-    if (stringifiedOperation == "%") {
+    if (binaryExpressionContext.literalOpModulo() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Modulo;
     }
-    if (stringifiedOperation == "*>") {
+    if (binaryExpressionContext.literalOpUpperBitMultiply() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::FracDivide;
     }
-    if (stringifiedOperation == "&&") {
+    if (binaryExpressionContext.literalOpLogicalAnd() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::LogicalAnd;
     }
-    if (stringifiedOperation == "||") {
+    if (binaryExpressionContext.literalOpLogicalOr() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::LogicalOr;
     }
-    if (stringifiedOperation == "&") {
+    if (binaryExpressionContext.literalOpBitwiseAnd() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::BitwiseAnd;
     }
-    if (stringifiedOperation == "|") {
+    if (binaryExpressionContext.literalOpBitwiseOr() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::BitwiseOr;
     }
-    if (stringifiedOperation == "<") {
+    if (binaryExpressionContext.literalOpLessThan() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::LessThan;
     }
-    if (stringifiedOperation == ">") {
+    if (binaryExpressionContext.literalOpGreaterThan() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::GreaterThan;
     }
-    if (stringifiedOperation == "=") {
+    if (binaryExpressionContext.literalOpEqual() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::Equals;
     }
-    if (stringifiedOperation == "!=") {
+    if (binaryExpressionContext.literalOpNotEqual() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::NotEquals;
     }
-    if (stringifiedOperation == "<=") {
+    if (binaryExpressionContext.literalOpLessOrEqual() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::LessEquals;
     }
-    if (stringifiedOperation == ">=") {
+    if (binaryExpressionContext.literalOpGreaterOrEqual() != nullptr) {
         return syrec::BinaryExpression::BinaryOperation::GreaterEquals;
     }
     return std::nullopt;
 }
 
-std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::deserializeShiftOperationFromString(const std::string_view& stringifiedOperation) {
-    if (stringifiedOperation == "<<") {
+std::optional<syrec::ShiftExpression::ShiftOperation> CustomExpressionVisitor::mapTokenToShiftOperation(const TSyrecParser::ShiftExpressionContext& shiftExpressionContext) {
+    if (shiftExpressionContext.literalOpLeftShift() != nullptr) {
         return syrec::ShiftExpression::ShiftOperation::Left;
     }
-    if (stringifiedOperation == ">>") {
+    if (shiftExpressionContext.literalOpRightShift() != nullptr) {
         return syrec::ShiftExpression::ShiftOperation::Right;
     }
     return std::nullopt;
 }
 
-std::optional<syrec::Number::ConstantExpression::Operation> CustomExpressionVisitor::deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation) {
-    if (stringifiedOperation == "+") {
+std::optional<syrec::Number::ConstantExpression::Operation> CustomExpressionVisitor::mapTokenToConstantExpressionOperation(const TSyrecParser::NumberFromExpressionContext& constantExpressionContext) {
+    if (constantExpressionContext.literalOpPlus() != nullptr) {
         return syrec::Number::ConstantExpression::Operation::Addition;
     }
-    if (stringifiedOperation == "-") {
+    if (constantExpressionContext.literalOpMinus() != nullptr) {
         return syrec::Number::ConstantExpression::Operation::Subtraction;
     }
-    if (stringifiedOperation == "*") {
+    if (constantExpressionContext.literalOpMultiply() != nullptr) {
         return syrec::Number::ConstantExpression::Operation::Multiplication;
     }
-    if (stringifiedOperation == "/") {
+    if (constantExpressionContext.literalOpDivision() != nullptr) {
         return syrec::Number::ConstantExpression::Operation::Division;
     }
     return std::nullopt;

@@ -58,9 +58,9 @@ namespace syrec_parser {
 
         void recordExpressionComponent(const utils::IfStatementExpressionComponentsRecorder::ExpressionComponent& expressionComponent) const;
 
-        [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation>     deserializeBinaryOperationFromString(const std::string_view& stringifiedOperation);
-        [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>       deserializeShiftOperationFromString(const std::string_view& stringifiedOperation);
-        [[nodiscard]] static std::optional<syrec::Number::ConstantExpression::Operation> deserializeConstantExpressionOperationFromString(const std::string_view& stringifiedOperation);
+        [[nodiscard]] static std::optional<syrec::BinaryExpression::BinaryOperation>     mapTokenToBinaryOperation(const TSyrecParser::BinaryExpressionContext& binaryExpressionContext);
+        [[nodiscard]] static std::optional<syrec::ShiftExpression::ShiftOperation>       mapTokenToShiftOperation(const TSyrecParser::ShiftExpressionContext& shiftExpressionContext);
+        [[nodiscard]] static std::optional<syrec::Number::ConstantExpression::Operation> mapTokenToConstantExpressionOperation(const TSyrecParser::NumberFromExpressionContext& constantExpressionContext);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpressionWithConstantValueOfOneOperandKnown(unsigned int knownOperandValue, syrec::BinaryExpression::BinaryOperation binaryOperation, const syrec::Expression::ptr& unknownOperandValue, bool isValueOfLhsOperandKnown);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyShiftExpression(const syrec::ShiftExpression& shiftExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression);
         [[nodiscard]] static std::optional<syrec::Expression::ptr>                       trySimplifyBinaryExpression(const syrec::BinaryExpression& binaryExpr, const std::optional<unsigned int>& optionalBitwidthOfOperandsInExpression, bool* detectedDivisionByZero);
