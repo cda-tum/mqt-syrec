@@ -9,10 +9,8 @@
 #include "atn/ATN.h"
 #include "atn/ParserATNSimulatorOptions.h"
 #include "atn/SerializedATNView.h"
-#include "tree/ParseTreeVisitor.h"
 #include "tree/TerminalNode.h"
 
-#include <any>
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -163,8 +161,6 @@ namespace syrec_parser {
 
             [[nodiscard]] antlr4::tree::TerminalNode* literalSignalWidthPrefix() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalIdent() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class NumberFromLoopVariableContext: public NumberContext {
@@ -173,8 +169,6 @@ namespace syrec_parser {
 
             [[nodiscard]] antlr4::tree::TerminalNode* literalLoopVariablePrefix() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalIdent() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class NumberFromConstantContext: public NumberContext {
@@ -182,8 +176,6 @@ namespace syrec_parser {
             explicit NumberFromConstantContext(NumberContext* ctx);
 
             [[nodiscard]] antlr4::tree::TerminalNode* literalInt() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class NumberFromExpressionContext: public NumberContext {
@@ -201,8 +193,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMinus() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMultiply() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpDivision() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         NumberContext* number();
@@ -214,8 +204,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalEOF() const;
             [[nodiscard]] std::vector<ModuleContext*> module() const;
             [[nodiscard]] ModuleContext*              module(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ProgramContext* program();
@@ -232,8 +220,6 @@ namespace syrec_parser {
             [[nodiscard]] ParameterListContext*           parameterList() const;
             [[nodiscard]] std::vector<SignalListContext*> signalList() const;
             [[nodiscard]] SignalListContext*              signalList(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ModuleContext* module();
@@ -246,8 +232,6 @@ namespace syrec_parser {
             [[nodiscard]] ParameterContext*                        parameter(size_t i) const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ParameterListContext* parameterList();
@@ -260,8 +244,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalVarTypeIn() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalVarTypeOut() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalVarTypeInout() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ParameterContext* parameter();
@@ -276,8 +258,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode*              literalVarTypeState() const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         SignalListContext* signalList();
@@ -298,8 +278,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode*              literalCloseRBracket() const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalInt() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalInt(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         SignalDeclarationContext* signalDeclaration();
@@ -314,8 +292,6 @@ namespace syrec_parser {
             [[nodiscard]] StatementContext*                        statement(size_t i) const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalStatementDelimiter() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalStatementDelimiter(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         StatementListContext* statementList();
@@ -331,8 +307,6 @@ namespace syrec_parser {
             [[nodiscard]] AssignStatementContext* assignStatement() const;
             [[nodiscard]] SwapStatementContext*   swapStatement() const;
             [[nodiscard]] SkipStatementContext*   skipStatement() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         StatementContext* statement();
@@ -352,8 +326,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode*              literalIdent(size_t i) const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         CallStatementContext* callStatement();
@@ -366,8 +338,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalLoopVariablePrefix() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpEqual() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalIdent() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         LoopVariableDefinitionContext* loopVariableDefinition();
@@ -379,8 +349,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalKeywordStep() const;
             [[nodiscard]] NumberContext*              number() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMinus() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         LoopStepsizeDefinitionContext* loopStepsizeDefinition();
@@ -400,8 +368,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode*    literalKeywordTo() const;
             [[nodiscard]] LoopStepsizeDefinitionContext* loopStepsizeDefinition() const;
             [[nodiscard]] LoopVariableDefinitionContext* loopVariableDefinition() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ForStatementContext* forStatement();
@@ -422,8 +388,6 @@ namespace syrec_parser {
             [[nodiscard]] ExpressionContext*                 expression(size_t i) const;
             [[nodiscard]] std::vector<StatementListContext*> statementList() const;
             [[nodiscard]] StatementListContext*              statementList(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         IfStatementContext* ifStatement();
@@ -437,8 +401,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpInvertAssign() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpIncrementAssign() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpDecrementAssign() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         UnaryStatementContext* unaryStatement();
@@ -453,8 +415,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpAddAssign() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpSubAssign() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpXorAssign() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         AssignStatementContext* assignStatement();
@@ -468,8 +428,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpSwap() const;
             [[nodiscard]] std::vector<SignalContext*> signal() const;
             [[nodiscard]] SignalContext*              signal(size_t i) const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         SwapStatementContext* swapStatement();
@@ -479,8 +437,6 @@ namespace syrec_parser {
             SkipStatementContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                      getRuleIndex() const override;
             [[nodiscard]] antlr4::tree::TerminalNode* literalKeywordSkip() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         SkipStatementContext* skipStatement();
@@ -504,8 +460,6 @@ namespace syrec_parser {
             [[nodiscard]] std::vector<NumberContext*>              number() const;
             [[nodiscard]] NumberContext*                           number(size_t i) const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalBitrangeEndPrefix() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         SignalContext* signal();
@@ -526,8 +480,6 @@ namespace syrec_parser {
             explicit ExpressionFromSignalContext(ExpressionContext* ctx);
 
             [[nodiscard]] SignalContext* signal() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class ExpressionFromBinaryExpressionContext: public ExpressionContext {
@@ -535,8 +487,6 @@ namespace syrec_parser {
             explicit ExpressionFromBinaryExpressionContext(ExpressionContext* ctx);
 
             [[nodiscard]] BinaryExpressionContext* binaryExpression() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class ExpressionFromNumberContext: public ExpressionContext {
@@ -544,8 +494,6 @@ namespace syrec_parser {
             explicit ExpressionFromNumberContext(ExpressionContext* ctx);
 
             [[nodiscard]] NumberContext* number() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class ExpressionFromUnaryExpressionContext: public ExpressionContext {
@@ -553,8 +501,6 @@ namespace syrec_parser {
             explicit ExpressionFromUnaryExpressionContext(ExpressionContext* ctx);
 
             [[nodiscard]] UnaryExpressionContext* unaryExpression() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         class ExpressionFromShiftExpressionContext: public ExpressionContext {
@@ -562,8 +508,6 @@ namespace syrec_parser {
             explicit ExpressionFromShiftExpressionContext(ExpressionContext* ctx);
 
             [[nodiscard]] ShiftExpressionContext* shiftExpression() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ExpressionContext* expression();
@@ -596,8 +540,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpNotEqual() const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpLessOrEqual() const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpGreaterOrEqual() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         BinaryExpressionContext* binaryExpression();
@@ -610,8 +552,6 @@ namespace syrec_parser {
             [[nodiscard]] ExpressionContext*          expression() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpLogicalNegation() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpBitwiseNegation() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         UnaryExpressionContext* unaryExpression();
@@ -627,8 +567,6 @@ namespace syrec_parser {
             [[nodiscard]] antlr4::tree::TerminalNode* literalCloseRBracket() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpRightShift() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpLeftShift() const;
-
-            std::any accept(antlr4::tree::ParseTreeVisitor* visitor) override;
         };
 
         ShiftExpressionContext* shiftExpression();

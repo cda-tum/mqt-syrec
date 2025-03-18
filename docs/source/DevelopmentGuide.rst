@@ -207,9 +207,9 @@ To keep the number of external dependencies for this project low and due to the 
 
     .. code-block:: console
 
-      $ java -jar antlr.jar -Dlanguage=Cpp -package syrec_parser -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
+      $ java -jar antlr.jar -Dlanguage=Cpp -package syrec_parser -o <OUTPUT_DIRECTORY_FOR_GEN_FILES> -no-visitor -no-listener -Werror TSyrecLexer.g4 TSyrecParser.g4
 
-   Out of all the generated files in the specified *<OUTPUT_DIRECTORY_FOR_GEN_FILES>* directory only the following are relevant for the C++ core library: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*, *TSyrecBaseVisitor.h*.
+   Out of all the generated files in the specified *<OUTPUT_DIRECTORY_FOR_GEN_FILES>* directory only the following are relevant for the C++ core library: *TSyrecLexer.h*, *TSyrecLexer.cpp*, *TSyrecParser.h*, *TSyrecParser.cpp*.
 
 3. Copy the relevant files generated in the previous step to the corresponding folders in the project:
 
