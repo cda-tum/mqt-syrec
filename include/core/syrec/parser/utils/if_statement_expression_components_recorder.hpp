@@ -35,7 +35,6 @@ namespace utils {
         void                              recordExpressionComponent(const ExpressionComponent& expressionComponent);
         void                              switchMode(OperationMode newOperationMode);
         [[nodiscard]] std::optional<bool> recordedMatchingExpressionComponents() const;
-        [[nodiscard]] OperationMode       getCurrentOperationMode() const;
 
     protected:
         OperationMode                    operationMode = OperationMode::Recording;

@@ -41,34 +41,19 @@ namespace syrec {
             [[nodiscard]] std::optional<unsigned int> tryEvaluate(const LoopVariableMapping& loopVariableValueLookup) const {
                 const std::optional<unsigned int> lhsOperandEvaluated = lhsOperand ? lhsOperand->tryEvaluate(loopVariableValueLookup) : std::nullopt;
                 const std::optional<unsigned int> rhsOperandEvaluated = rhsOperand ? rhsOperand->tryEvaluate(loopVariableValueLookup) : std::nullopt;
+                if ((operation == Operation::Division && rhsOperandEvaluated.has_value() && rhsOperandEvaluated.value() == 0) || (!lhsOperandEvaluated.has_value() || !rhsOperandEvaluated.has_value())) {
+                    return std::nullopt;
+                }
+
                 switch (operation) {
                     case Operation::Addition:
-                        if (lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) {
-                            return rhsOperandEvaluated;
-                        }
-                        if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
-                            return lhsOperandEvaluated;
-                        }
-                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated + *rhsOperandEvaluated) : std::nullopt;
+                        return *lhsOperandEvaluated + *rhsOperandEvaluated;
                     case Operation::Subtraction:
-                        if (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0) {
-                            return lhsOperandEvaluated;
-                        }
-                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated - *rhsOperandEvaluated) : std::nullopt;
-                    case Operation::Multiplication: {
-                        if ((lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) || (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0)) {
-                            return 0;
-                        }
-                        return lhsOperandEvaluated.has_value() && rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated * *rhsOperandEvaluated) : std::nullopt;
-                    }
+                        return *lhsOperandEvaluated - *rhsOperandEvaluated;
+                    case Operation::Multiplication:
+                        return *lhsOperandEvaluated * *rhsOperandEvaluated;
                     case Operation::Division:
-                        if (!lhsOperandEvaluated.has_value() || (rhsOperandEvaluated.has_value() && *rhsOperandEvaluated == 0)) {
-                            return std::nullopt;
-                        }
-                        if (lhsOperandEvaluated.has_value() && *lhsOperandEvaluated == 0) {
-                            return 0;
-                        }
-                        return rhsOperandEvaluated.has_value() ? std::make_optional(*lhsOperandEvaluated / *rhsOperandEvaluated) : std::nullopt;
+                        return *lhsOperandEvaluated / *rhsOperandEvaluated;
                 }
                 return std::nullopt;
             }

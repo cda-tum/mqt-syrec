@@ -120,6 +120,14 @@
     "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 4) / a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
   },
+  "simplificationOfDivisionWhenRhsOperandEvaluatesToOne": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += (a / (#a - 3))",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
+  },
+  "simplificationOfDivisionWhenLhsOperandEvalutedToOneIsNotPerformed": {
+    "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 3) / a)",
+    "expectedCircuit": "module main(in a(4), out res(4)) res[0] += (1 / a[0])"
+  },
   "simplificationOfModuloOperationWhenRhsOperandEvaluatesToOne": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (a % (#a - 3))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += 0"
@@ -135,6 +143,14 @@
   "simplificationOfLogicalAndOperationWhenRhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(1)) res += (a.1 && 0)",
     "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 0"
+  },
+  "simplificationOfLogicalOrOperationWhenLhsOperandEvaluatesToOne": {
+    "inputCircuit": "module main(in a(4), out res(1)) res += (1 || a.1)",
+    "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
+  },
+  "simplficiationOfLogicalOrOperationWhenRhsOperandEvalutesToOne": {
+    "inputCircuit": "module main(in a(4), out res(1)) res += (a.1 || 1)",
+    "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
   },
   "simplificationOfBitwiseXorOperationWhenLhsOperandEvaluatesToZero": {
     "inputCircuit": "module main(in a(4), out res(4)) res += (0 ^ a)",

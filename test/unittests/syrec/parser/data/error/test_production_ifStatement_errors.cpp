@@ -296,6 +296,16 @@ TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionsMismatchDetectedE
     performTestExecution("module main(inout a(4), in b(2)) for $i = 0 to 2 step 1 do if a.(#a * (#b - 2)):((#b - 2) * (($i + 1) * 2)) then ++= a else skip fi a.(#b * (#b - 2)):((#b - 2) * ($i * 2)) rof");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionMismatchInParentIfStatementWithNestedIfBeingCorrectCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMismatch>(Message::Position(1, 36));
+    performTestExecution("module main(inout a(4), in b(2)) if (a.0:1 > b) then if (b > 2) then ++= a else --= a fi (b > 2) else skip fi (b > a.0:1)");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, IfStatementGuardConditionMismatchInNestedIfStatementWithParentIfConditionBeingCorrectCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMismatch>(Message::Position(1, 52));
+    performTestExecution("module main(inout a(4), in b(2)) if (b > 2) then if (a.0:1 > b) then ++= a else --= a fi (b > a.0:1) else skip fi (b > 2)");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, UsageOfNon1DVariableInGuardExpressionCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::IfGuardExpressionMismatch>(Message::Position(1, 31));
     buildAndRecordExpectedSemanticError<SemanticError::TooFewDimensionsAccessed>(Message::Position(1, 32), 1, 2);

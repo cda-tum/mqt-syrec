@@ -228,11 +228,13 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     if (context == nullptr) {
         return std::nullopt;
     }
-
     auto generatedIfStatement = std::make_shared<syrec::IfStatement>();
 
     // A note regarding the reporting of semantic errors, if the guard condition evaluates to a constant value at compile time, semantic errors in the statements of the not taken branch will still be reported
     // (we will follow the behaviour found in other compilers [see https://godbolt.org/z/nM419obo4]).
+    const auto& backupOfCurrentIfStatementExpressionComponentsComparer = expressionVisitorInstance->getIfStatementExpressionComponentsRecorder();
+    expressionVisitorInstance->clearIfStatementExpressionComponentsRecorder();
+
     auto ifStatementExpressionComponentsComparer = std::make_shared<utils::IfStatementExpressionComponentsRecorder>();
     expressionVisitorInstance->setIfStatementExpressionComponentsRecorder(ifStatementExpressionComponentsComparer);
 
@@ -277,6 +279,12 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     if (generatedIfStatement->condition != nullptr && generatedIfStatement->fiCondition != nullptr && !ifStatementExpressionComponentsComparer->recordedMatchingExpressionComponents().value_or(true)) {
         recordSemanticError<SemanticError::IfGuardExpressionMismatch>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
         detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;
+    }
+
+    if (backupOfCurrentIfStatementExpressionComponentsComparer.has_value()) {
+        expressionVisitorInstance->setIfStatementExpressionComponentsRecorder(*backupOfCurrentIfStatementExpressionComponentsComparer);
+    } else {
+        expressionVisitorInstance->clearIfStatementExpressionComponentsRecorder();
     }
     return !detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed ? std::make_optional(generatedIfStatement) : std::nullopt;
 }

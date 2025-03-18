@@ -207,6 +207,11 @@ TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMismatchForOperandsOfBinaryE
     performTestExecution("module main(inout a[2](4), in b(2)) for $i = 0 to 3 do a[1].0 += ((a[0].$i:1 + (b = a[0].1:2)) + a[0]) rof");
 }
 
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthMismatchBetweenOperandsOfBinaryExpressionConsistingOfNestedBinaryExpressionsCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 58), 4, 2);
+    performTestExecution("module main(inout a[2](4), in b(2)) a[0] += ((a[1] + 2) + (a[1].1:2 + b))");
+}
+
 TEST_F(SyrecParserErrorTestsFixture, LogicalOperationRequiringOperandsWithBitwidthOfOneAndLhsOperandViolatingConstraintCausesError) {
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 48), 1, 2);
     performTestExecution("module main(inout a[2](4), in b(2)) a[0].1 += ((a[1].1:2 || b.1) || b.0)");

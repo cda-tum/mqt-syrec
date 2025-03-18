@@ -39,16 +39,17 @@ namespace syrec_parser {
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromExpressionTyped(const TSyrecParser::NumberFromExpressionContext* context) const;
         [[nodiscard]] std::optional<syrec::Number::ptr>            visitNumberFromLoopVariableTyped(const TSyrecParser::NumberFromLoopVariableContext* context) const;
 
-        void                         clearRestrictionOnVariableAccesses();
-        void                         setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
-        void                         clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
-        void                         setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
-        void                         clearIfStatementExpressionComponentsRecorder();
-        void                         markStartOfProcessingOfDimensionAccessOfVariableAccess();
-        void                         markEndOfProcessingOfDimensionAccessOfVariableAccess();
-        [[maybe_unused]] bool        setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
-        [[nodiscard]] bool           isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
-        [[maybe_unused]] static bool truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
+        void                                                                             clearRestrictionOnVariableAccesses();
+        void                                                                             setRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations(const std::string_view& loopVariableIdentifier);
+        void                                                                             clearRestrictionOnLoopVariablesUsableInFutureLoopVariableValueInitializations();
+        void                                                                             setIfStatementExpressionComponentsRecorder(const utils::IfStatementExpressionComponentsRecorder::ptr& ifStatementExpressionComponentsRecorder);
+        void                                                                             clearIfStatementExpressionComponentsRecorder();
+        void                                                                             markStartOfProcessingOfDimensionAccessOfVariableAccess();
+        void                                                                             markEndOfProcessingOfDimensionAccessOfVariableAccess();
+        [[nodiscard]] std::optional<utils::IfStatementExpressionComponentsRecorder::ptr> getIfStatementExpressionComponentsRecorder() const;
+        [[maybe_unused]] bool                                                            setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses);
+        [[nodiscard]] bool                                                               isCurrentlyProcessingDimensionAccessOfVariableAccess() const;
+        [[maybe_unused]] static bool                                                     truncateConstantValuesInExpression(syrec::Expression::ptr& expression, unsigned int expectedBitwidthOfOperandsInExpression, utils::IntegerConstantTruncationOperation truncationOperationToUseForIntegerConstants, bool* detectedDivisionByZero);
 
     protected:
         std::optional<syrec::VariableAccess::ptr>                          optionalRestrictionOnVariableAccesses;

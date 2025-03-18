@@ -323,26 +323,26 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
     if (operation.has_value()) {
         switch (*operation) {
             case syrec::Number::ConstantExpression::Operation::Addition: {
-                if (evaluationResultOfLhsOperand.has_value() && *evaluationResultOfLhsOperand == 0) {
+                if (evaluationResultOfLhsOperand.has_value() && utils::isOperandIdentityElementOfOperation(*evaluationResultOfLhsOperand, false, syrec::BinaryExpression::BinaryOperation::Add)) {
                     return rhsOperand;
                 }
-                if (evaluationResultOfRhsOperand.has_value() && *evaluationResultOfRhsOperand == 0) {
+                if (evaluationResultOfRhsOperand.has_value() && utils::isOperandIdentityElementOfOperation(*evaluationResultOfRhsOperand, true, syrec::BinaryExpression::BinaryOperation::Add)) {
                     return lhsOperand;
                 }
                 break;
             }
             case syrec::Number::ConstantExpression::Operation::Subtraction: {
-                if (evaluationResultOfRhsOperand.has_value() && *evaluationResultOfRhsOperand == 0) {
+                if (evaluationResultOfRhsOperand.has_value() && utils::isOperandIdentityElementOfOperation(*evaluationResultOfRhsOperand, true, syrec::BinaryExpression::BinaryOperation::Subtract)) {
                     return lhsOperand;
                 }
                 break;
             }
             case syrec::Number::ConstantExpression::Operation::Multiplication: {
-                if (evaluationResultOfLhsOperand.has_value() && *evaluationResultOfLhsOperand == 1) {
+                if (evaluationResultOfLhsOperand.has_value() && utils::isOperandIdentityElementOfOperation(*evaluationResultOfLhsOperand, false, syrec::BinaryExpression::BinaryOperation::Multiply)) {
                     return rhsOperand;
                 }
 
-                if (evaluationResultOfRhsOperand.has_value() && *evaluationResultOfRhsOperand == 1) {
+                if (evaluationResultOfRhsOperand.has_value() && utils::isOperandIdentityElementOfOperation(*evaluationResultOfRhsOperand, true, syrec::BinaryExpression::BinaryOperation::Multiply)) {
                     return lhsOperand;
                 }
                 break;
@@ -350,8 +350,7 @@ std::optional<syrec::Number::ptr> CustomExpressionVisitor::visitNumberFromExpres
             case syrec::Number::ConstantExpression::Operation::Division: {
                 if (evaluationResultOfLhsOperand.has_value()) {
                     if (*evaluationResultOfLhsOperand == 0) {
-                        recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->lhsOperand->getStart()));
-                        return std::nullopt;
+                        return rhsOperand;
                     }
                 }
                 if (evaluationResultOfRhsOperand.has_value()) {
@@ -661,6 +660,10 @@ void CustomExpressionVisitor::markStartOfProcessingOfDimensionAccessOfVariableAc
 
 void CustomExpressionVisitor::markEndOfProcessingOfDimensionAccessOfVariableAccess() {
     isCurrentlyProcessingDimensionAccessOfVariableAccessFlag = false;
+}
+
+std::optional<utils::IfStatementExpressionComponentsRecorder::ptr> CustomExpressionVisitor::getIfStatementExpressionComponentsRecorder() const {
+    return optionalIfStatementExpressionComponentsRecorder;
 }
 
 bool CustomExpressionVisitor::setRestrictionOnVariableAccesses(const syrec::VariableAccess::ptr& notAccessiblePartsForFutureVariableAccesses) {

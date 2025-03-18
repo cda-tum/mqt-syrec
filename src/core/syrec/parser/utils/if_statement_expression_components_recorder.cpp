@@ -33,7 +33,3 @@ void IfStatementExpressionComponentsRecorder::switchMode(OperationMode newOperat
 std::optional<bool> IfStatementExpressionComponentsRecorder::recordedMatchingExpressionComponents() const {
     return aggregateOfComparisonResultsOfExpressionComponents;
 }
-
-IfStatementExpressionComponentsRecorder::OperationMode IfStatementExpressionComponentsRecorder::getCurrentOperationMode() const {
-    return operationMode;
-}
