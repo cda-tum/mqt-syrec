@@ -28,7 +28,7 @@ namespace {
     class SyrecParserSuccessCasesTestFixture: public SyrecParserBaseTestsFixture {
     public:
         void SetUp() override {
-            return SyrecParserBaseTestsFixture::SetUp();
+            SyrecParserBaseTestsFixture::SetUp();
         }
     };
 } // namespace

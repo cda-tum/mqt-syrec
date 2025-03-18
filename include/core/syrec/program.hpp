@@ -125,7 +125,7 @@ namespace syrec {
         */
         bool                                            readFile(const std::string& filename, ReadProgramSettings settings, std::string& error);
         bool                                            readProgramFromString(const std::string_view& content, const ReadProgramSettings& settings, std::string&);
-        [[nodiscard]] static std::optional<std::string> tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors);
+        [[nodiscard]] static std::optional<std::string> tryReadFileContent(const std::string& filename, std::string* foundFileHandlingErrors);
     };
 
 } // namespace syrec

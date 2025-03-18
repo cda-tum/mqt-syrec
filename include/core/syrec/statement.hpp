@@ -67,8 +67,8 @@ namespace syrec {
             lhs(std::move(lhs)),
             rhs(std::move(rhs)) {}
 
-        VariableAccess::ptr lhs;
-        VariableAccess::ptr rhs;
+        VariableAccess::ptr lhs{};
+        VariableAccess::ptr rhs{};
     };
 
     /**
@@ -111,13 +111,11 @@ namespace syrec {
 
         Statement::ptr reverse() override {
             switch (unaryOperation) {
-                case UnaryOperation::Increment:
-                    return std::make_shared<UnaryStatement>(UnaryOperation::Decrement, var);
-
+                case UnaryOperation::Increment: // NOLINT(bugprone-branch-clone)
+                    return std::make_shared<UnaryStatement>(UnaryOperation::Decrement, var); 
                 case UnaryOperation::Decrement:
-                    return std::make_shared<UnaryStatement>(UnaryOperation::Increment, var);
-
-                case UnaryOperation::Invert:
+                    return std::make_shared<UnaryStatement>(UnaryOperation::Increment, var); 
+                // TODO: Handling all other cases via the default branch might not be correct when further unary operations are added
                 default:
                     return std::make_shared<UnaryStatement>(*this);
             }
@@ -169,13 +167,11 @@ namespace syrec {
 
         Statement::ptr reverse() override {
             switch (assignOperation) {
-                case AssignOperation::Add:
+                case AssignOperation::Add:  // NOLINT(bugprone-branch-clone)
                     return std::make_shared<AssignStatement>(lhs, AssignOperation::Subtract, rhs);
-
                 case AssignOperation::Subtract:
-                    return std::make_shared<AssignStatement>(lhs, AssignOperation::Add, rhs);
-
-                case AssignOperation::Exor:
+                    return std::make_shared<AssignStatement>(lhs, AssignOperation::Add, rhs); 
+                // TODO: Handling all other cases via the default branch might not be correct when further assignment operations are added
                 default:
                     return std::make_shared<AssignStatement>(*this);
             }

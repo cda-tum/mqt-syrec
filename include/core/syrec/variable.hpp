@@ -65,11 +65,11 @@ namespace syrec {
 
         void setReference(Variable::ptr updatedReference);
 
-        Type                  type{};
-        std::string           name{};
-        std::vector<unsigned> dimensions{};
-        unsigned              bitwidth{};
-        Variable::ptr         reference = nullptr;
+        Type                  type;
+        std::string           name;
+        std::vector<unsigned> dimensions;
+        unsigned              bitwidth;
+        Variable::ptr         reference;
     };
 
     /**
@@ -112,9 +112,9 @@ namespace syrec {
        */
         [[nodiscard]] unsigned bitwidth() const;
 
-        Variable::ptr                                      var{};
-        std::optional<std::pair<Number::ptr, Number::ptr>> range{};
-        std::vector<std::shared_ptr<Expression>>           indexes{};
+        Variable::ptr                                      var;
+        std::optional<std::pair<Number::ptr, Number::ptr>> range;
+        std::vector<std::shared_ptr<Expression>>           indexes;
     };
 
 } // namespace syrec

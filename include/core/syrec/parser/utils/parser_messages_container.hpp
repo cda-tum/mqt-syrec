@@ -42,9 +42,9 @@ namespace syrec_parser {
     class ParserMessagesContainer {
     public:
         ParserMessagesContainer() {
-            messagesPerType.emplace(std::make_pair(Message::Type::Error, std::vector<Message::ptr>()));
-            messagesPerType.emplace(std::make_pair(Message::Type::Information, std::vector<Message::ptr>()));
-            messagesPerType.emplace(std::make_pair(Message::Type::Warning, std::vector<Message::ptr>()));
+            messagesPerType.emplace(Message::Type::Error, std::vector<Message::ptr>());
+            messagesPerType.emplace(Message::Type::Information, std::vector<Message::ptr>());
+            messagesPerType.emplace(Message::Type::Warning, std::vector<Message::ptr>());
         }
 
         void                                    recordMessage(std::unique_ptr<Message> message);

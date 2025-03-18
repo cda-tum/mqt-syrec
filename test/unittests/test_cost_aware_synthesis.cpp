@@ -1,14 +1,17 @@
 #include "algorithms/synthesis/syrec_cost_aware_synthesis.hpp"
 #include "core/circuit.hpp"
-#include "core/properties.hpp"
+#include "core/gate.hpp"
 #include "core/syrec/program.hpp"
 
-#include "gtest/gtest.h"
+#include <algorithm>
+#include <fstream>
+#include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <vector>
 
-using json = nlohmann::json;
+// The .clang-tidy warning about the missing header file seems to be a false positive since the include of the required <nlohmann/json.hpp> is defined in this file.
+// Maybe this warning is reported because the nlohmann library is implicitly added by one of the external dependencies?
+using json = nlohmann::json; // NOLINT(misc-include-cleaner)
 
 using namespace syrec;
 
@@ -25,8 +28,8 @@ protected:
     Gate::cost_t expectedTc       = 0;
 
     void SetUp() override {
-        std::string synthesisParam = GetParam();
-        fileName                   = testCircuitsDir + GetParam() + ".src";
+        const std::string synthesisParam = GetParam();
+        fileName                         = testCircuitsDir + GetParam() + ".src";
         std::ifstream i(testConfigsDir + "circuits_cost_aware_synthesis.json");
         json          j  = json::parse(i);
         expectedNumGates = j[synthesisParam]["num_gates"];
@@ -70,10 +73,10 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecAddLinesSynthesisTest,
                              return s; });
 
 TEST_P(SyrecAddLinesSynthesisTest, GenericSynthesisTest) {
-    Circuit             circ;
-    Program             prog;
-    ReadProgramSettings settings;
-    std::string         errorString;
+    Circuit                   circ;
+    Program                   prog;
+    const ReadProgramSettings settings;
+    std::string               errorString;
 
     ASSERT_NO_FATAL_FAILURE(errorString = prog.read(fileName, settings)) << "Unexpected crash during processing of SyReC program";
     ASSERT_TRUE(errorString.empty()) << "Found errors during processing of SyReC program: " << errorString;

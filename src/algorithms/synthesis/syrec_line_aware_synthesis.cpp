@@ -102,9 +102,9 @@ namespace syrec {
                 unsigned                                      z = 0;
                 std::vector<AssignStatement::AssignOperation> statAssignOp;
                 if ((expOpVector.size() % 2) == 0) {
-                    z = (static_cast<int>(expOpVector.size()) / 2);
+                    z = static_cast<unsigned int>(expOpVector.size() / 2);
                 } else {
-                    z = (static_cast<int>((expOpVector.size()) - 1) / 2);
+                    z = static_cast<unsigned int>((expOpVector.size() - 1) / 2);
                 }
 
                 for (unsigned k = 0; k <= z - 1; k++) {

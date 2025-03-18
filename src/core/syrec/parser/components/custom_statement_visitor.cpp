@@ -7,7 +7,6 @@
 #include "core/syrec/parser/utils/custom_error_messages.hpp"
 #include "core/syrec/parser/utils/if_statement_expression_components_recorder.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
-#include "core/syrec/parser/utils/symbolTable/base_symbol_table.hpp"
 #include "core/syrec/parser/utils/symbolTable/temporary_variable_scope.hpp"
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
@@ -82,7 +81,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
 
     bool detectedSemanticErrorAfterOperandsWhereProcessed = false;
     if (expectedBitwidthOfAssignmentLhsOperand.has_value() && assignmentRhsOperand.has_value()) {
-        expressionVisitorInstance->truncateConstantValuesInExpression(*assignmentRhsOperand, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsWhereProcessed);
+        CustomExpressionVisitor::truncateConstantValuesInExpression(*assignmentRhsOperand, expectedBitwidthOfAssignmentLhsOperand->operandBitwidth, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsWhereProcessed);
         if (detectedSemanticErrorAfterOperandsWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->expression()->getStart()));
         } else if (expectedBitwidthOfAssignmentRhsOperand.has_value() && expectedBitwidthOfAssignmentLhsOperand->operandBitwidth != expectedBitwidthOfAssignmentRhsOperand->operandBitwidth) {
@@ -243,7 +242,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
     generatedIfStatement->setCondition(expressionVisitorInstance->visitExpressionTyped(context->guardCondition, determinedOperandBitwidthOfGuardConditionExpression).value_or(nullptr));
 
     if (generatedIfStatement->condition != nullptr) {
-        expressionVisitorInstance->truncateConstantValuesInExpression(generatedIfStatement->condition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed);
+        CustomExpressionVisitor::truncateConstantValuesInExpression(generatedIfStatement->condition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed);
         if (detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->guardCondition->getStart()));
         } else if (determinedOperandBitwidthOfGuardConditionExpression.has_value() && determinedOperandBitwidthOfGuardConditionExpression->operandBitwidth != 1) {
@@ -265,7 +264,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitIfStatementTyp
 
     if (generatedIfStatement->fiCondition != nullptr) {
         bool detectedDivisionByZeroDuringTruncationOfConstantValues = false;
-        expressionVisitorInstance->truncateConstantValuesInExpression(generatedIfStatement->fiCondition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
+        CustomExpressionVisitor::truncateConstantValuesInExpression(generatedIfStatement->fiCondition, 1, parserConfiguration.integerConstantTruncationOperation, &detectedDivisionByZeroDuringTruncationOfConstantValues);
         if (detectedDivisionByZeroDuringTruncationOfConstantValues) {
             recordSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(mapTokenPositionToMessagePosition(*context->matchingGuardExpression->getStart()));
             detectedSemanticErrorAfterOperandsOfGuardAndClosingGuardConditionWhereProcessed = true;

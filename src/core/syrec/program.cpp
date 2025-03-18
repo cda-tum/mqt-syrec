@@ -80,8 +80,10 @@ namespace syrec {
         return true;
     }
 
-    std::optional<std::string> Program::tryReadFileContent(std::string_view filename, std::string* foundFileHandlingErrors) {
-        if (std::ifstream inputFileStream(filename.data(), std::ifstream::in | std::ifstream::binary); inputFileStream.is_open()) {
+    std::optional<std::string> Program::tryReadFileContent(const std::string& filename, std::string* foundFileHandlingErrors) {
+        // We cannot pass the filename as a std::string_view since the std::ifstream constructor or any of the underlying functions
+        // will expect a null-terminated std::string argument to function correctly.
+        if (std::ifstream inputFileStream(filename, std::ifstream::in | std::ifstream::binary); inputFileStream.is_open()) {
             inputFileStream.ignore(std::numeric_limits<std::streamsize>::max());
             const std::streamsize fileContentLength = inputFileStream.gcount();
             inputFileStream.clear(); //  Since ignore will have set eof.

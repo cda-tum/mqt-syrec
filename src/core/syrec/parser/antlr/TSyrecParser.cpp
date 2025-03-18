@@ -1,6 +1,6 @@
 #include "TSyrecParser.h"
 
-#include "ANTLRErrorStrategy.h"
+#include "ANTLRErrorStrategy.h" // NOLINT(misc-include-cleaner)
 #include "NoViableAltException.h"
 #include "Parser.h"
 #include "ParserRuleContext.h"

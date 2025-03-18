@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 #include <algorithm>
+#include <string>
 
 using namespace syrec;
 
@@ -49,9 +50,9 @@ INSTANTIATE_TEST_SUITE_P(SyrecParserTest, SyrecParserTest,
                              return s; });
 
 TEST_P(SyrecParserTest, GenericParserTest) {
-    Program             prog;
-    ReadProgramSettings settings;
-    std::string         errorString;
+    Program                   prog;
+    const ReadProgramSettings settings;
+    std::string               errorString;
     errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
 }
