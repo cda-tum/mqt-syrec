@@ -104,7 +104,7 @@ if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
+set(ANTLR4_GIT_REPOSITORY "https://github.com/antlr/antlr4.git")
 # ANTLR v4.13.2 - minor version update could include "minor" breaking changes, thus we include only
 # a specific path version. https://github.com/antlr/antlr4?tab=readme-ov-file#versioning
 
@@ -112,8 +112,14 @@ set(ANTLR4_VERSION
     4.13.2
     CACHE STRING "ANTLR4 runtime version")
 
-# Note that the commit SHA hash 5435f14 refers to a commit in the dev branch of the repository due
-# to some required commits not being merged into the master branch as of 18.03.2025
+# Note that the specified hash value refers to a commit in the 'origin/dev' branch of the 
+# ANTLR4 runtime git repository that is currently needed to be able to compile the runtime on windows using the mvsc
+# compiler (see https://github.com/antlr/antlr4/pull/4738). Due to the GIT_TAG option of the FetchContent_Declare
+# CMake function (inherited from the ExternalProject_Add(...) function) only allowing commit hashes if the GIT_SHALLOW
+# argument is disabled (https://cmake.org/cmake/help/latest/module/ExternalProject.html#git), a full-checkout of the ANTLR4 git
+# repository will currently be performed. If the needed changes are merge into the 'origin/master' branch of the ANTLR runtime,
+# the ANTLR4_TAG should be updated to the 'new' version number and the GIT_SHALLOW argument enabled (i.e. set to ON) to only
+# perform a clone of the git repository of depth 1.
 set(ANTLR4_TAG
     "5435f14134eb699d7484d46d946df817dfe97297"
     CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)")
@@ -124,6 +130,10 @@ set(DISABLE_WARNINGS ON BOOL) # Do not report compiler warnings for build of ANT
 set(ANTLR4_BUILD_AS_STATIC_LIBRARY
     ON
     CACHE BOOL "Build the ANTLR4 runtime as a static library (turned on by default)")
+set(ANTLR4_GIT_SHALLOW_CLONE
+    OFF
+    CACHE BOOL "Should a shallow clone of the ANTLR4 runtime be performed (only required when refering to branch or tag)"
+)
 
 message(STATUS "ANTLR git repo: ${ANTLR4_GIT_REPOSITORY}")
 message(STATUS "ANTLR git tag: ${ANTLR4_TAG}")
@@ -146,16 +156,16 @@ if(ANTLR4_BUILD_AS_STATIC_LIBRARY)
     FetchContent_Declare(
       antlr4_static
       GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-      GIT_SHALLOW ON
+      GIT_SHALLOW ${ANTLR4_GIT_SHALLOW_CLONE}
       GIT_TAG ${ANTLR4_TAG}
-      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTL4_VERSION})
+      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTLR4_VERSION})
   else()
     find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
     if(NOT antlr4_static_FOUND)
       FetchContent_Declare(
         antlr4_static
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW ON
+        GIT_SHALLOW ${ANTLR4_GIT_SHALLOW_CLONE}
         GIT_TAG ${ANTLR4_TAG}
         SOURCE_SUBDIR runtime/Cpp)
     endif()
@@ -174,16 +184,16 @@ else()
     FetchContent_Declare(
       antlr4_shared
       GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-      GIT_SHALLOW ON
+      GIT_SHALLOW ${ANTLR4_GIT_SHALLOW_CLONE}
       GIT_TAG ${ANTLR4_TAG}
-      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTL4_VERSION})
+      SOURCE_SUBDIR runtime/Cpp FIND_PACKAGE_ARGS ${ANTLR4_VERSION})
   else()
     find_package(antlr4_static ${ANTLR4_VERSION} QUIET)
     if(NOT antlr4_static_FOUND)
       FetchContent_Declare(
         antlr4_shared
         GIT_REPOSITORY ${ANTLR4_GIT_REPOSITORY}
-        GIT_SHALLOW ON
+        GIT_SHALLOW ${ANTLR4_GIT_SHALLOW_CLONE}
         GIT_TAG ${ANTLR4_TAG}
         SOURCE_SUBDIR runtime/Cpp)
     endif()
