@@ -15,6 +15,7 @@
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -91,8 +92,8 @@ namespace syrec {
             }
         }
 
-        for (int i = 0; i < static_cast<int>(checkRhsVec.size()); i++) {
-            for (int j = 0; j < static_cast<int>(checkRhsVec.size()); j++) {
+        for (unsigned i = 0; i < checkRhsVec.size(); i++) {
+            for (unsigned j = 0; j < checkRhsVec.size(); j++) {
                 if ((j != i) && checkRhsVec.at(i) == checkRhsVec.at(j)) {
                     expOpVector.clear();
                     expLhsVector.clear();
@@ -785,11 +786,11 @@ namespace syrec {
         std::vector<unsigned> sum;
         std::vector<unsigned> partial;
 
-        for (unsigned i = 1U; i < src1.size(); ++i) {
+        for (auto i = 1U; i < src1.size(); ++i) {
             get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(i));
         }
 
-        for (unsigned i = 1U; i < src1.size(); ++i) {
+        for (auto i = 1U; i < src1.size(); ++i) {
             addActiveControl(src2.at(i));
         }
 
@@ -828,7 +829,7 @@ namespace syrec {
         ok = ok && bitwiseCnot(sum, partial);
         removeActiveControl(src1.at(0));
 
-        for (unsigned i = 1; i < dest.size(); ++i) {
+        for (std::size_t i = 1; i < dest.size(); ++i) {
             sum.erase(sum.begin());
             partial.pop_back();
             addActiveControl(src1.at(i));
@@ -850,7 +851,7 @@ namespace syrec {
     // TODO: A rename of the function would allow one to drop the now required linter annotations regarding swap functions which are expected to be exceptionless
     // NOLINTNEXTLINE(cppcoreguidelines-noexcept-swap, performance-noexcept-swap, bugprone-exception-escape)
     void SyrecSynthesis::swap(const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) {
-        for (unsigned i = 0U; i < dest1.size(); ++i) {
+        for (auto i = 0U; i < dest1.size(); ++i) {
             get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendFredkin(dest1.at(i), dest2.at(i));
         }
     }
@@ -860,13 +861,13 @@ namespace syrec {
     //**********************************************************************
 
     void SyrecSynthesis::leftShift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
-        for (unsigned i = 0U; i + src2 < dest.size(); ++i) {
+        for (auto i = 0U; i + src2 < dest.size(); ++i) {
             get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src1.at(i), dest.at(i + src2));
         }
     }
 
     void SyrecSynthesis::rightShift(const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
-        for (unsigned i = src2; i < dest.size(); ++i) {
+        for (auto i = src2; i < dest.size(); ++i) {
             get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src1.at(i), dest.at(i - src2));
         }
     }
@@ -935,9 +936,9 @@ namespace syrec {
 
         if (!var->indexes.empty()) {
             // check if it is all numeric_expressions
-            const unsigned n = static_cast<int>(var->getVar()->dimensions.size()); // dimensions
-            if (static_cast<unsigned>(std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<NumericExpression*>(p.get()); })) == n) {
-                for (unsigned i = 0U; i < n; ++i) {
+            const std::size_t n = var->getVar()->dimensions.size(); // dimensions
+            if (std::all_of(var->indexes.cbegin(), var->indexes.cend(), [](const auto& exprDefiningAccessedValueOfDimension) { return exprDefiningAccessedValueOfDimension != nullptr && dynamic_cast<const NumericExpression*>(exprDefiningAccessedValueOfDimension.get()) != nullptr; })) {
+                for (auto i = 0U; i < n; ++i) {
                     offset += dynamic_cast<NumericExpression*>(var->indexes.at(i).get())->value->evaluate(loopMap) *
                               std::accumulate(var->getVar()->dimensions.begin() + i + 1U, var->getVar()->dimensions.end(), 1U, std::multiplies<>()) *
                               var->getVar()->bitwidth;
@@ -956,7 +957,7 @@ namespace syrec {
                     lines.emplace_back(offset + i);
                 }
             } else {
-                for (auto i = static_cast<int>(first); i >= static_cast<int>(second); --i) {
+                for (auto i = first; i >= second; --i) {
                     lines.emplace_back(offset + i);
                 }
             }
@@ -1002,7 +1003,7 @@ namespace syrec {
             const unsigned              len = dimensions.front();
             const std::vector<unsigned> newDimensions(dimensions.begin() + 1U, dimensions.end());
 
-            for (unsigned i = 0U; i < len; ++i) {
+            for (auto i = 0U; i < len; ++i) {
                 addVariable(circ, newDimensions, var, constant, garbage, arraystr + "[" + std::to_string(i) + "]");
             }
         }
@@ -1051,7 +1052,6 @@ namespace syrec {
 
     bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         // Settings parsing
-        auto variableNameFormat = get<std::string>(settings, "variable_name_format", "%1$s%3$s.%2$d");
         auto mainModule         = get<std::string>(settings, "main_module", std::string());
         // Run-time measuring
         Timer<PropertiesTimer> t;

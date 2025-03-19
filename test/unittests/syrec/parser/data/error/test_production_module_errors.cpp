@@ -2,6 +2,7 @@
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
 #include "test_syrec_parser_errors_base.hpp"
 
+#include <climits>
 #include <gtest/gtest.h>
 
 using namespace syrec_parser_error_tests;
