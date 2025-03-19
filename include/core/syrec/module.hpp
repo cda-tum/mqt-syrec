@@ -3,7 +3,6 @@
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
