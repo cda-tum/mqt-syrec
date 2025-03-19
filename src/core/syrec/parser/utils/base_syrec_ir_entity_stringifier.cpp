@@ -279,9 +279,8 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     } else {
         for (std::size_t i = 0; stringificationSuccessful && i < numModulesParameters; ++i) {
             const auto& variable                = variables.at(i);
-            const bool  variableTypeGroupChange = i != 0 && variable && variable->type != variables.at(i - 1)->type;
-
-            stringificationSuccessful &= variable && (variableTypeGroupChange ? appendNewlineToStream(outputStream) && appendIndentationPaddingSequence(outputStream, indentationSequence) : true) && (i != 0 ? appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",") : true) && stringify(outputStream, *variable, i == 0 || variableTypeGroupChange);
+            const bool variableTypeGroupChange = i > 0 && (variable != nullptr && variables.at(i - 1) != nullptr && variable->type != variables.at(i - 1)->type);
+            stringificationSuccessful &= variable != nullptr && (variableTypeGroupChange ? appendNewlineToStream(outputStream) && appendIndentationPaddingSequence(outputStream, indentationSequence) : (i > 0 ? appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",") : true)) && stringify(outputStream, *variable, i == 0 || variableTypeGroupChange);
         }
     }
     return stringificationSuccessful;

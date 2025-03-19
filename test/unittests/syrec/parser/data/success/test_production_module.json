@@ -14,6 +14,9 @@
   "moduleDeclarationWithSingleLocalVariableOfTypeWireOk": {
     "inputCircuit": "module main() wire a(4) skip"
   },
+  "moduleDeclarationWithSingleLocalVariableOfTypeStateOk": {
+    "inputCircuit": "module main() state a(4) skip"
+  },
   "omittingExplicitDeclarationOfNumberOfValuesOfDimensionsForParameterOfModuleOk": {
     "inputCircuit": "module main(inout a(4)) skip"
   },
@@ -49,6 +52,10 @@
   "multipleLocalModuleVariablesDeclarationsWithSameVariableTypeInSeparateDeclarationsOk": {
     "inputCircuit": "module main() wire a(4) wire b[2][3](6), c(2) wire d(4) skip",
     "expectedCircuit": "module main() wire a(4), b[2][3](6), c(2), d(4) skip"
+  },
+  "multipleLocalModuleVariablesDeclarationsWithDifferentVariableTypesInSeparateDeclarationsOk": {
+    "inputCircuit": "module main() wire a(4) state b[2][3](6), c(2) wire d(4) wire e(4) skip",
+    "expectedCircuit": "module main() wire a(4) state b[2][3](6), c(2) wire d(4), e(4) skip"
   },
   "usageOfMultipleStatementsInModuleBodyAllowed": {
     "inputCircuit": "module main(inout a(4), in b(4)) a += b; if (a.1 > b.1) then ++= a else --= a fi (a.1 > b.1); --= a",
