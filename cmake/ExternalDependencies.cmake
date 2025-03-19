@@ -112,14 +112,16 @@ set(ANTLR4_VERSION
     4.13.2
     CACHE STRING "ANTLR4 runtime version")
 
-# Note that the specified hash value refers to a commit in the 'origin/dev' branch of the 
-# ANTLR4 runtime git repository that is currently needed to be able to compile the runtime on windows using the mvsc
-# compiler (see https://github.com/antlr/antlr4/pull/4738). Due to the GIT_TAG option of the FetchContent_Declare
-# CMake function (inherited from the ExternalProject_Add(...) function) only allowing commit hashes if the GIT_SHALLOW
-# argument is disabled (https://cmake.org/cmake/help/latest/module/ExternalProject.html#git), a full-checkout of the ANTLR4 git
-# repository will currently be performed. If the needed changes are merge into the 'origin/master' branch of the ANTLR runtime,
-# the ANTLR4_TAG should be updated to the 'new' version number and the GIT_SHALLOW argument enabled (i.e. set to ON) to only
-# perform a clone of the git repository of depth 1.
+# Note that the specified hash value refers to a commit in the 'origin/dev' branch of the ANTLR4
+# runtime git repository that is currently needed to be able to compile the runtime on windows using
+# the mvsc compiler (see https://github.com/antlr/antlr4/pull/4738). Due to the GIT_TAG option of
+# the FetchContent_Declare CMake function (inherited from the ExternalProject_Add(...) function)
+# only allowing commit hashes if the GIT_SHALLOW argument is disabled
+# (https://cmake.org/cmake/help/latest/module/ExternalProject.html#git), a full-checkout of the
+# ANTLR4 git repository will currently be performed. If the needed changes are merge into the
+# 'origin/master' branch of the ANTLR runtime, the ANTLR4_TAG should be updated to the 'new' version
+# number and the GIT_SHALLOW argument enabled (i.e. set to ON) to only perform a clone of the git
+# repository of depth 1.
 set(ANTLR4_TAG
     "5435f14134eb699d7484d46d946df817dfe97297"
     CACHE STRING "Antlr4 runtime identifier (tag, branch or commit hash)")
@@ -132,7 +134,9 @@ set(ANTLR4_BUILD_AS_STATIC_LIBRARY
     CACHE BOOL "Build the ANTLR4 runtime as a static library (turned on by default)")
 set(ANTLR4_GIT_SHALLOW_CLONE
     OFF
-    CACHE BOOL "Should a shallow clone of the ANTLR4 runtime be performed (only required when refering to branch or tag)"
+    CACHE
+      BOOL
+      "Should a shallow clone of the ANTLR4 runtime be performed (only required when referring to branch or tag)"
 )
 
 message(STATUS "ANTLR git repo: ${ANTLR4_GIT_REPOSITORY}")

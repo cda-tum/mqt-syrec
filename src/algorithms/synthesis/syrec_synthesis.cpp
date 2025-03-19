@@ -1052,7 +1052,7 @@ namespace syrec {
 
     bool SyrecSynthesis::synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics) {
         // Settings parsing
-        auto mainModule         = get<std::string>(settings, "main_module", std::string());
+        auto mainModule = get<std::string>(settings, "main_module", std::string());
         // Run-time measuring
         Timer<PropertiesTimer> t;
 
