@@ -957,7 +957,7 @@ namespace syrec {
                     lines.emplace_back(offset + i);
                 }
             } else {
-                for (auto i = first; i >= second; --i) {
+                for (auto i = static_cast<int>(first); i >= static_cast<int>(second); --i) {
                     lines.emplace_back(offset + i);
                 }
             }
