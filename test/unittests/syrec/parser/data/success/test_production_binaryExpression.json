@@ -124,7 +124,7 @@
     "inputCircuit": "module main(in a(4), out res(4)) res += (a / (#a - 3))",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += a[0]"
   },
-  "simplificationOfDivisionWhenLhsOperandEvalutedToOneIsNotPerformed": {
+  "simplificationOfDivisionWhenLhsOperandEvaluatedToOneIsNotPerformed": {
     "inputCircuit": "module main(in a(4), out res(4)) res += ((#a - 3) / a)",
     "expectedCircuit": "module main(in a(4), out res(4)) res[0] += (1 / a[0])"
   },
@@ -148,7 +148,7 @@
     "inputCircuit": "module main(in a(4), out res(1)) res += (1 || a.1)",
     "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
   },
-  "simplficiationOfLogicalOrOperationWhenRhsOperandEvalutesToOne": {
+  "simplficiationOfLogicalOrOperationWhenRhsOperandEvaluatesToOne": {
     "inputCircuit": "module main(in a(4), out res(1)) res += (a.1 || 1)",
     "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
   },
