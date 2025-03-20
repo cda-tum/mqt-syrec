@@ -97,9 +97,7 @@ namespace syrec {
             if (foundFileHandlingErrors != nullptr) {
                 *foundFileHandlingErrors = "Error while reading content from file @ " + std::string(filename);
             }
-        }
-
-        if (foundFileHandlingErrors != nullptr && foundFileHandlingErrors->empty()) {
+        } else if (foundFileHandlingErrors != nullptr) {
             *foundFileHandlingErrors = "Cannot open given circuit file @ " + std::string(filename);
         }
         return std::nullopt;
