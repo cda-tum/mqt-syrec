@@ -40,7 +40,12 @@
     "quantum_costs": 1492,
     "transistor_costs": 3776
   },
-
+  "constExpr_8": {
+    "num_gates": 8,
+    "lines": 16,
+    "quantum_costs": 8,
+    "transistor_costs": 64
+  },
   "divide_2": {
     "num_gates": 252,
     "lines": 22,
@@ -152,7 +157,12 @@
     "quantum_costs": 333,
     "transistor_costs": 1064
   },
-
+  "relationalOp_4": {
+    "num_gates": 361,
+    "lines": 60,
+    "quantum_costs": 755,
+    "transistor_costs": 2768
+  },
   "shift_4": {
     "num_gates": 11,
     "lines": 20,
