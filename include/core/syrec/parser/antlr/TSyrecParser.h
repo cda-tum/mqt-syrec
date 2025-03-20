@@ -1,6 +1,5 @@
 #pragma once
 
-// Generated from C:/School/MThesis/mqt-syrec-antlr/src/core/syrec/parser/antlr/grammar/TSyrecParser.g4 by ANTLR 4.13.2
 #include "Parser.h"
 #include "ParserRuleContext.h"
 #include "Token.h"
@@ -17,6 +16,9 @@
 #include <vector>
 
 namespace syrec_parser {
+    /**
+     * @brief A non-thread-safe ANTLR-generated (v4.13.2) SyReC parser
+     */
     class TSyrecParser: public antlr4::Parser {
     public:
         enum : std::uint8_t {

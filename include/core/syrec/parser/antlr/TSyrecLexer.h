@@ -1,6 +1,5 @@
 #pragma once
 
-// Generated from C:/School/MThesis/mqt-syrec-antlr/src/core/syrec/parser/antlr/grammar/TSyrecLexer.g4 by ANTLR 4.13.2
 #include "CharStream.h"
 #include "Lexer.h"
 #include "Vocabulary.h"
@@ -11,6 +10,9 @@
 #include <vector>
 
 namespace syrec_parser {
+    /**
+     * @brief A non-thread-safe ANTLR-generated (v4.13.2) SyReC lexer
+     */
     class TSyrecLexer: public antlr4::Lexer {
     public:
         explicit TSyrecLexer(antlr4::CharStream* input);
