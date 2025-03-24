@@ -75,7 +75,7 @@ namespace {
     void initializeStaticLexerData() {
         assert(lexerStaticData == nullptr);
 
-        // Currently we are assuming that the auto-generated string constants in the std::vector instances used to initialize the 
+        // Currently we are assuming that the auto-generated string constants in the std::vector instances used to initialize the
         // TSyrecLexerStaticData class should not be modified as they are used to debugging/visualization purposes (that is our
         // current assumption based on the Java documentation [e.g. https://www.antlr.org/api/Java/org/antlr/v4/runtime/Recognizer.html#getGrammarFileName()]
         // with the C++ implementation being assumed to be functionally equivalent). "Debugging purporses" could also mean resolving
