@@ -340,8 +340,8 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitForStatementTy
         // The iteration range is equivalent to the python range(<START>, <END>, <STEP>) function, meaning that we assume that the <END> value is not included in the iteration range (i.e. equal to for $i = START; $i < END; $i += STEP)
         if (*valueOfIterationRangeStart < *valueOfIterationRangeEnd) {
             shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart + *valueOfIterationRangeStepSize <= *valueOfIterationRangeEnd;
-        } else if (*valueOfIterationRangeEnd > *valueOfIterationRangeStart) {
-            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeEnd + *valueOfIterationRangeStepSize <= *valueOfIterationRangeStart;
+        } else if (*valueOfIterationRangeStart > *valueOfIterationRangeEnd) {
+            shouldValueOfLoopVariableBeResetPriorToProcessingOfLoopBody = *valueOfIterationRangeStart - *valueOfIterationRangeStepSize >= *valueOfIterationRangeEnd;
         }
     }
 

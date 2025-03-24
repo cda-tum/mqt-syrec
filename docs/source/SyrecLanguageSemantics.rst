@@ -213,24 +213,28 @@ ForStatement
 
 - Due to the assumption that all variable values can be represented by unsigned integer values, negative step size values are converted to their unsigned value using the C++17 value conversion semantics (see `chapter 7.8 <https://open-std.org/JTC1/SC22/WG21/docs/standards>`_). The same conversion is applied to all negative values determined at compile time.
 - Semantic/Syntax errors in the statements of the body of a loop performing no iterations are reported due to the parser not implementing the dead code elimination technique.
-- The following example will showcase how the iteration range of a SyReC loop is evaluated and could be rewritten as a C loop:
+- The iteration range of SyReC loops can be determined as shown in the following example:
 
   .. code-block:: text
 
    module main(inout a(32))
+     // Loop will perform three iterations (loop variable *$i* will have values :math:`0, 2, 4`).
      for $i = 0 to 5 step 2 do
        ++= a
      rof
 
-    // Is equivalent to the C loop
+    // Equivalent C loop
     unsigned int a = ...;
     for (unsigned int i = 0; i < 5; i += 2) {
       ++= a
     }
 
-  The value of the loop variable *$i* in the 3 performed iterations of the loop is :math:`0, 2, 4`
+    // Loop will perform three iterations (loop variable *$i* will have values :math:`5, 3, 1`). 
+    for $i = 5 to 0 step 2 do 
+        ++= a
+    rof
 
-- The value of the step size of a ForStatement cannot be defined or evaluate to 0 since this would cause an infinite loop.
+- The value of the step size of a ForStatement cannot be defined as or evaluate to 0 to prevent an infinite loop.
 
 IfStatement
 ^^^^^^^^^^^
