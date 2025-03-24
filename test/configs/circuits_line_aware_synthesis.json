@@ -70,6 +70,12 @@
     "quantum_costs": 312,
     "transistor_costs": 992
   },
+  "ifCondVariants_4": {
+    "num_gates": 251,
+    "lines": 23,
+    "quantum_costs": 1269,
+    "transistor_costs": 3496
+  },
   "input_repeated_2": {
     "num_gates": 50,
     "lines": 22,
