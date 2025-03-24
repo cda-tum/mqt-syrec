@@ -1,5 +1,5 @@
-#include "core/syrec/program.hpp"
 #include "core/syrec/parser/utils/parser_messages_container.hpp"
+#include "core/syrec/program.hpp"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -9,15 +9,15 @@ namespace {
 
     class SyrecParserPublicInterfaceErrorCasesTestFixture: public testing::Test {
     protected:
-        syrec::Program  parserInstance;
+        syrec::Program parserInstance;
 
         /**
          * @brief Check that parsing SyReC program from ill-formed path does not crash parser.
-         * 
+         *
          * Since both parser as well as file-handling errors are combined in the return value of the read(...) functions of the parser public interface
          * with the format of the latter not being specified, our check whether the processing of an ill-formed file input was OK
          * is reduced to a check whether the read(...) call did not throw and returned an non-empty error.
-         * 
+         *
          * @param pathToBeProcessedFile The path to the SyReC circuit to process.
          */
         void assertReadFromFileDoesNotCrashParser(const std::string& pathToBeProcessedFile) {
@@ -51,7 +51,7 @@ TEST_F(SyrecParserPublicInterfaceErrorCasesTestFixture, ReadProgramFromMalformed
 }
 
 TEST_F(SyrecParserPublicInterfaceErrorCasesTestFixture, ReadFromEmptyStringCausesError) {
-    const std::string foundErrors = parserInstance.readFromString("");
+    const std::string foundErrors   = parserInstance.readFromString("");
     const std::string expectedError = syrec_parser::Message(syrec_parser::Message::Type::Error, "SYNTAX", syrec_parser::Message::Position(1, 0), "mismatched input '<EOF>' expecting 'module'").stringify();
     ASSERT_EQ(expectedError, foundErrors);
 }
