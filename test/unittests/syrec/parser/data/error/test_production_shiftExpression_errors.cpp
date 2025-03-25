@@ -61,3 +61,13 @@ TEST_F(SyrecParserErrorTestsFixture, SemanticErrorInToBeShiftedExpressionReporte
     buildAndRecordExpectedSemanticError<SemanticError::NoVariableMatchingIdentifier>(Message::Position(1, 32), "b");
     performTestExecution("module main(inout a(2)) a.0 += (b.1 << 2)");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfShiftExpressionIsPropagatedToBinaryExpr) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 86), 2, 1);
+    performTestExecution("module main(inout a(4), in b(2), in c(2)) for $i = 0 to 3 do ++= a[(((b << 1) / $i) + c[0].0)] rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfShiftExpressionIsPropagatedToShiftExpr) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 86), 3, 2);
+    performTestExecution("module main(inout a(4), in b(3), in c(2)) for $i = 0 to 3 do ++= a[(((b << 2) / $i) + (c[0].0:1 >> 1))] rof");
+}

@@ -273,3 +273,14 @@ TEST_F(SyrecParserErrorTestsFixture, BinaryExpressionUsingRelationalOperationWit
     buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 42), 3, 2);
     performTestExecution("module main(inout a(4), in b(2)) a.1:3 += (b + (#a < 2))");
 }
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfBinaryExpressionIsPropagatedToShiftExpr) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 90), 1, 2);
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 149), 1, 2);
+    performTestExecution("module main(inout a(4), in b(2), in c[3](4)) for $i = 0 to 3 do if c[(((b.1 + 2) << $i) + a[0].0:1)].0 then skip else skip fi c[(((b.1 + 2) << $i) + a[0].0:1)].0 rof");
+}
+
+TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfBinaryExpressionIsPropagatedToBinaryExpr) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 92), 2, 1);
+    performTestExecution("module main(inout a(4), in b(2), in c(2)) for $i = 0 to 3 step 2 do ++= a[(((b + 2) / $i) + c[0].0)] rof");
+}

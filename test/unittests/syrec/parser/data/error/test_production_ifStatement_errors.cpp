@@ -411,23 +411,8 @@ TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionSetInExpressionFo
     performTestExecution("module main(inout a[1](4), in b(4)) for $i = 0 to 1 do if (a.$i + b) then ++= a[0] else --= a fi (a.$i + b) rof");
 }
 
-TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfBinaryExpressionIsPropagatedToShiftExpr) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 90), 1, 2);
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 149), 1, 2);
-    performTestExecution("module main(inout a(4), in b(2), in c[3](4)) for $i = 0 to 3 do if c[(((b.1 + 2) << $i) + a[0].0:1)].0 then skip else skip fi c[(((b.1 + 2) << $i) + a[0].0:1)].0 rof");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfBinaryExpressionIsPropagatedToBinaryExpr) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 92), 2, 1);
-    performTestExecution("module main(inout a(4), in b(2), in c(2)) for $i = 0 to 3 step 2 do ++= a[(((b + 2) / $i) + c[0].0)] rof");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfShiftExpressionIsPropagatedToBinaryExpr) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 86), 2, 1);
-    performTestExecution("module main(inout a(4), in b(2), in c(2)) for $i = 0 to 3 do ++= a[(((b << 1) / $i) + c[0].0)] rof");
-}
-
-TEST_F(SyrecParserErrorTestsFixture, OperandBitwidthRestrictionOfShiftExpressionIsPropagatedToShiftExpr) {
-    buildAndRecordExpectedSemanticError<SemanticError::ExpressionBitwidthMismatches>(Message::Position(1, 86), 3, 2);
-    performTestExecution("module main(inout a(4), in b(3), in c(2)) for $i = 0 to 3 do ++= a[(((b << 2) / $i) + (c[0].0:1 >> 1))] rof");
+TEST_F(SyrecParserErrorTestsFixture, DivisionByZeroDetectedDuringTruncationOfIntegerConstantsInBinaryExpressionWithUnknownBitwidthAtCompileTimeCausesError) {
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 53));
+    buildAndRecordExpectedSemanticError<SemanticError::ExpressionEvaluationFailedDueToDivisionByZero>(Message::Position(1, 90));
+    performTestExecution("module main(inout a(4)) for $i = 0 to (#a - 1) do if (a.0:$i / 2) then ++= a else skip fi (a.0:$i / 2) rof");
 }

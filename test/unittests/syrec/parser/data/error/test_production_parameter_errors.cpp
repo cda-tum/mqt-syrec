@@ -133,16 +133,16 @@ TEST_F(SyrecParserErrorTestsFixture, ModuleParameterDeclarationWithImplicitlyDef
     constexpr unsigned int defaultSignalBitwidth           = 0;
     const auto             userProvidedParserConfiguration = syrec::ReadProgramSettings(defaultSignalBitwidth);
 
-    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 29));
-    performTestExecution("module main(inout a(4), in b(0)) ++= a", userProvidedParserConfiguration);
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 27));
+    performTestExecution("module main(inout a(4), in b) ++= a", userProvidedParserConfiguration);
 }
 
 TEST_F(SyrecParserErrorTestsFixture, ModuleLocalVariableDeclarationWithImplicitlyDefinedBitwidthOfZeroNotPossible) {
     constexpr unsigned int defaultSignalBitwidth           = 0;
     const auto             userProvidedParserConfiguration = syrec::ReadProgramSettings(defaultSignalBitwidth);
 
-    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 31));
-    performTestExecution("module main(inout a(4)) wire b(0) ++= a", userProvidedParserConfiguration);
+    buildAndRecordExpectedSemanticError<SemanticError::VariableBitwidthEqualToZero>(Message::Position(1, 29));
+    performTestExecution("module main(inout a(4)) wire b ++= a", userProvidedParserConfiguration);
 }
 
 TEST_F(SyrecParserErrorTestsFixture, ModuleParameterDeclarationWithExplicitlyDefinedNumberOfValuesForDimensionEqualToZeroNotPossible) {
