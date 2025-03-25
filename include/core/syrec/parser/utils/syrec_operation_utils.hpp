@@ -2,6 +2,7 @@
 
 #include "core/syrec/expression.hpp"
 
+#include <climits>
 #include <cstdint>
 #include <optional>
 
@@ -31,9 +32,12 @@ namespace utils {
         if (expectedResultBitwidth == 0) {
             return 0;
         }
+        if (expectedResultBitwidth > 32) {
+            return valueToTruncate;
+        }
 
-        const unsigned int maxValueStorableInExpectedResultBitwidth = (1U << expectedResultBitwidth) - 1U;
-        if (expectedResultBitwidth >= 32 || valueToTruncate < maxValueStorableInExpectedResultBitwidth) {
+        const unsigned int maxValueStorableInExpectedResultBitwidth = expectedResultBitwidth == 32 ? UINT_MAX : (1U << expectedResultBitwidth) - 1U;
+        if (valueToTruncate < maxValueStorableInExpectedResultBitwidth) {
             return valueToTruncate;
         }
 
@@ -45,31 +49,6 @@ namespace utils {
             return valueToTruncate % maxValueStorableInExpectedResultBitwidth;
         }
         return valueToTruncate;
-    }
-
-    /**
-     * @brief Determine whether the given operand is the identity element of the binary operation for the range of unsigned integers.
-     * @param operandValue The element to test
-     * @param isOperandRhsOperandOfBinaryOperation Is the element to test the right hand side operand of the binary operation
-     * @param binaryOperation The binary operation used for the identity element check
-     * @return Whether the operand is the identity element
-     */
-    [[nodiscard]] inline bool isOperandIdentityElementOfOperation(const unsigned int operandValue, bool isOperandRhsOperandOfBinaryOperation, syrec::BinaryExpression::BinaryOperation binaryOperation) {
-        switch (binaryOperation) {
-            case syrec::BinaryExpression::BinaryOperation::Add:
-            case syrec::BinaryExpression::BinaryOperation::Exor:
-            case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
-            case syrec::BinaryExpression::BinaryOperation::LogicalOr:
-                return operandValue == 0;
-            case syrec::BinaryExpression::BinaryOperation::Subtract:
-                return isOperandRhsOperandOfBinaryOperation && operandValue == 0;
-            case syrec::BinaryExpression::BinaryOperation::Divide:
-            case syrec::BinaryExpression::BinaryOperation::Multiply:
-            case syrec::BinaryExpression::BinaryOperation::LogicalAnd:
-                return operandValue == 1;
-            default:
-                return false;
-        }
     }
 
     /**
@@ -157,10 +136,6 @@ namespace utils {
                 default:
                     break;
             }
-        } else if (lOperand.has_value() && isOperandIdentityElementOfOperation(*lOperand, false, binaryOperation)) {
-            evaluationResult = rOperand;
-        } else if (rOperand.has_value() && isOperandIdentityElementOfOperation(*rOperand, true, binaryOperation)) {
-            evaluationResult = lOperand;
         }
         return evaluationResult;
     }
@@ -170,18 +145,25 @@ namespace utils {
      * @param toBeShiftedValue The left hand side value of the shift operation
      * @param shiftOperation The shift operation to use for the evaluation of the shift expression
      * @param shiftAmount The right hand side value of the shift operation defining the number of positions each bit of the left hand side operand is shifted using the shift operation.
-     * @return The result of the shift operation if both operands had a constant value, 0 if either the \p toBeShiftedValue or the \p shiftAmount had a value of zero, otherwise std::nullopt.
+     * @return The result of the shift operation if both operands had a constant value, 0 if the \p toBeShiftedValue has a value of zero, otherwise std::nullopt.
      */
     [[nodiscard]] inline std::optional<unsigned int> tryEvaluate(const std::optional<unsigned int> toBeShiftedValue, syrec::ShiftExpression::ShiftOperation shiftOperation, const std::optional<unsigned int> shiftAmount) {
         if (shiftAmount.has_value() && *shiftAmount == 0) {
             return toBeShiftedValue;
         }
-        if (toBeShiftedValue.has_value() && shiftAmount.has_value()) {
+        if (toBeShiftedValue.has_value()) {
             if (*toBeShiftedValue == 0) {
                 return 0;
             }
 
-            return shiftOperation == syrec::ShiftExpression::ShiftOperation::Left ? *toBeShiftedValue << *shiftAmount : *toBeShiftedValue >> *shiftAmount;
+            if (shiftAmount.has_value()) {
+                switch (shiftOperation) {
+                    case syrec::ShiftExpression::ShiftOperation::Left:
+                        return *toBeShiftedValue << *shiftAmount;
+                    case syrec::ShiftExpression::ShiftOperation::Right:
+                        return *toBeShiftedValue >> *shiftAmount;
+                }
+            }
         }
         return std::nullopt;
     }

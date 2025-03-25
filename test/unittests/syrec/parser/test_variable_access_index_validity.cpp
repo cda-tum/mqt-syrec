@@ -194,25 +194,7 @@ INSTANTIATE_TEST_SUITE_P(VariableAccessIndexValidityTests, VariableAccessSuccess
                                                          VariableAccessData({{0, 1, 2}, std::make_pair(DEFAULT_SIGNAL_BITWIDTH - 4, 4)})}),
                                  VariableAccessTestData({"AccessOnBitRangeWithStartLargerThanEnd_StartAtIntermediatePositionEndAtStart_WithinRangeOk",
                                                          VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1, 2, 3}, DEFAULT_SIGNAL_BITWIDTH}),
-                                                         VariableAccessData({{0, 1, 2}, std::make_pair(DEFAULT_SIGNAL_BITWIDTH - 4, 0)})}),
-
-                                 /*VariableAccessTestData({"AccessOnSomeDimensionsAndBitrangeWithinRangeOk",
-            VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1, 2, 3}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0, 1}, std::nullopt})
-        }),
-        VariableAccessTestData({"AccessOnOneValuePerDimensionAndBitrangeWithinRangeOk",
-            VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1, 2, 3}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0, 1}, std::nullopt})
-        }),
-        VariableAccessTestData({"AccessOnSomeDimensionsAndBitWithinRangeOk",
-            VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1, 2, 3}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0, 1}, std::nullopt})
-        }),
-        VariableAccessTestData({"AccessOnOneValuePerDimensionAndBitWithinRangeOk",
-            VariableDefinition({DEFAULT_VARIABLE_IDENTIFIER, {1, 2, 3}, DEFAULT_SIGNAL_BITWIDTH}),
-            VariableAccessData({{0, 1}, std::nullopt})
-        }),*/
-
+                                                         VariableAccessData({{0, 1, 2}, std::make_pair(DEFAULT_SIGNAL_BITWIDTH - 4, 0)})})
                          }),
                          [](const testing::TestParamInfo<VariableAccessSuccessTestFixture::ParamType>& info) {
                              return info.param.testCaseName;
