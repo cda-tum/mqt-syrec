@@ -187,10 +187,7 @@ namespace syrec_parser {
             NumberContext*                            lhsOperand = nullptr;
             antlr4::Token*                            op         = nullptr;
             NumberContext*                            rhsOperand = nullptr;
-            [[nodiscard]] antlr4::tree::TerminalNode* literalOpenRBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode* literalCloseRBracket() const;
             [[nodiscard]] std::vector<NumberContext*> number() const;
-            [[nodiscard]] NumberContext*              number(size_t i) const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpPlus() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMinus() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMultiply() const;
@@ -216,12 +213,9 @@ namespace syrec_parser {
             [[nodiscard]] size_t                          getRuleIndex() const override;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalKeywordModule() const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalIdent() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*     literalOpenRBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*     literalCloseRBracket() const;
             [[nodiscard]] StatementListContext*           statementList() const;
             [[nodiscard]] ParameterListContext*           parameterList() const;
             [[nodiscard]] std::vector<SignalListContext*> signalList() const;
-            [[nodiscard]] SignalListContext*              signalList(size_t i) const;
         };
 
         ModuleContext* module();
@@ -229,11 +223,8 @@ namespace syrec_parser {
         class ParameterListContext: public antlr4::ParserRuleContext {
         public:
             ParameterListContext(ParserRuleContext* parent, size_t invokingState);
-            [[nodiscard]] size_t                                   getRuleIndex() const override;
-            [[nodiscard]] std::vector<ParameterContext*>           parameter() const;
-            [[nodiscard]] ParameterContext*                        parameter(size_t i) const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
+            [[nodiscard]] size_t                         getRuleIndex() const override;
+            [[nodiscard]] std::vector<ParameterContext*> parameter() const;
         };
 
         ParameterListContext* parameterList();
@@ -253,13 +244,10 @@ namespace syrec_parser {
         class SignalListContext: public antlr4::ParserRuleContext {
         public:
             SignalListContext(ParserRuleContext* parent, size_t invokingState);
-            [[nodiscard]] size_t                                   getRuleIndex() const override;
-            [[nodiscard]] std::vector<SignalDeclarationContext*>   signalDeclaration() const;
-            [[nodiscard]] SignalDeclarationContext*                signalDeclaration(size_t i) const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalVarTypeWire() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalVarTypeState() const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
+            [[nodiscard]] size_t                                 getRuleIndex() const override;
+            [[nodiscard]] std::vector<SignalDeclarationContext*> signalDeclaration() const;
+            [[nodiscard]] antlr4::tree::TerminalNode*            literalVarTypeWire() const;
+            [[nodiscard]] antlr4::tree::TerminalNode*            literalVarTypeState() const;
         };
 
         SignalListContext* signalList();
@@ -272,14 +260,7 @@ namespace syrec_parser {
             SignalDeclarationContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                                   getRuleIndex() const override;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalIdent() const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalOpenSBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalOpenSBracket(size_t i) const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalCloseSBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalCloseSBracket(size_t i) const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalOpenRBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalCloseRBracket() const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalInt() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalInt(size_t i) const;
         };
 
         SignalDeclarationContext* signalDeclaration();
@@ -289,11 +270,8 @@ namespace syrec_parser {
             StatementContext*              statementContext = nullptr;
             std::vector<StatementContext*> stmts;
             StatementListContext(ParserRuleContext* parent, size_t invokingState);
-            [[nodiscard]] size_t                                   getRuleIndex() const override;
-            [[nodiscard]] std::vector<StatementContext*>           statement() const;
-            [[nodiscard]] StatementContext*                        statement(size_t i) const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalStatementDelimiter() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalStatementDelimiter(size_t i) const;
+            [[nodiscard]] size_t                         getRuleIndex() const override;
+            [[nodiscard]] std::vector<StatementContext*> statement() const;
         };
 
         StatementListContext* statementList();
@@ -320,14 +298,9 @@ namespace syrec_parser {
             std::vector<antlr4::Token*> callerArguments;
             CallStatementContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                                   getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalOpenRBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalCloseRBracket() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalOpCall() const;
             [[nodiscard]] antlr4::tree::TerminalNode*              literalOpUncall() const;
             [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalIdent() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalIdent(size_t i) const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalParameterDelimiter() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalParameterDelimiter(size_t i) const;
         };
 
         CallStatementContext* callStatement();
@@ -348,7 +321,6 @@ namespace syrec_parser {
         public:
             LoopStepsizeDefinitionContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                      getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode* literalKeywordStep() const;
             [[nodiscard]] NumberContext*              number() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpMinus() const;
         };
@@ -362,12 +334,7 @@ namespace syrec_parser {
             ForStatementContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                         getRuleIndex() const override;
             [[nodiscard]] antlr4::tree::TerminalNode*    literalKeywordFor() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*    literalKeywordDo() const;
             [[nodiscard]] StatementListContext*          statementList() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*    literalKeywordRof() const;
-            [[nodiscard]] std::vector<NumberContext*>    number() const;
-            [[nodiscard]] NumberContext*                 number(size_t i) const;
-            [[nodiscard]] antlr4::tree::TerminalNode*    literalKeywordTo() const;
             [[nodiscard]] LoopStepsizeDefinitionContext* loopStepsizeDefinition() const;
             [[nodiscard]] LoopVariableDefinitionContext* loopVariableDefinition() const;
         };
@@ -381,15 +348,7 @@ namespace syrec_parser {
             StatementListContext* falseBranchStmts        = nullptr;
             ExpressionContext*    matchingGuardExpression = nullptr;
             IfStatementContext(ParserRuleContext* parent, size_t invokingState);
-            [[nodiscard]] size_t                             getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode*        literalKeywordIf() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*        literalKeywordThen() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*        literalKeywordElse() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*        literalKeywordFi() const;
-            [[nodiscard]] std::vector<ExpressionContext*>    expression() const;
-            [[nodiscard]] ExpressionContext*                 expression(size_t i) const;
-            [[nodiscard]] std::vector<StatementListContext*> statementList() const;
-            [[nodiscard]] StatementListContext*              statementList(size_t i) const;
+            [[nodiscard]] size_t getRuleIndex() const override;
         };
 
         IfStatementContext* ifStatement();
@@ -429,7 +388,6 @@ namespace syrec_parser {
             [[nodiscard]] size_t                      getRuleIndex() const override;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpSwap() const;
             [[nodiscard]] std::vector<SignalContext*> signal() const;
-            [[nodiscard]] SignalContext*              signal(size_t i) const;
         };
 
         SwapStatementContext* swapStatement();
@@ -450,18 +408,10 @@ namespace syrec_parser {
             NumberContext*                  bitStart    = nullptr;
             NumberContext*                  bitRangeEnd = nullptr;
             SignalContext(ParserRuleContext* parent, size_t invokingState);
-            [[nodiscard]] size_t                                   getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalIdent() const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalOpenSBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalOpenSBracket(size_t i) const;
-            [[nodiscard]] std::vector<antlr4::tree::TerminalNode*> literalCloseSBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalCloseSBracket(size_t i) const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalBitrangeStartPrefix() const;
-            [[nodiscard]] std::vector<ExpressionContext*>          expression() const;
-            [[nodiscard]] ExpressionContext*                       expression(size_t i) const;
-            [[nodiscard]] std::vector<NumberContext*>              number() const;
-            [[nodiscard]] NumberContext*                           number(size_t i) const;
-            [[nodiscard]] antlr4::tree::TerminalNode*              literalBitrangeEndPrefix() const;
+            [[nodiscard]] size_t                          getRuleIndex() const override;
+            [[nodiscard]] antlr4::tree::TerminalNode*     literalIdent() const;
+            [[nodiscard]] std::vector<ExpressionContext*> expression() const;
+            [[nodiscard]] std::vector<NumberContext*>     number() const;
         };
 
         SignalContext* signal();
@@ -521,10 +471,7 @@ namespace syrec_parser {
             ExpressionContext* rhsOperand      = nullptr;
             BinaryExpressionContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                          getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode*     literalOpenRBracket() const;
-            [[nodiscard]] antlr4::tree::TerminalNode*     literalCloseRBracket() const;
             [[nodiscard]] std::vector<ExpressionContext*> expression() const;
-            [[nodiscard]] ExpressionContext*              expression(size_t i) const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpPlus() const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpMinus() const;
             [[nodiscard]] antlr4::tree::TerminalNode*     literalOpMultiply() const;
@@ -563,10 +510,8 @@ namespace syrec_parser {
             antlr4::Token* shiftOperation = nullptr;
             ShiftExpressionContext(ParserRuleContext* parent, size_t invokingState);
             [[nodiscard]] size_t                      getRuleIndex() const override;
-            [[nodiscard]] antlr4::tree::TerminalNode* literalOpenRBracket() const;
             [[nodiscard]] ExpressionContext*          expression() const;
             [[nodiscard]] NumberContext*              number() const;
-            [[nodiscard]] antlr4::tree::TerminalNode* literalCloseRBracket() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpRightShift() const;
             [[nodiscard]] antlr4::tree::TerminalNode* literalOpLeftShift() const;
         };
