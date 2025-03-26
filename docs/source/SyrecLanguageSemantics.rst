@@ -229,8 +229,8 @@ ForStatement
       ++= a
     }
 
-    // Loop will perform three iterations (loop variable *$i* will have values :math:`5, 3, 1`). 
-    for $i = 5 to 0 step 2 do 
+    // Loop will perform three iterations (loop variable *$i* will have values :math:`5, 3, 1`).
+    for $i = 5 to 0 step 2 do
         ++= a
     rof
 
