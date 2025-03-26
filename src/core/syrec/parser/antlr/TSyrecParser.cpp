@@ -405,16 +405,8 @@ TSyrecParser::ProgramContext::ProgramContext(ParserRuleContext* parent, size_t i
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::ProgramContext::literalEOF() const {
-    return getToken(TSyrecParser::EOF, 0);
-}
-
 std::vector<TSyrecParser::ModuleContext*> TSyrecParser::ProgramContext::module() const {
     return getRuleContexts<ModuleContext>();
-}
-
-TSyrecParser::ModuleContext* TSyrecParser::ProgramContext::module(size_t i) const {
-    return getRuleContext<ModuleContext>(i);
 }
 
 size_t TSyrecParser::ProgramContext::getRuleIndex() const {
@@ -459,10 +451,6 @@ TSyrecParser::ProgramContext* TSyrecParser::program() {
 
 TSyrecParser::ModuleContext::ModuleContext(ParserRuleContext* parent, size_t invokingState):
     ParserRuleContext(parent, invokingState) {
-}
-
-tree::TerminalNode* TSyrecParser::ModuleContext::literalKeywordModule() const {
-    return getToken(KeywordModule, 0);
 }
 
 tree::TerminalNode* TSyrecParser::ModuleContext::literalIdent() const {
@@ -716,10 +704,6 @@ tree::TerminalNode* TSyrecParser::SignalDeclarationContext::literalIdent() const
     return getToken(Ident, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::SignalDeclarationContext::literalInt() const {
-    return getTokens(Int);
-}
-
 size_t TSyrecParser::SignalDeclarationContext::getRuleIndex() const {
     return RuleSignalDeclaration;
 }
@@ -778,10 +762,6 @@ TSyrecParser::SignalDeclarationContext* TSyrecParser::signalDeclaration() {
 
 TSyrecParser::StatementListContext::StatementListContext(ParserRuleContext* parent, size_t invokingState):
     ParserRuleContext(parent, invokingState) {
-}
-
-std::vector<TSyrecParser::StatementContext*> TSyrecParser::StatementListContext::statement() const {
-    return getRuleContexts<StatementContext>();
 }
 
 size_t TSyrecParser::StatementListContext::getRuleIndex() const {
@@ -945,10 +925,6 @@ tree::TerminalNode* TSyrecParser::CallStatementContext::literalOpUncall() const 
     return getToken(OpUncall, 0);
 }
 
-std::vector<tree::TerminalNode*> TSyrecParser::CallStatementContext::literalIdent() const {
-    return getTokens(Ident);
-}
-
 size_t TSyrecParser::CallStatementContext::getRuleIndex() const {
     return RuleCallStatement;
 }
@@ -1008,14 +984,6 @@ TSyrecParser::CallStatementContext* TSyrecParser::callStatement() {
 
 TSyrecParser::LoopVariableDefinitionContext::LoopVariableDefinitionContext(ParserRuleContext* parent, size_t invokingState):
     ParserRuleContext(parent, invokingState) {
-}
-
-tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalLoopVariablePrefix() const {
-    return getToken(LoopVariablePrefix, 0);
-}
-
-tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalOpEqual() const {
-    return getToken(OpEqual, 0);
 }
 
 tree::TerminalNode* TSyrecParser::LoopVariableDefinitionContext::literalIdent() const {
@@ -1357,14 +1325,6 @@ TSyrecParser::SwapStatementContext::SwapStatementContext(ParserRuleContext* pare
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SwapStatementContext::literalOpSwap() const {
-    return getToken(OpSwap, 0);
-}
-
-std::vector<TSyrecParser::SignalContext*> TSyrecParser::SwapStatementContext::signal() const {
-    return getRuleContexts<SignalContext>();
-}
-
 size_t TSyrecParser::SwapStatementContext::getRuleIndex() const {
     return RuleSwapStatement;
 }
@@ -1402,10 +1362,6 @@ TSyrecParser::SkipStatementContext::SkipStatementContext(ParserRuleContext* pare
     ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* TSyrecParser::SkipStatementContext::literalKeywordSkip() const {
-    return getToken(KeywordSkip, 0);
-}
-
 size_t TSyrecParser::SkipStatementContext::getRuleIndex() const {
     return RuleSkipStatement;
 }
@@ -1441,14 +1397,6 @@ TSyrecParser::SignalContext::SignalContext(ParserRuleContext* parent, size_t inv
 
 tree::TerminalNode* TSyrecParser::SignalContext::literalIdent() const {
     return getToken(Ident, 0);
-}
-
-std::vector<TSyrecParser::ExpressionContext*> TSyrecParser::SignalContext::expression() const {
-    return getRuleContexts<ExpressionContext>();
-}
-
-std::vector<TSyrecParser::NumberContext*> TSyrecParser::SignalContext::number() const {
-    return getRuleContexts<NumberContext>();
 }
 
 size_t TSyrecParser::SignalContext::getRuleIndex() const {
@@ -1643,10 +1591,6 @@ TSyrecParser::ExpressionContext* TSyrecParser::expression() {
 
 TSyrecParser::BinaryExpressionContext::BinaryExpressionContext(ParserRuleContext* parent, size_t invokingState):
     ParserRuleContext(parent, invokingState) {
-}
-
-std::vector<TSyrecParser::ExpressionContext*> TSyrecParser::BinaryExpressionContext::expression() const {
-    return getRuleContexts<ExpressionContext>();
 }
 
 tree::TerminalNode* TSyrecParser::BinaryExpressionContext::literalOpPlus() const {

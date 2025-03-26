@@ -14,7 +14,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -74,7 +73,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatemen
         recordErrorIfAssignmentToReadonlyVariableIsPerformed(*assignmentLhsOperand->get()->var, *context->signal()->start);
         expressionVisitorInstance->setRestrictionOnVariableAccesses(*assignmentLhsOperand);
     }
-    const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation = context->assignmentOp != nullptr ? deserializeAssignmentOperationFromString(context->assignmentOp->getText()) : std::nullopt;
+    const std::optional<syrec::AssignStatement::AssignOperation> assignmentOperation = mapAntlrTokenToAssignmentOperation(*context);
 
     std::optional<CustomExpressionVisitor::DeterminedExpressionOperandBitwidthInformation> expectedBitwidthOfAssignmentRhsOperand;
     std::optional<syrec::Expression::ptr>                                                  assignmentRhsOperand = expressionVisitorInstance->visitExpressionTyped(context->expression(), expectedBitwidthOfAssignmentRhsOperand);
@@ -111,7 +110,7 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitUnaryStatement
 
     expressionVisitorInstance->clearRestrictionOnVariableAccesses();
 
-    const std::optional<syrec::UnaryStatement::UnaryOperation> assignmentOperation = deserializeUnaryAssignmentOperationFromString(context->unaryOp->getText());
+    const std::optional<syrec::UnaryStatement::UnaryOperation> assignmentOperation = mapAntlrTokenToUnaryAssignmentOperation(*context);
     return assignedToVariable.has_value() && assignmentOperation.has_value() ? std::make_optional(std::make_shared<syrec::UnaryStatement>(*assignmentOperation, *assignedToVariable)) : std::nullopt;
 }
 
@@ -418,27 +417,27 @@ CustomStatementVisitor::NotOverloadResolutedCallStatementScope* CustomStatementV
     return &callStatementsWithNotPerformedOverloadResolutionScopes.back();
 }
 
-std::optional<syrec::AssignStatement::AssignOperation> CustomStatementVisitor::deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation) {
-    if (stringifiedAssignmentOperation == "+=") {
+std::optional<syrec::AssignStatement::AssignOperation> CustomStatementVisitor::mapAntlrTokenToAssignmentOperation(const TSyrecParser::AssignStatementContext& assignmentStatementContext) {
+    if (assignmentStatementContext.literalOpAddAssign() != nullptr) {
         return syrec::AssignStatement::AssignOperation::Add;
     }
-    if (stringifiedAssignmentOperation == "-=") {
+    if (assignmentStatementContext.literalOpSubAssign() != nullptr) {
         return syrec::AssignStatement::AssignOperation::Subtract;
     }
-    if (stringifiedAssignmentOperation == "^=") {
+    if (assignmentStatementContext.literalOpXorAssign() != nullptr) {
         return syrec::AssignStatement::AssignOperation::Exor;
     }
     return std::nullopt;
 }
 
-std::optional<syrec::UnaryStatement::UnaryOperation> CustomStatementVisitor::deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation) {
-    if (stringifiedUnaryAssignmentOperation == "++=") {
+std::optional<syrec::UnaryStatement::UnaryOperation> CustomStatementVisitor::mapAntlrTokenToUnaryAssignmentOperation(const TSyrecParser::UnaryStatementContext& unaryStatementContext) {
+    if (unaryStatementContext.literalOpIncrementAssign() != nullptr) {
         return syrec::UnaryStatement::UnaryOperation::Increment;
     }
-    if (stringifiedUnaryAssignmentOperation == "--=") {
+    if (unaryStatementContext.literalOpDecrementAssign() != nullptr) {
         return syrec::UnaryStatement::UnaryOperation::Decrement;
     }
-    if (stringifiedUnaryAssignmentOperation == "~=") {
+    if (unaryStatementContext.literalOpInvertAssign() != nullptr) {
         return syrec::UnaryStatement::UnaryOperation::Invert;
     }
     return std::nullopt;

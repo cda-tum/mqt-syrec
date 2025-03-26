@@ -15,7 +15,6 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -81,8 +80,8 @@ namespace syrec_parser {
         void                                                  recordErrorIfAssignmentToReadonlyVariableIsPerformed(const syrec::Variable& accessedVariable, const antlr4::Token& reportedErrorPosition) const;
         [[nodiscard]] NotOverloadResolutedCallStatementScope* getActiveModuleScopeRecordingCallStatements();
 
-        [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> deserializeAssignmentOperationFromString(const std::string_view& stringifiedAssignmentOperation);
-        [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   deserializeUnaryAssignmentOperationFromString(const std::string_view& stringifiedUnaryAssignmentOperation);
+        [[nodiscard]] static std::optional<syrec::AssignStatement::AssignOperation> mapAntlrTokenToAssignmentOperation(const TSyrecParser::AssignStatementContext& assignmentStatementContext);
+        [[nodiscard]] static std::optional<syrec::UnaryStatement::UnaryOperation>   mapAntlrTokenToUnaryAssignmentOperation(const TSyrecParser::UnaryStatementContext& unaryStatementContext);
         [[nodiscard]] static bool                                                   doesVariableTypeAllowAssignment(const syrec::Variable::Type variableType) noexcept {
             return variableType == syrec::Variable::Type::Inout || variableType == syrec::Variable::Type::Out || variableType == syrec::Variable::Type::Wire;
         }
