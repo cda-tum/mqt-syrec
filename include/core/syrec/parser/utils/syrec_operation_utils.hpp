@@ -32,21 +32,17 @@ namespace utils {
         if (expectedResultBitwidth == 0) {
             return 0;
         }
-        if (expectedResultBitwidth > 32) {
-            return valueToTruncate;
-        }
-
-        const unsigned int maxValueStorableInExpectedResultBitwidth = expectedResultBitwidth == 32 ? UINT_MAX : (1U << expectedResultBitwidth) - 1U;
-        if (valueToTruncate < maxValueStorableInExpectedResultBitwidth) {
-            return valueToTruncate;
-        }
-
-        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd) {
-            // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
-            return valueToTruncate & maxValueStorableInExpectedResultBitwidth;
-        }
-        if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo) {
-            return valueToTruncate % maxValueStorableInExpectedResultBitwidth;
+        
+        if (expectedResultBitwidth <= 32) {
+            if (const unsigned int maxValueStorableInExpectedResultBitwidth = expectedResultBitwidth == 32 ? UINT_MAX : (1U << expectedResultBitwidth) - 1U; valueToTruncate >= maxValueStorableInExpectedResultBitwidth) {
+                if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd) {
+                    // Create suitable bitmask to extract relevant bits from value to truncate as: 2^e_bitwidth - 1
+                    return valueToTruncate & maxValueStorableInExpectedResultBitwidth;
+                }
+                if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::Modulo) {
+                    return valueToTruncate % maxValueStorableInExpectedResultBitwidth;
+                }
+            }
         }
         return valueToTruncate;
     }

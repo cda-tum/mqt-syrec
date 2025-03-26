@@ -149,7 +149,7 @@
     "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
   },
   "simplficiationOfLogicalOrOperationWhenRhsOperandEvaluatesToOne": {
-    "inputCircuit": "module main(in a(4), out res(1)) res += (a.1 || 1)",
+    "inputCircuit": "module main(in a(4), out res(1)) res += (a.1 || (#a - 3))",
     "expectedCircuit": "module main(in a(4), out res(1)) res[0] += 1"
   },
   "simplificationOfBitwiseXorOperationWhenLhsOperandEvaluatesToZero": {

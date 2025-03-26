@@ -825,7 +825,6 @@ std::optional<syrec::Expression::ptr> CustomExpressionVisitor::trySimplifyBinary
             case syrec::BinaryExpression::BinaryOperation::Modulo:
                 return isValueOfLhsOperandKnown ? std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(1), 1) : std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(0), 1);
             case syrec::BinaryExpression::BinaryOperation::LogicalOr:
-            case syrec::BinaryExpression::BinaryOperation::BitwiseOr:
                 return std::make_shared<syrec::NumericExpression>(std::make_shared<syrec::Number>(1), 1);
             case syrec::BinaryExpression::BinaryOperation::Divide:
                 return !isValueOfLhsOperandKnown ? std::make_optional(unknownOperandValue) : std::nullopt;
