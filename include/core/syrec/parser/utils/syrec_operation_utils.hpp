@@ -32,7 +32,7 @@ namespace utils {
         if (expectedResultBitwidth == 0) {
             return 0;
         }
-        
+
         if (expectedResultBitwidth <= 32) {
             if (const unsigned int maxValueStorableInExpectedResultBitwidth = expectedResultBitwidth == 32 ? UINT_MAX : (1U << expectedResultBitwidth) - 1U; valueToTruncate >= maxValueStorableInExpectedResultBitwidth) {
                 if (integerConstantTruncationOperation == IntegerConstantTruncationOperation::BitwiseAnd) {
