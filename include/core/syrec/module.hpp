@@ -74,10 +74,10 @@ namespace syrec {
             statements.emplace_back(statement);
         }
 
-        std::string    name{};
-        Variable::vec  parameters{};
-        Variable::vec  variables{};
-        Statement::vec statements{};
+        std::string    name;
+        Variable::vec  parameters;
+        Variable::vec  variables;
+        Statement::vec statements;
     };
 
 } // namespace syrec
