@@ -48,7 +48,7 @@ jobs:
           echo $CXX
           $CC --version
           $CXX --version
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
       # runs the cpp-linter action using the generated compilation database and the specified clang version
       - name: Run cpp-linter
         uses: cpp-linter/cpp-linter-action@v2
