@@ -48,7 +48,7 @@ jobs:
           echo $CXX
           $CC --version
           $CXX --version
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=1
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       # runs the cpp-linter action using the generated compilation database and the specified clang version
       - name: Run cpp-linter
         uses: cpp-linter/cpp-linter-action@v2
@@ -61,7 +61,7 @@ jobs:
           version: ${{ env.clang-version }}
           # .hpp files should not be explicitly checked by .clang-tidy. Included headers of source-files
           # are implicitly checked by .clang-tidy
-          ignore: "build|**/python|**/include"
+          ignore: "build|**/python|include"
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
           step-summary: true
           database: "build"
