@@ -274,13 +274,19 @@ bool BaseSyrecIrEntityStringifier::stringify(std::ostream& outputStream, const s
     if (stringifyVariableTypeForEveryEntry) {
         for (std::size_t i = 0; stringificationSuccessful && i < numModulesParameters; ++i) {
             const auto& variable = variables.at(i);
-            stringificationSuccessful &= variable && (i != 0 ? appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",") : true) && stringify(outputStream, *variable, true);
+            stringificationSuccessful &= variable != nullptr && (i != 0 ? appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",") : true) && stringify(outputStream, *variable, true);
         }
     } else {
         for (std::size_t i = 0; stringificationSuccessful && i < numModulesParameters; ++i) {
-            const auto& variable                = variables.at(i);
-            const bool  variableTypeGroupChange = i > 0 && (variable != nullptr && variables.at(i - 1) != nullptr && variable->type != variables.at(i - 1)->type);
-            stringificationSuccessful &= variable != nullptr && (variableTypeGroupChange ? appendNewlineToStream(outputStream) && appendIndentationPaddingSequence(outputStream, indentationSequence) : (i > 0 ? appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",") : true)) && stringify(outputStream, *variable, i == 0 || variableTypeGroupChange);
+            const auto& variable = variables.at(i);
+            stringificationSuccessful &= variable != nullptr;
+            const bool variableTypeGroupChange = i > 0 && (variable != nullptr && variables.at(i - 1) != nullptr && variable->type != variables.at(i - 1)->type);
+            if (variableTypeGroupChange) {
+                stringificationSuccessful &= appendNewlineToStream(outputStream) && appendIndentationPaddingSequence(outputStream, indentationSequence);
+            } else {
+                stringificationSuccessful &= i == 0 || appendToStream(outputStream, additionalFormattingOptions.useWhitespaceAfterAfterModuleParameterDeclaration ? ", " : ",");
+            }
+            stringificationSuccessful &= stringify(outputStream, *variable, i == 0 || variableTypeGroupChange);
         }
     }
     return stringificationSuccessful;
