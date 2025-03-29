@@ -31,17 +31,17 @@ using namespace syrec;
 namespace {
     /**
      * @brief This struct represents a wrapper object used to handle the gateAdded signal "event" invocations for a specific syrec::Circuit instance.
-     * 
+     *
      * The only thing preventing an "event-handler" registration like:
      * (Assuming typedef for signal in syrec::Circuit exists): typedef boost::signals2::signal<void(Gate&)> GateAddedSignalType;
-     * 
+     *
      * const auto leafCircuitInstance = std::make_shared<Circuit>();
      * // Define callback for gate added signal with automatic lifetime tracking of std::shared_ptr instance that should prevent callback execution if managed object was destroyed
      * leafCircuitInstance->gateAdded.connect(Circuit::GateAddedSignalType::slot_type(&Circuit::handleGateAddition, leafCircuitInstance.get()).track_foreign(leafCircuitInstance));
-     * 
+     *
      * is the reference to the statement stack. Otherwise, the gate addition signal invocation could be handled in the syrec::Circuit class itself.
      * Storing the syrec::Circuit as well as the statement stack as references should be ok since the lifetime of these objects should extend the lifetime of the Annotater instance
-     * that is used to handle invocations of the defined boost::signal2 gateAdded "event". However, a future refactoring should simplfy this design if possible so that the syrec::Circuit
+     * that is used to handle invocations of the defined boost::signal2 gateAdded "event". However, a future refactoring should simplify this design if possible so that the syrec::Circuit
      * can handle the "event" instead.
      */
     struct Annotater {
