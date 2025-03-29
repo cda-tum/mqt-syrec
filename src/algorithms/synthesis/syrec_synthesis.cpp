@@ -318,7 +318,7 @@ bool SyrecSynthesis::onStatement(const ForStatement& statement) {
             // adjust loop variable if necessary
 
             if (!loopVariable.empty()) {
-                loopMap[loopVariable] = i;
+                loopMap[loopVariable] = static_cast<unsigned>(i);
             }
 
             for (const auto& stat: statement.statements) {
@@ -570,11 +570,10 @@ bool SyrecSynthesis::increment(const std::vector<unsigned>& dest) {
         addActiveControl(i);
     }
 
-    for (int i = static_cast<int>(dest.size()) - 1; i >= 0; --i) {
-        removeActiveControl(dest.at(i));
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(dest.at(i));
+    for (auto destLineIterator = dest.rbegin(); destLineIterator != dest.rend(); ++destLineIterator) {
+        removeActiveControl(*destLineIterator);
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(*destLineIterator);
     }
-
     return true;
 }
 
@@ -641,28 +640,32 @@ bool SyrecSynthesis::division(const std::vector<unsigned>& dest, const std::vect
     std::vector<unsigned> sum;
     std::vector<unsigned> partial;
 
-    for (unsigned i = 1U; i < src1.size(); ++i) {
+    for (std::size_t i = 1U; i < src1.size(); ++i) {
         get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(i));
     }
 
-    for (unsigned i = 1U; i < src1.size(); ++i) {
+    for (std::size_t i = 1U; i < src1.size(); ++i) {
         addActiveControl(src2.at(i));
     }
 
     for (int i = static_cast<int>(src1.size()) - 1; i >= 0; --i) {
-        partial.push_back(src2.at(src1.size() - 1U - i));
-        sum.insert(sum.begin(), src1.at(i));
-        addActiveControl(dest.at(i));
+        const auto castedIdx = static_cast<std::size_t>(i);
+
+        partial.push_back(src2.at(src1.size() - 1U - castedIdx));
+        sum.insert(sum.begin(), src1.at(castedIdx));
+        addActiveControl(dest.at(castedIdx));
         increase(sum, partial);
-        removeActiveControl(dest.at(i));
-        if (i > 0) {
-            for (unsigned j = static_cast<int>(src1.size()) - i; j < src1.size(); ++j) {
-                removeActiveControl(src2.at(j));
-            }
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(src1.size() - i));
-            for (unsigned j = static_cast<int>(src1.size()) + 1U - i; j < src1.size(); ++j) {
-                addActiveControl(src2.at(j));
-            }
+        removeActiveControl(dest.at(castedIdx));
+        if (i == 0) {
+            continue;
+        }
+
+        for (auto j = src1.size() - castedIdx; j < src1.size(); ++j) {
+            removeActiveControl(src2.at(j));
+        }
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(src1.size() - castedIdx));
+        for (auto j = src1.size() + 1U - castedIdx; j < src1.size(); ++j) {
+            addActiveControl(src2.at(j));
         }
     }
 
@@ -704,29 +707,29 @@ bool SyrecSynthesis::increase(const std::vector<unsigned>& rhs, const std::vecto
         get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(0), rhs.at(0));
     } else {
         for (int i = 1; i <= bitwidth - 1; ++i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(i), rhs.at(i));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(i)), rhs.at(static_cast<std::size_t>(i)));
         }
         for (int i = bitwidth - 2; i >= 1; --i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(i), lhs.at(i + 1));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(i)), lhs.at(static_cast<std::size_t>(i) + 1));
         }
         for (int i = 0; i <= bitwidth - 2; ++i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(rhs.at(i), lhs.at(i), lhs.at(i + 1));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(rhs.at(static_cast<std::size_t>(i)), lhs.at(static_cast<std::size_t>(i)), lhs.at(static_cast<std::size_t>(i) + 1));
         }
 
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(bitwidth - 1), rhs.at(bitwidth - 1));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(bitwidth - 1)), rhs.at(static_cast<std::size_t>(bitwidth - 1)));
 
         for (int i = bitwidth - 2; i >= 1; --i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(lhs.at(i), rhs.at(i), lhs.at(i + 1));
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(i), rhs.at(i));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(lhs.at(static_cast<std::size_t>(i)), rhs.at(static_cast<std::size_t>(i)), lhs.at(static_cast<std::size_t>(i) + 1));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(i)), rhs.at(static_cast<std::size_t>(i)));
         }
         get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(lhs.at(0), rhs.at(0), lhs.at(1));
         get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(0), rhs.at(0));
 
         for (int i = 1; i <= bitwidth - 2; ++i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(i), lhs.at(i + 1));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(i)), lhs.at(static_cast<std::size_t>(i) + 1));
         }
         for (int i = 1; i <= bitwidth - 1; ++i) {
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(i), rhs.at(i));
+            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(lhs.at(static_cast<std::size_t>(i)), rhs.at(static_cast<std::size_t>(i)));
         }
     }
 
@@ -754,32 +757,32 @@ bool SyrecSynthesis::increaseWithCarry(const std::vector<unsigned>& dest, const 
     }
 
     for (int i = 1U; i < bitwidth; ++i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(i), dest.at(i));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(i)), dest.at(static_cast<std::size_t>(i)));
     }
 
     if (bitwidth > 1) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(bitwidth - 1), carry);
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(bitwidth - 1)), carry);
     }
     for (int i = bitwidth - 2; i > 0; --i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(i), src.at(i + 1));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(i)), src.at(static_cast<std::size_t>(i) + 1));
     }
 
     for (int i = 0U; i < bitwidth - 1; ++i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(src.at(i), dest.at(i), src.at(i + 1));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(src.at(static_cast<std::size_t>(i)), dest.at(static_cast<std::size_t>(i)), src.at(static_cast<std::size_t>(i) + 1));
     }
-    get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(src.at(bitwidth - 1), dest.at(bitwidth - 1), carry);
+    get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(src.at(static_cast<std::size_t>(bitwidth - 1)), dest.at(static_cast<std::size_t>(bitwidth - 1)), carry);
 
     for (int i = bitwidth - 1; i > 0; --i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(i), dest.at(i));
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(dest.at(i - 1), src.at(i - 1), src.at(i));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(i)), dest.at(static_cast<std::size_t>(i)));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendToffoli(dest.at(static_cast<std::size_t>(i - 1)), src.at(static_cast<std::size_t>(i - 1)), src.at(static_cast<std::size_t>(i)));
     }
 
     for (int i = 1U; i < bitwidth - 1; ++i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(i), src.at(i + 1));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(i)), src.at(static_cast<std::size_t>(i) + 1));
     }
 
     for (int i = 0U; i < bitwidth; ++i) {
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(i), dest.at(i));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendCnot(src.at(static_cast<std::size_t>(i)), dest.at(static_cast<std::size_t>(i)));
     }
 
     return true;
@@ -811,21 +814,25 @@ bool SyrecSynthesis::modulo(const std::vector<unsigned>& dest, const std::vector
     }
 
     for (int i = static_cast<int>(src1.size()) - 1; i >= 0; --i) {
-        partial.push_back(src2.at(src1.size() - 1U - i));
-        sum.insert(sum.begin(), src1.at(i));
-        decreaseWithCarry(sum, partial, dest.at(i));
-        addActiveControl(dest.at(i));
+        const auto castedIdx = static_cast<std::size_t>(i);
+
+        partial.push_back(src2.at(src1.size() - 1U - castedIdx));
+        sum.insert(sum.begin(), src1.at(castedIdx));
+        decreaseWithCarry(sum, partial, dest.at(castedIdx));
+        addActiveControl(dest.at(castedIdx));
         increase(sum, partial);
-        removeActiveControl(dest.at(i));
-        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(dest.at(i));
-        if (i > 0) {
-            for (unsigned j = static_cast<int>(src1.size()) - i; j < src1.size(); ++j) {
-                removeActiveControl(src2.at(j));
-            }
-            get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(src1.size() - i));
-            for (unsigned j = static_cast<int>(src1.size()) + 1U - i; j < src1.size(); ++j) {
-                addActiveControl(src2.at(j));
-            }
+        removeActiveControl(dest.at(castedIdx));
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(dest.at(castedIdx));
+        if (i == 0) {
+            continue;
+        }
+
+        for (auto j = src1.size() - castedIdx; j < src1.size(); ++j) {
+            removeActiveControl(src2.at(j));
+        }
+        get(boost::vertex_name, cctMan.tree)[cctMan.current].circ->appendNot(src2.at(src1.size() - castedIdx));
+        for (auto j = src1.size() + 1U - castedIdx; j < src1.size(); ++j) {
+            addActiveControl(src2.at(static_cast<std::size_t>(j)));
         }
     }
     return true;
@@ -941,7 +948,7 @@ void SyrecSynthesis::removeActiveControl(unsigned control [[maybe_unused]]) {
 bool SyrecSynthesis::assembleCircuit(const cct_node& current) {
     // leaf
     if (out_edges(current, cctMan.tree).first == out_edges(current, cctMan.tree).second /*get( boost::vertex_name, cctMan.tree )[current].circ.get()->num_gates() > 0u*/) {
-        circ.insertCircuit(circ.numGates(), *get(boost::vertex_name, cctMan.tree)[current].circ, get(boost::vertex_name, cctMan.tree)[current].controls);
+        circ.insertCircuit(static_cast<unsigned>(circ.numGates()), *get(boost::vertex_name, cctMan.tree)[current].circ, get(boost::vertex_name, cctMan.tree)[current].controls);
         return true;
     }
     // assemble optimized circuits of successors
@@ -980,7 +987,7 @@ void SyrecSynthesis::getVariables(const VariableAccess::ptr& var, std::vector<un
             }
         } else {
             for (auto i = static_cast<int>(first); i >= static_cast<int>(second); --i) {
-                lines.emplace_back(offset + i);
+                lines.emplace_back(offset + static_cast<unsigned>(i));
             }
         }
     } else {
