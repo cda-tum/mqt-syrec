@@ -1,8 +1,17 @@
 # collect all test files
-file(GLOB_RECURSE TEST_FILES "*.cpp")
+file(GLOB_RECURSE SYREC_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
+# Due to the package_add_test macro is only accepting a single library
+# that is can link to the generated test executable, a wrapper library
+# to which all of the generated MQT::SyReC libraries are linked to is needed.
+# Note that the test source files are assumed to be defined after the last required
+# parameter of the package_add_test macro.
+add_library(${PROJECT_NAME}-test-lib)
+target_link_libraries(${PROJECT_NAME}-test-lib
+    PUBLIC MQT::SyReC-Antlr MQT::SyReC-CircuitFormatParsers MQT::SyReC-IR MQT::SyReC-Synthesis)
 
 # add test executable
-package_add_test(${PROJECT_NAME}-test MQT::SyReC ${TEST_FILES})
+package_add_test(${PROJECT_NAME}-test ${PROJECT_NAME}-test-lib ${SYREC_TEST_SOURCES})
 target_link_libraries(${PROJECT_NAME}-test PRIVATE fmt::fmt)
 target_include_directories(${PROJECT_NAME}-test
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/utils)
