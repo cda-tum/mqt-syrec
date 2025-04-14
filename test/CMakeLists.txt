@@ -5,13 +5,13 @@ file(GLOB_RECURSE SYREC_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 # generated test executable, a wrapper library to which all of the generated MQT::SyReC libraries
 # are linked to is needed. Note that the test source files are assumed to be defined after the last
 # required parameter of the package_add_test macro.
-add_library(${PROJECT_NAME}-test-lib)
+add_library(${PROJECT_NAME}-test-wrapper INTERFACE)
 target_link_libraries(
-  ${PROJECT_NAME}-test-lib PUBLIC MQT::SyReC-Antlr MQT::SyReC-CircuitFormatParsers MQT::SyReC-IR
+  ${PROJECT_NAME}-test-wrapper INTERFACE MQT::SyReC-Antlr MQT::SyReC-CircuitFormatParsers MQT::SyReC-IR
                                   MQT::SyReC-Synthesis)
 
 # add test executable
-package_add_test(${PROJECT_NAME}-test ${PROJECT_NAME}-test-lib ${SYREC_TEST_SOURCES})
+package_add_test(${PROJECT_NAME}-test ${PROJECT_NAME}-test-wrapper ${SYREC_TEST_SOURCES})
 target_link_libraries(${PROJECT_NAME}-test PRIVATE fmt::fmt)
 target_include_directories(${PROJECT_NAME}-test
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/unittests/syrec/parser/utils)
@@ -30,9 +30,9 @@ add_custom_command(
           $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/configs
   COMMAND ${CMAKE_COMMAND} -E create_symlink $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/configs
           ${CMAKE_BINARY_DIR}/configs
-  # Solution is sufficient for now but surely there is a better way where this explicit recreation
-  # of the folder structure is not necessary I.e. we might only need to update the paths for
-  # creation of the symlinks correctly since there files are only copied to the output directory?
+  # Solution is sufficient for now but surely there is a better way where the explicit recreation
+  # of the folder structure is not necessary, i.e. we might only need to update the paths for
+  # creation of the symlinks correctly since files are only copied to the output directory?
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/unittests
   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}-test>/unittests/syrec
   COMMAND ${CMAKE_COMMAND} -E make_directory
