@@ -144,8 +144,8 @@ namespace syrec {
         TruthTable::Cube::Set rootSigVec;
         pathFromSrcDst(src, current.p, rootSigVec);
 
-        const auto tables = dd->getUniqueTable<dd::mNode>().getTables();
-        auto const& table = tables[current.p->v];
+        const auto  tables = dd->getUniqueTable<dd::mNode>().getTables();
+        auto const& table  = tables[current.p->v];
 
         for (auto* p: table) {
             // While the dd::UniqueTable can store heterogeneous entities derived from dd::NodeBase, it is assumed to only contain entities of the same type (thus storing

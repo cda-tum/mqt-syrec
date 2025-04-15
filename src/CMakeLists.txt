@@ -64,8 +64,7 @@ if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-parsers)
             ${CMAKE_CURRENT_SOURCE_DIR}/core/real/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp)
 
-  target_include_directories(${MQT_SYREC_TARGET_NAME}-parsers
-                             PUBLIC ${MQT_SYREC_INCLUDE_BUILD_DIR})
+  target_include_directories(${MQT_SYREC_TARGET_NAME}-parsers PUBLIC ${MQT_SYREC_INCLUDE_BUILD_DIR})
 
   target_link_libraries(
     ${MQT_SYREC_TARGET_NAME}-parsers
