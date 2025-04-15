@@ -1,6 +1,6 @@
 #include "core/real/parser.hpp"
 
-#include "Definitions.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/Register.hpp"
 #include "ir/operations/Control.hpp"

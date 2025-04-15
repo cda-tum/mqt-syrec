@@ -1,18 +1,24 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "core/io/pla_parser.hpp"
+#include "core/truthTable/truth_table.hpp"
 #include "dd/Operations.hpp"
+#include "dd/Package.hpp"
+#include "ir/operations/Control.hpp"
+#include "ir/operations/OpType.hpp"
 #include "ir/operations/StandardOperation.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include <memory>
+#include <string>
 
 using namespace qc::literals;
 using namespace syrec;
 
 class TruthTableDD: public testing::Test {
 protected:
-    std::string                    testCircuitsDir = "./circuits/";
-    TruthTable                     tt{};
-    std::unique_ptr<dd::Package<>> dd = std::make_unique<dd::Package<>>(3U);
+    std::string                  testCircuitsDir = "./circuits/";
+    TruthTable                   tt{};
+    std::unique_ptr<dd::Package> dd = std::make_unique<dd::Package>(3U);
 };
 
 TEST_F(TruthTableDD, Ident2Bit) {

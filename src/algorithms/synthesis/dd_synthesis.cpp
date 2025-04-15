@@ -1,6 +1,5 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 
-#include "Definitions.hpp"
 #include "algorithms/optimization/esop_minimization.hpp"
 #include "algorithms/synthesis/encoding.hpp"
 #include "core/truthTable/truth_table.hpp"
@@ -8,6 +7,7 @@
 #include "dd/Node.hpp"
 #include "dd/Operations.hpp"
 #include "dd/Package.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
@@ -24,7 +24,7 @@
 using namespace qc::literals;
 
 namespace syrec {
-    auto buildDD(const TruthTable& tt, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto buildDD(const TruthTable& tt, std::unique_ptr<dd::Package>& dd) -> dd::mEdge {
         // truth table has to have the same number of inputs and outputs
         assert(tt.nInputs() == tt.nOutputs());
 
@@ -132,7 +132,7 @@ namespace syrec {
     }
 
     //please refer to the second optimization approach introduced in https://www.cda.cit.tum.de/files/eda/2017_rc_improving_qmdd_synthesis_of_reversible_circuits.pdf
-    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> TruthTable::Cube::Set {
+    auto DDSynthesizer::finalSrcPathSignature(dd::mEdge const& src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package>& dd) -> TruthTable::Cube::Set {
         assert(!src.isTerminal());
         assert(!current.isTerminal());
         if (current.p->v == src.p->v || current.p->v == 0U) {
@@ -144,25 +144,29 @@ namespace syrec {
         TruthTable::Cube::Set rootSigVec;
         pathFromSrcDst(src, current.p, rootSigVec);
 
-        const auto tables = dd->mUniqueTable.getTables();
-
+        const auto tables = dd->getUniqueTable<dd::mNode>().getTables();
         auto const& table = tables[current.p->v];
 
         for (auto* p: table) {
-            if (p != nullptr && p != current.p && p->ref > 0) {
+            // While the dd::UniqueTable can store heterogeneous entities derived from dd::NodeBase, it is assumed to only contain entities of the same type (thus storing
+            // only homogeneous entities. While the type information about the entities stored in the dd::UniqueTable is not available statically (with the type information also
+            // being removed from the internal dd::MemoryManager) we are assuming at this position in the code that only entities of type dd::mNode are stored in the accessed dd::UniqueTable.
+            // To make this assumption more explicit, we fetch the dd::UniqueTable from the dd::Package via the templated getUniqueTable<T> function instead of accessing the member variable directly.
+            // Note that due to the dd::NodeBase base of the dd::mNode not defining a polymorphic type, dynamic_cast cannot be used for the down-cast from the base to the derived class.
+            if (const auto& castedNode = static_cast<dd::mNode*>(p); castedNode != nullptr && castedNode != current.p && castedNode->ref > 0) { // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
                 TruthTable::Cube::Set p1Vec;
                 TruthTable::Cube::Set p2Vec;
                 if (changePaths) {
-                    pathSignature(p->e[3], p->v, p1Vec);
-                    pathSignature(p->e[2], p->v, p2Vec);
+                    pathSignature(castedNode->e[3], p->v, p1Vec);
+                    pathSignature(castedNode->e[2], p->v, p2Vec);
                 } else {
-                    pathSignature(p->e[0], p->v, p1Vec);
-                    pathSignature(p->e[1], p->v, p2Vec);
+                    pathSignature(castedNode->e[0], p->v, p1Vec);
+                    pathSignature(castedNode->e[1], p->v, p2Vec);
                 }
 
                 if (p1SigVec == p1Vec && p2SigVec == p2Vec) {
                     TruthTable::Cube::Set rootSigVecTmp;
-                    pathFromSrcDst(src, p, rootSigVecTmp);
+                    pathFromSrcDst(src, castedNode, rootSigVecTmp);
                     rootSigVec.merge(rootSigVecTmp);
                 }
             }
@@ -271,7 +275,7 @@ namespace syrec {
     }
 
     // This function performs the multi-control (if any) X operation.
-    auto DDSynthesizer::applyOperation(const qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, const std::unique_ptr<dd::Package<>>& dd) -> void {
+    auto DDSynthesizer::applyOperation(const qc::Qubit targetBit, dd::mEdge& to, const qc::Controls& ctrl, const std::unique_ptr<dd::Package>& dd) -> void {
         // create operation and corresponding decision diagram
         qc->mcx(ctrl, targetBit);
         const auto opDD = dd::getDD(*qc->back(), *dd);
@@ -286,7 +290,7 @@ namespace syrec {
     // This algorithm swaps the paths present in the p' edge to the n edge and vice versa.
     // If n' and p paths exists, we move on to P2 algorithm
     // Refer to the P1 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::swapPaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, std::unique_ptr<dd::Package>& dd) -> dd::mEdge {
         assert(!src.isTerminal());
         assert(!current.isTerminal());
         if (p2SigVec.size() > p1SigVec.size() || (p2SigVec.empty() && p1SigVec.empty())) {
@@ -318,7 +322,7 @@ namespace syrec {
     // This algorithm moves the unique paths present in the p' edge to the n edge.
     // If there are no unique paths in p' edge, the unique paths present in the n' edge are moved to the p edge if required.
     // Refer to the P2 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::shiftUniquePaths(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, TruthTable::Cube::Set const& p3SigVec, TruthTable::Cube::Set const& p4SigVec, bool& changePaths, std::unique_ptr<dd::Package>& dd) -> dd::mEdge {
         assert(!src.isTerminal());
         assert(!current.isTerminal());
         if (p2SigVec.empty()) {
@@ -377,7 +381,7 @@ namespace syrec {
 
     // This algorithm modifies the non-unique paths present in the p' or n (based on changePaths) edge to unique paths.
     // Refer to P4 algorithm of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf
-    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::unifyPath(dd::mEdge src, dd::mEdge const& current, TruthTable::Cube::Set const& p1SigVec, TruthTable::Cube::Set const& p2SigVec, bool const& changePaths, std::unique_ptr<dd::Package>& dd) -> dd::mEdge {
         assert(!src.isTerminal());
         assert(!current.isTerminal());
         TruthTable::Cube repeatedCube;
@@ -435,7 +439,7 @@ namespace syrec {
 
     // This algorithm ensures that the `current` node has the identity structure.
     // Refer to algorithm P of http://www.informatik.uni-bremen.de/agra/doc/konf/12aspdac_qmdd_synth_rev.pdf)
-    auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package<>>& dd) -> dd::mEdge {
+    auto DDSynthesizer::shiftingPaths(dd::mEdge const& src, dd::mEdge const& current, std::unique_ptr<dd::Package>& dd) -> dd::mEdge {
         assert(!src.isTerminal());
         assert(!current.isTerminal());
 
@@ -538,7 +542,7 @@ namespace syrec {
     }
 
     // This function returns the operations required to synthesize the DD.
-    auto DDSynthesizer::synthesize(dd::mEdge src, std::unique_ptr<dd::Package<>>& dd) -> std::shared_ptr<qc::QuantumComputation> {
+    auto DDSynthesizer::synthesize(dd::mEdge src, std::unique_ptr<dd::Package>& dd) -> std::shared_ptr<qc::QuantumComputation> {
         if (src.isTerminal() || dcNodeCondition(src)) {
             return qc;
         }
@@ -638,7 +642,7 @@ namespace syrec {
 
         // construct ddSynth only if it is pointing to null
         if (ddSynth == nullptr) {
-            ddSynth = std::make_unique<dd::Package<>>(totalNoBits);
+            ddSynth = std::make_unique<dd::Package>(totalNoBits);
         }
 
         // construct qc only if it is pointing to null

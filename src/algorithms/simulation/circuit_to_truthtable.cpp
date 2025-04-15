@@ -19,7 +19,7 @@ namespace syrec {
 
         assert(nBits < 65U);
 
-        auto dd = std::make_unique<dd::Package<>>(nBits);
+        auto dd = std::make_unique<dd::Package>(nBits);
 
         const auto totalInputs = 1U << nBits;
 
