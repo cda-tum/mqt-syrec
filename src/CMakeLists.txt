@@ -17,6 +17,7 @@ if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-ir)
                                                             MQT::ProjectOptions)
 
   add_library(MQT::SyReC-IR ALIAS ${MQT_SYREC_TARGET_NAME}-ir)
+  target_compile_features(${MQT_SYREC_TARGET_NAME}-ir PUBLIC cxx_std_17)
 endif()
 
 if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-antlr-parser)
@@ -51,6 +52,7 @@ if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-antlr-parser)
   endif()
 
   add_library(MQT::SyReC-Antlr ALIAS ${MQT_SYREC_TARGET_NAME}-antlr-parser)
+  target_compile_features(${MQT_SYREC_TARGET_NAME}-antlr-parser PUBLIC cxx_std_17)
 endif()
 
 if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-parsers)
