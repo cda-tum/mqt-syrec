@@ -1,20 +1,23 @@
 #include "algorithms/synthesis/dd_synthesis.hpp"
 #include "core/io/pla_parser.hpp"
+#include "core/truthTable/truth_table.hpp"
 #include "dd/FunctionalityConstruction.hpp"
+#include "dd/Package.hpp"
 
 #include <algorithm>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <memory>
+#include <string>
 
-using namespace dd::literals;
 using namespace syrec;
 
 class TestDDSynth: public testing::TestWithParam<std::string> {
 protected:
-    TruthTable                     tt{};
-    std::string                    testCircuitsDir = "./circuits/";
-    std::unique_ptr<dd::Package<>> dd              = std::make_unique<dd::Package<>>(15U);
-    std::string                    fileName;
+    TruthTable                   tt{};
+    std::string                  testCircuitsDir = "./circuits/";
+    std::unique_ptr<dd::Package> dd              = std::make_unique<dd::Package>(15U);
+    std::string                  fileName;
 
     void SetUp() override {
         fileName = testCircuitsDir + GetParam() + ".pla";
