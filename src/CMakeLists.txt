@@ -53,10 +53,10 @@ if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-antlr-parser)
   add_library(MQT::SyReC-Antlr ALIAS ${MQT_SYREC_TARGET_NAME}-antlr-parser)
 endif()
 
-if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers)
-  add_library(${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers)
+if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-parsers)
+  add_library(${MQT_SYREC_TARGET_NAME}-parsers)
   target_sources(
-    ${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers
+    ${MQT_SYREC_TARGET_NAME}-parsers
     PUBLIC ${MQT_SYREC_INCLUDE_BUILD_DIR}/core/io/pla_parser.hpp
            ${MQT_SYREC_INCLUDE_BUILD_DIR}/core/real/parser.hpp
            ${MQT_SYREC_INCLUDE_BUILD_DIR}/core/truthTable/truth_table.hpp
@@ -64,15 +64,15 @@ if(NOT TARGET ${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers)
             ${CMAKE_CURRENT_SOURCE_DIR}/core/real/parser.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/core/truthTable/truth_table.cpp)
 
-  target_include_directories(${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers
+  target_include_directories(${MQT_SYREC_TARGET_NAME}-parsers
                              PUBLIC ${MQT_SYREC_INCLUDE_BUILD_DIR})
 
   target_link_libraries(
-    ${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers
+    ${MQT_SYREC_TARGET_NAME}-parsers
     PUBLIC MQT::CoreDD MQT::CoreIR
     PRIVATE MQT::ProjectWarnings MQT::ProjectOptions)
 
-  add_library(MQT::SyReC-CircuitFormatParsers ALIAS ${MQT_SYREC_TARGET_NAME}-circuitFormat-parsers)
+  add_library(MQT::SyReC-Parsers ALIAS ${MQT_SYREC_TARGET_NAME}-parsers)
 
 endif()
 

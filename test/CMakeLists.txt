@@ -7,7 +7,7 @@ file(GLOB_RECURSE SYREC_TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 # required parameter of the package_add_test macro.
 add_library(${PROJECT_NAME}-test-wrapper INTERFACE)
 target_link_libraries(
-  ${PROJECT_NAME}-test-wrapper INTERFACE MQT::SyReC-Antlr MQT::SyReC-CircuitFormatParsers
+  ${PROJECT_NAME}-test-wrapper INTERFACE MQT::SyReC-Antlr MQT::SyReC-Parsers
                                          MQT::SyReC-IR MQT::SyReC-Synthesis)
 
 # add test executable
