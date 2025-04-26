@@ -1,7 +1,7 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10.7",
-    "setuptools-scm>=8.1",
+    "scikit-build-core>=0.11.0",
+    "setuptools-scm>=8.3",
     "pybind11>=2.13.6",
     "mqt.core>=3.0.2",
 ]
@@ -306,8 +306,8 @@ mqt-syrec = { workspace = true }
 [dependency-groups]
 build = [
     "pybind11>=2.13.6",
-    "scikit-build-core>=0.10.7",
-    "setuptools-scm>=8.1",
+    "scikit-build-core>=0.11.0",
+    "setuptools-scm>=8.3",
     "mqt-core>=3.0.2",
 ]
 docs = [
@@ -324,7 +324,7 @@ docs = [
     "sphinx-autodoc-typehints>=2.3.0",
 ]
 test = [
-    "pytest>=8.3.4",
+    "pytest>=8.3.5",
     "pytest-cov>=6",
 ]
 dev = [
