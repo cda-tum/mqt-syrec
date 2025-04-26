@@ -25,6 +25,7 @@ if(NOT TARGET MQT::SyReC)
 
   # add MQT alias
   add_library(MQT::SyReC ALIAS ${PROJECT_NAME})
+  target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 endif()
 
 if(BUILD_MQT_SYREC_BINDINGS)
