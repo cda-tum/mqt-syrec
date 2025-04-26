@@ -8,9 +8,9 @@ body:
         **Thank you for wanting to report a bug for this project!**
 
         ⚠
-        Verify first that your issue is not [already reported on GitHub](https://github.com/cda-tum/mqt-syrec/search?q=is%3Aissue&type=issues).
+        Verify first that your issue is not [already reported on GitHub](https://github.com/munich-quantum-toolkit/syrec/search?q=is%3Aissue&type=issues).
 
-        If you have general questions, please consider [starting a discussion](https://github.com/cda-tum/mqt-syrec/discussions).
+        If you have general questions, please consider [starting a discussion](https://github.com/munich-quantum-toolkit/syrec/discussions).
   - type: textarea
     attributes:
       label: Environment information
