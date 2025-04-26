@@ -48,10 +48,10 @@ dynamic = ["version"]
 "syrec-editor" = "mqt.syrec.syrec_editor:main"
 
 [project.urls]
-Homepage = "https://github.com/cda-tum/mqt-syrec"
+Homepage = "https://github.com/munich-quantum-toolkit/syrec"
 Documentation = "https://mqt.readthedocs.io/projects/syrec"
-Issues = "https://github.com/cda-tum/mqt-syrec/issues"
-Discussions = "https://github.com/cda-tum/mqt-syrec/discussions"
+Issues = "https://github.com/munich-quantum-toolkit/syrec/issues"
+Discussions = "https://github.com/munich-quantum-toolkit/syrec/discussions"
 
 [tool.scikit-build]
 # Protect the configuration against future changes in scikit-build-core

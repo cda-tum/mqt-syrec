@@ -1,9 +1,9 @@
 [![PyPI](https://img.shields.io/pypi/v/mqt.syrec?logo=pypi&style=flat-square)](https://pypi.org/project/mqt.syrec/)
 ![OS](https://img.shields.io/badge/os-linux%20%7C%20macos%20%7C%20windows-blue?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/mqt-syrec/ci.yml?branch=main&style=flat-square&logo=github&label=c%2B%2B)](https://github.com/cda-tum/mqt-syrec/actions/workflows/ci.yml)
-[![Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/mqt-syrec/deploy.yml?branch=main&style=flat-square&logo=github&label=python)](https://github.com/cda-tum/mqt-syrec/actions/workflows/deploy.yml)
-[![codecov](https://img.shields.io/codecov/c/github/cda-tum/mqt-syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/cda-tum/mqt-syrec)
+[![CI](https://img.shields.io/github/actions/workflow/status/munich-quantum-toolkit/syrec/ci.yml?branch=main&style=flat-square&logo=github&label=c%2B%2B)](https://github.com/munich-quantum-toolkit/syrec/actions/workflows/ci.yml)
+[![Bindings](https://img.shields.io/github/actions/workflow/status/munich-quantum-toolkit/syrec/deploy.yml?branch=main&style=flat-square&logo=github&label=python)](https://github.com/munich-quantum-toolkit/syrec/actions/workflows/deploy.yml)
+[![codecov](https://img.shields.io/codecov/c/github/munich-quantum-toolkit/syrec?style=flat-square&logo=codecov)](https://codecov.io/gh/munich-quantum-toolkit/syrec)
 
 > [!NOTE]
 > This project is currently in low maintenance mode. We will still fix bugs and accept pull requests, but we will not actively develop new features.
@@ -28,7 +28,7 @@ It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which
   </a>
 </p>
 
-If you have any questions, feel free to contact us by creating an issue on [GitHub](https://github.com/cda-tum/mqt-syrec/issues).
+If you have any questions, feel free to contact us by creating an issue on [GitHub](https://github.com/munich-quantum-toolkit/syrec/issues).
 
 ## Getting Started
 
