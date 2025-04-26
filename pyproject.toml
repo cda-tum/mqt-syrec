@@ -3,7 +3,7 @@ requires = [
     "scikit-build-core>=0.11.0",
     "setuptools-scm>=8.3",
     "pybind11>=2.13.6",
-    "mqt.core>=3.0.2",
+    "mqt.core~=3.0.2",
 ]
 build-backend = "scikit_build_core.build"
 
