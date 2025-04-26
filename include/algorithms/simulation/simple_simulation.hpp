@@ -60,6 +60,6 @@ namespace syrec {
     * </table>
     */
     void simpleSimulation(boost::dynamic_bitset<>& output, const Circuit& circ, const boost::dynamic_bitset<>& input,
-                          const Properties::ptr& statistics = Properties::ptr());
+                          const Properties::ptr& statistics = Properties::ptr(), const bool reverse = false);
 
 } // namespace syrec
