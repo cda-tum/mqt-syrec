@@ -1,9 +1,9 @@
 # set required cmake version
-cmake_minimum_required(VERSION 3.19...3.31)
+cmake_minimum_required(VERSION 3.24...4.0)
 
 project(
   mqt-syrec
-  LANGUAGES CXX
+  LANGUAGES C CXX
   DESCRIPTION "MQT SyReC Synthesizer: A Tool for HDL-based Synthesis of Reversible Circuits")
 
 option(BUILD_MQT_SYREC_BINDINGS "Build the MQT SYREC Python bindings" OFF)
