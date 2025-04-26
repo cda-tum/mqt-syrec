@@ -1,3 +1,11 @@
+# Copyright (c) 2023 - 2025 Chair for Design Automation, TUM
+# Copyright (c) 2025 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 if(NOT TARGET MQT::SyReC)
   # collect headers and source files
   file(GLOB_RECURSE SYREC_HEADERS ${MQT_SYREC_INCLUDE_BUILD_DIR}/*.hpp)
@@ -25,6 +33,7 @@ if(NOT TARGET MQT::SyReC)
 
   # add MQT alias
   add_library(MQT::SyReC ALIAS ${PROJECT_NAME})
+  target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 endif()
 
 if(BUILD_MQT_SYREC_BINDINGS)
