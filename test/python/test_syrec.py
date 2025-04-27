@@ -105,6 +105,7 @@ def test_simulation_no_lines(data_line_aware_simulation: dict[str, Any]) -> None
         syrec.simple_simulation(my_out_bitset2, circ, my_out_bitset, reverse=True)
         assert str(my_out_bitset2) == str(my_inp_bitset)
 
+
 def test_simulation_add_lines(data_cost_aware_simulation: dict[str, Any]) -> None:
     for file_name in data_cost_aware_simulation:
         circ = syrec.circuit()

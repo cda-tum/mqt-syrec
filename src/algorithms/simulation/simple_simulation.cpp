@@ -69,13 +69,13 @@ namespace syrec {
 
         output = input;
         if (reverse) {
-          for (const auto& g: std::ranges::reverse_view(circ)) {
-            coreGateSimulation(*g, output);
-          }
+            for (const auto& g: std::ranges::reverse_view(circ)) {
+                coreGateSimulation(*g, output);
+            }
         } else {
-          for (const auto& g: circ) {
-            coreGateSimulation(*g, output);
-          }
+            for (const auto& g: circ) {
+                coreGateSimulation(*g, output);
+            }
         }
 
         if (statistics) {
