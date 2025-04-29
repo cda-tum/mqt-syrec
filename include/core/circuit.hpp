@@ -96,6 +96,15 @@ namespace syrec {
         }
 
         /**
+         * @brief Constant reverse begin iterator pointing to gates
+         *
+         * @return Constant reverse begin iterator
+         */
+        [[nodiscard]] auto crbegin() const {
+            return gates.crbegin();
+        }
+
+        /**
          * @brief Begin iterator pointing to gates
          *
          * @return Begin iterator
@@ -111,6 +120,15 @@ namespace syrec {
          */
         [[nodiscard]] auto cend() const {
             return gates.cend();
+        }
+
+        /**
+         * @brief Constant reverse end iterator pointing to gates
+         *
+         * @return Constant reverse end iterator
+         */
+        [[nodiscard]] auto crend() const {
+            return gates.crend();
         }
 
         /**

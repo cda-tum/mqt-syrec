@@ -18,7 +18,6 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <cstddef>
 #include <iostream>
-#include <ranges>
 
 namespace syrec {
 
@@ -69,9 +68,9 @@ namespace syrec {
 
         output = input;
         if (reverse) {
-            for (const auto& g: std::ranges::reverse_view(circ)) {
-                coreGateSimulation(*g, output);
-            }
+          for (auto g = circ.crbegin(); g != circ.crend(); ++g) {
+            coreGateSimulation(*(*g), output);
+          }
         } else {
             for (const auto& g: circ) {
                 coreGateSimulation(*g, output);
