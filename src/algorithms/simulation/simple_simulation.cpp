@@ -68,9 +68,9 @@ namespace syrec {
 
         output = input;
         if (reverse) {
-          for (auto g = circ.crbegin(); g != circ.crend(); ++g) {
-            coreGateSimulation(*(*g), output);
-          }
+            for (auto g = circ.crbegin(); g != circ.crend(); ++g) {
+                coreGateSimulation(*(*g), output);
+            }
         } else {
             for (const auto& g: circ) {
                 coreGateSimulation(*g, output);
