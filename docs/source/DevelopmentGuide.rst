@@ -6,13 +6,13 @@ Ready to contribute to the project? Here is how to set up a local development en
 Initial Setup
 #############
 
-1. Fork the `cda-tum/syrec <https://github.com/cda-tum/syrec>`_ repository on GitHub (see https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+1. Fork the `munich-quantum-toolkit/syrec <https://github.com/munich-quantum-toolkit/syrec>`_ repository on GitHub (see https://docs.github.com/en/get-started/quickstart/fork-a-repo).
 
 2. Clone your fork locally
 
     .. code-block:: console
 
-        $ git clone git@github.com:your_name_here/syrec --recursive
+        $ git clone git@github.com:your_name_here/syrec mqt-syrec
 
     .. warning::
 
@@ -23,7 +23,7 @@ Initial Setup
 
     .. code-block:: console
 
-        $ cd syrec
+        $ cd mqt-syrec
 
 4. Create a branch for local development
 
@@ -108,7 +108,7 @@ Initial Setup
 Working on the core C++ library
 ###############################
 
-Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.19*, and the Boost libraries with a minimum version of *1.71.0*.
+Building the project requires a C++ compiler supporting *C++17*, CMake with a minimum version of *3.24*, and the Boost libraries with a minimum version of *1.71.0*.
 
     .. note::
         We noticed some issues when compiling with Microsoft's *MSCV* compiler toolchain.
@@ -255,15 +255,9 @@ A :code:`nox` session is provided to conveniently run the Python tests.
 
     .. code-block:: console
 
-        (venv) $ nox -rs tests
+        (venv) $ nox -s tests
 
 This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then runs the tests.
-The :code:`-r` flag ensures that the environment is reused for subsequent runs.
-To speed up subsequent runs, the installation step can be skipped by adding the :code:`skip-install` flag.
-
-    .. code-block:: console
-
-        (venv) $ nox -rs tests -- skip-install
 
 .. note::
     If you don't want to use :code:`nox`, you can also run the tests directly using :code:`pytest`.
@@ -278,36 +272,16 @@ Python Code Formatting and Linting
 The Python code is formatted and linted using a collection of `pre-commit hooks <https://pre-commit.com/>`_.
 This collection includes:
 
-- `black <https://black.readthedocs.io/en/stable/>`_ -- a code formatter that automatically formats Python code according to the `PEP 8 style guide <https://www.python.org/dev/peps/pep-0008/>`_
-- `flake8 <https://flake8.pycqa.org/en/latest/>`_ -- a linter that checks for common mistakes in Python code
-- `isort <https://pycqa.github.io/isort/>`_ -- a tool that automatically sorts Python imports according to the `PEP 8 style guide <https://www.python.org/dev/peps/pep-0008/>`_
+- `ruff <https://docs.astral.sh/ruff/>`_ -- an extremely fast Python linter and formatter, written in Rust.
 - `mypy <http://mypy-lang.org/>`_ -- a static type checker for Python code
-- `pyupgrade <https://github.com/asottile/pyupgrade>`_ -- a tool that automatically upgrades Python syntax to a newer version
 
-There are two ways of using these hooks:
 
-- You can install the hooks manually by running :code:`pre-commit install` in the project root directory.
-  This will install the hooks in the :code:`.git/hooks` directory of the repository.
-  The hooks will then be executed automatically when committing changes.
-- You can use the :code:`nox` session :code:`lint` to run the hooks manually.
+You can install the hooks manually by running :code:`pre-commit install` in the project root directory.
+The hooks will then be executed automatically when committing changes.
 
     .. code-block:: console
 
-        (venv) $ nox -rs lint
-
-    .. note::
-        If you don't want to use :code:`nox`, you can also run the hooks directly using :code:`pre-commit`.
-
-        .. code-block:: console
-
-            (venv) $ pre-commit run --all-files
-
-In addition to the pre-commit hooks, the Python code is also type checked by `mypy <http://mypy-lang.org/>`_.
-This is done by the :code:`nox` session :code:`mypy`.
-
-    .. code-block:: console
-
-        (venv) $ nox -rs mypy
+        (venv) $ pre-commit run -a
 
 Working on the Documentation
 ############################
@@ -318,22 +292,9 @@ You can build the documentation using the :code:`nox` session :code:`docs`.
 
     .. code-block:: console
 
-        (venv) $ nox -rs docs
+        (venv) $ nox -s docs
 
 This will install all dependencies for building the documentation in an isolated environment, build the Python package, and then build the documentation.
-The session also provides a convenient option to automatically serve the docs on a local web server. Running
-
-    .. code-block:: console
-
-        (venv) $ nox -rs docs -- serve
-
-will start a local web server on port 8000 and provide a link to open the documentation in your browser.
-
-To build the documentation without (re-)installing the Python package, you can use the :code:`skip-install` flag.
-
-    .. code-block:: console
-
-        (venv) $ nox -rs docs -- skip-install
 
     .. note::
         If you don't want to use :code:`nox`, you can also build the documentation directly using :code:`sphinx-build`.

@@ -28,7 +28,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
+        uses: pypa/cibuildwheel@v2.23
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-ubuntu-latest-${{ strategy.job-index }}
@@ -45,9 +45,9 @@ jobs:
       - name: Install boost
         run: brew install boost
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
+        uses: pypa/cibuildwheel@v2.23
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event_name == 'pull_request' && 'dev-' || '' }}cibw-wheels-macos-latest-${{ strategy.job-index }}
@@ -69,9 +69,9 @@ jobs:
           boost_version: ${{ env.BOOST_VERSION_MAJOR }}.${{ env.BOOST_VERSION_MINOR }}.${{ env.BOOST_VERSION_PATCH }}
           platform_version: 2019
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22
+        uses: pypa/cibuildwheel@v2.23
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       - uses: actions/upload-artifact@v4
@@ -91,7 +91,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get -y install libboost-all-dev
       # set up uv for faster Python package management
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
       # build the source distribution
       - name: Build SDist
         run: uv build --sdist
