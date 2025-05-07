@@ -21,19 +21,7 @@
 #include <vector>
 
 namespace syrec {
-    /// checking the entire statement
-    bool LineAwareSynthesis::fullStatement(Circuit& circuit, const Statement::ptr& statement) {
-        bool okay = false;
-        if (auto const* stat = dynamic_cast<AssignStatement*>(statement.get())) {
-            okay = fullStatement(circuit, *stat);
-        } else {
-            return false;
-        }
-
-        return okay;
-    }
-
-    bool LineAwareSynthesis::fullStatement(Circuit& circuit, const AssignStatement& statement) {
+    bool LineAwareSynthesis::onStatement(Circuit& circuit, const AssignStatement& statement) {
         std::vector<unsigned> d;
         std::vector<unsigned> statLhs;
         std::vector<unsigned> ddd;

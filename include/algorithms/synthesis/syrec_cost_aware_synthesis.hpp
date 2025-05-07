@@ -21,7 +21,7 @@ namespace syrec {
 
     protected:
         bool processStatement(Circuit& circuit, const Statement::ptr& statement) override {
-            return !SyrecSynthesis::onStatement(circuit, statement);
+            return SyrecSynthesis::onStatement(circuit, statement);
         }
 
         bool assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {

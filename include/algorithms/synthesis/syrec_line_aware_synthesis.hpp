@@ -21,11 +21,12 @@ namespace syrec {
 
     protected:
         bool processStatement(Circuit& circuit, const Statement::ptr& statement) override {
-            return !fullStatement(circuit, statement) && !SyrecSynthesis::onStatement(circuit, statement);
+            if (const auto& castedStmt = dynamic_cast<AssignStatement*>(statement.get()))
+                return onStatement(circuit, *castedStmt);
+            return SyrecSynthesis::onStatement(circuit, statement);
         }
 
-        bool fullStatement(Circuit& circuit, const Statement::ptr& statement);
-        bool fullStatement(Circuit& circuit, const AssignStatement& statement);
+        bool onStatement(Circuit& circuit, const AssignStatement& statement) override;
 
         bool opRhsLhsExpression(const Expression::ptr& expression, std::vector<unsigned>& v) override;
 

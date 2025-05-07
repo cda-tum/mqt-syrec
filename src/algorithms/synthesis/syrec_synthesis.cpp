@@ -48,44 +48,23 @@ namespace syrec {
         std::vector checkLhsVec(expLhsVector.cbegin(), expLhsVector.cend());
         std::vector checkRhsVec(expRhsVector.cbegin(), expRhsVector.cend());
 
-        for (unsigned k = 0; k < checkLhsVec.size(); k++) {
-            if (checkLhsVec.at(k).empty()) {
-                checkLhsVec.erase(checkLhsVec.begin() + k);
+        checkLhsVec.erase(std::remove_if(checkLhsVec.begin(), checkLhsVec.end(), [](const std::vector<unsigned>& linesContainer) { return linesContainer.empty(); }), checkLhsVec.end());
+        checkRhsVec.erase(std::remove_if(checkRhsVec.begin(), checkRhsVec.end(), [](const std::vector<unsigned>& linesContainer) { return linesContainer.empty(); }), checkRhsVec.end());
+
+        bool foundRepeat = false;
+        for (std::size_t i = 0; i < checkRhsVec.size() && !foundRepeat; ++i) {
+            for (std::size_t j = 0; j < checkRhsVec.size() && !foundRepeat; ++j) {
+                foundRepeat = i != j && checkRhsVec[i] == checkRhsVec[j];
             }
         }
 
-        for (unsigned k = 0; k < checkRhsVec.size(); k++) {
-            if (checkRhsVec.at(k).empty()) {
-                checkRhsVec.erase(checkRhsVec.begin() + k);
-            }
-        }
-
-        for (int i = 0; i < static_cast<int>(checkRhsVec.size()); i++) {
-            for (int j = 0; j < static_cast<int>(checkRhsVec.size()); j++) {
-                if ((j != i) && (checkRhsVec.at(i) == checkRhsVec.at(j))) {
-                    expOpVector.clear();
-                    expLhsVector.clear();
-                    expRhsVector.clear();
-                    return true;
-                }
-            }
-        }
-
-        for (auto const& i: checkLhsVec) {
-            for (auto const& j: checkRhsVec) {
-                if (i == j) {
-                    expOpVector.clear();
-                    expLhsVector.clear();
-                    expRhsVector.clear();
-                    return true;
-                }
-            }
-        }
+        for (std::size_t i = 0; i < checkLhsVec.size() && !foundRepeat; ++i)
+            foundRepeat = checkLhsVec[i] == checkRhsVec[i];
 
         expOpVector.clear();
         expLhsVector.clear();
         expRhsVector.clear();
-        return false;
+        return foundRepeat;
     }
 
     bool SyrecSynthesis::opRhsLhsExpression([[maybe_unused]] const Expression::ptr& expression, [[maybe_unused]] std::vector<unsigned>& v) {
@@ -100,7 +79,8 @@ namespace syrec {
 
     bool SyrecSynthesis::onStatement(Circuit& circuit, const Statement::ptr& statement) {
         stmts.push(statement);
-        bool okay = false;
+
+        bool okay = true;
         if (auto const* swapStat = dynamic_cast<SwapStatement*>(statement.get())) {
             okay = onStatement(circuit, *swapStat);
         } else if (auto const* unaryStat = dynamic_cast<UnaryStatement*>(statement.get())) {
@@ -118,7 +98,7 @@ namespace syrec {
         } else if (auto const* skipStat = statement.get()) {
             okay = onStatement(*skipStat);
         } else {
-            return false;
+            okay = false;
         }
 
         stmts.pop();
@@ -196,7 +176,7 @@ namespace syrec {
         unsigned helperLine = expressionResult.front();
 
         for (const Statement::ptr& stat: statement.thenStatements) {
-            if (processStatement(circuit, stat)) {
+            if (!processStatement(circuit, stat)) {
                 return false;
             }
         }
@@ -205,7 +185,7 @@ namespace syrec {
         circuit.createAndAddNotGate(helperLine);
 
         for (const Statement::ptr& stat: statement.elseStatements) {
-            if (processStatement(circuit, stat)) {
+            if (!processStatement(circuit, stat)) {
                 return false;
             }
         }
@@ -230,7 +210,7 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if (processStatement(circuit, stat)) {
+                    if (!processStatement(circuit, stat)) {
                         return false;
                     }
                 }
@@ -246,7 +226,7 @@ namespace syrec {
                 }
 
                 for (const auto& stat: statement.statements) {
-                    if (processStatement(circuit, stat)) {
+                    if (!processStatement(circuit, stat)) {
                         return false;
                     }
                 }
@@ -274,7 +254,7 @@ namespace syrec {
 
         modules.push(statement.target);
         for (const Statement::ptr& stat: statement.target->statements) {
-            if (processStatement(circuit, stat)) {
+            if (!processStatement(circuit, stat)) {
                 return false;
             }
         }
@@ -300,7 +280,7 @@ namespace syrec {
         const auto statements = statement.target->statements;
         for (auto it = statements.rbegin(); it != statements.rend(); ++it) {
             const auto reverseStatement = (*it)->reverse();
-            if (processStatement(circuit, reverseStatement)) {
+            if (!processStatement(circuit, reverseStatement)) {
                 return false;
             }
         }
@@ -908,13 +888,11 @@ namespace syrec {
         synthesizer->addVariables(circ, main->variables);
 
         // synthesize the statements
-        const auto& statements = synthesizer->onModule(circ, main);
-
+        const auto synthesisOfMainModuleOk = synthesizer->onModule(circ, main);
         if (statistics) {
             t.stop();
         }
-
-        return statements;
+        return synthesisOfMainModuleOk;
     }
 
 } // namespace syrec
