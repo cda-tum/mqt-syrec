@@ -333,7 +333,7 @@ namespace syrec {
 
         ///add circuit
 
-        void insertCircuit(unsigned pos, const Circuit& src, const Gate::line_container& controls) {
+        void insertCircuit(unsigned pos, const Circuit& src, const Gate::LinesLookup& controls) {
             if (controls.empty()) {
                 for (const auto& g: src) {
                     Gate& newGate = insertGate(pos++);
@@ -368,48 +368,27 @@ namespace syrec {
             }
         }
 
-        ///add gates
-        Gate& appendMultiControlToffoli(const Gate::line_container& controls, const Gate::line& target) {
-            Gate& g = appendGate();
-            for (const auto& control: controls) {
-                g.controls.emplace(control);
-            }
-            g.targets.emplace(target);
-            g.type = Gate::Types::Toffoli;
-
-            return g;
+        [[maybe_unused]] Gate::ptr createAndAddToffoliGate(const Gate::Line controlLineOne, const Gate::Line controlLineTwo, const Gate::Line targetLine) {
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}));
         }
 
-        Gate& appendToffoli(const Gate::line& control1, const Gate::line& control2, const Gate::line& target) {
-            Gate& g = appendGate();
-            g.controls.emplace(control1);
-            g.controls.emplace(control2);
-            g.targets.emplace(target);
-            g.type = Gate::Types::Toffoli;
-            return g;
+        [[maybe_unused]] std::optional<Gate::ptr> createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
+            if (controlLines.empty())
+                return std::nullopt;
+
+            return createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}));
         }
 
-        Gate& appendCnot(const Gate::line& control, const Gate::line& target) {
-            Gate& g = appendGate();
-            g.controls.emplace(control);
-            g.targets.emplace(target);
-            g.type = Gate::Types::Toffoli;
-            return g;
+        [[maybe_unused]] Gate::ptr createAndAddCnotGate(const Gate::Line controlLine, Gate::Line targetLine) {
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}));
         }
 
-        Gate& appendNot(const Gate::line& target) {
-            Gate& g = appendGate();
-            g.targets.emplace(target);
-            g.type = Gate::Types::Toffoli;
-            return g;
+        [[maybe_unused]] Gate::ptr createAndAddNotGate(Gate::Line targetLine) {
+            return createAndAddGate(Gate::Type::Toffoli, std::nullopt, Gate::LinesLookup({targetLine}));
         }
 
-        Gate& appendFredkin(const Gate::line& target1, const Gate::line& target2) {
-            Gate& g = appendGate();
-            g.targets.emplace(target1);
-            g.targets.emplace(target2);
-            g.type = Gate::Types::Fredkin;
-            return g;
+        [[maybe_unused]] Gate::ptr createAndAddFredkinGate(const Gate::Line targetLineOne, const Gate::Line targetLineTwo) {
+            return createAndAddGate(Gate::Type::Fredkin, std::nullopt, Gate::LinesLookup({targetLineOne, targetLineTwo}));
         }
 
         // SIGNALS
@@ -464,6 +443,19 @@ namespace syrec {
             file << toQasm();
             file.close();
             return true;
+        }
+
+    protected:
+        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
+            auto gateInstance  = std::make_shared<Gate>();
+            gateInstance->type = gateType;
+
+            if (controlLines.has_value())
+                gateInstance->controls = controlLines.value();
+
+            gateInstance->targets = targetLines;
+            gates.emplace_back(gateInstance);
+            return gateInstance;
         }
 
     private:

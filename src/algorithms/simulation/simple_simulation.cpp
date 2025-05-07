@@ -22,7 +22,7 @@
 namespace syrec {
 
     void coreGateSimulation(const Gate& g, boost::dynamic_bitset<>& input) {
-        if (g.type == Gate::Types::Toffoli) {
+        if (g.type == Gate::Type::Toffoli) {
             boost::dynamic_bitset<> cMask(input.size());
             for (const auto& c: g.controls) {
                 cMask.set(c);
@@ -31,7 +31,7 @@ namespace syrec {
             if (cMask.none() || ((input & cMask) == cMask)) {
                 input.flip(*g.targets.begin());
             }
-        } else if (g.type == Gate::Types::Fredkin) {
+        } else if (g.type == Gate::Type::Fredkin) {
             boost::dynamic_bitset<> cMask(input.size());
             for (const auto& c: g.controls) {
                 cMask.set(c);
