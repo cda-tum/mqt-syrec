@@ -11,10 +11,9 @@
 #pragma once
 
 #include "core/circuit.hpp"
+#include "core/nBit_circuit_line_values_container.hpp"
 #include "core/properties.hpp"
 
-#include <boost/dynamic_bitset.hpp>
-#include <functional>
 #include <memory>
 
 namespace syrec {
@@ -30,7 +29,7 @@ namespace syrec {
     * @param g     The gate to be simulated
     * @param input An input pattern
     */
-    void coreGateSimulation(const Gate& g, boost::dynamic_bitset<>& input);
+    void coreGateSimulation(const Gate& g, NBitCircuitLineValuesContainer& input);
 
     /**
     * @brief Simple Simulation function for a circuit
@@ -59,7 +58,7 @@ namespace syrec {
     *   </tr>
     * </table>
     */
-    void simpleSimulation(boost::dynamic_bitset<>& output, const Circuit& circ, const boost::dynamic_bitset<>& input,
+    void simpleSimulation(NBitCircuitLineValuesContainer& output, const Circuit& circ, const NBitCircuitLineValuesContainer& input,
                           const Properties::ptr& statistics = Properties::ptr());
 
 } // namespace syrec

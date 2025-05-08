@@ -93,6 +93,8 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
     qc = circ.quantumCost();
     tc = circ.transistorCost();
 
+    const auto x = circ.toQasm();
+
     EXPECT_EQ(expectedNumGates, circ.numGates());
     EXPECT_EQ(expectedLines, circ.getLines());
     EXPECT_EQ(expectedQc, qc);

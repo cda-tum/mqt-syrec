@@ -27,14 +27,14 @@ using namespace syrec;
 
 class SyrecSimulationTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string             testConfigsDir  = "./configs/";
-    std::string             testCircuitsDir = "./circuits/";
-    std::string             fileName;
-    boost::dynamic_bitset<> input;
-    boost::dynamic_bitset<> output;
-    std::vector<int>        setLines;
-    std::string             expectedSimOut;
-    std::string             outputString;
+    std::string                    testConfigsDir  = "./configs/";
+    std::string                    testCircuitsDir = "./circuits/";
+    std::string                    fileName;
+    NBitCircuitLineValuesContainer input;
+    NBitCircuitLineValuesContainer output;
+    std::vector<int>               setLines;
+    std::string                    expectedSimOut;
+    std::string                    outputString;
 
     void SetUp() override {
         std::string synthesisParam = GetParam();
@@ -64,25 +64,18 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     Program             prog;
     ReadProgramSettings settings;
     Properties::ptr     statistics;
-    std::string         errorString;
-
-    errorString = prog.read(fileName, settings);
+    std::string         errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
-
     EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
 
-    input.resize(circ.getLines());
+    const std::size_t nCircuitLines = circ.getLines();
+    input.resize(nCircuitLines);
+    output.resize(nCircuitLines);
 
-    for (int line: setLines) {
+    for (int line: setLines)
         input.set(line);
-    }
-
-    output.resize(circ.getLines());
 
     simpleSimulation(output, circ, input, statistics);
-
-    boost::to_string(output, outputString);
-    std::reverse(outputString.begin(), outputString.end());
-
+    outputString = output.stringify();
     EXPECT_EQ(expectedSimOut, outputString);
 }
