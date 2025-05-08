@@ -174,6 +174,8 @@ namespace syrec {
 
         // add new helper line
         unsigned helperLine = expressionResult.front();
+        circuit.activateLocalControlLineScope();
+        circuit.registerControlLineInCurrentScope(helperLine);
 
         for (const Statement::ptr& stat: statement.thenStatements) {
             if (!processStatement(circuit, stat)) {
@@ -190,6 +192,7 @@ namespace syrec {
             }
         }
         circuit.createAndAddNotGate(helperLine);
+        circuit.deactivateCurrLocalControlLineScope();
         return true;
     }
 
@@ -442,14 +445,25 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::decrement(Circuit& circuit, const std::vector<unsigned>& dest) {
-        for (const auto line: dest)
+        circuit.activateLocalControlLineScope();
+        for (const auto line: dest) {
             circuit.createAndAddNotGate(line);
+            circuit.registerControlLineInCurrentScope(line);
+        }
+        circuit.deactivateCurrLocalControlLineScope();
         return true;
     }
 
     bool SyrecSynthesis::increment(Circuit& circuit, const std::vector<unsigned>& dest) {
-        for (int i = static_cast<int>(dest.size()) - 1; i >= 0; --i) 
+        circuit.activateLocalControlLineScope();
+        for (const auto line: dest)
+            circuit.registerControlLineInCurrentScope(line);
+
+        for (int i = static_cast<int>(dest.size()) - 1; i >= 0; --i) {
+            circuit.deregisterControlLine(dest[i]);
             circuit.createAndAddNotGate(dest[i]);
+        }
+        circuit.deactivateCurrLocalControlLineScope();
         return true;
     }
 
@@ -518,17 +532,30 @@ namespace syrec {
         for (std::size_t i = 1; i < src1.size(); ++i)
             circuit.createAndAddNotGate(src2[i]);
 
+        circuit.activateLocalControlLineScope();
+        for (std::size_t i = 1U; i < src1.size(); ++i)
+            circuit.registerControlLineInCurrentScope(src2[i]);
+
         std::size_t helperIndex = 0;
         bool        synthesisOk = true;
         for (int i = static_cast<int>(src1.size()) - 1; i >= 0 && synthesisOk; --i) {
             partial.push_back(src2[helperIndex++]);
             sum.insert(sum.begin(), src1[i]);
+            circuit.registerControlLineInCurrentScope(dest[i]);
             synthesisOk = increase(circuit, sum, partial);
+            circuit.deregisterControlLine(dest[i]);
             if (i == 0)
                 continue;
 
+            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j)
+                circuit.deregisterControlLine(src2[j]);
+
             circuit.createAndAddNotGate(src2[helperIndex]);
+
+            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j)
+                circuit.registerControlLineInCurrentScope(src2[j]);
         }
+        circuit.deactivateCurrLocalControlLineScope();
         return synthesisOk;
     }
 
@@ -673,19 +700,34 @@ namespace syrec {
         for (std::size_t i = 1; i < src1.size(); ++i)
             circuit.createAndAddNotGate(src2[i]);
 
+        circuit.activateLocalControlLineScope();
+        for (std::size_t i = 1; i < src1.size(); ++i)
+            circuit.registerControlLineInCurrentScope(src2[i]);
+
         std::size_t helperIndex = 0;
         bool        synthesisOk = true;
         for (int i = static_cast<int>(src1.size()) - 1; i >= 0 && synthesisOk; --i) {
             partial.push_back(src2[helperIndex++]);
             sum.insert(sum.begin(), src1[i]);
             synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[i]);
+
+            circuit.registerControlLineInCurrentScope(dest[i]);
             synthesisOk &= increase(circuit, sum, partial);
+            circuit.deregisterControlLine(dest[i]);
+
             circuit.createAndAddNotGate(dest[i]);
             if (i == 0)
                 continue;
 
+            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j)
+                circuit.deregisterControlLine(src2[j]);
+
             circuit.createAndAddNotGate(src2[helperIndex]);
+
+            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j)
+                circuit.registerControlLineInCurrentScope(src2[j]);
         }
+        circuit.deactivateCurrLocalControlLineScope();
         return synthesisOk;
     }
 
@@ -700,13 +742,19 @@ namespace syrec {
         std::vector<unsigned> partial = src2;
 
         bool synthesisOk = true;
+        circuit.activateLocalControlLineScope();
+        circuit.registerControlLineInCurrentScope(src1.front());
         synthesisOk = synthesisOk && bitwiseCnot(circuit, sum, partial);
+        circuit.deregisterControlLine(src1.front());
 
         for (std::size_t i = 1; i < dest.size() && synthesisOk; ++i) {
             sum.erase(sum.begin());
             partial.pop_back();
+            circuit.registerControlLineInCurrentScope(src1[i]);
             synthesisOk &= increase(circuit, sum, partial);
+            circuit.deregisterControlLine(src1[i]);
         }
+        circuit.deactivateCurrLocalControlLineScope();
         return synthesisOk;
     }
 
