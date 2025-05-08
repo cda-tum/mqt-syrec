@@ -17,6 +17,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -334,44 +335,52 @@ namespace syrec {
                 return;
 
             const auto& localControlLineScope = localControlLinesScope.back();
-            for (const auto localControlLine: localControlLineScope)
-                globalActiveControlLines.erase(localControlLine);
+            for (const auto [controlLine, controlLineData]: localControlLineScope) {
+                if (!controlLineData.wasControlLineRegisteredInParentScope)
+                    aggregateOfLocalControlLineScopes.erase(controlLine);
+            }
             localControlLinesScope.pop_back();
         }
 
-        void deregisterControlLine(const Gate::Line controlLine) {
+        [[maybe_unused]] bool deregisterControlLineInCurrentScope(const Gate::Line controlLine) {
             if (localControlLinesScope.empty())
-                return;
+                return false;
 
-            localControlLinesScope.back().erase(controlLine);
-            globalActiveControlLines.erase(controlLine);
+            auto& localControlLineScope = localControlLinesScope.back();
+            if (localControlLineScope.count(controlLine) == 0)
+                return false;
+
+            localControlLineScope.at(controlLine).isControlLineActive = false;
+            return true;
         }
 
         void registerControlLineInCurrentScope(const Gate::Line controlLine) {
-            if (globalActiveControlLines.count(controlLine) != 0)
-                return;
-
             if (localControlLinesScope.empty())
                 activateLocalControlLineScope();
 
-            localControlLinesScope.back().emplace(controlLine);
-            globalActiveControlLines.emplace(controlLine);
+            auto& localControlLineScope = localControlLinesScope.back();
+            // If an entry for the to be registered control line already exists in the current scope then the previously determine value of the flag indicating whether the control line existed in the parent scope
+            // should have the same value that it had when the control line was initially added to the current scope
+            if (localControlLineScope.count(controlLine) != 0)
+                localControlLineScope.at(controlLine).isControlLineActive = true;
+            else
+                localControlLineScope.emplace(std::make_pair(controlLine, LocalControlLineScopeEntry(true, aggregateOfLocalControlLineScopes.count(controlLine) != 0)));
+
+            aggregateOfLocalControlLineScopes.emplace(controlLine);
         }
 
         // SIGNALS
         [[nodiscard]] Gate::cost_t quantumCost() const {
             Gate::cost_t cost = 0U;
-            for (const auto& g: gates) {
+            for (const auto& g: gates)
                 cost += g->quantumCost(lines);
-            }
             return cost;
         }
 
         [[nodiscard]] Gate::cost_t transistorCost() const {
             Gate::cost_t cost = 0U;
-            for (const auto& g: gates) {
+            for (const auto& g: gates)
                 cost += (8ULL * g->controls.size());
-            }
             return cost;
         }
 
@@ -408,8 +417,17 @@ namespace syrec {
             auto gateInstance  = std::make_shared<Gate>();
             gateInstance->type = gateType;
 
-            if (!ignoreGlobalActiveControlLines)
-                gateInstance->controls.insert(globalActiveControlLines.cbegin(), globalActiveControlLines.cend());
+            if (!ignoreGlobalActiveControlLines) {
+                if (localControlLinesScope.empty()) {
+                    gateInstance->controls.insert(aggregateOfLocalControlLineScopes.cbegin(), aggregateOfLocalControlLineScopes.cend());
+                } else {
+                    const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
+                    for (const auto [controlLine, controlLineData]: lastAddedLocalControlLineScope) {
+                        if (controlLineData.isControlLineActive)
+                            gateInstance->controls.emplace(controlLine);
+                    }
+                }
+            }
 
             if (controlLines.has_value())
                 gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
@@ -429,8 +447,15 @@ namespace syrec {
         std::vector<bool>        garbage;
         std::string              name;
 
-        Gate::LinesLookup              globalActiveControlLines;
-        std::vector<Gate::LinesLookup> localControlLinesScope;
+        Gate::LinesLookup aggregateOfLocalControlLineScopes;
+        struct LocalControlLineScopeEntry {
+            bool isControlLineActive;
+            bool wasControlLineRegisteredInParentScope;
+
+            LocalControlLineScopeEntry(bool isControlLineActive, bool wasControlLineRegisteredInParentScope):
+                isControlLineActive(isControlLineActive), wasControlLineRegisteredInParentScope(wasControlLineRegisteredInParentScope) {}
+        };
+        std::vector<std::unordered_map<Gate::Line, LocalControlLineScopeEntry>> localControlLinesScope;
 
         std::map<const Gate*, std::map<std::string, std::string>> annotations;
     };

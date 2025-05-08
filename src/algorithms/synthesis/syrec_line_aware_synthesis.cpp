@@ -306,7 +306,7 @@ namespace syrec {
                 lines = rhs;
                 break;
             default:
-                return false;
+                return true;
         }
         return synthesisOk;
     }
@@ -330,6 +330,8 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::expressionSingleOp(Circuit& circuit, const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) const {
+        // With the return value we only propagate an error if the defined 'synthesis' operation for any of the handled operations fails. In all other cases, we assume that
+        // no synthesis should be performed and simply return OK.
         switch (op) {
             case BinaryExpression::Add: // +
                 return increase(circuit, expRhs, expLhs);
@@ -338,11 +340,13 @@ namespace syrec {
             case BinaryExpression::Exor: // ^
                 return bitwiseCnot(circuit, expRhs, expLhs);
             default:
-                return false;
+                return true;
         }
     }
 
     bool LineAwareSynthesis::expressionOpInverse(Circuit& circuit, const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) const {
+        // With the return value we only propagate an error if the defined 'synthesis' operation for any of the handled operations fails. In all other cases, we assume that
+        // no synthesis should be performed and simply return OK.
         switch (op) {
             case BinaryExpression::Add: // +
                 return decrease(circuit, expRhs, expLhs);
@@ -351,7 +355,7 @@ namespace syrec {
             case BinaryExpression::Exor: // ^
                 return bitwiseCnot(circuit, expRhs, expLhs);
             default:
-                return false;
+                return true;
         }
     }
 
