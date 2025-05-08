@@ -21,128 +21,46 @@
 #include <vector>
 
 namespace syrec {
-    bool LineAwareSynthesis::onStatement(Circuit& circuit, const AssignStatement& statement) {
-        std::vector<unsigned> d;
-        std::vector<unsigned> statLhs;
-        std::vector<unsigned> ddd;
-        getVariables(statement.lhs, statLhs);
+    bool LineAwareSynthesis::processStatement(Circuit& circuit, const Statement::ptr& statement) {
+        const auto stmtCastedAsAssignmentStmt = dynamic_cast<const AssignStatement*>(statement.get());
+        if (stmtCastedAsAssignmentStmt == nullptr)
+            return SyrecSynthesis::onStatement(circuit, statement);
 
-        opRhsLhsExpression(statement.rhs, d);
-
-        if (opVec.empty()) {
-            return false;
+        const AssignStatement& assignmentStmt = *stmtCastedAsAssignmentStmt;
+        std::vector<unsigned>  d;
+        std::vector<unsigned>  dd;
+        std::vector<unsigned>  ddd;
+        std::vector<unsigned>  statLhs;
+        getVariables(assignmentStmt.lhs, statLhs);
+        
+        // The line aware synthesis of an assignment can only be performed when the rhs input signals are repeated (since the results are stored in the rhs)
+        // and the right-hand side expression of the assignment consists of only Variable- or BinaryExpressions with the latter only containing the operations (+, - or ^).
+        const bool canAssignmentSynthesisBeOptimized = opRhsLhsExpression(assignmentStmt.rhs, d) && !opVec.empty() && flow(assignmentStmt.rhs, ddd) && checkRepeats() && flow(assignmentStmt.rhs, dd);
+        if (!canAssignmentSynthesisBeOptimized) {
+            expOpVector.clear();
+            assignOpVector.clear();
+            expLhsVector.clear();
+            expRhsVector.clear();
+            opVec.clear();
+            return SyrecSynthesis::onStatement(circuit, statement);
         }
-        flow(statement.rhs, ddd);
 
-        /// Only when the rhs input signals are repeated (since the results are stored in the rhs)
-
-        if (checkRepeats()) {
-            std::vector<unsigned> dd;
-            flow(statement.rhs, dd);
-
-            if (expOpVector.size() == 1) {
-                if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
-                    /// cancel out the signals
-
-                    expOpVector.clear();
-                    assignOpVector.clear();
-                    expLhsVector.clear();
-                    expRhsVector.clear();
-                    opVec.clear();
-                } else {
-                    if (statement.op == 1) {
-                        expressionSingleOp(circuit, 1, expLhsVector.at(0), statLhs);
-                        expressionSingleOp(circuit, 1, expRhsVector.at(0), statLhs);
-                        expOpVector.clear();
-                        assignOpVector.clear();
-                        expLhsVector.clear();
-                        expRhsVector.clear();
-                        opVec.clear();
-                    } else {
-                        expressionSingleOp(circuit, statement.op, expLhsVector.at(0), statLhs);
-                        expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
-                        expOpVector.clear();
-                        assignOpVector.clear();
-                        expLhsVector.clear();
-                        expRhsVector.clear();
-                        opVec.clear();
-                    }
-                }
-
+        bool synthesisOk = true;
+        if (expOpVector.size() == 1) {
+            if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
+                /// cancel out the signals
+                expOpVector.clear();
+                assignOpVector.clear();
+                expLhsVector.clear();
+                expRhsVector.clear();
+                opVec.clear();
             } else {
-                std::vector<unsigned> lines;
-                if (expLhsVector.at(0) == expRhsVector.at(0)) {
-                    if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
-                        /// cancel out the signals
-                    } else if (expOpVector.at(0) != 1 || expOpVector.at(0) != 2) {
-                        expressionSingleOp(circuit, statement.op, expLhsVector.at(0), statLhs);
-                        expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
-                    }
+                if (assignmentStmt.op == 1) {
+                    synthesisOk = expressionSingleOp(circuit, 1, expLhsVector.at(0), statLhs) &&
+                                  expressionSingleOp(circuit, 1, expRhsVector.at(0), statLhs);
                 } else {
-                    solver(circuit, statLhs, statement.op, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
-                }
-
-                unsigned              j = 0;
-                unsigned              z = 0;
-                std::vector<unsigned> statAssignOp;
-                if ((expOpVector.size() % 2) == 0) {
-                    z = (static_cast<int>(expOpVector.size()) / 2);
-                } else {
-                    z = (static_cast<int>((expOpVector.size()) - 1) / 2);
-                }
-
-                for (unsigned k = 0; k <= z - 1; k++) {
-                    statAssignOp.push_back(assignOpVector.at(k));
-                }
-
-                /// Assignment operations
-
-                std::reverse(statAssignOp.begin(), statAssignOp.end());
-
-                /// If reversible assignment is "-", the assignment operations must negated appropriately
-
-                if (statement.op == 1) {
-                    for (unsigned int& i: statAssignOp) {
-                        if (i == 0) {
-                            i = 1;
-                        } else if (i == 1) {
-                            i = 0;
-                        } else {
-                            continue;
-                        }
-                    }
-                }
-
-                for (unsigned i = 1; i <= expOpVector.size() - 1; i++) {
-                    /// when both rhs and lhs exist
-                    if ((!expLhsVector.at(i).empty()) && (!expRhsVector.at(i).empty())) {
-                        if (expLhsVector.at(i) == expRhsVector.at(i)) {
-                            if (expOpVector.at(i) == 1 || expOpVector.at(i) == 2) {
-                                /// cancel out the signals
-                                j = j + 1;
-                            } else if (expOpVector.at(i) != 1 || expOpVector.at(i) != 2) {
-                                if (statAssignOp.at(j) == 1) {
-                                    expressionSingleOp(circuit, 1, expLhsVector.at(i), statLhs);
-                                    expressionSingleOp(circuit, 1, expRhsVector.at(i), statLhs);
-                                    j = j + 1;
-                                } else {
-                                    expressionSingleOp(circuit, statAssignOp.at(j), expLhsVector.at(i), statLhs);
-                                    expressionSingleOp(circuit, expOpVector.at(i), expRhsVector.at(i), statLhs);
-                                    j = j + 1;
-                                }
-                            }
-                        } else {
-                            solver(circuit, statLhs, statAssignOp.at(j), expLhsVector.at(i), expOpVector.at(i), expRhsVector.at(i));
-                            j = j + 1;
-                        }
-                    }
-
-                    /// when only lhs exists o rhs exists
-                    else if (((expLhsVector.at(i).empty()) && !(expRhsVector.at(i).empty())) || ((!expLhsVector.at(i).empty()) && (expRhsVector.at(i).empty()))) {
-                        expEvaluate(circuit, lines, statAssignOp.at(j), expRhsVector.at(i), statLhs);
-
-                        j = j + 1;
-                    }
+                    synthesisOk = expressionSingleOp(circuit, assignmentStmt.op, expLhsVector.at(0), statLhs) &&
+                                  expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
                 }
                 expOpVector.clear();
                 assignOpVector.clear();
@@ -150,30 +68,86 @@ namespace syrec {
                 expRhsVector.clear();
                 opVec.clear();
             }
-        } else {
-            expOpVector.clear();
-            assignOpVector.clear();
-            expLhsVector.clear();
-            expRhsVector.clear();
-            opVec.clear();
-            return false;
+            return synthesisOk;
         }
 
+        std::vector<unsigned> lines;
+        if (expLhsVector.at(0) == expRhsVector.at(0)) {
+            if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
+                /// cancel out the signals
+            } else if (expOpVector.at(0) != 1 || expOpVector.at(0) != 2) {
+                synthesisOk = expressionSingleOp(circuit, assignmentStmt.op, expLhsVector.at(0), statLhs) &&
+                              expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
+            }
+        } else {
+            synthesisOk = solver(circuit, statLhs, assignmentStmt.op, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
+        }
+
+        const std::size_t z = (expOpVector.size() - (expOpVector.size() % 2 == 0)) / 2;
+        std::vector<unsigned> statAssignOp(z == 0 ? 1 : z, 0);
+
+        for (std::size_t k = 0; k <= z - 1; k++)
+            statAssignOp[k] = assignOpVector[k];   
+
+        /// Assignment operations
+        std::reverse(statAssignOp.begin(), statAssignOp.end());
+
+        /// If reversible assignment is "-", the assignment operations must negated appropriately
+        if (assignmentStmt.op == 1) {
+            for (unsigned int& i: statAssignOp) {
+                if (i == 0) {
+                    i = 1;
+                } else if (i == 1) {
+                    i = 0;
+                }
+            }
+        }
+
+        std::size_t j = 0;
+        for (std::size_t i = 1; i <= expOpVector.size() - 1 && synthesisOk; i++) {
+            /// when both rhs and lhs exist
+            if ((!expLhsVector.at(i).empty()) && (!expRhsVector.at(i).empty())) {
+                if (expLhsVector.at(i) == expRhsVector.at(i)) {
+                    if (expOpVector.at(i) == 1 || expOpVector.at(i) == 2) {
+                        /// cancel out the signals
+                        j++;
+                    } else if (expOpVector.at(i) != 1 || expOpVector.at(i) != 2) {
+                        if (statAssignOp.at(j) == 1) {
+                            synthesisOk = expressionSingleOp(circuit, 1, expLhsVector.at(i), statLhs) &&
+                                          expressionSingleOp(circuit, 1, expRhsVector.at(i), statLhs);
+                            j++;
+                        } else {
+                            synthesisOk = expressionSingleOp(circuit, statAssignOp.at(j), expLhsVector.at(i), statLhs) &&
+                                          expressionSingleOp(circuit, expOpVector.at(i), expRhsVector.at(i), statLhs);
+                            j++;
+                        }
+                    }
+                } else {
+                    synthesisOk = solver(circuit, statLhs, statAssignOp.at(j), expLhsVector.at(i), expOpVector.at(i), expRhsVector.at(i));
+                    j++;
+                }
+            }
+            /// when only lhs exists o rhs exists
+            else if (((expLhsVector.at(i).empty()) && !(expRhsVector.at(i).empty())) || ((!expLhsVector.at(i).empty()) && (expRhsVector.at(i).empty()))) {
+                synthesisOk = expEvaluate(circuit, lines, statAssignOp.at(j), expRhsVector.at(i), statLhs);
+                j           = j + 1;
+            }
+        }
         expOpVector.clear();
         assignOpVector.clear();
         expLhsVector.clear();
         expRhsVector.clear();
         opVec.clear();
-        return true;
+        return synthesisOk;
     }
 
     bool LineAwareSynthesis::flow(const Expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
-            return flow(*binary, v);
-        }
-        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get())) {
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get()))
+            return (binary->op == BinaryExpression::Add || binary->op == BinaryExpression::Subtract || binary->op == BinaryExpression::Exor) && flow(*binary, v);
+
+        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get()))
             return flow(*var, v);
-        }
+
         return false;
     }
 
@@ -274,7 +248,7 @@ namespace syrec {
         }
 
         while (!expOpp.empty() && synthesisOfAssignmentOk)
-            synthesisOfAssignmentOk &= inverse(circuit);
+            synthesisOfAssignmentOk = inverse(circuit);
 
         return synthesisOfAssignmentOk;
     }
@@ -290,7 +264,7 @@ namespace syrec {
         }
 
         while (!expOpp.empty() && synthesisOfAssignmentOk)
-            synthesisOfAssignmentOk &= inverse(circuit);
+            synthesisOfAssignmentOk = inverse(circuit);
 
         return synthesisOfAssignmentOk;
     }
@@ -305,7 +279,7 @@ namespace syrec {
         }
 
         while (!expOpp.empty() && synthesisOfAssignmentOk)
-            synthesisOfAssignmentOk &= inverse(circuit);
+            synthesisOfAssignmentOk = inverse(circuit);
 
         return synthesisOfAssignmentOk;
     }

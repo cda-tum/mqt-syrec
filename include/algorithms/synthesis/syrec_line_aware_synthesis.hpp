@@ -20,13 +20,7 @@ namespace syrec {
         static bool synthesize(Circuit& circ, const Program& program, const Properties::ptr& settings = std::make_shared<Properties>(), const Properties::ptr& statistics = std::make_shared<Properties>());
 
     protected:
-        bool processStatement(Circuit& circuit, const Statement::ptr& statement) override {
-            if (const auto& castedStmt = dynamic_cast<AssignStatement*>(statement.get()))
-                return onStatement(circuit, *castedStmt);
-            return SyrecSynthesis::onStatement(circuit, statement);
-        }
-
-        bool onStatement(Circuit& circuit, const AssignStatement& statement) override;
+        bool processStatement(Circuit& circuit, const Statement::ptr& statement) override;
 
         bool opRhsLhsExpression(const Expression::ptr& expression, std::vector<unsigned>& v) override;
 
