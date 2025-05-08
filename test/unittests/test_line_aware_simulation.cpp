@@ -31,9 +31,9 @@ protected:
     std::string             testCircuitsDir = "./circuits/";
     std::string             fileName;
     boost::dynamic_bitset<> input;
-    boost::dynamic_bitset<> output;
+    boost::dynamic_bitset<> output, output2;
     std::vector<int>        setLines;
-    std::string             expectedSimOut;
+    std::string             expectedSimOut, expectedSimIn;
     std::string             outputString;
 
     void SetUp() override {
@@ -78,6 +78,7 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     }
 
     output.resize(circ.getLines());
+    output2.resize(circ.getLines());
 
     simpleSimulation(output, circ, input, statistics);
 
@@ -85,4 +86,10 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     std::reverse(outputString.begin(), outputString.end());
 
     EXPECT_EQ(expectedSimOut, outputString);
+
+    // Check reversed simulation
+    simpleSimulation(output2, circ, output, statistics, true);
+    boost::to_string(output2, outputString);
+    boost::to_string(input, expectedSimIn);
+    EXPECT_EQ(expectedSimIn, outputString);
 }

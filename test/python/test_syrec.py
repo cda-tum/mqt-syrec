@@ -92,6 +92,7 @@ def test_simulation_no_lines(data_line_aware_simulation: dict[str, Any]) -> None
 
         my_inp_bitset = syrec.bitset(circ.lines)
         my_out_bitset = syrec.bitset(circ.lines)
+        my_out_bitset2 = syrec.bitset(circ.lines)
         set_list = data_line_aware_simulation[file_name]["set_lines"]
 
         for set_index in set_list:
@@ -99,6 +100,10 @@ def test_simulation_no_lines(data_line_aware_simulation: dict[str, Any]) -> None
 
         syrec.simple_simulation(my_out_bitset, circ, my_inp_bitset)
         assert data_line_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
+
+        # Check reversed simulation
+        syrec.simple_simulation(my_out_bitset2, circ, my_out_bitset, reverse=True)
+        assert str(my_out_bitset2) == str(my_inp_bitset)
 
 
 def test_simulation_add_lines(data_cost_aware_simulation: dict[str, Any]) -> None:
@@ -112,6 +117,7 @@ def test_simulation_add_lines(data_cost_aware_simulation: dict[str, Any]) -> Non
 
         my_inp_bitset = syrec.bitset(circ.lines)
         my_out_bitset = syrec.bitset(circ.lines)
+        my_out_bitset2 = syrec.bitset(circ.lines)
         set_list = data_cost_aware_simulation[file_name]["set_lines"]
 
         for set_index in set_list:
@@ -119,6 +125,10 @@ def test_simulation_add_lines(data_cost_aware_simulation: dict[str, Any]) -> Non
 
         syrec.simple_simulation(my_out_bitset, circ, my_inp_bitset)
         assert data_cost_aware_simulation[file_name]["sim_out"] == str(my_out_bitset)
+
+        # Check reversed simulation
+        syrec.simple_simulation(my_out_bitset2, circ, my_out_bitset, reverse=True)
+        assert str(my_out_bitset2) == str(my_inp_bitset)
 
 
 def test_no_lines_to_qasm(data_line_aware_synthesis: dict[str, Any]) -> None:
