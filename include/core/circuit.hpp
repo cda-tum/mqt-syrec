@@ -308,6 +308,7 @@ namespace syrec {
         }
 
         [[maybe_unused]] std::optional<Gate::ptr> createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
+            // A multi control toffoli gate must have at least one control line
             if (controlLines.empty())
                 return std::nullopt;
 
@@ -319,11 +320,11 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddNotGate(Gate::Line targetLine) {
-            return createAndAddGate(Gate::Type::Toffoli, std::nullopt, Gate::LinesLookup({targetLine}), true);
+            return createAndAddGate(Gate::Type::Toffoli, std::nullopt, Gate::LinesLookup({targetLine}));
         }
 
         [[maybe_unused]] Gate::ptr createAndAddFredkinGate(const Gate::Line targetLineOne, const Gate::Line targetLineTwo) {
-            return createAndAddGate(Gate::Type::Fredkin, std::nullopt, Gate::LinesLookup({targetLineOne, targetLineTwo}), true);
+            return createAndAddGate(Gate::Type::Fredkin, std::nullopt, Gate::LinesLookup({targetLineOne, targetLineTwo}));
         }
 
         void activateLocalControlLineScope() {
@@ -351,6 +352,9 @@ namespace syrec {
                 return false;
 
             localControlLineScope.at(controlLine).isControlLineActive = false;
+            // TODO: What if we open a new local scope, the aggregate still contains the inactive control line
+            // Should we remove the deregistered control line from the aggregate and add it back when the local
+            // scope is deactivated?
             return true;
         }
 
@@ -413,19 +417,17 @@ namespace syrec {
         }
 
     protected:
-        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines, bool ignoreGlobalActiveControlLines = false) {
+        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
             auto gateInstance  = std::make_shared<Gate>();
             gateInstance->type = gateType;
 
-            if (!ignoreGlobalActiveControlLines) {
-                if (localControlLinesScope.empty()) {
-                    gateInstance->controls.insert(aggregateOfLocalControlLineScopes.cbegin(), aggregateOfLocalControlLineScopes.cend());
-                } else {
-                    const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
-                    for (const auto [controlLine, controlLineData]: lastAddedLocalControlLineScope) {
-                        if (controlLineData.isControlLineActive)
-                            gateInstance->controls.emplace(controlLine);
-                    }
+            if (localControlLinesScope.empty()) {
+                gateInstance->controls.insert(aggregateOfLocalControlLineScopes.cbegin(), aggregateOfLocalControlLineScopes.cend());
+            } else {
+                const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
+                for (const auto [controlLine, controlLineData]: lastAddedLocalControlLineScope) {
+                    if (controlLineData.isControlLineActive)
+                        gateInstance->controls.emplace(controlLine);
                 }
             }
 

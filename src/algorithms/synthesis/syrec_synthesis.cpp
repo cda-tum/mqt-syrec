@@ -140,8 +140,9 @@ namespace syrec {
         std::vector<unsigned> d;
 
         getVariables(statement.lhs, lhs);
+        opRhsLhsExpression(statement.rhs, d);
 
-        bool synthesisOfAssignmentOk = opRhsLhsExpression(statement.rhs, d) && SyrecSynthesis::onExpression(circuit, statement.rhs, rhs, lhs, statement.op);
+        bool synthesisOfAssignmentOk = SyrecSynthesis::onExpression(circuit, statement.rhs, rhs, lhs, statement.op);
         opVec.clear();
 
         switch (statement.op) {
@@ -183,14 +184,22 @@ namespace syrec {
             }
         }
 
-        // toggle helper line
+        // Toggle helper line.
+        // We do not want to use the current helper line controlling the conditional execution of the statements
+        // of both branches of the current IfStatement when negating the value of said helper line
+        circuit.deregisterControlLineInCurrentScope(helperLine);
         circuit.createAndAddNotGate(helperLine);
+        circuit.registerControlLineInCurrentScope(helperLine);
 
         for (const Statement::ptr& stat: statement.elseStatements) {
             if (!processStatement(circuit, stat)) {
                 return false;
             }
         }
+
+        // We do not want to use the current helper line controlling the conditional execution of the statements
+        // of both branches of the current IfStatement when negating the value of said helper line
+        circuit.deregisterControlLineInCurrentScope(helperLine);
         circuit.createAndAddNotGate(helperLine);
         circuit.deactivateCurrLocalControlLineScope();
         return true;
