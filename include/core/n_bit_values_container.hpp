@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -10,18 +11,18 @@ namespace syrec {
     /**
      * Provides a rudimentary reimplementation of the boost dynamic_bitset container
      */
-    class NBitCircuitLineValuesContainer {
+    class NBitValuesContainer {
     public:
         /**
          * Constructs an empty container
          */
-        NBitCircuitLineValuesContainer() = default;
+        NBitValuesContainer() = default;
 
         /**
          * Construct a zero initialized container storing n bits.
          * @param n The number of bits to be stored in the container
          */
-        explicit NBitCircuitLineValuesContainer(std::size_t n):
+        explicit NBitValuesContainer(std::size_t n):
             lineValues(std::vector(n, false)) {}
 
         /**
@@ -33,10 +34,11 @@ namespace syrec {
          * @param n The number of bits to be stored in the container
          * @param initialLineValues An integer defining the initial values of the bits in the container
          */
-        explicit NBitCircuitLineValuesContainer(std::size_t n, std::uint64_t initialLineValues):
-            NBitCircuitLineValuesContainer(n) {
-            for (std::size_t i = 0; i < lineValues.size() && i < 64U; ++i)
-                lineValues[i] = (initialLineValues >> i) & 1;
+        explicit NBitValuesContainer(std::size_t n, std::uint64_t initialLineValues):
+            NBitValuesContainer(n) {
+            for (std::size_t i = 0; i < lineValues.size() && i < 64U; ++i) {
+                lineValues[i] = static_cast<bool>((initialLineValues >> i) & 1);
+            }
         }
 
         /**
@@ -65,9 +67,9 @@ namespace syrec {
          */
         [[maybe_unused]] bool flip(std::size_t bitPosition) {
             const auto currentBitValue = test(bitPosition);
-            if (!currentBitValue.has_value())
+            if (!currentBitValue.has_value()) {
                 return false;
-
+            }
             set(bitPosition, !*currentBitValue);
             return true;
         }
@@ -79,9 +81,9 @@ namespace syrec {
          * @return Whether the provided index was in the range [0, size())
          */
         [[maybe_unused]] bool set(std::size_t bitPosition, bool value) {
-            if (bitPosition >= size())
+            if (bitPosition >= size()) {
                 return false;
-
+            }
             lineValues[bitPosition] = value;
             return true;
         }
@@ -110,9 +112,9 @@ namespace syrec {
          * @return Whether the provided index was in the range [0, size())
          */
         [[nodiscard]] std::optional<bool> test(std::size_t bitPosition) const {
-            if (bitPosition >= size())
+            if (bitPosition >= size()) {
                 return std::nullopt;
-
+            }
             return lineValues[bitPosition];
         }
 
@@ -137,8 +139,9 @@ namespace syrec {
          */
         [[nodiscard]] std::string stringify() const {
             std::string stringifiedContainerContent(size(), '0');
-            for (std::size_t i = 0; i < size(); ++i)
+            for (std::size_t i = 0; i < size(); ++i) {
                 stringifiedContainerContent[i] = operator[](i) ? '1' : '0';
+            }
             return stringifiedContainerContent;
         }
 
@@ -152,26 +155,29 @@ namespace syrec {
      * @param rOperand The right-hand operand of the bitwise AND operation (A & B)
      * @return The result of the bitwise AND operation if both operands had the same size, otherwise and exception
      */
-    inline NBitCircuitLineValuesContainer operator&(const NBitCircuitLineValuesContainer& lOperand, const NBitCircuitLineValuesContainer& rOperand) {
-        auto bitwiseAndResult = NBitCircuitLineValuesContainer(lOperand.size());
-        for (std::size_t i = 0; i < lOperand.size(); ++i)
+    inline NBitValuesContainer operator&(const NBitValuesContainer& lOperand, const NBitValuesContainer& rOperand) {
+        auto bitwiseAndResult = NBitValuesContainer(lOperand.size());
+        for (std::size_t i = 0; i < lOperand.size(); ++i) {
             bitwiseAndResult.set(i, lOperand[i] && rOperand[i]);
+        }
         return bitwiseAndResult;
     }
 
     /**
-     * @brief Perform a bitwise comparision between two containers container.
+     * @brief Perform a bitwise comparison between two containers container.
      * @param lOperand The left operand of the equality operation
      * @param rOperand The right operand of the equality operation
      * @return Whether the two objects store the same number of bits and are bitwise equal
      */
-    inline bool operator==(const NBitCircuitLineValuesContainer& lOperand, const NBitCircuitLineValuesContainer& rOperand) {
-        if (lOperand.size() != rOperand.size())
+    inline bool operator==(const NBitValuesContainer& lOperand, const NBitValuesContainer& rOperand) {
+        if (lOperand.size() != rOperand.size()) {
             return false;
+        }
 
         bool equal = true;
-        for (std::size_t i = 0; i < lOperand.size() && equal; ++i)
+        for (std::size_t i = 0; i < lOperand.size() && equal; ++i) {
             equal = lOperand[i] == rOperand[i];
+        }
         return equal;
     }
 }; // namespace syrec

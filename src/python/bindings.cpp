@@ -13,7 +13,7 @@
 #include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
-#include "core/nBit_circuit_line_values_container.hpp"
+#include "core/n_bit_values_container.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
 
@@ -74,18 +74,18 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("add_module", &Program::addModule)
             .def("read", &Program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.");
 
-    py::class_<NBitCircuitLineValuesContainer>(m, "nBitCircuitLineValuesContainer")
+    py::class_<NBitValuesContainer>(m, "nBitCircuitLineValuesContainer")
             .def(py::init<>(), "Constructs an empty container of size zero.")
             .def(py::init<std::size_t>(), "n"_a, "Constructs a zero-initialized container of size n.")
             .def(py::init<std::size_t, uint64_t>(), "n"_a, "initialLineValues"_a, "Constructs a container of size n from an integer initialLineValues")
-            .def("test", &NBitCircuitLineValuesContainer::test, "n"_a, "Determine the value of the bit at position n")
-            .def("set", py::overload_cast<std::size_t>(&NBitCircuitLineValuesContainer::set), "n"_a, "Set the value of the bit at position n to TRUE")
-            .def("set", py::overload_cast<std::size_t, bool>(&NBitCircuitLineValuesContainer::set), "n"_a, "value"_a, "Set the of the bit at position n to a specific value")
-            .def("reset", &NBitCircuitLineValuesContainer::reset, "n"_a, "Set the value of the bit at position n to FALSE")
-            .def("resize", &NBitCircuitLineValuesContainer::resize, "n"_a, "Changes the number of bits stored in the container")
-            .def("flip", &NBitCircuitLineValuesContainer::flip, "n"_a, "Flip the value of the bit at position n")
+            .def("test", &NBitValuesContainer::test, "n"_a, "Determine the value of the bit at position n")
+            .def("set", py::overload_cast<std::size_t>(&NBitValuesContainer::set), "n"_a, "Set the value of the bit at position n to TRUE")
+            .def("set", py::overload_cast<std::size_t, bool>(&NBitValuesContainer::set), "n"_a, "value"_a, "Set the of the bit at position n to a specific value")
+            .def("reset", &NBitValuesContainer::reset, "n"_a, "Set the value of the bit at position n to FALSE")
+            .def("resize", &NBitValuesContainer::resize, "n"_a, "Changes the number of bits stored in the container")
+            .def("flip", &NBitValuesContainer::flip, "n"_a, "Flip the value of the bit at position n")
             .def(
-                    "__str__", [](const NBitCircuitLineValuesContainer& container) {
+                    "__str__", [](const NBitValuesContainer& container) {
                         return container.stringify();
                     },
                     "Returns a string containing the stringified values of the stored bits.");

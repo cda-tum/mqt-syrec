@@ -20,7 +20,6 @@
 #include "core/syrec/variable.hpp"
 
 #include <map>
-#include <memory>
 #include <stack>
 #include <string>
 #include <vector>
@@ -38,7 +37,7 @@ namespace syrec {
         std::vector<std::vector<unsigned>> expLhsVector;
         std::vector<std::vector<unsigned>> expRhsVector;
 
-        using var_lines_map = std::map<Variable::ptr, unsigned int>;
+        using VarLinesMap = std::map<Variable::ptr, unsigned int>;
 
         explicit SyrecSynthesis(Circuit& circ);
         virtual ~SyrecSynthesis() = default;
@@ -103,10 +102,10 @@ namespace syrec {
         static bool  modulo(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);         // %
         static bool  multiplication(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2); // *
         static bool  notEquals(Circuit& circuit, unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2);                          // !=
-        static bool  swap(Circuit& circuit, const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // <=>
+        static bool  swap(Circuit& circuit, const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // NOLINT(cppcoreguidelines-noexcept-swap, performance-noexcept-swap) <=>
         static bool  decrease(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         static bool  increase(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        virtual bool expressionOpInverse(Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const;
+        virtual bool expressionOpInverse([[maybe_unused]] Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const;
         bool         checkRepeats();
 
         // shift operations
@@ -127,7 +126,7 @@ namespace syrec {
         std::stack<Module::ptr>       modules;
 
     private:
-        var_lines_map                         varLines;
+        VarLinesMap                         varLines;
         std::map<bool, std::vector<unsigned>> freeConstLinesMap;
     };
 

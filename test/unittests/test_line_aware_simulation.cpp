@@ -11,34 +11,37 @@
 #include "algorithms/simulation/simple_simulation.hpp"
 #include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 #include "core/circuit.hpp"
+#include "core/n_bit_values_container.hpp"
 #include "core/properties.hpp"
 #include "core/syrec/program.hpp"
 
 #include "gtest/gtest.h"
 #include <algorithm>
-#include <boost/dynamic_bitset.hpp>
+#include <cstddef>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
-using json = nlohmann::json;
+// .clang-tidy reports a false positive here since are including the required nlohman json header file
+using json = nlohmann::json; // NOLINT(misc-include-cleaner)
 
 using namespace syrec;
 
 class SyrecSimulationTest: public testing::TestWithParam<std::string> {
 protected:
-    std::string                    testConfigsDir  = "./configs/";
-    std::string                    testCircuitsDir = "./circuits/";
-    std::string                    fileName;
-    NBitCircuitLineValuesContainer input;
-    NBitCircuitLineValuesContainer output;
-    std::vector<int>               setLines;
-    std::string                    expectedSimOut;
-    std::string                    outputString;
+    std::string         testConfigsDir  = "./configs/";
+    std::string         testCircuitsDir = "./circuits/";
+    std::string         fileName;
+    NBitValuesContainer input;
+    NBitValuesContainer output;
+    std::vector<int>    setLines;
+    std::string         expectedSimOut;
+    std::string         outputString;
 
     void SetUp() override {
-        std::string synthesisParam = GetParam();
-        fileName                   = testCircuitsDir + GetParam() + ".src";
+        const std::string synthesisParam = GetParam();
+        fileName                         = testCircuitsDir + GetParam() + ".src";
         std::ifstream i(testConfigsDir + "circuits_line_aware_simulation.json");
         json          j = json::parse(i);
         expectedSimOut  = j[synthesisParam]["sim_out"];
@@ -60,11 +63,11 @@ INSTANTIATE_TEST_SUITE_P(SyrecSimulationTest, SyrecSimulationTest,
                              return s; });
 
 TEST_P(SyrecSimulationTest, GenericSimulationTest) {
-    Circuit             circ;
-    Program             prog;
-    ReadProgramSettings settings;
-    Properties::ptr     statistics;
-    std::string         errorString = prog.read(fileName, settings);
+    Circuit                   circ;
+    Program                   prog;
+    const ReadProgramSettings settings;
+    const Properties::ptr     statistics;
+    const std::string         errorString = prog.read(fileName, settings);
     EXPECT_TRUE(errorString.empty());
     EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
 
@@ -72,9 +75,9 @@ TEST_P(SyrecSimulationTest, GenericSimulationTest) {
     input.resize(nCircuitLines);
     output.resize(nCircuitLines);
 
-    for (int line: setLines)
-        input.set(line);
-
+    for (const int line: setLines) {
+        input.set(static_cast<std::size_t>(line));
+    }
     simpleSimulation(output, circ, input, statistics);
     outputString = output.stringify();
     EXPECT_EQ(expectedSimOut, outputString);

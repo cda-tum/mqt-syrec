@@ -11,6 +11,14 @@
 #pragma once
 
 #include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace syrec {
     class LineAwareSynthesis: public SyrecSynthesis {
@@ -46,19 +54,19 @@ namespace syrec {
 
         bool expAdd(Circuit& circuit, [[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
             const bool synthesisOfExprOk = increase(circuit, rhs, lhs);
-            lines = rhs;
+            lines                        = rhs;
             return synthesisOfExprOk;
         }
 
         bool expSubtract(Circuit& circuit, [[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
             const bool synthesisOfExprOk = decreaseNewAssign(circuit, rhs, lhs);
-            lines = rhs;
+            lines                        = rhs;
             return synthesisOfExprOk;
         }
 
         bool expExor(Circuit& circuit, [[maybe_unused]] const unsigned& bitwidth, std::vector<unsigned>& lines, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) override {
             const bool synthesisOfExprOk = bitwiseCnot(circuit, rhs, lhs); // duplicate lhs
-            lines = rhs;
+            lines                        = rhs;
             return synthesisOfExprOk;
         }
 

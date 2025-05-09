@@ -11,10 +11,9 @@
 #pragma once
 
 #include "core/circuit.hpp"
-#include "core/nBit_circuit_line_values_container.hpp"
+#include "core/gate.hpp"
+#include "core/n_bit_values_container.hpp"
 #include "core/properties.hpp"
-
-#include <memory>
 
 namespace syrec {
 
@@ -29,7 +28,7 @@ namespace syrec {
     * @param g     The gate to be simulated
     * @param input An input pattern
     */
-    void coreGateSimulation(const Gate& g, NBitCircuitLineValuesContainer& input);
+    void coreGateSimulation(const Gate& g, NBitValuesContainer& input);
 
     /**
     * @brief Simple Simulation function for a circuit
@@ -58,7 +57,7 @@ namespace syrec {
     *   </tr>
     * </table>
     */
-    void simpleSimulation(NBitCircuitLineValuesContainer& output, const Circuit& circ, const NBitCircuitLineValuesContainer& input,
+    void simpleSimulation(NBitValuesContainer& output, const Circuit& circ, const NBitValuesContainer& input,
                           const Properties::ptr& statistics = Properties::ptr());
 
 } // namespace syrec

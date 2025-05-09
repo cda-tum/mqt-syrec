@@ -11,11 +11,14 @@
 #pragma once
 
 #include <algorithm>
-#include <any>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <set>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
 namespace syrec {
     /**
@@ -44,8 +47,8 @@ namespace syrec {
         [[nodiscard]] cost_t quantumCost(unsigned lines) const {
             cost_t costs = 0U;
 
-            unsigned    n = lines;
-            std::size_t c = controls.size();
+            const unsigned n = lines;
+            std::size_t    c = controls.size();
 
             if (type == Gate::Type::Fredkin) {
                 c += 1U;
@@ -54,7 +57,7 @@ namespace syrec {
             c += static_cast<std::size_t>(std::max(-1 * static_cast<int>(c), 0));
             c = std::min(static_cast<unsigned>(c), lines - 1U);
 
-            unsigned e = n - static_cast<unsigned>(c) - 1U; // empty lines
+            const unsigned e = n - static_cast<unsigned>(c) - 1U; // empty lines
 
             switch (c) {
                 case 0U:

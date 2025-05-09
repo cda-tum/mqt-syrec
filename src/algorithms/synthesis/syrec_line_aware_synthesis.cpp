@@ -18,13 +18,15 @@
 #include "core/syrec/statement.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 namespace syrec {
     bool LineAwareSynthesis::processStatement(Circuit& circuit, const Statement::ptr& statement) {
-        const auto stmtCastedAsAssignmentStmt = dynamic_cast<const AssignStatement*>(statement.get());
-        if (stmtCastedAsAssignmentStmt == nullptr)
+        const auto* const stmtCastedAsAssignmentStmt = dynamic_cast<const AssignStatement*>(statement.get());
+        if (stmtCastedAsAssignmentStmt == nullptr) {
             return SyrecSynthesis::onStatement(circuit, statement);
+        }
 
         const AssignStatement& assignmentStmt = *stmtCastedAsAssignmentStmt;
         std::vector<unsigned>  d;
@@ -32,7 +34,7 @@ namespace syrec {
         std::vector<unsigned>  ddd;
         std::vector<unsigned>  statLhs;
         getVariables(assignmentStmt.lhs, statLhs);
-        
+
         // The line aware synthesis of an assignment can only be performed when the rhs input signals are repeated (since the results are stored in the rhs)
         // and the right-hand side expression of the assignment consists of only Variable- or BinaryExpressions with the latter only containing the operations (+, - or ^).
         const bool canAssignmentSynthesisBeOptimized = opRhsLhsExpression(assignmentStmt.rhs, d) && !opVec.empty() && flow(assignmentStmt.rhs, ddd) && checkRepeats() && flow(assignmentStmt.rhs, dd);
@@ -83,11 +85,12 @@ namespace syrec {
             synthesisOk = solver(circuit, statLhs, assignmentStmt.op, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
         }
 
-        const std::size_t z = (expOpVector.size() - (expOpVector.size() % 2 == 0)) / 2;
+        const std::size_t     z = (expOpVector.size() - static_cast<std::size_t>(expOpVector.size() % 2 == 0)) / 2;
         std::vector<unsigned> statAssignOp(z == 0 ? 1 : z, 0);
 
-        for (std::size_t k = 0; k <= z - 1; k++)
-            statAssignOp[k] = assignOpVector[k];   
+        for (std::size_t k = 0; k <= z - 1; k++) {
+            statAssignOp[k] = assignOpVector[k];
+        }
 
         /// Assignment operations
         std::reverse(statAssignOp.begin(), statAssignOp.end());
@@ -142,12 +145,12 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::flow(const Expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get()))
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return (binary->op == BinaryExpression::Add || binary->op == BinaryExpression::Subtract || binary->op == BinaryExpression::Exor) && flow(*binary, v);
-
-        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get()))
+        }
+        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get())) {
             return flow(*var, v);
-
+        }
         return false;
     }
 
@@ -160,7 +163,6 @@ namespace syrec {
     bool LineAwareSynthesis::flow(const BinaryExpression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
-        std::vector<unsigned> comp;
         assignOpVector.push_back(expression.op);
 
         if (!flow(expression.lhs, lhs) || !flow(expression.rhs, rhs)) {
@@ -185,9 +187,9 @@ namespace syrec {
             }
         } else {
             std::vector<unsigned> lines;
-            subFlag = true;
+            subFlag     = true;
             synthesisOk = expEvaluate(circuit, lines, expOp, expLhs, statLhs);
-            subFlag = false;
+            subFlag     = false;
             synthesisOk &= expEvaluate(circuit, lines, statOp, lines, expRhs);
             subFlag = true;
             if (expOp < 3) {
@@ -199,12 +201,12 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::opRhsLhsExpression(const Expression::ptr& expression, std::vector<unsigned>& v) {
-        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get()))
+        if (auto const* binary = dynamic_cast<BinaryExpression*>(expression.get())) {
             return opRhsLhsExpression(*binary, v);
-        
-        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get()))
+        }
+        if (auto const* var = dynamic_cast<VariableExpression*>(expression.get())) {
             return opRhsLhsExpression(*var, v);
-
+        }
         return false;
     }
 
@@ -217,9 +219,9 @@ namespace syrec {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
 
-        if (!opRhsLhsExpression(expression.lhs, lhs) || !opRhsLhsExpression(expression.rhs, rhs))
+        if (!opRhsLhsExpression(expression.lhs, lhs) || !opRhsLhsExpression(expression.rhs, rhs)) {
             return false;
-        
+        }
         v = rhs;
         opVec.push_back(expression.op);
         return true;
@@ -233,7 +235,7 @@ namespace syrec {
 
     bool LineAwareSynthesis::inverse(Circuit& circuit) {
         const bool synthesisOfInversionOk = expressionOpInverse(circuit, expOpp.top(), expLhss.top(), expRhss.top());
-        subFlag = false;
+        subFlag                           = false;
         popExp();
         return synthesisOfInversionOk;
     }
@@ -247,9 +249,9 @@ namespace syrec {
             synthesisOfAssignmentOk = increase(circuit, rhs, lhs);
         }
 
-        while (!expOpp.empty() && synthesisOfAssignmentOk)
+        while (!expOpp.empty() && synthesisOfAssignmentOk) {
             synthesisOfAssignmentOk = inverse(circuit);
-
+        }
         return synthesisOfAssignmentOk;
     }
 
@@ -257,15 +259,15 @@ namespace syrec {
         bool synthesisOfAssignmentOk = true;
         if (!expOpp.empty() && expOpp.top() == op) {
             synthesisOfAssignmentOk = decrease(circuit, rhs, expLhss.top()) &&
-                     increase(circuit, rhs, expRhss.top());
+                                      increase(circuit, rhs, expRhss.top());
             popExp();
         } else {
             synthesisOfAssignmentOk = decrease(circuit, rhs, lhs);
         }
 
-        while (!expOpp.empty() && synthesisOfAssignmentOk)
+        while (!expOpp.empty() && synthesisOfAssignmentOk) {
             synthesisOfAssignmentOk = inverse(circuit);
-
+        }
         return synthesisOfAssignmentOk;
     }
 
@@ -278,9 +280,9 @@ namespace syrec {
             synthesisOfAssignmentOk = bitwiseCnot(circuit, lhs, rhs);
         }
 
-        while (!expOpp.empty() && synthesisOfAssignmentOk)
+        while (!expOpp.empty() && synthesisOfAssignmentOk) {
             synthesisOfAssignmentOk = inverse(circuit);
-
+        }
         return synthesisOfAssignmentOk;
     }
 
@@ -290,20 +292,20 @@ namespace syrec {
         switch (op) {
             case BinaryExpression::Add: // +
                 synthesisOk = increase(circuit, rhs, lhs);
-                lines = rhs;
+                lines       = rhs;
                 break;
             case BinaryExpression::Subtract: // -
                 if (subFlag) {
                     synthesisOk = decreaseNewAssign(circuit, rhs, lhs);
-                    lines = rhs;
+                    lines       = rhs;
                 } else {
                     synthesisOk = decrease(circuit, rhs, lhs);
-                    lines = rhs;
+                    lines       = rhs;
                 }
                 break;
-            case BinaryExpression::Exor: // ^
+            case BinaryExpression::Exor:                      // ^
                 synthesisOk = bitwiseCnot(circuit, rhs, lhs); // duplicate lhs
-                lines = rhs;
+                lines       = rhs;
                 break;
             default:
                 return true;
@@ -312,20 +314,21 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::decreaseNewAssign(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
-        if (lhs.size() != rhs.size())
+        if (lhs.size() != rhs.size()) {
             return false;
-
-        for (const auto lh: lhs)
+        }
+        for (const auto lh: lhs) {
             circuit.createAndAddNotGate(lh);
-
-        if (!increase(circuit, rhs, lhs))
+        }
+        if (!increase(circuit, rhs, lhs)) {
             return false;
-
-        for (const auto lh: lhs)
+        }
+        for (const auto lh: lhs) {
             circuit.createAndAddNotGate(lh);
-
-        for (const auto rh: rhs)
+        }
+        for (const auto rh: rhs) {
             circuit.createAndAddNotGate(rh);
+        }
         return true;
     }
 

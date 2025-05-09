@@ -12,14 +12,20 @@
 
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
+#include "core/properties.hpp"
 #include "core/syrec/expression.hpp"
 #include "core/syrec/program.hpp"
 #include "core/syrec/statement.hpp"
 #include "core/syrec/variable.hpp"
 #include "core/utils/timer.hpp"
 
-#include <numeric>
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iostream>
 #include <stack>
+#include <string>
+#include <vector>
 
 namespace syrec {
     // Helper Functions for the synthesis methods
@@ -37,9 +43,9 @@ namespace syrec {
     bool SyrecSynthesis::onModule(Circuit& circuit, const Module::ptr& main) {
         bool              synthesisOfModuleStatementOk = true;
         const std::size_t nModuleStatements            = main->statements.size();
-        for (std::size_t i = 0; i < nModuleStatements && synthesisOfModuleStatementOk; ++i)
+        for (std::size_t i = 0; i < nModuleStatements && synthesisOfModuleStatementOk; ++i) {
             synthesisOfModuleStatementOk = processStatement(circuit, main->statements[i]);
-
+        }
         return synthesisOfModuleStatementOk;
     }
 
@@ -58,8 +64,9 @@ namespace syrec {
             }
         }
 
-        for (std::size_t i = 0; i < checkLhsVec.size() && !foundRepeat; ++i)
+        for (std::size_t i = 0; i < checkLhsVec.size() && !foundRepeat; ++i) {
             foundRepeat = checkLhsVec[i] == checkRhsVec[i];
+        }
 
         expOpVector.clear();
         expLhsVector.clear();
@@ -168,13 +175,14 @@ namespace syrec {
         // calculate expression
         std::vector<unsigned> expressionResult;
 
-        bool synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, 0U);
+        const bool synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, 0U);
         assert(expressionResult.size() == 1U);
-        if (!synthesisOfStatementOk)
+        if (!synthesisOfStatementOk) {
             return false;
+        }
 
         // add new helper line
-        unsigned helperLine = expressionResult.front();
+        const unsigned helperLine = expressionResult.front();
         circuit.activateLocalControlLineScope();
         circuit.registerControlLineInCurrentScope(helperLine);
 
@@ -234,7 +242,7 @@ namespace syrec {
                 // adjust loop variable if necessary
 
                 if (!loopVariable.empty()) {
-                    loopMap[loopVariable] = i;
+                    loopMap[loopVariable] = static_cast<unsigned>(i);
                 }
 
                 for (const auto& stat: statement.statements) {
@@ -328,7 +336,7 @@ namespace syrec {
             return false;
         }
 
-        unsigned rhs = expression.rhs->evaluate(loopMap);
+        const unsigned rhs = expression.rhs->evaluate(loopMap);
         switch (expression.op) {
             case ShiftExpression::Left: // <<
                 getConstantLines(circuit, expression.bitwidth(), 0U, lines);
@@ -448,8 +456,9 @@ namespace syrec {
     //**********************************************************************
 
     bool SyrecSynthesis::bitwiseNegation(Circuit& circuit, const std::vector<unsigned>& dest) {
-        for (const auto line: dest)
+        for (const auto line: dest) {
             circuit.createAndAddNotGate(line);
+        }
         return true;
     }
 
@@ -465,12 +474,13 @@ namespace syrec {
 
     bool SyrecSynthesis::increment(Circuit& circuit, const std::vector<unsigned>& dest) {
         circuit.activateLocalControlLineScope();
-        for (const auto line: dest)
+        for (const auto line: dest) {
             circuit.registerControlLineInCurrentScope(line);
+        }
 
         for (int i = static_cast<int>(dest.size()) - 1; i >= 0; --i) {
-            circuit.deregisterControlLineInCurrentScope(dest[i]);
-            circuit.createAndAddNotGate(dest[i]);
+            circuit.deregisterControlLineInCurrentScope(dest[static_cast<std::size_t>(i)]);
+            circuit.createAndAddNotGate(dest[static_cast<std::size_t>(i)]);
         }
         circuit.deactivateCurrLocalControlLineScope();
         return true;
@@ -482,25 +492,25 @@ namespace syrec {
 
     bool SyrecSynthesis::bitwiseAnd(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         bool synthesisOk = src1.size() >= dest.size() && src2.size() >= dest.size();
-        for (std::size_t i = 0; i < dest.size() && synthesisOk; ++i)
+        for (std::size_t i = 0; i < dest.size() && synthesisOk; ++i) {
             synthesisOk &= conjunction(circuit, dest[i], src1[i], src2[i]);
-
+        }
         return synthesisOk;
     }
 
     bool SyrecSynthesis::bitwiseCnot(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src) {
-        bool synthesisOk = dest.size() >= src.size();
-        for (std::size_t i = 0; i < src.size(); ++i)
+        const bool synthesisOk = dest.size() >= src.size();
+        for (std::size_t i = 0; i < src.size() && synthesisOk; ++i) {
             circuit.createAndAddCnotGate(src[i], dest[i]);
-
+        }
         return synthesisOk;
     }
 
     bool SyrecSynthesis::bitwiseOr(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
         bool synthesisOk = src1.size() >= dest.size() && src2.size() >= dest.size();
-        for (std::size_t i = 0; i < dest.size() && synthesisOk; ++i)
+        for (std::size_t i = 0; i < dest.size() && synthesisOk; ++i) {
             synthesisOk &= disjunction(circuit, dest[i], src1[i], src2[i]);
-
+        }
         return synthesisOk;
     }
 
@@ -511,13 +521,14 @@ namespace syrec {
 
     bool SyrecSynthesis::decreaseWithCarry(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src, unsigned carry) {
         bool synthesisOk = dest.size() >= src.size();
-        for (std::size_t i = 0; i < src.size() && synthesisOk; ++i)
+        for (std::size_t i = 0; i < src.size() && synthesisOk; ++i) {
             circuit.createAndAddNotGate(dest[i]);
+        }
 
         synthesisOk &= increaseWithCarry(circuit, dest, src, carry);
-        for (std::size_t i = 0; i < src.size() && synthesisOk; ++i)
+        for (std::size_t i = 0; i < src.size() && synthesisOk; ++i) {
             circuit.createAndAddNotGate(dest[i]);
-
+        }
         return synthesisOk;
     }
 
@@ -529,48 +540,57 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::division(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!modulo(circuit, dest, src1, src2))
+        if (!modulo(circuit, dest, src1, src2)) {
             return false;
+        }
 
         std::vector<unsigned> sum;
         std::vector<unsigned> partial;
 
-        if (src2.size() < src1.size() || dest.size() < src1.size())
+        if (src2.size() < src1.size() || dest.size() < src1.size()) {
             return false;
+        }
 
-        for (std::size_t i = 1; i < src1.size(); ++i)
+        for (std::size_t i = 1; i < src1.size(); ++i) {
             circuit.createAndAddNotGate(src2[i]);
+        }
 
         circuit.activateLocalControlLineScope();
-        for (std::size_t i = 1U; i < src1.size(); ++i)
+        for (std::size_t i = 1U; i < src1.size(); ++i) {
             circuit.registerControlLineInCurrentScope(src2[i]);
+        }
 
         std::size_t helperIndex = 0;
         bool        synthesisOk = true;
         for (int i = static_cast<int>(src1.size()) - 1; i >= 0 && synthesisOk; --i) {
+            const auto castedIndex = static_cast<std::size_t>(i);
+
             partial.push_back(src2[helperIndex++]);
-            sum.insert(sum.begin(), src1[i]);
-            circuit.registerControlLineInCurrentScope(dest[i]);
+            sum.insert(sum.begin(), src1[castedIndex]);
+            circuit.registerControlLineInCurrentScope(dest[castedIndex]);
             synthesisOk = increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(dest[i]);
-            if (i == 0)
+            circuit.deregisterControlLineInCurrentScope(dest[castedIndex]);
+            if (i == 0) {
                 continue;
+            }
 
-            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j)
+            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j) {
                 circuit.deregisterControlLineInCurrentScope(src2[j]);
-
+            }
             circuit.createAndAddNotGate(src2[helperIndex]);
 
-            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j)
+            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j) {
                 circuit.registerControlLineInCurrentScope(src2[j]);
+            }
         }
         circuit.deactivateCurrLocalControlLineScope();
         return synthesisOk;
     }
 
     bool SyrecSynthesis::equals(Circuit& circuit, const unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (src2.size() < src1.size())
+        if (src2.size() < src1.size()) {
             return false;
+        }
 
         for (std::size_t i = 0; i < src1.size(); ++i) {
             circuit.createAndAddCnotGate(src2[i], src1[i]);
@@ -587,8 +607,9 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::greaterEquals(Circuit& circuit, const unsigned dest, const std::vector<unsigned>& srcTwo, const std::vector<unsigned>& srcOne) {
-        if (!greaterThan(circuit, dest, srcOne, srcTwo))
+        if (!greaterThan(circuit, dest, srcOne, srcTwo)) {
             return false;
+        }
 
         circuit.createAndAddNotGate(dest);
         return true;
@@ -599,11 +620,13 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::increase(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
-        if (lhs.size() != rhs.size())
+        if (lhs.size() != rhs.size()) {
             return false;
+        }
 
-        if (rhs.empty())
+        if (rhs.empty()) {
             return true;
+        }
 
         if (rhs.size() == 1) {
             circuit.createAndAddCnotGate(lhs.front(), rhs.front());
@@ -611,14 +634,17 @@ namespace syrec {
         }
 
         const std::size_t bitwidth = rhs.size();
-        for (std::size_t i = 1; i <= bitwidth - 1; ++i)
+        for (std::size_t i = 1; i <= bitwidth - 1; ++i) {
             circuit.createAndAddCnotGate(lhs[i], rhs[i]);
+        }
 
-        for (std::size_t i = bitwidth - 2; i >= 1; --i)
+        for (std::size_t i = bitwidth - 2; i >= 1; --i) {
             circuit.createAndAddCnotGate(lhs[i], rhs[i]);
+        }
 
-        for (std::size_t i = 0; i <= bitwidth - 2; ++i)
+        for (std::size_t i = 0; i <= bitwidth - 2; ++i) {
             circuit.createAndAddToffoliGate(rhs[i], lhs[i], lhs[i + 1]);
+        }
 
         circuit.createAndAddCnotGate(lhs[bitwidth - 1], rhs[bitwidth - 1]);
         for (std::size_t i = bitwidth - 2; i >= 1; --i) {
@@ -628,25 +654,28 @@ namespace syrec {
         circuit.createAndAddToffoliGate(lhs.front(), rhs.front(), lhs[1]);
         circuit.createAndAddCnotGate(lhs.front(), rhs.front());
 
-        for (std::size_t i = 1; i <= bitwidth - 2; ++i)
+        for (std::size_t i = 1; i <= bitwidth - 2; ++i) {
             circuit.createAndAddCnotGate(lhs[i], rhs[i + 1]);
+        }
 
-        for (std::size_t i = 1; i <= bitwidth - 1; ++i)
+        for (std::size_t i = 1; i <= bitwidth - 1; ++i) {
             circuit.createAndAddCnotGate(lhs[i], rhs[i]);
-
+        }
         return true;
     }
 
     bool SyrecSynthesis::decrease(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
-        for (const auto rhsOperandLine: rhs)
+        for (const auto rhsOperandLine: rhs) {
             circuit.createAndAddNotGate(rhsOperandLine);
+        }
 
-        if (!increase(circuit, rhs, lhs))
+        if (!increase(circuit, rhs, lhs)) {
             return false;
+        }
 
-        for (const auto rhsOperandLine: rhs)
+        for (const auto rhsOperandLine: rhs) {
             circuit.createAndAddNotGate(rhsOperandLine);
-
+        }
         return true;
     }
 
@@ -656,41 +685,49 @@ namespace syrec {
             return true;
         }
 
-        if (src.size() != dest.size())
+        if (src.size() != dest.size()) {
             return false;
-
-        for (int i = 1U; i < bitwidth; ++i)
-            circuit.createAndAddCnotGate(src.at(i), dest.at(i));
-
-        if (bitwidth > 1)
-            circuit.createAndAddCnotGate(src.at(bitwidth - 1), carry);
-
-        for (int i = bitwidth - 2; i > 0; --i)
-            circuit.createAndAddCnotGate(src.at(i), src.at(i + 1));
-
-        for (int i = 0U; i < bitwidth - 1; ++i)
-            circuit.createAndAddToffoliGate(src.at(i), dest.at(i), src.at(i + 1));
-
-        circuit.createAndAddToffoliGate(src.at(bitwidth - 1), dest.at(bitwidth - 1), carry);
-
-        for (int i = bitwidth - 1; i > 0; --i) {
-            circuit.createAndAddCnotGate(src.at(i), dest.at(i));
-            circuit.createAndAddToffoliGate(dest.at(i - 1), src.at(i - 1), src.at(i));
         }
 
-        for (int i = 1U; i < bitwidth - 1; ++i)
-            circuit.createAndAddCnotGate(src.at(i), src.at(i + 1));
-
-        for (int i = 0U; i < bitwidth; ++i)
+        const auto unsignedBitwidth = static_cast<std::size_t>(bitwidth);
+        for (std::size_t i = 1U; i < unsignedBitwidth; ++i) {
             circuit.createAndAddCnotGate(src.at(i), dest.at(i));
+        }
 
+        if (bitwidth > 1) {
+            circuit.createAndAddCnotGate(src.at(unsignedBitwidth - 1), carry);
+        }
+
+        for (int i = bitwidth - 2; i > 0; --i) {
+            const auto castedIndex = static_cast<std::size_t>(i);
+            circuit.createAndAddCnotGate(src.at(castedIndex), src.at(castedIndex + 1));
+        }
+
+        for (std::size_t i = 0U; i < unsignedBitwidth - 1; ++i) {
+            circuit.createAndAddToffoliGate(src.at(i), dest.at(i), src.at(i + 1));
+        }
+        circuit.createAndAddToffoliGate(src.at(unsignedBitwidth - 1), dest.at(unsignedBitwidth - 1), carry);
+
+        for (int i = bitwidth - 1; i > 0; --i) {
+            const auto castedIndex = static_cast<std::size_t>(i);
+            circuit.createAndAddCnotGate(src.at(castedIndex), dest.at(castedIndex));
+            circuit.createAndAddToffoliGate(dest.at(castedIndex - 1), src.at(castedIndex - 1), src.at(castedIndex));
+        }
+
+        for (std::size_t i = 1U; i < unsignedBitwidth - 1; ++i) {
+            circuit.createAndAddCnotGate(src.at(i), src.at(i + 1));
+        }
+
+        for (std::size_t i = 0U; i < unsignedBitwidth; ++i) {
+            circuit.createAndAddCnotGate(src.at(i), dest.at(i));
+        }
         return true;
     }
 
     bool SyrecSynthesis::lessEquals(Circuit& circuit, unsigned dest, const std::vector<unsigned>& src2, const std::vector<unsigned>& src1) {
-        if (!lessThan(circuit, dest, src1, src2))
+        if (!lessThan(circuit, dest, src1, src2)) {
             return false;
-
+        }
         circuit.createAndAddNotGate(dest);
         return true;
     }
@@ -703,49 +740,58 @@ namespace syrec {
         std::vector<unsigned> sum;
         std::vector<unsigned> partial;
 
-        if (src2.size() < src1.size() || dest.size() < src1.size())
+        if (src2.size() < src1.size() || dest.size() < src1.size()) {
             return false;
+        }
 
-        for (std::size_t i = 1; i < src1.size(); ++i)
+        for (std::size_t i = 1; i < src1.size(); ++i) {
             circuit.createAndAddNotGate(src2[i]);
+        }
 
         circuit.activateLocalControlLineScope();
-        for (std::size_t i = 1; i < src1.size(); ++i)
+        for (std::size_t i = 1; i < src1.size(); ++i) {
             circuit.registerControlLineInCurrentScope(src2[i]);
+        }
 
         std::size_t helperIndex = 0;
         bool        synthesisOk = true;
         for (int i = static_cast<int>(src1.size()) - 1; i >= 0 && synthesisOk; --i) {
+            const auto unsignedLoopVariableValeu = static_cast<std::size_t>(i);
+
             partial.push_back(src2[helperIndex++]);
-            sum.insert(sum.begin(), src1[i]);
-            synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[i]);
+            sum.insert(sum.begin(), src1[unsignedLoopVariableValeu]);
+            synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[unsignedLoopVariableValeu]);
 
-            circuit.registerControlLineInCurrentScope(dest[i]);
+            circuit.registerControlLineInCurrentScope(dest[unsignedLoopVariableValeu]);
             synthesisOk &= increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(dest[i]);
+            circuit.deregisterControlLineInCurrentScope(dest[unsignedLoopVariableValeu]);
 
-            circuit.createAndAddNotGate(dest[i]);
-            if (i == 0)
+            circuit.createAndAddNotGate(dest[unsignedLoopVariableValeu]);
+            if (i == 0) {
                 continue;
+            }
 
-            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j)
+            for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j) {
                 circuit.deregisterControlLineInCurrentScope(src2[j]);
-
+            }
             circuit.createAndAddNotGate(src2[helperIndex]);
 
-            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j)
+            for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j) {
                 circuit.registerControlLineInCurrentScope(src2[j]);
+            }
         }
         circuit.deactivateCurrLocalControlLineScope();
         return synthesisOk;
     }
 
     bool SyrecSynthesis::multiplication(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (src1.empty() || dest.empty())
+        if (src1.empty() || dest.empty()) {
             return true;
+        }
 
-        if (src1.size() < dest.size() || src2.size() < dest.size())
+        if (src1.size() < dest.size() || src2.size() < dest.size()) {
             return false;
+        }
 
         std::vector<unsigned> sum     = dest;
         std::vector<unsigned> partial = src2;
@@ -768,19 +814,23 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::notEquals(Circuit& circuit, const unsigned dest, const std::vector<unsigned>& src1, const std::vector<unsigned>& src2) {
-        if (!equals(circuit, dest, src1, src2))
+        if (!equals(circuit, dest, src1, src2)) {
             return false;
+        }
 
         circuit.createAndAddNotGate(dest);
         return true;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-noexcept-swap, performance-noexcept-swap, bugprone-exception-escape)
     bool SyrecSynthesis::swap(Circuit& circuit, const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2) {
-        if (dest2.size() < dest1.size())
+        if (dest2.size() < dest1.size()) {
             return false;
+        }
 
-        for (std::size_t i = 0; i < dest1.size(); ++i)
+        for (std::size_t i = 0; i < dest1.size(); ++i) {
             circuit.createAndAddFredkinGate(dest1[i], dest2[i]);
+        }
         return true;
     }
 
@@ -789,47 +839,57 @@ namespace syrec {
     //**********************************************************************
 
     bool SyrecSynthesis::leftShift(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
-        if (src2 > dest.size())
+        if (src2 > dest.size()) {
             return false;
+        }
 
         const std::size_t nQubitsShifted = dest.size() - src2;
-        if (src1.size() < nQubitsShifted)
+        if (src1.size() < nQubitsShifted) {
             return false;
+        }
 
         const std::size_t targetLineBaseOffset = src2;
-        for (std::size_t i = 0; i < nQubitsShifted; ++i)
+        for (std::size_t i = 0; i < nQubitsShifted; ++i) {
             circuit.createAndAddCnotGate(src1[i], dest[targetLineBaseOffset + i]);
+        }
         return true;
     }
 
     bool SyrecSynthesis::rightShift(Circuit& circuit, const std::vector<unsigned>& dest, const std::vector<unsigned>& src1, unsigned src2) {
-        if (dest.size() < src2)
+        if (dest.size() < src2) {
             return false;
+        }
 
         const std::size_t nQubitsShifted = dest.size() - src2;
-        if (src1.size() < nQubitsShifted)
+        if (src1.size() < nQubitsShifted) {
             return false;
+        }
 
-        for (std::size_t i = 0; i < nQubitsShifted; ++i)
+        for (std::size_t i = 0; i < nQubitsShifted; ++i) {
             circuit.createAndAddCnotGate(src1[i], dest[i]);
+        }
         return true;
     }
 
-    bool SyrecSynthesis::expressionOpInverse(Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const {
+    bool SyrecSynthesis::expressionOpInverse([[maybe_unused]] Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const {
         return true;
     }
-   
+
     void SyrecSynthesis::getVariables(const VariableAccess::ptr& var, std::vector<unsigned>& lines) {
-        unsigned offset = varLines[var->getVar()];
+        const auto&       referenceVariableData           = var->getVar();
+        unsigned          offset                          = varLines[referenceVariableData];
+        const std::size_t numDeclaredDimensionsOfVariable = referenceVariableData->dimensions.size();
 
         if (!var->indexes.empty()) {
             // check if it is all numeric_expressions
-            unsigned n = static_cast<int>(var->getVar()->dimensions.size()); // dimensions
-            if (static_cast<unsigned>(std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<NumericExpression*>(p.get()); })) == n) {
-                for (unsigned i = 0U; i < n; ++i) {
-                    offset += dynamic_cast<NumericExpression*>(var->indexes.at(i).get())->value->evaluate(loopMap) *
-                              std::accumulate(var->getVar()->dimensions.begin() + i + 1U, var->getVar()->dimensions.end(), 1U, std::multiplies<>()) *
-                              var->getVar()->bitwidth;
+            if (static_cast<std::size_t>(std::count_if(var->indexes.cbegin(), var->indexes.cend(), [&](const auto& p) { return dynamic_cast<NumericExpression*>(p.get()); })) == numDeclaredDimensionsOfVariable) {
+                for (std::size_t i = 0U; i < numDeclaredDimensionsOfVariable; ++i) {
+                    const auto   evaluatedDimensionIndexValue = dynamic_cast<NumericExpression*>(var->indexes.at(i).get())->value->evaluate(loopMap);
+                    unsigned int aggregateValue               = evaluatedDimensionIndexValue;
+                    for (std::size_t j = i + 1; j < numDeclaredDimensionsOfVariable; ++j) {
+                        aggregateValue *= referenceVariableData->dimensions[i];
+                    }
+                    offset += aggregateValue * referenceVariableData->bitwidth;
                 }
             }
         }
@@ -837,8 +897,8 @@ namespace syrec {
         if (var->range) {
             auto [nfirst, nsecond] = *var->range;
 
-            unsigned first  = nfirst->evaluate(loopMap);
-            unsigned second = nsecond->evaluate(loopMap);
+            const unsigned first  = nfirst->evaluate(loopMap);
+            const unsigned second = nsecond->evaluate(loopMap);
 
             if (first < second) {
                 for (unsigned i = first; i <= second; ++i) {
@@ -846,11 +906,11 @@ namespace syrec {
                 }
             } else {
                 for (auto i = static_cast<int>(first); i >= static_cast<int>(second); --i) {
-                    lines.emplace_back(offset + i);
+                    lines.emplace_back(offset + static_cast<unsigned>(i));
                 }
             }
         } else {
-            for (unsigned i = 0U; i < var->getVar()->bitwidth; ++i) {
+            for (unsigned i = 0U; i < referenceVariableData->bitwidth; ++i) {
                 lines.emplace_back(offset + i);
             }
         }
@@ -875,20 +935,21 @@ namespace syrec {
 
     void SyrecSynthesis::getConstantLines(Circuit& circuit, unsigned bitwidth, unsigned value, std::vector<unsigned>& lines) {
         assert(bitwidth <= 32);
-        for (unsigned i = 0U; i < bitwidth; ++i)
-            lines.emplace_back(getConstantLine(circuit,  (value & (1 << i)) != 0));
+        for (unsigned i = 0U; i < bitwidth; ++i) {
+            lines.emplace_back(getConstantLine(circuit, (value & (1 << i)) != 0));
+        }
     }
 
     void SyrecSynthesis::addVariable(Circuit& circ, const std::vector<unsigned>& dimensions, const Variable::ptr& var,
                                      const constant constant, bool garbage, const std::string& arraystr) {
         if (dimensions.empty()) {
             for (unsigned i = 0U; i < var->bitwidth; ++i) {
-                std::string name = var->name + arraystr + "." + std::to_string(i);
+                const std::string name = var->name + arraystr + "." + std::to_string(i);
                 circ.addLine(name, name, constant, garbage);
             }
         } else {
-            unsigned              len = dimensions.front();
-            std::vector<unsigned> newDimensions(dimensions.begin() + 1U, dimensions.end());
+            const unsigned              len = dimensions.front();
+            const std::vector<unsigned> newDimensions(dimensions.begin() + 1U, dimensions.end());
 
             for (unsigned i = 0U; i < len; ++i) {
                 addVariable(circ, newDimensions, var, constant, garbage, arraystr + "[" + std::to_string(i) + "]");
@@ -902,8 +963,8 @@ namespace syrec {
             varLines.try_emplace(var, circVar.getLines());
 
             // types of constant and garbage
-            constant constVar = (var->type == Variable::Out || var->type == Variable::Wire) ? constant(false) : constant();
-            bool     garbage  = (var->type == Variable::In || var->type == Variable::Wire);
+            const constant constVar = (var->type == Variable::Out || var->type == Variable::Wire) ? constant(false) : constant();
+            const bool     garbage  = (var->type == Variable::In || var->type == Variable::Wire);
 
             addVariable(circVar, var->dimensions, var, constVar, garbage, std::string());
         }
@@ -917,7 +978,7 @@ namespace syrec {
         Timer<PropertiesTimer> t;
 
         if (statistics) {
-            PropertiesTimer rt(statistics);
+            const PropertiesTimer rt(statistics);
             t.start(rt);
         }
 
@@ -927,7 +988,7 @@ namespace syrec {
         if (!mainModule.empty()) {
             main = program.findModule(mainModule);
             if (!main) {
-                std::cerr << "Program has no module: " << mainModule << std::endl;
+                std::cerr << "Program has no module: " << mainModule << "\n";
                 return false;
             }
         } else {
@@ -951,5 +1012,4 @@ namespace syrec {
         }
         return synthesisOfMainModuleOk;
     }
-
 } // namespace syrec

@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -309,9 +310,9 @@ namespace syrec {
 
         [[maybe_unused]] std::optional<Gate::ptr> createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
             // A multi control toffoli gate must have at least one control line
-            if (controlLines.empty())
+            if (controlLines.empty()) {
                 return std::nullopt;
-
+            }
             return createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}));
         }
 
@@ -332,24 +333,28 @@ namespace syrec {
         }
 
         void deactivateCurrLocalControlLineScope() {
-            if (localControlLinesScope.empty())
+            if (localControlLinesScope.empty()) {
                 return;
+            }
 
             const auto& localControlLineScope = localControlLinesScope.back();
             for (const auto [controlLine, controlLineData]: localControlLineScope) {
-                if (!controlLineData.wasControlLineRegisteredInParentScope)
+                if (!controlLineData.wasControlLineRegisteredInParentScope) {
                     aggregateOfLocalControlLineScopes.erase(controlLine);
+                }
             }
             localControlLinesScope.pop_back();
         }
 
         [[maybe_unused]] bool deregisterControlLineInCurrentScope(const Gate::Line controlLine) {
-            if (localControlLinesScope.empty())
+            if (localControlLinesScope.empty()) {
                 return false;
+            }
 
             auto& localControlLineScope = localControlLinesScope.back();
-            if (localControlLineScope.count(controlLine) == 0)
+            if (localControlLineScope.count(controlLine) == 0) {
                 return false;
+            }
 
             localControlLineScope.at(controlLine).isControlLineActive = false;
             // TODO: What if we open a new local scope, the aggregate still contains the inactive control line
@@ -359,32 +364,35 @@ namespace syrec {
         }
 
         void registerControlLineInCurrentScope(const Gate::Line controlLine) {
-            if (localControlLinesScope.empty())
+            if (localControlLinesScope.empty()) {
                 activateLocalControlLineScope();
+            }
 
             auto& localControlLineScope = localControlLinesScope.back();
             // If an entry for the to be registered control line already exists in the current scope then the previously determine value of the flag indicating whether the control line existed in the parent scope
             // should have the same value that it had when the control line was initially added to the current scope
-            if (localControlLineScope.count(controlLine) != 0)
+            if (localControlLineScope.count(controlLine) != 0) {
                 localControlLineScope.at(controlLine).isControlLineActive = true;
-            else
+            } else {
                 localControlLineScope.emplace(std::make_pair(controlLine, LocalControlLineScopeEntry(true, aggregateOfLocalControlLineScopes.count(controlLine) != 0)));
-
+            }
             aggregateOfLocalControlLineScopes.emplace(controlLine);
         }
 
         // SIGNALS
         [[nodiscard]] Gate::cost_t quantumCost() const {
             Gate::cost_t cost = 0U;
-            for (const auto& g: gates)
+            for (const auto& g: gates) {
                 cost += g->quantumCost(lines);
+            }
             return cost;
         }
 
         [[nodiscard]] Gate::cost_t transistorCost() const {
             Gate::cost_t cost = 0U;
-            for (const auto& g: gates)
+            for (const auto& g: gates) {
                 cost += (8ULL * g->controls.size());
+            }
             return cost;
         }
 
@@ -426,14 +434,15 @@ namespace syrec {
             } else {
                 const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
                 for (const auto [controlLine, controlLineData]: lastAddedLocalControlLineScope) {
-                    if (controlLineData.isControlLineActive)
+                    if (controlLineData.isControlLineActive) {
                         gateInstance->controls.emplace(controlLine);
+                    }
                 }
             }
 
-            if (controlLines.has_value())
+            if (controlLines.has_value()) {
                 gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
-
+            }
             gateInstance->targets = targetLines;
             gates.emplace_back(gateInstance);
             return gateInstance;

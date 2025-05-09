@@ -12,26 +12,29 @@
 
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
-#include "core/nBit_circuit_line_values_container.hpp"
+#include "core/n_bit_values_container.hpp"
 #include "core/properties.hpp"
 #include "core/utils/timer.hpp"
 
+#include <cstddef>
 #include <iostream>
 
 namespace syrec {
-    void coreGateSimulation(const Gate& g, NBitCircuitLineValuesContainer& input) {
+    void coreGateSimulation(const Gate& g, NBitValuesContainer& input) {
         if (g.type == Gate::Type::Toffoli) {
-            NBitCircuitLineValuesContainer cMask(input.size());
-            for (const auto& c: g.controls)
+            NBitValuesContainer cMask(input.size());
+            for (const auto& c: g.controls) {
                 cMask.set(c);
+            }
 
             if (cMask.none() || ((input & cMask) == cMask)) {
                 input.flip(*g.targets.begin());
             }
         } else if (g.type == Gate::Type::Fredkin) {
-            NBitCircuitLineValuesContainer cMask(input.size());
-            for (const auto& c: g.controls)
+            NBitValuesContainer cMask(input.size());
+            for (const auto& c: g.controls) {
                 cMask.set(c);
+            }
 
             if (cMask.none() || ((input & cMask) == cMask)) {
                 // get both positions and values
@@ -53,7 +56,7 @@ namespace syrec {
         }
     }
 
-    void simpleSimulation(NBitCircuitLineValuesContainer& output, const Circuit& circ, const NBitCircuitLineValuesContainer& input,
+    void simpleSimulation(NBitValuesContainer& output, const Circuit& circ, const NBitValuesContainer& input,
                           const Properties::ptr& statistics) {
         Timer<PropertiesTimer> t;
 
