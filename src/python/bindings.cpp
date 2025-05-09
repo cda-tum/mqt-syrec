@@ -74,7 +74,7 @@ PYBIND11_MODULE(pysyrec, m) {
             .def("add_module", &Program::addModule)
             .def("read", &Program::read, "filename"_a, "settings"_a = ReadProgramSettings{}, "Read a SyReC program from a file.");
 
-    py::class_<NBitValuesContainer>(m, "nBitCircuitLineValuesContainer")
+    py::class_<NBitValuesContainer>(m, "n_bit_values_container")
             .def(py::init<>(), "Constructs an empty container of size zero.")
             .def(py::init<std::size_t>(), "n"_a, "Constructs a zero-initialized container of size n.")
             .def(py::init<std::size_t, uint64_t>(), "n"_a, "initialLineValues"_a, "Constructs a container of size n from an integer initialLineValues")
