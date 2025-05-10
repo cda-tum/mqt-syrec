@@ -126,7 +126,7 @@ namespace syrec {
         std::stack<Module::ptr>       modules;
 
     private:
-        VarLinesMap                         varLines;
+        VarLinesMap                           varLines;
         std::map<bool, std::vector<unsigned>> freeConstLinesMap;
     };
 

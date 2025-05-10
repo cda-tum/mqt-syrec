@@ -759,17 +759,17 @@ namespace syrec {
         std::size_t helperIndex = 0;
         bool        synthesisOk = true;
         for (int i = static_cast<int>(src1.size()) - 1; i >= 0 && synthesisOk; --i) {
-            const auto unsignedLoopVariableValeu = static_cast<std::size_t>(i);
+            const auto unsignedLoopVariableValue = static_cast<std::size_t>(i);
 
             partial.push_back(src2[helperIndex++]);
-            sum.insert(sum.begin(), src1[unsignedLoopVariableValeu]);
-            synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[unsignedLoopVariableValeu]);
+            sum.insert(sum.begin(), src1[unsignedLoopVariableValue]);
+            synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[unsignedLoopVariableValue]);
 
-            circuit.registerControlLineInCurrentScope(dest[unsignedLoopVariableValeu]);
+            circuit.registerControlLineInCurrentScope(dest[unsignedLoopVariableValue]);
             synthesisOk &= increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(dest[unsignedLoopVariableValeu]);
+            circuit.deregisterControlLineInCurrentScope(dest[unsignedLoopVariableValue]);
 
-            circuit.createAndAddNotGate(dest[unsignedLoopVariableValeu]);
+            circuit.createAndAddNotGate(dest[unsignedLoopVariableValue]);
             if (i == 0) {
                 continue;
             }

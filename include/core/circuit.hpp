@@ -379,7 +379,7 @@ namespace syrec {
         }
 
         /**
-         * Deactivate and destroy the last registered local scope. 
+         * Deactivate and destroy the last registered local scope.
          *
          * @remarks This will remove all control lines that were NOT registered in the aggregate prior to the activation of the local scope.
          * Assuming that the aggregate A contains the control lines (1,2,3), a local scope is activated an the control lines (3,4)
@@ -427,7 +427,7 @@ namespace syrec {
         }
 
         /**
-         * Register a control line in the last activated local scope. 
+         * Register a control line in the last activated local scope.
          * @param controlLine The control line to register
          */
         void registerControlLineInCurrentScope(const Gate::Line controlLine) {
