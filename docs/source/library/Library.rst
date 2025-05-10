@@ -10,4 +10,4 @@ Library
     Simulation
     Synthesis
     CircuitAndGates
-    NBitValueContainer
+    NBitValuesContainer

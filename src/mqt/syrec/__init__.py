@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from ._version import version as __version__
 from .pysyrec import (
-    bitset,
+    n_bit_values_container
     circuit,
     cost_aware_synthesis,
     gate,
@@ -30,7 +30,7 @@ from .pysyrec import (
 
 __all__ = [
     "__version__",
-    "bitset",
+    "n_bit_values_container",
     "circuit",
     "cost_aware_synthesis",
     "gate",

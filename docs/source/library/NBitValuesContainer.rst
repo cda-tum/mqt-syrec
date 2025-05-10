@@ -1,5 +1,5 @@
-NBitValueContainer
-======
+NBitValuesContainer
+===================
 
 Class wrapping boost::dynamic_bitset<>.
 
