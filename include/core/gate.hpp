@@ -28,9 +28,9 @@ namespace syrec {
         /**
         * @brief Represents a gate type
         */
-        enum class Type { None,
-                          Fredkin,
-                          Toffoli };
+        enum class Type : std::uint8_t { None,
+                                         Fredkin,
+                                         Toffoli };
 
         /**
         * @brief Type for accessing the line (line index)

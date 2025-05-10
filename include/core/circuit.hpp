@@ -298,7 +298,7 @@ namespace syrec {
                 existingAnnotationForKey->second = value;
                 return true;
             }
-            activeGlobalGateAnnotations.emplace(std::make_pair(static_cast<std::string>(key), value));
+            activeGlobalGateAnnotations.emplace(static_cast<std::string>(key), value);
             return false;
         }
 
