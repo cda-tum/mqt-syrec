@@ -11,6 +11,14 @@
 #pragma once
 
 #include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/expression.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace syrec {
     class LineAwareSynthesis: public SyrecSynthesis {
@@ -37,13 +45,13 @@ namespace syrec {
 
         void inverse();
 
-        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation& op) override;
 
-        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation& op) override;
 
-        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const AssignStatement::AssignOperation& op) override;
 
-        bool solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs);
+        bool solver(const std::vector<unsigned>& expRhs, AssignStatement::AssignOperation statOp, const std::vector<unsigned>& expLhs, BinaryExpression::BinaryOperation expOp, const std::vector<unsigned>& statLhs);
 
         bool flow(const Expression::ptr& expression, std::vector<unsigned>& v);
         bool flow(const VariableExpression& expression, std::vector<unsigned>& v);
@@ -64,12 +72,12 @@ namespace syrec {
             lines = rhs;
         }
 
-        bool expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
+        bool expEvaluate(std::vector<unsigned>& lines, BinaryExpression::BinaryOperation op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs);
 
-        bool expressionSingleOp(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs);
+        bool expressionSingleOp(BinaryExpression::BinaryOperation op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs);
 
         bool decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
 
-        bool expressionOpInverse(unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) override;
+        bool expressionOpInverse(BinaryExpression::BinaryOperation op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) override;
     };
 } // namespace syrec

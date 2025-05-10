@@ -10,15 +10,18 @@
 
 #include "algorithms/synthesis/syrec_line_aware_synthesis.hpp"
 #include "core/circuit.hpp"
-#include "core/properties.hpp"
+#include "core/gate.hpp"
 #include "core/syrec/program.hpp"
 
-#include "gtest/gtest.h"
+#include <algorithm>
+#include <fstream>
+#include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <vector>
 
-using json = nlohmann::json;
+// The .clang-tidy warning about the missing header file seems to be a false positive since the include of the required <nlohmann/json.hpp> is defined in this file.
+// Maybe this warning is reported because the nlohmann library is implicitly added by one of the external dependencies?
+using json = nlohmann::json; // NOLINT(misc-include-cleaner)
 
 using namespace syrec;
 
@@ -35,8 +38,8 @@ protected:
     Gate::cost_t expectedTc       = 0;
 
     void SetUp() override {
-        std::string synthesisParam = GetParam();
-        fileName                   = testCircuitsDir + GetParam() + ".src";
+        const std::string synthesisParam = GetParam();
+        fileName                         = testCircuitsDir + GetParam() + ".src";
         std::ifstream i(testConfigsDir + "circuits_line_aware_synthesis.json");
         json          j  = json::parse(i);
         expectedNumGates = j[synthesisParam]["num_gates"];
@@ -54,10 +57,12 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                                  "bitwise_or_2",
                                  "bn_2",
                                  "call_8",
+                                 "constExpr_8",
                                  "divide_2",
                                  "for_4",
                                  "for_32",
                                  "gray_binary_conversion_16",
+                                 "ifCondVariants_4",
                                  "input_repeated_2",
                                  "input_repeated_4",
                                  "logical_and_1",
@@ -69,6 +74,7 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                                  "operators_repeated_4",
                                  "parity_4",
                                  "parity_check_16",
+                                 "relationalOp_4",
                                  "shift_4",
                                  "simple_add_2",
                                  "single_longstatement_4",
@@ -80,15 +86,14 @@ INSTANTIATE_TEST_SUITE_P(SyrecSynthesisTest, SyrecSynthesisTest,
                              return s; });
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
-    Circuit             circ;
-    Program             prog;
-    ReadProgramSettings settings;
-    std::string         errorString;
+    Circuit                   circ;
+    Program                   prog;
+    const ReadProgramSettings settings;
+    std::string               errorString;
 
-    errorString = prog.read(fileName, settings);
-    EXPECT_TRUE(errorString.empty());
-
-    EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
+    ASSERT_NO_FATAL_FAILURE(errorString = prog.read(fileName, settings)) << "Unexpected crash during processing of SyReC program";
+    ASSERT_TRUE(errorString.empty()) << "Found errors during processing of SyReC program: " << errorString;
+    ASSERT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
 
     qc = circ.quantumCost();
     tc = circ.transistorCost();
@@ -100,12 +105,14 @@ TEST_P(SyrecSynthesisTest, GenericSynthesisTest) {
 }
 
 TEST_P(SyrecSynthesisTest, GenericSynthesisQASMTest) {
-    Circuit             circ;
-    Program             prog;
-    ReadProgramSettings settings;
+    Circuit                   circ;
+    Program                   prog;
+    const ReadProgramSettings settings;
 
-    const auto errorString = prog.read(fileName, settings);
-    EXPECT_TRUE(errorString.empty());
+    std::string errorString;
+    ASSERT_NO_FATAL_FAILURE(errorString = prog.read(fileName, settings)) << "Unexpected crash during processing of SyReC program";
+    ASSERT_TRUE(errorString.empty()) << "Found errors during processing of SyReC program: " << errorString;
+    // We are not asserting that the synthesis completes successfully since the 'dump' of the circuit into the .qasm file might help debugging the error.
     EXPECT_TRUE(LineAwareSynthesis::synthesize(circ, prog));
 
     const auto lastIndex      = fileName.find_last_of('.');

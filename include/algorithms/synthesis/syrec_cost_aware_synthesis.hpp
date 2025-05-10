@@ -11,6 +11,13 @@
 #pragma once
 
 #include "algorithms/synthesis/syrec_synthesis.hpp"
+#include "core/circuit.hpp"
+#include "core/properties.hpp"
+#include "core/syrec/program.hpp"
+#include "core/syrec/statement.hpp"
+
+#include <memory>
+#include <vector>
 
 namespace syrec {
     class CostAwareSynthesis: public SyrecSynthesis {
@@ -24,15 +31,15 @@ namespace syrec {
             return !SyrecSynthesis::onStatement(statement);
         }
 
-        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        void assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::increase(rhs, lhs);
         }
 
-        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        void assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::decrease(rhs, lhs);
         }
 
-        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+        void assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const AssignStatement::AssignOperation& op) override {
             status = SyrecSynthesis::bitwiseCnot(lhs, rhs);
         }
 

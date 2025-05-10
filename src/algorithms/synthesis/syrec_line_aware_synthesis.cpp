@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <boost/graph/detail/adjacency_list.hpp>
 #include <boost/graph/properties.hpp>
+#include <optional>
 #include <vector>
 
 namespace syrec {
@@ -54,8 +55,10 @@ namespace syrec {
             std::vector<unsigned> dd;
             flow(statement.rhs, dd);
 
+            // Binaryexpression ADD=0, MINUS=1, EXOR=2
+            // AssignOperation ADD=0, MINUS=1, EXOR=2
             if (expOpVector.size() == 1) {
-                if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
+                if (expOpVector.at(0) == BinaryExpression::BinaryOperation::Subtract || expOpVector.at(0) == BinaryExpression::BinaryOperation::Exor) {
                     /// cancel out the signals
 
                     expOpVector.clear();
@@ -64,16 +67,21 @@ namespace syrec {
                     expRhsVector.clear();
                     opVec.clear();
                 } else {
-                    if (statement.op == 1) {
-                        expressionSingleOp(1, expLhsVector.at(0), statLhs);
-                        expressionSingleOp(1, expRhsVector.at(0), statLhs);
+                    if (statement.assignOperation == AssignStatement::AssignOperation::Subtract) {
+                        expressionSingleOp(BinaryExpression::BinaryOperation::Subtract, expLhsVector.at(0), statLhs);
+                        expressionSingleOp(BinaryExpression::BinaryOperation::Subtract, expRhsVector.at(0), statLhs);
                         expOpVector.clear();
                         assignOpVector.clear();
                         expLhsVector.clear();
                         expRhsVector.clear();
                         opVec.clear();
                     } else {
-                        expressionSingleOp(statement.op, expLhsVector.at(0), statLhs);
+                        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statement.assignOperation);
+                        if (!mappedToBinaryOperation.has_value()) {
+                            return false;
+                        }
+
+                        expressionSingleOp(*mappedToBinaryOperation, expLhsVector.at(0), statLhs);
                         expressionSingleOp(expOpVector.at(0), expRhsVector.at(0), statLhs);
                         expOpVector.clear();
                         assignOpVector.clear();
@@ -86,23 +94,27 @@ namespace syrec {
             } else {
                 std::vector<unsigned> lines;
                 if (expLhsVector.at(0) == expRhsVector.at(0)) {
-                    if (expOpVector.at(0) == 1 || expOpVector.at(0) == 2) {
-                        /// cancel out the signals
-                    } else if (expOpVector.at(0) != 1 || expOpVector.at(0) != 2) {
-                        expressionSingleOp(statement.op, expLhsVector.at(0), statLhs);
+                    if (expOpVector.at(0) == BinaryExpression::BinaryOperation::Subtract || expOpVector.at(0) == BinaryExpression::BinaryOperation::Exor) {
+                        // cancel out the signals
+                    } else if (expOpVector.at(0) != BinaryExpression::BinaryOperation::Subtract || expOpVector.at(0) != BinaryExpression::BinaryOperation::Exor) {
+                        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statement.assignOperation);
+                        if (!mappedToBinaryOperation.has_value()) {
+                            return false;
+                        }
+                        expressionSingleOp(*mappedToBinaryOperation, expLhsVector.at(0), statLhs);
                         expressionSingleOp(expOpVector.at(0), expRhsVector.at(0), statLhs);
                     }
                 } else {
-                    solver(statLhs, statement.op, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
+                    solver(statLhs, statement.assignOperation, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
                 }
 
-                unsigned              j = 0;
-                unsigned              z = 0;
-                std::vector<unsigned> statAssignOp;
+                unsigned                                      j = 0;
+                unsigned                                      z = 0;
+                std::vector<AssignStatement::AssignOperation> statAssignOp;
                 if ((expOpVector.size() % 2) == 0) {
-                    z = (static_cast<int>(expOpVector.size()) / 2);
+                    z = static_cast<unsigned int>(expOpVector.size() / 2);
                 } else {
-                    z = (static_cast<int>((expOpVector.size()) - 1) / 2);
+                    z = static_cast<unsigned int>((expOpVector.size() - 1) / 2);
                 }
 
                 for (unsigned k = 0; k <= z - 1; k++) {
@@ -115,14 +127,12 @@ namespace syrec {
 
                 /// If reversible assignment is "-", the assignment operations must negated appropriately
 
-                if (statement.op == 1) {
-                    for (unsigned int& i: statAssignOp) {
-                        if (i == 0) {
-                            i = 1;
-                        } else if (i == 1) {
-                            i = 0;
-                        } else {
-                            continue;
+                if (statement.assignOperation == AssignStatement::AssignOperation::Subtract) {
+                    for (AssignStatement::AssignOperation& i: statAssignOp) {
+                        if (i == AssignStatement::AssignOperation::Add) {
+                            i = AssignStatement::AssignOperation::Subtract;
+                        } else if (i == AssignStatement::AssignOperation::Subtract) {
+                            i = AssignStatement::AssignOperation::Add;
                         }
                     }
                 }
@@ -131,16 +141,21 @@ namespace syrec {
                     /// when both rhs and lhs exist
                     if ((!expLhsVector.at(i).empty()) && (!expRhsVector.at(i).empty())) {
                         if (expLhsVector.at(i) == expRhsVector.at(i)) {
-                            if (expOpVector.at(i) == 1 || expOpVector.at(i) == 2) {
+                            if (expOpVector.at(i) == BinaryExpression::BinaryOperation::Subtract || expOpVector.at(i) == BinaryExpression::BinaryOperation::Exor) {
                                 /// cancel out the signals
                                 j = j + 1;
-                            } else if (expOpVector.at(i) != 1 || expOpVector.at(i) != 2) {
-                                if (statAssignOp.at(j) == 1) {
-                                    expressionSingleOp(1, expLhsVector.at(i), statLhs);
-                                    expressionSingleOp(1, expRhsVector.at(i), statLhs);
+                            } else if (expOpVector.at(i) != BinaryExpression::BinaryOperation::Subtract || expOpVector.at(i) != BinaryExpression::BinaryOperation::Exor) {
+                                if (statAssignOp.at(j) == AssignStatement::AssignOperation::Subtract) {
+                                    expressionSingleOp(BinaryExpression::BinaryOperation::Subtract, expLhsVector.at(i), statLhs);
+                                    expressionSingleOp(BinaryExpression::BinaryOperation::Subtract, expRhsVector.at(i), statLhs);
                                     j = j + 1;
                                 } else {
-                                    expressionSingleOp(statAssignOp.at(j), expLhsVector.at(i), statLhs);
+                                    const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statAssignOp.at(j));
+                                    if (!mappedToBinaryOperation.has_value()) {
+                                        return false;
+                                    }
+
+                                    expressionSingleOp(*mappedToBinaryOperation, expLhsVector.at(i), statLhs);
                                     expressionSingleOp(expOpVector.at(i), expRhsVector.at(i), statLhs);
                                     j = j + 1;
                                 }
@@ -153,7 +168,12 @@ namespace syrec {
 
                     /// when only lhs exists o rhs exists
                     else if (((expLhsVector.at(i).empty()) && !(expRhsVector.at(i).empty())) || ((!expLhsVector.at(i).empty()) && (expRhsVector.at(i).empty()))) {
-                        expEvaluate(lines, statAssignOp.at(j), expRhsVector.at(i), statLhs);
+                        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statAssignOp.at(j));
+                        if (!mappedToBinaryOperation.has_value()) {
+                            return false;
+                        }
+
+                        expEvaluate(lines, *mappedToBinaryOperation, expRhsVector.at(i), statLhs);
 
                         j = j + 1;
                     }
@@ -200,8 +220,12 @@ namespace syrec {
     bool LineAwareSynthesis::flow(const BinaryExpression& expression, const std::vector<unsigned>& v [[maybe_unused]]) {
         std::vector<unsigned> lhs;
         std::vector<unsigned> rhs;
-        std::vector<unsigned> comp;
-        assignOpVector.push_back(expression.op);
+
+        if (const std::optional<AssignStatement::AssignOperation> mappedToAssignmentOperation = tryMapBinaryToAssignmentOperation(expression.binaryOperation); mappedToAssignmentOperation.has_value()) {
+            assignOpVector.push_back(*mappedToAssignmentOperation);
+        } else {
+            return false;
+        }
 
         if (!flow(expression.lhs, lhs) || !flow(expression.rhs, rhs)) {
             return false;
@@ -209,28 +233,40 @@ namespace syrec {
 
         expLhsVector.push_back(lhs);
         expRhsVector.push_back(rhs);
-        expOpVector.push_back(expression.op);
+        expOpVector.push_back(expression.binaryOperation);
         return true;
     }
 
-    bool LineAwareSynthesis::solver(const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs) {
-        if (statOp == expOp) {
-            if (expOp == 1) {
-                expressionSingleOp(1, expLhs, expRhs);
-                expressionSingleOp(0, statLhs, expRhs);
+    bool LineAwareSynthesis::solver(const std::vector<unsigned>& expRhs, AssignStatement::AssignOperation statOp, const std::vector<unsigned>& expLhs, BinaryExpression::BinaryOperation expOp, const std::vector<unsigned>& statLhs) {
+        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statOp);
+        if (!mappedToBinaryOperation.has_value()) {
+            subFlag = false;
+            return true;
+        }
+
+        if (*mappedToBinaryOperation == expOp) {
+            if (expOp == BinaryExpression::BinaryOperation::Subtract) {
+                expressionSingleOp(BinaryExpression::BinaryOperation::Subtract, expLhs, expRhs);
+                expressionSingleOp(BinaryExpression::BinaryOperation::Add, statLhs, expRhs);
             } else {
-                expressionSingleOp(statOp, expLhs, expRhs);
-                expressionSingleOp(statOp, statLhs, expRhs);
+                expressionSingleOp(*mappedToBinaryOperation, expLhs, expRhs);
+                expressionSingleOp(*mappedToBinaryOperation, statLhs, expRhs);
             }
         } else {
             std::vector<unsigned> lines;
             subFlag = true;
             expEvaluate(lines, expOp, expLhs, statLhs);
             subFlag = false;
-            expEvaluate(lines, statOp, lines, expRhs);
+            expEvaluate(lines, *mappedToBinaryOperation, lines, expRhs);
             subFlag = true;
-            if (expOp < 3) {
-                expressionOpInverse(expOp, expLhs, statLhs);
+            switch (expOp) {
+                case BinaryExpression::BinaryOperation::Add:
+                case BinaryExpression::BinaryOperation::Subtract:
+                case BinaryExpression::BinaryOperation::Exor:
+                    expressionOpInverse(expOp, expLhs, statLhs);
+                    break;
+                default:
+                    break;
             }
         }
         subFlag = false;
@@ -261,7 +297,7 @@ namespace syrec {
         }
 
         v = rhs;
-        opVec.push_back(expression.op);
+        opVec.push_back(expression.binaryOperation);
         return true;
     }
 
@@ -277,8 +313,9 @@ namespace syrec {
         popExp();
     }
 
-    void LineAwareSynthesis::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
-        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+    void LineAwareSynthesis::assignAdd(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation& op) {
+        if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(op) : std::nullopt;
+            mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             SyrecSynthesis::increase(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
             popExp();
@@ -290,8 +327,9 @@ namespace syrec {
         }
     }
 
-    void LineAwareSynthesis::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) {
-        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+    void LineAwareSynthesis::assignSubtract(bool& status, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation& op) {
+        if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(op) : std::nullopt;
+            mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             SyrecSynthesis::decrease(rhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::increase(rhs, SyrecSynthesis::expRhss.top());
             popExp();
@@ -303,26 +341,28 @@ namespace syrec {
         }
     }
 
-    void LineAwareSynthesis::assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) {
-        if (!SyrecSynthesis::expOpp.empty() && SyrecSynthesis::expOpp.top() == op) {
+    void LineAwareSynthesis::assignExor(bool& status, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const AssignStatement::AssignOperation& op) {
+        if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(op) : std::nullopt;
+            mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expLhss.top()); //status = bitwiseCnot(lhs, expLhss.top())
             status = SyrecSynthesis::bitwiseCnot(lhs, SyrecSynthesis::expRhss.top());
             popExp();
         } else {
             status = SyrecSynthesis::bitwiseCnot(lhs, rhs);
         }
+
         while (!SyrecSynthesis::expOpp.empty()) {
             inverse();
         }
     }
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
-    bool LineAwareSynthesis::expEvaluate(std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
+    bool LineAwareSynthesis::expEvaluate(std::vector<unsigned>& lines, BinaryExpression::BinaryOperation op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) {
         switch (op) {
-            case BinaryExpression::Add: // +
+            case BinaryExpression::BinaryOperation::Add: // +
                 increase(rhs, lhs);
                 lines = rhs;
                 break;
-            case BinaryExpression::Subtract: // -
+            case BinaryExpression::BinaryOperation::Subtract: // -
                 if (subFlag) {
                     decreaseNewAssign(rhs, lhs);
                     lines = rhs;
@@ -331,8 +371,8 @@ namespace syrec {
                     lines = rhs;
                 }
                 break;
-            case BinaryExpression::Exor: // ^
-                bitwiseCnot(rhs, lhs);   // duplicate lhs
+            case BinaryExpression::BinaryOperation::Exor: // ^
+                bitwiseCnot(rhs, lhs);                    // duplicate lhs
                 lines = rhs;
                 break;
             default:
@@ -344,34 +384,34 @@ namespace syrec {
 
     bool LineAwareSynthesis::decreaseNewAssign(const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs) {
         for (const auto lh: lhs) {
-            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(lh);
+            (get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)->appendNot(lh);
         }
 
         increase(rhs, lhs);
 
         for (const auto lh: lhs) {
-            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(lh);
+            (get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)->appendNot(lh);
         }
 
         for (unsigned i = 0U; i < lhs.size(); ++i) {
-            ((get(boost::vertex_name, cctMan.tree)[cctMan.current].circ))->appendNot(rhs.at(i));
+            (get(boost::vertex_name, cctMan.tree)[cctMan.current].circ)->appendNot(rhs.at(i));
         }
         return true;
     }
 
-    bool LineAwareSynthesis::expressionSingleOp(const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAwareSynthesis::expressionSingleOp(BinaryExpression::BinaryOperation op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
-            case BinaryExpression::Add: // +
+            case BinaryExpression::BinaryOperation::Add: // +
                 increase(expRhs, expLhs);
                 break;
-            case BinaryExpression::Subtract: // -
+            case BinaryExpression::BinaryOperation::Subtract: // -
                 if (subFlag) {
                     decreaseNewAssign(expRhs, expLhs);
                 } else {
                     decrease(expRhs, expLhs);
                 }
                 break;
-            case BinaryExpression::Exor: // ^
+            case BinaryExpression::BinaryOperation::Exor: // ^
                 bitwiseCnot(expRhs, expLhs);
                 break;
             default:
@@ -380,15 +420,15 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::expressionOpInverse(const unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
+    bool LineAwareSynthesis::expressionOpInverse(BinaryExpression::BinaryOperation op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) {
         switch (op) {
-            case BinaryExpression::Add: // +
+            case BinaryExpression::BinaryOperation::Add: // +
                 decrease(expRhs, expLhs);
                 break;
-            case BinaryExpression::Subtract: // -
+            case BinaryExpression::BinaryOperation::Subtract: // -
                 decreaseNewAssign(expRhs, expLhs);
                 break;
-            case BinaryExpression::Exor: // ^
+            case BinaryExpression::BinaryOperation::Exor: // ^
                 bitwiseCnot(expRhs, expLhs);
                 break;
             default:
