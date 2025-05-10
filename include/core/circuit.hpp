@@ -328,10 +328,24 @@ namespace syrec {
             return createAndAddGate(Gate::Type::Fredkin, std::nullopt, Gate::LinesLookup({targetLineOne, targetLineTwo}));
         }
 
+        /**
+         * Activate a new control line scope.
+         *
+         * @remarks The aggregate of all control lines collected from the activate local scopes
+         * is added to each future gate of the circuit. Already added gates will not be modified.
+         */
         void activateLocalControlLineScope() {
             localControlLinesScope.emplace_back();
         }
 
+        /**
+         * Deactivate and destroy the last registered local scope. 
+         *
+         * @remarks This will remove all control lines that were NOT registered in the aggregate prior to the activation of the local scope.
+         * Assuming that the aggregate A contains the control lines (1,2,3), a local scope is activated an the control lines (3,4)
+         * registered which will set aggregate to (1,2,3,4). After the local scope is deactivated, only the control line 4 that is
+         * local to the scope is removed from the aggregate while control line 3 will remain in the aggregate.
+         */
         void deactivateCurrLocalControlLineScope() {
             if (localControlLinesScope.empty()) {
                 return;
@@ -341,11 +355,22 @@ namespace syrec {
             for (const auto [controlLine, controlLineData]: localControlLineScope) {
                 if (!controlLineData.wasControlLineRegisteredInParentScope) {
                     aggregateOfLocalControlLineScopes.erase(controlLine);
+                } else {
+                    // Control lines registered prior to the local scope and deactivated by the latter should still be registered in the parent
+                    // scope after the local one was deactivated.
+                    aggregateOfLocalControlLineScopes.emplace(controlLine);
                 }
             }
             localControlLinesScope.pop_back();
         }
 
+        /**
+         * Deregister a control line from the current scope.
+         *
+         * @remarks The control line is only removed from the aggregate if the last activated local scope registered @p controlLine.
+         * @param controlLine The control line to deregister
+         * @return Whether the control line was deregistered from the last activated local scope.
+         */
         [[maybe_unused]] bool deregisterControlLineInCurrentScope(const Gate::Line controlLine) {
             if (localControlLinesScope.empty()) {
                 return false;
@@ -357,12 +382,14 @@ namespace syrec {
             }
 
             localControlLineScope.at(controlLine).isControlLineActive = false;
-            // TODO: What if we open a new local scope, the aggregate still contains the inactive control line
-            // Should we remove the deregistered control line from the aggregate and add it back when the local
-            // scope is deactivated?
+            aggregateOfLocalControlLineScopes.erase(controlLine);
             return true;
         }
 
+        /**
+         * Register a control line in the last activated local scope. 
+         * @param controlLine The control line to register
+         */
         void registerControlLineInCurrentScope(const Gate::Line controlLine) {
             if (localControlLinesScope.empty()) {
                 activateLocalControlLineScope();
@@ -425,6 +452,14 @@ namespace syrec {
         }
 
     protected:
+        /**
+         * Create and add a gate of type \p gateType to the circuit.
+         *
+         * @param gateType The type of gate to be added
+         * @param controlLines The control lines of the gate to be added. Additionally, the registered control lines of all active local control line scopes will be added as control lines of the gate.
+         * @param targetLines The control lines of the gate to be added.
+         * @return A smart pointer to the created gate instance.
+         */
         [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
             auto gateInstance  = std::make_shared<Gate>();
             gateInstance->type = gateType;
