@@ -87,6 +87,9 @@ namespace syrec {
     bool SyrecSynthesis::onStatement(Circuit& circuit, const Statement::ptr& statement) {
         stmts.push(statement);
 
+        // To be able to associate which gates are associated with a statement in the syrec-editor we need to set the appropriate annotation that will be added for each created gate
+        circuit.setOrUpdateGlobalGateAnnotation(Circuit::GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER, std::to_string(static_cast<std::size_t>(statement->lineNumber)));
+
         bool okay = true;
         if (auto const* swapStat = dynamic_cast<SwapStatement*>(statement.get())) {
             okay = onStatement(circuit, *swapStat);

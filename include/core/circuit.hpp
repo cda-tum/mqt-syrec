@@ -13,11 +13,13 @@
 #include "gate.hpp"
 
 #include <fstream>
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -33,13 +35,17 @@ namespace syrec {
    */
     class Circuit {
     public:
+        constexpr static std::string_view GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER = "lno";
+
         /**
          * @brief Default constructor
          *
          * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
          * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
          */
-        Circuit()  = default;
+        Circuit():
+            activeGlobalGateAnnotations({std::make_pair(static_cast<std::string>(GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER), "0")}) {}
+
         ~Circuit() = default;
 
         /**
@@ -281,6 +287,40 @@ namespace syrec {
         }
 
         /**
+         * Register or update a global gate annotation.
+         * @param key The key of the global gate annotation
+         * @param value The value of the global gate annotation
+         * @return Whether an existing annotation was updated.
+         */
+        [[maybe_unused]] bool setOrUpdateGlobalGateAnnotation(const std::string_view& key, const std::string& value) {
+            auto existingAnnotationForKey = activeGlobalGateAnnotations.find(key);
+            if (existingAnnotationForKey != activeGlobalGateAnnotations.end()) {
+                existingAnnotationForKey->second = value;
+                return true;
+            }
+            activeGlobalGateAnnotations.emplace(std::make_pair(static_cast<std::string>(key), value));
+            return false;
+        }
+
+        /**
+         * Remove a global gate annotation.
+         * @param key The key of the global gate annotation to be removed
+         * @return Whether a global gate annotation was removed.
+         */
+        [[maybe_unused]] bool removeGlobalGateAnnotation(const std::string_view& key) {
+            // We utilize the ability to use a std::string_view to erase a matching element
+            // of std::string in a std::map<std::string, ...> without needing to cast the
+            // std::string_view to std::string for the std::map<>::erase() operation
+            // (see further: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2077r3.html)
+            auto existingAnnotationForKey = activeGlobalGateAnnotations.find(key);
+            if (existingAnnotationForKey != activeGlobalGateAnnotations.end()) {
+                activeGlobalGateAnnotations.erase(existingAnnotationForKey);
+                return true;
+            }
+            return false;
+        }
+
+        /**
        * @brief Add a line to a circuit with specifying all meta-data
        *
        * This function helps adding a line to the circuit.
@@ -455,6 +495,7 @@ namespace syrec {
         /**
          * Create and add a gate of type \p gateType to the circuit.
          *
+         * @remarks Note, the register global gate annotations will be added to the created gate instance.
          * @param gateType The type of gate to be added
          * @param controlLines The control lines of the gate to be added. Additionally, the registered control lines of all active local control line scopes will be added as control lines of the gate.
          * @param targetLines The control lines of the gate to be added.
@@ -480,6 +521,9 @@ namespace syrec {
             }
             gateInstance->targets = targetLines;
             gates.emplace_back(gateInstance);
+            for (const auto& [annotationKey, annotationValue]: activeGlobalGateAnnotations) {
+                annotate(*gateInstance, annotationKey, annotationValue);
+            }
             return gateInstance;
         }
 
@@ -504,6 +548,10 @@ namespace syrec {
         std::vector<std::unordered_map<Gate::Line, LocalControlLineScopeEntry>> localControlLinesScope;
 
         std::map<const Gate*, std::map<std::string, std::string>> annotations;
+        // To be able to use a std::string_view key lookup (heterogeneous lookup) in a std::map/std::unordered_set
+        // we need to define the transparent comparator (std::less<>). This feature is only available starting with C++17
+        // For further information, see: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3465.pdf
+        std::map<std::string, std::string, std::less<>> activeGlobalGateAnnotations;
     };
 
 } // namespace syrec
