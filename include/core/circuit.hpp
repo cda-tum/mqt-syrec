@@ -369,7 +369,7 @@ namespace syrec {
         }
 
         /**
-         * Activate a new control line scope.
+         * Activate a new local control line scope.
          *
          * @remarks The aggregate of all control lines collected from the activate local scopes
          * is added to each future gate of the circuit. Already added gates will not be modified.
@@ -379,7 +379,7 @@ namespace syrec {
         }
 
         /**
-         * Deactivate and destroy the last registered local scope.
+         * Deactivate and destroy the last registered local control line scope.
          *
          * @remarks This will remove all control lines that were NOT registered in the aggregate prior to the activation of the local scope.
          * Assuming that the aggregate A contains the control lines (1,2,3), a local scope is activated an the control lines (3,4)
@@ -405,14 +405,14 @@ namespace syrec {
         }
 
         /**
-         * Deregister a control line from the current scope.
+         * Deregister a control line from the last activated local control line scope.
          *
          * @remarks The control line is only removed from the aggregate if the last activated local scope registered @p controlLine.
          * @param controlLine The control line to deregister
-         * @return Whether the control line was deregistered from the last activated local scope.
+         * @return Whether the control line was deregistered from the last activated local scope. Note that false is also returned for an unknown control line in the circuit.
          */
         [[maybe_unused]] bool deregisterControlLineInCurrentScope(const Gate::Line controlLine) {
-            if (localControlLinesScope.empty()) {
+            if (localControlLinesScope.empty() || !isLineWithinRange(controlLine)) {
                 return false;
             }
 
@@ -427,10 +427,17 @@ namespace syrec {
         }
 
         /**
-         * Register a control line in the last activated local scope.
+         * Register a control line in the last activated local control line scope.
+         *
+         * @remarks If no active local control line scope exists, a new one is created.
          * @param controlLine The control line to register
+         * @return Whether the control line was register in the current scope. Note that false is also returned for an unknown control line in the circuit.
          */
-        void registerControlLineInCurrentScope(const Gate::Line controlLine) {
+        [[maybe_unused]] bool registerControlLineInCurrentScope(const Gate::Line controlLine) {
+            if (!isLineWithinRange(controlLine)) {
+                return false;
+            }
+
             if (localControlLinesScope.empty()) {
                 activateLocalControlLineScope();
             }
@@ -444,6 +451,7 @@ namespace syrec {
                 localControlLineScope.emplace(std::make_pair(controlLine, LocalControlLineScopeEntry(true, aggregateOfLocalControlLineScopes.count(controlLine) != 0)));
             }
             aggregateOfLocalControlLineScopes.emplace(controlLine);
+            return true;
         }
 
         // SIGNALS
@@ -502,6 +510,10 @@ namespace syrec {
          * @return A smart pointer to the created gate instance.
          */
         [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
+            if ((controlLines.has_value() && !areLinesWithinRange(*controlLines)) || !areLinesWithinRange(targetLines)) {
+                return nullptr;
+            }
+
             auto gateInstance  = std::make_shared<Gate>();
             gateInstance->type = gateType;
 
@@ -519,12 +531,20 @@ namespace syrec {
             if (controlLines.has_value()) {
                 gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
             }
+
             gateInstance->targets = targetLines;
             gates.emplace_back(gateInstance);
             for (const auto& [annotationKey, annotationValue]: activeGlobalGateAnnotations) {
                 annotate(*gateInstance, annotationKey, annotationValue);
             }
             return gateInstance;
+        }
+
+        [[nodiscard]] bool isLineWithinRange(const Gate::Line line) const noexcept {
+            return line <= lines;
+        }
+        [[nodiscard]] bool areLinesWithinRange(const Gate::LinesLookup& lines) const noexcept {
+            return std::all_of(lines.cbegin(), lines.cend(), [&](const Gate::Line line) { return isLineWithinRange(line); });
         }
 
     private:
