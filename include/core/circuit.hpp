@@ -345,19 +345,32 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddToffoliGate(const Gate::Line controlLineOne, const Gate::Line controlLineTwo, const Gate::Line targetLine) {
-            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}));
+            if (controlLineOne == controlLineTwo || controlLineOne == targetLine || controlLineTwo == targetLine) {
+                return nullptr;
+            }
+            constexpr std::size_t expectedMinimumNumberOfControlLines = 2;
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
         }
 
-        [[maybe_unused]] std::optional<Gate::ptr> createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
-            // A multi control toffoli gate must have at least one control line
-            if (controlLines.empty()) {
-                return std::nullopt;
+        [[maybe_unused]] Gate::ptr createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
+            if (controlLines.count(targetLine) != 0) {
+                return nullptr;
             }
-            return createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}));
+
+            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
+            auto createdMultiControlToffoliGate = createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
+            if (createdMultiControlToffoliGate != nullptr && createdMultiControlToffoliGate->controls.empty()) {
+                return nullptr;
+            }
+            return createdMultiControlToffoliGate;
         }
 
         [[maybe_unused]] Gate::ptr createAndAddCnotGate(const Gate::Line controlLine, Gate::Line targetLine) {
-            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}));
+            if (controlLine == targetLine) {
+                return nullptr;
+            }
+            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
         }
 
         [[maybe_unused]] Gate::ptr createAndAddNotGate(Gate::Line targetLine) {
@@ -365,6 +378,9 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddFredkinGate(const Gate::Line targetLineOne, const Gate::Line targetLineTwo) {
+            if (targetLineOne == targetLineTwo) {
+                return nullptr;
+            }
             return createAndAddGate(Gate::Type::Fredkin, std::nullopt, Gate::LinesLookup({targetLineOne, targetLineTwo}));
         }
 
@@ -507,9 +523,10 @@ namespace syrec {
          * @param gateType The type of gate to be added
          * @param controlLines The control lines of the gate to be added. Additionally, the registered control lines of all active local control line scopes will be added as control lines of the gate.
          * @param targetLines The control lines of the gate to be added.
+         * @param requiredMinimumNumberOfControlLines Set the minimum number of required control lines of the gate.
          * @return A smart pointer to the created gate instance.
          */
-        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
+        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines, std::size_t requiredMinimumNumberOfControlLines = 0) {
             if ((controlLines.has_value() && !areLinesWithinRange(*controlLines)) || !areLinesWithinRange(targetLines)) {
                 return nullptr;
             }
@@ -521,15 +538,21 @@ namespace syrec {
                 gateInstance->controls.insert(aggregateOfLocalControlLineScopes.cbegin(), aggregateOfLocalControlLineScopes.cend());
             } else {
                 const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
-                for (const auto [controlLine, controlLineData]: lastAddedLocalControlLineScope) {
-                    if (controlLineData.isControlLineActive) {
-                        gateInstance->controls.emplace(controlLine);
+                for (const auto& controlLine: aggregateOfLocalControlLineScopes) {
+                    if (lastAddedLocalControlLineScope.count(controlLine) != 0 && !lastAddedLocalControlLineScope.at(controlLine).isControlLineActive) {
+                        continue;
                     }
+                    gateInstance->controls.emplace(controlLine);
                 }
             }
 
             if (controlLines.has_value()) {
                 gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
+            }
+
+            if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines 
+                || std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
+                return nullptr;
             }
 
             gateInstance->targets = targetLines;
