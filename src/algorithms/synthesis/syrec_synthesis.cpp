@@ -186,8 +186,8 @@ namespace syrec {
 
         // add new helper line
         const unsigned helperLine = expressionResult.front();
-        circuit.activateLocalControlLineScope();
-        circuit.registerControlLineInCurrentScope(helperLine);
+        circuit.activateControlLinePropagationScope();
+        circuit.registerControlLineForPropagationInCurrentAndNestedScopes(helperLine);
 
         for (const Statement::ptr& stat: statement.thenStatements) {
             if (!processStatement(circuit, stat)) {
@@ -198,9 +198,9 @@ namespace syrec {
         // Toggle helper line.
         // We do not want to use the current helper line controlling the conditional execution of the statements
         // of both branches of the current IfStatement when negating the value of said helper line
-        circuit.deregisterControlLineInCurrentScope(helperLine);
+        circuit.deregisterControlLineFromPropagationInCurrentScope(helperLine);
         circuit.createAndAddNotGate(helperLine);
-        circuit.registerControlLineInCurrentScope(helperLine);
+        circuit.registerControlLineForPropagationInCurrentAndNestedScopes(helperLine);
 
         for (const Statement::ptr& stat: statement.elseStatements) {
             if (!processStatement(circuit, stat)) {
@@ -210,9 +210,9 @@ namespace syrec {
 
         // We do not want to use the current helper line controlling the conditional execution of the statements
         // of both branches of the current IfStatement when negating the value of said helper line
-        circuit.deregisterControlLineInCurrentScope(helperLine);
+        circuit.deregisterControlLineFromPropagationInCurrentScope(helperLine);
         circuit.createAndAddNotGate(helperLine);
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return true;
     }
 
@@ -466,26 +466,26 @@ namespace syrec {
     }
 
     bool SyrecSynthesis::decrement(Circuit& circuit, const std::vector<unsigned>& dest) {
-        circuit.activateLocalControlLineScope();
+        circuit.activateControlLinePropagationScope();
         for (const auto line: dest) {
             circuit.createAndAddNotGate(line);
-            circuit.registerControlLineInCurrentScope(line);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(line);
         }
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return true;
     }
 
     bool SyrecSynthesis::increment(Circuit& circuit, const std::vector<unsigned>& dest) {
-        circuit.activateLocalControlLineScope();
+        circuit.activateControlLinePropagationScope();
         for (const auto line: dest) {
-            circuit.registerControlLineInCurrentScope(line);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(line);
         }
 
         for (int i = static_cast<int>(dest.size()) - 1; i >= 0; --i) {
-            circuit.deregisterControlLineInCurrentScope(dest[static_cast<std::size_t>(i)]);
+            circuit.deregisterControlLineFromPropagationInCurrentScope(dest[static_cast<std::size_t>(i)]);
             circuit.createAndAddNotGate(dest[static_cast<std::size_t>(i)]);
         }
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return true;
     }
 
@@ -558,9 +558,9 @@ namespace syrec {
             circuit.createAndAddNotGate(src2[i]);
         }
 
-        circuit.activateLocalControlLineScope();
+        circuit.activateControlLinePropagationScope();
         for (std::size_t i = 1U; i < src1.size(); ++i) {
-            circuit.registerControlLineInCurrentScope(src2[i]);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src2[i]);
         }
 
         std::size_t helperIndex = 0;
@@ -570,23 +570,23 @@ namespace syrec {
 
             partial.push_back(src2[helperIndex++]);
             sum.insert(sum.begin(), src1[castedIndex]);
-            circuit.registerControlLineInCurrentScope(dest[castedIndex]);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(dest[castedIndex]);
             synthesisOk = increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(dest[castedIndex]);
+            circuit.deregisterControlLineFromPropagationInCurrentScope(dest[castedIndex]);
             if (i == 0) {
                 continue;
             }
 
             for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j) {
-                circuit.deregisterControlLineInCurrentScope(src2[j]);
+                circuit.deregisterControlLineFromPropagationInCurrentScope(src2[j]);
             }
             circuit.createAndAddNotGate(src2[helperIndex]);
 
             for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j) {
-                circuit.registerControlLineInCurrentScope(src2[j]);
+                circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src2[j]);
             }
         }
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return synthesisOk;
     }
 
@@ -751,9 +751,9 @@ namespace syrec {
             circuit.createAndAddNotGate(src2[i]);
         }
 
-        circuit.activateLocalControlLineScope();
+        circuit.activateControlLinePropagationScope();
         for (std::size_t i = 1; i < src1.size(); ++i) {
-            circuit.registerControlLineInCurrentScope(src2[i]);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src2[i]);
         }
 
         std::size_t helperIndex = 0;
@@ -765,9 +765,9 @@ namespace syrec {
             sum.insert(sum.begin(), src1[unsignedLoopVariableValue]);
             synthesisOk = decreaseWithCarry(circuit, sum, partial, dest[unsignedLoopVariableValue]);
 
-            circuit.registerControlLineInCurrentScope(dest[unsignedLoopVariableValue]);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(dest[unsignedLoopVariableValue]);
             synthesisOk &= increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(dest[unsignedLoopVariableValue]);
+            circuit.deregisterControlLineFromPropagationInCurrentScope(dest[unsignedLoopVariableValue]);
 
             circuit.createAndAddNotGate(dest[unsignedLoopVariableValue]);
             if (i == 0) {
@@ -775,15 +775,15 @@ namespace syrec {
             }
 
             for (std::size_t j = 1; j < src1.size() && synthesisOk; ++j) {
-                circuit.deregisterControlLineInCurrentScope(src2[j]);
+                circuit.deregisterControlLineFromPropagationInCurrentScope(src2[j]);
             }
             circuit.createAndAddNotGate(src2[helperIndex]);
 
             for (std::size_t j = 2; j < src1.size() && synthesisOk; ++j) {
-                circuit.registerControlLineInCurrentScope(src2[j]);
+                circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src2[j]);
             }
         }
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return synthesisOk;
     }
 
@@ -800,19 +800,19 @@ namespace syrec {
         std::vector<unsigned> partial = src2;
 
         bool synthesisOk = true;
-        circuit.activateLocalControlLineScope();
-        circuit.registerControlLineInCurrentScope(src1.front());
+        circuit.activateControlLinePropagationScope();
+        circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src1.front());
         synthesisOk = synthesisOk && bitwiseCnot(circuit, sum, partial);
-        circuit.deregisterControlLineInCurrentScope(src1.front());
+        circuit.deregisterControlLineFromPropagationInCurrentScope(src1.front());
 
         for (std::size_t i = 1; i < dest.size() && synthesisOk; ++i) {
             sum.erase(sum.begin());
             partial.pop_back();
-            circuit.registerControlLineInCurrentScope(src1[i]);
+            circuit.registerControlLineForPropagationInCurrentAndNestedScopes(src1[i]);
             synthesisOk &= increase(circuit, sum, partial);
-            circuit.deregisterControlLineInCurrentScope(src1[i]);
+            circuit.deregisterControlLineFromPropagationInCurrentScope(src1[i]);
         }
-        circuit.deactivateCurrLocalControlLineScope();
+        circuit.deactivateControlLinePropagationScope();
         return synthesisOk;
     }
 

@@ -345,18 +345,18 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddToffoliGate(const Gate::Line controlLineOne, const Gate::Line controlLineTwo, const Gate::Line targetLine) {
-            if (controlLineOne == controlLineTwo || controlLineOne == targetLine || controlLineTwo == targetLine) {
-                return nullptr;
-            }
-            constexpr std::size_t expectedMinimumNumberOfControlLines = 2;
+            // Due to the activation, deactivation and propagation of control lines using the control line propagation scopes, the defined function signature expecting two
+            // control lines might be missleading since a toffoli gate with only one control line can be implemented as a CNOT gate. Due to the possibility of 'implementing'
+            // the toffoli gate with a CNOT gate we only require a single active control line to be active.
+            // Additionally, the validation that none of the two control lines matches the target lines can only be performed after all deregistered control lines from the
+            // control line propagation scopes were removed.
+            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
             return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
         }
 
         [[maybe_unused]] Gate::ptr createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
-            if (controlLines.count(targetLine) != 0) {
-                return nullptr;
-            }
-
+            // The validation that the two control line does not match the target line can only be performed after all deregistered control lines from the
+            // control line propagation scopes were removed.
             constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
             auto createdMultiControlToffoliGate = createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
             if (createdMultiControlToffoliGate != nullptr && createdMultiControlToffoliGate->controls.empty()) {
@@ -366,9 +366,8 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddCnotGate(const Gate::Line controlLine, Gate::Line targetLine) {
-            if (controlLine == targetLine) {
-                return nullptr;
-            }
+            // The validation that the two control line does not match the target line can only be performed after all deregistered control lines from the
+            // control line propagation scopes were removed.
             constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
             return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
         }
@@ -385,88 +384,93 @@ namespace syrec {
         }
 
         /**
-         * Activate a new local control line scope.
+         * Activate a new control line propagation scope.
          *
-         * @remarks The aggregate of all control lines collected from the activate local scopes
-         * is added to each future gate of the circuit. Already added gates will not be modified.
+         * @remarks All active control lines registered in the currently active propagation scopes
+         * will be added to any future gate added to the circuit. Already existing gates are not modified.
          */
-        void activateLocalControlLineScope() {
-            localControlLinesScope.emplace_back();
+        void activateControlLinePropagationScope() {
+            controlLinePropagationScopes.emplace_back();
         }
 
         /**
-         * Deactivate and destroy the last registered local control line scope.
+         * Deactivates the last activated control line propagation scope.
          *
-         * @remarks This will remove all control lines that were NOT registered in the aggregate prior to the activation of the local scope.
-         * Assuming that the aggregate A contains the control lines (1,2,3), a local scope is activated an the control lines (3,4)
-         * registered which will set aggregate to (1,2,3,4). After the local scope is deactivated, only the control line 4 that is
-         * local to the scope is removed from the aggregate while control line 3 will remain in the aggregate.
+         * @remarks
+         * All control lines registered in the last activated control line propagation scope are removed from the aggregate of all active control lines.
+         * Control lines active prior to the last activated control line propagation scope and deregistered in said scope are activated again. \n
+         * \n
+         * Example:
+         * Assuming that the aggregate A contains the control lines (1,2,3), a propagation scope is activated and the control lines (3,4)
+         * registered which will set the aggregate to (1,2,3,4). After the local scope is deactivated, only the control line 4 that is
+         * local to the scope is removed from the aggregate while control line 3 will remain in the aggregate thus the aggregate is equal to (1,2,3) again.
          */
-        void deactivateCurrLocalControlLineScope() {
-            if (localControlLinesScope.empty()) {
+        void deactivateControlLinePropagationScope() {
+            if (controlLinePropagationScopes.empty()) {
                 return;
             }
 
-            const auto& localControlLineScope = localControlLinesScope.back();
-            for (const auto [controlLine, controlLineData]: localControlLineScope) {
-                if (!controlLineData.wasControlLineRegisteredInParentScope) {
-                    aggregateOfLocalControlLineScopes.erase(controlLine);
-                } else {
+            const auto& localControlLineScope = controlLinePropagationScopes.back();
+            for (const auto [controlLine, wasControlLineActiveInParentScope]: localControlLineScope) {
+                if (wasControlLineActiveInParentScope) {
                     // Control lines registered prior to the local scope and deactivated by the latter should still be registered in the parent
                     // scope after the local one was deactivated.
-                    aggregateOfLocalControlLineScopes.emplace(controlLine);
+                    aggregateOfPropagatedControlLines.emplace(controlLine);
+                } else {
+                    aggregateOfPropagatedControlLines.erase(controlLine);
                 }
+                deregisteredControlLinesFromAggregate.erase(controlLine);
             }
-            localControlLinesScope.pop_back();
+            controlLinePropagationScopes.pop_back();
         }
 
         /**
-         * Deregister a control line from the last activated local control line scope.
+         * Deregister a control line from the last activated control line propagation scope.
          *
-         * @remarks The control line is only removed from the aggregate if the last activated local scope registered @p controlLine.
+         * @remarks The control line is only removed from the aggregate if the last activated local scope registered the @p controlLine.
          * @param controlLine The control line to deregister
-         * @return Whether the control line was deregistered from the last activated local scope. Note that false is also returned for an unknown control line in the circuit.
+         * @return Whether the control line exists in the circuit and whether it was deregistered from the last activated propagation scope.
          */
-        [[maybe_unused]] bool deregisterControlLineInCurrentScope(const Gate::Line controlLine) {
-            if (localControlLinesScope.empty() || !isLineWithinRange(controlLine)) {
+        [[maybe_unused]] bool deregisterControlLineFromPropagationInCurrentScope(const Gate::Line controlLine) {
+            if (controlLinePropagationScopes.empty() || !isLineWithinRange(controlLine)) {
                 return false;
             }
 
-            auto& localControlLineScope = localControlLinesScope.back();
+            auto& localControlLineScope = controlLinePropagationScopes.back();
             if (localControlLineScope.count(controlLine) == 0) {
                 return false;
             }
 
-            localControlLineScope.at(controlLine).isControlLineActive = false;
-            aggregateOfLocalControlLineScopes.erase(controlLine);
+            aggregateOfPropagatedControlLines.erase(controlLine);
+            deregisteredControlLinesFromAggregate.emplace(controlLine);
             return true;
         }
 
         /**
-         * Register a control line in the last activated local control line scope.
+         * Register a control line in the last activated control line propagation scope.
          *
          * @remarks If no active local control line scope exists, a new one is created.
          * @param controlLine The control line to register
-         * @return Whether the control line was register in the current scope. Note that false is also returned for an unknown control line in the circuit.
+         * @return Whether the control line exists in the circuit and whether it was registered in the last activated propagation scope.
          */
-        [[maybe_unused]] bool registerControlLineInCurrentScope(const Gate::Line controlLine) {
+        [[maybe_unused]] bool registerControlLineForPropagationInCurrentAndNestedScopes(const Gate::Line controlLine) {
             if (!isLineWithinRange(controlLine)) {
                 return false;
             }
 
-            if (localControlLinesScope.empty()) {
-                activateLocalControlLineScope();
+            if (controlLinePropagationScopes.empty()) {
+                activateControlLinePropagationScope();
             }
 
-            auto& localControlLineScope = localControlLinesScope.back();
+            auto& localControlLineScope = controlLinePropagationScopes.back();
             // If an entry for the to be registered control line already exists in the current scope then the previously determine value of the flag indicating whether the control line existed in the parent scope
             // should have the same value that it had when the control line was initially added to the current scope
-            if (localControlLineScope.count(controlLine) != 0) {
-                localControlLineScope.at(controlLine).isControlLineActive = true;
-            } else {
-                localControlLineScope.emplace(std::make_pair(controlLine, LocalControlLineScopeEntry(true, aggregateOfLocalControlLineScopes.count(controlLine) != 0)));
+
+            if (localControlLineScope.count(controlLine) == 0) {
+                localControlLineScope.emplace(std::make_pair(controlLine, aggregateOfPropagatedControlLines.count(controlLine) != 0));
             }
-            aggregateOfLocalControlLineScopes.emplace(controlLine);
+            aggregateOfPropagatedControlLines.emplace(controlLine);
+            deregisteredControlLinesFromAggregate.erase(controlLine);
             return true;
         }
 
@@ -519,12 +523,15 @@ namespace syrec {
         /**
          * Create and add a gate of type \p gateType to the circuit.
          *
-         * @remarks Note, the register global gate annotations will be added to the created gate instance.
+         * @remarks All active control lines of the currently active control line propagation scopes are added as control lines to the created gate instance
+         * @remarks All registered global gate annotations are added to the created gate instance.
+         * @remarks None of the provided \p targetLines can be equal to any active control line from any of the active control line propagation scopes (note that child scopes
+         * can register/deregister control lines and only the status of the control line after all propagation scopes were processed is considered).
          * @param gateType The type of gate to be added
          * @param controlLines The control lines of the gate to be added. Additionally, the registered control lines of all active local control line scopes will be added as control lines of the gate.
          * @param targetLines The control lines of the gate to be added.
          * @param requiredMinimumNumberOfControlLines Set the minimum number of required control lines of the gate.
-         * @return A smart pointer to the created gate instance.
+         * @return A smart pointer to the created gate instance. If no gate was created a nullptr is returned.
          */
         [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines, std::size_t requiredMinimumNumberOfControlLines = 0) {
             if ((controlLines.has_value() && !areLinesWithinRange(*controlLines)) || !areLinesWithinRange(targetLines)) {
@@ -534,20 +541,21 @@ namespace syrec {
             auto gateInstance  = std::make_shared<Gate>();
             gateInstance->type = gateType;
 
-            if (localControlLinesScope.empty()) {
-                gateInstance->controls.insert(aggregateOfLocalControlLineScopes.cbegin(), aggregateOfLocalControlLineScopes.cend());
-            } else {
-                const auto& lastAddedLocalControlLineScope = localControlLinesScope.back();
-                for (const auto& controlLine: aggregateOfLocalControlLineScopes) {
-                    if (lastAddedLocalControlLineScope.count(controlLine) != 0 && !lastAddedLocalControlLineScope.at(controlLine).isControlLineActive) {
+            // All control lines deregistered in any parent control line propagation scope are already removed from the aggregate
+            gateInstance->controls.insert(aggregateOfPropagatedControlLines.cbegin(), aggregateOfPropagatedControlLines.cend());
+            if (controlLinePropagationScopes.empty()) {
+                if (controlLines.has_value()) {
+                    gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
+                }
+            } else if (controlLines.has_value()) {
+                // Filter out user provided control lines that were deregistered in any parent control line propagation scope
+                const Gate::LinesLookup& userProvidedControlLines       = *controlLines;
+                for (const auto userProvidedControlline: userProvidedControlLines) {
+                    if (deregisteredControlLinesFromAggregate.count(userProvidedControlline) != 0) {
                         continue;
                     }
-                    gateInstance->controls.emplace(controlLine);
+                    gateInstance->controls.emplace(userProvidedControlline);
                 }
-            }
-
-            if (controlLines.has_value()) {
-                gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
             }
 
             if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines 
@@ -563,9 +571,15 @@ namespace syrec {
             return gateInstance;
         }
 
+        /**
+         * Determine whether the given line is known in the circuit assuming that zero-based indexing is used for all circuit lines.
+         * @param line The line to check
+         * @return Whether the line is known in the circuit
+         */
         [[nodiscard]] bool isLineWithinRange(const Gate::Line line) const noexcept {
-            return line <= lines;
+            return line < lines;
         }
+
         [[nodiscard]] bool areLinesWithinRange(const Gate::LinesLookup& lines) const noexcept {
             return std::all_of(lines.cbegin(), lines.cend(), [&](const Gate::Line line) { return isLineWithinRange(line); });
         }
@@ -580,15 +594,9 @@ namespace syrec {
         std::vector<bool>        garbage;
         std::string              name;
 
-        Gate::LinesLookup aggregateOfLocalControlLineScopes;
-        struct LocalControlLineScopeEntry {
-            bool isControlLineActive;
-            bool wasControlLineRegisteredInParentScope;
-
-            LocalControlLineScopeEntry(bool isControlLineActive, bool wasControlLineRegisteredInParentScope):
-                isControlLineActive(isControlLineActive), wasControlLineRegisteredInParentScope(wasControlLineRegisteredInParentScope) {}
-        };
-        std::vector<std::unordered_map<Gate::Line, LocalControlLineScopeEntry>> localControlLinesScope;
+        Gate::LinesLookup aggregateOfPropagatedControlLines;
+        Gate::LinesLookup deregisteredControlLinesFromAggregate;
+        std::vector<std::unordered_map<Gate::Line, bool>> controlLinePropagationScopes;
 
         std::map<const Gate*, std::map<std::string, std::string>> annotations;
         // To be able to use a std::string_view key lookup (heterogeneous lookup) in a std::map/std::unordered_set
