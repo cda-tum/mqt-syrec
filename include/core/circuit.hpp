@@ -418,7 +418,6 @@ namespace syrec {
                 } else {
                     aggregateOfPropagatedControlLines.erase(controlLine);
                 }
-                deregisteredControlLinesFromAggregate.erase(controlLine);
             }
             controlLinePropagationScopes.pop_back();
         }
@@ -427,6 +426,8 @@ namespace syrec {
          * Deregister a control line from the last activated control line propagation scope.
          *
          * @remarks The control line is only removed from the aggregate if the last activated local scope registered the @p controlLine.
+         * The deregistered control line is not 'inherited' by any gate added while the current scope is active. Additionally, no deregistered control line
+         * is filtered from the user provided control lines when adding a new gate.
          * @param controlLine The control line to deregister
          * @return Whether the control line exists in the circuit and whether it was deregistered from the last activated propagation scope.
          */
@@ -441,7 +442,6 @@ namespace syrec {
             }
 
             aggregateOfPropagatedControlLines.erase(controlLine);
-            deregisteredControlLinesFromAggregate.emplace(controlLine);
             return true;
         }
 
@@ -469,7 +469,6 @@ namespace syrec {
                 localControlLineScope.emplace(std::make_pair(controlLine, aggregateOfPropagatedControlLines.count(controlLine) != 0));
             }
             aggregateOfPropagatedControlLines.emplace(controlLine);
-            deregisteredControlLinesFromAggregate.erase(controlLine);
             return true;
         }
 
@@ -542,19 +541,8 @@ namespace syrec {
 
             // All control lines deregistered in any parent control line propagation scope are already removed from the aggregate
             gateInstance->controls.insert(aggregateOfPropagatedControlLines.cbegin(), aggregateOfPropagatedControlLines.cend());
-            if (controlLinePropagationScopes.empty()) {
-                if (controlLines.has_value()) {
-                    gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
-                }
-            } else if (controlLines.has_value()) {
-                // Filter out user provided control lines that were deregistered in any parent control line propagation scope
-                const Gate::LinesLookup& userProvidedControlLines = *controlLines;
-                for (const auto userProvidedControlline: userProvidedControlLines) {
-                    if (deregisteredControlLinesFromAggregate.count(userProvidedControlline) != 0) {
-                        continue;
-                    }
-                    gateInstance->controls.emplace(userProvidedControlline);
-                }
+            if (controlLines.has_value()) {
+                gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
             }
 
             if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines || std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
@@ -593,7 +581,6 @@ namespace syrec {
         std::string              name;
 
         Gate::LinesLookup                                 aggregateOfPropagatedControlLines;
-        Gate::LinesLookup                                 deregisteredControlLinesFromAggregate;
         std::vector<std::unordered_map<Gate::Line, bool>> controlLinePropagationScopes;
 
         std::map<const Gate*, std::map<std::string, std::string>> annotations;

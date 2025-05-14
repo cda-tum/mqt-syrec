@@ -230,7 +230,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithTargetLineMatchingActiveControlLin
 }
 
 TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrentControlLineScope) {
-    constexpr unsigned numCircuitLines = 3;
+    constexpr unsigned numCircuitLines = 4;
     circuit->setLines(numCircuitLines);
 
     constexpr Gate::Line controlLineOne = 0;
@@ -247,48 +247,39 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
     circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
 
     constexpr Gate::Line gateControlLine = 2;
-    constexpr Gate::Line targetLine      = controlLineTwo;
+    constexpr Gate::Line targetLine      = 3;
     // Both control lines of toffoli gate were deactivated in propagation scope
     auto createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, controlLineTwo, targetLine);
-    ASSERT_THAT(createdToffoliGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
+    ASSERT_THAT(createdToffoliGate, testing::NotNull());
+
+    auto expectedToffoliGateWithBothControlLinesDeregistered  = std::make_shared<Gate>();
+    expectedToffoliGateWithBothControlLinesDeregistered->type = Gate::Type::Toffoli;
+    expectedToffoliGateWithBothControlLinesDeregistered->controls = {controlLineOne, controlLineTwo};
+    expectedToffoliGateWithBothControlLinesDeregistered->targets.emplace(targetLine);
+    assertThatGatesMatch(*expectedToffoliGateWithBothControlLinesDeregistered, *createdToffoliGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGateWithBothControlLinesDeregistered});
 
     createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, gateControlLine, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto firstExpectedToffoliGateWithOneControlLine  = std::make_shared<Gate>();
-    firstExpectedToffoliGateWithOneControlLine->type = Gate::Type::Toffoli;
-    firstExpectedToffoliGateWithOneControlLine->controls.emplace(gateControlLine);
-    firstExpectedToffoliGateWithOneControlLine->targets.emplace(targetLine);
+    auto secondExpectedToffoliGateWithOneDeregisteredControlLine  = std::make_shared<Gate>();
+    secondExpectedToffoliGateWithOneDeregisteredControlLine->type = Gate::Type::Toffoli;
+    secondExpectedToffoliGateWithOneDeregisteredControlLine->controls = {controlLineOne, gateControlLine};
+    secondExpectedToffoliGateWithOneDeregisteredControlLine->targets.emplace(targetLine);
 
-    assertThatGatesMatch(*createdToffoliGate, *firstExpectedToffoliGateWithOneControlLine);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {firstExpectedToffoliGateWithOneControlLine});
+    assertThatGatesMatch(*createdToffoliGate, *secondExpectedToffoliGateWithOneDeregisteredControlLine);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGateWithBothControlLinesDeregistered, secondExpectedToffoliGateWithOneDeregisteredControlLine });
 
     createdToffoliGate = circuit->createAndAddToffoliGate(gateControlLine, controlLineOne, targetLine); // NOLINT(readability-suspicious-call-argument)
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto secondExpectedToffoliGateWithOneControlLine  = std::make_shared<Gate>();
-    secondExpectedToffoliGateWithOneControlLine->type = Gate::Type::Toffoli;
-    secondExpectedToffoliGateWithOneControlLine->controls.emplace(gateControlLine);
-    secondExpectedToffoliGateWithOneControlLine->targets.emplace(targetLine);
+    auto thirdExpectedToffoliGateWithOneDeregisteredControlLine  = std::make_shared<Gate>();
+    thirdExpectedToffoliGateWithOneDeregisteredControlLine->type = Gate::Type::Toffoli;
+    thirdExpectedToffoliGateWithOneDeregisteredControlLine->controls = {gateControlLine, controlLineOne};
+    thirdExpectedToffoliGateWithOneDeregisteredControlLine->targets.emplace(targetLine);
 
-    assertThatGatesMatch(*createdToffoliGate, *secondExpectedToffoliGateWithOneControlLine);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {firstExpectedToffoliGateWithOneControlLine, secondExpectedToffoliGateWithOneControlLine});
-
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(gateControlLine);
-
-    // While both user provided control lines are deactivated in aggregate of the control lines, the one control line
-    // registered in the last activated control line propagation scope is active and thus used as the control line of the toffoli gate.
-    createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, controlLineTwo, targetLine);
-    ASSERT_THAT(createdToffoliGate, testing::NotNull());
-
-    auto expectedToffoliGate      = std::make_shared<Gate>();
-    expectedToffoliGate->type     = Gate::Type::Toffoli;
-    expectedToffoliGate->controls = {gateControlLine};
-    expectedToffoliGate->targets.emplace(targetLine);
-
-    assertThatGatesMatch(*expectedToffoliGate, *createdToffoliGate);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {firstExpectedToffoliGateWithOneControlLine, secondExpectedToffoliGateWithOneControlLine, expectedToffoliGate});
+    assertThatGatesMatch(*createdToffoliGate, *thirdExpectedToffoliGateWithOneDeregisteredControlLine);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGateWithBothControlLinesDeregistered, secondExpectedToffoliGateWithOneDeregisteredControlLine, thirdExpectedToffoliGateWithOneDeregisteredControlLine});
 }
 
 TEST_F(CircuitTestsFixture, AddToffoliGateWithScopeActivatingDeactivatedControlLineOfParentScope) {
@@ -380,45 +371,51 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithTargetLineMatchingDeactivatedContr
 }
 
 TEST_F(CircuitTestsFixture, AddToffoliGateWithCallerProvidedControlLinesMatchingDeregisteredControlLinesOfParentScope) {
-    constexpr unsigned numCircuitLines = 4;
+    constexpr unsigned numCircuitLines = 5;
     circuit->setLines(numCircuitLines);
 
     constexpr Gate::Line controlLineOne   = 0;
     constexpr Gate::Line controlLineTwo   = 1;
     constexpr Gate::Line controlLineThree = 2;
+    constexpr Gate::Line controlLineFour  = 3;
+    constexpr Gate::Line targetLine       = 4;
+
+    constexpr Gate::Line propagatedControlLine = controlLineThree;
 
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineFour);
 
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
-
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineOne);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
+    circuit->deregisterControlLineFromPropagationInCurrentScope(propagatedControlLine);
 
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineThree);
 
-    auto createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, controlLineTwo, controlLineThree);
-    ASSERT_THAT(createdToffoliGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
+    constexpr Gate::Line gateControlLineOne      = controlLineOne;
+    constexpr Gate::Line gateControlLineTwo      = controlLineTwo;
+    const auto           firstCreatedToffoliGate = circuit->createAndAddToffoliGate(gateControlLineOne, gateControlLineTwo, targetLine);
+    ASSERT_THAT(firstCreatedToffoliGate, testing::NotNull());
 
-    constexpr Gate::Line targetLine      = controlLineThree;
-    constexpr Gate::Line controlLineFour = 3;
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    createdToffoliGate = circuit->createAndAddToffoliGate(controlLineFour, controlLineTwo, targetLine);
+    auto expectedFirstToffoliGate      = std::make_shared<Gate>();
+    expectedFirstToffoliGate->type     = Gate::Type::Toffoli;
+    expectedFirstToffoliGate->controls = {gateControlLineOne, gateControlLineTwo, controlLineFour};
+    expectedFirstToffoliGate->targets.emplace(targetLine);
+    assertThatGatesMatch(*expectedFirstToffoliGate, *firstCreatedToffoliGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstToffoliGate});
 
-    auto expectedToffoliGate      = std::make_shared<Gate>();
-    expectedToffoliGate->type     = Gate::Type::Toffoli;
-    expectedToffoliGate->controls = {controlLineOne, controlLineFour};
-    expectedToffoliGate->targets.emplace(targetLine);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
+    const auto secondCreatedToffoliGate = circuit->createAndAddToffoliGate(gateControlLineOne, gateControlLineTwo, targetLine);
 
-    assertThatGatesMatch(*expectedToffoliGate, *createdToffoliGate);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGate});
+    auto expectedSecondToffoliGate      = std::make_shared<Gate>();
+    expectedSecondToffoliGate->type     = Gate::Type::Toffoli;
+    expectedSecondToffoliGate->controls = {propagatedControlLine, gateControlLineOne, gateControlLineTwo, controlLineFour};
+    expectedSecondToffoliGate->targets.emplace(targetLine);
+
+    assertThatGatesMatch(*expectedSecondToffoliGate, *secondCreatedToffoliGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstToffoliGate, expectedSecondToffoliGate});
 }
 
 TEST_F(CircuitTestsFixture, AddCnotGate) {
@@ -525,22 +522,30 @@ TEST_F(CircuitTestsFixture, AddCnotGateWithTargetLineMatchingActiveControlLineIn
 }
 
 TEST_F(CircuitTestsFixture, AddCnotGateWithControlLineBeingDeactivatedInCurrentControlLineScope) {
-    constexpr unsigned numCircuitLines = 2;
+    constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
-    constexpr Gate::Line controlLine = 0;
+    constexpr Gate::Line controlLineOne = 0;
+    constexpr Gate::Line controlLineTwo = 1;
 
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLine);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
 
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLine);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLine);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
+    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineOne);
 
-    constexpr Gate::Line targetLine      = 1;
-    const auto           createdCnotGate = circuit->createAndAddCnotGate(controlLine, targetLine);
-    ASSERT_THAT(createdCnotGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
+    constexpr Gate::Line gateControlLine = controlLineTwo;
+    constexpr Gate::Line targetLine      = 2;
+    const auto           createdCnotGate = circuit->createAndAddCnotGate(gateControlLine, targetLine);
+    ASSERT_THAT(createdCnotGate, testing::NotNull());
+
+    auto expectedCnotGate  = std::make_shared<Gate>();
+    expectedCnotGate->type = Gate::Type::Toffoli;
+    expectedCnotGate->controls.emplace(gateControlLine);
+    expectedCnotGate->targets.emplace(targetLine);
+    assertThatGatesMatch(*expectedCnotGate, *createdCnotGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedCnotGate});
 }
 
 TEST_F(CircuitTestsFixture, AddCnotGateWithDeactivationOfControlLinePropagationScope) {
@@ -600,8 +605,9 @@ TEST_F(CircuitTestsFixture, AddCnotGateWithCallerProvidedControlLinesMatchingDer
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
-    constexpr Gate::Line controlLineOne = 0;
-    constexpr Gate::Line controlLineTwo = 1;
+    constexpr Gate::Line controlLineOne   = 0;
+    constexpr Gate::Line controlLineTwo   = 1;
+    constexpr Gate::Line controlLineThree = 2;
 
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
@@ -616,23 +622,29 @@ TEST_F(CircuitTestsFixture, AddCnotGateWithCallerProvidedControlLinesMatchingDer
 
     circuit->activateControlLinePropagationScope();
 
-    auto createdCnotGate = circuit->createAndAddCnotGate(controlLineOne, controlLineTwo);
-    ASSERT_THAT(createdCnotGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
+    constexpr Gate::Line gateControlLine      = controlLineOne;
+    constexpr Gate::Line targetLine           = controlLineThree;
+    const auto           firstCreatedCnotGate = circuit->createAndAddCnotGate(gateControlLine, targetLine);
+    ASSERT_THAT(firstCreatedCnotGate, testing::NotNull());
 
-    constexpr Gate::Line targetLine       = controlLineTwo;
-    constexpr Gate::Line controlLineThree = 2;
+    auto expectedFirstCnotGate  = std::make_shared<Gate>();
+    expectedFirstCnotGate->type = Gate::Type::Toffoli;
+    expectedFirstCnotGate->controls.emplace(gateControlLine);
+    expectedFirstCnotGate->targets.emplace(targetLine);
+    assertThatGatesMatch(*expectedFirstCnotGate, *firstCreatedCnotGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstCnotGate});
 
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    createdCnotGate = circuit->createAndAddCnotGate(controlLineThree, targetLine);
+    constexpr Gate::Line propagatedControlLine = controlLineTwo;
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
+    const auto secondCreatedCnotGate = circuit->createAndAddCnotGate(gateControlLine, targetLine);
 
-    auto expectedCnotGate      = std::make_shared<Gate>();
-    expectedCnotGate->type     = Gate::Type::Toffoli;
-    expectedCnotGate->controls = {controlLineOne, controlLineThree};
-    expectedCnotGate->targets.emplace(targetLine);
+    auto expectedSecondCnotGate      = std::make_shared<Gate>();
+    expectedSecondCnotGate->type     = Gate::Type::Toffoli;
+    expectedSecondCnotGate->controls = {propagatedControlLine, gateControlLine};
+    expectedSecondCnotGate->targets.emplace(targetLine);
 
-    assertThatGatesMatch(*expectedCnotGate, *createdCnotGate);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedCnotGate});
+    assertThatGatesMatch(*expectedSecondCnotGate, *secondCreatedCnotGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstCnotGate, expectedSecondCnotGate});
 }
 
 TEST_F(CircuitTestsFixture, AddNotGate) {
@@ -860,35 +872,6 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithTargetLineBeingEqualTo
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
 }
 
-TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithAggregateOfUserProvidedAndActiveControlLinesOfParentControlLinesScopesIsEmpty) {
-    constexpr unsigned numCircuitLines = 4;
-    circuit->setLines(numCircuitLines);
-
-    constexpr Gate::Line controlLineOne   = 0;
-    constexpr Gate::Line controlLineTwo   = 1;
-    constexpr Gate::Line controlLineThree = 2;
-    constexpr Gate::Line targetLine       = 3;
-
-    circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
-
-    circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
-
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineThree);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineOne);
-
-    const Gate::LinesLookup gateControlLines               = {controlLineOne, controlLineThree};
-    const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
-    ASSERT_THAT(createdMultiControlToffoliGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
-}
-
 TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithTargetLineMatchingDeactivatedControlLineOfParentScope) {
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
@@ -920,45 +903,54 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithTargetLineMatchingDeac
 }
 
 TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithCallerProvidedControlLinesMatchingDeregisteredControlLinesOfParentScope) {
-    constexpr unsigned numCircuitLines = 4;
+    constexpr unsigned numCircuitLines = 5;
     circuit->setLines(numCircuitLines);
 
     constexpr Gate::Line controlLineOne   = 0;
     constexpr Gate::Line controlLineTwo   = 1;
     constexpr Gate::Line controlLineThree = 2;
+    constexpr Gate::Line controlLineFour  = 3;
+    constexpr Gate::Line targetLine       = 4;
+
+    constexpr Gate::Line propagatedControlLine = controlLineThree;
+    constexpr Gate::Line notPropagatedControlLine = controlLineFour;
 
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineFour);
 
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
-
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineOne);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
-
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
+    circuit->deregisterControlLineFromPropagationInCurrentScope(propagatedControlLine);
+    
     circuit->activateControlLinePropagationScope();
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineThree);
-    circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineThree);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(notPropagatedControlLine);
+    circuit->deregisterControlLineFromPropagationInCurrentScope(notPropagatedControlLine);
 
-    auto createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate({controlLineOne, controlLineTwo}, controlLineThree);
-    ASSERT_THAT(createdMultiControlToffoliGate, testing::IsNull());
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
+    constexpr Gate::Line gateControlLineOne                  = propagatedControlLine;
+    constexpr Gate::Line gateControlLineTwo                  = controlLineTwo;
+    const auto           firstCreatedMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate({gateControlLineOne, gateControlLineTwo}, targetLine);
+    ASSERT_THAT(firstCreatedMultiControlToffoliGate, testing::NotNull());
 
-    constexpr Gate::Line targetLine      = controlLineThree;
-    constexpr Gate::Line controlLineFour = 3;
-    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
-    createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate({controlLineFour}, targetLine);
+    auto expectedFirstMultiControlToffoliGate      = std::make_shared<Gate>();
+    expectedFirstMultiControlToffoliGate->type     = Gate::Type::Toffoli;
+    expectedFirstMultiControlToffoliGate->controls = {controlLineOne, gateControlLineOne, gateControlLineTwo};
+    expectedFirstMultiControlToffoliGate->targets.emplace(targetLine);
+    assertThatGatesMatch(*expectedFirstMultiControlToffoliGate, *firstCreatedMultiControlToffoliGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstMultiControlToffoliGate});
 
-    auto expectedMultiControlToffoliGate      = std::make_shared<Gate>();
-    expectedMultiControlToffoliGate->type     = Gate::Type::Toffoli;
-    expectedMultiControlToffoliGate->controls = {controlLineFour, controlLineOne};
-    expectedMultiControlToffoliGate->targets.emplace(targetLine);
+    circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
+    const auto secondCreatedMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate({gateControlLineTwo}, targetLine);
 
-    assertThatGatesMatch(*expectedMultiControlToffoliGate, *createdMultiControlToffoliGate);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedMultiControlToffoliGate});
+    auto expectedSecondCreatedToffoliGate      = std::make_shared<Gate>();
+    expectedSecondCreatedToffoliGate->type     = Gate::Type::Toffoli;
+    expectedSecondCreatedToffoliGate->controls = {controlLineOne, propagatedControlLine, gateControlLineTwo};
+    expectedSecondCreatedToffoliGate->targets.emplace(targetLine);
+
+    assertThatGatesMatch(*expectedSecondCreatedToffoliGate, *secondCreatedMultiControlToffoliGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstMultiControlToffoliGate, expectedSecondCreatedToffoliGate});
 }
 
 TEST_F(CircuitTestsFixture, AddFredkinGate) {
@@ -1154,26 +1146,25 @@ TEST_F(CircuitTestsFixture, DeregisterControlLineOfLocalControlLineScope) {
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
+    constexpr Gate::Line targetLine             = 0;
     constexpr Gate::Line activateControlLine    = 1;
     constexpr Gate::Line deactivatedControlLine = 2;
-    constexpr Gate::Line targetLine             = 0;
 
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(deactivatedControlLine);
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(activateControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(deactivatedControlLine);
 
-    const Gate::LinesLookup gateControlLines               = {deactivatedControlLine, activateControlLine};
-    const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
-    ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
+    const auto createdNotGate = circuit->createAndAddNotGate(targetLine);
+    ASSERT_THAT(createdNotGate, testing::NotNull());
 
-    auto expectedMultiControlToffoliGate  = std::make_shared<Gate>();
-    expectedMultiControlToffoliGate->type = Gate::Type::Toffoli;
-    expectedMultiControlToffoliGate->controls.emplace(activateControlLine);
-    expectedMultiControlToffoliGate->targets.emplace(targetLine);
+    auto expectedNotGate  = std::make_shared<Gate>();
+    expectedNotGate->type = Gate::Type::Toffoli;
+    expectedNotGate->controls.emplace(activateControlLine);
+    expectedNotGate->targets.emplace(targetLine);
 
-    assertThatGatesMatch(*expectedMultiControlToffoliGate, *createdMultiControlToffoliGate);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedMultiControlToffoliGate});
+    assertThatGatesMatch(*expectedNotGate, *createdNotGate);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedNotGate});
 }
 
 TEST_F(CircuitTestsFixture, DeregisterControlLineOfParentScopeInLastActivateControlLineScope) {
@@ -1246,13 +1237,13 @@ TEST_F(CircuitTestsFixture, DeregisterControlLineOfParentPropagationScopeNotRegi
     circuit->activateControlLinePropagationScope();
     circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
 
-    const Gate::LinesLookup gateControlLines               = {controlLineOne, controlLineTwo};
+    const Gate::LinesLookup gateControlLines               = {controlLineOne};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
     auto expectedMultiControlToffoliGate      = std::make_shared<Gate>();
     expectedMultiControlToffoliGate->type     = Gate::Type::Toffoli;
-    expectedMultiControlToffoliGate->controls = gateControlLines;
+    expectedMultiControlToffoliGate->controls = {controlLineOne, controlLineTwo};
     expectedMultiControlToffoliGate->targets.emplace(targetLine);
 
     assertThatGatesMatch(*expectedMultiControlToffoliGate, *createdMultiControlToffoliGate);
