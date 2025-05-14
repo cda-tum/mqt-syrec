@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2023 - 2025 Chair for Design Automation, TUM
+ * Copyright (c) 2025 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
 #include "core/circuit.hpp"
 #include "core/gate.hpp"
 
@@ -45,7 +55,7 @@ protected:
         const std::vector<Gate::ptr> gatesOfCircuit = {circuit.cbegin(), circuit.cend()};
 
         const auto* expectedCircuitGatesIterator = expectedCircuitGates.begin();
-        auto actualCircuitGatesIterator   = circuit.cbegin();
+        auto        actualCircuitGatesIterator   = circuit.cbegin();
         for (std::size_t i = 0; i < numGatesInCircuit; ++i) {
             ASSERT_THAT(*expectedCircuitGatesIterator, testing::NotNull());
             ASSERT_THAT(*actualCircuitGatesIterator, testing::NotNull());
@@ -238,7 +248,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
 
     constexpr Gate::Line gateControlLine = 2;
     constexpr Gate::Line targetLine      = controlLineTwo;
-    // Both control lines of toffoli gate were deactived in propagation scope
+    // Both control lines of toffoli gate were deactivated in propagation scope
     auto createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, controlLineTwo, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::IsNull());
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
@@ -983,7 +993,7 @@ TEST_F(CircuitTestsFixture, AddFredkinGateWithUnknownTargetLine) {
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
 }
 
-TEST_F(CircuitTestsFixture, AddFredkinGateWithTargetLinesTargettingSameLine) {
+TEST_F(CircuitTestsFixture, AddFredkinGateWithTargetLinesTargetingSameLine) {
     constexpr unsigned numCircuitLines = 1;
     circuit->setLines(numCircuitLines);
 
@@ -1140,7 +1150,7 @@ TEST_F(CircuitTestsFixture, RegisterControlLineNotKnownInCircuit) {
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedMultiControlToffoliGate});
 }
 
-TEST_F(CircuitTestsFixture, DeregisterControLineOfLocalControlLineScope) {
+TEST_F(CircuitTestsFixture, DeregisterControlLineOfLocalControlLineScope) {
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
@@ -1166,7 +1176,7 @@ TEST_F(CircuitTestsFixture, DeregisterControLineOfLocalControlLineScope) {
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedMultiControlToffoliGate});
 }
 
-TEST_F(CircuitTestsFixture, DeregisterControLineOfParentScopeInLastActivateControlLineScope) {
+TEST_F(CircuitTestsFixture, DeregisterControlLineOfParentScopeInLastActivateControlLineScope) {
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
@@ -1784,7 +1794,7 @@ TEST_F(CircuitTestsFixture, RemovingGlobalGateAnnotationMatchingExistingAnnotati
     assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
 }
 
-TEST_F(CircuitTestsFixture, UpdateLocalAnnotationWhosKeyMatchesGlobalAnnotationDoesOnlyUpdateLocalAnnotation) {
+TEST_F(CircuitTestsFixture, UpdateLocalAnnotationWhoseKeyMatchesGlobalAnnotationDoesOnlyUpdateLocalAnnotation) {
     circuit->setLines(2);
 
     constexpr Gate::Line         targetLineOne = 0;

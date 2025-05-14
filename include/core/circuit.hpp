@@ -345,7 +345,7 @@ namespace syrec {
 
         [[maybe_unused]] Gate::ptr createAndAddToffoliGate(const Gate::Line controlLineOne, const Gate::Line controlLineTwo, const Gate::Line targetLine) {
             // Due to the activation, deactivation and propagation of control lines using the control line propagation scopes, the defined function signature expecting two
-            // control lines might be missleading since a toffoli gate with only one control line can be implemented as a CNOT gate. Due to the possibility of 'implementing'
+            // control lines might be misleading since a toffoli gate with only one control line can be implemented as a CNOT gate. Due to the possibility of 'implementing'
             // the toffoli gate with a CNOT gate we only require a single active control line to be active.
             // Additionally, the validation that none of the two control lines matches the target lines can only be performed after all deregistered control lines from the
             // control line propagation scopes were removed.
@@ -357,7 +357,7 @@ namespace syrec {
             // The validation that the two control line does not match the target line can only be performed after all deregistered control lines from the
             // control line propagation scopes were removed.
             constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
-            auto createdMultiControlToffoliGate = createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
+            auto                  createdMultiControlToffoliGate      = createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
             if (createdMultiControlToffoliGate != nullptr && createdMultiControlToffoliGate->controls.empty()) {
                 return nullptr;
             }
@@ -548,7 +548,7 @@ namespace syrec {
                 }
             } else if (controlLines.has_value()) {
                 // Filter out user provided control lines that were deregistered in any parent control line propagation scope
-                const Gate::LinesLookup& userProvidedControlLines       = *controlLines;
+                const Gate::LinesLookup& userProvidedControlLines = *controlLines;
                 for (const auto userProvidedControlline: userProvidedControlLines) {
                     if (deregisteredControlLinesFromAggregate.count(userProvidedControlline) != 0) {
                         continue;
@@ -557,8 +557,7 @@ namespace syrec {
                 }
             }
 
-            if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines 
-                || std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
+            if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines || std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
                 return nullptr;
             }
 
@@ -593,8 +592,8 @@ namespace syrec {
         std::vector<bool>        garbage;
         std::string              name;
 
-        Gate::LinesLookup aggregateOfPropagatedControlLines;
-        Gate::LinesLookup deregisteredControlLinesFromAggregate;
+        Gate::LinesLookup                                 aggregateOfPropagatedControlLines;
+        Gate::LinesLookup                                 deregisteredControlLinesFromAggregate;
         std::vector<std::unordered_map<Gate::Line, bool>> controlLinePropagationScopes;
 
         std::map<const Gate*, std::map<std::string, std::string>> annotations;

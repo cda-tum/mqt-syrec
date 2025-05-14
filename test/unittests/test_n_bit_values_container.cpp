@@ -25,9 +25,9 @@ namespace {
         const std::optional<bool> actualValueOfBit = nBitValuesContainer.test(bitPositionInContainer);
         if (expectedValueOfBit.has_value()) {
             ASSERT_TRUE(actualValueOfBit.has_value());
-            ASSERT_EQ(*expectedValueOfBit, *actualValueOfBit) << "Bit value missmatch @ position " << std::to_string(bitPositionInContainer) << ", Expected: " << std::to_string(static_cast<int>(*expectedValueOfBit)) << "| Actual: " << std::to_string(static_cast<int>(*actualValueOfBit));
+            ASSERT_EQ(*expectedValueOfBit, *actualValueOfBit) << "Bit value mismatch @ position " << std::to_string(bitPositionInContainer) << ", Expected: " << std::to_string(static_cast<int>(*expectedValueOfBit)) << "| Actual: " << std::to_string(static_cast<int>(*actualValueOfBit));
         } else {
-            ASSERT_FALSE(actualValueOfBit.has_value()) << "Bit value missmatch @ position " << std::to_string(bitPositionInContainer) << ", Expected: <None> | Actual: " << std::to_string(static_cast<int>(*actualValueOfBit));
+            ASSERT_FALSE(actualValueOfBit.has_value()) << "Bit value mismatch @ position " << std::to_string(bitPositionInContainer) << ", Expected: <None> | Actual: " << std::to_string(static_cast<int>(*actualValueOfBit));
         }
     }
 
