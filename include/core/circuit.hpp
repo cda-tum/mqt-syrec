@@ -13,7 +13,6 @@
 #include "gate.hpp"
 
 #include <algorithm>
-#include <cstddef>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -344,31 +343,26 @@ namespace syrec {
         }
 
         [[maybe_unused]] Gate::ptr createAndAddToffoliGate(const Gate::Line controlLineOne, const Gate::Line controlLineTwo, const Gate::Line targetLine) {
-            // Due to the activation, deactivation and propagation of control lines using the control line propagation scopes, the defined function signature expecting two
-            // control lines might be misleading since a toffoli gate with only one control line can be implemented as a CNOT gate. Due to the possibility of 'implementing'
-            // the toffoli gate with a CNOT gate we only require a single active control line to be active.
-            // Additionally, the validation that none of the two control lines matches the target lines can only be performed after all deregistered control lines from the
-            // control line propagation scopes were removed.
-            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
-            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
+            // The defined function signature expecting two control lines might be misleading since a toffoli gate with only one control line can be implemented as a CNOT gate thus we allow
+            // that the first and second control lines are equal
+            if (controlLineOne == targetLine || controlLineTwo == targetLine) {
+                return nullptr;
+            }
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLineOne, controlLineTwo}), Gate::LinesLookup({targetLine}));
         }
 
         [[maybe_unused]] Gate::ptr createAndAddMultiControlToffoliGate(const Gate::LinesLookup& controlLines, const Gate::Line targetLine) {
-            // The validation that the two control line does not match the target line can only be performed after all deregistered control lines from the
-            // control line propagation scopes were removed.
-            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
-            auto                  createdMultiControlToffoliGate      = createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
-            if (createdMultiControlToffoliGate != nullptr && createdMultiControlToffoliGate->controls.empty()) {
+            if ((controlLines.empty() && aggregateOfPropagatedControlLines.empty()) || controlLines.count(targetLine) != 0) {
                 return nullptr;
             }
-            return createdMultiControlToffoliGate;
+            return createAndAddGate(Gate::Type::Toffoli, controlLines, Gate::LinesLookup({targetLine}));
         }
 
         [[maybe_unused]] Gate::ptr createAndAddCnotGate(const Gate::Line controlLine, Gate::Line targetLine) {
-            // The validation that the two control line does not match the target line can only be performed after all deregistered control lines from the
-            // control line propagation scopes were removed.
-            constexpr std::size_t expectedMinimumNumberOfControlLines = 1;
-            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}), expectedMinimumNumberOfControlLines);
+            if (controlLine == targetLine) {
+                return nullptr;
+            }
+            return createAndAddGate(Gate::Type::Toffoli, Gate::LinesLookup({controlLine}), Gate::LinesLookup({targetLine}));
         }
 
         [[maybe_unused]] Gate::ptr createAndAddNotGate(Gate::Line targetLine) {
@@ -521,17 +515,15 @@ namespace syrec {
         /**
          * Create and add a gate of type \p gateType to the circuit.
          *
-         * @remarks All active control lines of the currently active control line propagation scopes are added as control lines to the created gate instance
+         * @remarks All registered control lines of the active control line propagation scopes are added as control lines to the created gate instance
          * @remarks All registered global gate annotations are added to the created gate instance.
-         * @remarks None of the provided \p targetLines can be equal to any active control line from any of the active control line propagation scopes (note that child scopes
-         * can register/deregister control lines and only the status of the control line after all propagation scopes were processed is considered).
+         * @remarks None of the provided \p targetLines can be equal to any active control line from any of the active control line propagation scopes.
          * @param gateType The type of gate to be added
          * @param controlLines The control lines of the gate to be added. Additionally, the registered control lines of all active local control line scopes will be added as control lines of the gate.
          * @param targetLines The control lines of the gate to be added.
-         * @param requiredMinimumNumberOfControlLines Set the minimum number of required control lines of the gate.
          * @return A smart pointer to the created gate instance. If no gate was created a nullptr is returned.
          */
-        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines, std::size_t requiredMinimumNumberOfControlLines = 0) {
+        [[maybe_unused]] Gate::ptr createAndAddGate(Gate::Type gateType, const std::optional<Gate::LinesLookup>& controlLines, const Gate::LinesLookup& targetLines) {
             if ((controlLines.has_value() && !areLinesWithinRange(*controlLines)) || !areLinesWithinRange(targetLines)) {
                 return nullptr;
             }
@@ -545,7 +537,7 @@ namespace syrec {
                 gateInstance->controls.insert(controlLines->cbegin(), controlLines->cend());
             }
 
-            if (gateInstance->controls.size() < requiredMinimumNumberOfControlLines || std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
+            if (std::any_of(targetLines.cbegin(), targetLines.cend(), [&gateInstance](const Gate::Line targetLine) { return gateInstance->controls.count(targetLine) != 0; })) {
                 return nullptr;
             }
 
