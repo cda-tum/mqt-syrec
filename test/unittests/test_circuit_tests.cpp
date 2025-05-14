@@ -1,19 +1,32 @@
 #include "core/circuit.hpp"
+#include "core/gate.hpp"
 
 #include <cstddef>
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+// The current tests do not cover the functionality:
+// * set- and get constant/garbage/input/output lines
+// * adding and getting lines of the circuit
+// * the stringification of the supported gate types
+// ** (Gate::toQasm() will generate outputs that are not supported by the QASM standard without extra definitions and only supported by MQT::Core)
+// * the stringification of the whole circuit to either a string or file
 
 using namespace syrec;
 
-// TODO: Defined expected gate data instead of reusing returned data of function
-// TODO: Compare returned gate data with expected gate data
 class CircuitTestsFixture: public testing::Test {
 protected:
+    struct GeneratedAndExpectedGatePair {
+        Gate::ptr generatedGate;
+        Gate::ptr expectedGate;
+    };
+
     std::unique_ptr<Circuit> circuit;
 
     void SetUp() override {
@@ -31,20 +44,44 @@ protected:
         ASSERT_EQ(expectedCircuitGates.size(), numGatesInCircuit) << "Expected that circuit contains " << std::to_string(expectedCircuitGates.size()) << " gates but actually contained " << std::to_string(numGatesInCircuit) << " gates";
         const std::vector<Gate::ptr> gatesOfCircuit = {circuit.cbegin(), circuit.cend()};
 
-        auto expectedCircuitGatesIterator = expectedCircuitGates.begin();
-        auto actualCircuitGatesIterator   = circuit.begin();
+        const auto* expectedCircuitGatesIterator = expectedCircuitGates.begin();
+        auto actualCircuitGatesIterator   = circuit.cbegin();
         for (std::size_t i = 0; i < numGatesInCircuit; ++i) {
             ASSERT_THAT(*expectedCircuitGatesIterator, testing::NotNull());
             ASSERT_THAT(*actualCircuitGatesIterator, testing::NotNull());
             assertThatGatesMatch(**expectedCircuitGatesIterator, **actualCircuitGatesIterator);
-            ++expectedCircuitGatesIterator;
+            ++expectedCircuitGatesIterator; // NOLINT (cppcoreguidelines-pro-bounds-pointer-arithmetic)
             ++actualCircuitGatesIterator;
         }
     }
-};
 
-// TODO: Control line deregistered in parent scope not added to gate?
-// TODO: Control line deregistered in parent scope usable as target line?
+    static void assertThatAnnotationsOfGateAreEqualTo(const Circuit& circuit, const Gate& gate, const std::optional<std::unordered_map<std::string, std::string>>& expectedAnnotationsOfGate) {
+        const auto& actualAnnotationsOfGate = circuit.getAnnotations(gate);
+        if (!expectedAnnotationsOfGate.has_value()) {
+            ASSERT_FALSE(actualAnnotationsOfGate.has_value());
+            return;
+        }
+        ASSERT_TRUE(actualAnnotationsOfGate.has_value());
+        for (const auto& [expectedAnnotationKey, expectedAnnotationValue]: *expectedAnnotationsOfGate) {
+            const auto& matchingActualAnnotationForKey = actualAnnotationsOfGate->find(expectedAnnotationKey);
+            ASSERT_NE(matchingActualAnnotationForKey, actualAnnotationsOfGate->cend()) << "Annotation with key " << expectedAnnotationKey << " did not exist for gate";
+            ASSERT_EQ(expectedAnnotationValue, matchingActualAnnotationForKey->second) << "Value of annotation with key " << expectedAnnotationKey << " did not match! Expected: " << expectedAnnotationValue << " Actual: " << matchingActualAnnotationForKey->second;
+        }
+    }
+
+    static void createNotGateWithSingleTargetLine(Circuit& circuit, Gate::Line targetLine, GeneratedAndExpectedGatePair& generatedAndExpectedGatePair) {
+        const auto& generatedNotGate = circuit.createAndAddNotGate(targetLine);
+        ASSERT_THAT(generatedNotGate, testing::NotNull());
+
+        auto expectedNotGate  = std::make_shared<Gate>();
+        expectedNotGate->type = Gate::Type::Toffoli;
+        expectedNotGate->targets.emplace(targetLine);
+        assertThatGatesMatch(*generatedNotGate, *expectedNotGate);
+
+        generatedAndExpectedGatePair.generatedGate = generatedNotGate;
+        generatedAndExpectedGatePair.expectedGate  = expectedNotGate;
+    }
+};
 
 // BEGIN AddXGate tests
 TEST_F(CircuitTestsFixture, AddToffoliGate) {
@@ -90,7 +127,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithDuplicateControlLineNotPossible) {
     const auto           createdToffoliGate = circuit->createAndAddToffoliGate(controlLine, controlLine, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto expectedToffoliGate = std::make_shared<Gate>();
+    auto expectedToffoliGate  = std::make_shared<Gate>();
     expectedToffoliGate->type = Gate::Type::Toffoli;
     expectedToffoliGate->controls.emplace(controlLine);
     expectedToffoliGate->targets.emplace(targetLine);
@@ -186,7 +223,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
     constexpr unsigned numCircuitLines = 3;
     circuit->setLines(numCircuitLines);
 
-    constexpr Gate::Line controlLineOne  = 0;
+    constexpr Gate::Line controlLineOne = 0;
     constexpr Gate::Line controlLineTwo = 1;
 
     circuit->activateControlLinePropagationScope();
@@ -217,7 +254,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
     assertThatGatesMatch(*createdToffoliGate, *firstExpectedToffoliGateWithOneControlLine);
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {firstExpectedToffoliGateWithOneControlLine});
 
-    createdToffoliGate = circuit->createAndAddToffoliGate(gateControlLine, controlLineOne, targetLine);
+    createdToffoliGate = circuit->createAndAddToffoliGate(gateControlLine, controlLineOne, targetLine); // NOLINT(readability-suspicious-call-argument)
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
     auto secondExpectedToffoliGateWithOneControlLine  = std::make_shared<Gate>();
@@ -320,7 +357,7 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithTargetLineMatchingDeactivatedContr
     constexpr Gate::Line gateControlLineOne = controlLineTwo;
     constexpr Gate::Line gateControlLineTwo = controlLineThree;
     constexpr Gate::Line targetLine         = controlLineOne;
-    const auto           createdToffoliGate     = circuit->createAndAddToffoliGate(gateControlLineOne, gateControlLineTwo, targetLine);
+    const auto           createdToffoliGate = circuit->createAndAddToffoliGate(gateControlLineOne, gateControlLineTwo, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
     auto expectedToffoliGate      = std::make_shared<Gate>();
@@ -690,13 +727,13 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGate) {
     constexpr Gate::Line    controlLineTwo   = 3;
     constexpr Gate::Line    controlLineThree = 2;
     constexpr Gate::Line    targetLine       = 0;
-    const Gate::LinesLookup gateControlLines     = {controlLineOne, controlLineTwo, controlLineThree};
+    const Gate::LinesLookup gateControlLines = {controlLineOne, controlLineTwo, controlLineThree};
 
     const auto createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
-    auto expectedMultiControlToffoliGate = std::make_shared<Gate>();
-    expectedMultiControlToffoliGate->type = Gate::Type::Toffoli;
+    auto expectedMultiControlToffoliGate      = std::make_shared<Gate>();
+    expectedMultiControlToffoliGate->type     = Gate::Type::Toffoli;
     expectedMultiControlToffoliGate->controls = gateControlLines;
     expectedMultiControlToffoliGate->targets.emplace(targetLine);
 
@@ -712,7 +749,7 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithUnknownControlLine) {
     constexpr Gate::Line    unknownControlLine = numCircuitLines + 1;
     constexpr Gate::Line    controlLineThree   = 2;
     constexpr Gate::Line    targetLine         = 0;
-    const Gate::LinesLookup gateControlLines       = {controlLineOne, unknownControlLine, controlLineThree};
+    const Gate::LinesLookup gateControlLines   = {controlLineOne, unknownControlLine, controlLineThree};
 
     const auto createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::IsNull());
@@ -727,7 +764,7 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithUnknownTargetLine) {
     constexpr Gate::Line    controlLineTwo   = 3;
     constexpr Gate::Line    controlLineThree = 2;
     constexpr Gate::Line    targetLine       = numCircuitLines + 1;
-    const Gate::LinesLookup gateControlLines     = {controlLineOne, controlLineTwo, controlLineThree};
+    const Gate::LinesLookup gateControlLines = {controlLineOne, controlLineTwo, controlLineThree};
 
     const auto createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::IsNull());
@@ -864,8 +901,8 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithTargetLineMatchingDeac
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
-    auto expectedMultiControlToffoliGate     = std::make_shared<Gate>();
-    expectedMultiControlToffoliGate->type    = Gate::Type::Toffoli;
+    auto expectedMultiControlToffoliGate      = std::make_shared<Gate>();
+    expectedMultiControlToffoliGate->type     = Gate::Type::Toffoli;
     expectedMultiControlToffoliGate->controls = gateControlLines;
     expectedMultiControlToffoliGate->targets.emplace(targetLine);
     assertThatGatesMatch(*expectedMultiControlToffoliGate, *createdMultiControlToffoliGate);
@@ -918,14 +955,14 @@ TEST_F(CircuitTestsFixture, AddFredkinGate) {
     constexpr unsigned numCircuitLines = 2;
     circuit->setLines(numCircuitLines);
 
-    constexpr Gate::Line targetLineOne  = 0;
+    constexpr Gate::Line targetLineOne = 0;
     constexpr Gate::Line targetLineTwo = 1;
 
     const auto createdFredkinGate = circuit->createAndAddFredkinGate(targetLineOne, targetLineTwo);
     ASSERT_THAT(createdFredkinGate, testing::NotNull());
 
-    auto expectedFredkinGate = std::make_shared<Gate>();
-    expectedFredkinGate->type = Gate::Type::Fredkin;
+    auto expectedFredkinGate     = std::make_shared<Gate>();
+    expectedFredkinGate->type    = Gate::Type::Fredkin;
     expectedFredkinGate->targets = {targetLineOne, targetLineTwo};
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {createdFredkinGate});
 }
@@ -981,7 +1018,7 @@ TEST_F(CircuitTestsFixture, AddFredkinGateWithTargetLineMatchingActiveControlLin
     createdFredkinGate = circuit->createAndAddFredkinGate(overlappingTargetLine, notOverlappingTargetLine);
     ASSERT_THAT(createdFredkinGate, testing::IsNull());
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
-    
+
     createdFredkinGate = circuit->createAndAddFredkinGate(overlappingTargetLine, overlappingTargetLine);
     ASSERT_THAT(createdFredkinGate, testing::IsNull());
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {});
@@ -1008,8 +1045,8 @@ TEST_F(CircuitTestsFixture, AddFredkinGateWithTargetLineMatchingDeactivatedContr
     const auto           firstCreatedFredkinGate  = circuit->createAndAddFredkinGate(notOverlappingTargetLine, overlappingTargetLine);
     ASSERT_THAT(firstCreatedFredkinGate, testing::NotNull());
 
-    auto expectedFirstFredkinGate     = std::make_shared<Gate>();
-    expectedFirstFredkinGate->type    = Gate::Type::Fredkin;
+    auto expectedFirstFredkinGate  = std::make_shared<Gate>();
+    expectedFirstFredkinGate->type = Gate::Type::Fredkin;
     expectedFirstFredkinGate->controls.emplace(controlLineTwo);
     expectedFirstFredkinGate->targets = {notOverlappingTargetLine, overlappingTargetLine};
     assertThatGatesMatch(*expectedFirstFredkinGate, *firstCreatedFredkinGate);
@@ -1018,35 +1055,14 @@ TEST_F(CircuitTestsFixture, AddFredkinGateWithTargetLineMatchingDeactivatedContr
     const auto secondCreatedFredkinGate = circuit->createAndAddFredkinGate(overlappingTargetLine, notOverlappingTargetLine);
     ASSERT_THAT(secondCreatedFredkinGate, testing::NotNull());
 
-    auto expectedSecondFredkinGate     = std::make_shared<Gate>();
-    expectedSecondFredkinGate->type    = Gate::Type::Fredkin;
+    auto expectedSecondFredkinGate  = std::make_shared<Gate>();
+    expectedSecondFredkinGate->type = Gate::Type::Fredkin;
     expectedSecondFredkinGate->controls.emplace(controlLineTwo);
     expectedSecondFredkinGate->targets = {overlappingTargetLine, notOverlappingTargetLine};
     assertThatGatesMatch(*expectedSecondFredkinGate, *secondCreatedFredkinGate);
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstFredkinGate, expectedSecondFredkinGate});
 }
 // END AddXGate tests
-
-// TODO: Stringify function might use custom non-QASM conforming format that is only accepted by MQT::Core?
-TEST_F(CircuitTestsFixture, StringifyToffoliGate) {
-    GTEST_SKIP();
-}
-
-TEST_F(CircuitTestsFixture, StringifyCnotGate) {
-    GTEST_SKIP();
-}
-
-TEST_F(CircuitTestsFixture, StringifyMultiControlToffoliGate) {
-    GTEST_SKIP();
-}
-
-TEST_F(CircuitTestsFixture, StringifyNotGate) {
-    GTEST_SKIP();
-}
-
-TEST_F(CircuitTestsFixture, StringifyFredkinGate) {
-    GTEST_SKIP();
-}
 
 // BEGIN Control line propagation scopes tests
 TEST_F(CircuitTestsFixture, RegisterDuplicateControlLineOfParentScopeInLocalControlLineScope) {
@@ -1079,7 +1095,7 @@ TEST_F(CircuitTestsFixture, RegisterDuplicateControlLineDeactivatedOfParentScope
     circuit->setLines(numCircuitLines);
 
     constexpr Gate::Line controlLineOne = 0;
-    constexpr Gate::Line targetLine             = 1;
+    constexpr Gate::Line targetLine     = 1;
 
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineOne);
@@ -1111,7 +1127,7 @@ TEST_F(CircuitTestsFixture, RegisterControlLineNotKnownInCircuit) {
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(unknownControlLine);
 
-    const Gate::LinesLookup gateControlLines                   = {knownControlLine};
+    const Gate::LinesLookup gateControlLines               = {knownControlLine};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
@@ -1137,7 +1153,7 @@ TEST_F(CircuitTestsFixture, DeregisterControLineOfLocalControlLineScope) {
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(activateControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(deactivatedControlLine);
 
-    const Gate::LinesLookup gateControlLines                   = {deactivatedControlLine, activateControlLine};
+    const Gate::LinesLookup gateControlLines               = {deactivatedControlLine, activateControlLine};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
@@ -1166,7 +1182,7 @@ TEST_F(CircuitTestsFixture, DeregisterControLineOfParentScopeInLastActivateContr
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(deactivatedControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(deactivatedControlLine);
 
-    const Gate::LinesLookup gateControlLines                   = {activateControlLine};
+    const Gate::LinesLookup gateControlLines               = {activateControlLine};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
@@ -1191,7 +1207,7 @@ TEST_F(CircuitTestsFixture, DeregisterControlLineNotKnownInCircuit) {
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(unknownControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(unknownControlLine);
 
-    const Gate::LinesLookup gateControlLines                   = {knownControlLine};
+    const Gate::LinesLookup gateControlLines               = {knownControlLine};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
@@ -1220,7 +1236,7 @@ TEST_F(CircuitTestsFixture, DeregisterControlLineOfParentPropagationScopeNotRegi
     circuit->activateControlLinePropagationScope();
     circuit->deregisterControlLineFromPropagationInCurrentScope(controlLineTwo);
 
-    const Gate::LinesLookup gateControlLines                   = {controlLineOne, controlLineTwo};
+    const Gate::LinesLookup gateControlLines               = {controlLineOne, controlLineTwo};
     const auto              createdMultiControlToffoliGate = circuit->createAndAddMultiControlToffoliGate(gateControlLines, targetLine);
     ASSERT_THAT(createdMultiControlToffoliGate, testing::NotNull());
 
@@ -1317,7 +1333,7 @@ TEST_F(CircuitTestsFixture, DeactivatingControlLinePropagationScopeDoesNotAddNew
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(controlLineTwo);
 
     constexpr Gate::Line gateControlLine = controlLineThree;
-    const auto           createdCnotGate  = circuit->createAndAddCnotGate(gateControlLine, targetLine);
+    const auto           createdCnotGate = circuit->createAndAddCnotGate(gateControlLine, targetLine);
     ASSERT_THAT(createdCnotGate, testing::NotNull());
 
     auto expectedCnotGate      = std::make_shared<Gate>();
@@ -1393,3 +1409,417 @@ TEST_F(CircuitTestsFixture, DeactivateControlLinePropagationScopeNotRegisteringC
     assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedNotGate});
 }
 // BEGIN Control line propagation scopes tests
+
+// BEGIN Annotation tests
+TEST_F(CircuitTestsFixture, SetAnnotationForGate) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+
+    const std::string annotationKey          = "KEY";
+    const std::string initialAnnotationValue = "InitialValue";
+    circuit->annotate(*firstGeneratedNotGate, annotationKey, initialAnnotationValue);
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{annotationKey, initialAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+}
+
+TEST_F(CircuitTestsFixture, UpdateAnnotationForGate) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+
+    const std::string firstAnnotationKey          = "KEY_ONE";
+    const std::string initialFirstAnnotationValue = "InitialValue";
+
+    const std::string secondAnnotationKey          = "KEY_TWO";
+    const std::string initialSecondAnnotationValue = "OtherValue";
+    circuit->annotate(*firstGeneratedNotGate, firstAnnotationKey, initialFirstAnnotationValue);
+    circuit->annotate(*firstGeneratedNotGate, secondAnnotationKey, initialSecondAnnotationValue);
+
+    std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{firstAnnotationKey, initialFirstAnnotationValue}, {secondAnnotationKey, initialSecondAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::string updatedAnnotationValue = "UpdatedValue";
+    circuit->annotate(*firstGeneratedNotGate, firstAnnotationKey, updatedAnnotationValue);
+
+    expectedAnnotationsOfFirstGate[firstAnnotationKey] = updatedAnnotationValue;
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+}
+
+TEST_F(CircuitTestsFixture, SetAnnotationForUnknownGate) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+
+    const std::string annotationKey   = "KEY";
+    const std::string annotationValue = "VALUE";
+    const auto        unknownGate     = std::make_shared<Gate>();
+    unknownGate->type                 = Gate::Type::Toffoli;
+
+    circuit->annotate(*unknownGate, annotationKey, annotationValue);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+}
+
+TEST_F(CircuitTestsFixture, UpdateNotExistingAnnotationForGate) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+
+    const std::string firstAnnotationKey          = "KEY_ONE";
+    const std::string initialFirstAnnotationValue = "InitialValue";
+    circuit->annotate(*firstGeneratedNotGate, firstAnnotationKey, initialFirstAnnotationValue);
+
+    std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{firstAnnotationKey, initialFirstAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::string secondAnnotationKey          = "KEY_TWO";
+    const std::string initialSecondAnnotationValue = "OtherValue";
+    circuit->annotate(*firstGeneratedNotGate, secondAnnotationKey, initialSecondAnnotationValue);
+    expectedAnnotationsOfFirstGate[secondAnnotationKey] = initialSecondAnnotationValue;
+
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+}
+
+TEST_F(CircuitTestsFixture, SetAnnotationForGateWithEmptyKey) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+
+    const std::string firstAnnotationKey          = "KEY_ONE";
+    const std::string initialFirstAnnotationValue = "InitialValue";
+    circuit->annotate(*firstGeneratedNotGate, firstAnnotationKey, initialFirstAnnotationValue);
+
+    std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{firstAnnotationKey, initialFirstAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::string valueForAnnotationWithEmptyKey = "OtherValue";
+    circuit->annotate(*firstGeneratedNotGate, "", valueForAnnotationWithEmptyKey);
+    expectedAnnotationsOfFirstGate.emplace("", valueForAnnotationWithEmptyKey);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+}
+
+TEST_F(CircuitTestsFixture, SetGlobalGateAnnotation) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    const std::string globalAnnotationKey   = "KEY_ONE";
+    const std::string globalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, globalAnnotationValue));
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{globalAnnotationKey, globalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+
+TEST_F(CircuitTestsFixture, UpdateGlobalGateAnnotation) {
+    circuit->setLines(2);
+
+    const std::string globalAnnotationKey          = "KEY_ONE";
+    const std::string initialGlobalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, initialGlobalAnnotationValue));
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{globalAnnotationKey, initialGlobalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string updatedGlobalAnnoatationValue = "UpdatedValue";
+    ASSERT_TRUE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, updatedGlobalAnnoatationValue));
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{globalAnnotationKey, updatedGlobalAnnoatationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+
+TEST_F(CircuitTestsFixture, UpdateNotExistingGlobalGateAnnotation) {
+    circuit->setLines(2);
+
+    const std::string firstGlobalAnnotationKey   = "KEY_ONE";
+    const std::string firstGlobalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(firstGlobalAnnotationKey, firstGlobalAnnotationValue));
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{firstGlobalAnnotationKey, firstGlobalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string secondGlobalAnnotationKey   = "KEY_TWO";
+    const std::string secondGlobalAnnotationValue = "OtherValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(secondGlobalAnnotationKey, secondGlobalAnnotationValue));
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{firstGlobalAnnotationKey, firstGlobalAnnotationValue}, {secondGlobalAnnotationKey, secondGlobalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+
+TEST_F(CircuitTestsFixture, RemoveGlobalGateAnnotation) {
+    circuit->setLines(2);
+
+    const std::string globalAnnotationKey          = "KEY_ONE";
+    const std::string initialGlobalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, initialGlobalAnnotationValue));
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{globalAnnotationKey, initialGlobalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    ASSERT_TRUE(circuit->removeGlobalGateAnnotation(globalAnnotationKey));
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, {});
+}
+
+TEST_F(CircuitTestsFixture, SetGlobalGateAnnotationWithEmptyKey) {
+    circuit->setLines(2);
+
+    const std::string globalAnnotationKey          = "KEY_ONE";
+    const std::string initialGlobalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, initialGlobalAnnotationValue));
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{globalAnnotationKey, initialGlobalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string valueOfAnnotationWithEmptyKey = "OtherValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation("", valueOfAnnotationWithEmptyKey));
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{"", valueOfAnnotationWithEmptyKey}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+
+TEST_F(CircuitTestsFixture, SetGlobalGateAnnotationMatchingExistingAnnotationOfGateDoesNotUpdateTheLatter) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    const std::string localAnnotationKey   = "KEY_ONE";
+    const std::string localAnnotationValue = "LocalValue";
+    circuit->annotate(*firstGeneratedNotGate, localAnnotationKey, localAnnotationValue);
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{localAnnotationKey, localAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string& globalAnnotationKey   = localAnnotationKey;
+    const std::string  globalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, globalAnnotationValue));
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{globalAnnotationKey, globalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+
+TEST_F(CircuitTestsFixture, RemovingGlobalGateAnnotationMatchingExistingAnnotationOfGateDoesNotRemoveTheLatter) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    const std::string localAnnotationKey   = "KEY_ONE";
+    const std::string localAnnotationValue = "LocalValue";
+    circuit->annotate(*firstGeneratedNotGate, localAnnotationKey, localAnnotationValue);
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{localAnnotationKey, localAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string& globalAnnotationKey   = localAnnotationKey;
+    const std::string  globalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, globalAnnotationValue));
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    ASSERT_TRUE(circuit->removeGlobalGateAnnotation(globalAnnotationKey));
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, std::nullopt);
+}
+
+TEST_F(CircuitTestsFixture, UpdateLocalAnnotationWhosKeyMatchesGlobalAnnotationDoesOnlyUpdateLocalAnnotation) {
+    circuit->setLines(2);
+
+    constexpr Gate::Line         targetLineOne = 0;
+    GeneratedAndExpectedGatePair firstGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineOne, firstGeneratedNotGatePairData);
+    auto [firstGeneratedNotGate, expectedFirstNotGate] = firstGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate});
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, std::nullopt);
+
+    const std::string localAnnotationKey   = "KEY_ONE";
+    const std::string localAnnotationValue = "LocalValue";
+    circuit->annotate(*firstGeneratedNotGate, localAnnotationKey, localAnnotationValue);
+    const std::unordered_map<std::string, std::string> expectedAnnotationsOfFirstGate = {{localAnnotationKey, localAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    const std::string& globalAnnotationKey   = localAnnotationKey;
+    const std::string  globalAnnotationValue = "InitialValue";
+    ASSERT_FALSE(circuit->setOrUpdateGlobalGateAnnotation(globalAnnotationKey, globalAnnotationValue));
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+
+    constexpr Gate::Line         targetLineTwo = 1;
+    GeneratedAndExpectedGatePair secondGeneratedNotGatePairData;
+    createNotGateWithSingleTargetLine(*circuit, targetLineTwo, secondGeneratedNotGatePairData);
+    auto [secondGeneratedNotGate, expectedSecondNotGate] = secondGeneratedNotGatePairData;
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedFirstNotGate, expectedSecondNotGate});
+
+    std::unordered_map<std::string, std::string> expectedAnnotationsOfSecondGate = {{globalAnnotationKey, globalAnnotationValue}};
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+
+    const std::string updatedLocalAnnotationValue = "UpdatedValue";
+    circuit->annotate(*secondGeneratedNotGate, localAnnotationKey, updatedLocalAnnotationValue);
+    expectedAnnotationsOfSecondGate[localAnnotationKey] = updatedLocalAnnotationValue;
+
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *firstGeneratedNotGate, expectedAnnotationsOfFirstGate);
+    assertThatAnnotationsOfGateAreEqualTo(*circuit, *secondGeneratedNotGate, expectedAnnotationsOfSecondGate);
+}
+// END Annotation tests

@@ -12,6 +12,8 @@
 
 #include "gate.hpp"
 
+#include <algorithm>
+#include <cstddef>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -35,16 +37,13 @@ namespace syrec {
    */
     class Circuit {
     public:
-        constexpr static std::string_view GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER = "lno";
-
         /**
          * @brief Default constructor
          *
          * This constructor initializes a standard_circuit with 0 lines, also called an empty circuit.
          * Empty circuits are usually used as parameters for parsing functions, optimization algorithms, etc.
          */
-        Circuit():
-            activeGlobalGateAnnotations({std::make_pair(static_cast<std::string>(GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER), "0")}) {}
+        Circuit() = default;
 
         ~Circuit() = default;
 
@@ -287,7 +286,7 @@ namespace syrec {
         }
 
         /**
-         * Register or update a global gate annotation.
+         * Register or update a global gate annotation. Global gate annotations are added to all future gates added to the circuit. Existing gates are not modified.
          * @param key The key of the global gate annotation
          * @param value The value of the global gate annotation
          * @return Whether an existing annotation was updated.
@@ -303,7 +302,7 @@ namespace syrec {
         }
 
         /**
-         * Remove a global gate annotation.
+         * Remove a global gate annotation. Existing annotations of the gates of the circuit are not modified.
          * @param key The key of the global gate annotation to be removed
          * @return Whether a global gate annotation was removed.
          */
@@ -580,8 +579,8 @@ namespace syrec {
             return line < lines;
         }
 
-        [[nodiscard]] bool areLinesWithinRange(const Gate::LinesLookup& lines) const noexcept {
-            return std::all_of(lines.cbegin(), lines.cend(), [&](const Gate::Line line) { return isLineWithinRange(line); });
+        [[nodiscard]] bool areLinesWithinRange(const Gate::LinesLookup& linesToCheck) const noexcept {
+            return std::all_of(linesToCheck.cbegin(), linesToCheck.cend(), [&](const Gate::Line line) { return isLineWithinRange(line); });
         }
 
     private:
