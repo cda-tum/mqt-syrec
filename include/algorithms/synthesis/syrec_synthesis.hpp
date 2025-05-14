@@ -46,6 +46,8 @@ namespace syrec {
         void setMainModule(const Module::ptr& mainModule);
 
     protected:
+        constexpr static std::string_view GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER = "lno";
+
         virtual bool processStatement(Circuit& circuit, const Statement::ptr& statement) = 0;
 
         virtual bool onModule(Circuit& circuit, const Module::ptr&);
