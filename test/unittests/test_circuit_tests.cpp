@@ -252,8 +252,8 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
     auto createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, controlLineTwo, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto expectedToffoliGateWithBothControlLinesDeregistered  = std::make_shared<Gate>();
-    expectedToffoliGateWithBothControlLinesDeregistered->type = Gate::Type::Toffoli;
+    auto expectedToffoliGateWithBothControlLinesDeregistered      = std::make_shared<Gate>();
+    expectedToffoliGateWithBothControlLinesDeregistered->type     = Gate::Type::Toffoli;
     expectedToffoliGateWithBothControlLinesDeregistered->controls = {controlLineOne, controlLineTwo};
     expectedToffoliGateWithBothControlLinesDeregistered->targets.emplace(targetLine);
     assertThatGatesMatch(*expectedToffoliGateWithBothControlLinesDeregistered, *createdToffoliGate);
@@ -262,19 +262,19 @@ TEST_F(CircuitTestsFixture, AddToffoliGateWithControlLinesBeingDisabledInCurrent
     createdToffoliGate = circuit->createAndAddToffoliGate(controlLineOne, gateControlLine, targetLine);
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto secondExpectedToffoliGateWithOneDeregisteredControlLine  = std::make_shared<Gate>();
-    secondExpectedToffoliGateWithOneDeregisteredControlLine->type = Gate::Type::Toffoli;
+    auto secondExpectedToffoliGateWithOneDeregisteredControlLine      = std::make_shared<Gate>();
+    secondExpectedToffoliGateWithOneDeregisteredControlLine->type     = Gate::Type::Toffoli;
     secondExpectedToffoliGateWithOneDeregisteredControlLine->controls = {controlLineOne, gateControlLine};
     secondExpectedToffoliGateWithOneDeregisteredControlLine->targets.emplace(targetLine);
 
     assertThatGatesMatch(*createdToffoliGate, *secondExpectedToffoliGateWithOneDeregisteredControlLine);
-    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGateWithBothControlLinesDeregistered, secondExpectedToffoliGateWithOneDeregisteredControlLine });
+    assertThatGatesOfCircuitAreEqualToSequence(*circuit, {expectedToffoliGateWithBothControlLinesDeregistered, secondExpectedToffoliGateWithOneDeregisteredControlLine});
 
     createdToffoliGate = circuit->createAndAddToffoliGate(gateControlLine, controlLineOne, targetLine); // NOLINT(readability-suspicious-call-argument)
     ASSERT_THAT(createdToffoliGate, testing::NotNull());
 
-    auto thirdExpectedToffoliGateWithOneDeregisteredControlLine  = std::make_shared<Gate>();
-    thirdExpectedToffoliGateWithOneDeregisteredControlLine->type = Gate::Type::Toffoli;
+    auto thirdExpectedToffoliGateWithOneDeregisteredControlLine      = std::make_shared<Gate>();
+    thirdExpectedToffoliGateWithOneDeregisteredControlLine->type     = Gate::Type::Toffoli;
     thirdExpectedToffoliGateWithOneDeregisteredControlLine->controls = {gateControlLine, controlLineOne};
     thirdExpectedToffoliGateWithOneDeregisteredControlLine->targets.emplace(targetLine);
 
@@ -912,7 +912,7 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithCallerProvidedControlL
     constexpr Gate::Line controlLineFour  = 3;
     constexpr Gate::Line targetLine       = 4;
 
-    constexpr Gate::Line propagatedControlLine = controlLineThree;
+    constexpr Gate::Line propagatedControlLine    = controlLineThree;
     constexpr Gate::Line notPropagatedControlLine = controlLineFour;
 
     circuit->activateControlLinePropagationScope();
@@ -924,7 +924,7 @@ TEST_F(CircuitTestsFixture, AddMultiControlToffoliGateWithCallerProvidedControlL
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(propagatedControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(propagatedControlLine);
-    
+
     circuit->activateControlLinePropagationScope();
     circuit->registerControlLineForPropagationInCurrentAndNestedScopes(notPropagatedControlLine);
     circuit->deregisterControlLineFromPropagationInCurrentScope(notPropagatedControlLine);

@@ -768,7 +768,7 @@ namespace syrec {
             circuit.registerControlLineForPropagationInCurrentAndNestedScopes(dest[unsignedLoopVariableValue]);
             synthesisOk &= increase(circuit, sum, partial);
             circuit.deregisterControlLineFromPropagationInCurrentScope(dest[unsignedLoopVariableValue]);
-            
+
             circuit.createAndAddNotGate(dest[unsignedLoopVariableValue]);
             if (i == 0) {
                 continue;
