@@ -49,23 +49,17 @@ std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped
     std::optional<syrec::Statement::ptr> generatedStatement;
     if (context->callStatement() != nullptr) {
         generatedStatement = visitCallStatementTyped(context->callStatement());
-    }
-    else if (context->forStatement() != nullptr) {
+    } else if (context->forStatement() != nullptr) {
         generatedStatement = visitForStatementTyped(context->forStatement());
-    }
-    else if (context->ifStatement() != nullptr) {
+    } else if (context->ifStatement() != nullptr) {
         generatedStatement = visitIfStatementTyped(context->ifStatement());
-    }
-    else if (context->unaryStatement() != nullptr) {
+    } else if (context->unaryStatement() != nullptr) {
         generatedStatement = visitUnaryStatementTyped(context->unaryStatement());
-    }
-    else if (context->assignStatement() != nullptr) {
+    } else if (context->assignStatement() != nullptr) {
         generatedStatement = visitAssignStatementTyped(context->assignStatement());
-    }
-    else if (context->swapStatement() != nullptr) {
+    } else if (context->swapStatement() != nullptr) {
         generatedStatement = visitSwapStatementTyped(context->swapStatement());
-    }
-    else if (context->skipStatement() != nullptr) {
+    } else if (context->skipStatement() != nullptr) {
         generatedStatement = visitSkipStatementTyped(context->skipStatement());
     } else {
         // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
