@@ -46,30 +46,37 @@ std::optional<syrec::Statement::vec> CustomStatementVisitor::visitStatementListT
 }
 
 std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitStatementTyped(const TSyrecParser::StatementContext* context) {
+    std::optional<syrec::Statement::ptr> generatedStatement;
     if (context->callStatement() != nullptr) {
-        return visitCallStatementTyped(context->callStatement());
+        generatedStatement = visitCallStatementTyped(context->callStatement());
     }
-    if (context->forStatement() != nullptr) {
-        return visitForStatementTyped(context->forStatement());
+    else if (context->forStatement() != nullptr) {
+        generatedStatement = visitForStatementTyped(context->forStatement());
     }
-    if (context->ifStatement() != nullptr) {
-        return visitIfStatementTyped(context->ifStatement());
+    else if (context->ifStatement() != nullptr) {
+        generatedStatement = visitIfStatementTyped(context->ifStatement());
     }
-    if (context->unaryStatement() != nullptr) {
-        return visitUnaryStatementTyped(context->unaryStatement());
+    else if (context->unaryStatement() != nullptr) {
+        generatedStatement = visitUnaryStatementTyped(context->unaryStatement());
     }
-    if (context->assignStatement() != nullptr) {
-        return visitAssignStatementTyped(context->assignStatement());
+    else if (context->assignStatement() != nullptr) {
+        generatedStatement = visitAssignStatementTyped(context->assignStatement());
     }
-    if (context->swapStatement() != nullptr) {
-        return visitSwapStatementTyped(context->swapStatement());
+    else if (context->swapStatement() != nullptr) {
+        generatedStatement = visitSwapStatementTyped(context->swapStatement());
     }
-    if (context->skipStatement() != nullptr) {
-        return visitSkipStatementTyped(context->skipStatement());
+    else if (context->skipStatement() != nullptr) {
+        generatedStatement = visitSkipStatementTyped(context->skipStatement());
+    } else {
+        // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
+        // not in the union of the FIRST sets of the potential alternatives.
+        return std::nullopt;
     }
-    // We should not have to report an error at this position since the tokenizer should already report an error if the currently processed token is
-    // not in the union of the FIRST sets of the potential alternatives.
-    return std::nullopt;
+
+    if (generatedStatement.has_value() && *generatedStatement != nullptr && context != nullptr && context->getStart() != nullptr) {
+        generatedStatement->get()->lineNumber = static_cast<unsigned>(context->getStart()->getLine());
+    }
+    return generatedStatement;
 }
 
 std::optional<syrec::Statement::ptr> CustomStatementVisitor::visitAssignStatementTyped(const TSyrecParser::AssignStatementContext* context) const {
