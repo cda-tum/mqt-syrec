@@ -182,7 +182,7 @@ namespace syrec {
         if (auto const* binary = dynamic_cast<BinaryExpression*>(statement.condition.get())) {
             synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, binary->binaryOperation);
         } else if (auto const* shift = dynamic_cast<ShiftExpression*>(statement.condition.get())) {
-        synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, shift->shiftOperation);
+            synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, shift->shiftOperation);
         } else {
             synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, BinaryExpression::BinaryOperation::Add);
         }

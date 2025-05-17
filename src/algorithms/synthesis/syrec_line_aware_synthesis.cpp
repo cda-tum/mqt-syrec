@@ -68,7 +68,7 @@ namespace syrec {
                                   expressionSingleOp(circuit, BinaryExpression::BinaryOperation::Subtract, expRhsVector.at(0), statLhs);
                 } else {
                     const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(assignmentStmt.assignOperation);
-                    synthesisOk = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(0), statLhs) &&
+                    synthesisOk                                                                    = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(0), statLhs) &&
                                   expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
                 }
                 expOpVector.clear();
@@ -86,15 +86,15 @@ namespace syrec {
                 /// cancel out the signals
             } else if (expOpVector.at(0) != BinaryExpression::BinaryOperation::Subtract || expOpVector.at(0) != BinaryExpression::BinaryOperation::Exor) {
                 const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(assignmentStmt.assignOperation);
-                synthesisOk = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(0), statLhs) &&
+                synthesisOk                                                                    = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(0), statLhs) &&
                               expressionSingleOp(circuit, expOpVector.at(0), expRhsVector.at(0), statLhs);
             }
         } else {
             synthesisOk = solver(circuit, statLhs, assignmentStmt.assignOperation, expLhsVector.at(0), expOpVector.at(0), expRhsVector.at(0));
         }
 
-        const std::size_t     z = (expOpVector.size() - static_cast<std::size_t>(expOpVector.size() % 2 == 0)) / 2;
-        std::vector statAssignOp(z == 0 ? 1 : z, AssignStatement::AssignOperation::Add);
+        const std::size_t z = (expOpVector.size() - static_cast<std::size_t>(expOpVector.size() % 2 == 0)) / 2;
+        std::vector       statAssignOp(z == 0 ? 1 : z, AssignStatement::AssignOperation::Add);
 
         for (std::size_t k = 0; k <= z - 1; k++) {
             statAssignOp[k] = assignOpVector[k];
@@ -129,7 +129,7 @@ namespace syrec {
                             j++;
                         } else {
                             const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statAssignOp.at(j));
-                            synthesisOk = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(i), statLhs) &&
+                            synthesisOk                                                                    = mappedToBinaryOperation.has_value() && expressionSingleOp(circuit, *mappedToBinaryOperation, expLhsVector.at(i), statLhs) &&
                                           expressionSingleOp(circuit, expOpVector.at(i), expRhsVector.at(i), statLhs);
                             j++;
                         }
@@ -142,8 +142,8 @@ namespace syrec {
             /// when only lhs exists o rhs exists
             else if (((expLhsVector.at(i).empty()) && !(expRhsVector.at(i).empty())) || ((!expLhsVector.at(i).empty()) && (expRhsVector.at(i).empty()))) {
                 const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statAssignOp.at(j));
-                synthesisOk = mappedToBinaryOperation.has_value() && expEvaluate(circuit, lines, *mappedToBinaryOperation, expRhsVector.at(i), statLhs);
-                j           = j + 1;
+                synthesisOk                                                                    = mappedToBinaryOperation.has_value() && expEvaluate(circuit, lines, *mappedToBinaryOperation, expRhsVector.at(i), statLhs);
+                j                                                                              = j + 1;
             }
         }
         expOpVector.clear();
