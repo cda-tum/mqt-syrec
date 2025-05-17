@@ -40,13 +40,13 @@ namespace syrec {
 
         bool inverse(Circuit& circuit);
 
-        bool assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
+        bool assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, AssignStatement::AssignOperation assignOperation) override;
 
-        bool assignSubtract(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const unsigned& op) override;
+        bool assignSubtract(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, AssignStatement::AssignOperation assignOperation) override;
 
-        bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const unsigned& op) override;
+        bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, AssignStatement::AssignOperation assignOperation) override;
 
-        bool solver(Circuit& circuit, const std::vector<unsigned>& expRhs, unsigned statOp, const std::vector<unsigned>& expLhs, unsigned expOp, const std::vector<unsigned>& statLhs);
+        bool solver(Circuit& circuit, const std::vector<unsigned>& expRhs, AssignStatement::AssignOperation assignOperation, const std::vector<unsigned>& expLhs, BinaryExpression::BinaryOperation binaryOperation, const std::vector<unsigned>& statLhs);
 
         bool flow(const Expression::ptr& expression, std::vector<unsigned>& v);
         bool flow(const VariableExpression& expression, std::vector<unsigned>& v);
@@ -70,12 +70,12 @@ namespace syrec {
             return synthesisOfExprOk;
         }
 
-        bool expEvaluate(Circuit& circuit, std::vector<unsigned>& lines, unsigned op, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) const;
+        bool expEvaluate(Circuit& circuit, std::vector<unsigned>& lines, BinaryExpression::BinaryOperation binaryOperation, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) const;
 
-        bool expressionSingleOp(Circuit& circuit, unsigned op, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) const;
+        bool expressionSingleOp(Circuit& circuit, BinaryExpression::BinaryOperation binaryOperation, const std::vector<unsigned>& expLhs, const std::vector<unsigned>& expRhs) const;
 
         static bool decreaseNewAssign(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
 
-        bool expressionOpInverse(Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const override;
+        bool expressionOpInverse(Circuit& circuit, [[maybe_unused]] BinaryExpression::BinaryOperation binaryOperation, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const override;
     };
 } // namespace syrec

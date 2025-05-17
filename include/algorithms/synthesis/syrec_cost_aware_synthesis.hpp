@@ -31,15 +31,15 @@ namespace syrec {
             return SyrecSynthesis::onStatement(circuit, statement);
         }
 
-        bool assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        bool assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation) override {
             return increase(circuit, rhs, lhs);
         }
 
-        bool assignSubtract(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] const unsigned& op) override {
+        bool assignSubtract(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation) override {
             return decrease(circuit, rhs, lhs);
         }
 
-        bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) override {
+        bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation) override {
             return bitwiseCnot(circuit, lhs, rhs);
         }
 
