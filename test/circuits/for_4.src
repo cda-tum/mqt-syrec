@@ -1,5 +1,5 @@
 module forloop( in op(1),out c[2](4),inout a[2](4), inout b[2](4))
- for $i = 0 to 2 do
+ for $i = 0 to 1 do
     c[$i] ^= (a[$i] + b[$i])
  rof
 
