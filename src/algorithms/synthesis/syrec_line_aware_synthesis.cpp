@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -190,16 +191,16 @@ namespace syrec {
         return true;
     }
 
-    bool LineAwareSynthesis::solver(Circuit& circuit, const std::vector<unsigned>& expRhs, const AssignStatement::AssignOperation statOp, const std::vector<unsigned>& expLhs, const BinaryExpression::BinaryOperation expOp, const std::vector<unsigned>& statLhs) {
-        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(statOp);
+    bool LineAwareSynthesis::solver(Circuit& circuit, const std::vector<unsigned>& expRhs, const AssignStatement::AssignOperation assignOperation, const std::vector<unsigned>& expLhs, const BinaryExpression::BinaryOperation binaryOperation, const std::vector<unsigned>& statLhs) {
+        const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = tryMapAssignmentToBinaryOperation(assignOperation);
         if (!mappedToBinaryOperation.has_value()) {
             subFlag = false;
             return false;
         }
 
-        bool synthesisOk;
-        if (*mappedToBinaryOperation == expOp) {
-            if (expOp == BinaryExpression::BinaryOperation::Subtract) {
+        bool synthesisOk = false;
+        if (*mappedToBinaryOperation == binaryOperation) {
+            if (binaryOperation == BinaryExpression::BinaryOperation::Subtract) {
                 synthesisOk = expressionSingleOp(circuit, BinaryExpression::BinaryOperation::Subtract, expLhs, expRhs) &&
                               expressionSingleOp(circuit, BinaryExpression::BinaryOperation::Add, statLhs, expRhs);
             } else {
@@ -209,15 +210,15 @@ namespace syrec {
         } else {
             std::vector<unsigned> lines;
             subFlag     = true;
-            synthesisOk = expEvaluate(circuit, lines, expOp, expLhs, statLhs);
+            synthesisOk = expEvaluate(circuit, lines, binaryOperation, expLhs, statLhs);
             subFlag     = false;
             synthesisOk &= expEvaluate(circuit, lines, *mappedToBinaryOperation, lines, expRhs);
             subFlag = true;
-            switch (expOp) {
+            switch (binaryOperation) {
                 case BinaryExpression::BinaryOperation::Add:
                 case BinaryExpression::BinaryOperation::Subtract:
                 case BinaryExpression::BinaryOperation::Exor:
-                    synthesisOk &= expressionOpInverse(circuit, expOp, expLhs, statLhs);
+                    synthesisOk &= expressionOpInverse(circuit, binaryOperation, expLhs, statLhs);
                     break;
                 default:
                     break;
@@ -268,7 +269,7 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::assignAdd(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation assignOperation) {
-        bool synthesisOfAssignmentOk;
+        bool synthesisOfAssignmentOk = false;
         if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(assignOperation) : std::nullopt;
             mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             synthesisOfAssignmentOk = increase(circuit, rhs, expLhss.top()) && increase(circuit, rhs, expRhss.top());
@@ -284,7 +285,7 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::assignSubtract(Circuit& circuit, std::vector<unsigned>& rhs, std::vector<unsigned>& lhs, const AssignStatement::AssignOperation assignOperation) {
-        bool synthesisOfAssignmentOk;
+        bool synthesisOfAssignmentOk = false;
         if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(assignOperation) : std::nullopt;
             mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             synthesisOfAssignmentOk = decrease(circuit, rhs, expLhss.top()) &&
@@ -301,7 +302,7 @@ namespace syrec {
     }
 
     bool LineAwareSynthesis::assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, const AssignStatement::AssignOperation assignOperation) {
-        bool synthesisOfAssignmentOk;
+        bool synthesisOfAssignmentOk = false;
         if (const std::optional<BinaryExpression::BinaryOperation> mappedToBinaryOperation = !expOpp.empty() ? tryMapAssignmentToBinaryOperation(assignOperation) : std::nullopt;
             mappedToBinaryOperation.has_value() && *mappedToBinaryOperation == expOpp.top()) {
             synthesisOfAssignmentOk = bitwiseCnot(circuit, lhs, expLhss.top()) && bitwiseCnot(circuit, lhs, expRhss.top());
@@ -318,7 +319,7 @@ namespace syrec {
 
     /// This function is used when input signals (rhs) are equal (just to solve statements individually)
     bool LineAwareSynthesis::expEvaluate(Circuit& circuit, std::vector<unsigned>& lines, const BinaryExpression::BinaryOperation binaryOperation, const std::vector<unsigned>& lhs, const std::vector<unsigned>& rhs) const {
-        bool synthesisOk;
+        bool synthesisOk = true;
         switch (binaryOperation) {
             case BinaryExpression::BinaryOperation::Add: // +
                 synthesisOk = increase(circuit, rhs, lhs);
@@ -338,7 +339,7 @@ namespace syrec {
                 lines       = rhs;
                 break;
             default:
-                return true;
+                synthesisOk = true;
         }
         return synthesisOk;
     }

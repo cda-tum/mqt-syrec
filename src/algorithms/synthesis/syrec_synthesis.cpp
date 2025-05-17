@@ -23,8 +23,10 @@
 #include <cassert>
 #include <cstddef>
 #include <iostream>
+#include <optional>
 #include <stack>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace syrec {
@@ -90,7 +92,7 @@ namespace syrec {
         // To be able to associate which gates are associated with a statement in the syrec-editor we need to set the appropriate annotation that will be added for each created gate
         circuit.setOrUpdateGlobalGateAnnotation(GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER, std::to_string(static_cast<std::size_t>(statement->lineNumber)));
 
-        bool okay;
+        bool okay = false;
         if (auto const* swapStat = dynamic_cast<SwapStatement*>(statement.get())) {
             okay = onStatement(circuit, *swapStat);
         } else if (auto const* unaryStat = dynamic_cast<UnaryStatement*>(statement.get())) {
@@ -107,8 +109,6 @@ namespace syrec {
             okay = onStatement(circuit, *uncallStat);
         } else if (auto const* skipStat = statement.get()) {
             okay = onStatement(*skipStat);
-        } else {
-            okay = false;
         }
 
         stmts.pop();
@@ -178,7 +178,7 @@ namespace syrec {
         // calculate expression
         std::vector<unsigned> expressionResult;
 
-        bool synthesisOfStatementOk;
+        bool synthesisOfStatementOk = false;
         if (auto const* binary = dynamic_cast<BinaryExpression*>(statement.condition.get())) {
             synthesisOfStatementOk = onExpression(circuit, statement.condition, expressionResult, {}, binary->binaryOperation);
         } else if (auto const* shift = dynamic_cast<ShiftExpression*>(statement.condition.get())) {
@@ -396,7 +396,7 @@ namespace syrec {
             }
         }
 
-        bool synthesisOfExprOk;
+        bool synthesisOfExprOk = false;
         switch (expression.binaryOperation) {
             case BinaryExpression::BinaryOperation::Add: // +
                 synthesisOfExprOk = expAdd(circuit, expression.bitwidth(), lines, lhs, rhs);
