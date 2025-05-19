@@ -23,20 +23,21 @@
 #include <stack>
 #include <string>
 #include <string_view>
+#include <variant>
 #include <vector>
 
 namespace syrec {
     class SyrecSynthesis {
     public:
-        std::stack<unsigned>               expOpp;
-        std::stack<std::vector<unsigned>>  expLhss;
-        std::stack<std::vector<unsigned>>  expRhss;
-        bool                               subFlag = false;
-        std::vector<unsigned>              opVec;
-        std::vector<unsigned>              assignOpVector;
-        std::vector<unsigned>              expOpVector;
-        std::vector<std::vector<unsigned>> expLhsVector;
-        std::vector<std::vector<unsigned>> expRhsVector;
+        std::stack<BinaryExpression::BinaryOperation>  expOpp;
+        std::stack<std::vector<unsigned>>              expLhss;
+        std::stack<std::vector<unsigned>>              expRhss;
+        bool                                           subFlag = false;
+        std::vector<BinaryExpression::BinaryOperation> opVec;
+        std::vector<AssignStatement::AssignOperation>  assignOpVector;
+        std::vector<BinaryExpression::BinaryOperation> expOpVector;
+        std::vector<std::vector<unsigned>>             expLhsVector;
+        std::vector<std::vector<unsigned>>             expRhsVector;
 
         using VarLinesMap = std::map<Variable::ptr, unsigned int>;
 
@@ -48,6 +49,7 @@ namespace syrec {
 
     protected:
         constexpr static std::string_view GATE_ANNOTATION_KEY_ASSOCIATED_STATEMENT_LINE_NUMBER = "lno";
+        using OperationVariant                                                                 = std::variant<AssignStatement::AssignOperation, BinaryExpression::BinaryOperation, ShiftExpression::ShiftOperation>;
 
         virtual bool processStatement(Circuit& circuit, const Statement::ptr& statement) = 0;
 
@@ -67,13 +69,13 @@ namespace syrec {
         bool                      onStatement(Circuit& circuit, const UnaryStatement& statement);
         [[nodiscard]] static bool onStatement(const SkipStatement& statement);
 
-        virtual bool assignAdd(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op)      = 0;
-        virtual bool assignSubtract(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op) = 0;
-        virtual bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] const unsigned& op)     = 0;
+        virtual bool assignAdd(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation)      = 0;
+        virtual bool assignSubtract(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation) = 0;
+        virtual bool assignExor(Circuit& circuit, std::vector<unsigned>& lhs, std::vector<unsigned>& rhs, [[maybe_unused]] AssignStatement::AssignOperation assignOperation)     = 0;
 
-        virtual bool onExpression(Circuit& circuit, const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
-        virtual bool onExpression(Circuit& circuit, const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
-        virtual bool onExpression(Circuit& circuit, const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, unsigned op);
+        virtual bool onExpression(Circuit& circuit, const Expression::ptr& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant operationVariant);
+        virtual bool onExpression(Circuit& circuit, const BinaryExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant operationVariant);
+        virtual bool onExpression(Circuit& circuit, const ShiftExpression& expression, std::vector<unsigned>& lines, std::vector<unsigned> const& lhsStat, OperationVariant operationVariant);
         virtual bool onExpression(Circuit& circuit, const NumericExpression& expression, std::vector<unsigned>& lines);
         virtual bool onExpression(const VariableExpression& expression, std::vector<unsigned>& lines);
 
@@ -108,7 +110,7 @@ namespace syrec {
         static bool  swap(Circuit& circuit, const std::vector<unsigned>& dest1, const std::vector<unsigned>& dest2);                                            // NOLINT(cppcoreguidelines-noexcept-swap, performance-noexcept-swap) <=>
         static bool  decrease(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
         static bool  increase(Circuit& circuit, const std::vector<unsigned>& rhs, const std::vector<unsigned>& lhs);
-        virtual bool expressionOpInverse([[maybe_unused]] Circuit& circuit, [[maybe_unused]] unsigned op, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const;
+        virtual bool expressionOpInverse([[maybe_unused]] Circuit& circuit, [[maybe_unused]] BinaryExpression::BinaryOperation binaryOperation, [[maybe_unused]] const std::vector<unsigned>& expLhs, [[maybe_unused]] const std::vector<unsigned>& expRhs) const;
         bool         checkRepeats();
 
         // shift operations
@@ -123,10 +125,13 @@ namespace syrec {
 
         static bool synthesize(SyrecSynthesis* synthesizer, Circuit& circ, const Program& program, const Properties::ptr& settings, const Properties::ptr& statistics);
 
-        std::stack<Statement::ptr>    stmts;
-        Circuit&                      circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
-        Number::loop_variable_mapping loopMap;
-        std::stack<Module::ptr>       modules;
+        [[nodiscard]] static std::optional<AssignStatement::AssignOperation>  tryMapBinaryToAssignmentOperation(BinaryExpression::BinaryOperation binaryOperation) noexcept;
+        [[nodiscard]] static std::optional<BinaryExpression::BinaryOperation> tryMapAssignmentToBinaryOperation(AssignStatement::AssignOperation assignOperation) noexcept;
+
+        std::stack<Statement::ptr>  stmts;
+        Circuit&                    circ; // NOLINT(cppcoreguidelines-avoid-const-or-ref-data-members)
+        Number::LoopVariableMapping loopMap;
+        std::stack<Module::ptr>     modules;
 
     private:
         VarLinesMap                           varLines;
